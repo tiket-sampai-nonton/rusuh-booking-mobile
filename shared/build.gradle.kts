@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.multiplatform.library)
@@ -19,14 +17,22 @@ kotlin {
             isStatic = true
         }
     }
-    js { browser() }
+    // Node is a test runner only; the application web entry point remains browser-based.
+    js { browser(); nodejs() }
 
     sourceSets {
+        androidMain.dependencies { implementation(libs.androidx.activity.compose) }
+        commonTest.dependencies { implementation(kotlin("test")) }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.components.resources)
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "com.tiketsampainonton.rusuhbooking.resources"
 }
