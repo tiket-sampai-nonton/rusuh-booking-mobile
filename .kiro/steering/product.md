@@ -4,8 +4,9 @@ inclusion: always
 
 # Product — Rusuh Booking Tiket
 
-- Alur: Home → Waiting Room → Detail Ticket → Payment, untuk web dan mobile.
-- Klien: PT. Tiga Sekawan Angin Ribut. Penyusun: Tim PT. Tiket Sampai Nonton Sentosa.
-- Prinsip: (1) jaga pengalaman pengguna apa pun kondisi backend; (2) **Jangan PHP**: pembeli yang sudah masuk detail dijamin ada tiket untuknya.
-- Server adalah sumber kebenaran: posisi antrean, timer, kuota, dan status pembayaran. UI hanya menampilkan; angka aturan (TTL, batas tiket, interval polling) datang dari konfigurasi server, tidak di-hard-code.
-- Dokumen sistem (PRD, SRS, HLD, SDD, ADR, Test Plan) ada di repo BE: https://github.com/tiket-sampai-nonton/rusuh-booking-be/tree/main/docs
+- Flow: Home → Waiting Room → Ticket Detail → Payment on Android, iOS, and web.
+- Client: PT. Tiga Sekawan Angin Ribut. Prepared by PT. Tiket Sampai Nonton Sentosa.
+- Preserve the user experience even when the backend is degraded. A buyer who reaches Ticket Detail must have a ticket reserved for them; do not make a false availability promise.
+- The server is authoritative for queue position, timers, quotas, and payment status. The client displays server state. TTL, ticket limits, and polling intervals come from server configuration.
+- Compose Multiplatform is the **client** stack. Do not infer or prescribe a backend implementation language from it.
+- System documents (PRD, SRS, HLD, SDD, ADR, Test Plan) are in the backend repository: https://github.com/tiket-sampai-nonton/rusuh-booking-be/tree/main/docs
