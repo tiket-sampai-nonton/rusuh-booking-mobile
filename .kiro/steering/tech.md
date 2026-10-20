@@ -2,9 +2,8 @@
 inclusion: always
 ---
 
-# Tech (mobile)
+# Tech (Android, iOS, web)
 
-- React Native + TypeScript (Expo, expo-router). Android wajib; iOS tidak wajib untuk assessment.
-- Payment memakai payment page web lewat `react-native-webview` (SCP-01), tidak dibangun native.
-- Test: Jest (jest-expo) + Testing Library; E2E Appium (menyusul).
-- Distribusi: APK dari GitHub Actions (`release-android.yml`) ke GitHub Releases saat tag `v*`.
+- Kotlin Multiplatform + Compose Multiplatform adalah stack final untuk UI Android, iOS, dan web.
+- Implementasi, dependensi, versi, target build, dan strategi test ditetapkan saat proyek Compose Multiplatform dibuat.
+- Server tetap sumber kebenaran untuk aturan bisnis dan status. Klien tidak mengunci TTL, batas tiket, atau interval polling dalam kode.

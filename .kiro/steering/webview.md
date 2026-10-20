@@ -1,12 +1,11 @@
 ---
-inclusion: fileMatch
-fileMatchPattern: "{app/pay,src/features/payment}/**"
+inclusion: always
 ---
 
-# Aturan WebView (SDD)
+# Alur pembayaran lintas platform
 
-- Hanya origin aplikasi dimuat; lainnya dibuka eksternal. Deeplink `gojek://`, `shopeeid://`, `intent://` → `Linking.openURL`.
-- `onMessage` hanya dari origin aplikasi; payload divalidasi (`parseBridgeMessage`).
-- File access, universal file access, mixed content dimatikan; debugging WebView hanya build debug.
-- Back: pesanan bisa diubah → tutup WebView, buka detail mode ubah. Terkunci → dialog "Pesanan Anda menunggu pembayaran hingga mm:ss". Menutup WebView tidak membatalkan booking.
-- Hasil akhir selalu dari `GET /api/v1/bookings/{bookingId}`.
+- Payment page web tetap bagian dari alur produk. Integrasi pembuka halaman dan komunikasi balik dipilih sesuai kemampuan Android, iOS, dan web saat implementasi Compose Multiplatform.
+- Hanya origin aplikasi yang boleh dimuat dalam tampilan web tersemat dan mengirim pesan ke aplikasi. Validasi payload sebelum diproses. Tautan e-wallet dibuka melalui penangan tautan eksternal platform.
+- Nonaktifkan akses file dan mixed content pada tampilan web tersemat jika platform mendukungnya; debugging hanya pada build debug.
+- Kembali dari pembayaran: pesanan yang masih bisa diubah membuka detail mode ubah; pesanan terkunci menampilkan pesan "Pesanan Anda menunggu pembayaran hingga mm:ss". Menutup tampilan pembayaran tidak membatalkan booking.
+- Hasil akhir selalu diverifikasi melalui `GET /api/v1/bookings/{bookingId}`.

@@ -2,8 +2,8 @@
 inclusion: always
 ---
 
-# Struktur (mobile)
+# Struktur aplikasi
 
-- `app/` — layar expo-router (tipis): `index`, `waiting-room/[eventId]`, `events/[eventId]`, `pay/[bookingId]`.
-- `src/features/<fitur>/` — logika per fitur; `src/lib/` — config dan client API.
-- Test berdampingan (`*.test.ts[x]`).
+- Susun UI bersama dan logika bersama dalam source set Kotlin Multiplatform.
+- Tempatkan integrasi khusus Android, iOS, dan web dalam source set masing-masing.
+- Struktur modul dan lokasi test ditetapkan saat proyek Compose Multiplatform dibuat.
