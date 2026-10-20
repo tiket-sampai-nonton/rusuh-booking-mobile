@@ -2,8 +2,9 @@
 inclusion: always
 ---
 
-# Tech (Android, iOS, web)
+# Technology
 
-- Kotlin Multiplatform + Compose Multiplatform adalah stack final untuk UI Android, iOS, dan web.
-- Implementasi, dependensi, versi, target build, dan strategi test ditetapkan saat proyek Compose Multiplatform dibuat.
-- Server tetap sumber kebenaran untuk aturan bisnis dan status. Klien tidak mengunci TTL, batas tiket, atau interval polling dalam kode.
+- Kotlin Multiplatform and Compose Multiplatform are the final UI stack for Android, iOS, and web.
+- Only the payment page uses an embedded web view (`WebView` on Android, `WKWebView` on iOS, iframe on web). All other screens use shared Compose UI.
+- Gradle builds the Android and web apps and the shared iOS framework. Xcode builds the iOS app.
+- The server is authoritative for business rules and state. Do not hard-code queue timers, ticket limits, or polling intervals in the client.

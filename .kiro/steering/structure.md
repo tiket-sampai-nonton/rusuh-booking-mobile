@@ -2,8 +2,9 @@
 inclusion: always
 ---
 
-# Struktur aplikasi
+# Project structure
 
-- Susun UI bersama dan logika bersama dalam source set Kotlin Multiplatform.
-- Tempatkan integrasi khusus Android, iOS, dan web dalam source set masing-masing.
-- Struktur modul dan lokasi test ditetapkan saat proyek Compose Multiplatform dibuat.
+- `shared/src/commonMain/`: shared Compose screens and state.
+- `shared/src/androidMain/`, `iosMain/`, `jsMain/`: platform implementations of the payment web host.
+- `androidApp/`, `iosApp/`, `webApp/`: platform entry points.
+- Add tests beside their related source sets when implementing behavior.

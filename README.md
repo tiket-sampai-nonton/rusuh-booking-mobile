@@ -1,14 +1,24 @@
-# rusuh-booking-mobile
+# Rusuh Booking
 
-Aplikasi **Rusuh Booking Tiket** untuk Android, iOS, dan web.
-Disusun oleh Tim PT. Tiket Sampai Nonton Sentosa.
+Compose Multiplatform scaffold for **Android, iOS, and web**. Home, Waiting Room, and Ticket Detail are shared Compose UI. Payment is the only embedded web page: Android uses `WebView`, iOS uses `WKWebView`, and the web app uses an iframe.
 
-## Stack yang disetujui
+This is an initial project scaffold. Screen content is placeholder text; booking, queue, payment URL, origin validation, and server status handling are not yet connected. Business rules and final payment state must come from the backend.
 
-- Kotlin Multiplatform dengan Compose Multiplatform untuk UI Android, iOS, dan web.
-- Kode aplikasi dan konfigurasi build Compose Multiplatform belum dibuat. Repositori ini siap untuk implementasi baru.
-- Aturan bisnis dan status antrean, tiket, serta pembayaran tetap berasal dari server.
+## Build
 
-## Dokumen
+- Android debug APK: `./gradlew :androidApp:assembleDebug`
+- Web development bundle: `./gradlew :webApp:jsBrowserDevelopmentWebpack`
+- Web development server: `./gradlew :webApp:jsBrowserDevelopmentRun`
+- iOS simulator framework: `./gradlew :shared:linkDebugFrameworkIosSimulatorArm64`
+- iOS app: open `iosApp/RusuhBooking.xcodeproj` in Xcode and run the `RusuhBooking` scheme.
 
-Lihat [docs/README.md](docs/README.md) untuk rujukan dokumen sistem dan [.kiro/steering](.kiro/steering) untuk arahan proyek.
+Use JDK 17 or newer, Android SDK 36, and Xcode for iOS. Gradle downloads Kotlin and web tooling on the first build.
+
+## Modules
+
+- `shared/`: common Compose UI and platform payment web hosts
+- `androidApp/`: Android launcher
+- `webApp/`: browser launcher
+- `iosApp/`: SwiftUI launcher and Xcode project
+
+See [docs/README.md](docs/README.md) for the system specifications.
