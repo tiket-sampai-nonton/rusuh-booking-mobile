@@ -1,0 +1,8 @@
+=== eslint on a domain->infra import (expect ERROR) ===
+/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/src/domain/_probe_boundary.ts
+  2:33  error  Unexpected path "@infrastructure/http/fetch-http-client" imported in restricted zone  import/no-restricted-paths
+✖ 1 problem (1 error, 0 warnings)
+
+=== codegen reproducibility: npm run gen:api then git diff generated/ ===
+gen:api ran OK
+git diff generated/ = EMPTY (regen is deterministic/reproducible)

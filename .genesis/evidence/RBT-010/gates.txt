@@ -1,0 +1,68 @@
+RBT-010 — OpenAPI types + repositories — gate evidence
+Captured: 2026-10-30T11:38:04Z  Branch: feature/RBT-010-openapi-types-repositories
+
+=== GATE 1: tsc --noEmit ===
+exit=0 (clean)
+=== GATE 2: eslint src/**/*.{ts,tsx} (boundaries enforced) ===
+exit=0 (clean)
+=== GATE 3: jest --coverage ===
+-------------------------------|---------|----------|---------|---------|-------------------
+File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------------------|---------|----------|---------|---------|-------------------
+All files                      |   99.58 |    97.05 |     100 |     100 |                   
+ app                           |     100 |      100 |     100 |     100 |                   
+  _layout.tsx                  |     100 |      100 |     100 |     100 |                   
+ app/(booking)                 |     100 |      100 |     100 |     100 |                   
+  _layout.tsx                  |     100 |      100 |     100 |     100 |                   
+ app/(booking)/checkout        |     100 |      100 |     100 |     100 |                   
+  [sessionId].tsx              |     100 |      100 |     100 |     100 |                   
+ app/(booking)/payment         |     100 |      100 |     100 |     100 |                   
+  [bookingId].tsx              |     100 |      100 |     100 |     100 |                   
+ app/(booking)/success         |     100 |      100 |     100 |     100 |                   
+  [bookingId].tsx              |     100 |      100 |     100 |     100 |                   
+ app/(booking)/waiting         |     100 |      100 |     100 |     100 |                   
+  [eventId].tsx                |     100 |      100 |     100 |     100 |                   
+ app/(public)                  |     100 |      100 |     100 |     100 |                   
+  browse.tsx                   |     100 |      100 |     100 |     100 |                   
+  history.tsx                  |     100 |      100 |     100 |     100 |                   
+  index.tsx                    |     100 |      100 |     100 |     100 |                   
+ app/(public)/events           |     100 |      100 |     100 |     100 |                   
+  [eventId].tsx                |     100 |      100 |     100 |     100 |                   
+ app/expired                   |     100 |      100 |     100 |     100 |                   
+  [resourceId].tsx             |     100 |      100 |     100 |     100 |                   
+ infrastructure/__fixtures__   |     100 |      100 |     100 |     100 |                   
+  mock-booking.repository.ts   |     100 |      100 |     100 |     100 |                   
+  mock-event.repository.ts     |     100 |      100 |     100 |     100 |                   
+  mock-file-share.adapter.ts   |     100 |      100 |     100 |     100 |                   
+  mock-http-client.ts          |     100 |      100 |     100 |     100 |                   
+  mock-notification.adapter.ts |     100 |      100 |     100 |     100 |                   
+  mock-payment.repository.ts   |     100 |      100 |     100 |     100 |                   
+  mock-queue.repository.ts     |     100 |      100 |     100 |     100 |                   
+  mock-user.repository.ts      |     100 |      100 |     100 |     100 |                   
+ infrastructure/api            |   98.73 |    97.43 |     100 |     100 |                   
+  dto-mappers.ts               |     100 |      100 |     100 |     100 |                   
+  envelope.ts                  |     100 |      100 |     100 |     100 |                   
+  http-booking.repository.ts   |   92.85 |    83.33 |     100 |     100 | 48                
+  http-event.repository.ts     |     100 |      100 |     100 |     100 |                   
+  http-payment.repository.ts   |     100 |      100 |     100 |     100 |                   
+  http-queue.repository.ts     |     100 |      100 |     100 |     100 |                   
+  http-user.repository.ts      |     100 |      100 |     100 |     100 |                   
+ infrastructure/http           |     100 |      100 |     100 |     100 |                   
+  fetch-http-client.ts         |     100 |      100 |     100 |     100 |                   
+ infrastructure/time           |     100 |      100 |     100 |     100 |                   
+  system-clock.ts              |     100 |      100 |     100 |     100 |                   
+ presentation/theme            |     100 |      100 |     100 |     100 |                   
+  theme.ts                     |     100 |      100 |     100 |     100 |                   
+  tokens.ts                    |     100 |      100 |     100 |     100 |                   
+ providers                     |     100 |    89.47 |     100 |     100 |                   
+  container.ts                 |     100 |    84.61 |     100 |     100 | 117               
+  providers.tsx                |     100 |      100 |     100 |     100 |                   
+  query-client.ts              |     100 |      100 |     100 |     100 |                   
+  service-context.tsx          |     100 |      100 |     100 |     100 |                   
+ shared/utils                  |     100 |      100 |     100 |     100 |                   
+  clamp.ts                     |     100 |      100 |     100 |     100 |                   
+-------------------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 17 passed, 17 total
+Test Suites: 17 passed, 17 total
+Tests:       110 passed, 110 total
