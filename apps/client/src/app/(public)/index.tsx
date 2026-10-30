@@ -7,11 +7,14 @@ import { APP_NAME } from "@shared/utils/clamp";
 // prove the app boots and the alias + NativeWind wiring resolves.
 export default function HomeScreen() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-xl font-bold text-brand" accessibilityRole="header">
+    <View className="flex-1 items-center justify-center bg-background">
+      <Text
+        className="text-xl font-bold text-brand"
+        accessibilityRole="header"
+      >
         {APP_NAME}
       </Text>
-      <Text className="mt-2 text-gray-500">Home — / (RBT-002)</Text>
+      <Text className="mt-2 text-muted-foreground">Home — / (RBT-002)</Text>
     </View>
   );
 }
