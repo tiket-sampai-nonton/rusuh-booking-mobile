@@ -197,25 +197,37 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
         </Section>
       </ScrollView>
 
-      <View className="border-t border-line bg-card p-5">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Lanjut Bayar"
-          accessibilityState={{ disabled: !ready || hold.isPending || expired }}
-          disabled={!ready || hold.isPending || expired}
-          onPress={onSubmit}
-          testID="checkout-submit"
-          className={`items-center rounded-pill py-4 ${ready && !expired ? "bg-brand" : "bg-muted"}`}
-        >
-          <Text className="text-md font-bold text-white">
-            {hold.isPending ? "Memproses…" : expired ? "Waktu habis" : "Lanjut Bayar →"}
-          </Text>
-        </Pressable>
+      {/* Dark sticky checkout bar (prototype detail.html .checkout). */}
+      <View style={{ backgroundColor: "#0a0a0c" }} className="px-5 pb-6 pt-4">
         {hold.isError ? (
-          <Text className="mt-2 text-center text-xs text-error" accessibilityLiveRegion="polite">
+          <Text className="mb-2 text-center text-xs text-error-dark" accessibilityLiveRegion="polite">
             {hold.error?.message || "Gagal memproses pemesanan. Coba lagi."}
           </Text>
         ) : null}
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-2xs uppercase tracking-tag text-white/50">Tiket</Text>
+            <Text className="text-xl font-extrabold text-white">{rows.length} tiket</Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Lanjut Bayar"
+            accessibilityState={{ disabled: !ready || hold.isPending || expired }}
+            disabled={!ready || hold.isPending || expired}
+            onPress={onSubmit}
+            testID="checkout-submit"
+            className={`flex-row items-center gap-3 rounded-pill py-3.5 pl-6 pr-3.5 ${ready && !expired ? "bg-brand" : "bg-white/15"}`}
+          >
+            <Text className="text-md font-bold text-white">
+              {hold.isPending ? "Memproses…" : expired ? "Waktu habis" : "Lanjut Bayar"}
+            </Text>
+            {ready && !expired && !hold.isPending ? (
+              <View className="h-7 w-7 items-center justify-center rounded-full bg-white/25">
+                <Text className="text-sm text-white" accessibilityElementsHidden>↗</Text>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
       </View>
     </View>
   );

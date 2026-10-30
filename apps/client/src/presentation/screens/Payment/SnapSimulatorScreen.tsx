@@ -11,6 +11,7 @@
 import { useRouter, type Href } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
+import { AuraBackground } from "@presentation/components/AuraBackground";
 import { useServices } from "@providers/service-context";
 import { useSessionStore } from "@presentation/stores/session-store";
 
@@ -36,38 +37,42 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
   };
 
   return (
-    <View className="flex-1 items-center justify-center bg-ink p-6" testID="snap-screen">
-      <Text className="text-2xs font-bold uppercase tracking-tag text-white/60">
-        SNAP · Payment Gateway (simulasi)
-      </Text>
-      <Text
-        className="mt-3 text-xl font-extrabold text-white"
-        accessibilityRole="header"
-      >
-        Selesaikan Pembayaran
-      </Text>
-      <Text className="mt-2 text-center text-sm text-white/70">
-        Halaman ini mewakili SNAP (Midtrans). Pilih hasil untuk simulasi.
-      </Text>
+    <AuraBackground tone="brand" testID="snap-screen">
+      <View className="flex-1 items-center justify-center p-6">
+        <View className="w-full max-w-md items-center rounded-5xl border border-white/10 bg-white/5 p-7">
+          <Text className="text-2xs font-bold uppercase tracking-tag text-white/60">
+            SNAP · Payment Gateway (simulasi)
+          </Text>
+          <Text
+            className="mt-3 text-xl font-extrabold text-white"
+            accessibilityRole="header"
+          >
+            Selesaikan Pembayaran
+          </Text>
+          <Text className="mt-2 text-center text-sm text-white/70">
+            Halaman ini mewakili SNAP (Midtrans). Pilih hasil untuk simulasi.
+          </Text>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Simulasikan pembayaran berhasil"
-        onPress={() => settle("PAID")}
-        testID="snap-success"
-        className="mt-7.5 w-full items-center rounded-pill bg-ok py-4"
-      >
-        <Text className="text-md font-bold text-white">Bayar Berhasil ✓</Text>
-      </Pressable>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Simulasikan pembayaran gagal"
-        onPress={() => settle("FAILED")}
-        testID="snap-fail"
-        className="mt-3 w-full items-center rounded-pill border border-white/30 py-4"
-      >
-        <Text className="text-md font-bold text-white">Bayar Gagal ✕</Text>
-      </Pressable>
-    </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Simulasikan pembayaran berhasil"
+            onPress={() => settle("PAID")}
+            testID="snap-success"
+            className="mt-7.5 w-full items-center rounded-pill bg-ok py-4"
+          >
+            <Text className="text-md font-bold text-white">Bayar Berhasil ✓</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Simulasikan pembayaran gagal"
+            onPress={() => settle("FAILED")}
+            testID="snap-fail"
+            className="mt-3 w-full items-center rounded-pill border border-white/30 py-4"
+          >
+            <Text className="text-md font-bold text-white">Bayar Gagal ✕</Text>
+          </Pressable>
+        </View>
+      </View>
+    </AuraBackground>
   );
 }

@@ -129,29 +129,41 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
         </View>
       </ScrollView>
 
-      <View className="border-t border-line bg-card p-5">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Bayar Sekarang"
-          accessibilityState={{ disabled: !method || expired || createAttempt.isPending }}
-          disabled={!method || expired || createAttempt.isPending}
-          onPress={onPay}
-          testID="pay-now"
-          className={`items-center rounded-pill py-4 ${method && !expired ? "bg-brand" : "bg-muted"}`}
-        >
-          <Text className="text-md font-bold text-white">
-            {createAttempt.isPending
-              ? "Memproses…"
-              : expired
-                ? "Waktu habis"
-                : "Bayar Sekarang →"}
-          </Text>
-        </Pressable>
+      {/* Dark sticky checkout bar (prototype payment.html .checkout). */}
+      <View style={{ backgroundColor: "#0a0a0c" }} className="px-5 pb-6 pt-4">
         {createAttempt.isError ? (
-          <Text className="mt-2 text-center text-xs text-error" accessibilityLiveRegion="polite">
+          <Text className="mb-2 text-center text-xs text-error-dark" accessibilityLiveRegion="polite">
             {createAttempt.error?.message || "Gagal memproses pembayaran. Coba lagi."}
           </Text>
         ) : null}
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-2xs uppercase tracking-tag text-white/50">Total Bayar</Text>
+            <Text className="text-xl font-extrabold text-white">{minorToIDR(amountMinor)}</Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Bayar Sekarang"
+            accessibilityState={{ disabled: !method || expired || createAttempt.isPending }}
+            disabled={!method || expired || createAttempt.isPending}
+            onPress={onPay}
+            testID="pay-now"
+            className={`flex-row items-center gap-3 rounded-pill py-3.5 pl-6 pr-3.5 ${method && !expired ? "bg-brand" : "bg-white/15"}`}
+          >
+            <Text className="text-md font-bold text-white">
+              {createAttempt.isPending
+                ? "Memproses…"
+                : expired
+                  ? "Waktu habis"
+                  : "Bayar Sekarang"}
+            </Text>
+            {method && !expired && !createAttempt.isPending ? (
+              <View className="h-7 w-7 items-center justify-center rounded-full bg-white/25">
+                <Text className="text-sm text-white" accessibilityElementsHidden>↗</Text>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
       </View>
     </View>
   );

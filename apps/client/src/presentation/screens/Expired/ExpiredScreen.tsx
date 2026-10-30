@@ -9,6 +9,7 @@
 import { useRouter, type Href } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
+import { AuraBackground } from "@presentation/components/AuraBackground";
 import { useSessionStore } from "@presentation/stores/session-store";
 
 export type ExpiredReason = "payment" | "payment-failed" | "session" | string;
@@ -52,33 +53,35 @@ export function ExpiredScreen({ resourceId, reason }: ExpiredScreenProps) {
   };
 
   return (
-    <View className="flex-1 items-center justify-center bg-background p-6" testID="expired-screen">
-      <View className="h-16 w-16 items-center justify-center rounded-full bg-error">
-        <Text className="text-3xl text-white" accessibilityElementsHidden>
-          ⏱
+    <AuraBackground tone="error" testID="expired-screen">
+      <View className="flex-1 items-center justify-center p-6">
+        <View className="h-16 w-16 items-center justify-center rounded-full bg-error">
+          <Text className="text-3xl text-white" accessibilityElementsHidden>
+            ⏱
+          </Text>
+        </View>
+        <Text
+          className="mt-4 text-2xl font-extrabold text-white"
+          accessibilityRole="header"
+          accessibilityLiveRegion="polite"
+        >
+          {title}
         </Text>
-      </View>
-      <Text
-        className="mt-4 text-2xl font-extrabold text-foreground"
-        accessibilityRole="header"
-        accessibilityLiveRegion="polite"
-      >
-        {title}
-      </Text>
-      <Text className="mt-2 text-center text-sm text-muted-foreground">{body}</Text>
-      <Text className="mt-1 text-2xs text-muted-foreground">Ref: {resourceId}</Text>
+        <Text className="mt-2 text-center text-sm text-white/70">{body}</Text>
+        <Text className="mt-1 text-2xs text-white/40">Ref: {resourceId}</Text>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={eventId ? "Antre lagi" : "Ke Beranda"}
-        onPress={onRequeue}
-        testID="expired-requeue"
-        className="mt-7.5 items-center rounded-pill bg-brand px-8 py-4"
-      >
-        <Text className="text-md font-bold text-white">
-          {eventId ? "Antre Lagi →" : "Ke Beranda →"}
-        </Text>
-      </Pressable>
-    </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={eventId ? "Antre lagi" : "Ke Beranda"}
+          onPress={onRequeue}
+          testID="expired-requeue"
+          className="mt-7.5 items-center rounded-pill bg-brand px-8 py-4"
+        >
+          <Text className="text-md font-bold text-white">
+            {eventId ? "Antre Lagi →" : "Ke Beranda →"}
+          </Text>
+        </Pressable>
+      </View>
+    </AuraBackground>
   );
 }

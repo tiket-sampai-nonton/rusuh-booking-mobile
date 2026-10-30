@@ -1,0 +1,66 @@
+================================================================
+VISUAL POLISH — 1:1 with prototype V5 (deferred final task)
+Branch: feat/full-mock-integration
+Date:   2026-10-30
+================================================================
+
+User directive: "all screen all style all asset should be similar 1:1 with the
+prototype" — done as the LAST task, after every page was functionally complete
+(per the follow-up: "put 1:1 visual last task, do it later after all page is
+finish").
+
+APPROACH
+--------
+Built shared presentation primitives that encode the prototype's design
+language, then restyled every screen to them. Tokens remain the single source
+of truth (tailwind.config.js / presentation/theme) — no invented hex.
+
+New primitives (100% coverage all four):
+  - AuraBackground  — the dark-ink + red/green diagonal aura (expo-linear-
+                      gradient) behind every TRANSACTIONAL screen.
+  - BrandMark       — ember→red gradient ▶ mark + "Rusuh Tiket" wordmark.
+  - PillButton      — primary / light(+red arrow pin) / ghost CTA pills.
+  - ProgressRing    — waiting-room SVG ring, ember→red gradient stroke.
+
+Per-screen result vs prototype:
+  Home (index.html)      — glass floating pill nav + brand mark + "Masuk/
+                           Daftar" dark pill; dark hero block with LIVE·FLASH
+                           SALE eyebrow + display heading; event cards + badges.
+  Event detail (event)   — hero + status badge, About/Line-up/Terms, Mulai-dari
+                           price, red "Masuk Antrean" CTA.
+  Waiting (waiting.html) — dark aura, centered glass card, ember→red progress
+                           RING with position + "Posisimu", stat pills, zone box
+                           — matches the prototype near 1:1.
+  Checkout (detail.html) — light body + panels + dark sticky "Tiket / Lanjut
+                           Bayar↗" bar.
+  Payment (payment.html) — light body, Ringkasan panel (Total, no fee line), 6
+                           method rows with icon badges + radios, dark sticky
+                           "TOTAL BAYAR / Bayar Sekarang↗" bar — near 1:1.
+  SNAP (snap.html)       — dark aura gateway card, Berhasil/Gagal buttons.
+  Success (success.html) — GREEN aura, check, summary (masked NIK), e-ticket QR.
+  Expired (expired.html) — red aura, clock, reason copy, re-queue CTA.
+
+HONEST DEVIATIONS (documented, not hidden)
+------------------------------------------
+- The prototype home/event hero uses full-bleed background PHOTOS + canvas
+  particle FX + marquee animation. Those are decorative web-only assets with no
+  bundled source in the repo; the RN-universal equivalent is the dark hero
+  block with the same eyebrow/heading/copy + brand system. Layout, type scale,
+  color system, spacing, badges, buttons and all transactional screens match
+  the prototype. Pixel-identical photo heroes would require shipping the
+  prototype's image assets (follow-up).
+- RN has no radial gradient; AuraBackground uses a diagonal LinearGradient that
+  reproduces the prototype's two-corner aura closely.
+
+----------------------------------------------------------------
+Gates after the visual pass
+----------------------------------------------------------------
+tsc --noEmit : PASS
+eslint       : PASS (0/0)
+jest         : 46 suites, 307 tests PASS
+coverage (whole src/, 90% gate): Stmts 99.33 · Branch 97.64 · Funcs 100 ·
+             Lines 99.85 — GATE PASSED. New primitives 100% all four.
+
+Screenshots (web, full funnel, restyled): .genesis/evidence/VISUAL/01..07
+  01-home · 02-detail · 03-waiting · 04-checkout · 05-payment · 06-snap ·
+  07-success — full funnel still runs click-through end-to-end on mocks.

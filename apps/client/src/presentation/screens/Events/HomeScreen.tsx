@@ -10,6 +10,7 @@
 import { useRouter, type Href } from "expo-router";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
+import { BrandMark } from "@presentation/components/BrandMark";
 import { EventCard } from "@presentation/components/EventCard";
 import { useEvents } from "@presentation/hooks/useEvents";
 
@@ -29,15 +30,28 @@ export function HomeScreen() {
       contentContainerStyle={{ padding: 20, paddingTop: 48 }}
       testID="home-scroll"
     >
-      <Text
-        className="text-3xl font-extrabold text-foreground"
-        accessibilityRole="header"
-      >
-        Rusuh Booking Tiket
-      </Text>
-      <Text className="mt-1.5 text-base text-muted-foreground">
-        Pilih event, masuk waiting room, amankan tiketmu. Tanpa PHP.
-      </Text>
+      {/* Floating glass nav (prototype index.html .nav). */}
+      <View className="mb-5 flex-row items-center justify-between rounded-pill border border-line bg-card px-4 py-2.5 shadow-filter">
+        <BrandMark />
+        <View className="rounded-pill bg-ink px-4 py-2">
+          <Text className="text-xs font-bold text-white">Masuk / Daftar</Text>
+        </View>
+      </View>
+
+      <View className="rounded-5xl bg-ink p-6">
+        <Text className="text-2xs font-bold uppercase tracking-tag text-white/60">
+          ● Live · Flash Sale
+        </Text>
+        <Text
+          className="mt-2 text-display font-extrabold text-white"
+          accessibilityRole="header"
+        >
+          Rusuh Tiket
+        </Text>
+        <Text className="mt-1.5 text-base text-white/70">
+          Pilih event, masuk waiting room, amankan tiketmu. Tanpa PHP.
+        </Text>
+      </View>
 
       {isLoading ? (
         <View className="mt-7.5 items-center" testID="home-loading">

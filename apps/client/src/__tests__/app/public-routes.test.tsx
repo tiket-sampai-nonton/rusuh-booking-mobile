@@ -28,8 +28,10 @@ describe("(public) route shells", () => {
 
   it("Home route mounts the HomeScreen (header renders through providers)", async () => {
     renderWithProviders(<HomeRoute />);
-    // The header is static, but findBy retries to absorb the async query's
-    // state update so the assertion never races the initial render.
-    expect(await screen.findByText("Rusuh Booking Tiket")).toBeTruthy();
+    // The hero heading renders "Rusuh Tiket" (the brand mark says it too, so
+    // match the header role to disambiguate). findBy retries past the async
+    // query's state update.
+    const headers = await screen.findAllByRole("header");
+    expect(headers.some((h) => /Rusuh Tiket/.test(h.props.children))).toBe(true);
   });
 });
