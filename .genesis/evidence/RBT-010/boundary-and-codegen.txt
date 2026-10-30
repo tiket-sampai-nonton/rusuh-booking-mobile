@@ -6,3 +6,15 @@
 === codegen reproducibility: npm run gen:api then git diff generated/ ===
 gen:api ran OK
 git diff generated/ = EMPTY (regen is deterministic/reproducible)
+
+--- VERDICT ---
+PASS (both checks):
+  • The "error" above is EXPECTED and DESIRED: a throwaway probe file
+    (src/domain/_probe_boundary.ts, deleted immediately, never committed)
+    intentionally imported infrastructure from the domain layer, and the
+    ESLint boundary rule (import/no-restricted-paths, RBT-004) correctly
+    REJECTED it. This proves the Clean-Architecture Dependency Rule is
+    mechanically enforced. A no-error result here would mean the guard is broken.
+  • Real domain code imports ZERO infrastructure (verified: grep finds only a
+    doc-comment mention, no import statement).
+  • Codegen regeneration is deterministic (git diff of generated/ is empty).
