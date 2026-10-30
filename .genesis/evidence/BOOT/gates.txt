@@ -1,0 +1,77 @@
+================================================================
+BOOT — STEP 1: fix the boot bug (install @tanstack/react-query)
+Branch: feat/full-mock-integration
+Date:   2026-10-30
+================================================================
+
+ROOT CAUSE
+----------
+src/providers/providers.tsx and query-client.ts used a runtime
+`require("@tanstack/react-query")` guarded by try/catch, because the package
+was not a declared dependency (RBT-004 placeholder). tsc + jest passed (jest
+virtual-mocked the module), but `npx expo export --platform web` FAILED: Metro
+statically resolves requires at bundle time and could not resolve the module.
+
+FIX
+---
+1. `npm install @tanstack/react-query@5` (added to dependencies).
+2. query-client.ts: removed the dynamic require + null-return guard; now
+   `import { QueryClient } from "@tanstack/react-query"` and
+   createQueryClient() returns a real QueryClient.
+3. providers.tsx: normal import of QueryClient + QueryClientProvider; composes
+   SafeAreaProvider (initialMetrics so children render on the first frame /
+   synchronously in jsdom) -> QueryClientProvider -> ServiceProvider.
+4. Updated the two provider tests to assert the real import behaviour
+   (they previously asserted the now-removed "returns null when absent" path).
+
+----------------------------------------------------------------
+tsc --noEmit
+----------------------------------------------------------------
+PASS — no type errors.
+
+----------------------------------------------------------------
+eslint . --ext .ts,.tsx
+----------------------------------------------------------------
+PASS — 0 errors, 0 warnings.
+
+----------------------------------------------------------------
+jest (full existing suite — regression check)
+----------------------------------------------------------------
+Test Suites: 21 passed, 21 total
+Tests:       141 passed, 141 total
+Time:        ~2.3 s
+
+----------------------------------------------------------------
+Coverage — files changed by the boot fix
+----------------------------------------------------------------
+File             | % Stmts | % Branch | % Funcs | % Lines
+-----------------|---------|----------|---------|--------
+providers.tsx    |    100  |   100    |   100   |   100
+query-client.ts  |    100  |   100    |   100   |   100
+
+----------------------------------------------------------------
+npx expo export --platform web   (THE gate for this step)
+----------------------------------------------------------------
+SUCCESS.
+  Web Bundled ~5.8s node_modules/expo-router/entry.js (726 modules)
+  web bundles (2):
+    _expo/static/css/web-*.css (8.37 kB)
+    _expo/static/js/web/entry-*.js (1.04 MB)
+  Files: index.html (1.37 kB), metadata.json
+  Exported: dist
+
+----------------------------------------------------------------
+Boot screenshot (web)
+----------------------------------------------------------------
+web-home-boot.png — dist/ served on 127.0.0.1 (ephemeral port), chromium
+headless, route "/", no console/page errors. The placeholder Home screen
+("Rusuh Booking Tiket" + "Home — / (RBT-002)") renders => app boots.
+
+----------------------------------------------------------------
+Platform availability (confirmed this session)
+----------------------------------------------------------------
+WEB     : OK — expo export + chromium screenshot.
+iOS SIM : AVAILABLE — iPhone 16 Pro booted (xcrun simctl).
+ANDROID : AVAILABLE — emulator-5554 (Android 16), Expo Go (host.exp.exponent)
+          installed. SDK at ~/Library/Android/sdk (not on PATH; use the full
+          adb path: ~/Library/Android/sdk/platform-tools/adb).

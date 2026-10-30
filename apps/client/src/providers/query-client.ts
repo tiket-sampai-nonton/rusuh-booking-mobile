@@ -5,12 +5,12 @@
  * QueryClient instance it reads is created here, in the composition root, and
  * handed to `QueryClientProvider` by `providers.tsx`.
  *
- * NOTE: `@tanstack/react-query` is not yet a dependency of this app (added with
- * the server-data layer in RBT-010). To keep RBT-004 dependency-free, this file
- * exports the REAL client config as a typed object and a factory that builds the
- * client only when the package is present. RBT-010 removes the dynamic require
- * and imports `QueryClient` directly.
+ * RBT-010 added `@tanstack/react-query` as a real dependency, so this file now
+ * imports `QueryClient` directly (the former dynamic `require` guard that let
+ * the app boot without the package is removed — it broke `expo export`, which
+ * cannot resolve a runtime `require` of a bundled module).
  */
+import { QueryClient } from "@tanstack/react-query";
 
 /**
  * Default query/mutation behaviour for the app. Retries are bounded and
@@ -35,22 +35,7 @@ export type QueryClientConfig = typeof queryClientConfig;
 
 /**
  * Build a TanStack QueryClient from {@link queryClientConfig}.
- *
- * Returns `null` when `@tanstack/react-query` is not installed (RBT-004 state),
- * so `providers.tsx` can compose providers without the dependency. Once RBT-010
- * adds the package this becomes a direct `new QueryClient(queryClientConfig)`.
  */
-export function createQueryClient(): unknown | null {
-  try {
-    // Indirected so bundlers/tsc do not hard-require a package absent in RBT-004.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports -- optional dep until RBT-010 adds @tanstack/react-query
-    const mod = require("@tanstack/react-query") as {
-      QueryClient: new (cfg: QueryClientConfig) => unknown;
-    };
-    return new mod.QueryClient(queryClientConfig);
-  } catch {
-    // TODO(RBT-010): replace this guard with a direct import once the package
-    // is a declared dependency.
-    return null;
-  }
+export function createQueryClient(): QueryClient {
+  return new QueryClient(queryClientConfig);
 }

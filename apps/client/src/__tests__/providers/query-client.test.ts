@@ -1,4 +1,6 @@
-import { queryClientConfig } from "@providers/query-client";
+import { QueryClient } from "@tanstack/react-query";
+
+import { createQueryClient, queryClientConfig } from "@providers/query-client";
 
 describe("providers/query-client — config", () => {
   it("bounds retries exponentially and caps at 30s", () => {
@@ -22,41 +24,16 @@ describe("providers/query-client — config", () => {
 });
 
 describe("providers/query-client — createQueryClient", () => {
-  afterEach(() => {
-    jest.resetModules();
+  it("builds a real QueryClient instance (RBT-010 state)", () => {
+    const client = createQueryClient();
+    expect(client).toBeInstanceOf(QueryClient);
   });
 
-  it("returns null when @tanstack/react-query is not installed (RBT-004 state)", () => {
-    jest.isolateModules(() => {
-      // Force the optional require to fail.
-      jest.doMock(
-        "@tanstack/react-query",
-        () => {
-          throw new Error("MODULE_NOT_FOUND");
-        },
-        { virtual: true },
-      );
-      // eslint-disable-next-line @typescript-eslint/no-require-imports -- isolated module reload under test
-      const { createQueryClient } = require("@providers/query-client");
-      expect(createQueryClient()).toBeNull();
-    });
-  });
-
-  it("builds a QueryClient when the package is present (RBT-010 state)", () => {
-    jest.isolateModules(() => {
-      class FakeQueryClient {
-        constructor(public readonly cfg: unknown) {}
-      }
-      jest.doMock(
-        "@tanstack/react-query",
-        () => ({ QueryClient: FakeQueryClient }),
-        { virtual: true },
-      );
-      // eslint-disable-next-line @typescript-eslint/no-require-imports -- isolated module reload under test
-      const { createQueryClient } = require("@providers/query-client");
-      const client = createQueryClient();
-      expect(client).toBeInstanceOf(FakeQueryClient);
-      expect((client as FakeQueryClient).cfg).toHaveProperty("defaultOptions");
-    });
+  it("applies the config defaults to the built client", () => {
+    const client = createQueryClient();
+    const defaults = client.getDefaultOptions();
+    expect(defaults.queries?.staleTime).toBe(30_000);
+    expect(defaults.queries?.refetchOnWindowFocus).toBe(false);
+    expect(defaults.mutations?.retry).toBe(0);
   });
 });

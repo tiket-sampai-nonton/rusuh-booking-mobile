@@ -2,14 +2,19 @@
  * providers.tsx — composition of the app-wide providers (ARCHITECTURE §3, §11.7).
  *
  * Composes the server-data provider (TanStack `QueryClientProvider`) around the
- * DI `ServiceProvider`. `_layout.tsx` wraps the router tree with `<AppProviders>`.
+ * DI `ServiceProvider` and the theme/safe-area providers. `_layout.tsx` wraps
+ * the router tree with `<AppProviders>`.
  *
- * TanStack is added in RBT-010; until then {@link createQueryClient} returns
- * `null` and the QueryClientProvider layer is skipped. ThemeProvider + SafeArea
- * are layered here by RBT-003 (tokens/theme) — left as a documented TODO so this
- * task does not collide with RBT-003's `presentation/theme` work.
+ * RBT-010 made `@tanstack/react-query` a real dependency, so the former dynamic
+ * `require` (which `expo export` could not resolve) is replaced by a normal
+ * import. Order (outer → inner): SafeArea → QueryClientProvider → ServiceProvider.
  */
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useMemo } from "react";
+import {
+  SafeAreaProvider,
+  initialWindowMetrics,
+} from "react-native-safe-area-context";
 
 import type { Container } from "@providers/container";
 import { createQueryClient } from "@providers/query-client";
@@ -18,36 +23,40 @@ import { ServiceProvider } from "@providers/service-context";
 export interface AppProvidersProps {
   /** Override the container (tests inject mocks). */
   readonly container?: Container;
+  /** Override the QueryClient (tests inject a throwaway client). */
+  readonly queryClient?: QueryClient;
   readonly children: React.ReactNode;
 }
 
 /**
  * Wrap the subtree with the composition-root providers.
  *
- * Order (outer → inner): QueryClientProvider (when present) → ServiceProvider.
- * TODO(RBT-003): add ThemeProvider + SafeAreaProvider once the theme lands.
+ * Order (outer → inner): SafeAreaProvider → QueryClientProvider → ServiceProvider.
  */
 export function AppProviders({
   container,
+  queryClient,
   children,
 }: AppProvidersProps): React.ReactElement {
-  const queryClient = useMemo(() => createQueryClient(), []);
+  const client = useMemo(
+    () => queryClient ?? createQueryClient(),
+    [queryClient],
+  );
 
-  const tree = <ServiceProvider container={container}>{children}</ServiceProvider>;
-
-  if (queryClient === null) {
-    // RBT-004 state: @tanstack/react-query not installed yet.
-    return tree;
-  }
-
-  // RBT-010: wrap with QueryClientProvider. Indirected so RBT-004 does not
-  // hard-import the absent package; replaced by a direct import in RBT-010.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports -- optional dep until RBT-010 adds @tanstack/react-query
-  const { QueryClientProvider } = require("@tanstack/react-query") as {
-    QueryClientProvider: React.ComponentType<{
-      client: unknown;
-      children: React.ReactNode;
-    }>;
+  // `initialMetrics` lets children render on the first frame (correct for web
+  // static export + synchronous in tests) instead of waiting for an async inset
+  // measurement that never resolves in jsdom. `initialWindowMetrics` is null on
+  // platforms with no native module (jest), so fall back to a zero-inset frame.
+  const metrics = initialWindowMetrics ?? {
+    insets: { top: 0, left: 0, right: 0, bottom: 0 },
+    frame: { x: 0, y: 0, width: 0, height: 0 },
   };
-  return <QueryClientProvider client={queryClient}>{tree}</QueryClientProvider>;
+
+  return (
+    <SafeAreaProvider initialMetrics={metrics}>
+      <QueryClientProvider client={client}>
+        <ServiceProvider container={container}>{children}</ServiceProvider>
+      </QueryClientProvider>
+    </SafeAreaProvider>
+  );
 }
