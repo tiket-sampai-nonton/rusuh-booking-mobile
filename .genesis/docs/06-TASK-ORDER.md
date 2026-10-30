@@ -26,8 +26,8 @@
 
 ## Run Next
 
-**Current wave:** `Wave 1 — Foundations (E1)`
-**Run next:** `RBT-002` / `RBT-003` / `RBT-004` — all depend only on RBT-001 (✅) and are file-disjoint, so they can run in parallel. (RBT-001 ✅ and RBT-005a ✅ delivered; RBT-005b CI deferred post-E2E.)
+**Current wave:** `Wave 2 — Core API (E2)` — Wave 1 Foundations COMPLETE.
+**Run next:** `Wave 2 (RBT-010→014, Core API)` — ends by freezing the ports for Eld + Ray. (Wave 1 delivered: RBT-001 ✅, RBT-005a ✅, RBT-002 ✅, RBT-003 ✅, RBT-004 ✅; RBT-005b CI deferred post-E2E.)
 
 ---
 
@@ -56,9 +56,9 @@
 | Task | Owner | Domain | Depends On | Files (disjoint) | Parallel | Status | Delivered |
 |------|-------|--------|-----------|------------------|----------|--------|-----------|
 | RBT-001 | Riz | Platform | — | scaffold: `apps/client/**`, `src/*` folders, `tailwind.config.js` | ❌ first | Done | ✅ |
-| RBT-002 | Riz | Platform | 001 | `src/app/**` (Expo Router route tree) | ✅ | To Do | ☐ |
-| RBT-003 | Riz | Platform | 001 | `tailwind.config.js`, `src/presentation/theme/**` | ✅ | To Do | ☐ |
-| RBT-004 | Riz | Platform | 001 | `src/providers/**` (DI container + ports wiring) | ✅ | To Do | ☐ |
+| RBT-002 | Riz | Platform | 001 | `src/app/**` (Expo Router route tree) | ✅ | Done | ☑ |
+| RBT-003 | Riz | Platform | 001 | `tailwind.config.js`, `src/presentation/theme/**` | ✅ | Done | ☑ |
+| RBT-004 | Riz | Platform | 001 | `src/providers/**` (DI container + ports wiring) | ✅ | Done | ☑ |
 | RBT-005a | Riz | Platform | 001 | `.husky/**`, `apps/client/package.json` (lint-staged) | ✅ | Done | ✅ |
 | RBT-005b | Riz | Platform | 001, 005a | `.github/workflows/**`, `sonar-project.properties` | ✅ | Deferred (post-E2E) | ☐ |
 
