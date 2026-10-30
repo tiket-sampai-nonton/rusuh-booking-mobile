@@ -3,6 +3,12 @@
 > The execution workflow that runs after GENESIS completes.
 > 5 numbered phases (1-5) + TRIGGER (Phase 0) + REVIEW (Phase 3.5), 4 human gates.
 > TRIGGER is a classification step, not a build phase. Task-level implementation.
+>
+> **Evidence-first ordering (v2, 2026-10-30):** QA/evidence capture and the human
+> evidence-approval gate (G3) run **before the PR is opened**, not after. Sequence:
+> IMPLEMENT → REVIEW (3.5) → VERIFY/QA (capture evidence to `.genesis/evidence/<KEY>/`)
+> → **G3 human OK** → open PR → merge. A PR is only ever opened for work the human has
+> already approved.
 
 ---
 
@@ -31,15 +37,18 @@ This workflow executes **one task at a time** (or parallel batches).
 
 ```mermaid
 flowchart LR
-    T[TRIGGER<br/>classify] --> S[Spec<br/>G1·human] --> D[Design<br/>G2·human] --> I[Implement<br/>agent] --> R[Review 3.5<br/>AI, no gate] --> V[Verify<br/>G3·human] --> N[Done<br/>G4·human]
+    T[TRIGGER<br/>classify] --> S[Spec<br/>G1·human] --> D[Design<br/>G2·human] --> I[Implement<br/>agent] --> R[Review 3.5<br/>AI, no gate] --> V[Verify/QA<br/>evidence] --> G3[Evidence OK<br/>G3·human] --> P[PR + Merge<br/>agent] --> N[Done<br/>G4·human]
     R -. fail ≤2× .-> I
+    G3 -. fail .-> I
     classDef gate fill:#fde68a,stroke:#b45309,color:#000;
-    class S,D,V,N gate;
+    class S,D,G3,N gate;
 ```
 
 **TRIGGER** classifies the task — it is not a build phase and has no gate.
-**REVIEW** is a multi-perspective AI pass after code is pushed but before the PR opens;
+**REVIEW** is a multi-perspective AI pass after implementation but before VERIFY;
 required fixes loop back to IMPLEMENT (no human gate).
+**VERIFY/QA** captures live evidence to `.genesis/evidence/<KEY>/` — this runs **before** any PR.
+**G3 (Evidence OK)** is the human checkpoint that **gates PR creation**: the PR is opened only after the human approves the evidence.
 **Gates (G1–G4) are human checkpoints.** Agent stops and reports. Human approves before proceeding.
 
 ---
@@ -136,7 +145,7 @@ fail_action: Revise design
 5. Write tests with real assertions alongside code
 6. Follow project `RULES.md`
 7. Micro-commits with issue key — each commit passes the **husky commit guard** (lint + type-check + related tests + **changed-code coverage ≥ 80%**); never `--no-verify` (R008/R009/R017)
-8. Push branch (do NOT open PR yet — REVIEW comes first)
+8. Push branch (do NOT open PR yet — REVIEW, evidence capture, and human evidence-approval (G3) all come first; the PR is opened in Phase 5, after G3)
 
 **Output:** Branch pushed + local tests passing + commit guard green + skills log
 
@@ -161,13 +170,13 @@ Multi-perspective AI review before PR opens. Check:
 7. **Style** — Does the code match project conventions from `RULES.md`?
 
 **Review outcome:**
-- **PASS** → Proceed to open PR
+- **PASS** → Proceed to Phase 4 VERIFY/QA (capture evidence)
 - **FAIL** → List required fixes, loop back to Phase 3 IMPLEMENT
 
 ```yaml
 review_loop:
   max_iterations: 2
-  on_pass: Open PR, transition issue → In Review, proceed to Phase 4
+  on_pass: Proceed to Phase 4 VERIFY/QA (NO PR yet — PR opens in Phase 5 after G3)
   on_fail_iteration_1: Fix issues, re-review (this is the second and final review)
   on_fail_iteration_2: Escalate to human with review findings (see RECOVERY.md §F011)
 ```
@@ -176,45 +185,41 @@ review_loop:
 
 **Note:** The review loop cap (max 2) is separate from the CI fix loop cap (max 3 — see Phase 4 and F003). Review fails when the code is *wrong* (correctness, architecture); CI fails when code is *broken* (doesn't compile, tests fail).
 
-**Output:** Review passed + PR opened + issue in `In Review`
+**Output:** Review passed → proceed to Phase 4 VERIFY/QA (no PR yet)
 
 **No human gate.** This is an AI quality gate. Human review happens at Gate 3 (Evidence Approval).
 
 ---
 
-## Phase 4: VERIFY
+## Phase 4: VERIFY / QA  (before the PR)
 
-**Input:** PR opened (after REVIEW pass), CI running.
+**Input:** REVIEW (3.5) passed. Branch pushed. **No PR yet.**
 
 **Agent actions:**
-1. Wait for CI
-2. **If CI fails:**
-   - **Skill check:** If error is unfamiliar, search for debugging skill
-   - Enter fix loop (max 3 iterations)
-   - Escalate if still failing → `RECOVERY.md §F003`
-3. **If CI passes:**
-   - Run security checklist from `SECURITY.md`
-   - Capture live evidence for user-facing changes
-   - Attach evidence to issue
-   - Transition issue → `QA`
-4. Report to human
+1. Run the full local gate suite (type-check, lint incl. layer boundaries, unit/component tests + coverage, and the build/export for the platform(s) touched). These stand in for cloud CI while RBT-005b (CI) is deferred; once CI exists, also wait for it here.
+   - **If a gate fails:** skill-check if unfamiliar → fix loop (max 3) → escalate per `RECOVERY.md §F003`.
+2. Run the security checklist from `SECURITY.md`.
+3. **Capture live evidence** for the task's acceptance criteria and save it under **`.genesis/evidence/<KEY>/`** (e.g. `.genesis/evidence/RBT-001/`): screenshots for UI/visual ACs (web + each native target), terminal/output captures for non-visual ACs, gate output. Evidence must be from a **live run**, not stale.
+4. Transition issue → `QA`.
+5. **Report to the human with the evidence** and STOP for G3.
 
-**Output:** Green CI + evidence attached
+**Output:** Green gates + security checklist passed + live evidence in `.genesis/evidence/<KEY>/` + issue in `QA`. **No PR yet.**
 
-### Gate 3 — Evidence Approval
+### Gate 3 — Evidence Approval  (gates PR creation)
 
 ```yaml
 gate: G3
 type: human
-question: "Is the evidence acceptable?"
+question: "Is the evidence acceptable? (approve = open the PR)"
 pass_criteria:
-  - Evidence is from a live run (not stale)
+  - Evidence is from a live run (not stale), stored in .genesis/evidence/<KEY>/
   - All acceptance criteria verified
   - Security checklist passed
-fail_action: Re-run evidence or fix issues
+pass_action: Proceed to Phase 5 — open PR to base branch
+fail_action: Fix issues / re-capture evidence (loop back to Phase 3 or re-run evidence)
 ```
 
-**Agent behavior:** STOP. Report evidence. Wait for approval.
+**Agent behavior:** STOP. Report evidence (reference `.genesis/evidence/<KEY>/`). Wait for approval. **Do NOT open the PR before G3 passes.**
 
 ---
 
@@ -223,13 +228,14 @@ fail_action: Re-run evidence or fix issues
 **Input:** Approved evidence (Gate G3 passed).
 
 **Agent actions:**
-1. Merge PR to base branch (feature → develop/base)
-2. Transition issue → `Done`
-3. Update any docs affected by this change
+1. **Open the PR** to the base branch (feature → develop/base) — this is the first time a PR exists. Transition issue → `In Review`. Include the evidence reference and the Phase 3.5 review summary in the PR body.
+2. Merge PR to base branch once mergeable (feature → develop/base).
+3. Transition issue → `Done`.
+4. Update any docs affected by this change.
 
 **Output:** Issue closed, code merged to base branch.
 
-**Note:** Agent merges feature branches to base branch after G3 approval. The `base → main` merge (release) is a HUMAN action at Gate G4. Templates say "Do NOT merge" because workers should stop and let the conductor or human handle the merge.
+**Note:** The PR is opened only AFTER G3 (human evidence approval) — a PR is never opened for unapproved work. Agent merges feature branches to base branch after G3. The `base → main` merge (release) is a HUMAN action at Gate G4. Templates say "Do NOT merge" because workers stop and let the conductor or human handle the merge.
 
 ### Gate 4 — Release Approval (base → main)
 

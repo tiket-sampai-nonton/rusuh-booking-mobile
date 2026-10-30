@@ -189,7 +189,7 @@ Type: Story · P0 · L · Deps: RBT-001
 - AC2: Branch model `develop`/`main` with the PIPELINE.md gates wired; branch protection on `main`/`develop` (require PR + checks, no direct push); secrets referenced (not committed).
 - AC3: Bundle-size + SEO-output checks stubbed for web release.
 - AC4: **Husky commit guard** installed (`.husky/pre-commit`): lint (staged) → type-check → related tests → changed-code coverage ≥80%; `.husky/commit-msg` enforces `type(scope): [RBT-xxx]` Conventional Commits. Never `--no-verify` (project RULES).
-- AC5: **Issue-state automation** (per TRACKING.md §Issue States + Automation Hooks): a status mechanism exists (status labels `status:in-progress|in-review|qa|done|blocked`, or a GitHub Projects board with those columns) AND a GitHub Actions workflow moves the linked issue automatically — **PR opened → In Review**, **CI green + evidence → QA**, **PR merged → Done** — so transitions are enforced by the repo, not by an agent remembering. Branch/PR must reference the issue (`RBT-xxx` / `Closes #N`) so the Action can resolve it. `In Progress` is set when the feature branch is first pushed (or by the agent at task start per PLAYBOOK).
+- AC5: **Issue-state automation** (per TRACKING.md §Issue States + Automation Hooks): a status mechanism exists (status labels `status:in-progress|qa|in-review|done|blocked`, or a GitHub Projects board with those columns) AND a GitHub Actions workflow moves the linked issue automatically — **PR opened → In Review**, **PR merged → Done** (the **→ QA** transition is set pre-PR by the agent on evidence capture, since QA precedes the PR in the evidence-first flow) — so transitions are enforced by the repo where a PR event exists. Branch/PR must reference the issue (`RBT-xxx` / `Closes #N`) so the Action can resolve it. `In Progress` is set when the feature branch is first pushed (or by the agent at task start per PLAYBOOK).
 - Skills: GitHub Actions, SonarCloud, EAS config, husky/lint-staged.
 
 ---
@@ -496,7 +496,7 @@ Type: Story · P0/P1 · M · Deps: RBT-005, RBT-081, RBT-082, RBT-083
 | Admin/back-office | Out of scope (requirement §2) |
 
 ## Tracking
-States: Backlog → To Do → In Progress → In Review → QA → Done. Labels: `blocked`, `needs-spec`, `needs-review`, `tech-debt`.
+States: Backlog → To Do → In Progress → QA → In Review → Done. Labels: `blocked`, `needs-spec`, `needs-review`, `tech-debt`.
 
 ---
 

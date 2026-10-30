@@ -176,15 +176,17 @@ Review (Phase 3.5):
 15. If review PASS after ≤2 iterations: continue
 16. If review FAIL after 2 iterations: escalate to human, STOP
 
-PR (only after review PASS):
-17. Open PR into base branch: [{KEY}] description
-18. Wait for CI green
-19. Run security checklist (if applicable)
-20. Capture live evidence (if user-facing)
-21. Report PR URL and STOP — await G3 approval
+Verify / QA (Phase 4 — before the PR):
+17. Run gates: type-check + lint (incl. boundaries) + tests/coverage + build/export
+18. Run security checklist (if applicable)
+19. Capture live evidence → .genesis/evidence/{KEY}/ (screenshots per platform / output captures)
+20. Transition issue → QA. Report evidence (reference .genesis/evidence/{KEY}/) and STOP — await G3 approval.
 
-Do NOT merge before G3 approval. After G3, use Post-G3 Merge template.
-If spec is unclear, STOP and escalate.
+PR + Done (Phase 5 — only after G3 approval):
+21. Open PR into base branch: [{KEY}] description (include evidence ref + review summary). Transition issue → In Review.
+22. Merge PR to base branch → transition issue → Done.
+
+Do NOT open a PR before G3 approval. Do NOT merge before G3. If spec is unclear, STOP and escalate.
 If skill conflicts with project rules, adapt or escalate.
 ```
 
@@ -226,13 +228,16 @@ Review (Phase 3.5):
 13. If review PASS: continue
 14. If review FAIL after 2 iterations: escalate to human, STOP
 
-PR (only after review PASS):
-15. Open PR
-16. Wait for CI green
-17. Capture evidence showing the fix
-18. Report PR URL and STOP — await G3 approval
+Verify / QA (Phase 4 — before the PR):
+15. Run the full test suite for the affected area + gates
+16. Capture evidence showing the fix → .genesis/evidence/{KEY}/
+17. Transition issue → QA. Report evidence and STOP — await G3 approval.
 
-Do NOT merge before G3 approval. After G3, use Post-G3 Merge template.
+PR + Done (Phase 5 — only after G3 approval):
+18. Open PR (include evidence ref). Transition issue → In Review.
+19. Merge → transition issue → Done.
+
+Do NOT open a PR before G3 approval. Do NOT merge before G3.
 ```
 
 ---
