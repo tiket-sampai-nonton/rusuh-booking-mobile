@@ -8,18 +8,28 @@
  * E8 tasks the platform adapters); the non-mock branch is a clearly-marked TODO
  * until then.
  */
+import type { BookingRepository } from "@domain/repositories/booking.repository";
 import type { EventRepository } from "@domain/repositories/event.repository";
 import type { PaymentRepository } from "@domain/repositories/payment.repository";
 import type { QueueRepository } from "@domain/repositories/queue.repository";
+import type { UserRepository } from "@domain/repositories/user.repository";
 import type { ClockPort } from "@domain/services/clock.port";
 import type { FileSharePort } from "@domain/services/file-share.port";
 import type { NotificationPort } from "@domain/services/notification.port";
+import { HttpBookingRepository } from "@infrastructure/api/http-booking.repository";
+import { HttpEventRepository } from "@infrastructure/api/http-event.repository";
+import { HttpPaymentRepository } from "@infrastructure/api/http-payment.repository";
+import { HttpQueueRepository } from "@infrastructure/api/http-queue.repository";
+import { HttpUserRepository } from "@infrastructure/api/http-user.repository";
+import { MockBookingRepository } from "@infrastructure/__fixtures__/mock-booking.repository";
 import { MockEventRepository } from "@infrastructure/__fixtures__/mock-event.repository";
 import { MockFileShareAdapter } from "@infrastructure/__fixtures__/mock-file-share.adapter";
 import { MockHttpClient } from "@infrastructure/__fixtures__/mock-http-client";
 import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notification.adapter";
 import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.repository";
+import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
+import { FetchHttpClient } from "@infrastructure/http/fetch-http-client";
 import type { HttpClient } from "@infrastructure/http/http-client";
 import { SystemClock } from "@infrastructure/time/system-clock";
 
@@ -32,7 +42,9 @@ export interface Container {
   readonly httpClient: HttpClient;
   readonly eventRepository: EventRepository;
   readonly queueRepository: QueueRepository;
+  readonly bookingRepository: BookingRepository;
   readonly paymentRepository: PaymentRepository;
+  readonly userRepository: UserRepository;
   readonly notification: NotificationPort;
   readonly fileShare: FileSharePort;
 }
@@ -44,6 +56,13 @@ export interface ContainerOptions {
    * mutating the environment.
    */
   readonly useMocks?: boolean;
+  /**
+   * Base URL for the real HTTP adapters. Omitted → read
+   * `EXPO_PUBLIC_API_BASE_URL`. Passed explicitly so tests are deterministic:
+   * `jest-expo` inlines `EXPO_PUBLIC_*` at transform time, so a runtime
+   * `process.env` assignment would not be seen.
+   */
+  readonly baseUrl?: string;
 }
 
 /**
@@ -81,22 +100,39 @@ export function createContainer(options: ContainerOptions = {}): Container {
       httpClient: new MockHttpClient(),
       eventRepository: new MockEventRepository(),
       queueRepository: new MockQueueRepository(),
+      bookingRepository: new MockBookingRepository(),
       paymentRepository: new MockPaymentRepository(),
+      userRepository: new MockUserRepository(),
       notification: new MockNotificationAdapter(),
       fileShare: new MockFileShareAdapter(),
     };
   }
 
-  // TODO(RBT-010/RBT-014/E8): bind the REAL adapters here, e.g.
-  //   const httpClient = new AxiosHttpClient(baseUrl);               // RBT-010
-  //   const eventRepository = new HttpEventRepository(httpClient);   // RBT-010
-  //   const queueRepository = new HttpQueueRepository(httpClient);   // RBT-010
-  //   const paymentRepository = new HttpPaymentRepository(httpClient);// RBT-010 (mock→real swap, §13 P5)
-  //   const notification = new ExpoNotificationAdapter();            // RBT-072 (.native.ts / .web.ts)
-  //   const fileShare = new ExpoFileShareAdapter();                  // E6
-  // Until those exist, refuse to pretend the app can talk to a backend.
-  throw new Error(
-    "createContainer: real adapters are not wired yet — set EXPO_PUBLIC_USE_MOCKS=true " +
-      "until RBT-010/RBT-014 land the HTTP repositories and fixtures.",
-  );
+  // REAL wiring (RBT-010): HTTP repositories over the fetch transport. Note the
+  // app still DEFAULTS to mocks (unset EXPO_PUBLIC_USE_MOCKS → mocks) because the
+  // real BE is not reachable and the FE-NEED gaps (O1) aren't delivered; this
+  // branch runs only when EXPO_PUBLIC_USE_MOCKS is explicitly "false"/"0".
+  // Platform adapters (notification/fileShare) still come from E8/E6 — until
+  // then they fall back to the mock adapters here.
+  const baseUrl = options.baseUrl ?? process.env.EXPO_PUBLIC_API_BASE_URL ?? "";
+  if (baseUrl.length === 0) {
+    throw new Error(
+      "createContainer: EXPO_PUBLIC_API_BASE_URL is required for real adapters " +
+        "(or set EXPO_PUBLIC_USE_MOCKS=true for mock wiring).",
+    );
+  }
+  const httpClient: HttpClient = new FetchHttpClient({ baseUrl });
+  return {
+    clock,
+    httpClient,
+    eventRepository: new HttpEventRepository(httpClient),
+    queueRepository: new HttpQueueRepository(httpClient),
+    bookingRepository: new HttpBookingRepository(httpClient),
+    paymentRepository: new HttpPaymentRepository(httpClient),
+    userRepository: new HttpUserRepository(httpClient),
+    // Platform adapters are not part of RBT-010 — bound in E6/E8. Until then
+    // the mock adapters keep the container complete without faking a backend.
+    notification: new MockNotificationAdapter(),
+    fileShare: new MockFileShareAdapter(),
+  };
 }

@@ -7,6 +7,7 @@
  */
 import type {
   PaymentAttempt,
+  PaymentMethod,
   PaymentRepository,
 } from "@domain/repositories/payment.repository";
 
@@ -17,6 +18,7 @@ export class MockPaymentRepository implements PaymentRepository {
 
   async createAttempt(
     bookingId: string,
+    _method: PaymentMethod,
     idempotencyKey: string,
   ): Promise<PaymentAttempt> {
     const existing = this.attemptsByKey.get(idempotencyKey);
@@ -26,7 +28,11 @@ export class MockPaymentRepository implements PaymentRepository {
     this.seq += 1;
     const attempt: PaymentAttempt = {
       attemptId: `pay-${bookingId}-${this.seq}`,
+      bookingId,
       status: "AWAITING_PAYMENT",
+      redirectUrl: `https://snap.mock/${bookingId}`,
+      paymentExpiresAt: new Date(Date.now() + 600_000).toISOString(),
+      serverTime: new Date().toISOString(),
     };
     this.attemptsByKey.set(idempotencyKey, attempt);
     this.attemptsById.set(attempt.attemptId, attempt);
