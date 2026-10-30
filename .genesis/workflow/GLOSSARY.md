@@ -38,7 +38,7 @@ A specification document that defines what to build for a single issue. Contains
 Architecture Decision Record. A short document capturing a significant decision, the context, options considered, and rationale for the choice.
 
 ### REVIEW (Phase 3.5)
-A mandatory multi-perspective AI quality gate that runs after code is pushed but before the PR is opened. It checks 7 perspectives: acceptance criteria, architecture, API contract conformance, edge cases, security, test coverage, and style. It is agent-executed with no human gate. If it passes, the PR opens. If it fails after 2 iterations, the issue moves to Blocked and escalates to human (see RECOVERY.md §F011). It is distinct from human code review, which happens later at Gate G3.
+A mandatory multi-perspective AI quality gate that runs after implementation but before VERIFY (and before any PR). It checks 7 perspectives: acceptance criteria, architecture, API contract conformance, edge cases, security, test coverage, and style. It is agent-executed with no human gate. If it passes, the task proceeds to Phase 4 VERIFY/QA (evidence capture) — the PR is opened later, only after human evidence-approval (G3). If it fails after 2 iterations, the issue moves to Blocked and escalates to human (see RECOVERY.md §F011). It is distinct from human review, which happens at Gate G3 (evidence approval).
 
 ---
 
@@ -70,7 +70,7 @@ Issue is actively being worked on. Branch exists, coding happening, includes Pha
 PR is open, awaiting code review and CI checks.
 
 ### QA
-CI green and evidence attached; awaiting human approval (Gate G3). PR not yet merged.
+REVIEW passed, gates green, and live evidence captured to `.genesis/evidence/<KEY>/`; awaiting human approval (Gate G3). **No PR yet** — G3 approval is what opens the PR.
 
 ### Done
 Issue is complete. Code merged, evidence approved, issue closed.

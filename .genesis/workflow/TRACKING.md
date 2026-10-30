@@ -184,22 +184,23 @@ stateDiagram-v2
     [*] --> Backlog
     Backlog --> ToDo
     ToDo --> InProgress
-    InProgress --> InReview
-    InReview --> QA
-    QA --> Done
+    InProgress --> QA : REVIEW 3.5 pass + evidence captured
+    QA --> InReview : G3 evidence approved → PR opened
+    InReview --> Done : merged
     Done --> [*]
-    QA --> InReview : G3 rejected
+    QA --> InProgress : G3 rejected
     ToDo --> Blocked
     InProgress --> Blocked
-    InReview --> Blocked
     QA --> Blocked
+    InReview --> Blocked
     Blocked --> ToDo
     Blocked --> InProgress
-    Blocked --> InReview
     Blocked --> QA
+    Blocked --> InReview
 ```
 
 > `Blocked` is entered from any active state when a blocker is identified, and returns to the same state when it is resolved.
+> **Evidence-first order (v2, 2026-10-30):** `QA` (evidence captured, awaiting G3) now comes **before** `In Review` (PR open). The human evidence-approval gate (G3) gates PR creation — a PR is opened only after evidence is approved.
 
 ### State Definitions
 
@@ -208,9 +209,9 @@ stateDiagram-v2
 | `Backlog` | Identified but not prioritized | Issue created |
 | `To Do` | Prioritized and ready to pick up | Decomposed in GENESIS Phase 3, or added ad-hoc (per-task spec/G1 not required to enter — it gates To Do → In Progress) |
 | `In Progress` | Being actively worked on | Branch created, coding started, includes Phase 3.5 REVIEW |
-| `In Review` | PR open, awaiting review | PR opened |
-| `QA` | CI green, evidence attached, awaiting Gate G3 approval | Evidence attached |
-| `Done` | Complete and verified | PR merged + evidence approved |
+| `QA` | REVIEW passed, gates green, live evidence captured to `.genesis/evidence/<KEY>/`, awaiting Gate G3 approval — **no PR yet** | Evidence captured |
+| `In Review` | **G3 approved → PR opened**, awaiting merge | PR opened (after G3) |
+| `Done` | Complete and verified | PR merged |
 | `Blocked` | Cannot progress | Blocker identified |
 
 ### Transitions
@@ -226,27 +227,27 @@ transitions:
     trigger: Spec approved (Gate G1) + agent starts implementation
     
   - from: In Progress
+    to: QA
+    trigger: REVIEW 3.5 passed + gates green + live evidence captured to .genesis/evidence/<KEY>/
+    
+  - from: QA
     to: In Review
-    trigger: PR opened
+    trigger: G3 evidence approved → PR opened
     
   - from: In Review
-    to: QA
-    trigger: CI green + evidence attached
-    
-  - from: QA
     to: Done
-    trigger: G3 approved + PR merged
+    trigger: PR merged to base
     
   - from: QA
-    to: In Review
-    trigger: G3 rejected (fixes needed)
+    to: In Progress
+    trigger: G3 rejected (fixes / re-capture evidence needed)
     
-  - from: [To Do, In Progress, In Review, QA]
+  - from: [To Do, In Progress, QA, In Review]
     to: Blocked
     trigger: Blocker identified
     
   - from: Blocked
-    to: [To Do, In Progress, In Review, QA]
+    to: [To Do, In Progress, QA, In Review]
     trigger: Blocker resolved
 ```
 
@@ -306,14 +307,14 @@ Related to PROJ-456
 
 ## Automation Hooks
 
-### On PR Open
-- Transition issue to `In Review`
-- Run CI pipeline
-- Assign reviewers (if CODEOWNERS configured)
-
-### On CI Green + Evidence Attached
+### On REVIEW pass + gates green + evidence captured (pre-PR)
 - Transition issue to `QA`
-- Notify human for Gate G3 review
+- Notify human for Gate G3 (evidence approval) — **no PR yet**
+
+### On G3 approval → PR opened
+- Transition issue to `In Review`
+- Run CI pipeline (when CI exists — RBT-005b)
+- Assign reviewers (if CODEOWNERS configured)
 
 ### On PR Merge
 - Transition issue to `Done`
