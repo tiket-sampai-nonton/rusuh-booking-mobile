@@ -47,5 +47,52 @@ module.exports = {
         ],
       },
     },
+    // RBT-004 AC2 (D1 mitigation, ARCHITECTURE §2.1 / §11.6): domain and
+    // application are framework-free. Ban React / React Native / Expo / native
+    // / browser packages there so the dependency rule is lint-enforced, not just
+    // convention. `import/no-restricted-paths` above blocks cross-LAYER imports;
+    // this blocks framework imports the path zones cannot see.
+    {
+      files: ["src/domain/**/*.{ts,tsx}", "src/application/**/*.{ts,tsx}"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              { name: "react", message: "domain/application must be framework-free (RBT-004 AC2)." },
+              { name: "react-dom", message: "domain/application must be framework-free (RBT-004 AC2)." },
+              { name: "react-native", message: "domain/application must be framework-free (RBT-004 AC2)." },
+              { name: "react-native-web", message: "domain/application must be framework-free (RBT-004 AC2)." },
+            ],
+            patterns: [
+              {
+                group: [
+                  "expo",
+                  "expo-*",
+                  "expo/*",
+                  "@expo/*",
+                  "react-native/*",
+                  "react-native-*",
+                  "@react-native/*",
+                  "@react-navigation/*",
+                  "nativewind",
+                  "nativewind/*",
+                ],
+                message:
+                  "domain/application must not import React Native / Expo / native / browser packages (RBT-004 AC2).",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    // RBT-004 AC2 (D1): any `eslint-disable` of a boundary/framework rule MUST
+    // carry a justification comment — no silent bypass (ARCHITECTURE §11.6).
+    // The dedicated `eslint-comments/require-description` rule needs
+    // `eslint-plugin-eslint-comments`, which is NOT a dependency of this app and
+    // RBT-004 must add no dependencies. Deferred to RBT-005b (CI), which owns the
+    // lint toolchain; the justification-comment convention is enforced in review
+    // meanwhile (every disable in this codebase carries a `-- reason`). The
+    // framework-import ban above is the load-bearing half of AC2 and is active.
   ],
 };
