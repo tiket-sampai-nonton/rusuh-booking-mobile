@@ -47,6 +47,7 @@ comment citing the evidence path.
 
 | What | Path |
 |------|------|
+| Read-first router (any harness) | `.genesis/workflow/PLAYBOOK.md` |
 | Repo manifest (read first) | `AGENTS.md` |
 | The pipeline (phases + gates) | `.genesis/workflow/WORKFLOW.md` |
 | State machine + board states | `.genesis/workflow/TRACKING.md` |

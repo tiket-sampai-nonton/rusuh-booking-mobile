@@ -41,7 +41,8 @@ order lives in `06-TASK-ORDER.md`.
 │  Phase 3.5 Review          (AI 7-perspective, no PR yet)     │
 │  Phase 4 Verify/QA → evidence to .genesis/evidence/<KEY>/    │
 │                    → G3 human OK  (gates the PR)             │
-│  Phase 5 Done     → open PR → merge                          │
+│  Phase 5 Done     → open PR → merge feature→base            │
+│                    → G4 human OK  (base→main release)       │
 └───────────────────────────────────────────────────────────────┘
             ↑________ loop back for the next task ______________│
 ```
@@ -122,7 +123,7 @@ The human points the agent at this file at session start. Convenience hooks:
 
 | Runtime | How it loads this |
 |---|---|
-| **Kiro** | Auto — `.kiro/steering/genesis.md` points here (no action needed). |
+| **Kiro** | Auto — `.kiro/steering/00-workflow.md` (inclusion: always) enforces the workflow every session (no action needed). |
 | **Claude Code** | Add to root `CLAUDE.md`: "Read `.genesis/PLAYBOOK.md` first and follow it." |
 | **Codex / Codex CLI** | Add the same line to root `AGENTS.md`. |
 | **Cursor** | Add the line to `.cursorrules` (or a `.curs/rules/` file). |
