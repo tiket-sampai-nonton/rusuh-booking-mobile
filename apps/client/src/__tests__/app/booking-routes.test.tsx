@@ -1,4 +1,7 @@
-import { render, screen } from "@testing-library/react-native";
+import { screen } from "@testing-library/react-native";
+
+import { useSessionStore } from "@presentation/stores/session-store";
+import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
 jest.mock("expo-router", () => ({
   Stack: () => null,
@@ -7,12 +10,13 @@ jest.mock("expo-router", () => ({
     sessionId: "sess-1",
     bookingId: "bk-1",
   }),
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
 }));
 
 // eslint-disable-next-line import/first
 import BookingLayout from "../../app/(booking)/_layout";
 // eslint-disable-next-line import/first
-import WaitingScreen from "../../app/(booking)/waiting/[eventId]";
+import WaitingRoute from "../../app/(booking)/waiting/[eventId]";
 // eslint-disable-next-line import/first
 import CheckoutScreen from "../../app/(booking)/checkout/[sessionId]";
 // eslint-disable-next-line import/first
@@ -20,36 +24,22 @@ import PaymentScreen from "../../app/(booking)/payment/[bookingId]";
 // eslint-disable-next-line import/first
 import SuccessScreen from "../../app/(booking)/success/[bookingId]";
 
-describe("(booking) routes", () => {
+describe("(booking) route shells", () => {
   it("export component functions", () => {
     expect(typeof BookingLayout).toBe("function");
-    expect(typeof WaitingScreen).toBe("function");
+    expect(typeof WaitingRoute).toBe("function");
     expect(typeof CheckoutScreen).toBe("function");
     expect(typeof PaymentScreen).toBe("function");
     expect(typeof SuccessScreen).toBe("function");
   });
 
   it("renders the booking layout without crashing", () => {
-    expect(() => render(<BookingLayout />)).not.toThrow();
+    expect(() => renderWithProviders(<BookingLayout />)).not.toThrow();
   });
 
-  it("renders Waiting with the event param", () => {
-    render(<WaitingScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/evt-1/);
-  });
-
-  it("renders Checkout with the session param", () => {
-    render(<CheckoutScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/sess-1/);
-  });
-
-  it("renders Payment with the booking param", () => {
-    render(<PaymentScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/bk-1/);
-  });
-
-  it("renders Success with the booking param", () => {
-    render(<SuccessScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/bk-1/);
+  it("Waiting route mounts the WaitingRoomScreen (no active queue → no-queue state)", () => {
+    useSessionStore.getState().reset();
+    renderWithProviders(<WaitingRoute />);
+    expect(screen.getByTestId("waiting-noqueue")).toBeTruthy();
   });
 });

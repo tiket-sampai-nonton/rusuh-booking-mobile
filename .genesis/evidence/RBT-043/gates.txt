@@ -1,0 +1,70 @@
+================================================================
+RBT-040/042/043/044 — Queue / Waiting Room (E5)
+Branch: feat/full-mock-integration
+Date:   2026-10-30
+================================================================
+
+ACCEPTANCE CRITERIA
+-------------------
+RBT-040 Queue state machine (domain):  ✓
+  queue-display.ts — phaseFor()/isAdmitted()/isTerminal() classify every
+  QueueStatus (WAITING/ADMITTED/CLAIMED/MISSED/LEFT/SOLD_OUT/CLOSED/
+  COMPLETED/ENDED); only ADMITTED|CLAIMED authorize proceeding (FR-08).
+RBT-042 Adaptive polling, one poller:  ✓
+  pollIntervalMs() honours server nextPollAfterMs, clamped [1s,15s], with a
+  position-based fallback (far=slow/near=fast). useWaitingRoom drives a SINGLE
+  TanStack poller (refetchInterval fn) that STOPS on terminal/admitted and
+  cancels on unmount — no request storm (NFR-05/06).
+RBT-043 Waiting room UI:  ✓
+  position ("orang di depanmu") + stats (Di depanmu / Estimasi via etaText) +
+  zone copy (GUARANTEED/POSSIBLE/NOT_ENOUGH) with a live region announcing
+  changes (RBT-080). Zone is color + icon + label (never color-only).
+RBT-044 Auto-claim + redirect + error states:  ✓
+  On ADMITTED the hook auto-claims ONCE (no button) via ClaimAdmission ->
+  BookingRepository.createSession -> records sessionId -> screen redirects to
+  /checkout/[sessionId]. Terminal statuses show recovery copy
+  (terminalMessage) + "Ke Beranda"; poll error shows an error state.
+  Refresh-safe: queueId is read from the persisted session store.
+
+WIRING (inward-only)
+--------------------
+app/(booking)/waiting/[eventId].tsx (shell)
+  -> WaitingRoomScreen
+  -> useWaitingRoom (TanStack query poll + claim mutation) [D3 seam]
+  -> ObserveQueue / LeaveQueue / ClaimAdmission use cases (framework-free)
+  -> Queue + Booking ports -> mock adapters (composition root)
+  -> session-store (Zustand) for queueId + status + sessionId handoff
+
+----------------------------------------------------------------
+tsc --noEmit        : PASS
+eslint . --ext ...  : PASS (0/0; Clean-Arch boundaries OK)
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+jest --coverage  (RBT-04x files; 90% gate on all four)
+----------------------------------------------------------------
+Test Suites: 3 passed, 3 total
+Tests:       26 passed, 26 total
+
+File                          | % Stmts | % Branch | % Funcs | % Lines
+------------------------------|---------|----------|---------|--------
+All files                     |   100   |   100    |   100   |   100
+  claim-admission.ts          |   100   |   100    |   100   |   100
+  observe-queue.ts            |   100   |   100    |   100   |   100
+  queue-display.ts            |   100   |   100    |   100   |   100
+  useWaitingRoom.ts           |   100   |   100    |   100   |   100
+  WaitingRoomScreen.tsx       |   100   |   100    |   100   |   100
+
+>= 90% on all four metrics. GATE PASSED.
+
+----------------------------------------------------------------
+Run evidence
+----------------------------------------------------------------
+WEB: expo export web -> SUCCESS. Screenshot web-waiting.png captured by full
+     CLICK-THROUGH (Home -> "Rusuh Fest 2026" -> "Masuk Antrean" CTA). Shows
+     the live waiting room: position 4 (DECREMENTED from 5 by the adaptive
+     poll — polling verified working), "orang di depanmu", stats (Di depanmu 4
+     / Estimasi ± 12 detik), zone "⚠ Masih Mungkin" (POSSIBLE), the server-
+     persistence reassurance, and "Keluar dari antrean". No console errors.
+
+iOS / ANDROID: at funnel-complete milestone (one emulator at a time).
