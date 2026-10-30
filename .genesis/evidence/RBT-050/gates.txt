@@ -1,0 +1,75 @@
+================================================================
+RBT-050/051/052/053/054 — Checkout / booking hold (E6)
+Branch: feat/full-mock-integration
+Date:   2026-10-30
+================================================================
+
+ACCEPTANCE CRITERIA
+-------------------
+RBT-050 Booking session create/restore + timer:  ✓
+  useCheckout restores the current session (getCurrentSession, refresh-safe);
+  useServerCountdown drives the hold timer from the ServerClock (server deadline
+  + serverTime, NEVER the device clock, D3.2/D9.2). On expiry → /expired/[id].
+RBT-051 Ticket item list + quantity rules:  ✓
+  dynamic rows (min 1, max effectiveCap = min(maxSelectable,3)); add/remove;
+  category chips (Reguler/VIP — default set until BE checkout-category O1).
+RBT-052 NIK validation + attendee + single-use buyer-NIK:  ✓
+  isValidNik (16-digit); each ticket carries an attendee NIK; the
+  "Gunakan NIK pembeli" toggle is SINGLE-USE (enabling it on one row disables
+  the others, D9.1); duplicate attendee NIKs rejected; buyer NIK masked, never
+  logged (SECURITY/D7.1). Guest path: NIK-consent note shown inline (D8.5).
+RBT-053 Buyer data:  ✓  buyer NIK + email captured with inline validation.
+RBT-054 Create booking (idempotent hold):  ✓
+  HoldBooking mints ONE Idempotency-Key per session (IdempotencyKeys, reused on
+  retry/refresh, cleared on terminal — RBT-012/FR-25), maps rows → contract
+  BookingItemInput[] (resolving a buyer-NIK row to the buyer), calls the
+  idempotent port hold, records bookingId, routes to /payment/[bookingId].
+  Hold errors surfaced in Bahasa.
+
+WIRING (inward-only)
+--------------------
+app/(booking)/checkout/[sessionId].tsx (shell)
+  -> CheckoutScreen (form state local)
+  -> useCheckout (session query + hold mutation) + useServerCountdown [D3 seam]
+  -> GetCurrentSession / HoldBooking / (CheckAttendee) use cases (framework-free)
+  -> Booking port + IdempotencyKeys -> mock adapters (composition root)
+  -> session-store records bookingId handoff
+
+----------------------------------------------------------------
+tsc --noEmit        : PASS
+eslint . --ext ...  : PASS (0/0; Clean-Arch boundaries OK)
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+jest --coverage  (RBT-05x files; 90% gate on all four)
+----------------------------------------------------------------
+Test Suites: 4 passed, 4 total
+Tests:       44 passed, 44 total
+
+File                           | % Stmts | % Branch | % Funcs | % Lines
+-------------------------------|---------|----------|---------|--------
+All files                      |  98.4   |  94.84   |  100    |  100
+  checkout.ts                  |  100    |  100     |  100    |  100
+  hold-booking.ts              |  100    |  100     |  100    |  100
+  booking-session.ts           |  100    |  100     |  100    |  100
+  useCheckout.ts               |  100    |  100     |  100    |  100
+  useServerCountdown.ts        |  100    |  100     |  100    |  100
+  CheckoutScreen.tsx           |  96     |  91.52   |  100    |  100
+
+>= 90% on all four metrics (stmts/branches/funcs/lines). GATE PASSED.
+(Remaining CheckoutScreen branch gaps are defensive guards — !session on
+submit, removeRow single-row guard — unreachable in normal flow.)
+
+----------------------------------------------------------------
+Run evidence
+----------------------------------------------------------------
+WEB: expo export web -> SUCCESS. Screenshot web-checkout.png captured by the
+     FULL funnel click-through: Home -> "Rusuh Fest 2026" -> "Masuk Antrean" ->
+     waiting room drains (adaptive poll 5→ADMITTED) -> AUTO-CLAIM -> Checkout.
+     Shows the "Checkout" header + LIVE server timer ⏱ 04:50 (counting down
+     from the booking hold deadline on the server clock), Data Pembeli (NIK +
+     email), Tiket #1 (Reguler/VIP chips, Nama/NIK Penonton, single-use
+     "Gunakan NIK pembeli" toggle), "＋ Tambah tiket", quota note, and the
+     "Lanjut Bayar →" CTA. End-to-end Home→Checkout works on web with mocks.
+
+iOS / ANDROID: at funnel-complete milestone (one emulator at a time).

@@ -13,10 +13,12 @@ import type { EventRepository } from "@domain/repositories/event.repository";
 import type { PaymentRepository } from "@domain/repositories/payment.repository";
 import type { QueueRepository } from "@domain/repositories/queue.repository";
 import type { UserRepository } from "@domain/repositories/user.repository";
+import { IdempotencyKeys } from "@domain/idempotency/idempotency-key";
 import type { ClockPort } from "@domain/services/clock.port";
 import type { FileSharePort } from "@domain/services/file-share.port";
 import type { NotificationPort } from "@domain/services/notification.port";
 import { ServerClock } from "@domain/services/server-clock";
+import { InMemoryIdempotencyStore } from "@infrastructure/__fixtures__/in-memory-idempotency-store";
 import { HttpBookingRepository } from "@infrastructure/api/http-booking.repository";
 import { HttpEventRepository } from "@infrastructure/api/http-event.repository";
 import { HttpPaymentRepository } from "@infrastructure/api/http-payment.repository";
@@ -46,6 +48,13 @@ export interface Container {
    * device clock never leaks into booking/payment deadlines.
    */
   readonly serverClock: ServerClock;
+  /**
+   * Idempotency-Key manager (RBT-012): mints one key per logical action and
+   * reuses it across retry/refresh so a double-submit cannot create a second
+   * booking/payment. Backed by an in-memory store (dev); a durable adapter is
+   * swapped at the composition root for cross-restart persistence.
+   */
+  readonly idempotencyKeys: IdempotencyKeys;
   readonly httpClient: HttpClient;
   readonly eventRepository: EventRepository;
   readonly queueRepository: QueueRepository;
@@ -101,11 +110,13 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // system clock is bound in both modes. Tests inject a fake ClockPort directly.
   const clock: ClockPort = new SystemClock();
   const serverClock = new ServerClock(clock);
+  const idempotencyKeys = new IdempotencyKeys(new InMemoryIdempotencyStore());
 
   if (useMocks) {
     return {
       clock,
       serverClock,
+      idempotencyKeys,
       httpClient: new MockHttpClient(),
       eventRepository: new MockEventRepository(),
       queueRepository: new MockQueueRepository(),
@@ -134,6 +145,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
   return {
     clock,
     serverClock,
+    idempotencyKeys,
     httpClient,
     eventRepository: new HttpEventRepository(httpClient),
     queueRepository: new HttpQueueRepository(httpClient),

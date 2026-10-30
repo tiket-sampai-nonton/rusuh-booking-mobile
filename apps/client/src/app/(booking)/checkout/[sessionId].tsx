@@ -1,15 +1,10 @@
+// Booking route `/checkout/[sessionId]`. Routing-only shell: reads the param
+// and mounts the presentation screen. RBT-050…054.
 import { useLocalSearchParams } from "expo-router";
-import { Text, View } from "react-native";
 
-// Booking route `/checkout/[sessionId]` (attendee + quantity + payment
-// method). Skeleton placeholder — real checkout lands in a later RBT.
-export default function CheckoutScreen() {
+import { CheckoutScreen } from "@presentation/screens/Checkout/CheckoutScreen";
+
+export default function CheckoutRoute() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
-  return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-lg font-semibold text-brand" accessibilityRole="header">
-        Checkout — /checkout/{sessionId} (RBT-002)
-      </Text>
-    </View>
-  );
+  return <CheckoutScreen sessionId={sessionId ?? ""} />;
 }

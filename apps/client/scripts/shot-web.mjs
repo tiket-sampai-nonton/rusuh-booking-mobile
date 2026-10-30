@@ -78,12 +78,17 @@ await page.goto(base + ROUTE, { waitUntil: "networkidle" });
 await page.waitForTimeout(WAIT);
 
 for (const step of STEPS) {
+  if (step.wait) {
+    // A pure wait step (no click) — e.g. let an adaptive poll drain the queue.
+    await page.waitForTimeout(step.wait);
+    continue;
+  }
   if (step.text) {
     await page.getByText(step.text, { exact: false }).first().click();
   } else if (step.testid) {
     await page.locator(`[data-testid="${step.testid}"]`).first().click();
   }
-  await page.waitForTimeout(WAIT);
+  await page.waitForTimeout(step.after ?? WAIT);
 }
 
 await page.screenshot({ path: OUT, fullPage: true });
