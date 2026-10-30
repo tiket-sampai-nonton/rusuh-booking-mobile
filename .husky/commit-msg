@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+# RBT-005a — commit-message guard (commit-msg).
+# Enforce Conventional Commits `type(scope): subject` carrying an RBT-xxx issue key.
+# Accepts the key in EITHER position so both repo history styles pass:
+#   feat(RBT-001): add thing          (key in scope)
+#   feat(scope): RBT-001 add thing    (key in subject)
+# Merge/revert commits are exempt.
+
+msg_file="$1"
+msg=$(head -n1 "$msg_file")
+
+# Exempt merge/revert/fixup commits
+case "$msg" in
+  "Merge "*|"Revert "*|"fixup! "*|"squash! "*) exit 0 ;;
+esac
+
+types='feat|fix|refactor|test|docs|chore|style|perf|build|ci|revert'
+
+# type(scope): subject  — scope required, subject non-empty
+if ! printf '%s' "$msg" | grep -Eq "^($types)\([a-zA-Z0-9._-]+\): .+"; then
+  echo "✖ commit-msg: must be Conventional Commits 'type(scope): subject'"
+  echo "  type ∈ {$types}"
+  echo "  got: $msg"
+  exit 1
+fi
+
+# RBT-xxx key present somewhere in the subject line (scope or description)
+if ! printf '%s' "$msg" | grep -Eq 'RBT-[0-9]+[a-z]?'; then
+  echo "✖ commit-msg: subject must reference an issue key (RBT-xxx), e.g. feat(RBT-001): ..."
+  echo "  got: $msg"
+  exit 1
+fi
+
+exit 0
