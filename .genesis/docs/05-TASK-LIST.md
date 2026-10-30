@@ -183,12 +183,14 @@ Type: Story · P0 · M · Deps: RBT-001
 - AC2: Domain/application layers import no React/RN/Expo/browser/native (lint-enforced dependency rule).
 - Skills: Clean Architecture, DI.
 
-#### RBT-005: CI skeleton (GitHub Actions + SonarCloud)
+#### RBT-005: CI skeleton (GitHub Actions + SonarCloud) + issue-state automation
 Type: Story · P0 · L · Deps: RBT-001
-- AC1: PR workflow runs typecheck, lint, Jest, `npm audit`, SonarCloud; stops before deploy.
-- AC2: Branch model `develop`/`main` with the PIPELINE.md gates wired; secrets referenced (not committed).
+- AC1: PR workflow runs typecheck, lint (incl. layer-boundary rules), Jest, `npm audit`, SonarCloud; stops before deploy.
+- AC2: Branch model `develop`/`main` with the PIPELINE.md gates wired; branch protection on `main`/`develop` (require PR + checks, no direct push); secrets referenced (not committed).
 - AC3: Bundle-size + SEO-output checks stubbed for web release.
-- Skills: GitHub Actions, SonarCloud, EAS config.
+- AC4: **Husky commit guard** installed (`.husky/pre-commit`): lint (staged) → type-check → related tests → changed-code coverage ≥80%; `.husky/commit-msg` enforces `type(scope): [RBT-xxx]` Conventional Commits. Never `--no-verify` (project RULES).
+- AC5: **Issue-state automation** (per TRACKING.md §Issue States + Automation Hooks): a status mechanism exists (status labels `status:in-progress|in-review|qa|done|blocked`, or a GitHub Projects board with those columns) AND a GitHub Actions workflow moves the linked issue automatically — **PR opened → In Review**, **CI green + evidence → QA**, **PR merged → Done** — so transitions are enforced by the repo, not by an agent remembering. Branch/PR must reference the issue (`RBT-xxx` / `Closes #N`) so the Action can resolve it. `In Progress` is set when the feature branch is first pushed (or by the agent at task start per PLAYBOOK).
+- Skills: GitHub Actions, SonarCloud, EAS config, husky/lint-staged.
 
 ---
 

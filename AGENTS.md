@@ -140,6 +140,14 @@ app (routes) → presentation → application (use cases) → domain → Ports/C
 ```
 **Rule:** source dependencies point inward; outer adapters are swappable (mock ↔ BE, axios ↔ fetch). TanStack Query lives only in presentation hooks.
 
+> **Pre-code arch check (do this BEFORE writing any file):** locate the file in the layer map above, then confirm its imports obey the inward-only direction —
+> - `src/domain/**` and `src/application/**`: pure TS, import **no** React/React Native/Expo/browser/native and **no** `src/infrastructure`/`src/presentation`.
+> - `src/presentation/**`: may import `application` + `domain`, **never** `infrastructure` directly — reach the backend through a use case → port.
+> - `src/infrastructure/**`: implements `domain` ports; the only layer that touches axios/fetch, Expo/native SDKs, storage.
+> - Concrete adapters are bound **only** in `src/providers/container.ts` (the composition root).
+>
+> If a change seems to need a forbidden import, the design is wrong — **STOP, re-read ARCHITECTURE, or ASK.** Do not add the import; never `eslint-disable` a boundary rule to pass the commit guard. (ESLint + husky enforce this, but check first — the guard is a backstop.)
+
 ---
 
 ## Tech Stack

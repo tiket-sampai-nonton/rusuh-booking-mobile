@@ -64,6 +64,7 @@ Source: `PIPELINE.md`.
 - [ ] Playwright + Maestro are **local/manual only** — NOT in cloud CI (per TESTING-STRATEGY §9.1)
 - [ ] Coverage lcov uploaded for Sonar ingestion
 - [ ] First green run on a trivial PR verified
+- [ ] **Issue-state automation wired** (RBT-005 AC5): status labels or a Projects board (`in-progress / in-review / qa / done / blocked`) exist, and a GitHub Actions workflow moves the linked issue — PR opened → In Review, CI green + evidence → QA, merge → Done. Verified by a trivial PR that references an issue and watches the issue move.
 
 ## 4. Static Analysis (SonarCloud) — RBT-005
 
