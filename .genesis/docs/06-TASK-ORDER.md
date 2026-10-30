@@ -26,8 +26,8 @@
 
 ## Run Next
 
-**Current wave:** `Wave 2 — Core API (E2)` — RBT-010 ✅ delivered (port freeze landed).
-**Run next:** `RBT-011 / 012 / 013 / 014` — all depend only on RBT-010 (✅) and are file-disjoint → parallelizable. (Wave 1 ✅ all; RBT-010 ✅; RBT-005b CI deferred post-E2E.)
+**Current wave:** `Wave 3 — Feature epics (E3/E4/E5)` — Wave 2 Core API COMPLETE, ports FROZEN.
+**Run next:** `E3 Auth (Ray) · E4 Events (Ray) · E5 Queue (Eld)` — unblocked now the domain ports are frozen; disjoint feature areas, parallel across owners. (Wave 1 ✅; Wave 2 ✅ RBT-010/011/012/013/014; RBT-005b CI deferred post-E2E.)
 
 ---
 
@@ -70,9 +70,9 @@
 |------|-------|--------|-----------|------------------|----------|--------|-----------|
 | RBT-010 | Riz | Core/API | 004 | `src/infrastructure/{http,api}/**`, generated types | ❌ first | Done ✅ | ☑ |
 | RBT-011 | Riz | Core/API | 010 ✅ | `src/domain/services/server-clock.ts` | ✅ | Done ✅ | ☑ |
-| RBT-012 | Riz | Core/API | 010 ✅ | idempotency util in `src/domain`/`src/application` | ✅ | To Do (unblocked) | ☐ |
-| RBT-013 | Riz | Core/API | 010 ✅ | `src/domain/errors/**`, error mapping | ✅ | To Do (unblocked) | ☐ |
-| RBT-014 | Riz | Core/API | 010 ✅ | `src/infrastructure/__fixtures__/**`, `src/shared/test-fixtures/**` | ✅ | To Do (unblocked) | ☐ |
+| RBT-012 | Riz | Core/API | 010 ✅ | idempotency util in `src/domain`/`src/application` | ✅ | Done ✅ | ☑ |
+| RBT-013 | Riz | Core/API | 010 ✅ | `src/domain/errors/**`, error mapping | ✅ | Done ✅ | ☑ |
+| RBT-014 | Riz | Core/API | 010 ✅ | `src/infrastructure/__fixtures__/**`, `src/shared/test-fixtures/**` | ✅ | Done ✅ | ☑ |
 
 **Wave 2 gate:** all `Done` + `src/domain` ports/interfaces frozen (owned by Eld/Ray) → start Wave 3.
 
