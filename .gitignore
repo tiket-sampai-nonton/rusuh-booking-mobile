@@ -2,7 +2,9 @@
 .DS_Store
 
 # Local agent/tooling settings (per-machine, not shared)
-.kiro/
+.kiro/*
+# ...but DO share steering (every teammate's agent must auto-load the workflow)
+!.kiro/steering/
 
 # Node / Expo (for when app code lands)
 node_modules/
