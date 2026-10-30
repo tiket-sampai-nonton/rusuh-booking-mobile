@@ -46,4 +46,26 @@ export class MockPaymentRepository implements PaymentRepository {
     }
     return found;
   }
+
+  /**
+   * MOCK-ONLY SNAP simulator hook (D10.5). The real BE flips the status via the
+   * SNAP callback + webhook; the frozen `PaymentRepository` port exposes only
+   * `createAttempt`/`getStatus`, so the local SNAP simulator calls this extra
+   * method to transition the stored attempt to a terminal status. NOT part of
+   * the port — a production adapter does not implement it; the composition root
+   * exposes it only in mock mode. Keeps the verify-with-BE flow (getStatus)
+   * authoritative: the UI still reads PAID only from getStatus.
+   */
+  simulateSnapResult(
+    attemptId: string,
+    outcome: "PAID" | "FAILED",
+  ): PaymentAttempt {
+    const found = this.attemptsById.get(attemptId);
+    if (!found) {
+      throw new Error(`MockPaymentRepository: unknown attempt ${attemptId}`);
+    }
+    const next: PaymentAttempt = { ...found, status: outcome };
+    this.attemptsById.set(attemptId, next);
+    return next;
+  }
 }

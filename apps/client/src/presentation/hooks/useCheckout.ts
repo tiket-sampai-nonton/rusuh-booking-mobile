@@ -47,7 +47,7 @@ export function useCheckout(): CheckoutView {
         buyerNik,
       ),
     onSuccess: (booking) => {
-      setBooking(booking.bookingId);
+      setBooking(booking.bookingId, booking.amountMinor);
     },
   });
 

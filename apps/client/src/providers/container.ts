@@ -63,6 +63,18 @@ export interface Container {
   readonly userRepository: UserRepository;
   readonly notification: NotificationPort;
   readonly fileShare: FileSharePort;
+  /**
+   * MOCK-ONLY SNAP simulator (D10.5). Present only when the mock payment
+   * adapter is bound; the local SNAP page uses it to drive a PAID/FAILED
+   * outcome the real BE would deliver via its SNAP callback. `undefined` in
+   * real mode — the production flow verifies through the real gateway.
+   */
+  readonly paymentSimulator?: PaymentSimulator;
+}
+
+/** The mock-only SNAP outcome hook (see Container.paymentSimulator). */
+export interface PaymentSimulator {
+  simulateSnapResult(attemptId: string, outcome: "PAID" | "FAILED"): unknown;
 }
 
 export interface ContainerOptions {
@@ -113,6 +125,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
   const idempotencyKeys = new IdempotencyKeys(new InMemoryIdempotencyStore());
 
   if (useMocks) {
+    const paymentRepository = new MockPaymentRepository();
     return {
       clock,
       serverClock,
@@ -121,10 +134,12 @@ export function createContainer(options: ContainerOptions = {}): Container {
       eventRepository: new MockEventRepository(),
       queueRepository: new MockQueueRepository(),
       bookingRepository: new MockBookingRepository(),
-      paymentRepository: new MockPaymentRepository(),
+      paymentRepository,
       userRepository: new MockUserRepository(),
       notification: new MockNotificationAdapter(),
       fileShare: new MockFileShareAdapter(),
+      // Mock-only SNAP simulator: the same instance, exposed via its extra hook.
+      paymentSimulator: paymentRepository,
     };
   }
 

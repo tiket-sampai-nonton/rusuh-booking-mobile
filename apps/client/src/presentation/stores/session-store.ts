@@ -25,8 +25,13 @@ export interface SessionState {
   sessionId?: string;
   /** Confirmed booking id (payment). */
   bookingId?: string;
+  /** Booking total in minor IDR (carried from the hold to the payment page —
+   *  the frozen ports expose no "get booking by id", so the amount rides here). */
+  amountMinor?: number;
   /** Selected payment method bucket. */
   paymentMethod?: PaymentMethod;
+  /** The created payment attempt id (SNAP handoff + verify reference). */
+  attemptId?: string;
 
   /** Record the queue join. */
   setQueue: (eventId: string, queueId: string, status: QueueStatus) => void;
@@ -34,10 +39,10 @@ export interface SessionState {
   setQueueStatus: (status: QueueStatus) => void;
   /** Record a created booking session. */
   setSession: (sessionId: string) => void;
-  /** Record a confirmed booking. */
-  setBooking: (bookingId: string) => void;
-  /** Record the chosen payment method. */
-  setPaymentMethod: (method: PaymentMethod) => void;
+  /** Record a confirmed booking (id + total). */
+  setBooking: (bookingId: string, amountMinor?: number) => void;
+  /** Record the chosen payment method + the created attempt id. */
+  setPaymentMethod: (method: PaymentMethod, attemptId?: string) => void;
   /** Clear everything (terminal: success / expiry / cancel — D7.4). */
   reset: () => void;
 }
@@ -47,8 +52,9 @@ export const useSessionStore = create<SessionState>((set) => ({
     set({ eventId, queueId, queueStatus }),
   setQueueStatus: (queueStatus) => set({ queueStatus }),
   setSession: (sessionId) => set({ sessionId }),
-  setBooking: (bookingId) => set({ bookingId }),
-  setPaymentMethod: (paymentMethod) => set({ paymentMethod }),
+  setBooking: (bookingId, amountMinor) => set({ bookingId, amountMinor }),
+  setPaymentMethod: (paymentMethod, attemptId) =>
+    set({ paymentMethod, attemptId }),
   reset: () =>
     set({
       eventId: undefined,
@@ -56,6 +62,8 @@ export const useSessionStore = create<SessionState>((set) => ({
       queueStatus: undefined,
       sessionId: undefined,
       bookingId: undefined,
+      amountMinor: undefined,
       paymentMethod: undefined,
+      attemptId: undefined,
     }),
 }));
