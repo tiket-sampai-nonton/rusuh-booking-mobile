@@ -27,7 +27,7 @@
 ## Run Next
 
 **Current wave:** `Wave 1 — Foundations (E1)`
-**Run next:** `RBT-001` (then the rest of Wave 1 in listed order; RBT-002/003/004 after RBT-001).
+**Run next:** `RBT-005a`, then `RBT-002` / `RBT-003` / `RBT-004` — all depend only on RBT-001 (✅ delivered) and are file-disjoint, so they can run in parallel. (RBT-005b CI is deferred post-E2E.)
 
 ---
 
@@ -55,7 +55,7 @@
 
 | Task | Owner | Domain | Depends On | Files (disjoint) | Parallel | Status | Delivered |
 |------|-------|--------|-----------|------------------|----------|--------|-----------|
-| RBT-001 | Riz | Platform | — | scaffold: `apps/client/**`, `src/*` folders, `tailwind.config.js` | ❌ first | To Do | ☐ |
+| RBT-001 | Riz | Platform | — | scaffold: `apps/client/**`, `src/*` folders, `tailwind.config.js` | ❌ first | Done | ✅ |
 | RBT-002 | Riz | Platform | 001 | `src/app/**` (Expo Router route tree) | ✅ | To Do | ☐ |
 | RBT-003 | Riz | Platform | 001 | `tailwind.config.js`, `src/presentation/theme/**` | ✅ | To Do | ☐ |
 | RBT-004 | Riz | Platform | 001 | `src/providers/**` (DI container + ports wiring) | ✅ | To Do | ☐ |
