@@ -14,6 +14,7 @@ import { useRouter, type Href } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
+  ImageBackground,
   Pressable,
   ScrollView,
   Text,
@@ -22,6 +23,7 @@ import {
 
 import { badgeFor } from "@domain/rules/event-display";
 import { parseDescription } from "@domain/rules/event-description";
+import { eventImage } from "@domain/rules/event-image";
 import { formatDateID, formatTimeID } from "@domain/services/date-format";
 import { minorToIDR } from "@domain/services/money";
 import { StatusBadge } from "@presentation/components/StatusBadge";
@@ -78,27 +80,41 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   const canJoin = !badge.disabled && event.status !== "NOT_STARTED";
   const dateTxt = formatDateID(event.startsAt);
   const timeTxt = formatTimeID(event.startsAt);
+  const banner = eventImage(event.id, desc.bannerImage);
 
   return (
     <View className="flex-1 bg-background">
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingTop: 48, paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         testID="detail-scroll"
       >
-        <View className="flex-row items-start justify-between">
-          <Text
-            className="flex-1 pr-2 text-3xl font-extrabold text-foreground"
-            accessibilityRole="header"
-          >
-            {event.name}
-          </Text>
-          <StatusBadge tone={badge.tone} label={badge.label} />
-        </View>
+        {/* Banner hero (prototype event.html .hero-ev). */}
+        <ImageBackground
+          source={{ uri: banner }}
+          resizeMode="cover"
+          style={{ minHeight: 320, justifyContent: "flex-end" }}
+        >
+          <View
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(10,10,12,0.5)" }}
+          />
+          <View className="p-5 pt-14">
+            <View className="mb-3 flex-row">
+              <StatusBadge tone={badge.tone} label={badge.label} />
+            </View>
+            <Text
+              className="text-3xl font-extrabold text-white"
+              accessibilityRole="header"
+              numberOfLines={2}
+            >
+              {event.name}
+            </Text>
+            <Text className="mt-2 text-sm text-white/80">
+              {[event.venue, dateTxt, timeTxt].filter(Boolean).join(" · ")}
+            </Text>
+          </View>
+        </ImageBackground>
 
-        <Text className="mt-2 text-sm text-muted-foreground">
-          {[event.venue, dateTxt, timeTxt].filter(Boolean).join(" · ")}
-        </Text>
-
+      <View className="px-5">
         {desc.longDesc ? (
           <Block title="Tentang event">
             <Text className="text-base text-foreground">{desc.longDesc}</Text>
@@ -136,6 +152,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
             </Text>
           ) : null}
         </Block>
+      </View>
       </ScrollView>
 
       <View className="border-t border-line bg-card p-5">

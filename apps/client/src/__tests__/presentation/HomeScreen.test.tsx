@@ -74,6 +74,20 @@ describe("HomeScreen", () => {
     expect(mockRouter.push).toHaveBeenCalledWith("/events/evt-1");
   });
 
+  it("renders the photo hero and books the featured event + sees all", async () => {
+    renderWithProviders(<HomeScreen />, {
+      container: { eventRepository: repoReturning(EVENT_FIXTURES) },
+    });
+    await waitFor(() => screen.getByTestId("home-hero"));
+    // "Lihat Semua" is a no-op scroll affordance (catalog is already below).
+    fireEvent.press(screen.getByTestId("hero-see-all"));
+    // Book the featured (first upcoming) event → routes to its detail.
+    fireEvent.press(screen.getByTestId("hero-book"));
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/events\//),
+    );
+  });
+
   it("renders empty states when the catalog is empty", async () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning([]) },

@@ -1,17 +1,17 @@
 /**
- * EventCard — one catalog row (RBT-030).
+ * EventCard — one catalog card (RBT-030), 1:1 with prototype index.html `.card`.
  *
- * Shows name, venue, date (DD-MMM-YYYY), price-from, and the availability badge.
- * A SOLD_OUT / CLOSED event is disabled (dimmed, not pressable). Pressing an
- * enterable card calls `onPress(eventId)` — the screen routes to the detail.
- *
- * Accessibility: the whole card is one button with a descriptive label; a
- * disabled card is still read but marked disabled.
+ * A 4:3 concert-photo thumbnail with the status badge overlaid top-left and a
+ * price tag bottom-right; below it the title, 📍 venue and 🗓 date; a footer
+ * row with "N tiket tersedia" and a circular ↗ action button. SOLD_OUT / CLOSED
+ * cards dim and are non-interactive (✕ instead of ↗). The whole card is one
+ * accessible button.
  */
-import { Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 
 import type { EventSummary } from "@domain/repositories/event.repository";
 import { badgeFor } from "@domain/rules/event-display";
+import { eventImage } from "@domain/rules/event-image";
 import { formatDateID } from "@domain/services/date-format";
 import { minorToIDR } from "@domain/services/money";
 
@@ -28,10 +28,17 @@ export function EventCard({ event, onPress, history = false }: EventCardProps) {
   const badge = badgeFor(event);
   const disabled = badge.disabled || history;
   const dateTxt = formatDateID(event.startsAt);
+  const image = eventImage(event.id);
   const priceTxt =
     typeof event.minPriceMinor === "number"
-      ? `Mulai ${minorToIDR(event.minPriceMinor)}`
+      ? minorToIDR(event.minPriceMinor)
       : "Harga menyusul";
+  const qtyTxt =
+    disabled
+      ? "—"
+      : typeof event.remainingTickets === "number"
+        ? `${event.remainingTickets.toLocaleString("id-ID")} tiket tersedia`
+        : "Tersedia";
 
   return (
     <Pressable
@@ -41,39 +48,59 @@ export function EventCard({ event, onPress, history = false }: EventCardProps) {
       disabled={disabled}
       onPress={() => onPress(event.id)}
       testID={`event-card-${event.id}`}
-      className={`rounded-4xl border border-line bg-card p-3.5 ${disabled ? "opacity-60" : ""}`}
+      className={`overflow-hidden rounded-5xl border border-line bg-card p-1.75 ${disabled ? "opacity-60" : ""}`}
     >
-      <View className="flex-row items-start justify-between">
+      {/* Thumbnail (4:3) with badge + price overlays. */}
+      <View className="relative aspect-[4/3] overflow-hidden rounded-4xl bg-ink">
+        <Image
+          source={{ uri: image }}
+          resizeMode="cover"
+          accessibilityIgnoresInvertColors
+          style={{ width: "100%", height: "100%" }}
+        />
+        <View className="absolute left-3 top-3">
+          <StatusBadge tone={badge.tone} label={badge.label} />
+        </View>
+        {!badge.disabled ? (
+          <View className="absolute bottom-3 right-3 rounded-pill bg-card px-3 py-1.75">
+            <Text className="text-xs font-extrabold text-card-foreground">
+              {priceTxt}
+            </Text>
+          </View>
+        ) : null}
+      </View>
+
+      {/* Body. */}
+      <View className="px-3.25 pb-3.25 pt-4">
         <Text
-          className="flex-1 pr-2 text-xl font-extrabold text-card-foreground"
-          numberOfLines={2}
+          className="text-xl font-extrabold text-card-foreground"
+          numberOfLines={1}
         >
           {event.name}
         </Text>
-        <StatusBadge tone={badge.tone} label={badge.label} />
-      </View>
+        {event.venue ? (
+          <Text className="mt-1.5 text-xs text-muted-foreground" numberOfLines={1}>
+            📍 {event.venue}
+          </Text>
+        ) : null}
+        {dateTxt ? (
+          <Text className="mt-1.5 text-xs font-semibold text-muted-foreground">
+            🗓 {dateTxt}
+          </Text>
+        ) : null}
 
-      {event.venue ? (
-        <Text className="mt-1.5 text-xs text-muted-foreground">
-          📍 {event.venue}
-        </Text>
-      ) : null}
-
-      {dateTxt ? (
-        <Text className="mt-1.5 text-xs font-semibold text-muted-foreground">
-          🗓 {dateTxt}
-        </Text>
-      ) : null}
-
-      <View className="mt-3.5 flex-row items-center justify-between border-t border-line pt-3.25">
-        <Text className="text-sm font-extrabold text-card-foreground">
-          {priceTxt}
-        </Text>
-        <Text
-          className={`text-sm font-bold ${disabled ? "text-muted-foreground" : "text-brand"}`}
-        >
-          {history ? "Berlalu" : disabled ? "Habis" : "Lihat →"}
-        </Text>
+        <View className="mt-4 flex-row items-center justify-between border-t border-line pt-3.25">
+          <Text className="text-xs font-semibold text-muted-foreground">
+            {qtyTxt}
+          </Text>
+          <View
+            className={`h-9 w-9 items-center justify-center rounded-full ${disabled ? "bg-line" : "bg-ink"}`}
+          >
+            <Text className="text-sm text-white" accessibilityElementsHidden>
+              {disabled ? "✕" : "↗"}
+            </Text>
+          </View>
+        </View>
       </View>
     </Pressable>
   );

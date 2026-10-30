@@ -12,6 +12,7 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
 import { BrandMark } from "@presentation/components/BrandMark";
 import { EventCard } from "@presentation/components/EventCard";
+import { EventHero } from "@presentation/components/EventHero";
 import { useEvents } from "@presentation/hooks/useEvents";
 
 export function HomeScreen() {
@@ -38,20 +39,30 @@ export function HomeScreen() {
         </View>
       </View>
 
-      <View className="rounded-5xl bg-ink p-6">
-        <Text className="text-2xs font-bold uppercase tracking-tag text-white/60">
-          ● Live · Flash Sale
-        </Text>
-        <Text
-          className="mt-2 text-display font-extrabold text-white"
-          accessibilityRole="header"
-        >
-          Rusuh Tiket
-        </Text>
-        <Text className="mt-1.5 text-base text-white/70">
-          Pilih event, masuk waiting room, amankan tiketmu. Tanpa PHP.
-        </Text>
-      </View>
+      {data && data.upcoming.length > 0 ? (
+        <EventHero
+          events={data.upcoming}
+          onBook={goToEvent}
+          onSeeAll={() => {
+            /* "Lihat Semua" scrolls to the catalog, which is already below. */
+          }}
+        />
+      ) : (
+        <View className="rounded-5xl bg-ink p-6">
+          <Text className="text-2xs font-bold uppercase tracking-tag text-white/60">
+            ● Live · Flash Sale
+          </Text>
+          <Text
+            className="mt-2 text-display font-extrabold text-white"
+            accessibilityRole="header"
+          >
+            Rusuh Tiket
+          </Text>
+          <Text className="mt-1.5 text-base text-white/70">
+            Pilih event, masuk waiting room, amankan tiketmu. Tanpa PHP.
+          </Text>
+        </View>
+      )}
 
       {isLoading ? (
         <View className="mt-7.5 items-center" testID="home-loading">
