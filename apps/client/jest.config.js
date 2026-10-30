@@ -4,6 +4,11 @@ module.exports = {
   // Watchman's file crawler is unreliable in sandboxed/CI environments (no
   // socket); Jest's own node crawler is used instead. No effect on results.
   watchman: false,
+  // jest-expo + RN Web leaves the environment's timer/animation loop running
+  // after the suite settles, which stalls the process at teardown (worst under
+  // coverage instrumentation). Force a clean exit once all tests resolve — this
+  // changes nothing about pass/fail, only the shutdown.
+  forceExit: true,
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   transformIgnorePatterns: [
     "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|nativewind|react-native-css-interop))",

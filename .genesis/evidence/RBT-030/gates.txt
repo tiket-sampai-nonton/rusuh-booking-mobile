@@ -1,0 +1,79 @@
+================================================================
+RBT-030 — Home: event list + status + nearby/history (E4)
+Branch: feat/full-mock-integration
+Date:   2026-10-30
+================================================================
+
+ACCEPTANCE CRITERIA
+-------------------
+AC1: listEvents(); status enum -> badge (Tersedia/Stok Menipis/Sold Out,
+     disabled when sold out); price-from minorToIDR; date DD-MMM-YYYY.  ✓
+     - badgeFor() maps AVAILABLE(+stock)->Tersedia/Stok Menipis,
+       SOLD_OUT/0-stock->Sold Out (disabled), NOT_STARTED->Segera,
+       CLOSED->Selesai. minorToIDR() -> "Rp 450.000". formatDateID() ->
+       "01-Des-2026" (Indonesian months).
+AC2: skeletons + empty state; defensive null-checks.  ✓
+     - ActivityIndicator while loading; dashed empty-state per section;
+       error state with live region; EventCard tolerates missing
+       venue/startsAt/minPriceMinor.
+
+WIRING (ARCHITECTURE §3 inward-only)
+------------------------------------
+app/(public)/index.tsx (shell)
+  -> presentation/screens/Events/HomeScreen
+  -> presentation/hooks/useEvents          (TanStack Query seam — ONLY here)
+  -> application/use-cases/list-events      (framework-free)
+  -> domain/rules/event-display + ServerClock (server clock, not device)
+  -> domain/repositories/event.repository (PORT)
+  -> infrastructure/__fixtures__/mock-event.repository (bound at composition root)
+
+Nearby/History: splitCatalog() derives upcoming (asc) + history (desc) on the
+SERVER clock (ServerClock.serverNow()), client-side until BE archive (O4).
+Status is never color-only (RBT-080): each badge = color + icon glyph + label.
+
+----------------------------------------------------------------
+tsc --noEmit        : PASS (no errors)
+eslint . --ext ...  : PASS (0 errors, 0 warnings — Clean-Arch boundaries OK)
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+jest --coverage  (RBT-030 files; threshold gate 90% all four)
+----------------------------------------------------------------
+Test Suites: 6 passed, 6 total
+Tests:       45 passed, 45 total
+
+File                         | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------|---------|----------|---------|--------
+All files                    |   100   |   100    |   100   |   100
+ application/use-cases
+  list-events.ts             |   100   |   100    |   100   |   100
+ domain/rules
+  event-display.ts           |   100   |   100    |   100   |   100
+ domain/services
+  date-format.ts             |   100   |   100    |   100   |   100
+  money.ts                   |   100   |   100    |   100   |   100
+ presentation/components
+  EventCard.tsx              |   100   |   100    |   100   |   100
+  StatusBadge.tsx            |   100   |   100    |   100   |   100
+ presentation/hooks
+  useEvents.ts               |   100   |   100    |   100   |   100
+ presentation/screens/Events
+  HomeScreen.tsx             |   100   |   100    |   100   |   100
+
+>= 90% on statements, branches, functions AND lines. GATE PASSED.
+
+----------------------------------------------------------------
+Run evidence
+----------------------------------------------------------------
+WEB: npx expo export --platform web -> SUCCESS; dist/ served on 127.0.0.1,
+     chromium headless, route "/", no console/page errors.
+     Screenshot: web-home.png — shows "Konser Terdekat" with 6 event cards:
+       Stadium Tour Jakarta  [SOLD OUT, dimmed, "Habis"]
+       Rusuh Fest 2026       [STOK MENIPIS]  Mulai Rp 450.000  01-Des-2026
+       Nonton Bareng Finale  [STOK MENIPIS]  Mulai Rp 300.000  20-Des-2026
+       Indie Night Vol. 9    [SEGERA]        Mulai Rp 200.000  10-Jan-2027
+       Electronic Waves      [TERSEDIA]      ...
+     (History section "Jazz in the Park 2025" [CLOSED] renders below the fold.)
+
+iOS / ANDROID: captured at the funnel-complete milestone (one emulator at a
+time per the memory budget). Both confirmed available this session.

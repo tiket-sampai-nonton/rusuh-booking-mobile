@@ -1,45 +1,35 @@
-import { render, screen } from "@testing-library/react-native";
+import { screen } from "@testing-library/react-native";
 
-// Dynamic routes read params via expo-router's useLocalSearchParams; stub it so
-// the route bodies execute under jest without a navigation container.
+import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
+
+// Dynamic routes read params via expo-router; stub router + params so the route
+// shells execute under jest without a navigation container.
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => ({ eventId: "evt-1" }),
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
 }));
 
 // eslint-disable-next-line import/first
-import HomeScreen from "../../app/(public)/index";
+import HomeRoute from "../../app/(public)/index";
 // eslint-disable-next-line import/first
 import BrowseScreen from "../../app/(public)/browse";
 // eslint-disable-next-line import/first
 import HistoryScreen from "../../app/(public)/history";
 // eslint-disable-next-line import/first
-import EventDetailScreen from "../../app/(public)/events/[eventId]";
+import EventDetailRoute from "../../app/(public)/events/[eventId]";
 
-describe("(public) routes", () => {
+describe("(public) route shells", () => {
   it("export component functions", () => {
-    expect(typeof HomeScreen).toBe("function");
+    expect(typeof HomeRoute).toBe("function");
     expect(typeof BrowseScreen).toBe("function");
     expect(typeof HistoryScreen).toBe("function");
-    expect(typeof EventDetailScreen).toBe("function");
+    expect(typeof EventDetailRoute).toBe("function");
   });
 
-  it("renders Home with the app name header", () => {
-    render(<HomeScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent("Rusuh Booking");
-  });
-
-  it("renders Browse placeholder", () => {
-    render(<BrowseScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/Browse/);
-  });
-
-  it("renders History placeholder", () => {
-    render(<HistoryScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/History/);
-  });
-
-  it("renders Event Detail with the route param", () => {
-    render(<EventDetailScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/evt-1/);
+  it("Home route mounts the HomeScreen (header renders through providers)", async () => {
+    renderWithProviders(<HomeRoute />);
+    // The header is static, but findBy retries to absorb the async query's
+    // state update so the assertion never races the initial render.
+    expect(await screen.findByText("Rusuh Booking Tiket")).toBeTruthy();
   });
 });

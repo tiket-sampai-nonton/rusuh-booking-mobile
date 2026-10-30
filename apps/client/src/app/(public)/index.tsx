@@ -1,20 +1,7 @@
-import { Text, View } from "react-native";
+// Public route `/` (Home). Routing-only shell (ARCHITECTURE §3): it mounts the
+// presentation screen, which owns all logic + the TanStack hook. RBT-030.
+import { HomeScreen } from "@presentation/screens/Events/HomeScreen";
 
-import { APP_NAME } from "@shared/utils/clamp";
-
-// Public route `/` (Home). Skeleton placeholder — RBT-030 builds the real
-// event list. Route files stay routing-only; this renders a shared constant to
-// prove the app boots and the alias + NativeWind wiring resolves.
-export default function HomeScreen() {
-  return (
-    <View className="flex-1 items-center justify-center bg-background">
-      <Text
-        className="text-xl font-bold text-brand"
-        accessibilityRole="header"
-      >
-        {APP_NAME}
-      </Text>
-      <Text className="mt-2 text-muted-foreground">Home — / (RBT-002)</Text>
-    </View>
-  );
+export default function HomeRoute() {
+  return <HomeScreen />;
 }

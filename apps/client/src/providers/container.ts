@@ -16,6 +16,7 @@ import type { UserRepository } from "@domain/repositories/user.repository";
 import type { ClockPort } from "@domain/services/clock.port";
 import type { FileSharePort } from "@domain/services/file-share.port";
 import type { NotificationPort } from "@domain/services/notification.port";
+import { ServerClock } from "@domain/services/server-clock";
 import { HttpBookingRepository } from "@infrastructure/api/http-booking.repository";
 import { HttpEventRepository } from "@infrastructure/api/http-event.repository";
 import { HttpPaymentRepository } from "@infrastructure/api/http-payment.repository";
@@ -39,6 +40,12 @@ import { SystemClock } from "@infrastructure/time/system-clock";
  */
 export interface Container {
   readonly clock: ClockPort;
+  /**
+   * Server-authoritative clock (RBT-011) layered over `clock`. Use cases read
+   * this (not the raw `ClockPort`) for all timer / date-window math so a skewed
+   * device clock never leaks into booking/payment deadlines.
+   */
+  readonly serverClock: ServerClock;
   readonly httpClient: HttpClient;
   readonly eventRepository: EventRepository;
   readonly queueRepository: QueueRepository;
@@ -93,10 +100,12 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // ClockPort is a platform primitive (not a backend capability): the real
   // system clock is bound in both modes. Tests inject a fake ClockPort directly.
   const clock: ClockPort = new SystemClock();
+  const serverClock = new ServerClock(clock);
 
   if (useMocks) {
     return {
       clock,
+      serverClock,
       httpClient: new MockHttpClient(),
       eventRepository: new MockEventRepository(),
       queueRepository: new MockQueueRepository(),
@@ -124,6 +133,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
   const httpClient: HttpClient = new FetchHttpClient({ baseUrl });
   return {
     clock,
+    serverClock,
     httpClient,
     eventRepository: new HttpEventRepository(httpClient),
     queueRepository: new HttpQueueRepository(httpClient),
