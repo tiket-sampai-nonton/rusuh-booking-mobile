@@ -9,6 +9,7 @@ export const APP_NAME = "Rusuh Booking";
 
 /**
  * Clamp a number into an inclusive range.
+ * @returns the value bounded to [min, max].
  * Used later by timer/quantity math; lives here as the first real shared unit.
  */
 export function clamp(value: number, min: number, max: number): number {
