@@ -9,6 +9,7 @@ jest.mock("expo-router", () => ({
     eventId: "evt-1",
     sessionId: "sess-1",
     bookingId: "bk-1",
+    seed: "1",
   }),
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
 }));
@@ -44,5 +45,14 @@ describe("(booking) route shells", () => {
     useSessionStore.getState().reset();
     renderWithProviders(<WaitingRoute />);
     expect(screen.getByTestId("waiting-noqueue")).toBeTruthy();
+  });
+
+  it("dev seed (?seed=1, mock mode) populates a queue entry in the store", () => {
+    useSessionStore.getState().reset();
+    renderWithProviders(<BookingLayout />);
+    // The jest expo-router mock returns { eventId: 'evt-1', seed: '1' } and
+    // EXPO_PUBLIC_USE_MOCKS defaults to mock mode, so the layout seeds a queue.
+    expect(useSessionStore.getState().queueId).toBe("q-evt-1");
+    expect(useSessionStore.getState().eventId).toBe("evt-1");
   });
 });

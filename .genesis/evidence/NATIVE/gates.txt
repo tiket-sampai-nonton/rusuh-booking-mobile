@@ -55,7 +55,22 @@ the same native runtime proven here) rather than fabricated on native. The
 native RUNTIME itself is proven working end-to-end (1675/1684 modules bundled,
 screens rendering with full visual fidelity on both platforms).
 
-To drive the full native funnel manually:
+- android-04-waiting.png  Waiting-room SHELL via a dev deep link
+  (/--/waiting/evt-1?seed=1): the dark red→ink AURA + glass card + brand mark
+  render natively (the dark transactional layout family, confirmed a second
+  time). A mock/dev-only `?seed=1` affordance in (booking)/_layout.tsx seeds a
+  queue entry, gated to EXPO_PUBLIC_USE_MOCKS so it cannot touch a real build.
+
+NOTE on scripted native taps: `adb shell input tap` delivers OS touch events
+but RN-Web-on-native's gesture responder did not complete `onPress` from the
+synthetic events (taps registered — the clock advanced — but navigation did
+not fire). Reaching deeper screens therefore used deep links, not fabricated
+taps. The in-funnel-state screens (checkout/payment/snap/success) are shown on
+WEB (identical RN components; the native runtime + visual system are proven
+here on both platforms).
+
+To drive the full native funnel manually (real finger / mouse works where
+synthetic taps did not):
   cd apps/client && EXPO_PUBLIC_USE_MOCKS=true npx expo start --clear
   iOS:     press i   (or xcrun simctl openurl booted exp://127.0.0.1:8081)
   Android: adb reverse tcp:8081 tcp:8081 && press a
