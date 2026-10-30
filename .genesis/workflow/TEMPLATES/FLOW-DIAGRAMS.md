@@ -19,11 +19,9 @@ This document describes the key user journeys and system flows.
 **Goal:** {what user wants to accomplish}
 **Preconditions:** {what must be true before starting}
 
-```
-┌─────────┐     ┌─────────┐     ┌─────────┐     ┌─────────┐
-│ Step 1  │ ──▶ │ Step 2  │ ──▶ │ Step 3  │ ──▶ │ Step 4  │
-│ {desc}  │     │ {desc}  │     │ {desc}  │     │ {desc}  │
-└─────────┘     └─────────┘     └─────────┘     └─────────┘
+```mermaid
+flowchart LR
+    S1["Step 1 · {desc}"] --> S2["Step 2 · {desc}"] --> S3["Step 3 · {desc}"] --> S4["Step 4 · {desc}"]
 ```
 
 **Steps:**
@@ -81,32 +79,14 @@ This document describes the key user journeys and system flows.
 
 ### Flow 1: {flow name}
 
-```
-     ┌─────────────┐
-     │   Start     │
-     └──────┬──────┘
-            │
-            ▼
-     ┌─────────────┐
-     │  Step 1     │
-     │  {action}   │
-     └──────┬──────┘
-            │
-            ▼
-     ┌─────────────┐     No
-     │ Condition?  │────────┐
-     └──────┬──────┘        │
-            │ Yes           │
-            ▼               ▼
-     ┌─────────────┐  ┌─────────────┐
-     │  Step 2A    │  │  Step 2B    │
-     └──────┬──────┘  └──────┬──────┘
-            │                │
-            └───────┬────────┘
-                    ▼
-             ┌─────────────┐
-             │    End      │
-             └─────────────┘
+```mermaid
+flowchart TD
+    Start([Start]) --> S1["Step 1 · {action}"]
+    S1 --> C{Condition?}
+    C -->|Yes| A[Step 2A]
+    C -->|No| B[Step 2B]
+    A --> End([End])
+    B --> End
 ```
 
 ---
@@ -121,27 +101,15 @@ This document describes the key user journeys and system flows.
 
 ### {Entity} States
 
-```
-            ┌──────────────┐
-            │   Initial    │
-            └──────┬───────┘
-                   │ {trigger}
-                   ▼
-            ┌──────────────┐
-     ┌──────│   State A    │──────┐
-     │      └──────────────┘      │
-     │ {trigger}          {trigger}
-     ▼                            ▼
-┌──────────────┐          ┌──────────────┐
-│   State B    │          │   State C    │
-└──────┬───────┘          └──────┬───────┘
-       │                         │
-       └───────────┬─────────────┘
-                   │ {trigger}
-                   ▼
-            ┌──────────────┐
-            │    Final     │
-            └──────────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> Initial
+    Initial --> StateA : {trigger}
+    StateA --> StateB : {trigger}
+    StateA --> StateC : {trigger}
+    StateB --> Final : {trigger}
+    StateC --> Final : {trigger}
+    Final --> [*]
 ```
 
 ### State Definitions
@@ -160,23 +128,15 @@ This document describes the key user journeys and system flows.
 **Trigger:** {what initiates this}
 **Actors:** {who/what is involved}
 
-```
-┌──────────┐          ┌──────────┐          ┌──────────┐
-│  User    │          │  System  │          │ External │
-└────┬─────┘          └────┬─────┘          └────┬─────┘
-     │                     │                     │
-     │  1. {action}        │                     │
-     │────────────────────▶│                     │
-     │                     │                     │
-     │                     │  2. {action}        │
-     │                     │────────────────────▶│
-     │                     │                     │
-     │                     │  3. {response}      │
-     │                     │◀────────────────────│
-     │                     │                     │
-     │  4. {response}      │                     │
-     │◀────────────────────│                     │
-     │                     │                     │
+```mermaid
+sequenceDiagram
+    actor User
+    participant System
+    participant External
+    User->>System: 1. {action}
+    System->>External: 2. {action}
+    External-->>System: 3. {response}
+    System-->>User: 4. {response}
 ```
 
 ---
@@ -189,24 +149,12 @@ This document describes the key user journeys and system flows.
 **Detection:** {how system detects it}
 **User Impact:** {what user sees}
 
-```
-Normal Flow                 Error Flow
-    │                           │
-    ▼                           ▼
-┌─────────┐    Error    ┌──────────────┐
-│ Action  │ ──────────▶ │ Error State  │
-└─────────┘             └──────┬───────┘
-                               │
-                               ▼
-                        ┌──────────────┐
-                        │ Error Screen │
-                        └──────┬───────┘
-                               │
-                    ┌──────────┴──────────┐
-                    ▼                     ▼
-             ┌──────────┐          ┌──────────┐
-             │  Retry   │          │  Cancel  │
-             └──────────┘          └──────────┘
+```mermaid
+flowchart TD
+    A[Action] -->|Error| E[Error State]
+    E --> ES[Error Screen]
+    ES --> R[Retry]
+    ES --> C[Cancel]
 ```
 
 **Recovery Options:**

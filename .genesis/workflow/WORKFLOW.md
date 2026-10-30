@@ -21,11 +21,12 @@ This workflow executes **one task at a time** (or parallel batches).
 
 ## Pipeline Overview
 
-```
-TRIGGER → SPEC → DESIGN → IMPLEMENT → REVIEW → VERIFY → DONE
-(classify)  ↓       ↓                    ↓         ↓       ↓
-          [G1]    [G2]              (AI review) [G3]    [G4]
-          human   human              agent      human   human
+```mermaid
+flowchart LR
+    T[TRIGGER<br/>classify] --> S[Spec<br/>G1·human] --> D[Design<br/>G2·human] --> I[Implement<br/>agent] --> R[Review 3.5<br/>AI, no gate] --> V[Verify<br/>G3·human] --> N[Done<br/>G4·human]
+    R -. fail ≤2× .-> I
+    classDef gate fill:#fde68a,stroke:#b45309,color:#000;
+    class S,D,V,N gate;
 ```
 
 **TRIGGER** classifies the task — it is not a build phase and has no gate.
@@ -37,7 +38,9 @@ required fixes loop back to IMPLEMENT (no human gate).
 
 ## Phase 0: TRIGGER
 
-**Input:** Task from `TASK-LIST.md` or user request.
+**Input:** Next task from `06-TASK-ORDER.md` (GENESIS-prepared work) or an ad-hoc user request.
+
+> For GENESIS-prepared work, take the next task from **`06-TASK-ORDER.md`** (the "Run Next" pointer / current wave) — the main run reference. Dispatch a whole wave in parallel when its tasks are file-disjoint (see Parallel-Batch Mode), else take the next eligible task top-down. A task is eligible only when every "Depends On" task is `Done`. Update Status/Delivered in TASK-ORDER.md as you progress; TASK-LIST.md holds the detail.
 
 **Agent actions:**
 1. Classify: `Story` | `Bug` | `Chore` | `Spike` | `Question`
@@ -124,10 +127,10 @@ fail_action: Revise design
 4. Implement strictly against spec, inside listed files only
 5. Write tests with real assertions alongside code
 6. Follow project `RULES.md`
-7. Micro-commits with issue key
+7. Micro-commits with issue key — each commit passes the **husky commit guard** (lint + type-check + related tests + **changed-code coverage ≥ 80%**); never `--no-verify` (R008/R009/R017)
 8. Push branch (do NOT open PR yet — REVIEW comes first)
 
-**Output:** Branch pushed + local tests passing + skills log
+**Output:** Branch pushed + local tests passing + commit guard green + skills log
 
 **No human gate here.** Agent has autonomy within the spec boundary.
 If spec is ambiguous mid-implementation → STOP and escalate (see `RECOVERY.md §F001` for ambiguous spec, or `§F006` if implementation requires scope beyond spec).
@@ -242,18 +245,14 @@ fail_action: Block release
 
 ### When to Use Which Mode
 
-```
-Is this a research/investigation task with no code deliverable?
-  YES → Spike Mode
-  NO  ↓
-
-Are there multiple independent tasks with disjoint file sets?
-  YES → Can they run in parallel without dependencies?
-          YES → Parallel-Batch Mode
-          NO  → Single-Ticket Mode (serialize)
-  NO  ↓
-
-Single-Ticket Mode
+```mermaid
+flowchart TD
+    Q1{No code deliverable?<br/>research only} -->|Yes| SP[Spike Mode]
+    Q1 -->|No| Q2{2+ independent tasks,<br/>disjoint files?}
+    Q2 -->|No| ST[Single-Ticket Mode]
+    Q2 -->|Yes| Q3{Run in parallel,<br/>no dependencies?}
+    Q3 -->|Yes| PB[Parallel-Batch Mode]
+    Q3 -->|No| ST2[Single-Ticket Mode<br/>serialize]
 ```
 
 **Decision factors:**
@@ -305,13 +304,24 @@ Research only. No code. No PR.
 
 ## State Machine
 
+```mermaid
+stateDiagram-v2
+    [*] --> Backlog
+    Backlog --> ToDo
+    ToDo --> InProgress
+    InProgress --> InReview
+    InReview --> QA : CI green + evidence
+    QA --> Done
+    Done --> [*]
+    ToDo --> Blocked
+    InProgress --> Blocked
+    InReview --> Blocked
+    QA --> Blocked
+    Blocked --> ToDo
+    Blocked --> InProgress
 ```
-Backlog → To Do → In Progress → In Review → QA → Done
-                                                   ↑
-                                           (CI green + evidence)
 
-Side state: Blocked (hard dependency unresolved)
-```
+> `Blocked` is a side state entered from any active state when a hard dependency is unresolved, and returns to the state it came from. Full transition rules in `TRACKING.md`.
 
 State transitions are defined in `TRACKING.md`.
 
@@ -350,7 +360,9 @@ GENESIS produces → WORKFLOW consumes:
 | `CI-CD.md` | Phase 4 pipeline configuration |
 | `SECURITY.md` | Phase 3.5 review, Phase 4 security checklist |
 | `OBSERVABILITY.md` | Phase 3 logging/metrics, Phase 4 alerting |
-| `TASK-LIST.md` | Phase 0 task selection |
+| `TASK-ORDER.md` | Phase 0 task selection + parallel-wave dispatch (main run reference) |
+| `TASK-LIST.md` | Phase 1 task detail / acceptance criteria |
 | `RULES.md` | Phase 3 implementation rules |
 | `AGENTS.md` | All phases — project manifest |
 | `IMPLEMENTATION-READINESS.md` | Phase 1 blocker check |
+| `PROJECT-SETUP.md` | Phase 3 commit guard / CI / Sonar already stood up (Phase 5.5) |

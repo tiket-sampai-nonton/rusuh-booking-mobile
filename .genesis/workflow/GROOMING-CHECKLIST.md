@@ -474,9 +474,14 @@
 
 ```
 9.1 WHAT code coverage target?
-    - Percentage target
+    - Percentage target (workflow default: ≥ 80%)
     - Coverage for what (lines, branches, functions)
     - Critical paths with higher target
+
+9.1b WHAT is enforced at COMMIT time (local guard)?
+    - Husky pre-commit guard: lint + type-check + related tests + coverage gate
+    - Coverage threshold enforced on changed code (default ≥ 80%)
+    - Is bypassing (--no-verify) ever allowed? (workflow default: no)
 
 9.2 WHAT static analysis rules?
     - Linting rules (ESLint, Prettier)

@@ -8,32 +8,34 @@
 ## Config Block
 
 ```yaml
-# Filled 2026-10-29
+# Copy this file to the project and fill every <fill>. Do NOT leave placeholders.
 
 project:
-  issue_prefix: "RBT"
+  issue_prefix: "<PREFIX>"         # e.g. "PROJ" → PROJ-123
 
 tracker:
-  type: "github"
-  base_url: "https://github.com/tiket-sampai-nonton/rusuh-booking-mobile"
-  board_id: "1"                    # org project "Rusuh Booking FE"
+  type: "<github | gitlab | jira>"
+  base_url: "<tracker base url>"
+  board_id: "<board id>"           # if the tracker uses boards
 
-github:
-  owner: "tiket-sampai-nonton"
-  repo: "rusuh-booking-mobile"
-  base_branch: "develop"           # feature → PR develop → PR main (D5.2)
+github:                            # or the equivalent block for your tracker
+  owner: "<org or user>"
+  repo: "<repo name>"
+  base_branch: "<develop | main>"  # feature → PR base → PR main
 
 ci:
-  provider: "github-actions"
+  provider: "<github-actions | gitlab-ci | jenkins | other>"
   required_checks:
-    - "typecheck"
-    - "lint"
-    - "test"
-    - "sonarcloud"
+    - "<check 1>"                  # e.g. typecheck
+    - "<check 2>"                  # e.g. lint
+    - "<check 3>"                  # e.g. test
+    - "<check 4>"                  # e.g. coverage ≥ 80%
+    - "<check 5>"                  # e.g. sonar quality gate
+  coverage_threshold: 80           # min % for the husky pre-commit gate AND CI (RULES R017)
 ```
 
-> **Branch pattern:** `feature/<issue-key>-<slug>` (e.g. `feature/RBT-050-booking-timer`).
-> **Commit pattern:** Conventional Commits `<type>(<issue-key>): <message>` (e.g. `feat(RBT-050): add booking session timer`).
+> **Branch pattern:** `feature/<issue-key>-<slug>` (e.g. `feature/PROJ-123-payment-timer`).
+> **Commit pattern:** Conventional Commits `<type>(<issue-key>): <message>` (e.g. `feat(PROJ-123): add payment timer`).
 
 ### Placeholder Guard
 
@@ -177,18 +179,34 @@ Closes #<issue-number> or PROJ-123
 
 ### State Machine
 
+```mermaid
+stateDiagram-v2
+    [*] --> Backlog
+    Backlog --> ToDo
+    ToDo --> InProgress
+    InProgress --> InReview
+    InReview --> QA
+    QA --> Done
+    Done --> [*]
+    QA --> InReview : G3 rejected
+    ToDo --> Blocked
+    InProgress --> Blocked
+    InReview --> Blocked
+    QA --> Blocked
+    Blocked --> ToDo
+    Blocked --> InProgress
+    Blocked --> InReview
+    Blocked --> QA
 ```
-Backlog → To Do → In Progress → In Review → QA → Done
-                       ↓
-                   Blocked
-```
+
+> `Blocked` is entered from any active state when a blocker is identified, and returns to the same state when it is resolved.
 
 ### State Definitions
 
 | State | Meaning | Entry Criteria |
 |-------|---------|----------------|
 | `Backlog` | Identified but not prioritized | Issue created |
-| `To Do` | Prioritized for current sprint/cycle | Spec approved (Gate G1) |
+| `To Do` | Prioritized and ready to pick up | Decomposed in GENESIS Phase 3, or added ad-hoc (per-task spec/G1 not required to enter — it gates To Do → In Progress) |
 | `In Progress` | Being actively worked on | Branch created, coding started, includes Phase 3.5 REVIEW |
 | `In Review` | PR open, awaiting review | PR opened |
 | `QA` | CI green, evidence attached, awaiting Gate G3 approval | Evidence attached |
@@ -201,11 +219,11 @@ Backlog → To Do → In Progress → In Review → QA → Done
 transitions:
   - from: Backlog
     to: To Do
-    trigger: Spec approved (Gate G1)
+    trigger: Prioritized (GENESIS Phase 3 decomposition, or sprint planning)
     
   - from: To Do
     to: In Progress
-    trigger: Agent starts implementation
+    trigger: Spec approved (Gate G1) + agent starts implementation
     
   - from: In Progress
     to: In Review

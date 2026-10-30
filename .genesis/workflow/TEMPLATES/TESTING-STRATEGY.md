@@ -5,20 +5,76 @@
 
 ---
 
+## Pre-Commit Coverage Gate (Husky)
+
+> The local commit guard that enforces coverage **before** a commit is created,
+> so broken/undertested code never reaches CI. Mirror of the CI coverage gate.
+
+**Threshold:** changed code must be **≥ {coverage_threshold}% (default 80%)** before the commit is allowed.
+
+### What the guard runs (in order, fail-fast)
+
+1. Lint on staged files
+2. Type-check
+3. Tests related to staged files, with coverage
+4. **Coverage gate** — abort the commit if any changed file is below threshold
+
+### Setup
+
+```bash
+# Install husky + lint-staged (one-time)
+{pkg-manager} add -D husky lint-staged
+npx husky init            # creates .husky/ and wires the prepare script
+```
+
+`package.json`:
+```json
+{
+  "scripts": {
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "{lint command}",
+      "{typecheck command}"
+    ]
+  },
+  "jest": {
+    "coverageThreshold": {
+      "global": { "branches": 80, "functions": 80, "lines": 80, "statements": 80 }
+    }
+  }
+}
+```
+
+### `.husky/pre-commit`
+
+```sh
+# Fail-fast: any step's non-zero exit aborts the commit.
+npx lint-staged
+
+# Coverage gate on changed code (choose the form your runner supports):
+#   Jest:   jest --coverage --changedSince=origin/{base_branch} --coverageThreshold ...
+#   or:     jest --coverage --findRelatedTests $(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$')
+#   Vitest: vitest run --coverage --changed
+{coverage command for changed files, must exit non-zero when < threshold}
+```
+
+> **Rules:** the guard is **R008** (must run) and must not be bypassed with `--no-verify` (**R009**); the ≥80% changed-code bar is **R017**. Coverage must come from **real assertions** — never tests written only to lift the number.
+
+> **Why both local and CI:** the husky gate gives fast feedback and keeps red commits out of history; CI re-runs the same thresholds on the full tree as the authoritative gate (a hook can be skipped or differ per machine).
+
+---
+
 ## Overview
 
 **Test Pyramid:**
-```
-          ┌─────────┐
-          │   E2E   │  Few, slow, high confidence
-          ├─────────┤
-          │ Integr. │  Some, moderate
-          ├─────────┤
-          │  Unit   │  Many, fast, isolated
-          └─────────┘
+```mermaid
+flowchart TB
+    E2E[E2E — few, slow, high confidence] --> INT[Integration — some, moderate] --> UNIT[Unit — many, fast, isolated]
 ```
 
-**Target Coverage:** {percentage}%
+**Target Coverage:** {percentage}% (default ≥ 80% — enforced locally by the husky pre-commit gate and in CI)
 
 ---
 

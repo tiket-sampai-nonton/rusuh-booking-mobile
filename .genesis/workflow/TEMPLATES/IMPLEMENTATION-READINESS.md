@@ -54,6 +54,7 @@ Overall:        {GO | NO-GO}
 | AGENTS.md | {✅/❌} | {name} | {date} |
 | RULES.md | {✅/❌} | {name} | {date} |
 | TASK-LIST.md | {✅/❌} | {name} | {date} |
+| TASK-ORDER.md (run plan) | {✅/❌} | {name} | {date} |
 
 **Documentation Status:** {All verified | {n} pending}
 
@@ -147,6 +148,8 @@ Overall:        {GO | NO-GO}
 | CI pipeline configured | {✅/❌} | {tool} |
 | CD pipeline configured | {✅/❌} | {tool} |
 | Required checks set | {✅/❌} | {checks} |
+| Husky commit guard installed | {✅/❌} | pre-commit: lint + typecheck + tests + coverage ≥ {80}% |
+| Static analysis (Sonar) configured | {✅/❌} | project key {key}, quality gate new_coverage ≥ {80}% |
 
 ### Environments
 

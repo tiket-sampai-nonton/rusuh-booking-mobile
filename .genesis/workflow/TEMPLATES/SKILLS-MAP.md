@@ -16,11 +16,25 @@
 
 ## Skills by Task
 
-| Task | Domain | Skill | Source | Key Patterns |
-|------|--------|-------|--------|--------------|
-| {KEY}-001 | {domain} | {skill name} | {local/registry/manual} | {brief summary} |
-| {KEY}-002 | {domain} | {skill name} | {local/registry/manual} | {brief summary} |
-| {KEY}-003 | {domain} | {skill name} | {local/registry/manual} | {brief summary} |
+> `Source`: local (already installed) · registry (skills.sh — human must install) · web (official doc URL — reference) · manual (training knowledge).
+> Only skills the human approved for install belong here. Proposed-but-not-approved go under "Candidates (not approved)" below.
+
+| Task | Domain | Skill | Source | Approved? | Key Patterns |
+|------|--------|-------|--------|-----------|--------------|
+| {KEY}-001 | {domain} | {skill name} | {local / registry / web `<url>` / manual} | {✅ human / ☐} | {brief summary} |
+| {KEY}-002 | {domain} | {skill name} | {local / registry / web `<url>` / manual} | {✅ / ☐} | {brief summary} |
+| {KEY}-003 | {domain} | {skill name} | {local / registry / web `<url>` / manual} | {✅ / ☐} | {brief summary} |
+
+---
+
+## Candidates (not approved)
+
+> Found during discovery but NOT installed/approved yet. The human decides whether to
+> install (registry) or accept as reference (web). The agent never installs.
+
+| Domain / task | Candidate skill | Source | Why it helps | Trust note | Decision |
+|---|---|---|---|---|---|
+| {domain} | {name} | registry `owner/repo/skill` / web `<url>` (date) | {what it gives} | untrusted — evaluate | {install / reference / reject / pending} |
 
 ---
 

@@ -15,26 +15,16 @@
 
 ## System Context
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        EXTERNAL USERS                           │
-│                   {user types from grooming}                    │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                         YOUR SYSTEM                             │
-│                      {system name}                              │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
-│  │ {component} │  │ {component} │  │ {component} │             │
-│  └─────────────┘  └─────────────┘  └─────────────┘             │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     EXTERNAL SERVICES                           │
-│        {payment provider} | {auth provider} | {other}           │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    U["External users · {user types}"] --> SYS
+    subgraph SYS ["Your system · {system name}"]
+        direction LR
+        C1["{component}"]
+        C2["{component}"]
+        C3["{component}"]
+    end
+    SYS --> EXT["External services · {payment} · {auth} · {other}"]
 ```
 
 ---
@@ -62,26 +52,11 @@
 
 ## Layer Architecture
 
-```
-┌─────────────────────────────────────────┐
-│  PRESENTATION                           │
-│  {UI framework, screens, components}    │
-└──────────────────┬──────────────────────┘
-                   │ calls
-┌──────────────────▼──────────────────────┐
-│  APPLICATION / FEATURES                 │
-│  {use cases, feature hooks, handlers}   │
-└──────────────────┬──────────────────────┘
-                   │ uses
-┌──────────────────▼──────────────────────┐
-│  DOMAIN                                 │
-│  {entities, business rules, pure logic} │
-└──────────────────┬──────────────────────┘
-                   │ via ports
-┌──────────────────▼──────────────────────┐
-│  INFRASTRUCTURE / ADAPTERS              │
-│  {API clients, DB repos, external svcs} │
-└─────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    P["Presentation · {UI, screens, components}"] -->|calls| A["Application / Features · {use cases, hooks}"]
+    A -->|uses| D["Domain · {entities, business rules}"]
+    D -->|via ports| I["Infrastructure / Adapters · {API clients, DB repos}"]
 ```
 
 ### Dependency Rules
@@ -121,10 +96,10 @@
 
 ### Data Flow
 
-```
-Client → API Gateway → {service} → {database}
-                           ↓
-                       {cache}
+```mermaid
+flowchart LR
+    C[Client] --> G[API Gateway] --> S["{service}"] --> DB[("{database}")]
+    S --> CA[("{cache}")]
 ```
 
 ### Key Entities

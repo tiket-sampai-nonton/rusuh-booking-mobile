@@ -397,16 +397,18 @@ Follow GENESIS.md workflow:
 2. Gate H1: Conduct critical grooming (GROOMING-CHECKLIST.md)
 3. Phase 2: Generate all documentation
 4. Gate H2: Wait for doc verification
-5. Phase 3: Decompose into tasks
+5. Phase 3: Decompose into tasks (TASK-LIST.md) + order into parallel waves (TASK-ORDER.md)
 6. Gate H3: Wait for task verification
 7. Phase 4: Discover skills, generate RULES.md + AGENTS.md
 8. Gate H4: Wait for skill verification
 9. Phase 5: Run readiness checklist
-10. Gate H5: Wait for final approval
+10. Gate H5: Wait for final approval (Go/No-Go)
+11. Phase 5.5: Stand up the project (repo, CI, Sonar, husky, secrets)
+12. Gate H6: Wait for setup verification (trivial PR green end-to-end)
 
 Use GROOMING-PROTOCOL.md behavior — challenge decisions, don't just accept.
 
-Output all docs to: `.genesis/docs/` (see GENESIS.md "Output Layout" — numbered 01-08 for the phase/gate trail, un-numbered for the deliverable set, AGENTS.md at the repo root).
+Output all docs to: `.genesis/docs/` (see GENESIS.md "Output Layout" — numbered 01-10 for the phase/gate trail, un-numbered for the deliverable set, AGENTS.md at the repo root).
 ```
 
 ---

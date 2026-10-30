@@ -16,16 +16,12 @@
 
 ## The Three Pillars
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                       OBSERVABILITY                              │
-├─────────────────────┬─────────────────────┬─────────────────────┤
-│       LOGS          │      METRICS        │       TRACES        │
-│                     │                     │                     │
-│  What happened      │  How it's doing     │  Request flow       │
-│  Detailed events    │  Aggregated values  │  Distributed path   │
-│  Debug & audit      │  Trends & alerts    │  Latency & deps     │
-└─────────────────────┴─────────────────────┴─────────────────────┘
+```mermaid
+flowchart TB
+    O[Observability]
+    O --> L["LOGS<br/>what happened"]
+    O --> M["METRICS<br/>how it's doing"]
+    O --> T["TRACES<br/>request flow"]
 ```
 
 ---

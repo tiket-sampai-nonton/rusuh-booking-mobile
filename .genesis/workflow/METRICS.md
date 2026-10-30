@@ -23,6 +23,8 @@ Track time spent in each GENESIS phase:
 | Gate H4 (Skill Review) | < 30 min | 30-60 min | > 1 hr |
 | Phase 5 (Readiness) | < 30 min | 30-60 min | > 1 hr |
 | Gate H5 (Approval) | < 30 min | 30-60 min | > 1 hr |
+| Phase 5.5 (Project Setup) | < 1 hr | 1-2 hr | > 2 hr |
+| Gate H6 (Setup Verify) | < 30 min | 30-60 min | > 1 hr |
 | **Total GENESIS** | < 8 hr | 8-12 hr | > 12 hr |
 
 ### Grooming Quality
@@ -30,7 +32,7 @@ Track time spent in each GENESIS phase:
 | Metric | Target | Meaning |
 |--------|--------|---------|
 | Sections completed | 10/10 | All topics covered |
-| Challenges raised | > 5 | Agent is being critical |
+| Challenges raised | where warranted | Agent challenges weak/risky choices (quality, not count — do not manufacture pushback to hit a number) |
 | Contradictions found | Tracked | Awareness of conflicts |
 | Contradictions resolved | 100% | All conflicts addressed |
 

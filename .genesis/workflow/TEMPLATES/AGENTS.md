@@ -41,10 +41,11 @@ This project uses:
 | 5 | Security | `.genesis/docs/SECURITY.md` |
 | 6 | Infrastructure | `.genesis/docs/INFRASTRUCTURE.md` |
 | 7 | Testing strategy | `.genesis/docs/TESTING-STRATEGY.md` |
-| 10 | Task list | `.genesis/docs/05-TASK-LIST.md` |
-| 11 | Project rules | `.genesis/docs/07-RULES.md` |
-| 12 | Skills map | `.genesis/docs/06-SKILLS-MAP.md` |
-| 8 | Readiness | `.genesis/docs/08-IMPLEMENTATION-READINESS.md` |
+| 8 | Task list (detail) | `.genesis/docs/05-TASK-LIST.md` |
+| 8a | **Task order (RUN REFERENCE)** | `.genesis/docs/06-TASK-ORDER.md` |
+| 9 | Skills map | `.genesis/docs/07-SKILLS-MAP.md` |
+| 10 | Project rules | `.genesis/docs/08-RULES.md` |
+| 11 | Readiness | `.genesis/docs/09-IMPLEMENTATION-READINESS.md` |
 
 **If code contradicts these docs, the docs win. Escalate instead of inventing.**
 
@@ -52,7 +53,7 @@ This project uses:
 
 ## Blockers — Check Before Starting
 
-From `.genesis/docs/08-IMPLEMENTATION-READINESS.md`.
+From `.genesis/docs/09-IMPLEMENTATION-READINESS.md`.
 
 | ID | Status | Blocks |
 |----|--------|--------|
@@ -157,7 +158,7 @@ These extend the generic rules in `.genesis/workflow/RULES.md`.
 
 ## Skills Required
 
-From `.genesis/docs/06-SKILLS-MAP.md`:
+From `.genesis/docs/07-SKILLS-MAP.md`:
 
 | Domain | Skill | Source |
 |--------|-------|--------|

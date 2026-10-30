@@ -16,29 +16,18 @@ Technical sequence diagrams showing system component interactions.
 **Purpose:** {what this sequence accomplishes}
 **Trigger:** {what initiates this sequence}
 
-```
-┌──────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│Client│     │ Gateway  │     │ Service  │     │ Database │
-└──┬───┘     └────┬─────┘     └────┬─────┘     └────┬─────┘
-   │              │                │                │
-   │ 1. Request   │                │                │
-   │─────────────▶│                │                │
-   │              │                │                │
-   │              │ 2. Validate    │                │
-   │              │───────────────▶│                │
-   │              │                │                │
-   │              │                │ 3. Query       │
-   │              │                │───────────────▶│
-   │              │                │                │
-   │              │                │ 4. Result      │
-   │              │                │◀───────────────│
-   │              │                │                │
-   │              │ 5. Response    │                │
-   │              │◀───────────────│                │
-   │              │                │                │
-   │ 6. Response  │                │                │
-   │◀─────────────│                │                │
-   │              │                │                │
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Gateway
+    participant Service
+    participant Database
+    Client->>Gateway: 1. Request
+    Gateway->>Service: 2. Validate
+    Service->>Database: 3. Query
+    Database-->>Service: 4. Result
+    Service-->>Gateway: 5. Response
+    Gateway-->>Client: 6. Response
 ```
 
 ### Steps
@@ -68,95 +57,73 @@ Technical sequence diagrams showing system component interactions.
 
 ## Authentication Sequence
 
-```
-┌──────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│Client│     │   API    │     │   Auth   │     │   DB     │
-└──┬───┘     └────┬─────┘     └────┬─────┘     └────┬─────┘
-   │              │                │                │
-   │ 1. Login     │                │                │
-   │─────────────▶│                │                │
-   │              │ 2. Validate    │                │
-   │              │───────────────▶│                │
-   │              │                │ 3. Check user  │
-   │              │                │───────────────▶│
-   │              │                │ 4. User data   │
-   │              │                │◀───────────────│
-   │              │ 5. Token       │                │
-   │              │◀───────────────│                │
-   │ 6. Token     │                │                │
-   │◀─────────────│                │                │
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Auth
+    participant DB
+    Client->>API: 1. Login
+    API->>Auth: 2. Validate
+    Auth->>DB: 3. Check user
+    DB-->>Auth: 4. User data
+    Auth-->>API: 5. Token
+    API-->>Client: 6. Token
 ```
 
 ---
 
 ## Data Sync Sequence
 
-```
-┌──────┐     ┌──────────┐     ┌──────────┐
-│Client│     │   API    │     │   DB     │
-└──┬───┘     └────┬─────┘     └────┬─────┘
-   │              │                │
-   │ 1. Fetch     │                │
-   │─────────────▶│                │
-   │              │ 2. Query       │
-   │              │───────────────▶│
-   │              │ 3. Data        │
-   │              │◀───────────────│
-   │ 4. Response  │                │
-   │◀─────────────│                │
-   │              │                │
-   │ ... later ...│                │
-   │              │                │
-   │ 5. Update    │                │
-   │─────────────▶│                │
-   │              │ 6. Write       │
-   │              │───────────────▶│
-   │              │ 7. Confirm     │
-   │              │◀───────────────│
-   │ 8. Success   │                │
-   │◀─────────────│                │
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant DB
+    Client->>API: 1. Fetch
+    API->>DB: 2. Query
+    DB-->>API: 3. Data
+    API-->>Client: 4. Response
+    Note over Client,DB: ... later ...
+    Client->>API: 5. Update
+    API->>DB: 6. Write
+    DB-->>API: 7. Confirm
+    API-->>Client: 8. Success
 ```
 
 ---
 
 ## Webhook Sequence
 
-```
-┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│ External │     │ Gateway  │     │ Handler  │     │   DB     │
-└────┬─────┘     └────┬─────┘     └────┬─────┘     └────┬─────┘
-     │                │                │                │
-     │ 1. Webhook     │                │                │
-     │───────────────▶│                │                │
-     │                │ 2. Verify sig  │                │
-     │                │───────────────▶│                │
-     │                │ 3. Process     │                │
-     │                │                │───────────────▶│
-     │                │ 4. Store       │                │
-     │                │                │◀───────────────│
-     │ 5. 200 OK      │                │                │
-     │◀───────────────│                │                │
+```mermaid
+sequenceDiagram
+    participant External
+    participant Gateway
+    participant Handler
+    participant DB
+    External->>Gateway: 1. Webhook
+    Gateway->>Handler: 2. Verify sig
+    Handler->>DB: 3. Process
+    DB-->>Handler: 4. Store
+    Gateway-->>External: 5. 200 OK
 ```
 
 ---
 
 ## Background Job Sequence
 
-```
-┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│  Queue   │     │  Worker  │     │ Service  │     │   DB     │
-└────┬─────┘     └────┬─────┘     └────┬─────┘     └────┬─────┘
-     │                │                │                │
-     │ 1. Dequeue     │                │                │
-     │◀───────────────│                │                │
-     │                │ 2. Process     │                │
-     │                │───────────────▶│                │
-     │                │                │ 3. Update      │
-     │                │                │───────────────▶│
-     │                │                │ 4. Done        │
-     │                │◀───────────────│◀───────────────│
-     │ 5. Ack         │                │                │
-     │◀───────────────│                │                │
+```mermaid
+sequenceDiagram
+    participant Queue
+    participant Worker
+    participant Service
+    participant DB
+    Worker->>Queue: 1. Dequeue
+    Worker->>Service: 2. Process
+    Service->>DB: 3. Update
+    DB-->>Service: 4. Done
+    Service-->>Worker: 4. Done
+    Worker->>Queue: 5. Ack
 ```
 
 ---

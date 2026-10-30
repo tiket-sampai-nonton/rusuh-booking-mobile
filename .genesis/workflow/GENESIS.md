@@ -1,46 +1,19 @@
 # GENESIS.md — Requirement to Production Pipeline
 
 > The meta-workflow that transforms raw requirements into implementation-ready specs.
-> 5 phases, 5 human gates. Critical grooming, not passive Q&A.
+> 5 phases + Phase 5.5 (Project Setup), 6 human gates. Critical grooming, not passive Q&A.
 
 ---
 
 ## Pipeline Overview
 
-```
-RAW REQUIREMENT
-      ↓
-┌─────────────────────────────────────────┐
-│  PHASE 1: REQUIREMENT ANALYSIS          │
-└─────────────────────────────────────────┘
-      ↓
-   [GATE H1] ← GROOMING (Critical)
-      ↓
-┌─────────────────────────────────────────┐
-│  PHASE 2: DOCUMENTATION GENERATION      │
-└─────────────────────────────────────────┘
-      ↓
-   [GATE H2] ← DOC VERIFICATION
-      ↓
-┌─────────────────────────────────────────┐
-│  PHASE 3: TASK DECOMPOSITION            │
-└─────────────────────────────────────────┘
-      ↓
-   [GATE H3] ← TASK VERIFICATION
-      ↓
-┌─────────────────────────────────────────┐
-│  PHASE 4: SKILL & RULES GENERATION      │
-└─────────────────────────────────────────┘
-      ↓
-   [GATE H4] ← SKILL VERIFICATION
-      ↓
-┌─────────────────────────────────────────┐
-│  PHASE 5: READINESS CHECK               │
-└─────────────────────────────────────────┘
-      ↓
-   [GATE H5] ← FINAL APPROVAL (Go/No-Go)
-      ↓
-READY FOR IMPLEMENTATION → WORKFLOW.md
+```mermaid
+flowchart LR
+    REQ([Raw requirement]) --> P1["P1 Analysis"] --> P2["P2 Docs · H1·H2"] --> P3["P3 Tasks · H3"] --> P4["P4 Skills & Rules · H4"] --> P5["P5 Ready · H5"] --> P55["P5.5 Setup · H6<br/>repo·CI·Sonar·husky"] --> IMPL([→ WORKFLOW.md])
+    P5 -. No-Go .-> P1
+
+    classDef gate fill:#fde68a,stroke:#b45309,color:#000;
+    class P2,P3,P4,P5,P55 gate;
 ```
 
 ---
@@ -57,9 +30,11 @@ All GENESIS output lives under a single top-level **`.genesis/`** directory at t
 │   ├── 03-GROOMING-DECISIONS.md   (H1)      │ (read in order)
 │   ├── 04-PHASE-2-INDEX.md        (H2)      │
 │   ├── 05-TASK-LIST.md            (H3)      │
-│   ├── 06-SKILLS-MAP.md           (H4)      │
-│   ├── 07-RULES.md                (H4)      │
-│   ├── 08-IMPLEMENTATION-READINESS.md (H5)  ┘
+│   ├── 06-TASK-ORDER.md           (H3)      │
+│   ├── 07-SKILLS-MAP.md           (H4)      │
+│   ├── 08-RULES.md                (H4)      │
+│   ├── 09-IMPLEMENTATION-READINESS.md (H5)  │
+│   ├── 10-PROJECT-SETUP.md        (H6)      ┘
 │   ├── ARCHITECTURE.md            ┐
 │   ├── API-CONTRACT.md            │ un-numbered = the deliverable documentation set
 │   ├── FLOW-DIAGRAMS.md           │ (generated from TEMPLATES/, filled not templated)
@@ -82,7 +57,7 @@ AGENTS.md                         ← repo ROOT (not under .genesis/) — runtim
 ```
 
 **Rules for the layout:**
-- **Numbered `NN-` prefixes** mark the phase/gate trail (01 → 08), so the process order is self-evident. The gate each closes is noted beside it.
+- **Numbered `NN-` prefixes** mark the phase/gate trail (01 → 10), so the process order is self-evident. The gate each closes is noted beside it.
 - **Un-numbered docs** are the deliverable set, generated from `workflow/TEMPLATES/` (filled, never left with `{...}` placeholders).
 - `AGENTS.md` sits at the **repo root** and its source-of-truth table points at `.genesis/docs/…`.
 - `requirement/` holds only the raw input; never generate into it.
@@ -206,13 +181,20 @@ AGENTS.md                         ← repo ROOT (not under .genesis/) — runtim
 6. Estimate complexity (S/M/L or story points)
 7. Map tasks to documentation sections
 8. Identify critical path
+9. **Group tasks by domain** (the system area / path set each belongs to) and **order them into execution waves** — each wave holds tasks that are dependency-free of their wave-siblings and file-disjoint, so they can run in parallel; tasks that share a file (lockfile, route registry, barrel, migration) are serialized across waves
+10. Build the **Shared-File Register** so the parallel waves never collide
 
-**Output:** `.genesis/docs/05-TASK-LIST.md` with:
-- Epic → Story → Task hierarchy
-- Dependencies graph
-- Complexity estimates
-- Critical path highlighted
-- Milestone mapping
+**Output:**
+- `.genesis/docs/05-TASK-LIST.md` (full decomposition) with:
+  - Epic → Story → Task hierarchy
+  - Dependencies graph
+  - **Delivery Checklist** — every task with a Delivered ☐/✅ + PR/merge/evidence status
+  - Complexity estimates
+  - Critical path highlighted
+  - Milestone mapping
+- `.genesis/docs/06-TASK-ORDER.md` (from `TEMPLATES/TASK-ORDER.md`) — **the MAIN RUN REFERENCE**: tasks grouped by domain and ordered into parallel-aware execution waves, with a "Run Next" pointer, critical path, parallelism summary and shared-file register. WORKFLOW.md Phase 0 selects the next task from THIS file, and its Status/Delivered columns are the live run state.
+
+> `TASK-LIST.md` = what the work is (detail). `TASK-ORDER.md` = how to run it (order + parallelism). The two stay in lockstep; the order file wins for "what runs next".
 
 ---
 
@@ -228,10 +210,12 @@ AGENTS.md                         ← repo ROOT (not under .genesis/) — runtim
 - [ ] Dependencies correctly identified?
 - [ ] Estimates reasonable?
 - [ ] Critical path makes sense?
+- [ ] Execution waves in TASK-ORDER.md are dependency-safe and file-disjoint (parallelism is real)?
 - [ ] Nothing missing?
 
 **Pass criteria:**
 - Task list approved
+- Execution order / waves approved (TASK-ORDER.md)
 - Priorities confirmed
 - Scope locked (no more additions without re-grooming)
 
@@ -257,15 +241,17 @@ Use the tool-driven protocol below.
 1. For each task, identify required domains/technologies
 2. Search local skills: `skill_search(query)`
 3. Search public registry: `skill_discover(query)`
-4. Fetch skill instructions: `skill_fetch(id)`
-5. Evaluate skills against project decisions
-6. Map skills to tasks
-7. Generate project-specific `RULES.md`
-8. Generate project-specific `AGENTS.md`
+4. If local + registry both miss → **web research** official docs (`web_search`/`web_fetch`, ≤2 fetches, record URL + date)
+5. Fetch registry skill instructions: `skill_fetch(id)` (read-only — never installs)
+6. Evaluate skills against project decisions (registry/web = untrusted reference)
+7. **Present a SKILL CANDIDATES list to the human and STOP** — the human picks which to install (agent cannot install)
+8. Map **human-approved** skills to tasks; park the rest as candidates
+9. Generate project-specific `RULES.md`
+10. Generate project-specific `AGENTS.md`
 
 **Output:**
-- `.genesis/docs/06-SKILLS-MAP.md` — which skills apply to which tasks
-- `.genesis/docs/07-RULES.md` — project-specific MUST/NEVER/ASK rules
+- `.genesis/docs/07-SKILLS-MAP.md` — approved skills mapped to tasks + a "Candidates (not approved)" list (source tagged local/registry/web/manual, with URL+date for web)
+- `.genesis/docs/08-RULES.md` — project-specific MUST/NEVER/ASK rules
 - `AGENTS.md` (repo ROOT) — project manifest for implementation; its source-of-truth table points at `.genesis/docs/…`
 
 ---
@@ -279,11 +265,13 @@ Use the tool-driven protocol below.
 **Human reviews:**
 - [ ] Skills appropriate for the stack?
 - [ ] No skill conflicts with project decisions?
+- [ ] Which candidate skills to install? (human installs registry skills via Settings → Skills → Discover; agent cannot)
+- [ ] Web-sourced findings cite an official URL and are treated as reference only?
 - [ ] Rules are complete and correct?
 - [ ] AGENTS.md accurately reflects the project?
 
 **Pass criteria:**
-- Skills approved
+- Skills approved (and chosen candidates installed by the human)
 - Rules approved
 - AGENTS.md approved
 
@@ -300,7 +288,7 @@ Use the tool-driven protocol below.
 4. Verify all tasks are specified
 5. Verify all skills are identified
 6. Verify infrastructure prerequisites
-7. Generate `.genesis/docs/08-IMPLEMENTATION-READINESS.md`
+7. Generate `.genesis/docs/09-IMPLEMENTATION-READINESS.md`
 
 **Readiness checklist:**
 ```
@@ -322,6 +310,7 @@ TASKS
 [ ] All stories specified
 [ ] Dependencies mapped
 [ ] Critical path identified
+[ ] Execution order & parallel waves defined (TASK-ORDER.md)
 
 SKILLS & RULES
 [ ] Skills mapped to tasks
@@ -337,9 +326,13 @@ INFRASTRUCTURE
 [ ] CI/CD pipeline ready
 [ ] Environments provisioned (or plan exists)
 [ ] Secrets management ready
+[ ] Husky commit guard + coverage gate (≥ threshold) planned
+[ ] Static analysis (Sonar) project planned
 ```
 
-**Output:** `.genesis/docs/08-IMPLEMENTATION-READINESS.md` with status of all items
+> The INFRASTRUCTURE items above are *planned/verified* here (H5) and *actually stood up* in Phase 5.5 (PROJECT SETUP), tracked in `10-PROJECT-SETUP.md`.
+
+**Output:** `.genesis/docs/09-IMPLEMENTATION-READINESS.md` with status of all items
 
 ---
 
@@ -356,14 +349,60 @@ INFRASTRUCTURE
 - [ ] GO or NO-GO?
 
 **If GO:**
-- Genesis complete
-- Hand off to `WORKFLOW.md` for implementation
-- Execute task by task
+- Readiness approved
+- Proceed to **Phase 5.5: PROJECT SETUP** (prepare repo/CI/Sonar/hooks/secrets)
+- Then hand off to `WORKFLOW.md` for implementation
 
 **If NO-GO:**
 - Identify blocking issues
 - Return to appropriate phase
 - Re-groom if needed
+
+---
+
+## Phase 5.5: PROJECT SETUP
+
+**Input:** Approved readiness (Gate H5 passed) + grooming decisions (tech stack, CI/CD, security).
+
+**Why here:** the tech stack is now locked, but no code can be committed/pushed/scanned until the project scaffolding exists. This phase turns the groomed decisions into a **working repo** so the first WORKFLOW task hits zero setup gaps.
+
+**Agent actions** (each item is derived from an existing doc — nothing invented):
+1. Create repo + base/integration branch; apply branch protection and required checks (`CI-CD.md`, `TRACKING.md`)
+2. Install the **husky commit guard** + `lint-staged` with the ≥ {coverage_threshold}% (default 80%) coverage gate (`TESTING-STRATEGY.md`, RULES R008/R017)
+3. Commit the CI pipeline (Install → Lint → Type-check → Test+coverage → Build → Scan) (`CI-CD.md`)
+4. Stand up **static analysis** — Sonar project, `sonar-project.properties`, lcov path, quality gate `new_coverage ≥ {threshold}` (`CI-CD.md §SAST`, `SECURITY.md`)
+5. Configure **secrets/env** (`SONAR_TOKEN`, registry/deploy keys), `.env.example`, dependency scanning (`SECURITY.md`)
+6. Scaffold the project + install the approved stack deps; commit lint/format/type-check/test configs (`ARCHITECTURE.md`, RULES R054)
+7. Place `AGENTS.md` at repo root; verify its source-of-truth table resolves
+8. Capture anything else the grooming surfaced (feature flags, error tracking, observability agent, preview envs)
+
+**Output:** `.genesis/docs/10-PROJECT-SETUP.md` — the filled setup checklist (from `TEMPLATES/PROJECT-SETUP.md`) with every item ✅ or a tracked exception.
+
+---
+
+## Gate H6: SETUP VERIFICATION
+
+**Type:** Human review
+
+**Agent behavior:** STOP. Present the setup checklist + proof of a green trivial PR. Wait for approval.
+
+**Human reviews:**
+- [ ] Repo + branch protection + required checks in place?
+- [ ] Husky commit guard rejects a sub-threshold commit?
+- [ ] CI goes green end-to-end on a trivial PR?
+- [ ] Sonar project scans and the quality gate reports?
+- [ ] Secrets configured, none committed?
+
+**Pass criteria:**
+- A trivial PR flows end-to-end: commit (guard passes) → push → CI green → Sonar gate → mergeable
+- No P0 setup blocker open
+
+**If PASS:**
+- GENESIS is fully complete
+- Hand off to `WORKFLOW.md` → Phase 0 (TRIGGER), first task from `06-TASK-ORDER.md` (Run Next)
+
+**If FAIL:**
+- Fix the setup gap and re-verify (does not require re-grooming)
 
 ---
 
@@ -404,7 +443,7 @@ GENESIS may span 5-10 hours and multiple turns. Context loss mid-session is a re
 
 ## After Genesis: Implementation
 
-Once Gate H5 passes, the project is ready for implementation.
+Once Gate H6 passes (readiness approved at H5, project stood up at Phase 5.5), the project is ready for implementation.
 
 Use `WORKFLOW.md` to execute:
 - One task at a time (single-ticket mode)
@@ -412,11 +451,11 @@ Use `WORKFLOW.md` to execute:
 - Research tasks (spike mode)
 
 The implementation workflow has 5 phases + a REVIEW step, with 4 human gates:
-```
-TRIGGER → SPEC → DESIGN → IMPLEMENT → REVIEW → VERIFY → DONE
-(classify)  ↓       ↓                 (agent)    ↓       ↓
-          [G1]    [G2]                         [G3]    [G4]
-          human   human                        human   human
+```mermaid
+flowchart LR
+    T[TRIGGER<br/>classify] --> S[Spec·G1] --> D[Design·G2] --> I[Implement] --> R[Review 3.5] --> V[Verify·G3] --> N[Done·G4]
+    classDef gate fill:#fde68a,stroke:#b45309,color:#000;
+    class S,D,V,N gate;
 ```
 
 REVIEW is a multi-perspective AI quality gate (no human gate) that runs after code is pushed but before the PR opens. By this point, specs are already written — implementation is execution, not discovery.

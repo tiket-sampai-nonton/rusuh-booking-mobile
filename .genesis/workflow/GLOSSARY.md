@@ -8,10 +8,22 @@
 ## Workflow Terms
 
 ### GENESIS
-The meta-workflow that transforms raw requirements into implementation-ready documentation. 5 phases, 5 human gates. Produces all project documentation before implementation begins.
+The meta-workflow that transforms raw requirements into implementation-ready documentation. 5 phases + Phase 5.5 (Project Setup), 6 human gates (H1–H6). Produces all project documentation and a stood-up repo before implementation begins.
 
 ### Gate
 A checkpoint where the agent stops and waits for human approval before proceeding. Gates are the human control points in the pipeline.
+
+### Phase 5.5 (PROJECT SETUP)
+The preparation phase between readiness approval (H5) and the first implementation task. The agent stands up the project from groomed decisions: repo + branch protection, CI pipeline, static analysis (Sonar), the husky commit guard, secrets/env, and the project scaffold. Verified at Gate H6 by a trivial PR going green end-to-end. Output: `10-PROJECT-SETUP.md`.
+
+### Commit Guard (Husky)
+A local `pre-commit` git hook (husky) that runs before every commit and must pass: lint + type-check + related tests + a **changed-code coverage gate (≥ 80% default)**. It keeps red/undertested code out of history and mirrors the CI gate. Bypassing it with `--no-verify` is forbidden (RULES R009). See TESTING-STRATEGY.md §Pre-Commit Coverage Gate.
+
+### Execution Order / Task Order
+The ordered run plan in `06-TASK-ORDER.md` — tasks grouped by domain and arranged into parallel-aware **execution waves** (each wave dependency-free and file-disjoint so it can run in parallel), with a "Run Next" pointer, critical path and shared-file register. This is the **main run reference**: WORKFLOW Phase 0 selects the next task from it, and its Status/Delivered columns are the live run state. `05-TASK-LIST.md` holds the full decomposition detail; the order file governs what runs next.
+
+### Delivery Checklist
+The section of `TASK-LIST.md` tracking what has actually shipped — each task's PR / merged / evidence-approved / Delivered state. A task is Delivered only when its issue reaches `Done`.
 
 ### Phase
 A distinct stage of work in the pipeline. Each phase has defined inputs, actions, and outputs.
@@ -49,7 +61,7 @@ Stop and get human approval before proceeding. Do not assume approval.
 Issue is identified but not yet prioritized for work.
 
 ### To Do
-Issue is prioritized and ready to be picked up. Spec is approved.
+Issue is prioritized and ready to be picked up. (Tasks enter To Do from GENESIS Phase 3 decomposition, or when added ad-hoc. The per-task spec and its approval — Gate G1 — happen in WORKFLOW Phase 1 and gate the move **To Do → In Progress**, not entry into To Do.)
 
 ### In Progress
 Issue is actively being worked on. Branch exists, coding happening, includes Phase 3.5 REVIEW before PR opens.

@@ -25,20 +25,47 @@
 
 ---
 
+## Execution Order
+
+> **The run order lives in `06-TASK-ORDER.md`** (domain-grouped, parallel-aware
+> waves + "Run Next" pointer) — that file is the main run reference and the live
+> Status/Delivered state. This section is a quick index only; do not duplicate the
+> wave plan here. See `TASK-ORDER.md`.
+
+| # | Task | Domain | Depends On | Wave |
+|---|------|--------|-----------|------|
+| 1 | {PREFIX}-001 | {auth} | — | 1 |
+| 2 | {PREFIX}-003 | {catalog} | — | 1 |
+| 3 | {PREFIX}-002 | {payments} | 001 | 2 |
+| … | … | … | … | … |
+
+---
+
+## Delivery Checklist
+
+> What has actually shipped. A task is **Delivered ✅** only when merged to base +
+> CI green + evidence approved (Gate G3) — i.e. issue state `Done`. Keep this in
+> lockstep with the waves in `06-TASK-ORDER.md` (the live run state).
+
+| Task | Title | PR | Merged | Evidence (G3) | Delivered |
+|------|-------|----|--------|---------------|-----------|
+| {PREFIX}-001 | {name} | {#/url} | ☐ | ☐ | ☐ |
+| {PREFIX}-002 | {name} | {#/url} | ☐ | ☐ | ☐ |
+| {PREFIX}-003 | {name} | {#/url} | ☐ | ☐ | ☐ |
+
+**Delivered:** {n}/{total}  •  **In progress:** {n}  •  **Remaining:** {n}
+
+---
+
 ## Dependency Graph
 
-```
-{Epic 1}
-    │
-    ├── {Story 1.1} ─────────────────────┐
-    │                                    │
-    ├── {Story 1.2} (depends on 1.1) ◀───┘
-    │       │
-    │       └── {Story 1.3} (depends on 1.2)
-    │
-{Epic 2} (depends on Epic 1)
-    │
-    └── ...
+```mermaid
+flowchart TD
+    E1[Epic 1] --> S11[Story 1.1]
+    E1 --> S12[Story 1.2]
+    S11 --> S12
+    S12 --> S13[Story 1.3]
+    E1 --> E2[Epic 2<br/>depends on Epic 1]
 ```
 
 ---

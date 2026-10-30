@@ -5,6 +5,39 @@
 
 ---
 
+## Local Git Hooks (Husky)
+
+> The commit guard that runs on the developer/agent machine **before** CI.
+> It mirrors a subset of the CI quality gates so broken code never gets committed.
+
+**Tool:** Husky + lint-staged
+**Installed by:** `prepare` npm script (`"prepare": "husky"`) — runs on `{install command}`
+
+### Pre-Commit Hook
+
+| Step | Command | Blocks commit on |
+|------|---------|------------------|
+| Lint (staged) | `{lint command}` | any error |
+| Type check | `{typecheck command}` | any error |
+| Related tests | `{test command for changed files}` | any failure |
+| Coverage gate | `{coverage command}` | changed-code coverage < {coverage_threshold}% (default 80%) |
+
+See `TESTING-STRATEGY.md §Pre-Commit Coverage Gate` for the hook script and config.
+Bypassing with `--no-verify` is forbidden (RULES R009).
+
+### Commit-Msg Hook (optional)
+
+Enforce the commit convention from `TRACKING.md` (issue key + Conventional Commits):
+
+```sh
+# .husky/commit-msg
+npx --no-install commitlint --edit "$1"
+```
+
+> **Local vs CI:** the hook is fast, per-machine feedback and can be skipped or drift between machines — so CI re-runs lint, type-check, the **full** test suite and the coverage threshold as the authoritative gate (below).
+
+---
+
 ## Overview
 
 **CI Platform:** {GitHub Actions | GitLab CI | Jenkins | CircleCI}
@@ -18,13 +51,22 @@
 
 **Strategy:** {GitFlow | Trunk-based | GitHub Flow}
 
+```mermaid
+gitGraph
+    commit
+    branch develop
+    checkout develop
+    commit
+    branch feature/x
+    checkout feature/x
+    commit
+    checkout develop
+    merge feature/x
+    checkout main
+    merge develop tag: "release"
 ```
-{main/master}     ─────●─────●─────●─────●─────●─────────▶ Production
-                       │     ↑     │     ↑
-{develop}         ────●┼────●┼────●┼────●┼────●──────────▶ Staging
-                      │└────┘│    │└────┘│
-{feature/*}      ────●──────●    ●──────●               Feature branches
-```
+
+> `feature/*` → PR → `develop` (staging) → release PR → `main` (production). Agent merges feature→develop after G3; human merges develop→main at G4.
 
 ### Branch Rules
 
@@ -51,10 +93,9 @@
 
 ### Stages
 
-```
-┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
-│ Install │ ─▶ │  Lint   │ ─▶ │  Test   │ ─▶ │  Build  │ ─▶ │ Deploy  │
-└─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
+```mermaid
+flowchart LR
+    I[Install] --> L[Lint] --> T[Test] --> B[Build] --> D[Deploy]
 ```
 
 ### Stage Details
@@ -115,7 +156,7 @@
 | Lint | Yes | 0 errors |
 | Type check | Yes | 0 errors |
 | Unit tests | Yes | 100% pass |
-| Coverage | Yes | ≥ {x}% |
+| Coverage | Yes | ≥ {x}% (default 80%) |
 | Security scan | Yes | 0 critical |
 | Build | Yes | Success |
 
@@ -165,30 +206,18 @@
 
 ### Blue-Green Deployment
 
-```
-                    ┌──────────────┐
-    Traffic ───────▶│   Blue (v1)  │ ← Current
-                    └──────────────┘
-                    
-                    ┌──────────────┐
-    (Deploy) ──────▶│  Green (v2)  │ ← New
-                    └──────────────┘
-
-After validation:
-                    ┌──────────────┐
-    Traffic ───────▶│  Green (v2)  │ ← Current
-                    └──────────────┘
+```mermaid
+flowchart LR
+    T[Traffic] --> B[Blue v1 · current]
+    D[Deploy] --> G[Green v2 · new]
+    G -. after validation .-> T2[Traffic → Green v2]
 ```
 
 ### Canary Deployment
 
-```
-Traffic split:
-  - 90% → v1 (stable)
-  - 10% → v2 (canary)
-
-Gradual rollout:
-  10% → 25% → 50% → 100%
+```mermaid
+flowchart LR
+    S[90% v1 stable<br/>10% v2 canary] --> R1[10%] --> R2[25%] --> R3[50%] --> R4[100%]
 ```
 
 ---
