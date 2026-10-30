@@ -17,6 +17,14 @@ Use this workflow AFTER `GENESIS.md` completes:
 
 This workflow executes **one task at a time** (or parallel batches).
 
+> **Exception — the setup wave (GENESIS → WORKFLOW handoff).** The first tasks
+> (scaffold, CI/Sonar/husky — e.g. `RBT-001`, `RBT-005`) run through THIS pipeline
+> **before** GENESIS Gate **H6**. H6 does not precede WORKFLOW — it **brackets** the
+> setup wave: it is GENESIS's verification that this first wave landed green. The
+> sequence is **H5 GO → run the setup wave via WORKFLOW → H6 verifies → feature
+> waves**. For those setup tasks, "commit guard / CI / Sonar already stood up" (the
+> integration table below) does **not** yet hold — they are the tasks standing it up.
+
 ---
 
 ## Pipeline Overview
@@ -365,4 +373,4 @@ GENESIS produces → WORKFLOW consumes:
 | `RULES.md` | Phase 3 implementation rules |
 | `AGENTS.md` | All phases — project manifest |
 | `IMPLEMENTATION-READINESS.md` | Phase 1 blocker check |
-| `PROJECT-SETUP.md` | Phase 3 commit guard / CI / Sonar already stood up (Phase 5.5) |
+| `PROJECT-SETUP.md` | Setup-wave tasks (RBT-001/005) IMPLEMENT it (Phase 3); all later tasks assume commit guard / CI / Sonar already stood up |

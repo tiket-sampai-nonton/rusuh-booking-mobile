@@ -9,6 +9,23 @@
 
 ---
 
+## How this runs (reads with `WORKFLOW.md`)
+
+Phase 5.5 is a **GENESIS gate**, but its rows are **built by running the setup-wave
+tasks (RBT-001 scaffold, RBT-005 CI/Sonar) through the WORKFLOW pipeline** — each a
+real issue with its own G1/G2/G3. So WORKFLOW is the engine here too; **H6 does not
+run before WORKFLOW, it brackets the first WORKFLOW wave**:
+
+```
+H5 GO → [ WORKFLOW runs the setup wave: RBT-001, RBT-005 ] → H6 verifies green → feature waves (WORKFLOW)
+```
+
+This resolves the apparent circularity between the two docs: WORKFLOW's "start only
+after setup is stood up" applies to **feature** tasks; the setup-wave tasks are the
+exception that stands setup up (see `WORKFLOW.md` → When to Use → *setup-wave exception*).
+
+---
+
 ## Status
 
 | Area | Status | Notes |
