@@ -1,15 +1,10 @@
+// Public route `/events/[eventId]` (event detail). Routing-only shell: reads the
+// param and mounts the presentation screen. RBT-032.
 import { useLocalSearchParams } from "expo-router";
-import { Text, View } from "react-native";
 
-// Public route `/events/[eventId]` (event detail). Skeleton placeholder — real
-// detail screen lands in a later RBT. Routing-only, no API calls.
-export default function EventDetailScreen() {
+import { EventDetailScreen } from "@presentation/screens/Events/EventDetailScreen";
+
+export default function EventDetailRoute() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-lg font-semibold text-brand" accessibilityRole="header">
-        Event Detail — /events/{eventId} (RBT-002)
-      </Text>
-    </View>
-  );
+  return <EventDetailScreen eventId={eventId ?? ""} />;
 }

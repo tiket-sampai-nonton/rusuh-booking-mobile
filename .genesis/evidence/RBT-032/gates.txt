@@ -1,0 +1,80 @@
+================================================================
+RBT-032 — Event detail: categories + availability + queue CTA (E4)
+Branch: feat/full-mock-integration
+Date:   2026-10-30
+================================================================
+
+ACCEPTANCE CRITERIA
+-------------------
+AC1: getEvent() -> categories + priceMinor + available; rich description JSON
+     (FE-NEED O1, mock until delivered).  ✓
+     - EventDetailScreen renders hero (name/venue/date+time + status badge),
+       About (longDesc), Line-up, Syarat & Ketentuan, "Mulai dari" min price
+       (minorToIDR), and "Sisa tiket" (remainingTickets). description parsed
+       safely by parseDescription() (tolerates missing/wrong-typed fields).
+       NOTE vs prototype: the frozen EventDetail port exposes `description`
+       (opaque O1 bag), minPriceMinor and remainingTickets — NOT a structured
+       `categories[]` with per-category priceMinor. Rendered from the port's
+       real fields; structured categories remain an O1 gap (documented, not
+       invented). Docs win over prototype per AGENTS.md.
+AC2: "Masuk Antrean" CTA -> anonymous join.  ✓
+     - CTA calls useJoinQueue (anonymous, D8.5 no login) -> JoinQueue use case
+       -> QueueRepository.join(eventId) -> mock. On success records the entry
+       in the session store and routes to /waiting/[eventId]. Disabled for
+       SOLD_OUT / CLOSED / NOT_STARTED (shows the status label instead).
+
+WIRING (inward-only)
+--------------------
+app/(public)/events/[eventId].tsx (shell, reads param)
+  -> presentation/screens/Events/EventDetailScreen
+  -> useEventDetail (query) + useJoinQueue (mutation)   [TanStack seam]
+  -> GetEventDetail / JoinQueue use cases (framework-free)
+  -> Event/Queue ports -> mock adapters (composition root)
+  -> session-store (Zustand) records the queue handoff
+
+----------------------------------------------------------------
+BOOT-BUG FIX FOLDED IN (web navigation):
+  query-string ^9.5.1 (ESM-only) broke ALL Expo-Router web navigation with
+  "o.stringify is not a function" (v9 has no CJS .stringify the router expects,
+  and nothing in src/ uses it directly). Pinned query-string@7.1.3 (CJS) —
+  the version Expo SDK 52 expects. Web client-side navigation now works; this
+  was required for the web funnel click-through.
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+tsc --noEmit        : PASS
+eslint . --ext ...  : PASS (0 errors/warnings; Clean-Arch boundaries OK)
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+jest --coverage  (RBT-032 files; 90% gate on all four)
+----------------------------------------------------------------
+Test Suites: 4 passed, 4 total
+Tests:       22 passed, 22 total
+
+File                         | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------|---------|----------|---------|--------
+All files                    |   100   |   100    |   100   |   100
+  get-event-detail.ts        |   100   |   100    |   100   |   100
+  join-queue.ts              |   100   |   100    |   100   |   100
+  event-description.ts       |   100   |   100    |   100   |   100
+  useEventDetail.ts          |   100   |   100    |   100   |   100
+  useJoinQueue.ts            |   100   |   100    |   100   |   100
+  EventDetailScreen.tsx      |   100   |   100    |   100   |   100
+  session-store.ts           |   100   |   100    |   100   |   100
+
+>= 90% on all four metrics. GATE PASSED.
+
+----------------------------------------------------------------
+Run evidence
+----------------------------------------------------------------
+WEB: expo export web -> SUCCESS. Screenshot web-detail.png captured by
+     CLICK-THROUGH from Home (clicked "Rusuh Fest 2026") — the SPA client
+     router navigates with no console errors. Shows hero + STOK MENIPIS badge,
+     Tentang/Line-up/Syarat/Harga sections, "Mulai dari Rp 450.000", Sisa
+     tiket 120, and the red "Masuk Antrean →" CTA.
+     (A hard deep-link load of a dynamic route in the static SPA export is a
+     separate SEO concern — RBT-033 web.output:"static". In-app navigation,
+     the funnel path, works.)
+
+iOS / ANDROID: at funnel-complete milestone (one emulator at a time).

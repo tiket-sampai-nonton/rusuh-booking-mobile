@@ -13,6 +13,12 @@ const DIST = join(process.cwd(), "dist");
 const ROUTE = process.argv[2] ?? "/";
 const OUT = process.argv[3];
 const WAIT = Number(process.argv[4] ?? 1500);
+// Optional 5th arg: a JSON array of click steps to run AFTER loading ROUTE,
+// e.g. '[{"text":"Rusuh Fest 2026"},{"testid":"join-cta"}]'. Each step clicks
+// the element and waits WAIT ms. This drives the SPA through its client router
+// (the reliable way to reach a dynamic route — a hard deep-link load of a
+// dynamic path in the static SPA export is a separate SEO concern, RBT-033).
+const STEPS = process.argv[5] ? JSON.parse(process.argv[5]) : [];
 
 const MIME = {
   ".html": "text/html",
@@ -70,6 +76,16 @@ page.on("pageerror", (e) => errors.push(String(e)));
 
 await page.goto(base + ROUTE, { waitUntil: "networkidle" });
 await page.waitForTimeout(WAIT);
+
+for (const step of STEPS) {
+  if (step.text) {
+    await page.getByText(step.text, { exact: false }).first().click();
+  } else if (step.testid) {
+    await page.locator(`[data-testid="${step.testid}"]`).first().click();
+  }
+  await page.waitForTimeout(WAIT);
+}
+
 await page.screenshot({ path: OUT, fullPage: true });
 
 await browser.close();
