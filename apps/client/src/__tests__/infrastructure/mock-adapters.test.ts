@@ -12,7 +12,14 @@ describe("MockEventRepository", () => {
   it("lists seeded events as summaries", async () => {
     const events = await repo.listEvents();
     expect(events).toHaveLength(2);
-    expect(events[0]).toEqual({ id: "evt-1", name: "Rusuh Fest 2026" });
+    expect(events[0]).toMatchObject({
+      id: "evt-1",
+      name: "Rusuh Fest 2026",
+      status: "AVAILABLE",
+      slug: "rusuh-fest-2026",
+    });
+    // listEvents returns summaries — the detail-only `description` is stripped.
+    expect(events[0]).not.toHaveProperty("description");
   });
 
   it("returns detail for a known event", async () => {
@@ -27,40 +34,56 @@ describe("MockEventRepository", () => {
 });
 
 describe("MockQueueRepository", () => {
-  it("joins, decrements position on status, and leaves", async () => {
+  it("joins, decrements position, exposes zone/status, and leaves", async () => {
     const repo = new MockQueueRepository();
     const ticket = await repo.join("evt-1");
-    expect(ticket).toEqual({ queueId: "q-evt-1", position: 5 });
+    expect(ticket).toMatchObject({
+      queueId: "q-evt-1",
+      eventId: "evt-1",
+      position: 5,
+      status: "WAITING",
+      zone: "POSSIBLE", // position 5 > 3 → POSSIBLE branch
+    });
+    expect(ticket.nextPollAfterMs).toBe(2000);
+    expect(typeof ticket.serverTime).toBe("string");
 
     const s1 = await repo.getStatus("q-evt-1");
     expect(s1.position).toBe(4);
+    expect(s1.zone).toBe("POSSIBLE");
     const s2 = await repo.getStatus("q-evt-1");
     expect(s2.position).toBe(3);
+    expect(s2.zone).toBe("GUARANTEED"); // position ≤ 3 → GUARANTEED branch
+
+    // drain to admission (position 0 → status ADMITTED branch)
+    await repo.getStatus("q-evt-1");
+    await repo.getStatus("q-evt-1");
+    const admitted = await repo.getStatus("q-evt-1");
+    expect(admitted.position).toBe(0);
+    expect(admitted.status).toBe("ADMITTED");
 
     await repo.leave("q-evt-1");
-    // after leaving, an unknown queue reports position 0 (floor branch)
-    const s3 = await repo.getStatus("q-evt-1");
-    expect(s3.position).toBe(0);
-    const s4 = await repo.getStatus("q-evt-1");
-    expect(s4.position).toBe(0);
+    // after leaving, an unknown queue falls back to eventId "evt-1" + position 0
+    const gone = await repo.getStatus("q-evt-1");
+    expect(gone.position).toBe(0);
+    expect(gone.eventId).toBe("evt-1"); // events map fallback branch
   });
 });
 
 describe("MockPaymentRepository", () => {
   it("creates an attempt and returns the same attempt for a reused key", async () => {
     const repo = new MockPaymentRepository();
-    const a1 = await repo.createAttempt("book-1", "key-1");
+    const a1 = await repo.createAttempt("book-1", "QRIS", "key-1");
     expect(a1.status).toBe("AWAITING_PAYMENT");
-    const a2 = await repo.createAttempt("book-1", "key-1");
+    const a2 = await repo.createAttempt("book-1", "QRIS", "key-1");
     expect(a2.attemptId).toBe(a1.attemptId); // idempotent reuse
 
-    const a3 = await repo.createAttempt("book-1", "key-2");
+    const a3 = await repo.createAttempt("book-1", "QRIS", "key-2");
     expect(a3.attemptId).not.toBe(a1.attemptId); // new key → new attempt
   });
 
   it("reads back an existing attempt and throws for an unknown one", async () => {
     const repo = new MockPaymentRepository();
-    const a = await repo.createAttempt("book-9", "k");
+    const a = await repo.createAttempt("book-9", "QRIS", "k");
     expect((await repo.getStatus(a.attemptId)).attemptId).toBe(a.attemptId);
     await expect(repo.getStatus("ghost")).rejects.toThrow(/unknown attempt ghost/);
   });

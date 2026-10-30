@@ -18,5 +18,15 @@ module.exports = {
     "src/**/*.{ts,tsx}",
     "!src/**/*.d.ts",
     "!src/**/index.ts",
+    // Domain PORTS are pure TypeScript interfaces/types (DIP). They compile to
+    // ZERO executable JS, so coverage reports them as 0/0 → 0%. They are
+    // non-executable declarations (like .d.ts) and are verified by the compiler
+    // + exercised structurally through their adapters' tests. Documented
+    // exclusion per the project's "whole-src, documented non-executable only"
+    // coverage rule. Concrete adapters (infrastructure/**) are NOT excluded.
+    "!src/domain/repositories/*.repository.ts",
+    "!src/domain/services/*.port.ts",
+    // HttpClient transport PORT — also a pure interface (zero executable JS).
+    "!src/infrastructure/http/http-client.ts",
   ],
 };

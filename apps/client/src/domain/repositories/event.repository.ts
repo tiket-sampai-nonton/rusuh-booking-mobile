@@ -1,27 +1,47 @@
 /**
  * EventRepository — domain PORT (ARCHITECTURE §2.1, §3, §4.1).
  *
- * Pure TS interface: no React / React Native / Expo / browser / native imports.
- * Infrastructure implements this port (RBT-010 HttpEventRepository); the
- * composition root (`src/providers/container.ts`) binds the concrete adapter.
+ * Pure TS interface: no React / React Native / Expo / browser / native / codegen
+ * imports. Infrastructure implements this port (`HttpEventRepository`); the
+ * composition root binds the concrete adapter.
  *
- * The shapes below are intentionally minimal placeholders for RBT-004 wiring.
- * RBT-010 replaces them with OpenAPI-generated contract types.
+ * RBT-010: shapes refined to the Booking-service event contract (EventSummary /
+ * EventDetail). These are DOMAIN entities — minimal, business-meaningful fields
+ * the app needs (ISP) — NOT a 1:1 copy of the generated wire DTO. The
+ * DTO→domain mapping lives in `infrastructure/api/dto-mappers.ts`.
  */
 
-/** Minimal event summary placeholder — superseded by OpenAPI types in RBT-010. */
+/** Lifecycle status of an event (contract enum). */
+export type EventStatus = "NOT_STARTED" | "AVAILABLE" | "SOLD_OUT" | "CLOSED";
+
+/** Event as shown in the catalog/list. */
 export interface EventSummary {
   readonly id: string;
+  readonly slug: string;
   readonly name: string;
+  readonly venue?: string;
+  /** ISO-8601; optional until scheduled. */
+  readonly startsAt?: string;
+  readonly salesStartsAt: string;
+  readonly salesEndsAt: string;
+  readonly status: EventStatus;
+  /** Minor-unit IDR (integer). Undefined when not yet priced. */
+  readonly minPriceMinor?: number;
+  /** FE-NEED (O1): mocked until BE delivers on the list summary. */
+  readonly remainingTickets?: number;
 }
 
-/** Minimal event detail placeholder — superseded by OpenAPI types in RBT-010. */
+/** Full event detail (adds rich description + pricing categories). */
 export interface EventDetail extends EventSummary {
-  readonly startsAt: string;
+  /**
+   * FE-NEED (O1): rich description JSON (longDesc, lineup, terms, bannerImage).
+   * Modeled as an opaque record until the BE `EventDetail.description` lands.
+   */
+  readonly description?: Readonly<Record<string, unknown>>;
 }
 
 export interface EventRepository {
-  /** List the event catalog. */
+  /** List the event catalog (upcoming + history derived by the caller). */
   listEvents(): Promise<readonly EventSummary[]>;
   /** Fetch one event's detail by id. */
   getEventDetail(eventId: string): Promise<EventDetail>;
