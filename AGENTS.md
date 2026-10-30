@@ -50,7 +50,7 @@ Follow: `.genesis/workflow/WORKFLOW.md`
 | — | Prototype (UX reference) | `.genesis/prototype/Final/` |
 
 **If code contradicts these docs, the docs win. Escalate instead of inventing.**
-Upstream order: GROOMING-DECISIONS → OpenAPI contracts → FE-BE-align → FE-Flow-Diagrams → prototype V5.
+Upstream order: GROOMING-DECISIONS → OpenAPI contracts → FE-BE-align → FE-Flow-Diagrams → prototype `.genesis/prototype/Final/` (internal version "V5").
 
 ---
 
@@ -129,7 +129,7 @@ apps/client/                 # One Expo app — Android, iOS, Web
     presentation/            # screens, components, hooks (TanStack seam), stores (Zustand), theme
     providers/               # composition root: container.ts (manual DI), query-client, providers.tsx
     shared/                  # utils, constants, test-fixtures
-  tailwind.config.js         # single design-token source (NativeWind, from prototype V5)
+  tailwind.config.js         # single design-token source (NativeWind, from prototype Final/ (V5))
 ```
 > **v2 (2026-10-30):** single app, Clean-Architecture layers as folders — supersedes the former 8-package monorepo. Boundaries are ESLint-enforced in the commit guard. See `.genesis/docs/ARCHITECTURE.md` §11.6–11.9.
 
@@ -158,7 +158,7 @@ app (routes) → presentation → application (use cases) → domain → Ports/C
 | Framework | Expo (Router, config plugins, dev builds) |
 | UI | React Native |
 | Web | React Native Web |
-| Styling | NativeWind (Tailwind for RN/RN-Web); single token source = `tailwind.config.js` from prototype V5 |
+| Styling | NativeWind (Tailwind for RN/RN-Web); single token source = `tailwind.config.js` from prototype `Final/` (V5) |
 | Client state | Zustand |
 | Server data | TanStack Query (confined to `presentation/hooks` — the swap seam) |
 | HTTP client | `HttpClient` port → axios / fetch adapter (swapped at composition root) |
