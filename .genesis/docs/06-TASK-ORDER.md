@@ -26,8 +26,8 @@
 
 ## Run Next
 
-**Current wave:** `Wave 2 — Core API (E2)` — Wave 1 Foundations COMPLETE.
-**Run next:** `Wave 2 (RBT-010→014, Core API)` — ends by freezing the ports for Eld + Ray. (Wave 1 delivered: RBT-001 ✅, RBT-005a ✅, RBT-002 ✅, RBT-003 ✅, RBT-004 ✅; RBT-005b CI deferred post-E2E.)
+**Current wave:** `Wave 2 — Core API (E2)` — RBT-010 ✅ delivered (port freeze landed).
+**Run next:** `RBT-011 / 012 / 013 / 014` — all depend only on RBT-010 (✅) and are file-disjoint → parallelizable. (Wave 1 ✅ all; RBT-010 ✅; RBT-005b CI deferred post-E2E.)
 
 ---
 
@@ -68,11 +68,11 @@
 
 | Task | Owner | Domain | Depends On | Files (disjoint) | Parallel | Status | Delivered |
 |------|-------|--------|-----------|------------------|----------|--------|-----------|
-| RBT-010 | Riz | Core/API | 004 | `src/infrastructure/{http,api}/**`, generated types | ❌ first | Blocked | ☐ |
-| RBT-011 | Riz | Core/API | 010 | `src/domain/services/server-clock.ts` | ✅ | Blocked | ☐ |
-| RBT-012 | Riz | Core/API | 010 | idempotency util in `src/domain`/`src/application` | ✅ | Blocked | ☐ |
-| RBT-013 | Riz | Core/API | 010 | `src/domain/errors/**`, error mapping | ✅ | Blocked | ☐ |
-| RBT-014 | Riz | Core/API | 010 | `src/infrastructure/__fixtures__/**`, `src/shared/test-fixtures/**` | ✅ | Blocked | ☐ |
+| RBT-010 | Riz | Core/API | 004 | `src/infrastructure/{http,api}/**`, generated types | ❌ first | Done ✅ | ☑ |
+| RBT-011 | Riz | Core/API | 010 ✅ | `src/domain/services/server-clock.ts` | ✅ | To Do (unblocked) | ☐ |
+| RBT-012 | Riz | Core/API | 010 ✅ | idempotency util in `src/domain`/`src/application` | ✅ | To Do (unblocked) | ☐ |
+| RBT-013 | Riz | Core/API | 010 ✅ | `src/domain/errors/**`, error mapping | ✅ | To Do (unblocked) | ☐ |
+| RBT-014 | Riz | Core/API | 010 ✅ | `src/infrastructure/__fixtures__/**`, `src/shared/test-fixtures/**` | ✅ | To Do (unblocked) | ☐ |
 
 **Wave 2 gate:** all `Done` + `src/domain` ports/interfaces frozen (owned by Eld/Ray) → start Wave 3.
 
