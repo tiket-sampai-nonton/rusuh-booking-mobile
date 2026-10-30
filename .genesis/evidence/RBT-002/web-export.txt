@@ -1,0 +1,11 @@
+RBT-002 web export served from dist/ (python http.server 127.0.0.1:8731)
+Captured: 2026-10-30T10:40:57Z
+No browser available in sandbox (playwright not in the symlinked node_modules; adding deps is forbidden by this task).
+Web evidence = successful 'expo export --platform web' + served static HTML returning HTTP 200 with the Expo root + entry bundle present.
+
+--- GET / HTTP status ---
+200
+--- index.html markers ---
+<title>Rusuh Booking</title>
+id="root"
+entry-23f804b1bfacf21c10ebfc749ebf6b9b.js
