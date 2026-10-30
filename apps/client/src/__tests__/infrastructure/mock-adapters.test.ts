@@ -11,7 +11,9 @@ describe("MockEventRepository", () => {
 
   it("lists seeded events as summaries", async () => {
     const events = await repo.listEvents();
-    expect(events).toHaveLength(2);
+    // RBT-014 expanded the shared fixtures to ≥5 events (incl. SOLD_OUT/
+    // NOT_STARTED/CLOSED); assert the floor rather than a brittle exact count.
+    expect(events.length).toBeGreaterThanOrEqual(5);
     expect(events[0]).toMatchObject({
       id: "evt-1",
       name: "Rusuh Fest 2026",
