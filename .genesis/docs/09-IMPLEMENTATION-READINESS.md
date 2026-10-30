@@ -39,13 +39,14 @@ Overall:        CONDITIONAL GO — start on the critical path; mocks cover BE ga
 | TESTING-STRATEGY | ✅ | `.genesis/docs/TESTING-STRATEGY.md` |
 | PIPELINE (CI/CD) | ✅ | `.genesis/docs/PIPELINE.md` |
 | TASK-LIST | ✅ H3 | `.genesis/docs/05-TASK-LIST.md` |
-| SKILLS-MAP | ✅ H4 | `.genesis/docs/06-SKILLS-MAP.md` |
-| RULES (project) | ✅ H4 | `.genesis/docs/07-RULES.md` |
+| TASK-ORDER (run reference) | ✅ H3 | `.genesis/docs/06-TASK-ORDER.md` |
+| SKILLS-MAP | ✅ H4 | `.genesis/docs/07-SKILLS-MAP.md` |
+| RULES (project) | ✅ H4 | `.genesis/docs/08-RULES.md` |
 | AGENTS (manifest) | ✅ H4 | `AGENTS.md` (repo root) |
 
 > **Not generated (deliberate):** INFRASTRUCTURE.md (BE-owned), standalone SEQUENCE/FLOW-DIAGRAMS (covered by FE-Flow-Diagrams §1–2).
 
-**Documentation Status:** ✅ All verified through H2/H3/H4.
+**Documentation Status:** ✅ All verified through H2/H3/H4. **v2 update (2026-10-30):** ARCHITECTURE rewritten to single-app Clean-Architecture folders; all downstream docs aligned + consistency-checked; Phase 4 re-run (skills). The docset is internally consistent at v2 — see `04-PHASE-2-INDEX.md` correction #3.
 
 ---
 
@@ -77,12 +78,15 @@ Overall:        CONDITIONAL GO — start on the critical path; mocks cover BE ga
 
 | Domain | Skill | Source | Status |
 |--------|-------|--------|--------|
-| perf/RN | react-native-best-practices | local | ✅ |
-| design | frontend-design | local | ✅ |
-| e2e evidence | browser-recording | local | ✅ |
+| perf/RN | react-native-best-practices | local | ✅ installed |
+| design | frontend-design | local | ✅ installed |
+| FE design workflow | frontend-design-workflow | local | ✅ installed |
+| Clean-Arch / DI | software-architecture-analysis | local | ✅ installed |
+| NativeWind styling | expo-tailwind-setup | local | ✅ installed (pin versions for SDK 52 — targets Tailwind v4/NativeWind v5) |
+| e2e evidence | browser-recording | local | ✅ installed |
 | EAS / Playwright / Maestro / OpenAPI codegen / web push / Midtrans | documented fallback (registry/docs at task time) | — | ⚠️ fallback |
 
-**Skill conflicts:** none. **Skills Status:** ✅ All domains have a skill or documented fallback.
+**Skill conflicts:** none. **Skills Status:** ✅ Phase 4 re-run 2026-10-30 — 5 mapped skills + browser-recording installed; remaining domains have documented fallbacks.
 
 ---
 
@@ -106,7 +110,7 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 
 | Item | Status | Note |
 |------|--------|------|
-| Repo / monorepo scaffold | ❌ | **This is RBT-001** — the first story |
+| Repo / app scaffold | ❌ | **This is RBT-001** — the first story (single Expo app, Clean-Arch folders) |
 | CI pipeline (GitHub Actions + SonarCloud) | ❌ | **This is RBT-005** — PIPELINE.md is the spec |
 | EAS config (dev/prod channels) | ❌ | Lands with RBT-005/084 |
 | Environments (develop/main) | ⚠️ planned | Per D5.2 — provisioned during E1 |
@@ -142,7 +146,7 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 **Rationale:** The GENESIS documentation package is complete and internally consistent (H1–H4 passed), the task breakdown is fully specified with a clear critical path, and every backend dependency is decoupled via mock adapters behind the real ports — so the FE team can start immediately on the critical path without waiting on BE. The only ❌ items (repo scaffold, CI) are **the first stories themselves** (RBT-001, RBT-005), not external pre-requisites. This is a GO for implementation, conditional only on treating E1 (Foundations) as the literal first step.
 
 **Can start now:**
-- E1 Foundations (RBT-001…005) — monorepo, Expo app, Clean-Arch packages, tokens, CI skeleton.
+- E1 Foundations (RBT-001…005) — single Expo app, Clean-Arch folders, NativeWind tokens, CI skeleton.
 - Then E2 (API layer + mock adapters), unblocking E3/E4/E5 in parallel.
 
 **Must resolve before affected features (not before start):**
@@ -153,11 +157,12 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 
 ## 8. Next Steps (if GO)
 
-1. [ ] Scaffold the monorepo + Expo app (RBT-001) and `set_project` to the new tree.
+1. [ ] Scaffold the single Expo app + Clean-Arch folders (RBT-001) and `set_project` to the new tree.
 2. [ ] Stand up the CI skeleton (RBT-005) per PIPELINE.md.
 3. [ ] Build E2 API layer + mock adapters (RBT-010…014, incl. mock PaymentRepository seed).
-4. [ ] Open the parallel batch E3/E4/E5 once E2 interfaces are frozen.
-5. [ ] Follow `.genesis/workflow/WORKFLOW.md` per story (Single-ticket mode default).
+4. [ ] **Verify Gate H6 Project-Setup** (`10-PROJECT-SETUP.md`) — trivial PR green end-to-end (husky → CI → Sonar → mergeable) before feature work.
+5. [ ] Open the parallel batch E3/E4/E5 once E2 interfaces are frozen.
+6. [ ] Follow `.genesis/workflow/WORKFLOW.md` per story (Single-ticket mode default).
 
 ---
 
@@ -168,4 +173,4 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 | Product Owner | {pending} | |
 | FE Tech Lead | {pending} | |
 
-**GENESIS complete through Phase 5. Awaiting H5 Go/No-Go sign-off.**
+**GENESIS complete through Phase 5. Awaiting H5 Go/No-Go sign-off → then Phase 5.5 Project-Setup (Gate H6, see `10-PROJECT-SETUP.md`) before WORKFLOW Phase 0.**

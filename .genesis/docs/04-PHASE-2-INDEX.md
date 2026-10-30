@@ -9,7 +9,7 @@
 
 | Doc | Status | Location |
 |---|---|---|
-| ARCHITECTURE | ✅ Adopted (existing) + **corrected** §6.1 web-push→v1 | `.genesis/docs/ARCHITECTURE.md` |
+| ARCHITECTURE | ✅ Adopted + **rewritten to v2 (2026-10-30): single-app Clean-Architecture folders** (was 8-package monorepo); §6.1 web-push→v1 retained | `.genesis/docs/ARCHITECTURE.md` |
 | FE-FLOW-DIAGRAMS | ✅ Adopted (existing) + **corrected** §2.4 Midtrans-hosted | `.genesis/docs/FE-Flow-Diagrams.md` |
 | CI-CD (PIPELINE) | ✅ Adopted (existing) as-is | `.genesis/docs/PIPELINE.md` |
 | API-CONTRACT (OpenAPI) | ✅ Adopted (existing) + gap list (O1/O2/O4) | `.genesis/docs/api-contract/*.openapi.json` + `.genesis/docs/FE-BE-align-contract.md` |
@@ -25,6 +25,7 @@
 
 1. **ARCHITECTURE.md §6.1** — "Web notifications deferred from v1" → **web push mandatory in v1** (service-worker + browser push, shared domain flow), per D8.2.
 2. **FE-Flow-Diagrams.md §2.4** — correction note (re-corrected 2026-10-29 per user "follow the prototype"): payment = **FE-built payment page** (summary + method selection + server timer) → create-attempt → **Midtrans SNAP handoff** → verify-with-BE; **page-token WebView-reuse retained as FE scope**; instrument entry on SNAP only; O2 open items flagged.
+3. **ARCHITECTURE.md v2 rewrite (2026-10-30)** — the eight-package monorepo (`packages/{domain,api-client,state,ui,design-tokens,platform,config,test-fixtures}`) was replaced by a **single Expo app with Clean-Architecture layers as folders** (`apps/client/src/{app,domain,application,infrastructure,presentation,providers,shared}`). Added decisions: D1 single-app/ESLint-enforced boundaries (§11.6), D2 composition root in `src/providers` (§11.7), D3 hook-seam + swappable `HttpClient` port (§11.8), styling = NativeWind with prototype-V5 tokens (§11.9). Downstream docs (03-GROOMING-DECISIONS, 05-TASK-LIST, 06-TASK-ORDER, DESIGN-SYSTEM, TESTING-STRATEGY, 02/09) aligned the same day.
 
 ## Open dependencies carried forward (not blocking H2)
 

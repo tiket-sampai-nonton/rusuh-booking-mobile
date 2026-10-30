@@ -8,7 +8,7 @@
 ## Project Identity
 
 - **Name:** Rusuh Booking Tiket — Front-End (Expo Universal)
-- **Stack:** Expo · React Native · React Native Web · TypeScript · Zustand · TanStack Query
+- **Stack:** Expo · React Native · React Native Web · TypeScript · NativeWind · Zustand · TanStack Query
 - **State:** Pre-implementation (GENESIS complete through H3; Phase 4 in progress)
 - **Scope:** **FRONT-END only** — Backend is a separate team; BE OpenAPI contracts are a consumed integration contract.
 - **Issue prefix:** `RBT`
@@ -23,7 +23,7 @@
 Follow: `.genesis/workflow/WORKFLOW.md`
 
 - **Single-ticket mode** for most stories.
-- **Parallel-batch mode** for disjoint feature packages (E3/E4/E5 after E2).
+- **Parallel-batch mode** for disjoint feature areas (E3/E4/E5 after E2).
 - **Spike mode** for research (e.g. confirming the O2 payment contract).
 
 ---
@@ -43,9 +43,10 @@ Follow: `.genesis/workflow/WORKFLOW.md`
 | 7 | Testing strategy | `.genesis/docs/TESTING-STRATEGY.md` |
 | 8 | Design system | `.genesis/docs/DESIGN-SYSTEM.md` |
 | 9 | CI/CD pipeline | `.genesis/docs/PIPELINE.md` |
-| 10 | Task list | `.genesis/docs/05-TASK-LIST.md` |
-| 11 | Project rules | `.genesis/docs/07-RULES.md` |
-| 12 | Skills map | `.genesis/docs/06-SKILLS-MAP.md` |
+| 10 | Task list (detail) | `.genesis/docs/05-TASK-LIST.md` |
+| 10b | Task run order (run reference) | `.genesis/docs/06-TASK-ORDER.md` |
+| 11 | Project rules | `.genesis/docs/08-RULES.md` |
+| 12 | Skills map | `.genesis/docs/07-SKILLS-MAP.md` |
 | — | Prototype (UX reference) | `.genesis/prototype/Final/` |
 
 **If code contradicts these docs, the docs win. Escalate instead of inventing.**
@@ -97,7 +98,7 @@ eas update --channel <development|production>
 
 ## Project-Specific Rules
 
-Full set in `.genesis/docs/07-RULES.md`; these extend `.genesis/workflow/RULES.md`. Highlights:
+Full set in `.genesis/docs/08-RULES.md`; these extend `.genesis/workflow/RULES.md`. Highlights:
 
 ### MUST
 - **MUST** keep domain/application layers framework-free; access the backend only through ports.
@@ -119,24 +120,25 @@ Full set in `.genesis/docs/07-RULES.md`; these extend `.genesis/workflow/RULES.m
 
 ### Structure
 ```
-apps/client/                 # Expo app — Expo Router routes only (no logic)
-packages/
-  domain/                    # entities, use cases, state machines (framework-free)
-  api-client/                # OpenAPI types, repositories, transport
-  state/                     # Zustand stores
-  ui/                        # shared RN/RN-Web components
-  design-tokens/             # color/type/spacing/radius/motion
-  platform/                  # native/web adapter interfaces + actuals
-  config/                    # env, composition root
-  test-fixtures/             # contract-shaped mocks (incl. mock PaymentRepository)
+apps/client/                 # One Expo app — Android, iOS, Web
+  src/
+    app/                     # Expo Router routes only (no logic)
+    domain/                  # entities, rules, state machines, ports (framework-free)
+    application/             # use cases + dto (framework-free)
+    infrastructure/          # repo impls, HttpClient (axios/fetch), platform adapters, __fixtures__ (mock PaymentRepository)
+    presentation/            # screens, components, hooks (TanStack seam), stores (Zustand), theme
+    providers/               # composition root: container.ts (manual DI), query-client, providers.tsx
+    shared/                  # utils, constants, test-fixtures
+  tailwind.config.js         # single design-token source (NativeWind, from prototype V5)
 ```
+> **v2 (2026-10-30):** single app, Clean-Architecture layers as folders — supersedes the former 8-package monorepo. Boundaries are ESLint-enforced in the commit guard. See `.genesis/docs/ARCHITECTURE.md` §11.6–11.9.
 
 ### Dependency Direction
 ```
-UI → Application (use cases) → Domain → Ports/Contracts
-                                          ↑ implemented by →  Platform Adapters → Backend/OS/Browser
+app (routes) → presentation → application (use cases) → domain → Ports/Contracts
+                                                          ↑ implemented by → infrastructure adapters → Backend/OS/Browser
 ```
-**Rule:** source dependencies point inward; outer adapters are swappable (mock ↔ BE).
+**Rule:** source dependencies point inward; outer adapters are swappable (mock ↔ BE, axios ↔ fetch). TanStack Query lives only in presentation hooks.
 
 ---
 
@@ -148,8 +150,10 @@ UI → Application (use cases) → Domain → Ports/Contracts
 | Framework | Expo (Router, config plugins, dev builds) |
 | UI | React Native |
 | Web | React Native Web |
+| Styling | NativeWind (Tailwind for RN/RN-Web); single token source = `tailwind.config.js` from prototype V5 |
 | Client state | Zustand |
-| Server data | TanStack Query |
+| Server data | TanStack Query (confined to `presentation/hooks` — the swap seam) |
+| HTTP client | `HttpClient` port → axios / fetch adapter (swapped at composition root) |
 | Forms | React Hook Form + Zod |
 | Animation | Reanimated |
 | QR | react-native-svg |
@@ -175,7 +179,7 @@ One Idempotency-Key per action, persisted, reused across refresh/retry, cleared 
 
 ## Skills Required
 
-From `.genesis/docs/06-SKILLS-MAP.md`:
+From `.genesis/docs/07-SKILLS-MAP.md`:
 
 | Domain | Skill | Source |
 |--------|-------|--------|

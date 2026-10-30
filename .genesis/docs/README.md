@@ -2,6 +2,7 @@
 
 > Index of the GENESIS output for this project. Numbered files = the phase/gate
 > process trail (read in order). `docs/` = the implementation-ready deliverable set.
+> **Gate model: 6 human gates** — H1 Grooming → H2 Docs → H3 Tasks → H4 Skills/Rules → H5 Go/No-Go → H6 Project-Setup.
 > **Authoritative order when docs disagree:** `03-GROOMING-DECISIONS.md` → OpenAPI contracts → `docs/FE-BE-align-contract.md` → `docs/FE-Flow-Diagrams.md` → prototype V5.
 
 ---
@@ -15,10 +16,12 @@
 | 03 | `03-GROOMING-DECISIONS.md` | 1 output — **source of truth** | **H1** | ✅ PASSED |
 | 04 | `04-PHASE-2-INDEX.md` | 2 — Documentation manifest | **H2** | ✅ PASSED |
 | 05 | `05-TASK-LIST.md` | 3 — Task decomposition (9 epics / 44 stories) | **H3** | ✅ PASSED |
-| 06 | `06-SKILLS-MAP.md` | 4 — Skills by task | **H4** | ✅ PASSED |
-| 07 | `07-RULES.md` | 4 — Project rules (MUST/NEVER/ASK) | **H4** | ✅ PASSED |
+| 06 | `06-TASK-ORDER.md` | 3 — **run reference** (domain-grouped waves + Run Next) | **H3** | ✅ PASSED |
+| 07 | `07-SKILLS-MAP.md` | 4 — Skills by task | **H4** | ✅ PASSED |
+| 08 | `08-RULES.md` | 4 — Project rules (MUST/NEVER/ASK) | **H4** | ✅ PASSED |
 | — | `../../AGENTS.md` (repo root) | 4 — Agent manifest | **H4** | ✅ PASSED |
-| 08 | `08-IMPLEMENTATION-READINESS.md` | 5 — Readiness check (CONDITIONAL GO) | **H5** | ⏳ awaiting Go/No-Go |
+| 09 | `09-IMPLEMENTATION-READINESS.md` | 5 — Readiness check (CONDITIONAL GO) | **H5** | ⏳ awaiting Go/No-Go |
+| 10 | `10-PROJECT-SETUP.md` | 5.5 — Project setup (repo·CI·Sonar·husky·secrets·scaffold) | **H6** | ⏳ pending (RBT-001/005) |
 
 ---
 
@@ -26,7 +29,7 @@
 
 | Doc | Origin |
 |-----|--------|
-| `docs/ARCHITECTURE.md` | adopted (web-push v1 correction) |
+| `docs/ARCHITECTURE.md` | adopted + **v2 rewrite (2026-10-30): single-app Clean-Arch folders**; web-push v1 |
 | `docs/FE-Flow-Diagrams.md` | adopted (payment = follow-prototype correction) |
 | `docs/PIPELINE.md` | adopted |
 | `docs/FE-BE-align-contract.md` | authoritative FE↔BE gap list |

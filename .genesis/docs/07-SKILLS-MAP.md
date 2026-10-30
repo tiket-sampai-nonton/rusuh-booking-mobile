@@ -8,9 +8,9 @@
 ## Overview
 
 - **Project:** Rusuh Booking Tiket (FE — Expo Universal)
-- **Date:** 2026-10-29
-- **Skill Discovery Method:** tool-driven (`skill_search` on the installed set) + honest fallback where no skill exists
-- **Rule:** skills are **reference patterns, adapted to project decisions** — they never override `RULES.md` / `GROOMING-DECISIONS.md` / `ARCHITECTURE.md`.
+- **Date:** 2026-10-29 · **Re-run:** 2026-10-30 (Phase 4 re-executed after the v2 architecture rewrite — added NativeWind styling + Clean-Arch/DI domains)
+- **Skill Discovery Method:** tool-driven (`skill_search` on the installed set, `skill_discover` on the registry) + honest fallback where no skill exists
+- **Rule:** skills are **reference patterns, adapted to project decisions** — they never override `08-RULES.md` / `GROOMING-DECISIONS.md` / `ARCHITECTURE.md`. The agent **never installs**; it presents candidates and the human installs (R073).
 
 ---
 
@@ -27,6 +27,20 @@
   - Covers: intentional visual design, typography, non-templated aesthetic direction.
   - Key patterns: token-driven surfaces; deliberate type scale; theme-variable colour (no fixed literals — matches our design-token rule).
   - Applies to: RBT-003 (design tokens + theme), the DESIGN-SYSTEM component set.
+- **frontend-design-workflow** (local: `frontend-design-workflow`)
+  - Covers: mockup-first FE workflow, build on the project design system, right evidence (screenshot vs video), new-user usability review.
+  - Applies to: presentation-layer stories (E4 events, E6 checkout UI) — the `src/presentation` work.
+
+### Styling / NativeWind (RBT-003) — v2 domain
+- **expo-tailwind-setup** (local, installed 2026-10-30: `skillsh/expo-tailwind-setup`) — official Expo skill: "Set up Tailwind CSS v4 in Expo with react-native-css and NativeWind v5 for universal styling."
+  - Applies to: RBT-003 (NativeWind wiring + `tailwind.config.js` token source from prototype V5).
+  - **⚠️ Version caveat (project adaptation):** the skill targets **Tailwind v4 + NativeWind v5** (bleeding-edge). The RBT-001 skeleton is **Expo SDK 52 / RN 0.76**, where **NativeWind v4** is the proven-stable line. At RBT-003, PIN the NativeWind/Tailwind versions deliberately and verify against SDK 52 before adopting v5 — follow the skill's *setup pattern*, not necessarily its exact versions (skills are reference, never override ARCHITECTURE/stack decisions).
+
+### Clean Architecture / DI (RBT-004) — v2 emphasis
+- **software-architecture-analysis** (local: `skillsh/magnus919-agent-skills-software-architecture-analysis`)
+  - Covers: layer boundaries, coupling lenses, ports/adapters, clean-room structure.
+  - Key patterns: dependency rule inward; ports in `src/domain`; manual DI composition root; swappable `HttpClient` (axios/fetch).
+  - Applies to: RBT-004 (DI container + ports), and the ESLint boundary enforcement (D1).
 
 ### E2E evidence / recording (RBT-083)
 - **browser-recording** (local: `browser-recording`)
@@ -41,6 +55,8 @@
 | Task | Domain | Skill | Source | Key Patterns |
 |------|--------|-------|--------|--------------|
 | RBT-003 | design system | frontend-design | local | token surfaces, type scale, theme-var colour |
+| RBT-003 | NativeWind styling | expo-tailwind-setup | local (installed) | NativeWind + tailwind.config from prototype V5 tokens (pin versions for SDK 52) |
+| RBT-004 | Clean-Arch / DI | software-architecture-analysis | local | ports in domain, manual DI root, swappable HttpClient |
 | RBT-030 | RN lists | react-native-best-practices | local | virtualization, fewer re-renders |
 | RBT-042 | polling perf | react-native-best-practices | local | cancel on unmount/background, no storm |
 | RBT-081 | perf/bundle | react-native-best-practices | local | bundle trim, transform-only animation, Web Vitals |
@@ -107,4 +123,4 @@ When workers are dispatched (Parallel-Batch), the brief includes the skills abov
 - [x] Skill patterns adapted to project conventions
 - [x] No skill overrides project RULES.md / GROOMING-DECISIONS.md
 
-**Status:** READY — 3 local skills mapped; 7 fallback domains documented (no fabricated skills). Registry discovery deferred to task time per SKILLS-PROTOCOL.
+**Status:** READY (v2 re-run 2026-10-30) — **all 5 mapped skills now installed** (react-native-best-practices, frontend-design, frontend-design-workflow, software-architecture-analysis, **expo-tailwind-setup**) + browser-recording for evidence. NativeWind skill targets Tailwind v4 / NativeWind v5 — pin versions for SDK 52 at RBT-003. 7 fallback domains documented (no fabricated skills); registry discovery otherwise deferred to task time per SKILLS-PROTOCOL.

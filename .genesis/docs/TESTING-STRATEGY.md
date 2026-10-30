@@ -21,7 +21,7 @@
 
 ## 2. Coverage targets (D6.3)
 
-- **≥90% coverage on shared domain/application** (`packages/domain`, `packages/state`, use cases) — enforced by the SonarCloud new-code gate via Jest `lcov`.
+- **≥90% coverage on shared domain/application** (`src/domain`, `src/application`, use cases + state machines) — enforced by the SonarCloud new-code gate via Jest `lcov`.
 - UI/platform layers: behavior-covered, not held to 90% (logic lives in the shared core by design).
 - Acceptable non-covered: generated OpenAPI types, pure asset/token modules, `.web.tsx`/`.native.tsx` thin presentation shells with no logic.
 
@@ -77,6 +77,6 @@ Automated axe-style checks + manual: keyboard-only flow, screen-reader smoke, fo
 
 ## 8. Test data
 
-- Contract-shaped fixtures in `packages/test-fixtures` (mirrors prototype V5 mock scenarios: ≥5 events incl. SOLD_OUT / NOT_STARTED / CLOSED).
+- Contract-shaped fixtures in `src/shared/test-fixtures` (with mock adapters in `src/infrastructure/__fixtures__`; mirrors prototype V5 mock scenarios: ≥5 events incl. SOLD_OUT / NOT_STARTED / CLOSED).
 - **Never** use real NIK in fixtures — use valid-format synthetic 16-digit values.
 - OTP demo code `123456` for the mock/dev auth path.

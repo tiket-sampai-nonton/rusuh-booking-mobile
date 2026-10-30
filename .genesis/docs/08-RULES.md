@@ -10,7 +10,10 @@
 
 - **MUST** keep domain/application layers free of React, React Native, Expo, browser globals, and native modules (dependency rule points inward). (D2.1)
 - **MUST** put all routing-only code in `src/app`; features call use cases, never `fetch`/storage/native APIs directly. (D2.2)
-- **MUST** implement each backend capability behind a focused port (`QueueRepository`, `PaymentRepository`, `Clock`, `NotificationPort`, `FileSharePort`); wire concretes at the composition root. (SOLID-I)
+- **MUST** implement each backend capability behind a focused port (`QueueRepository`, `PaymentRepository`, `ClockPort`, `NotificationPort`, `FileSharePort`, `HttpClient`); wire concretes at the composition root `src/providers/container.ts` (manual DI, no library). (SOLID-I, D2.2a)
+- **MUST** enforce layer boundaries with ESLint in the pre-commit guard: ban React/RN/Expo/browser globals inside `src/domain/**` and `src/application/**`; any boundary `eslint-disable` needs a justification comment. (D2.2 / ARCHITECTURE §11.6)
+- **MUST** keep TanStack Query only in `src/presentation/hooks` (the swap seam); use cases and repositories stay framework-free; the HTTP client (axios/fetch) is swapped at the composition root. (D2.2b / ARCHITECTURE §11.8)
+- **MUST** style with NativeWind; the single token source of truth is `apps/client/tailwind.config.js` (from prototype V5), with `src/presentation/theme` only re-exporting values for non-className use. (D2.2c / ARCHITECTURE §11.9)
 - **NEVER** split business logic across `.web.tsx`/`.native.tsx` — platform files are presentation/adapter escape hatches only. (D2.3)
 - **MUST** extract a shared primitive when platform duplication exceeds ~25%.
 

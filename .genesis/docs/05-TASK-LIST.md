@@ -3,6 +3,7 @@
 > GENESIS Phase 3 output. Conforms to `GROOMING-DECISIONS.md` + the Phase 2 doc set.
 > Scope: **FE only** (Expo + RN + RN Web). BE is a consumed contract. Prefix: **RBT**.
 > Seeded by `ARCHITECTURE.md §13` delivery roadmap (P0–P7) and FR/BR/NFR coverage.
+> **This file is the DETAIL** (epics/stories/ACs). The **run reference is `06-TASK-ORDER.md`** (domain-grouped waves + "Run Next") — WORKFLOW Phase 0 selects the next task there, not here.
 > **STOP at Gate H3** — human verifies the breakdown.
 
 ---
@@ -17,7 +18,7 @@
 
 | Epic | Name | Priority | Stories | Est. Points | Roadmap |
 |------|------|----------|---------|-------------|---------|
-| E1 | Foundations (monorepo, Expo, Clean Arch skeleton, CI) | P0 | 5 | 26 | P0 |
+| E1 | Foundations (Expo app, Clean-Arch folders, NativeWind, CI) | P0 | 5 | 26 | P0 |
 | E2 | API client, contracts, server-clock, idempotency, mock adapter | P0 | 5 | 29 | P1 |
 | E3 | Auth / profile (OTP, NIK, consent) | P0 | 4 | 21 | P1 |
 | E4 | Events: Home, Browse, Event detail (+SEO) | P0 | 5 | 29 | P2 |
@@ -28,6 +29,99 @@
 | E9 | Hardening: a11y, perf/bundle, load test, QA, release readiness | P0/P1 | 5 | 24 | P7 |
 
 ---
+
+## Team Assignment (3 developers)
+
+> Division across **Ray**, **Eld**, **Riz**. **Riz is platform lead** — owns the ENTIRE foundation + Core-API rails (E1+E2: scaffold, router, NativeWind, DI, CI/Sonar/husky, OpenAPI ports, ServerClock, idempotency, errors, mock) plus one simple feature (E8). Eld and Ray are feature owners. Balanced by **story points** (~82/84/82). Owner tags mirrored in `06-TASK-ORDER.md`. (v3 2026-10-30 — platform-lead model, supersedes the earlier feature-split versions.)
+
+### Lanes
+
+| Developer | Owns | Pts | Role |
+|-----------|------|-----|------|
+| **Riz** | **E1 Foundations + E2 Core-API (all rails)** + **E8 E-ticket/Notifications** | **82** | Platform lead — builds the rails everyone rides, then a light independent feature |
+| **Eld** | **E5 Queue** + **E6 Booking** (transaction spine, in-lane) + a11y | **84** | Owns the Queue→Booking critical chain end-to-end |
+| **Ray** | **E3 Auth** + **E4 Events** + **E7 Payment** + perf/load/QA/release | **82** | Feature breadth: identity, discovery, payment |
+
+### Full per-developer allocation (points: S=3·M=5·L=8)
+
+**Riz — 82 pts** (ALL rails + E8)
+| Task | Pts | Epic | Depends on |
+|------|-----|------|-----------|
+| RBT-001 Single Expo app skeleton + Clean-Arch folders | 8 | E1 | — (kicks off everything) |
+| RBT-002 Expo Router + route tree + guards | 5 | E1 | RBT-001 |
+| RBT-003 Design tokens (NativeWind) + theme | 5 | E1 | RBT-001 |
+| RBT-004 DI composition root + ports | 5 | E1 | RBT-001 |
+| RBT-005 CI skeleton — Actions + SonarCloud + **husky commit guard** + branch protection | 8 | E1 | RBT-001 |
+| RBT-010 OpenAPI types + repositories | 8 | E2 | RBT-004 |
+| RBT-011 Server-authoritative clock (ServerClock) | 5 | E2 | RBT-010 |
+| RBT-012 Idempotency-Key handling | 5 | E2 | RBT-010 |
+| RBT-013 Error taxonomy + Bahasa + Retry-After | 5 | E2 | RBT-010 |
+| RBT-014 Mock adapter + test fixtures | 5 | E2 | RBT-010 |
+| RBT-070 Success page + order summary | 5 | E8 | RBT-063 (Ray) |
+| RBT-071 E-ticket QR + download/share | 5 | E8 | RBT-070 |
+| RBT-072 Native notifications | 5 | E8 | RBT-004 (self) |
+| RBT-073 Web push (service worker) | 8 | E8 | RBT-072 |
+
+> Riz owns the whole rails surface, so "wait for foundation / the API layer / CI" is **one owner**. E8 is the lightest, most independent feature — notifications need only Riz's own DI port; success/QR just read a paid-booking status.
+
+**Eld — 84 pts** (Queue + Booking spine, in-lane)
+| Task | Pts | Epic | Depends on |
+|------|-----|------|-----------|
+| RBT-040 Queue state machine (domain) | 8 | E5 | RBT-011 (Riz) |
+| RBT-041 Join (anon) + refresh-safe persistence | 8 | E5 | RBT-040, RBT-023 (Ray) |
+| RBT-042 Adaptive polling (+ SSE fallback) | 8 | E5 | RBT-040 |
+| RBT-043 Waiting room UI | 5 | E5 | RBT-042 |
+| RBT-044 Auto-claim + redirect + error states | 5 | E5 | RBT-040 |
+| RBT-050 Booking session create/restore + timer | 8 | E6 | RBT-044, RBT-011 (Riz) |
+| RBT-051 Ticket item list + category/quantity rules | 8 | E6 | RBT-050 |
+| RBT-052 NIK validation + attendee + single-use buyer-NIK | 8 | E6 | RBT-051 |
+| RBT-053 Buyer data + set-buyer + confirm-leave | 5 | E6 | RBT-052, RBT-022 (Ray) |
+| RBT-054 Create booking (idempotent hold) | 8 | E6 | RBT-053, RBT-012 (Riz) |
+| RBT-080 Accessibility (WCAG 2.1 AA) | 5 | E9 | feature epics |
+
+> Queue→Booking (044→050) is **in-lane** — no cross-dev wait on the tightest link.
+
+**Ray — 82 pts** (Auth + Events + Payment)
+| Task | Pts | Epic | Depends on |
+|------|-----|------|-----------|
+| RBT-020 OTP request/verify | 5 | E3 | RBT-010 (Riz) |
+| RBT-021 Registration — name + NIK + consent | 8 | E3 | RBT-020 |
+| RBT-022 Profile store + checkout auto-fill | 3 | E3 | RBT-021 |
+| RBT-023 Secure token storage + session | 5 | E3 | RBT-020 |
+| RBT-030 Home — event list + status + nearby/history | 8 | E4 | RBT-010 (Riz) |
+| RBT-031 Browse — URL-driven filters | 5 | E4 | RBT-030 |
+| RBT-032 Event detail — categories + availability + CTA | 5 | E4 | RBT-030 |
+| RBT-033 Public SEO rendering (static/server) | 8 | E4 | RBT-030, RBT-005 (Riz) |
+| RBT-034 Nearby + history derivation | 3 | E4 | RBT-030 |
+| RBT-060 Payment page (summary + method + timer) | 8 | E7 | RBT-054 (Eld), RBT-011 (Riz) |
+| RBT-061 Create-attempt + SNAP handoff | 8 | E7 | RBT-060, RBT-012 (Riz) |
+| RBT-062 Page-token WebView reuse | 5 | E7 | RBT-061 |
+| RBT-063 Callback verify + result routing | 5 | E7 | RBT-061 |
+| RBT-064 Failure/expiry recovery | 5 | E7 | RBT-063 |
+| RBT-065 Mock PaymentRepository + SNAP simulator | 5 | E7 | RBT-014 (Riz), RBT-060 |
+| RBT-081 Performance + bundle budgets | 5 | E9 | RBT-033 + features |
+| RBT-082 Flash-crowd load test | 8 | E9 | RBT-042/050/054 (Eld) |
+| RBT-083 QA suites — Playwright + Maestro | 8 | E9 | feature epics |
+| RBT-084 Release readiness — OTA, rollback, summary | 5 | E9 | RBT-005 (Riz)/081/082/083 |
+
+**Balance:** Riz 82 · Eld 84 · Ray 82 (±2% of ~83).
+
+### Cross-developer dependencies
+
+> Riz owns ALL rails, so most cross-edges are **Riz's frozen ports fanning out** (build once, everyone reads the interface). Feature-chain crossings are few:
+
+| Handoff | From → To | Interface | When |
+|---------|-----------|-----------|------|
+| Rails: ports + clock + idempotency | **Riz (010/011/012)** → Eld + Ray | `src/domain/repositories` + `HttpClient` + `ClockPort` | freeze end of rails (Wave 2) |
+| Token/session | Ray (023) → Eld (041 queue join) | session/visitor-token port | Wave 3 |
+| **Booking hold → Payment** | **Eld (054) → Ray (060)** | booking id + `PaymentRepository` port | critical-path cross-edge |
+| Paid booking → Success | Ray (063) → Riz (070 success/QR) | payment-status PAID | Wave 6 |
+| Load test | Eld (queue/booking) → Ray (082) | runs against Eld's flows | Wave 7 |
+
+**Platform-lead advantage:** every foundation/API/CI dependency resolves to **one person (Riz)** — the hardest-to-split concern has no seams. The only feature-chain cross-edges are Booking→Payment (Eld→Ray) and Paid→Success (Ray→Riz), each at a frozen port.
+
+**Ordering:** Riz lands RBT-001, then builds the rails (router/tokens/DI/CI, then Core-API) and freezes the ports; Eld + Ray start their lanes the moment the ports they need are published. Riz's E8 comes late (needs paid-booking), so Riz front-loads rails then does E8 while others finish features.
+
 
 ## Dependency Graph
 
@@ -53,7 +147,7 @@ E1 Foundations
 ## Critical Path
 
 ```
-E1 skeleton → E2 api-client+clock+idempotency → E5 queue→admission → E6 hold → E7 payment → E8 e-ticket → E9 release-ready
+E1 skeleton → E2 API layer+clock+idempotency → E5 queue→admission → E6 hold → E7 payment → E8 e-ticket → E9 release-ready
   (L)              (XL)                            (XL)             (XL)       (L)         (L)          (L)
 ≈ the booking spine; E3/E4 run in parallel off E2 and merge in at E6/E4.
 ```
@@ -62,14 +156,14 @@ E1 skeleton → E2 api-client+clock+idempotency → E5 queue→admission → E6 
 
 ## Epic 1 — Foundations
 
-**Delivers:** the Expo Universal monorepo, Clean Architecture package skeleton, Expo Router, theme tokens, and the CI skeleton. **Priority:** P0. **Dependencies:** none.
+**Delivers:** the Expo Universal single app, Clean-Architecture folder skeleton (`src/{app,domain,application,infrastructure,presentation,providers,shared}`), Expo Router, NativeWind + prototype tokens, ESLint boundary rules, and the CI skeleton. **Priority:** P0. **Dependencies:** none.
 
-#### RBT-001: Monorepo + Expo app skeleton
+#### RBT-001: Single Expo app skeleton + Clean-Architecture folders
 Type: Story · P0 · L · Deps: none
 - AC1: `apps/client` Expo app boots on web, Android, iOS (dev build).
-- AC2: `packages/{domain,api-client,state,ui,design-tokens,platform,config,test-fixtures}` exist with build wiring.
-- AC3: TypeScript strict passes; path aliases resolve across packages.
-- Skills: Expo, monorepo (npm workspaces), TypeScript.
+- AC2: `src/{app,domain,application,infrastructure,presentation,providers,shared}` folders exist with build wiring + path aliases (`@domain/*`, `@application/*`, `@infrastructure/*`, `@presentation/*`, `@providers/*`, `@shared/*`).
+- AC3: TypeScript strict passes; path aliases resolve; NativeWind + `tailwind.config.js` wired; ESLint layer-boundary rules installed in the pre-commit guard.
+- Skills: Expo, Clean Architecture, NativeWind, TypeScript.
 
 #### RBT-002: Expo Router + route tree + layout guards
 Type: Story · P0 · M · Deps: RBT-001
@@ -77,15 +171,15 @@ Type: Story · P0 · M · Deps: RBT-001
 - AC2: `src/app` contains routing only (no API/business logic — lint rule enforces).
 - Skills: Expo Router.
 
-#### RBT-003: Design tokens + theme provider
+#### RBT-003: Design tokens (NativeWind) + theme provider
 Type: Story · P0 · M · Deps: RBT-001
-- AC1: `packages/design-tokens` with color/type/spacing/radius/motion tokens (ported from V5), light+dark.
+- AC1: `apps/client/tailwind.config.js` with color/type/spacing/radius/motion tokens (ported from prototype V5), light+dark; `presentation/theme` re-exports for non-className use.
 - AC2: Every surface sets background+text pair (no fixed literals). Reduced-motion flag wired.
 - Skills: design systems, RN styling.
 
 #### RBT-004: DI composition root + ports
 Type: Story · P0 · M · Deps: RBT-001
-- AC1: Composition root wires ports (`QueueRepository`, `PaymentRepository`, `Clock`, `NotificationPort`, `FileSharePort`) to concrete adapters.
+- AC1: Composition root (`src/providers/container.ts`, manual DI — no library) wires ports (`QueueRepository`, `PaymentRepository`, `ClockPort`, `NotificationPort`, `FileSharePort`, `HttpClient`) to concrete adapters; `EXPO_PUBLIC_USE_MOCKS` toggles mock/real.
 - AC2: Domain/application layers import no React/RN/Expo/browser/native (lint-enforced dependency rule).
 - Skills: Clean Architecture, DI.
 
@@ -104,9 +198,9 @@ Type: Story · P0 · L · Deps: RBT-001
 
 #### RBT-010: OpenAPI-generated types + repositories
 Type: Story · P0 · L · Deps: RBT-004
-- AC1: Types generated from `.genesis/docs/api-contract/*`; repositories per service (User/Queue/Booking/Payment).
-- AC2: `{meta,data}` + `ErrorEnvelope` unwrap centralized.
-- Skills: OpenAPI codegen, TanStack Query.
+- AC1: Types generated from `.genesis/docs/api-contract/*`; repositories per service (User/Queue/Booking/Payment) implement domain ports via a swappable `HttpClient` port (axios/fetch adapter).
+- AC2: `{meta,data}` + `ErrorEnvelope` unwrap centralized. TanStack Query confined to `presentation/hooks` (the D3 seam), never in repositories.
+- Skills: OpenAPI codegen, TanStack Query, ports/adapters.
 
 #### RBT-011: Server-authoritative clock (`ServerClock`)
 Type: Story · P0 · M · Deps: RBT-010
@@ -126,7 +220,7 @@ Type: Story · P0 · M · Deps: RBT-010
 
 #### RBT-014: Mock adapter + test fixtures
 Type: Story · P0 · M · Deps: RBT-010
-- AC1: `packages/test-fixtures` contract-shaped mocks (≥5 events incl. SOLD_OUT/NOT_STARTED/CLOSED) behind the repository ports; toggle real/mock. Covers FE-NEED gaps (O1) until BE delivers.
+- AC1: mock adapters in `src/infrastructure/__fixtures__` + contract-shaped data in `src/shared/test-fixtures` (≥5 events incl. SOLD_OUT/NOT_STARTED/CLOSED) behind the repository ports; `EXPO_PUBLIC_USE_MOCKS` toggles real/mock. Covers FE-NEED gaps (O1) until BE delivers.
 - Skills: MSW/fixtures.
 
 ---
@@ -376,9 +470,9 @@ Type: Story · P0/P1 · M · Deps: RBT-005, RBT-081, RBT-082, RBT-083
 
 ## Parallel Work Opportunities (disjoint files)
 
-- **Batch A (after E2):** E3 (auth, `features/auth`), E4 (events, `features/events`), E5 (queue, `features/queue`) — distinct feature packages, shared only via domain/api-client (frozen interfaces).
+- **Batch A (after E2):** E3 (auth, `presentation/screens` + feature folders), E4 (events), E5 (queue) — file-disjoint feature areas, shared only via `src/domain` + `src/application` (frozen interfaces).
 - **Batch B (after E6):** E7 (payment) sequential on booking; E8 notifications (RBT-072/073) can start in parallel with E7 since they only need the DI port.
-- **Serialize:** anything touching `packages/domain` state machines or `api-client` ports (shared writers) — land interface changes first.
+- **Serialize:** anything touching `src/domain` state machines or `src/domain/repositories` ports (shared writers) — land interface changes first.
 
 ## Risk Register
 
