@@ -1,0 +1,50 @@
+PASS src/__tests__/providers/providers.test.tsx
+PASS src/__tests__/providers/service-context.test.tsx
+PASS src/__tests__/app/_layout.test.tsx
+PASS src/__tests__/app/index.test.tsx
+PASS src/__tests__/infrastructure/mock-adapters.test.ts
+PASS src/__tests__/providers/container.test.ts
+PASS src/__tests__/providers/query-client.test.ts
+PASS src/shared/utils/clamp.test.ts
+PASS src/__tests__/infrastructure/system-clock.test.ts
+-------------------------------|---------|----------|---------|---------|-------------------
+File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------------------|---------|----------|---------|---------|-------------------
+All files                      |     100 |      100 |     100 |     100 |                   
+ app                           |     100 |      100 |     100 |     100 |                   
+  _layout.tsx                  |     100 |      100 |     100 |     100 |                   
+  index.tsx                    |     100 |      100 |     100 |     100 |                   
+ domain/repositories           |       0 |        0 |       0 |       0 |                   
+  event.repository.ts          |       0 |        0 |       0 |       0 |                   
+  payment.repository.ts        |       0 |        0 |       0 |       0 |                   
+  queue.repository.ts          |       0 |        0 |       0 |       0 |                   
+ domain/services               |       0 |        0 |       0 |       0 |                   
+  clock.port.ts                |       0 |        0 |       0 |       0 |                   
+  file-share.port.ts           |       0 |        0 |       0 |       0 |                   
+  notification.port.ts         |       0 |        0 |       0 |       0 |                   
+ infrastructure/__fixtures__   |     100 |      100 |     100 |     100 |                   
+  mock-event.repository.ts     |     100 |      100 |     100 |     100 |                   
+  mock-file-share.adapter.ts   |     100 |      100 |     100 |     100 |                   
+  mock-http-client.ts          |     100 |      100 |     100 |     100 |                   
+  mock-notification.adapter.ts |     100 |      100 |     100 |     100 |                   
+  mock-payment.repository.ts   |     100 |      100 |     100 |     100 |                   
+  mock-queue.repository.ts     |     100 |      100 |     100 |     100 |                   
+ infrastructure/http           |       0 |        0 |       0 |       0 |                   
+  http-client.ts               |       0 |        0 |       0 |       0 |                   
+ infrastructure/time           |     100 |      100 |     100 |     100 |                   
+  system-clock.ts              |     100 |      100 |     100 |     100 |                   
+ providers                     |     100 |      100 |     100 |     100 |                   
+  container.ts                 |     100 |      100 |     100 |     100 |                   
+  providers.tsx                |     100 |      100 |     100 |     100 |                   
+  query-client.ts              |     100 |      100 |     100 |     100 |                   
+  service-context.tsx          |     100 |      100 |     100 |     100 |                   
+ shared/utils                  |     100 |      100 |     100 |     100 |                   
+  clamp.ts                     |     100 |      100 |     100 |     100 |                   
+-------------------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 9 passed, 9 total
+Tests:       38 passed, 38 total
+Snapshots:   0 total
+Time:        1.414 s
+Ran all test suites.
+jest exit 0 (0=pass, threshold 90 all metrics)
