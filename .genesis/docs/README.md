@@ -20,7 +20,7 @@
 | 07 | `07-SKILLS-MAP.md` | 4 — Skills by task | **H4** | ✅ PASSED |
 | 08 | `08-RULES.md` | 4 — Project rules (MUST/NEVER/ASK) | **H4** | ✅ PASSED |
 | — | `../../AGENTS.md` (repo root) | 4 — Agent manifest | **H4** | ✅ PASSED |
-| 09 | `09-IMPLEMENTATION-READINESS.md` | 5 — Readiness check (CONDITIONAL GO) | **H5** | ⏳ awaiting Go/No-Go |
+| 09 | `09-IMPLEMENTATION-READINESS.md` | 5 — Readiness check | **H5** | ✅ GO (2026-10-30) |
 | 10 | `10-PROJECT-SETUP.md` | 5.5 — Project setup (repo·CI·Sonar·husky·secrets·scaffold) | **H6** | ⏳ pending (RBT-001/005) |
 
 ---

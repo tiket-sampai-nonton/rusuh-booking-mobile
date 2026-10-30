@@ -8,17 +8,17 @@
 ## Overall Status
 
 - **Project:** Rusuh Booking Tiket — Front-End (Expo Universal)
-- **Date:** 2026-10-29
-- **Status:** **CONDITIONAL GO**
+- **Date:** 2026-10-29 · **H5 approved:** 2026-10-30
+- **Status:** **GO** (was CONDITIONAL GO — H5 approved by Riz 2026-10-30; CI + dev-env accepted as first-epic work)
 
 ```
 Documentation:  ✅
 Tasks:          ✅
 Skills:         ✅
 Blockers:       ⚠️  (no FE-internal P0; cross-team O1/O2/O4 open — mocked, non-blocking)
-Infrastructure: ⚠️  (repo/CI not yet scaffolded — that IS RBT-001/005, the first work)
+Infrastructure: ✅  (repo/CI = RBT-001/005, owned by Riz as the first work — accepted at H5)
 
-Overall:        CONDITIONAL GO — start on the critical path; mocks cover BE gaps
+Overall:        GO — start Wave 1 (RBT-001); mocks cover BE gaps
 ```
 
 ---
@@ -128,8 +128,8 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 - [x] No FE-internal P0 blockers
 - [x] Core docs verified (ARCHITECTURE, API-CONTRACT, FE-Flow)
 - [x] Task list complete with estimates + critical path
-- [ ] CI pipeline working — **is RBT-005 (first epic), not a pre-req**
-- [ ] Dev environment working — **is RBT-001 (first epic)**
+- [x] CI pipeline — **owned by Riz as RBT-005 (first-epic work, not a pre-req)**; accepted at H5
+- [x] Dev environment — **owned by Riz as RBT-001 (first-epic work, not a pre-req)**; accepted at H5
 
 ### Should Have
 - [x] All documentation verified
@@ -141,7 +141,7 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 
 ## 7. Decision
 
-**Status:** **CONDITIONAL GO**
+**Status:** **GO** (H5 approved by Riz, 2026-10-30)
 
 **Rationale:** The GENESIS documentation package is complete and internally consistent (H1–H4 passed), the task breakdown is fully specified with a clear critical path, and every backend dependency is decoupled via mock adapters behind the real ports — so the FE team can start immediately on the critical path without waiting on BE. The only ❌ items (repo scaffold, CI) are **the first stories themselves** (RBT-001, RBT-005), not external pre-requisites. This is a GO for implementation, conditional only on treating E1 (Foundations) as the literal first step.
 
@@ -170,7 +170,9 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 
 | Role | Decision | Date |
 |------|----------|------|
-| Product Owner | {pending} | |
-| FE Tech Lead | {pending} | |
+| FE Tech Lead / Riz | ✅ GO (H5) | 2026-10-30 |
+| Product Owner | {pending — confirm with PO} | |
 
-**GENESIS complete through Phase 5. Awaiting H5 Go/No-Go sign-off → then Phase 5.5 Project-Setup (Gate H6, see `10-PROJECT-SETUP.md`) before WORKFLOW Phase 0.**
+> H5 GO recorded by Riz (platform lead). CI pipeline + dev environment accepted as first-epic work (RBT-005 / RBT-001), not external prerequisites. Product-owner sign-off still advisable before release (G4), but does not block the start of implementation.
+
+**GATE H5 STATUS: ✅ GO (Riz, 2026-10-30).** GENESIS complete through Phase 5. Proceed to **Phase 5.5 Project-Setup (Gate H6, see `10-PROJECT-SETUP.md`)**, executed by RBT-001 + RBT-005, then WORKFLOW Phase 0 → Wave 1 (`RBT-001`).

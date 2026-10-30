@@ -20,6 +20,41 @@ time (or in parallel batches). All generated artifacts live under `.genesis/docs
 (numbered `01–10` = process/gate trail, un-numbered = deliverable docs). The run
 order lives in `06-TASK-ORDER.md`.
 
+### The order: GENESIS runs ONCE, then WORKFLOW loops per task
+
+```
+┌─ GENESIS — run ONCE for the whole project (planning + setup) ─┐
+│  Phase 1 Grooming   → H1                                      │
+│  Phase 2 Docs       → H2                                      │
+│  Phase 3 Tasks      → H3   (WRITE the task list — not code)   │
+│  Phase 4 Skills     → H4                                      │
+│  Phase 5 Go/No-Go   → H5                                      │
+│  Phase 5.5 Setup    → H6   (repo/CI/husky stood up)          │
+└───────────────────────────────────────────────────────────────┘
+                          │  GENESIS done forever
+                          ▼  then, for EACH task…
+┌─ WORKFLOW — LOOPS per task (RBT-001, 002, 003 …) ────────────┐
+│  Phase 0 Trigger  → pick next from 06-TASK-ORDER             │
+│  Phase 1 Spec     → G1                                        │
+│  Phase 2 Design   → G2                                        │
+│  Phase 3 Implement         (WRITE the code — the build)      │
+│  Phase 3.5 Review → open PR                                   │
+│  Phase 4 Verify   → CI green                                  │
+│  Phase 5 Done     → G3 + merge                                │
+└───────────────────────────────────────────────────────────────┘
+            ↑________ loop back for the next task ______________│
+```
+
+**Read the order this way:**
+- **GENESIS = one-time**, for the *whole* project. It ends at Go/No-Go (H5); its
+  Phase 5.5 Setup is the **handoff** — the first WORKFLOW runs (scaffold + CI) are
+  what satisfy H6. After that GENESIS is done and never repeats.
+- **WORKFLOW = a loop**, run *per task*. Every task goes Phase 0→5; when one merges,
+  loop back to Phase 0 and pick the next from `06-TASK-ORDER.md`.
+- **Naming trap:** both stages have a "Phase 3" and a "Phase 5" that mean different
+  things. GENESIS Phase 3 = *write the task list* (planning). WORKFLOW Phase 3 =
+  *write the code* (building). A task is **developed in WORKFLOW Phase 3 (Implement)**.
+
 ---
 
 ## The gates — NEVER skip one (agent STOPS and waits for the human)
