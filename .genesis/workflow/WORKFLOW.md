@@ -18,8 +18,9 @@ Use this workflow AFTER `GENESIS.md` completes:
 This workflow executes **one task at a time** (or parallel batches).
 
 > **Exception — the setup wave (GENESIS → WORKFLOW handoff).** The first tasks
-> (scaffold, CI/Sonar/husky — e.g. `RBT-001`, `RBT-005`) run through THIS pipeline
-> **before** GENESIS Gate **H6**. H6 does not precede WORKFLOW — it **brackets** the
+> (scaffold + local commit guard — e.g. `RBT-001`, `RBT-005a`; a project MAY defer
+> the server CI/Sonar task, e.g. `RBT-005b`, to a later hardening step) run through
+> THIS pipeline **before** GENESIS Gate **H6**. H6 does not precede WORKFLOW — it **brackets** the
 > setup wave: it is GENESIS's verification that this first wave landed green. The
 > sequence is **H5 GO → run the setup wave via WORKFLOW → H6 verifies → feature
 > waves**. For those setup tasks, "commit guard / CI / Sonar already stood up" (the

@@ -51,7 +51,8 @@
 | RBT-002 Expo Router + route tree + guards | 5 | E1 | RBT-001 |
 | RBT-003 Design tokens (NativeWind) + theme | 5 | E1 | RBT-001 |
 | RBT-004 DI composition root + ports | 5 | E1 | RBT-001 |
-| RBT-005 CI skeleton — Actions + SonarCloud + **husky commit guard** + branch protection | 8 | E1 | RBT-001 |
+| RBT-005a Local commit guard — husky + lint-staged + ESLint boundaries | 5 | E1 | RBT-001 |
+| RBT-005b CI/CD — Actions + SonarCloud + issue automation (**DEFERRED post-E2E**) | 8 | E1 | RBT-001, RBT-005a |
 | RBT-010 OpenAPI types + repositories | 8 | E2 | RBT-004 |
 | RBT-011 Server-authoritative clock (ServerClock) | 5 | E2 | RBT-010 |
 | RBT-012 Idempotency-Key handling | 5 | E2 | RBT-010 |
@@ -91,7 +92,7 @@
 | RBT-030 Home — event list + status + nearby/history | 8 | E4 | RBT-010 (Riz) |
 | RBT-031 Browse — URL-driven filters | 5 | E4 | RBT-030 |
 | RBT-032 Event detail — categories + availability + CTA | 5 | E4 | RBT-030 |
-| RBT-033 Public SEO rendering (static/server) | 8 | E4 | RBT-030, RBT-005 (Riz) |
+| RBT-033 Public SEO rendering (static/server) | 8 | E4 | RBT-030, RBT-005b (Riz) |
 | RBT-034 Nearby + history derivation | 3 | E4 | RBT-030 |
 | RBT-060 Payment page (summary + method + timer) | 8 | E7 | RBT-054 (Eld), RBT-011 (Riz) |
 | RBT-061 Create-attempt + SNAP handoff | 8 | E7 | RBT-060, RBT-012 (Riz) |
@@ -102,7 +103,7 @@
 | RBT-081 Performance + bundle budgets | 5 | E9 | RBT-033 + features |
 | RBT-082 Flash-crowd load test | 8 | E9 | RBT-042/050/054 (Eld) |
 | RBT-083 QA suites — Playwright + Maestro | 8 | E9 | feature epics |
-| RBT-084 Release readiness — OTA, rollback, summary | 5 | E9 | RBT-005 (Riz)/081/082/083 |
+| RBT-084 Release readiness — OTA, rollback, summary | 5 | E9 | RBT-005b (Riz)/081/082/083 |
 
 **Balance:** Riz 82 · Eld 84 · Ray 82 (±2% of ~83).
 
@@ -183,14 +184,23 @@ Type: Story · P0 · M · Deps: RBT-001
 - AC2: Domain/application layers import no React/RN/Expo/browser/native (lint-enforced dependency rule).
 - Skills: Clean Architecture, DI.
 
-#### RBT-005: CI skeleton (GitHub Actions + SonarCloud) + issue-state automation
-Type: Story · P0 · L · Deps: RBT-001
+#### RBT-005a: Local commit guard (husky + lint-staged + ESLint boundaries)
+Type: Story · P0 · M · Deps: RBT-001 · **Setup wave — runs early, no secrets/server**
+- AC1: **Husky commit guard** installed (`.husky/pre-commit`): lint (staged) → type-check → related tests → changed-code coverage ≥80%; `.husky/commit-msg` enforces `type(scope): [RBT-xxx]` Conventional Commits. Never `--no-verify` (project RULES).
+- AC2: ESLint layer-boundary rules (`import/no-restricted-paths` / `eslint-plugin-boundaries`) wired so the pre-commit lint step BLOCKS a forbidden cross-layer import locally — the mechanical teeth behind the PLAYBOOK/AGENTS.md arch guardrails.
+- AC3: Runs entirely on the developer machine via `npm install` (husky `prepare` script). No GitHub Actions, no SonarCloud, no tokens, no branch protection — fully independent of RBT-005b.
+- Skills: husky/lint-staged, ESLint boundaries.
+
+> **Why split from RBT-005b:** husky is a LOCAL git hook — it needs no server, token, or SonarCloud org. It is what keeps architecture-boundary enforcement mechanically live during feature development, so it stays in the setup wave even though the CI/CD pipeline is deferred.
+
+#### RBT-005b: CI/CD pipeline (GitHub Actions + SonarCloud) + issue-state automation
+Type: Story · P0 · L · Deps: RBT-001, RBT-005a · **DEFERRED — integrate after the project works E2E (decision 2026-10-30)**
 - AC1: PR workflow runs typecheck, lint (incl. layer-boundary rules), Jest, `npm audit`, SonarCloud; stops before deploy.
 - AC2: Branch model `develop`/`main` with the PIPELINE.md gates wired; branch protection on `main`/`develop` (require PR + checks, no direct push); secrets referenced (not committed).
 - AC3: Bundle-size + SEO-output checks stubbed for web release.
-- AC4: **Husky commit guard** installed (`.husky/pre-commit`): lint (staged) → type-check → related tests → changed-code coverage ≥80%; `.husky/commit-msg` enforces `type(scope): [RBT-xxx]` Conventional Commits. Never `--no-verify` (project RULES).
-- AC5: **Issue-state automation** (per TRACKING.md §Issue States + Automation Hooks): a status mechanism exists (status labels `status:in-progress|in-review|qa|done|blocked`, or a GitHub Projects board with those columns) AND a GitHub Actions workflow moves the linked issue automatically — **PR opened → In Review**, **CI green + evidence → QA**, **PR merged → Done** — so transitions are enforced by the repo, not by an agent remembering. Branch/PR must reference the issue (`RBT-xxx` / `Closes #N`) so the Action can resolve it. `In Progress` is set when the feature branch is first pushed (or by the agent at task start per PLAYBOOK).
-- Skills: GitHub Actions, SonarCloud, EAS config, husky/lint-staged.
+- AC4: **Issue-state automation** (per TRACKING.md §Issue States + Automation Hooks): a status mechanism exists (status labels `status:in-progress|in-review|qa|done|blocked`, or a GitHub Projects board with those columns) AND a GitHub Actions workflow moves the linked issue automatically — **PR opened → In Review**, **CI green + evidence → QA**, **PR merged → Done** — so transitions are enforced by the repo, not by an agent remembering. Branch/PR must reference the issue (`RBT-xxx` / `Closes #N`) so the Action can resolve it. `In Progress` is set when the feature branch is first pushed (or by the agent at task start per PLAYBOOK).
+- Skills: GitHub Actions, SonarCloud, EAS config.
+- **Blocked-until:** project runs end-to-end; SonarCloud org membership resolved (or `SONAR_TOKEN` fallback). Not a prerequisite for feature waves.
 
 ---
 
@@ -277,7 +287,7 @@ Type: Story · P0 · M · Deps: RBT-030
 - Skills: RN, contracts.
 
 #### RBT-033: Public SEO rendering (static/server)
-Type: Story · P0 · L · Deps: RBT-030, RBT-005
+Type: Story · P0 · L · Deps: RBT-030, RBT-005b
 - AC1: `web.output: static`; `/` + `/events/[eventId]` produce indexable HTML; `single` rejected by CI.
 - AC2: route metadata, canonical, OG, JSON-LD, sitemap/robots; transactional pages `noindex`.
 - Skills: Expo static rendering, SEO.
@@ -455,7 +465,7 @@ Type: Story · P0 · L · Deps: all feature epics
 - Skills: Playwright, Maestro, e2e.
 
 #### RBT-084: Release readiness — OTA channels, rollback, release summary
-Type: Story · P0/P1 · M · Deps: RBT-005, RBT-081, RBT-082, RBT-083
+Type: Story · P0/P1 · M · Deps: RBT-005b, RBT-081, RBT-082, RBT-083
 - AC1: EAS Update channels (`development`/`production`) + OTA-vs-native routing rehearsed; rollback path tested (per PIPELINE.md + D5.3).
 - AC2: release summary/checklist wired; SEO output + bundle gates green on web release; go/no-go evidence collected for H5.
 - Skills: EAS, GitHub Actions, release management.

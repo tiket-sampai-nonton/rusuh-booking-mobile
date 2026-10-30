@@ -111,8 +111,8 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 | Item | Status | Note |
 |------|--------|------|
 | Repo / app scaffold | ❌ | **This is RBT-001** — the first story (single Expo app, Clean-Arch folders) |
-| CI pipeline (GitHub Actions + SonarCloud) | ❌ | **This is RBT-005** — PIPELINE.md is the spec |
-| EAS config (dev/prod channels) | ❌ | Lands with RBT-005/084 |
+| CI pipeline (GitHub Actions + SonarCloud) | ❌ deferred | **RBT-005b — deferred post-E2E (2026-10-30)**; PIPELINE.md is the spec. Local commit guard RBT-005a stays in setup wave |
+| EAS config (dev/prod channels) | ❌ deferred | Lands with RBT-005b/084 (post-E2E) |
 | Environments (develop/main) | ⚠️ planned | Per D5.2 — provisioned during E1 |
 | Secrets strategy | ✅ documented | SECURITY.md D7.5; no secrets in `EXPO_PUBLIC_*` |
 
@@ -128,7 +128,7 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 - [x] No FE-internal P0 blockers
 - [x] Core docs verified (ARCHITECTURE, API-CONTRACT, FE-Flow)
 - [x] Task list complete with estimates + critical path
-- [x] CI pipeline — **owned by Riz as RBT-005 (first-epic work, not a pre-req)**; accepted at H5
+- [x] CI pipeline — **split: RBT-005a (husky local guard) stays in setup wave; RBT-005b (Actions+Sonar) DEFERRED post-E2E (2026-10-30)**; accepted at H5
 - [x] Dev environment — **owned by Riz as RBT-001 (first-epic work, not a pre-req)**; accepted at H5
 
 ### Should Have
@@ -143,7 +143,7 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 
 **Status:** **GO** (H5 approved by Riz, 2026-10-30)
 
-**Rationale:** The GENESIS documentation package is complete and internally consistent (H1–H4 passed), the task breakdown is fully specified with a clear critical path, and every backend dependency is decoupled via mock adapters behind the real ports — so the FE team can start immediately on the critical path without waiting on BE. The only ❌ items (repo scaffold, CI) are **the first stories themselves** (RBT-001, RBT-005), not external pre-requisites. This is a GO for implementation, conditional only on treating E1 (Foundations) as the literal first step.
+**Rationale:** The GENESIS documentation package is complete and internally consistent (H1–H4 passed), the task breakdown is fully specified with a clear critical path, and every backend dependency is decoupled via mock adapters behind the real ports — so the FE team can start immediately on the critical path without waiting on BE. The only ❌ items (repo scaffold, CI) are **the first stories themselves** (RBT-001, RBT-005a; RBT-005b CI deferred post-E2E), not external pre-requisites. This is a GO for implementation, conditional only on treating E1 (Foundations) as the literal first step.
 
 **Can start now:**
 - E1 Foundations (RBT-001…005) — single Expo app, Clean-Arch folders, NativeWind tokens, CI skeleton.
@@ -158,7 +158,7 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 ## 8. Next Steps (if GO)
 
 1. [ ] Scaffold the single Expo app + Clean-Arch folders (RBT-001) and `set_project` to the new tree.
-2. [ ] Stand up the CI skeleton (RBT-005) per PIPELINE.md.
+2. [ ] Stand up the local commit guard — husky + lint-staged + ESLint boundaries (RBT-005a). CI skeleton (RBT-005b) is DEFERRED until the project runs E2E.
 3. [ ] Build E2 API layer + mock adapters (RBT-010…014, incl. mock PaymentRepository seed).
 4. [ ] **Verify Gate H6 Project-Setup** (`10-PROJECT-SETUP.md`) — trivial PR green end-to-end (husky → CI → Sonar → mergeable) before feature work.
 5. [ ] Open the parallel batch E3/E4/E5 once E2 interfaces are frozen.
@@ -173,6 +173,6 @@ _None._ The FE build has no internal P0 — mocks decouple it from BE.
 | FE Tech Lead / Riz | ✅ GO (H5) | 2026-10-30 |
 | Product Owner | {pending — confirm with PO} | |
 
-> H5 GO recorded by Riz (platform lead). CI pipeline + dev environment accepted as first-epic work (RBT-005 / RBT-001), not external prerequisites. Product-owner sign-off still advisable before release (G4), but does not block the start of implementation.
+> H5 GO recorded by Riz (platform lead). CI pipeline + dev environment accepted as first-epic work (RBT-005a now / RBT-005b deferred / RBT-001), not external prerequisites. Product-owner sign-off still advisable before release (G4), but does not block the start of implementation.
 
-**GATE H5 STATUS: ✅ GO (Riz, 2026-10-30).** GENESIS complete through Phase 5. Proceed to **Phase 5.5 Project-Setup (Gate H6, see `10-PROJECT-SETUP.md`)**, executed by RBT-001 + RBT-005, then WORKFLOW Phase 0 → Wave 1 (`RBT-001`).
+**GATE H5 STATUS: ✅ GO (Riz, 2026-10-30).** GENESIS complete through Phase 5. Proceed to **Phase 5.5 Project-Setup (Gate H6, see `10-PROJECT-SETUP.md`)**, executed by RBT-001 + RBT-005a (RBT-005b CI deferred), then WORKFLOW Phase 0 → Wave 1 (`RBT-001`).

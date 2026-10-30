@@ -12,13 +12,20 @@
 ## How this runs (reads with `WORKFLOW.md`)
 
 Phase 5.5 is a **GENESIS gate**, but its rows are **built by running the setup-wave
-tasks (RBT-001 scaffold, RBT-005 CI/Sonar) through the WORKFLOW pipeline** — each a
+tasks (RBT-001 scaffold, RBT-005a local commit guard) through the WORKFLOW pipeline** — each a
 real issue with its own G1/G2/G3. So WORKFLOW is the engine here too; **H6 does not
 run before WORKFLOW, it brackets the first WORKFLOW wave**:
 
 ```
-H5 GO → [ WORKFLOW runs the setup wave: RBT-001, RBT-005 ] → H6 verifies green → feature waves (WORKFLOW)
+H5 GO → [ WORKFLOW runs the setup wave: RBT-001, RBT-005a ] → H6 verifies boot+guard green → feature waves (WORKFLOW)
 ```
+
+> **CI/CD deferred (decision 2026-10-30):** RBT-005 was split. **RBT-005a** (husky + lint-staged
+> + ESLint boundaries — a LOCAL commit guard, no server/secrets) stays in the setup wave and is
+> what keeps architecture-boundary enforcement mechanically live during feature development.
+> **RBT-005b** (GitHub Actions + SonarCloud + branch-protection + issue-state automation) is
+> **deferred until the project runs end-to-end**, then integrated as a hardening step. H6 therefore
+> verifies RBT-001 boot + RBT-005a guard; the CI-green proof shifts to RBT-005b, post-E2E.
 
 This resolves the apparent circularity between the two docs: WORKFLOW's "start only
 after setup is stood up" applies to **feature** tasks; the setup-wave tasks are the
@@ -30,18 +37,19 @@ exception that stands setup up (see `WORKFLOW.md` → When to Use → *setup-wav
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Repository & branch protection | ☐ | GitHub, `RBT` prefix, `develop` base → PR → `main` |
-| Local commit guard (husky) | ☐ | lint + typecheck + related tests + changed-code coverage ≥ 80% |
-| CI pipeline (GitHub Actions) | ☐ | RBT-005 — see PIPELINE.md |
-| Static analysis (SonarCloud) | ☐ | RBT-005 — quality gate incl. new-code coverage |
-| Secrets / env | ☐ | `EXPO_PUBLIC_*`, `SONAR_TOKEN`, EAS/registry tokens |
+| Repository & branch protection | ☐ | GitHub, `RBT` prefix, `develop` base → PR → `main`. Branch-protection enforcement = RBT-005b (deferred) |
+| Local commit guard (husky) | ☐ | **RBT-005a (setup wave)** — lint + typecheck + related tests + changed-code coverage ≥ 80% + ESLint layer boundaries |
+| CI pipeline (GitHub Actions) | ☐ | **RBT-005b — DEFERRED post-E2E** — see PIPELINE.md |
+| Static analysis (SonarCloud) | ☐ | **RBT-005b — DEFERRED post-E2E** — quality gate incl. new-code coverage |
+| Secrets / env | ☐ | `EXPO_PUBLIC_*` now; `SONAR_TOKEN`, EAS/registry tokens with RBT-005b |
 | Project scaffold & deps | ☐ | RBT-001 — single Expo app, Clean-Arch folders, NativeWind |
 
 **Overall:** {READY TO IMPLEMENT | BLOCKED}
+**H6 gate scope:** verified by RBT-001 (boots on web/Android/iOS) + RBT-005a (commit guard blocks a forbidden import locally). CI-green / Sonar proof belongs to RBT-005b and is **not** required to pass H6 under the deferral.
 
-> Most rows below are executed by the first-epic stories (RBT-001 scaffold, RBT-005 CI/Sonar).
-> H6 **verifies** they are stood up and proven by a green trivial PR — it is the gate between
-> "docs ready" (H5) and "building features" (WORKFLOW Phase 0).
+> Most rows below are executed by the first-epic stories (RBT-001 scaffold, RBT-005a commit guard;
+> RBT-005b CI/Sonar is deferred post-E2E). H6 **verifies** RBT-001 boots and RBT-005a's guard blocks
+> a forbidden import locally — the gate between "docs ready" (H5) and "building features" (WORKFLOW Phase 0).
 
 ---
 
@@ -71,7 +79,7 @@ Source: `TESTING-STRATEGY.md`, `08-RULES.md` (R008/R009/R017 equivalents), `PIPE
 - [ ] Verified: a commit that violates a layer boundary, imports React/RN/Expo into `src/domain`/`src/application`, or drops changed-code coverage below threshold is **rejected**
 - [ ] NEVER `--no-verify` without recorded human authorization
 
-## 3. CI Pipeline (GitHub Actions) — RBT-005
+## 3. CI Pipeline (GitHub Actions) — RBT-005b (DEFERRED post-E2E)
 
 Source: `PIPELINE.md`.
 
@@ -81,9 +89,9 @@ Source: `PIPELINE.md`.
 - [ ] Playwright + Maestro are **local/manual only** — NOT in cloud CI (per TESTING-STRATEGY §9.1)
 - [ ] Coverage lcov uploaded for Sonar ingestion
 - [ ] First green run on a trivial PR verified
-- [ ] **Issue-state automation wired** (RBT-005 AC5): status labels or a Projects board (`in-progress / in-review / qa / done / blocked`) exist, and a GitHub Actions workflow moves the linked issue — PR opened → In Review, CI green + evidence → QA, merge → Done. Verified by a trivial PR that references an issue and watches the issue move.
+- [ ] **Issue-state automation wired** (RBT-005b AC4): status labels or a Projects board (`in-progress / in-review / qa / done / blocked`) exist, and a GitHub Actions workflow moves the linked issue — PR opened → In Review, CI green + evidence → QA, merge → Done. Verified by a trivial PR that references an issue and watches the issue move.
 
-## 4. Static Analysis (SonarCloud) — RBT-005
+## 4. Static Analysis (SonarCloud) — RBT-005b (DEFERRED post-E2E)
 
 Source: `PIPELINE.md`, `SECURITY.md`.
 
@@ -145,4 +153,4 @@ Review checklist:
 
 **Pass criteria:** all boxes checked; trivial PR merged green. On pass → **WORKFLOW Phase 0** (first feature task).
 
-**GATE H6 STATUS: ⏳ pending (executed by RBT-001 + RBT-005, verified here).**
+**GATE H6 STATUS: ⏳ pending (executed by RBT-001 + RBT-005a (RBT-005b CI deferred), verified here).**

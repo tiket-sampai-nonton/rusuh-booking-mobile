@@ -90,7 +90,7 @@ No installed skill covers these domains. Per SKILLS-PROTOCOL, fallback = registr
 
 | Domain | Queries Tried | Fallback Approach |
 |--------|---------------|-------------------|
-| Expo EAS build/submit/update | "expo eas github actions" | Official Expo EAS docs + PIPELINE.md; registry `skill_discover` at RBT-005/084 |
+| Expo EAS build/submit/update | "expo eas github actions" | Official Expo EAS docs + PIPELINE.md; registry `skill_discover` at RBT-005b/084 |
 | Playwright e2e (web) setup | "playwright e2e testing" | TESTING-STRATEGY §4 + official Playwright docs; browser-recording for evidence; registry check at RBT-083 |
 | Maestro (native e2e) | "maestro native e2e" | Official Maestro docs; registry check at RBT-083 |
 | OpenAPI → TS codegen | "openapi codegen typescript" | Standard `openapi-typescript`/generator + API-CONTRACT; registry check at RBT-010 |

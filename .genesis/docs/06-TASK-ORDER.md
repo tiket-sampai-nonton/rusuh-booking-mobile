@@ -59,7 +59,8 @@
 | RBT-002 | Riz | Platform | 001 | `src/app/**` (Expo Router route tree) | ✅ | To Do | ☐ |
 | RBT-003 | Riz | Platform | 001 | `tailwind.config.js`, `src/presentation/theme/**` | ✅ | To Do | ☐ |
 | RBT-004 | Riz | Platform | 001 | `src/providers/**` (DI container + ports wiring) | ✅ | To Do | ☐ |
-| RBT-005 | Riz | Platform | 001 | `.github/workflows/**`, `sonar-project.properties`, `.husky/**` | ✅ | To Do | ☐ |
+| RBT-005a | Riz | Platform | 001 | `.husky/**`, `eslint.config.js` (boundary rules), `package.json` (lint-staged) | ✅ | To Do | ☐ |
+| RBT-005b | Riz | Platform | 001, 005a | `.github/workflows/**`, `sonar-project.properties` | ✅ | **Deferred (post-E2E)** | ☐ |
 
 **Wave 1 gate:** all `Done` → start Wave 2. (Also satisfies most of Gate **H6** Project-Setup, verified via `10-PROJECT-SETUP.md`.)
 
@@ -117,7 +118,7 @@
 | RBT-081 perf/bundle | Ray | Hardening | RBT-033 + features | bundle/Web Vitals across routes | ❌ serialize | Backlog | ☐ |
 | RBT-082 load test | Ray | Hardening | RBT-042/050/054 | flash-crowd on queue+booking | ❌ serialize | Backlog | ☐ |
 | RBT-083 QA suites | Ray | Hardening | features | Playwright + Maestro across flows | ❌ serialize | Backlog | ☐ |
-| RBT-084 release readiness | Ray | Hardening | RBT-005/081/082/083 | OTA/rollback/summary | ❌ serialize | Backlog | ☐ |
+| RBT-084 release readiness | Ray | Hardening | RBT-005b/081/082/083 | OTA/rollback/summary | ❌ serialize | Backlog | ☐ |
 
 ---
 
