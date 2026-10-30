@@ -27,7 +27,7 @@
 ## Run Next
 
 **Current wave:** `Wave 1 — Foundations (E1)`
-**Run next:** `RBT-005a`, then `RBT-002` / `RBT-003` / `RBT-004` — all depend only on RBT-001 (✅ delivered) and are file-disjoint, so they can run in parallel. (RBT-005b CI is deferred post-E2E.)
+**Run next:** `RBT-002` / `RBT-003` / `RBT-004` — all depend only on RBT-001 (✅) and are file-disjoint, so they can run in parallel. (RBT-001 ✅ and RBT-005a ✅ delivered; RBT-005b CI deferred post-E2E.)
 
 ---
 
@@ -59,7 +59,8 @@
 | RBT-002 | Riz | Platform | 001 | `src/app/**` (Expo Router route tree) | ✅ | To Do | ☐ |
 | RBT-003 | Riz | Platform | 001 | `tailwind.config.js`, `src/presentation/theme/**` | ✅ | To Do | ☐ |
 | RBT-004 | Riz | Platform | 001 | `src/providers/**` (DI container + ports wiring) | ✅ | To Do | ☐ |
-| RBT-005 | Riz | Platform | 001 | `.github/workflows/**`, `sonar-project.properties`, `.husky/**` | ✅ | To Do | ☐ |
+| RBT-005a | Riz | Platform | 001 | `.husky/**`, `apps/client/package.json` (lint-staged) | ✅ | Done | ✅ |
+| RBT-005b | Riz | Platform | 001, 005a | `.github/workflows/**`, `sonar-project.properties` | ✅ | Deferred (post-E2E) | ☐ |
 
 **Wave 1 gate:** all `Done` → start Wave 2. (Also satisfies most of Gate **H6** Project-Setup, verified via `10-PROJECT-SETUP.md`.)
 
