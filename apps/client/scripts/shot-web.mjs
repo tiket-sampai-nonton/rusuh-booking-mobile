@@ -78,6 +78,17 @@ await page.goto(base + ROUTE, { waitUntil: "networkidle" });
 await page.waitForTimeout(WAIT);
 
 for (const step of STEPS) {
+  if (step.shot) {
+    // Capture a mid-sequence screenshot to the given absolute path.
+    await page.screenshot({ path: step.shot, fullPage: true });
+    continue;
+  }
+  if (step.fill) {
+    // Fill a field by testid with text.
+    await page.locator(`[data-testid="${step.fill}"]`).first().fill(step.value);
+    await page.waitForTimeout(step.after ?? 200);
+    continue;
+  }
   if (step.wait) {
     // A pure wait step (no click) — e.g. let an adaptive poll drain the queue.
     await page.waitForTimeout(step.wait);

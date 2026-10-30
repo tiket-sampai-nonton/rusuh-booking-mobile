@@ -1,15 +1,13 @@
+// Top-level route `/expired/[resourceId]`. Routing-only shell: reads the id +
+// optional `reason` query and mounts the presentation screen. RBT-064.
 import { useLocalSearchParams } from "expo-router";
-import { Text, View } from "react-native";
 
-// Top-level route `/expired/[resourceId]` (expired queue session / booking
-// hold / payment). Skeleton placeholder — real expiry screen lands later.
-export default function ExpiredScreen() {
-  const { resourceId } = useLocalSearchParams<{ resourceId: string }>();
-  return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-lg font-semibold text-brand" accessibilityRole="header">
-        Expired — /expired/{resourceId} (RBT-002)
-      </Text>
-    </View>
-  );
+import { ExpiredScreen } from "@presentation/screens/Expired/ExpiredScreen";
+
+export default function ExpiredRoute() {
+  const { resourceId, reason } = useLocalSearchParams<{
+    resourceId: string;
+    reason?: string;
+  }>();
+  return <ExpiredScreen resourceId={resourceId ?? ""} reason={reason} />;
 }

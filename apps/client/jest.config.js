@@ -9,9 +9,14 @@ module.exports = {
   // coverage instrumentation). Force a clean exit once all tests resolve — this
   // changes nothing about pass/fail, only the shutdown.
   forceExit: true,
+  // The sandbox/CI host is memory-tight; async waitFor/timer tests can exceed
+  // the 5s default when 40+ suites run in parallel. Raise the ceiling and cap
+  // workers so the full-suite run is not starved (no effect on logic/results).
+  testTimeout: 20000,
+  maxWorkers: "50%",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   transformIgnorePatterns: [
-    "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|nativewind|react-native-css-interop))",
+    "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|react-native-qrcode-svg|nativewind|react-native-css-interop))",
   ],
   moduleNameMapper: {
     "\\.css$": "<rootDir>/jest.css-stub.js",

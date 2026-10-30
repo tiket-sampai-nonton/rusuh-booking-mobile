@@ -1,0 +1,79 @@
+================================================================
+RBT-070/071 + RBT-064 — Success + e-ticket QR + Expired (E8/E7)
+Branch: feat/full-mock-integration
+Date:   2026-10-30
+================================================================
+
+ACCEPTANCE CRITERIA
+-------------------
+RBT-070 Success page + order summary:  ✓
+  SuccessScreen verifies the AUTHORITATIVE status (useVerifyPayment ->
+  getStatus): renders tickets only when PAID (never trusts the SNAP callback,
+  D10.2). Order summary: Order ID, Jumlah tiket, Total (minorToIDR), and the
+  MASKED buyer NIK (D7.1 — raw NIK never stored/shown). Clears session state on
+  the terminal success (D7.4).
+RBT-071 E-ticket QR + download/share:  ✓
+  One ETicketCard per ticket with a real QR (react-native-qrcode-svg /
+  react-native-svg, renders on web + native). QR payload is a NON-PII reference
+  `RBT|<bookingId>|<n>` — never a raw NIK/token (D7.1). (Native file-system /
+  web print share is the remaining platform-adapter tail, noted as follow-up.)
+RBT-064 Failure/expiry recovery:  ✓
+  ExpiredScreen drives copy from the `reason` param (payment / payment-failed /
+  session), shows the recovery CTA that re-queues to the event (or home) and
+  clears stale session state. Reached from the payment timer expiry, the SNAP
+  "Bayar Gagal" path, and the checkout hold-timer expiry.
+
+WIRING (inward-only)
+--------------------
+success route -> SuccessScreen -> useVerifyPayment (getStatus) [D3 seam]
+             -> ETicketCard (react-native-svg QR)
+snap route    -> SnapSimulatorScreen -> paymentSimulator (mock-only)
+expired route -> ExpiredScreen -> session-store (reset + eventId)
+
+----------------------------------------------------------------
+tsc --noEmit        : PASS
+eslint . --ext ...  : PASS (0/0)
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+jest --coverage  (RBT-070/071/064 files)
+----------------------------------------------------------------
+Tests: 13 passed (ETicketCard, SuccessScreen, ExpiredScreen)
+
+File                  | % Stmts | % Branch | % Funcs | % Lines
+----------------------|---------|----------|---------|--------
+ETicketCard.tsx       |   100   |   100    |   100   |   100
+SuccessScreen.tsx     |   100   |   100    |   100   |   100
+ExpiredScreen.tsx     |   100   |   100    |   100   |   100
+useVerifyPayment.ts   |   100   |   100    |   100   |   100
+
+>= 90% on all four metrics. GATE PASSED.
+
+================================================================
+FULL FUNNEL — whole-tree gate at the E8 epic boundary
+================================================================
+Full suite: 45 suites, 300 tests PASS.
+Whole src/ coverage (jest.config coverageThreshold 90% all four — PASSED):
+  Statements 99.31% · Branches 97.42% · Functions 100% · Lines 99.84%
+Every file is >= 90% on all four metrics except a few pre-existing/defensive
+branch dips (mock-payment 83.33% line 65, http-booking 83.33% line 48,
+container 84.61% line 152, PaymentScreen 90%, CheckoutScreen 91.52%) — all
+comfortably inside the GLOBAL 90% gate.
+
+----------------------------------------------------------------
+Full funnel run evidence (web, mocks) — .genesis/evidence/FUNNEL/
+----------------------------------------------------------------
+Captured by one scripted click-through (no console errors at any step):
+  01-home.png            Home — event catalog
+  02-detail.png          Event detail — Masuk Antrean
+  03-waiting.png         Waiting room — adaptive poll + zone
+  04-checkout.png        Checkout — restored session + live hold timer
+  05-checkout-filled.png Checkout — buyer NIK/email + ticket row filled
+  06-payment.png         Payment — total Rp 450.000 (no fee), 6 methods, ⏱ 09:59
+  07-snap.png            SNAP simulator — Bayar Berhasil / Bayar Gagal
+  08-success.png         Success — PAID, order summary (NIK 32****99 masked),
+                         scannable e-ticket QR (RBT|bk-...|1), Ke Beranda
+=> Home → Detail → Waiting → auto-claim → Checkout → Payment → SNAP → Success
+   runs end-to-end on web with the mock adapters.
+
+iOS / ANDROID: captured next (one emulator at a time per the memory budget).

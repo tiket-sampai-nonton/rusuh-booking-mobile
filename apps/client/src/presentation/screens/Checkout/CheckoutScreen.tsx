@@ -25,11 +25,13 @@ import {
   effectiveCap,
   isCheckoutReady,
   isValidNik,
+  maskNik,
   type TicketRow,
 } from "@domain/rules/checkout";
 import { formatCountdown } from "@domain/services/date-format";
 import { useCheckout } from "@presentation/hooks/useCheckout";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
+import { useSessionStore } from "@presentation/stores/session-store";
 import { useServices } from "@providers/service-context";
 
 /** Default ticket categories (O1 gap — real set arrives from BE checkout page). */
@@ -55,6 +57,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const router = useRouter();
   const { serverClock } = useServices();
   const { session, isLoading, hold } = useCheckout();
+  const setOrderDetail = useSessionStore((s) => s.setOrderDetail);
 
   const [buyerNik, setBuyerNik] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
@@ -106,6 +109,9 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
       { sessionId: session.sessionId, rows, buyerNik },
       {
         onSuccess: (booking) => {
+          // Carry the masked NIK + ticket count for the success summary
+          // (masked only — never the raw NIK, D7.1/D7.5).
+          setOrderDetail(maskNik(buyerNik), rows.length);
           router.push(`/payment/${booking.bookingId}` as Href);
         },
       },

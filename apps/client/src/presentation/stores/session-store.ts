@@ -32,6 +32,10 @@ export interface SessionState {
   paymentMethod?: PaymentMethod;
   /** The created payment attempt id (SNAP handoff + verify reference). */
   attemptId?: string;
+  /** MASKED buyer NIK for the success summary (never the raw NIK — D7.1/D7.5). */
+  buyerNikMasked?: string;
+  /** Number of tickets held (for the e-ticket list on success). */
+  ticketCount?: number;
 
   /** Record the queue join. */
   setQueue: (eventId: string, queueId: string, status: QueueStatus) => void;
@@ -41,6 +45,8 @@ export interface SessionState {
   setSession: (sessionId: string) => void;
   /** Record a confirmed booking (id + total). */
   setBooking: (bookingId: string, amountMinor?: number) => void;
+  /** Record the order detail shown on success (masked NIK + ticket count). */
+  setOrderDetail: (buyerNikMasked: string, ticketCount: number) => void;
   /** Record the chosen payment method + the created attempt id. */
   setPaymentMethod: (method: PaymentMethod, attemptId?: string) => void;
   /** Clear everything (terminal: success / expiry / cancel — D7.4). */
@@ -53,6 +59,8 @@ export const useSessionStore = create<SessionState>((set) => ({
   setQueueStatus: (queueStatus) => set({ queueStatus }),
   setSession: (sessionId) => set({ sessionId }),
   setBooking: (bookingId, amountMinor) => set({ bookingId, amountMinor }),
+  setOrderDetail: (buyerNikMasked, ticketCount) =>
+    set({ buyerNikMasked, ticketCount }),
   setPaymentMethod: (paymentMethod, attemptId) =>
     set({ paymentMethod, attemptId }),
   reset: () =>
@@ -65,5 +73,7 @@ export const useSessionStore = create<SessionState>((set) => ({
       amountMinor: undefined,
       paymentMethod: undefined,
       attemptId: undefined,
+      buyerNikMasked: undefined,
+      ticketCount: undefined,
     }),
 }));

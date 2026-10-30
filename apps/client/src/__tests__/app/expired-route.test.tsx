@@ -1,19 +1,20 @@
 import { render, screen } from "@testing-library/react-native";
 
 jest.mock("expo-router", () => ({
-  useLocalSearchParams: () => ({ resourceId: "res-1" }),
+  useLocalSearchParams: () => ({ resourceId: "res-1", reason: "session" }),
+  useRouter: () => ({ replace: jest.fn(), push: jest.fn() }),
 }));
 
 // eslint-disable-next-line import/first
-import ExpiredScreen from "../../app/expired/[resourceId]";
+import ExpiredRoute from "../../app/expired/[resourceId]";
 
-describe("/expired/[resourceId] route", () => {
+describe("/expired/[resourceId] route shell", () => {
   it("exports a component function", () => {
-    expect(typeof ExpiredScreen).toBe("function");
+    expect(typeof ExpiredRoute).toBe("function");
   });
 
-  it("renders Expired with the resource param", () => {
-    render(<ExpiredScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/res-1/);
+  it("mounts the ExpiredScreen with the route params", () => {
+    render(<ExpiredRoute />);
+    expect(screen.getByTestId("expired-screen")).toBeTruthy();
   });
 });

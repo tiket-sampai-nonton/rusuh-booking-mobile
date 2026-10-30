@@ -23,6 +23,8 @@ import CheckoutScreen from "../../app/(booking)/checkout/[sessionId]";
 import PaymentScreen from "../../app/(booking)/payment/[bookingId]";
 // eslint-disable-next-line import/first
 import SuccessScreen from "../../app/(booking)/success/[bookingId]";
+// eslint-disable-next-line import/first
+import SnapRoute from "../../app/(booking)/snap/[bookingId]";
 
 describe("(booking) route shells", () => {
   it("export component functions", () => {
@@ -31,6 +33,7 @@ describe("(booking) route shells", () => {
     expect(typeof CheckoutScreen).toBe("function");
     expect(typeof PaymentScreen).toBe("function");
     expect(typeof SuccessScreen).toBe("function");
+    expect(typeof SnapRoute).toBe("function");
   });
 
   it("renders the booking layout without crashing", () => {
