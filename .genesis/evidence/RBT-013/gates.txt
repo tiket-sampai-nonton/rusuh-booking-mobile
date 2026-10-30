@@ -1,0 +1,26 @@
+RBT-013 — Error taxonomy + Bahasa + Retry-After — gate evidence
+Captured: 2026-10-30T12:21:20Z  Branch: feature/RBT-013-error-taxonomy
+
+Files: domain/errors/{domain-error.ts, messages.id.ts, error-mapper.ts} + __tests__/domain/errors.test.ts
+
+=== GATE 1: tsc --noEmit ===  exit=0
+=== GATE 2: eslint (domain must NOT import infrastructure) ===  exit=0
+  -> mapError accepts a DOMAIN-side {code,retryAfterMs} shape (NOT infra TransportError),
+     so the Dependency Rule holds. Boundary clean.
+=== GATE 3: jest --coverage ===
+PASS src/__tests__/domain/errors.test.ts
+ domain/errors                   |     100 |      100 |     100 |     100 |                   
+  domain-error.ts                |     100 |      100 |     100 |     100 |                   
+  error-mapper.ts                |     100 |      100 |     100 |     100 |                   
+  messages.id.ts                 |     100 |      100 |     100 |     100 |                   
+Test Suites: 20 passed, 20 total
+Tests:       132 passed, 132 total
+
+errorCodes covered (25, from .genesis/docs/api-contract): VALIDATION_ERROR NIK_INVALID
+UNAUTHORIZED ACCOUNT_DISABLED OTP_INVALID OTP_LOCKED OTP_RESEND_TOO_SOON RATE_LIMITED
+BUYER_QUOTA_EXHAUSTED QUANTITY_EXCEEDS_LIMIT ATTENDEE_NIK_ALREADY_REGISTERED NIK_ALREADY_IN_QUEUE
+NIK_ALREADY_LINKED CHECK_LIMIT_REACHED SESSION_EXPIRED SESSION_INVALID ADMISSION_TOKEN_INVALID
+BOOKING_LOCKED BOOKING_NOT_PAYABLE TURN_MISSED EVENT_SOLD_OUT PAYMENT_METHOD_UNAVAILABLE
+PAYMENT_PAGE_TOKEN_INVALID PAYMENT_PROVIDER_UNAVAILABLE WEBHOOK_SIGNATURE_INVALID
+DEPENDENCY_UNAVAILABLE NOT_FOUND (+ UNKNOWN fallback). Retry-After honored on rate_limited.
+Read-dedup: concurrent identical reads share one in-flight promise, cleared on settle.
