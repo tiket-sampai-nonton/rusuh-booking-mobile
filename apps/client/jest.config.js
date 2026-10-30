@@ -28,5 +28,7 @@ module.exports = {
     "!src/domain/services/*.port.ts",
     // HttpClient transport PORT — also a pure interface (zero executable JS).
     "!src/infrastructure/http/http-client.ts",
+    // Idempotency store PORT — pure interface (zero executable JS), RBT-012.
+    "!src/domain/idempotency/*.port.ts",
   ],
 };
