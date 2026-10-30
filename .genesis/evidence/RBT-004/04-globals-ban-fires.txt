@@ -1,0 +1,20 @@
+RBT-004 AC2 — domain framework-import ban FIRES (proof)
+Date: 2026-10-30T10:48:13Z
+
+Step 1: write a temp probe into src/domain importing react + expo-router:
+  import React from "react"; import { Stack } from "expo-router"; export const probe = React && Stack;
+
+Step 2: ESLINT_USE_FLAT_CONFIG=false eslint src/domain/__ban_probe__.ts
+--- eslint output ---
+
+/Users/rizkyrachmawan/.kiro/crew/scratch/runtime-db08cb04/wt/rbt-004/apps/client/src/domain/__ban_probe__.ts
+  1:1  error  'react' import is restricted from being used. domain/application must be framework-free (RBT-004 AC2)                                                              no-restricted-imports
+  2:1  error  'expo-router' import is restricted from being used by a pattern. domain/application must not import React Native / Expo / native / browser packages (RBT-004 AC2)  no-restricted-imports
+
+✖ 2 problems (2 errors, 0 warnings)
+
+--- end eslint output ---
+eslint exit: 1 (NON-ZERO = ban fired as required)
+
+Step 3: delete the probe (temp only):
+  src/domain/__ban_probe__.ts deleted ✓
