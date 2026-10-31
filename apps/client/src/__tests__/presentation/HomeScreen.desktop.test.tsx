@@ -114,4 +114,20 @@ describe("HomeScreen (web desktop)", () => {
     // All three scroll in-page; none navigate.
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
+
+  it("RBT-090: nav links + CTA widen their hit region to the 44pt floor", async () => {
+    renderWithProviders(<HomeScreen />, {
+      container: { eventRepository: repoReturning(EVENT_FIXTURES) },
+    });
+    await waitFor(() => screen.getByTestId("nav-jelajah"));
+    // Text links render ~29pt tall → hitSlop pads +7/+7 vertically (≈44pt),
+    // visual pill unchanged.
+    for (const id of ["nav-jelajah", "nav-history", "nav-kategori"]) {
+      const slop = screen.getByTestId(id).props.hitSlop;
+      expect(slop.top).toBeGreaterThanOrEqual(7);
+      expect(slop.bottom).toBeGreaterThanOrEqual(7);
+    }
+    // CTA carries a hitSlop too.
+    expect(screen.getByTestId("nav-cta").props.hitSlop).toBeTruthy();
+  });
 });

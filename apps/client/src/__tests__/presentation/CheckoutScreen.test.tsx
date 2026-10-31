@@ -125,6 +125,30 @@ describe("CheckoutScreen", () => {
     );
   });
 
+  it("RBT-090: category pills + back + leave-confirm meet the 44pt touch floor", async () => {
+    await renderCheckout(bookingRepo(futureSession()));
+    // Compact category pills keep their size, widen the hit region to 44pt.
+    expect(screen.getByTestId("cat-0-REG").props.hitSlop).toEqual({
+      left: 0,
+      right: 0,
+      top: 6,
+      bottom: 6,
+    });
+    // Back link grows its touch box via minHeight.
+    const back = screen.getByTestId("checkout-back");
+    const backStyle = Array.isArray(back.props.style)
+      ? Object.assign({}, ...back.props.style)
+      : back.props.style;
+    expect(backStyle.minHeight).toBe(44);
+    // Leave-confirm buttons grow too.
+    fireEvent.press(back);
+    const stay = screen.getByTestId("checkout-stay");
+    const stayStyle = Array.isArray(stay.props.style)
+      ? Object.assign({}, ...stay.props.style)
+      : stay.props.style;
+    expect(stayStyle.minHeight).toBe(44);
+  });
+
   it("shows a hold error message", async () => {
     await renderCheckout(
       bookingRepo(futureSession(), {

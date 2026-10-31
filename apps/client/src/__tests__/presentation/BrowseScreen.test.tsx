@@ -105,6 +105,27 @@ describe("BrowseScreen", () => {
     expect(mockRouter.push).toHaveBeenCalledWith("/");
   });
 
+  it("RBT-090: back + refine controls meet the 44pt touch-target floor", async () => {
+    mockParams.genre = "Jazz"; // filtered → reset chip also present
+    renderWithProviders(<BrowseScreen />, { container: { eventRepository: repo(EVENT_FIXTURES) } });
+    await waitFor(() => screen.getByTestId("browse-refine"));
+    // Back link grows its touch box to ≥44pt via minHeight (label unchanged).
+    const back = screen.getByTestId("browse-home");
+    const backStyle = Array.isArray(back.props.style)
+      ? Object.assign({}, ...back.props.style)
+      : back.props.style;
+    expect(backStyle.minHeight).toBe(44);
+    // Compact chips keep their pixel size but widen the hit region to 44pt.
+    const refine = screen.getByTestId("browse-refine");
+    expect(refine.props.hitSlop).toEqual({ left: 0, right: 0, top: 6, bottom: 6 });
+    expect(screen.getByTestId("browse-reset").props.hitSlop).toEqual({
+      left: 0,
+      right: 0,
+      top: 6,
+      bottom: 6,
+    });
+  });
+
   it("shows the loading state before the catalog resolves", () => {
     const pending: EventRepository = {
       listEvents: () => new Promise(() => {}),
