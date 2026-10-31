@@ -2,7 +2,7 @@
 // and mounts the presentation screen. RBT-050…054.
 import { useLocalSearchParams } from "expo-router";
 
-import { CheckoutScreen } from "@presentation/screens/Checkout/CheckoutScreen";
+import { CheckoutScreen } from "@presentation/screens/Checkout";
 
 export default function CheckoutRoute() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();

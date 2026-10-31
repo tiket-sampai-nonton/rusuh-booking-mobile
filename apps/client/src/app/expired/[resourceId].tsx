@@ -2,7 +2,7 @@
 // optional `reason` query and mounts the presentation screen. RBT-064.
 import { useLocalSearchParams } from "expo-router";
 
-import { ExpiredScreen } from "@presentation/screens/Expired/ExpiredScreen";
+import { ExpiredScreen } from "@presentation/screens/Expired";
 
 export default function ExpiredRoute() {
   const { resourceId, reason } = useLocalSearchParams<{

@@ -2,7 +2,7 @@
 // Routing-only shell. RBT-065.
 import { useLocalSearchParams } from "expo-router";
 
-import { SnapSimulatorScreen } from "@presentation/screens/Payment/SnapSimulatorScreen";
+import { SnapSimulatorScreen } from "@presentation/screens/Snap";
 
 export default function SnapRoute() {
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();

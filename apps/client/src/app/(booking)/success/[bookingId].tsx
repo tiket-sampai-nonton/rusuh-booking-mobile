@@ -1,7 +1,7 @@
 // Booking route `/success/[bookingId]`. Routing-only shell. RBT-070/071.
 import { useLocalSearchParams } from "expo-router";
 
-import { SuccessScreen } from "@presentation/screens/Success/SuccessScreen";
+import { SuccessScreen } from "@presentation/screens/Success";
 
 export default function SuccessRoute() {
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();

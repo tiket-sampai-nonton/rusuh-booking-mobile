@@ -27,5 +27,5 @@ export default function BookingLayout() {
     setQueue(id, `q-${id}`, "WAITING");
   }, [seed, eventId, setQueue]);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return <Stack screenOptions={{ headerShown: false, animation: "fade" }} />;
 }
