@@ -35,13 +35,13 @@ export function ProgressRing({ progress, size = 200, children }: ProgressRingPro
             <Stop offset="1" stopColor={brand.red} />
           </LinearGradient>
         </Defs>
-        <Circle cx={cx} cy={cy} r={r} stroke="rgba(255,255,255,0.12)" strokeWidth={10} fill="none" />
+        <Circle cx={cx} cy={cy} r={r} stroke="rgba(255,255,255,0.08)" strokeWidth={9} fill="none" />
         <Circle
           cx={cx}
           cy={cy}
           r={r}
           stroke="url(#ringGrad)"
-          strokeWidth={10}
+          strokeWidth={9}
           fill="none"
           strokeLinecap="round"
           strokeDasharray={`${dash} ${circumference}`}

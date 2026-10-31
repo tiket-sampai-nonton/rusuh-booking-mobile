@@ -1,9 +1,29 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
+// Flip reduced-motion per test to drive both the drift-loop and static paths
+// of AuraBackground (and any other reduced-motion-aware primitive).
+const motionState = { reduced: false };
+jest.mock("react-native-reanimated", () => {
+  const actual = jest.requireActual("react-native-reanimated/mock");
+  return { ...actual, useReducedMotion: () => motionState.reduced };
+});
+
+// eslint-disable-next-line import/first
 import { AuraBackground } from "@presentation/components/AuraBackground";
+// eslint-disable-next-line import/first
 import { BrandMark } from "@presentation/components/BrandMark";
+// eslint-disable-next-line import/first
+import { MiniNav } from "@presentation/components/MiniNav";
+// eslint-disable-next-line import/first
 import { PillButton } from "@presentation/components/PillButton";
+// eslint-disable-next-line import/first
 import { ProgressRing } from "@presentation/components/ProgressRing";
+// eslint-disable-next-line import/first
+import { Steps } from "@presentation/components/Steps";
+
+afterEach(() => {
+  motionState.reduced = false;
+});
 
 describe("AuraBackground", () => {
   it("renders children for each tone", () => {
@@ -25,6 +45,46 @@ describe("AuraBackground", () => {
       </AuraBackground>,
     );
     expect(screen.getByTestId("aura-default")).toBeTruthy();
+  });
+
+  it("renders a static aura under reduced-motion (no drift loop)", () => {
+    motionState.reduced = true;
+    render(
+      <AuraBackground testID="aura-reduced">
+        <></>
+      </AuraBackground>,
+    );
+    expect(screen.getByTestId("aura-reduced")).toBeTruthy();
+  });
+});
+
+describe("MiniNav", () => {
+  it("renders the brand and a back link that fires onBack", () => {
+    const onBack = jest.fn();
+    render(<MiniNav onBack={onBack} />);
+    expect(screen.getByText("Rusuh Tiket")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("mini-nav-back"));
+    expect(onBack).toHaveBeenCalled();
+  });
+
+  it("hides the back link when showBack is false", () => {
+    render(<MiniNav showBack={false} />);
+    expect(screen.queryByTestId("mini-nav-back")).toBeNull();
+  });
+
+  it("renders a custom back label (inert when no handler)", () => {
+    render(<MiniNav backLabel="← Kembali" />);
+    expect(screen.getByText("← Kembali")).toBeTruthy();
+  });
+});
+
+describe("Steps", () => {
+  it("renders the four funnel steps with an active index", () => {
+    render(<Steps active={2} />);
+    expect(screen.getByTestId("funnel-steps")).toBeTruthy();
+    for (const l of ["Detail", "Antre", "Pilih", "Bayar"]) {
+      expect(screen.getByText(l)).toBeTruthy();
+    }
   });
 });
 

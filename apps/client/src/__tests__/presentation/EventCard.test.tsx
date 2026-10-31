@@ -33,16 +33,17 @@ describe("StatusBadge", () => {
   });
 });
 
-describe("EventCard", () => {
-  it("renders name, venue, date, price tag, qty and badge", () => {
+describe("EventCard (1:1 prototype .card)", () => {
+  it("renders name, venue, date, compact price tag, qty and badge", () => {
     render(<EventCard event={available} onPress={() => {}} />);
     expect(screen.getByText("Rusuh Fest 2026")).toBeTruthy();
     expect(screen.getByText(/GBK Jakarta/)).toBeTruthy();
     expect(screen.getByText(/01-Des-2026/)).toBeTruthy();
-    // Price shows in the overlay tag (no "Mulai" prefix in the 1:1 card).
-    expect(screen.getByText("Rp 450.000")).toBeTruthy();
-    // Availability line.
-    expect(screen.getByText("120 tiket tersedia")).toBeTruthy();
+    // Compact price tag (prototype card: "Rp 450rb"), not the full form.
+    expect(screen.getByText("Rp 450rb")).toBeTruthy();
+    // Availability qty (nested: bold count + " tiket tersedia").
+    expect(screen.getByText("120")).toBeTruthy();
+    expect(screen.getByText(/tiket tersedia/)).toBeTruthy();
     // 120 < low-stock threshold (200) → "Stok Menipis" badge.
     expect(screen.getByText("Stok Menipis")).toBeTruthy();
   });
@@ -54,7 +55,7 @@ describe("EventCard", () => {
     expect(onPress).toHaveBeenCalledWith("evt-1");
   });
 
-  it("disables a SOLD_OUT card and does not fire onPress", () => {
+  it("disables a SOLD_OUT card: no price tag, Sold Out badge + avail", () => {
     const onPress = jest.fn();
     const soldOut: EventSummary = {
       ...available,
@@ -65,10 +66,21 @@ describe("EventCard", () => {
     render(<EventCard event={soldOut} onPress={onPress} />);
     fireEvent.press(screen.getByTestId("event-card-evt-4"));
     expect(onPress).not.toHaveBeenCalled();
-    // Sold-out: no price tag, qty dash, SOLD-OUT badge.
-    expect(screen.getByText("—")).toBeTruthy();
-    expect(screen.getByText("Sold Out")).toBeTruthy();
-    expect(screen.queryByText("Rp 450.000")).toBeNull();
+    // "Sold Out" appears in the badge; the foot avail reads "Sold Out" too.
+    expect(screen.getAllByText("Sold Out").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("Rp 450rb")).toBeNull();
+  });
+
+  it("renders a CLOSED card with the Selesai badge + 'Event selesai' avail", () => {
+    const closed: EventSummary = {
+      ...available,
+      id: "evt-5",
+      status: "CLOSED",
+      remainingTickets: 0,
+    };
+    render(<EventCard event={closed} onPress={() => {}} />);
+    expect(screen.getByText("Selesai")).toBeTruthy();
+    expect(screen.getByText("Event selesai")).toBeTruthy();
   });
 
   it("renders the history (dimmed, non-interactive) variant", () => {
@@ -76,11 +88,11 @@ describe("EventCard", () => {
     render(<EventCard event={available} onPress={onPress} history />);
     fireEvent.press(screen.getByTestId("event-card-evt-1"));
     expect(onPress).not.toHaveBeenCalled();
-    // History is dimmed + non-interactive: qty dash.
-    expect(screen.getByText("—")).toBeTruthy();
+    // A history card is forced disabled → shows the Sold-Out-style avail.
+    expect(screen.getByText("Sold Out")).toBeTruthy();
   });
 
-  it("shows a date-less, qty-fallback card when optional fields are absent", () => {
+  it("shows a date-less card when optional fields are absent", () => {
     const sparse: EventSummary = {
       id: "evt-9",
       slug: "s",
@@ -90,10 +102,10 @@ describe("EventCard", () => {
       status: "AVAILABLE",
     };
     render(<EventCard event={sparse} onPress={() => {}} />);
-    // No minPrice → the price tag shows the fallback label.
-    expect(screen.getByText("Harga menyusul")).toBeTruthy();
-    // No remainingTickets → generic "Tersedia" (badge + qty line both show it).
-    expect(screen.getAllByText("Tersedia").length).toBeGreaterThanOrEqual(1);
+    // No minPrice → compact of 0 renders "Rp 0".
+    expect(screen.getByText("Rp 0")).toBeTruthy();
+    // No remainingTickets → qty count "0".
+    expect(screen.getByText("0")).toBeTruthy();
     expect(screen.queryByText(/🗓/)).toBeNull();
     expect(screen.queryByText(/📍/)).toBeNull();
   });

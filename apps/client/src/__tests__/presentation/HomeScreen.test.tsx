@@ -16,7 +16,7 @@ jest.mock("expo-router", () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { HomeScreen } from "@presentation/screens/Events/HomeScreen";
+import { HomeScreen } from "@presentation/screens/Home";
 
 function repoReturning(events: readonly EventSummary[]): EventRepository {
   return {
@@ -60,9 +60,17 @@ describe("HomeScreen", () => {
     );
     expect(screen.getByText("Konser Terdekat")).toBeTruthy();
     expect(screen.getByText("History Event")).toBeTruthy();
-    // evt-5 is CLOSED (history); evt-1 is AVAILABLE (upcoming).
-    expect(screen.getByText("Rusuh Fest 2026")).toBeTruthy();
+    // "Rusuh Fest 2026" shows in the hero slide AND its catalog card.
+    expect(screen.getAllByText("Rusuh Fest 2026").length).toBeGreaterThanOrEqual(1);
+    // evt-5 is CLOSED → history card only.
     expect(screen.getByText("Jazz in the Park 2025")).toBeTruthy();
+    // Measure BOTH section scroll targets (onFeaturedLayout + onHistoryLayout).
+    fireEvent(screen.getByTestId("section-upcoming"), "layout", {
+      nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
+    });
+    fireEvent(screen.getByTestId("section-history"), "layout", {
+      nativeEvent: { layout: { x: 0, y: 1500, width: 393, height: 600 } },
+    });
   });
 
   it("navigates to the event detail on an enterable card press", async () => {
@@ -79,10 +87,14 @@ describe("HomeScreen", () => {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
     await waitFor(() => screen.getByTestId("home-hero"));
-    // "Lihat Semua" is a no-op scroll affordance (catalog is already below).
-    fireEvent.press(screen.getByTestId("hero-see-all"));
-    // Book the featured (first upcoming) event → routes to its detail.
-    fireEvent.press(screen.getByTestId("hero-book"));
+    // Fire onLayout so the featured-section Y is measured (scroll target).
+    fireEvent(screen.getByTestId("section-upcoming"), "layout", {
+      nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
+    });
+    // Each hero slide carries its own CTAs (prototype .slide-body); press the
+    // first. "Lihat Semua" scrolls to the catalog, "Booking Sekarang" routes.
+    fireEvent.press(screen.getAllByTestId("hero-see-all")[0]);
+    fireEvent.press(screen.getAllByTestId("hero-book")[0]);
     expect(mockRouter.push).toHaveBeenCalledWith(
       expect.stringMatching(/^\/events\//),
     );
@@ -93,7 +105,7 @@ describe("HomeScreen", () => {
       container: { eventRepository: repoReturning([]) },
     });
     await waitFor(() =>
-      expect(screen.getByText("Belum ada event mendatang.")).toBeTruthy(),
+      expect(screen.getByText("Belum ada event yang cocok.")).toBeTruthy(),
     );
     expect(screen.getByText("Belum ada event yang berlalu.")).toBeTruthy();
   });
