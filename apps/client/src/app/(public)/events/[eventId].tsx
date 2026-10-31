@@ -2,7 +2,7 @@
 // param and mounts the presentation screen. RBT-032.
 import { useLocalSearchParams } from "expo-router";
 
-import { EventDetailScreen } from "@presentation/screens/Events/EventDetailScreen";
+import { EventDetailScreen } from "@presentation/screens/EventDetail";
 
 export default function EventDetailRoute() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();

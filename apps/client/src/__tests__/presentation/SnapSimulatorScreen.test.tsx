@@ -10,7 +10,7 @@ jest.mock("expo-router", () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { SnapSimulatorScreen } from "@presentation/screens/Payment/SnapSimulatorScreen";
+import { SnapSimulatorScreen } from "@presentation/screens/Snap";
 
 describe("SnapSimulatorScreen", () => {
   beforeEach(() => {

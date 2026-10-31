@@ -18,7 +18,7 @@ jest.mock("expo-router", () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { WaitingRoomScreen } from "@presentation/screens/Waiting/WaitingRoomScreen";
+import { WaitingRoomScreen } from "@presentation/screens/Waiting";
 
 function entryWith(
   status: QueueStatus,
@@ -92,7 +92,9 @@ describe("WaitingRoomScreen", () => {
     });
     await waitFor(() => expect(screen.getByTestId("waiting-active")).toBeTruthy());
     expect(screen.getByTestId("waiting-position")).toBeTruthy();
-    expect(screen.getByText("orang di depanmu")).toBeTruthy();
+    // Prototype heading + stat label + zone copy.
+    expect(screen.getByText("Kamu sedang mengantre")).toBeTruthy();
+    expect(screen.getByText("Di depanmu")).toBeTruthy();
     expect(screen.getByText(/Zona Aman/)).toBeTruthy();
   });
 

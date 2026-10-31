@@ -8,13 +8,13 @@ import type {
 import { useSessionStore } from "@presentation/stores/session-store";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
-const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
 
 // eslint-disable-next-line import/first
-import { CheckoutScreen } from "@presentation/screens/Checkout/CheckoutScreen";
+import { CheckoutScreen } from "@presentation/screens/Checkout";
 
 const BUYER = "3201019999999999";
 const NIK_A = "3201010101010001";
@@ -234,6 +234,33 @@ describe("CheckoutScreen", () => {
   it("does not render a remove button when only one row exists", async () => {
     await renderCheckout(bookingRepo(futureSession()));
     expect(screen.queryByTestId("remove-ticket-0")).toBeNull();
+  });
+
+  it("back opens the 'Tinggalkan halaman ini?' confirm (no immediate nav)", async () => {
+    await renderCheckout(bookingRepo(futureSession()));
+    fireEvent.press(screen.getByTestId("checkout-back"));
+    // Prototype opens a confirm dialog; it must NOT navigate yet.
+    expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+    // "Tetap di sini" closes it, still no navigation.
+    fireEvent.press(screen.getByTestId("checkout-stay"));
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+  });
+
+  it("'Ya, keluar' on the confirm leaves to home", async () => {
+    await renderCheckout(bookingRepo(futureSession()));
+    fireEvent.press(screen.getByTestId("checkout-back"));
+    fireEvent.press(screen.getByTestId("checkout-leave-confirm"));
+    expect(mockRouter.replace).toHaveBeenCalledWith("/");
+  });
+
+  it("tapping the confirm backdrop dismisses it without leaving", async () => {
+    await renderCheckout(bookingRepo(futureSession()));
+    fireEvent.press(screen.getByTestId("checkout-back"));
+    expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy();
+    // Tap outside the card (backdrop) → onStay, same as "Tetap di sini".
+    fireEvent.press(screen.getByTestId("checkout-leave-backdrop"));
+    expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 
   it("shows the loading state while the session restores", () => {

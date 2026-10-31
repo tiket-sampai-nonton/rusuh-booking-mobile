@@ -1,4 +1,5 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { Platform } from "react-native";
 
 import type {
   PaymentAttempt,
@@ -12,8 +13,15 @@ jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
 
+// Drive the success-check pop vs reduced-motion branch.
+const motionState = { reduced: false };
+jest.mock("react-native-reanimated", () => {
+  const actual = jest.requireActual("react-native-reanimated/mock");
+  return { ...actual, useReducedMotion: () => motionState.reduced };
+});
+
 // eslint-disable-next-line import/first
-import { SuccessScreen } from "@presentation/screens/Success/SuccessScreen";
+import { SuccessScreen } from "@presentation/screens/Success";
 
 function paymentRepo(status: PaymentAttempt["status"]): PaymentRepository {
   return {
@@ -35,6 +43,9 @@ function seedStore(): void {
 }
 
 describe("SuccessScreen", () => {
+  afterEach(() => {
+    motionState.reduced = false;
+  });
   beforeEach(() => {
     mockRouter.replace.mockReset();
     seedStore();
@@ -52,6 +63,15 @@ describe("SuccessScreen", () => {
     // Two e-tickets (ticketCount = 2).
     expect(screen.getByTestId("eticket-0")).toBeTruthy();
     expect(screen.getByTestId("eticket-1")).toBeTruthy();
+  });
+
+  it("renders the success check statically under reduced-motion", async () => {
+    motionState.reduced = true;
+    renderWithProviders(<SuccessScreen bookingId="bk-1" />, {
+      container: { paymentRepository: paymentRepo("PAID") },
+    });
+    await waitFor(() => expect(screen.getByTestId("success-scroll")).toBeTruthy());
+    expect(screen.getByText("Pembayaran Berhasil!")).toBeTruthy();
   });
 
   it("shows the unverified state when status is not PAID", async () => {
@@ -72,6 +92,42 @@ describe("SuccessScreen", () => {
     fireEvent.press(screen.getByTestId("success-home"));
     expect(mockRouter.replace).toHaveBeenCalledWith("/");
     expect(useSessionStore.getState().bookingId).toBeUndefined();
+  });
+
+  it("'Unduh E-Tiket' does NOT navigate away on native (no print dialog)", async () => {
+    // Prototype success.html wires download → window.print(). On native there
+    // is no print dialog (Platform.OS="ios" here), so it is a graceful no-op —
+    // crucially it must NEVER navigate home (that would lose the ticket).
+    renderWithProviders(<SuccessScreen bookingId="bk-1" />, {
+      container: { paymentRepository: paymentRepo("PAID") },
+    });
+    await waitFor(() => screen.getByTestId("success-download"));
+    fireEvent.press(screen.getByTestId("success-download"));
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+  });
+
+  it("'Unduh E-Tiket' calls window.print() on web and does NOT navigate", async () => {
+    // Force the web branch at runtime (no react-native module mock — that
+    // breaks reanimated's import). Restore OS + print after.
+    const originalOS = Platform.OS;
+    const originalPrint = (globalThis as { print?: () => void }).print;
+    const printSpy = jest.fn();
+    (Platform as { OS: string }).OS = "web";
+    // The handler reads window.print; jsdom's window is globalThis here.
+    (globalThis as { print?: () => void }).print = printSpy;
+    (globalThis as { window?: unknown }).window = globalThis;
+    try {
+      renderWithProviders(<SuccessScreen bookingId="bk-1" />, {
+        container: { paymentRepository: paymentRepo("PAID") },
+      });
+      await waitFor(() => screen.getByTestId("success-download"));
+      fireEvent.press(screen.getByTestId("success-download"));
+      expect(printSpy).toHaveBeenCalledTimes(1);
+      expect(mockRouter.replace).not.toHaveBeenCalled();
+    } finally {
+      (Platform as { OS: string }).OS = originalOS;
+      (globalThis as { print?: () => void }).print = originalPrint;
+    }
   });
 
   it("shows loading while verification is pending", () => {

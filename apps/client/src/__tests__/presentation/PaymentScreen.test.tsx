@@ -7,13 +7,13 @@ import type {
 import { useSessionStore } from "@presentation/stores/session-store";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
-const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
 
 // eslint-disable-next-line import/first
-import { PaymentScreen } from "@presentation/screens/Payment/PaymentScreen";
+import { PaymentScreen } from "@presentation/screens/Payment";
 
 const attempt: PaymentAttempt = {
   attemptId: "pay-1",
@@ -72,10 +72,11 @@ describe("PaymentScreen", () => {
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: { paymentRepository: paymentRepo() },
     });
-    // Default 10-min window before an attempt exists.
-    expect(screen.getByTestId("payment-timer").props.children.join("")).toMatch(
-      /\d\d:\d\d/,
-    );
+    // Default 10-min window before an attempt exists. The timer renders just
+    // the MM:SS string (no icon prefix).
+    const timer = screen.getByTestId("payment-timer").props.children;
+    const text = Array.isArray(timer) ? timer.join("") : String(timer);
+    expect(text).toMatch(/\d\d:\d\d/);
   });
 
   it("surfaces a createAttempt error", async () => {
@@ -95,6 +96,14 @@ describe("PaymentScreen", () => {
         screen.getByText("Layanan pembayaran sedang gangguan. Coba lagi."),
       ).toBeTruthy(),
     );
+  });
+
+  it("navigates back from the topbar back button", () => {
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: { paymentRepository: paymentRepo() },
+    });
+    fireEvent.press(screen.getByTestId("payment-back"));
+    expect(mockRouter.back).toHaveBeenCalled();
   });
 
   it("redirects to expired when the attempt's deadline is already past", async () => {

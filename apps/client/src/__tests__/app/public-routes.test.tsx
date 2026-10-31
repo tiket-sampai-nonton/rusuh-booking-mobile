@@ -26,12 +26,14 @@ describe("(public) route shells", () => {
     expect(typeof EventDetailRoute).toBe("function");
   });
 
-  it("Home route mounts the HomeScreen (header renders through providers)", async () => {
+  it("Home route mounts the HomeScreen (hero + brand render through providers)", async () => {
     renderWithProviders(<HomeRoute />);
-    // The hero heading renders "Rusuh Tiket" (the brand mark says it too, so
-    // match the header role to disambiguate). findBy retries past the async
-    // query's state update.
+    // The hero renders the featured event title as an accessibility header
+    // (data-dependent, so assert a header exists rather than a fixed name).
+    // findBy retries past the async query's state update.
     const headers = await screen.findAllByRole("header");
-    expect(headers.some((h) => /Rusuh Tiket/.test(h.props.children))).toBe(true);
+    expect(headers.length).toBeGreaterThan(0);
+    // Brand mark is always present in the floating nav.
+    expect(screen.getAllByText("Rusuh Tiket").length).toBeGreaterThan(0);
   });
 });

@@ -17,7 +17,7 @@ jest.mock("expo-router", () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { EventDetailScreen } from "@presentation/screens/Events/EventDetailScreen";
+import { EventDetailScreen } from "@presentation/screens/EventDetail";
 
 const available: EventDetail = {
   id: "evt-1",
@@ -82,13 +82,20 @@ describe("EventDetailScreen", () => {
     renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
       container: { eventRepository: repo(available) },
     });
-    await waitFor(() => expect(screen.getByText("Rusuh Fest 2026")).toBeTruthy());
+    // Name shows in the hero AND the "Tentang event" block heading.
+    await waitFor(() =>
+      expect(screen.getAllByText("Rusuh Fest 2026").length).toBeGreaterThanOrEqual(1),
+    );
     expect(screen.getByText("Festival musik tahunan.")).toBeTruthy();
-    expect(screen.getByText("• Band A")).toBeTruthy();
+    // Line-up rows render the act name (prototype .lineup row, no bullet).
+    expect(screen.getByText("Band A")).toBeTruthy();
     expect(screen.getByText("Wajib membawa KTP.")).toBeTruthy();
-    expect(screen.getByText("Rp 450.000")).toBeTruthy();
-    expect(screen.getByText("Sisa tiket: 120")).toBeTruthy();
-    expect(screen.getByText("Masuk Antrean →")).toBeTruthy();
+    // Buy box shows the compact min price (prototype minorToIDR compact).
+    expect(screen.getByText("Rp 450rb")).toBeTruthy();
+    // Remaining tickets render as a hero chip.
+    expect(screen.getByText("120 tiket tersedia")).toBeTruthy();
+    // CTA label (the arrow is a separate pin, not part of the text).
+    expect(screen.getByText("Masuk Antrean")).toBeTruthy();
   });
 
   it("joins the queue and navigates to the waiting room on CTA press", async () => {
@@ -139,6 +146,22 @@ describe("EventDetailScreen", () => {
     await waitFor(() => screen.getByTestId("join-cta"));
     fireEvent.press(screen.getByTestId("join-cta"));
     expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it("disables the CTA and shows the Ditutup labels for a CLOSED event", async () => {
+    const closed: EventDetail = { ...available, status: "CLOSED" };
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: {
+        eventRepository: repo(closed),
+        queueRepository: queueRepo(),
+      },
+    });
+    await waitFor(() => screen.getByTestId("join-cta"));
+    fireEvent.press(screen.getByTestId("join-cta"));
+    expect(mockRouter.push).not.toHaveBeenCalled();
+    // CLOSED status → "Ditutup" badge + "Penjualan Ditutup" CTA (closed arms).
+    expect(screen.getByText("Ditutup")).toBeTruthy();
+    expect(screen.getByText("Penjualan Ditutup")).toBeTruthy();
   });
 
   it("shows the error state when detail fetch fails", async () => {
@@ -217,7 +240,9 @@ describe("EventDetailScreen", () => {
     renderWithProviders(<EventDetailScreen eventId="evt-2" />, {
       container: { eventRepository: repo(minimal) },
     });
-    await waitFor(() => expect(screen.getByText("Minimal Event")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getAllByText("Minimal Event").length).toBeGreaterThanOrEqual(1),
+    );
     expect(screen.getByText("Menyusul")).toBeTruthy();
     expect(screen.queryByText(/Sisa tiket/)).toBeNull();
   });

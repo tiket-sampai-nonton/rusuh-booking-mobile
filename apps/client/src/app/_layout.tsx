@@ -11,7 +11,9 @@ import { AppProviders } from "@providers/providers";
 export default function RootLayout() {
   return (
     <AppProviders>
-      <Stack screenOptions={{ headerShown: false }} />
+      {/* `animation: fade` gives a soft crossfade between routes (native-stack);
+          the per-screen ScreenFade wrapper complements it on web. */}
+      <Stack screenOptions={{ headerShown: false, animation: "fade" }} />
       <StatusBar style="auto" />
     </AppProviders>
   );
