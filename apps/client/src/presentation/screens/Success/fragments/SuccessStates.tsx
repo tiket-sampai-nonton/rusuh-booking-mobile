@@ -2,6 +2,7 @@
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import { AuraBackground } from "@presentation/components/AuraBackground";
+import { TAP_MIN } from "@shared/utils/tap-target";
 
 import type { SuccessUnverifiedProps } from "../interface";
 
@@ -32,6 +33,7 @@ export function SuccessUnverified({ onHome }: SuccessUnverifiedProps) {
           accessibilityLabel="Ke Beranda"
           onPress={onHome}
           testID="success-home"
+          style={{ minHeight: TAP_MIN, justifyContent: "center" }}
           className="mt-7.5 rounded-pill border border-white/20 px-6 py-3"
         >
           <Text className="text-sm font-bold text-white">Ke Beranda</Text>

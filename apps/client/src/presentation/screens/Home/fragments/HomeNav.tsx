@@ -5,9 +5,15 @@
 import { Pressable, Text, View } from "react-native";
 
 import { BrandMark } from "@presentation/components/BrandMark";
+import { tapSlop } from "@shared/utils/tap-target";
 
 import type { HomeNavProps } from "../interface";
 import { homeNavPill, homeNavWrap, homeStyles } from "../style";
+
+// RBT-090: nav links render ~29pt tall and the CTA ~44pt wide-ish inside the
+// floating pill; widen only the HIT REGION so the pill's 1:1 look is unchanged.
+const LINK_SLOP = tapSlop(56, 29); // ~56×29 text link → vertical padding to 44
+const CTA_SLOP = tapSlop(140, 40);
 
 export function HomeNav({
   showLinks,
@@ -33,6 +39,7 @@ export function HomeNav({
               accessibilityLabel="Jelajah event"
               testID="nav-jelajah"
               onPress={onJelajah}
+              hitSlop={LINK_SLOP}
               style={homeStyles.navLink}
               className="rounded-pill"
             >
@@ -43,6 +50,7 @@ export function HomeNav({
               accessibilityLabel="History event"
               testID="nav-history"
               onPress={onHistory}
+              hitSlop={LINK_SLOP}
               style={homeStyles.navLink}
               className="rounded-pill"
             >
@@ -53,6 +61,7 @@ export function HomeNav({
               accessibilityLabel="Kategori event"
               testID="nav-kategori"
               onPress={onKategori}
+              hitSlop={LINK_SLOP}
               style={homeStyles.navLink}
               className="rounded-pill"
             >
@@ -65,6 +74,7 @@ export function HomeNav({
           accessibilityLabel="Masuk atau Daftar"
           testID="nav-cta"
           onPress={onAccount}
+          hitSlop={CTA_SLOP}
           style={homeStyles.ctaInner}
           className="flex-row items-center gap-2.25 rounded-pill bg-ink"
         >

@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { formatCountdown } from "@domain/services/date-format";
+import { TAP_MIN } from "@shared/utils/tap-target";
 
 import type { CheckoutTopBarProps } from "../interface";
 import { checkoutStyles, checkoutTopBar } from "../style";
@@ -19,6 +20,8 @@ export function CheckoutTopBar({ remainingMs, warn, expired, onBack }: CheckoutT
         accessibilityLabel="Kembali"
         onPress={onBack}
         testID="checkout-back"
+        // RBT-090: ≥44pt touch target (WCAG 2.5.5); label unchanged.
+        style={{ minHeight: TAP_MIN, justifyContent: "center" }}
       >
         <Text className="text-sm font-semibold text-muted-foreground">← Kembali</Text>
       </Pressable>

@@ -14,6 +14,12 @@
 import { useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 
+import { tapSlop } from "@shared/utils/tap-target";
+
+// RBT-090: option pills render ~33pt tall — widen the hit region to 44pt
+// without changing the pixel size (WCAG 2.5.5).
+const PILL_SLOP = tapSlop(80, 33);
+
 export interface FilterValue {
   readonly genre: string;
   readonly time: string;
@@ -145,6 +151,7 @@ function PillGroup({
               accessibilityLabel={`${label}: ${o.l}`}
               onPress={() => onPick(o.v)}
               testID={`${testPrefix}-${o.v}`}
+              hitSlop={PILL_SLOP}
               className={`rounded-pill border px-3.5 py-2 ${on ? "border-brand bg-brand" : "border-line bg-background"}`}
             >
               <Text className={`text-xs font-semibold ${on ? "text-white" : "text-foreground"}`}>

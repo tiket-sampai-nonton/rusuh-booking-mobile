@@ -1,15 +1,29 @@
 /** One ticket row: category pills + attendee name/NIK + "use buyer NIK" switch. */
 import { Pressable, Switch, Text, View } from "react-native";
+import Animated, { FadeInDown, FadeOut, useReducedMotion } from "react-native-reanimated";
 
 import { isValidNik } from "@domain/rules/checkout";
+import { tapSlop } from "@shared/utils/tap-target";
 
 import { CATEGORIES } from "../categories";
 import { Field } from "./common";
 import type { TicketItemProps } from "../interface";
 
+// RBT-090: category pills render ~33pt tall — widen the hit region to 44pt
+// without changing the pixel size (WCAG 2.5.5). The "Hapus" link gets it too.
+const PILL_SLOP = tapSlop(72, 33);
+
 export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuyer }: TicketItemProps) {
+  // RBT-090 AC2: subtle add/remove motion (ease-out ~200ms), reduced-motion
+  // gated — when the OS asks for reduced motion the row appears/removes instantly.
+  const reduced = useReducedMotion();
   return (
-    <View className="mt-3 rounded-xl border border-line p-3.5" testID={`ticket-row-${index}`}>
+    <Animated.View
+      entering={reduced ? undefined : FadeInDown.duration(200)}
+      exiting={reduced ? undefined : FadeOut.duration(160)}
+      className="mt-3 rounded-xl border border-line p-3.5"
+      testID={`ticket-row-${index}`}
+    >
       <View className="flex-row items-center justify-between">
         <Text className="text-sm font-bold text-foreground">Tiket #{index + 1}</Text>
         {canRemove ? (
@@ -18,6 +32,7 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
             accessibilityLabel={`Hapus tiket ${index + 1}`}
             onPress={onRemove}
             testID={`remove-ticket-${index}`}
+            hitSlop={PILL_SLOP}
           >
             <Text className="text-xs font-bold text-error">Hapus</Text>
           </Pressable>
@@ -34,6 +49,7 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
             accessibilityState={{ selected: row.categoryId === c.id }}
             onPress={() => onPatch({ categoryId: c.id })}
             testID={`cat-${index}-${c.id}`}
+            hitSlop={PILL_SLOP}
             className={`rounded-pill border px-4 py-2 ${row.categoryId === c.id ? "border-brand bg-brand" : "border-line"}`}
           >
             <Text className={`text-xs font-bold ${row.categoryId === c.id ? "text-white" : "text-foreground"}`}>
@@ -73,6 +89,6 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
           testID={`use-buyer-${index}`}
         />
       </View>
-    </View>
+    </Animated.View>
   );
 }

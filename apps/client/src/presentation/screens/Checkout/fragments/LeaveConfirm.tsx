@@ -1,6 +1,8 @@
 /** "Tinggalkan halaman ini?" confirm modal (prototype detail.html confirmBack). */
 import { Modal, Pressable, Text, View } from "react-native";
 
+import { TAP_MIN } from "@shared/utils/tap-target";
+
 import type { LeaveConfirmProps } from "../interface";
 
 export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
@@ -30,6 +32,7 @@ export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
               accessibilityLabel="Tetap di sini"
               onPress={onStay}
               testID="checkout-stay"
+              style={{ minHeight: TAP_MIN, justifyContent: "center" }}
               className="rounded-pill border border-line px-5 py-3"
             >
               <Text className="text-sm font-semibold text-foreground">Tetap di sini</Text>
@@ -39,6 +42,7 @@ export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
               accessibilityLabel="Ya, keluar"
               onPress={onLeave}
               testID="checkout-leave-confirm"
+              style={{ minHeight: TAP_MIN, justifyContent: "center" }}
               className="rounded-pill bg-error px-5 py-3"
             >
               <Text className="text-sm font-bold text-white">Ya, keluar ↗</Text>

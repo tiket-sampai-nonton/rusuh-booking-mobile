@@ -11,6 +11,7 @@ import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { neutral } from "@presentation/theme";
+import { TAP_MIN } from "@shared/utils/tap-target";
 
 export interface MiniNavProps {
   /** Right-side label, e.g. "← Beranda". Default "← Beranda". */
@@ -68,6 +69,8 @@ export function MiniNav({
           onPress={onBack}
           disabled={!onBack}
           testID="mini-nav-back"
+          // RBT-090: ≥44pt touch target (WCAG 2.5.5); label unchanged.
+          style={{ minHeight: TAP_MIN, justifyContent: "center" }}
         >
           <Text style={{ fontSize: 13 }} className="font-semibold text-white/60">
             {backLabel}

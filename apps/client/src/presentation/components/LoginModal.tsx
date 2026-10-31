@@ -19,6 +19,7 @@ import { Modal, Pressable, Text, TextInput, View } from "react-native";
 
 import { isValidEmail, isValidNik } from "@domain/rules/checkout";
 import { useAccountStore } from "@presentation/stores/account-store";
+import { TAP_MIN } from "@shared/utils/tap-target";
 
 const DEMO_OTP = "123456";
 const KNOWN_EMAIL = "ada@rusuh.id"; // demo existing account (skips register)
@@ -299,6 +300,7 @@ function Actions({
         accessibilityRole="button"
         accessibilityLabel={cancelLabel}
         onPress={onCancel}
+        style={{ minHeight: TAP_MIN, justifyContent: "center" }}
         className="rounded-pill border border-line px-5 py-3"
       >
         <Text className="text-sm font-semibold text-foreground">{cancelLabel}</Text>
@@ -308,6 +310,7 @@ function Actions({
         accessibilityLabel={primaryLabel}
         onPress={onPrimary}
         testID={primaryTestID}
+        style={{ minHeight: TAP_MIN, justifyContent: "center" }}
         className={`rounded-pill px-5 py-3 ${destructive ? "bg-error" : "bg-brand"}`}
       >
         <Text className="text-sm font-bold text-white">{primaryLabel}</Text>
