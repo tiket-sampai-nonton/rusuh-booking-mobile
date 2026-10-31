@@ -15,6 +15,35 @@ module.exports = {
   root: true,
   extends: ["expo"],
   ignorePatterns: ["dist/", ".expo/", "coverage/", "node_modules/"],
+  // Teach eslint-plugin-import how to resolve the TypeScript path aliases
+  // (@domain/*, @presentation/*, … from tsconfig.json "paths") and RN's
+  // platform-specific extensions. Without this, `import/no-unresolved` fires on
+  // every aliased import in editors (the resolver falls back to plain node and
+  // cannot see the tsconfig paths). `eslint-import-resolver-typescript` reads
+  // the tsconfig directly, so the aliases resolve exactly as tsc + Metro see them.
+  settings: {
+    "import/resolver": {
+      typescript: {
+        project: __dirname + "/tsconfig.json",
+        alwaysTryTypes: true,
+      },
+      node: {
+        extensions: [
+          ".js",
+          ".jsx",
+          ".ts",
+          ".tsx",
+          ".native.ts",
+          ".native.tsx",
+          ".ios.ts",
+          ".ios.tsx",
+          ".android.ts",
+          ".android.tsx",
+        ],
+      },
+    },
+    "import/extensions": [".js", ".jsx", ".ts", ".tsx"],
+  },
   overrides: [
     {
       files: ["src/**/*.{ts,tsx}"],
