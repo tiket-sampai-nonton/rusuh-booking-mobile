@@ -1,7 +1,10 @@
 import {
   createContainer,
+  createTokenStorage,
   readUseMocksFlag,
 } from "@providers/container";
+import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-token-storage";
+import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
 import { MockBookingRepository } from "@infrastructure/__fixtures__/mock-booking.repository";
 import { MockEventRepository } from "@infrastructure/__fixtures__/mock-event.repository";
 import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.repository";
@@ -70,6 +73,13 @@ describe("providers/container — createContainer (mock mode)", () => {
     expect(typeof c.clock.now()).toBe("number");
   });
 
+  it("binds a TokenStorage in mock mode (platform-selected, RBT-023)", () => {
+    expect(c.tokenStorage).toBeDefined();
+    expect(typeof c.tokenStorage.save).toBe("function");
+    expect(typeof c.tokenStorage.load).toBe("function");
+    expect(typeof c.tokenStorage.clear).toBe("function");
+  });
+
   it("resolves a port to a working mock adapter (wiring proof)", async () => {
     const events = await c.eventRepository.listEvents();
     expect(events.length).toBeGreaterThan(0);
@@ -86,6 +96,22 @@ describe("providers/container — createContainer (mock mode)", () => {
     } else {
       process.env.EXPO_PUBLIC_USE_MOCKS = prev;
     }
+  });
+});
+
+describe("providers/container — createTokenStorage (RBT-023)", () => {
+  it("binds the in-memory fallback on web (SecureStore unsupported)", () => {
+    expect(createTokenStorage("web")).toBeInstanceOf(InMemoryTokenStorage);
+  });
+
+  it("binds the secure-store adapter on iOS", () => {
+    expect(createTokenStorage("ios")).toBeInstanceOf(SecureStoreTokenStorage);
+  });
+
+  it("binds the secure-store adapter on Android", () => {
+    expect(createTokenStorage("android")).toBeInstanceOf(
+      SecureStoreTokenStorage,
+    );
   });
 });
 

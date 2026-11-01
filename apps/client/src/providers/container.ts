@@ -8,6 +8,9 @@
  * E8 tasks the platform adapters); the non-mock branch is a clearly-marked TODO
  * until then.
  */
+import { Platform } from "react-native";
+
+import type { TokenStorage } from "@domain/auth/token-storage.port";
 import type { BookingRepository } from "@domain/repositories/booking.repository";
 import type { EventRepository } from "@domain/repositories/event.repository";
 import type { PaymentRepository } from "@domain/repositories/payment.repository";
@@ -29,6 +32,8 @@ import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notif
 import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.repository";
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
+import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-token-storage";
+import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
 import { FetchHttpClient } from "@infrastructure/http/fetch-http-client";
 import type { HttpClient } from "@infrastructure/http/http-client";
 import { SystemClock } from "@infrastructure/time/system-clock";
@@ -47,6 +52,23 @@ export interface Container {
   readonly userRepository: UserRepository;
   readonly notification: NotificationPort;
   readonly fileShare: FileSharePort;
+  readonly tokenStorage: TokenStorage;
+}
+
+/**
+ * Pick the TokenStorage adapter for the current platform (RBT-023). SecureStore
+ * is native-only, so native binds {@link SecureStoreTokenStorage} (OS keychain /
+ * KeyStore) while web binds the in-memory fallback — on web the token lives in
+ * memory only and does NOT survive a reload (SECURITY.md tradeoff). Jest runs
+ * under the `jest-expo` web-ish default, so tests also get the in-memory store,
+ * which keeps the composition root deterministic without touching a keychain.
+ */
+export function createTokenStorage(
+  platformOs: typeof Platform.OS = Platform.OS,
+): TokenStorage {
+  return platformOs === "web"
+    ? new InMemoryTokenStorage()
+    : new SecureStoreTokenStorage();
 }
 
 export interface ContainerOptions {
@@ -94,9 +116,15 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // system clock is bound in both modes. Tests inject a fake ClockPort directly.
   const clock: ClockPort = new SystemClock();
 
+  // TokenStorage is a platform primitive (like the clock): the native secure
+  // store vs web in-memory choice is driven by Platform.OS, not the mock flag,
+  // so it is bound in BOTH modes (RBT-023).
+  const tokenStorage: TokenStorage = createTokenStorage();
+
   if (useMocks) {
     return {
       clock,
+      tokenStorage,
       httpClient: new MockHttpClient(),
       eventRepository: new MockEventRepository(),
       queueRepository: new MockQueueRepository(),
@@ -124,6 +152,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
   const httpClient: HttpClient = new FetchHttpClient({ baseUrl });
   return {
     clock,
+    tokenStorage,
     httpClient,
     eventRepository: new HttpEventRepository(httpClient),
     queueRepository: new HttpQueueRepository(httpClient),

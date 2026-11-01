@@ -30,5 +30,7 @@ module.exports = {
     "!src/infrastructure/http/http-client.ts",
     // Idempotency store PORT — pure interface (zero executable JS), RBT-012.
     "!src/domain/idempotency/*.port.ts",
+    // Token storage PORT — pure interface (zero executable JS), RBT-023.
+    "!src/domain/auth/*.port.ts",
   ],
 };
