@@ -1,0 +1,363 @@
+npm notice run rusuh-booking-client@0.1.0 npx
+npm notice run 'jest' --coverage --forceExit
+PASS src/__tests__/providers/providers.test.tsx
+PASS src/__tests__/app/_layout.test.tsx
+PASS src/__tests__/presentation/queue/useAutoClaim.test.tsx
+PASS src/__tests__/providers/service-context.test.tsx
+PASS src/__tests__/app/public-routes.test.tsx
+PASS src/__tests__/presentation/auth/LoginButton.test.tsx
+PASS src/__tests__/domain/rules/queue-polling.test.ts
+PASS src/__tests__/domain/idempotency.test.ts
+FAIL src/__tests__/providers/query-client.test.ts
+  ● providers/query-client — createQueryClient › returns null when @tanstack/react-query is not installed (RBT-004 state)
+
+    expect(received).toBeNull()
+
+    Received: {}
+
+      39 |       // eslint-disable-next-line @typescript-eslint/no-require-imports -- isolated module reload under test
+      40 |       const { createQueryClient } = require("@providers/query-client");
+    > 41 |       expect(createQueryClient()).toBeNull();
+         |                                   ^
+      42 |     });
+      43 |   });
+      44 |
+
+      at toBeNull (src/__tests__/providers/query-client.test.ts:41:35)
+      at Object.isolateModules (src/__tests__/providers/query-client.test.ts:30:10)
+
+  ● providers/query-client — createQueryClient › builds a QueryClient when the package is present (RBT-010 state)
+
+    expect(received).toBeInstanceOf(expected)
+
+    Expected constructor: FakeQueryClient
+    Received constructor: QueryClient
+
+      56 |       const { createQueryClient } = require("@providers/query-client");
+      57 |       const client = createQueryClient();
+    > 58 |       expect(client).toBeInstanceOf(FakeQueryClient);
+         |                      ^
+      59 |       expect((client as FakeQueryClient).cfg).toHaveProperty("defaultOptions");
+      60 |     });
+      61 |   });
+
+      at toBeInstanceOf (src/__tests__/providers/query-client.test.ts:58:22)
+      at Object.isolateModules (src/__tests__/providers/query-client.test.ts:46:10)
+
+PASS src/__tests__/infrastructure/api/envelope.test.ts
+PASS src/__tests__/domain/server-clock.test.ts
+PASS src/__tests__/domain/errors.test.ts
+PASS src/__tests__/providers/container.test.ts
+PASS src/__tests__/shared/test-fixtures.test.ts
+PASS src/__tests__/application/auth/session-use-cases.test.ts
+PASS src/__tests__/infrastructure/http/fetch-http-client.test.ts
+PASS src/__tests__/app/booking-routes.test.tsx
+PASS src/__tests__/presentation/screens/waiting-display.test.ts
+PASS src/presentation/theme/tokens.test.ts
+PASS src/__tests__/infrastructure/api/http-repositories.test.ts
+PASS src/__tests__/application/queue/observe-queue.use-case.test.ts
+PASS src/__tests__/presentation/screens/WaitingRoom.test.tsx
+PASS src/__tests__/infrastructure/mock-booking-user.test.ts
+PASS src/shared/utils/clamp.test.ts
+PASS src/__tests__/domain/queue-state-machine.test.ts
+PASS src/__tests__/application/auth/otp-use-cases.test.ts
+PASS src/__tests__/infrastructure/system-clock.test.ts
+PASS src/__tests__/app/expired-route.test.tsx
+PASS src/__tests__/infrastructure/auth/secure-store-token-storage.test.ts
+PASS src/__tests__/infrastructure/mock-adapters.test.ts
+PASS src/__tests__/application/queue/claim-admission.test.ts
+PASS src/presentation/theme/theme.test.ts
+PASS src/__tests__/presentation/auth/LoginModal.test.tsx
+  ● Console
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+PASS src/__tests__/presentation/hooks/useQueuePolling.test.tsx
+  ● Console
+
+    console.error
+      Warning: An update to Harness inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at repo (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/src/__tests__/presentation/hooks/useQueuePolling.test.tsx:93:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt023/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+---------------------------------|---------|----------|---------|---------|-------------------
+File                             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+---------------------------------|---------|----------|---------|---------|-------------------
+All files                        |   98.46 |     92.5 |   99.47 |   99.18 |                   
+ app                             |     100 |      100 |     100 |     100 |                   
+  _layout.tsx                    |     100 |      100 |     100 |     100 |                   
+ app/(booking)                   |     100 |      100 |     100 |     100 |                   
+  _layout.tsx                    |     100 |      100 |     100 |     100 |                   
+ app/(booking)/checkout          |     100 |      100 |     100 |     100 |                   
+  [sessionId].tsx                |     100 |      100 |     100 |     100 |                   
+ app/(booking)/payment           |     100 |      100 |     100 |     100 |                   
+  [bookingId].tsx                |     100 |      100 |     100 |     100 |                   
+ app/(booking)/success           |     100 |      100 |     100 |     100 |                   
+  [bookingId].tsx                |     100 |      100 |     100 |     100 |                   
+ app/(booking)/waiting           |     100 |      100 |     100 |     100 |                   
+  [eventId].tsx                  |     100 |      100 |     100 |     100 |                   
+ app/(public)                    |     100 |      100 |     100 |     100 |                   
+  browse.tsx                     |     100 |      100 |     100 |     100 |                   
+  history.tsx                    |     100 |      100 |     100 |     100 |                   
+  index.tsx                      |     100 |      100 |     100 |     100 |                   
+ app/(public)/events             |     100 |      100 |     100 |     100 |                   
+  [eventId].tsx                  |     100 |      100 |     100 |     100 |                   
+ app/expired                     |     100 |      100 |     100 |     100 |                   
+  [resourceId].tsx               |     100 |      100 |     100 |     100 |                   
+ application/auth                |     100 |      100 |     100 |     100 |                   
+  clear-session.use-case.ts      |     100 |      100 |     100 |     100 |                   
+  persist-session.use-case.ts    |     100 |      100 |     100 |     100 |                   
+  request-otp.use-case.ts        |     100 |      100 |     100 |     100 |                   
+  restore-session.use-case.ts    |     100 |      100 |     100 |     100 |                   
+  verify-otp.use-case.ts         |     100 |      100 |     100 |     100 |                   
+ application/queue               |     100 |      100 |     100 |     100 |                   
+  claim-admission.use-case.ts    |     100 |      100 |     100 |     100 |                   
+  leave-queue.use-case.ts        |     100 |      100 |     100 |     100 |                   
+  observe-queue.use-case.ts      |     100 |      100 |     100 |     100 |                   
+ domain/errors                   |     100 |      100 |     100 |     100 |                   
+  domain-error.ts                |     100 |      100 |     100 |     100 |                   
+  error-mapper.ts                |     100 |      100 |     100 |     100 |                   
+  messages.id.ts                 |     100 |      100 |     100 |     100 |                   
+ domain/idempotency              |     100 |      100 |     100 |     100 |                   
+  idempotency-key.ts             |     100 |      100 |     100 |     100 |                   
+ domain/rules                    |     100 |      100 |     100 |     100 |                   
+  queue-polling.ts               |     100 |      100 |     100 |     100 |                   
+ domain/services                 |     100 |      100 |     100 |     100 |                   
+  server-clock.ts                |     100 |      100 |     100 |     100 |                   
+ domain/state-machines           |     100 |      100 |     100 |     100 |                   
+  queue-state-machine.ts         |     100 |      100 |     100 |     100 |                   
+ infrastructure/__fixtures__     |     100 |      100 |     100 |     100 |                   
+  in-memory-idempotency-store.ts |     100 |      100 |     100 |     100 |                   
+  in-memory-token-storage.ts     |     100 |      100 |     100 |     100 |                   
+  mock-booking.repository.ts     |     100 |      100 |     100 |     100 |                   
+  mock-event.repository.ts       |     100 |      100 |     100 |     100 |                   
+  mock-file-share.adapter.ts     |     100 |      100 |     100 |     100 |                   
+  mock-http-client.ts            |     100 |      100 |     100 |     100 |                   
+  mock-notification.adapter.ts   |     100 |      100 |     100 |     100 |                   
+  mock-payment.repository.ts     |     100 |      100 |     100 |     100 |                   
+  mock-queue.repository.ts       |     100 |      100 |     100 |     100 |                   
+  mock-user.repository.ts        |     100 |      100 |     100 |     100 |                   
+ infrastructure/api              |   98.73 |    97.43 |     100 |     100 |                   
+  dto-mappers.ts                 |     100 |      100 |     100 |     100 |                   
+  envelope.ts                    |     100 |      100 |     100 |     100 |                   
+  http-booking.repository.ts     |   92.85 |    83.33 |     100 |     100 | 48                
+  http-event.repository.ts       |     100 |      100 |     100 |     100 |                   
+  http-payment.repository.ts     |     100 |      100 |     100 |     100 |                   
+  http-queue.repository.ts       |     100 |      100 |     100 |     100 |                   
+  http-user.repository.ts        |     100 |      100 |     100 |     100 |                   
+ infrastructure/auth             |     100 |      100 |     100 |     100 |                   
+  secure-store-token-storage.ts  |     100 |      100 |     100 |     100 |                   
+ infrastructure/http             |     100 |      100 |     100 |     100 |                   
+  fetch-http-client.ts           |     100 |      100 |     100 |     100 |                   
+ infrastructure/time             |     100 |      100 |     100 |     100 |                   
+  system-clock.ts                |     100 |      100 |     100 |     100 |                   
+ presentation/components/auth    |   93.84 |    77.77 |      95 |   96.61 |                   
+  LoginButton.tsx                |     100 |      100 |     100 |     100 |                   
+  LoginModal.tsx                 |   92.72 |    76.47 |   92.85 |   96.07 | 55,164            
+  auth.schema.ts                 |     100 |      100 |     100 |     100 |                   
+ presentation/hooks              |   96.77 |    93.33 |     100 |   98.27 |                   
+  useAuth.ts                     |   95.23 |      100 |     100 |   95.23 | 95                
+  useAutoClaim.ts                |   96.42 |    85.71 |     100 |     100 | 65,108            
+  useQueuePolling.ts             |     100 |      100 |     100 |     100 |                   
+ presentation/screens/Waiting    |     100 |    93.75 |     100 |     100 |                   
+  display.ts                     |     100 |      100 |     100 |     100 |                   
+  index.tsx                      |     100 |       90 |     100 |     100 | 152-182,240       
+  interface.ts                   |       0 |        0 |       0 |       0 |                   
+  style.ts                       |     100 |      100 |     100 |     100 |                   
+ presentation/theme              |     100 |      100 |     100 |     100 |                   
+  theme.ts                       |     100 |      100 |     100 |     100 |                   
+  tokens.ts                      |     100 |      100 |     100 |     100 |                   
+ providers                       |   97.05 |     90.9 |     100 |   96.87 |                   
+  container.ts                   |     100 |     87.5 |     100 |     100 | 145               
+  providers.tsx                  |     100 |      100 |     100 |     100 |                   
+  query-client.ts                |   83.33 |      100 |     100 |   83.33 | 54                
+  service-context.tsx            |     100 |      100 |     100 |     100 |                   
+ shared/test-fixtures            |     100 |      100 |     100 |     100 |                   
+  events.fixture.ts              |     100 |      100 |     100 |     100 |                   
+ shared/utils                    |     100 |      100 |     100 |     100 |                   
+  clamp.ts                       |     100 |      100 |     100 |     100 |                   
+---------------------------------|---------|----------|---------|---------|-------------------
+
+Summary of all failing tests
+FAIL src/__tests__/providers/query-client.test.ts
+  ● providers/query-client — createQueryClient › returns null when @tanstack/react-query is not installed (RBT-004 state)
+
+    expect(received).toBeNull()
+
+    Received: {}
+
+      39 |       // eslint-disable-next-line @typescript-eslint/no-require-imports -- isolated module reload under test
+      40 |       const { createQueryClient } = require("@providers/query-client");
+    > 41 |       expect(createQueryClient()).toBeNull();
+         |                                   ^
+      42 |     });
+      43 |   });
+      44 |
+
+      at toBeNull (src/__tests__/providers/query-client.test.ts:41:35)
+      at Object.isolateModules (src/__tests__/providers/query-client.test.ts:30:10)
+
+  ● providers/query-client — createQueryClient › builds a QueryClient when the package is present (RBT-010 state)
+
+    expect(received).toBeInstanceOf(expected)
+
+    Expected constructor: FakeQueryClient
+    Received constructor: QueryClient
+
+      56 |       const { createQueryClient } = require("@providers/query-client");
+      57 |       const client = createQueryClient();
+    > 58 |       expect(client).toBeInstanceOf(FakeQueryClient);
+         |                      ^
+      59 |       expect((client as FakeQueryClient).cfg).toHaveProperty("defaultOptions");
+      60 |     });
+      61 |   });
+
+      at toBeInstanceOf (src/__tests__/providers/query-client.test.ts:58:22)
+      at Object.isolateModules (src/__tests__/providers/query-client.test.ts:46:10)
+
+
+Test Suites: 1 failed, 33 passed, 34 total
+Tests:       2 failed, 255 passed, 257 total
+Snapshots:   0 total
+Time:        3.801 s
+Ran all test suites.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
