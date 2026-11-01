@@ -2,10 +2,32 @@ import { render, screen } from "@testing-library/react-native";
 
 jest.mock("expo-router", () => ({
   Stack: () => null,
+  useRouter: () => ({ replace: jest.fn() }),
   useLocalSearchParams: () => ({
     eventId: "evt-1",
     sessionId: "sess-1",
     bookingId: "bk-1",
+  }),
+}));
+
+// The waiting route composes the RBT-043 screen, which consumes the queue hooks.
+// Mock the seams so the routing-only smoke test needs no providers.
+jest.mock("@presentation/hooks/useQueuePolling", () => ({
+  useQueuePolling: () => ({
+    entry: undefined,
+    isLoading: false,
+    isError: false,
+    error: null,
+    isSettled: false,
+    leave: jest.fn(),
+  }),
+}));
+jest.mock("@presentation/hooks/useAutoClaim", () => ({
+  useAutoClaim: () => ({
+    claiming: false,
+    claimedSessionId: undefined,
+    error: null,
+    errorState: null,
   }),
 }));
 
@@ -33,9 +55,12 @@ describe("(booking) routes", () => {
     expect(() => render(<BookingLayout />)).not.toThrow();
   });
 
-  it("renders Waiting with the event param", () => {
+  it("renders the Waiting room (no-queue guard without a queueId)", () => {
     render(<WaitingScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/evt-1/);
+    expect(screen.getByTestId("waiting-noqueue")).toHaveTextContent(
+      "Belum ada antrean aktif",
+      { exact: false },
+    );
   });
 
   it("renders Checkout with the session param", () => {
