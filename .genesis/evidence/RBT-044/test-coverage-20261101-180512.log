@@ -1,0 +1,14 @@
+RBT-044 Auto-claim admission + error states — verification
+branch feature/RBT-044-auto-claim-redirect @ 5901846
+verified on develop base e6c3a6e, Sun Nov  1 18:05:12 WIB 2026
+
+typecheck: PASS   lint: PASS
+
+All files                     |   97.14 |    88.88 |     100 |     100 |
+ application/queue            |     100 |      100 |     100 |     100 |
+  claim-admission.use-case.ts |     100 |      100 |     100 |     100 |
+ presentation/hooks           |   96.42 |    85.71 |     100 |     100 |
+  useAutoClaim.ts             |   96.42 |    85.71 |     100 |     100 | 65,108
+
+Test Suites: 2 passed, 2 total
+Tests:       16 passed, 16 total
