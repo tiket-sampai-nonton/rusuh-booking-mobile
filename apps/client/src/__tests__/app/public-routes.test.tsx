@@ -8,7 +8,7 @@ import { renderWithProviders } from "@shared/test-fixtures/render-with-providers
 // stub both.
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => ({ eventId: "evt-1" }),
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
 }));
 
 // eslint-disable-next-line import/first
@@ -38,9 +38,15 @@ describe("(public) routes", () => {
     expect(screen.getByText("History Event")).toBeTruthy();
   });
 
-  it("renders Browse placeholder", () => {
-    render(<BrowseScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/Browse/);
+  it("renders the Browse screen (RBT-031: real URL-driven results, not a placeholder)", async () => {
+    // The Browse route wires the mock catalog through the provider stack and
+    // reads filters from the URL; the "Event Terfilter" header + a result count
+    // prove the real screen mounts.
+    renderWithProviders(<BrowseScreen />);
+    await waitFor(() =>
+      expect(screen.getByText("Event Terfilter")).toBeTruthy(),
+    );
+    expect(screen.getByTestId("browse-count")).toBeTruthy();
   });
 
   it("renders History placeholder", () => {
