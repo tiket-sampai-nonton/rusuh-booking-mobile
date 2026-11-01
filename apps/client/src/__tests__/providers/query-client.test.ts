@@ -22,20 +22,21 @@ describe("providers/query-client — config", () => {
 });
 
 describe("providers/query-client — createQueryClient", () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
   afterEach(() => {
+    jest.dontMock("@tanstack/react-query");
     jest.resetModules();
   });
 
   it("returns null when @tanstack/react-query is not installed (RBT-004 state)", () => {
     jest.isolateModules(() => {
-      // Force the optional require to fail.
-      jest.doMock(
-        "@tanstack/react-query",
-        () => {
-          throw new Error("MODULE_NOT_FOUND");
-        },
-        { virtual: true },
-      );
+      // Force the optional require to fail. No `virtual` flag — the package is
+      // now installed (RBT-010), so a plain doMock reliably overrides it.
+      jest.doMock("@tanstack/react-query", () => {
+        throw new Error("MODULE_NOT_FOUND");
+      });
       // eslint-disable-next-line @typescript-eslint/no-require-imports -- isolated module reload under test
       const { createQueryClient } = require("@providers/query-client");
       expect(createQueryClient()).toBeNull();
