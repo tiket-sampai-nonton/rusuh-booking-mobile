@@ -33,6 +33,7 @@ import {
 import { DomainError } from "@domain/errors/domain-error";
 import {
   EMAIL_ERROR,
+  isValidCode,
   isValidEmail,
   normalizeCode,
 } from "@presentation/components/auth/auth.schema";
@@ -108,7 +109,7 @@ export function LoginModal({
   }, [auth, email]);
 
   // ----- Code step: verify OTP ----------------------------------------------
-  const canVerify = /^\d{6}$/.test(code);
+  const canVerify = isValidCode(code);
 
   const onVerify = useCallback(async () => {
     if (!canVerify) return;
