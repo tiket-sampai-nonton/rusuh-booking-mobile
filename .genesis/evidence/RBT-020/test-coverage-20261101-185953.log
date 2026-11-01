@@ -1,0 +1,22 @@
+RBT-020 OTP login modal (Masuk/Daftar landing modal) — verification
+branch feature/RBT-020-otp-login-modal (verified by orchestrator after subagent provider 404)
+typecheck: PASS   lint: PASS
+
+------------------------------|---------|----------|---------|---------|
+All files                     |   94.68 |       80 |   96.87 |   96.59 |
+ application/auth             |     100 |      100 |     100 |     100 |
+  request-otp.use-case.ts     |     100 |      100 |     100 |     100 |
+  verify-otp.use-case.ts      |     100 |      100 |     100 |     100 |
+ presentation/components/auth |   93.84 |    77.77 |      95 |   96.61 |
+  LoginButton.tsx             |     100 |      100 |     100 |     100 |
+  LoginModal.tsx              |   92.72 |    76.47 |   92.85 |   96.07 |
+  auth.schema.ts              |     100 |      100 |     100 |     100 |
+ presentation/hooks           |   95.23 |      100 |     100 |   95.23 |
+  useAuth.ts                  |   95.23 |      100 |     100 |   95.23 |
+------------------------------|---------|----------|---------|---------|
+Test Suites: 3 passed / Tests: 18 passed
+
+Notes: query-string ESM->CJS shim wired via metro.config.js fixes the
+'queryString.stringify is not a function' runtime bug. Dependency-free
+validators (no RHF/zod). Registration (RBT-021) + token persistence (RBT-023)
+scoped out. Auth is a landing modal launched from (public)/index.tsx, not a route.
