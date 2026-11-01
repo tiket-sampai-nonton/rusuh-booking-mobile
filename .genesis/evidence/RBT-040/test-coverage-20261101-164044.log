@@ -1,0 +1,34 @@
+npm notice run rusuh-booking-client@0.1.0 npx
+npm notice run 'jest' src/__tests__/domain/queue-state-machine.test.ts --coverage --collectCoverageFrom=src/domain/state-machines/**/*.ts --verbose
+PASS src/__tests__/domain/queue-state-machine.test.ts
+  domain/queue-state-machine — state sets
+    ✓ partitions the port enum into active + terminal with no overlap and no gaps (2 ms)
+    ✓ isTerminal is true for exactly the terminal states
+    ✓ QUEUE_TRANSITIONS matches the expected table exactly
+  domain/queue-state-machine — authorization invariant (safety)
+    ✓ ONLY ADMITTED authorizes progression
+    ✓ every non-ADMITTED status is unauthorized (1 ms)
+  domain/queue-state-machine — canTransition
+    ✓ allows every legal transition in the table
+    ✓ rejects every transition NOT in the table (exhaustive complement) (2 ms)
+    ✓ rejects self-transitions (no status transitions to itself)
+    ✓ rejects representative illegal transitions (1 ms)
+    ✓ no terminal state transitions anywhere (1 ms)
+    ✓ treats an unknown status as having no legal transitions
+  domain/queue-state-machine — nextStatus (guarded transition)
+    ✓ returns the target for a legal transition
+    ✓ throws a DomainError (kind=conflict) on an illegal transition (6 ms)
+    ✓ throws on any transition out of a terminal state (1 ms)
+    ✓ throws on an unknown source status
+
+------------------------|---------|----------|---------|---------|-------------------
+File                    | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+------------------------|---------|----------|---------|---------|-------------------
+All files               |     100 |      100 |     100 |     100 |                   
+ queue-state-machine.ts |     100 |      100 |     100 |     100 |                   
+------------------------|---------|----------|---------|---------|-------------------
+Test Suites: 1 passed, 1 total
+Tests:       15 passed, 15 total
+Snapshots:   0 total
+Time:        0.36 s, estimated 1 s
+Ran all test suites matching /src\/__tests__\/domain\/queue-state-machine.test.ts/i.
