@@ -1,9 +1,14 @@
-import { render, screen } from "@testing-library/react-native";
+import { render, screen, waitFor } from "@testing-library/react-native";
+
+import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
 // Dynamic routes read params via expo-router's useLocalSearchParams; stub it so
-// the route bodies execute under jest without a navigation container.
+// the route bodies execute under jest without a navigation container. The Home
+// route (RBT-030) now renders the real HomeScreen, which also calls useRouter —
+// stub both.
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => ({ eventId: "evt-1" }),
+  useRouter: () => ({ push: jest.fn() }),
 }));
 
 // eslint-disable-next-line import/first
@@ -23,9 +28,14 @@ describe("(public) routes", () => {
     expect(typeof EventDetailScreen).toBe("function");
   });
 
-  it("renders Home with the app name header", () => {
-    render(<HomeScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent("Rusuh Booking");
+  it("renders the Home screen (RBT-030: real event catalog, not a placeholder)", async () => {
+    // The Home route wires the mock catalog through the provider stack; the
+    // "Konser Terdekat" / "History Event" sections prove the real screen mounts.
+    renderWithProviders(<HomeScreen />);
+    await waitFor(() =>
+      expect(screen.getByText("Konser Terdekat")).toBeTruthy(),
+    );
+    expect(screen.getByText("History Event")).toBeTruthy();
   });
 
   it("renders Browse placeholder", () => {

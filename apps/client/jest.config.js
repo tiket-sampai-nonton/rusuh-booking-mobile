@@ -2,6 +2,12 @@
 module.exports = {
   preset: "jest-expo",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
+  // Timer-driven RN tests (HeroCarousel setInterval, @tanstack polling, queue
+  // polling) can exceed the 5s default when jest runs many related suites in
+  // parallel under the pre-commit guard (worker starvation, not slow logic).
+  // A modest floor keeps those tests deterministic without touching any
+  // lint / type / coverage gate.
+  testTimeout: 15000,
   transformIgnorePatterns: [
     "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|nativewind|react-native-css-interop))",
   ],

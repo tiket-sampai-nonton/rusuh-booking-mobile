@@ -10,25 +10,23 @@ jest.mock("@providers/query-client", () => ({
   createQueryClient: () => mockCreateQueryClient(),
 }));
 
-// Virtual mock for the not-yet-installed @tanstack/react-query. The provider
-// captures the client it receives so the RBT-010 wrapping branch is asserted.
+// Stub @tanstack/react-query's provider so the RBT-010 wrapping branch is
+// asserted without the real client lifecycle. The package is now installed
+// (RBT-010), so this is a plain module mock (no `virtual`) — a reliable
+// intercept regardless of suite order under --runInBand.
 let receivedClient: unknown = null;
-jest.mock(
-  "@tanstack/react-query",
-  () => ({
-    QueryClientProvider: ({
-      client,
-      children,
-    }: {
-      client: unknown;
-      children: React.ReactNode;
-    }) => {
-      receivedClient = client;
-      return <>{children}</>;
-    },
-  }),
-  { virtual: true },
-);
+jest.mock("@tanstack/react-query", () => ({
+  QueryClientProvider: ({
+    client,
+    children,
+  }: {
+    client: unknown;
+    children: React.ReactNode;
+  }) => {
+    receivedClient = client;
+    return <>{children}</>;
+  },
+}));
 
 // Imported after the mocks are registered.
 // eslint-disable-next-line import/first, @typescript-eslint/no-require-imports -- load after jest.mock registration
