@@ -1,0 +1,16 @@
+RBT-042 Adaptive polling (nextPollAfterMs + jitter + one-poller) — verification
+branch feature/RBT-042-adaptive-polling
+typecheck: PASS   lint: PASS
+
+----------------------------|---------|----------|---------|---------|
+All files                   |     100 |      100 |     100 |     100 |
+ application/queue          |     100 |      100 |     100 |     100 |
+  leave-queue.use-case.ts   |     100 |      100 |     100 |     100 |
+  observe-queue.use-case.ts |     100 |      100 |     100 |     100 |
+ domain/rules               |     100 |      100 |     100 |     100 |
+  queue-polling.ts          |     100 |      100 |     100 |     100 |
+ presentation/hooks         |     100 |      100 |     100 |     100 |
+  useQueuePolling.ts        |     100 |      100 |     100 |     100 |
+----------------------------|---------|----------|---------|---------|
+Test Suites: 3 passed, 3 total
+Tests:       22 passed, 22 total
