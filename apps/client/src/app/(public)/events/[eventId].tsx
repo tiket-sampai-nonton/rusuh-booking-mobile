@@ -1,15 +1,14 @@
 import { useLocalSearchParams } from "expo-router";
-import { Text, View } from "react-native";
 
-// Public route `/events/[eventId]` (event detail). Skeleton placeholder — real
-// detail screen lands in a later RBT. Routing-only, no API calls.
-export default function EventDetailScreen() {
+import { EventDetailScreen } from "@presentation/screens/EventDetail";
+
+/**
+ * Public route `/events/[eventId]` — the single-event detail screen (RBT-032).
+ *
+ * Routing-only: reads the `eventId` route param and hands it to the screen,
+ * which owns the data fetch (useEventDetail → GetEventDetail → EventRepository).
+ */
+export default function EventDetailRoute() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-lg font-semibold text-brand" accessibilityRole="header">
-        Event Detail — /events/{eventId} (RBT-002)
-      </Text>
-    </View>
-  );
+  return <EventDetailScreen eventId={eventId ?? ""} />;
 }

@@ -26,6 +26,14 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       lineup: ["Band A", "Band B", "DJ C"],
       terms: "Tiket tidak dapat dikembalikan. Wajib membawa KTP sesuai NIK.",
       bannerImage: "https://cdn.example/evt-1/banner.jpg",
+      // FE-NEED (O2): pricing categories + availability, mocked until the BE
+      // typed `priceMinor`/`available` contract lands. Read defensively by the
+      // detail screen (parseDescription).
+      categories: [
+        { code: "FEST", name: "Festival", priceMinor: 45000000, available: 90 },
+        { code: "VIP", name: "VIP", priceMinor: 120000000, available: 20 },
+        { code: "CAT1", name: "Tribun Cat 1", priceMinor: 65000000, available: 10 },
+      ],
     },
   },
   {
@@ -44,6 +52,10 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       lineup: [],
       terms: "Masuk sesuai sesi pada tiket.",
       bannerImage: "https://cdn.example/evt-2/banner.jpg",
+      categories: [
+        { code: "REG", name: "Reguler", priceMinor: 30000000, available: 8 },
+        { code: "VIP", name: "VIP Lounge", priceMinor: 75000000, available: 0 },
+      ],
     },
   },
   {
@@ -80,6 +92,10 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       lineup: ["Headliner Z"],
       terms: "Sold out. Tidak ada penjualan di lokasi.",
       bannerImage: "https://cdn.example/evt-4/banner.jpg",
+      categories: [
+        { code: "REG", name: "Reguler", priceMinor: 75000000, available: 0 },
+        { code: "VIP", name: "VIP", priceMinor: 150000000, available: 0 },
+      ],
     },
   },
   {
@@ -116,6 +132,10 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       lineup: ["DJ One", "DJ Two", "DJ Three"],
       terms: "Usia 18+. Wajib NIK.",
       bannerImage: "https://cdn.example/evt-6/banner.jpg",
+      categories: [
+        { code: "GA", name: "General Admission", priceMinor: 35000000, available: 300 },
+        { code: "FRONT", name: "Front of Stage", priceMinor: 90000000, available: 40 },
+      ],
     },
   },
 ];

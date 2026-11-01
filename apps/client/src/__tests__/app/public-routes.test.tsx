@@ -48,8 +48,14 @@ describe("(public) routes", () => {
     expect(screen.getByRole("header")).toHaveTextContent(/History/);
   });
 
-  it("renders Event Detail with the route param", () => {
-    render(<EventDetailScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/evt-1/);
+  it("renders the Event Detail screen for the route param (RBT-032: real detail, not a placeholder)", async () => {
+    // The route reads eventId=evt-1 (stubbed) and wires the mock event through
+    // the provider stack; the resolved event name proves the real screen mounts.
+    renderWithProviders(<EventDetailScreen />);
+    await waitFor(() =>
+      expect(
+        screen.getAllByText("Rusuh Fest 2026").length,
+      ).toBeGreaterThanOrEqual(1),
+    );
   });
 });
