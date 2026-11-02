@@ -1,4 +1,5 @@
 import {
+  prefillFromProfile,
   selectCheckoutPrefill,
   useAccountStore,
   type AccountState,
@@ -68,5 +69,20 @@ describe("selectCheckoutPrefill", () => {
     const prefill = selectCheckoutPrefill(useAccountStore.getState());
     expect(prefill.fromAccount).toBe(true);
     expect(prefill.nikMasked).toBe("3171********1234");
+  });
+});
+
+describe("prefillFromProfile (stable-reference derivation, RBT-053)", () => {
+  it("returns fromAccount:false for an undefined profile", () => {
+    expect(prefillFromProfile(undefined)).toEqual({ fromAccount: false });
+  });
+
+  it("maps a profile to the masked prefill", () => {
+    expect(prefillFromProfile(PROFILE)).toEqual({
+      fromAccount: true,
+      fullName: "Rizky R.",
+      emailMasked: "r***@gmail.com",
+      nikMasked: "3171********1234",
+    });
   });
 });

@@ -59,6 +59,21 @@ export class HttpBookingRepository implements BookingRepository {
     return toAttendeeCheck(unwrap<Parameters<typeof toAttendeeCheck>[0]>(res));
   }
 
+  async setBuyer(
+    sessionId: string,
+    buyerNik: string,
+    email: string,
+  ): Promise<void> {
+    // FE-NEED (O1): proposed endpoint; harmless no-op path until the BE
+    // delivers it (the hold body can also carry the buyer). We still POST so
+    // the real adapter is wired the day the route exists.
+    await this.http.request({
+      method: "POST",
+      url: `booking-sessions/${encodeURIComponent(sessionId)}/buyer`,
+      body: { buyerNik, email },
+    });
+  }
+
   async hold(
     sessionId: string,
     items: readonly BookingItemInput[],

@@ -34,6 +34,7 @@ class FakeRepo implements BookingRepository {
         : "AVAILABLE";
     return { nikMasked: "3***", result };
   }
+  async setBuyer(): Promise<void> {}
   async hold(
     _s: string,
     _i: readonly BookingItemInput[],

@@ -21,6 +21,14 @@ describe("MockBookingRepository", () => {
     expect(limited.result).toBe("CHECK_LIMIT_REACHED");
     expect(limited.checksRemaining).toBe(0);
 
+    // setBuyer records the MASKED NIK only (SECURITY — never the raw NIK).
+    expect(repo.getBuyerSet()).toBeNull();
+    await repo.setBuyer(session.sessionId, "3171999999999999", "buyer@mail.com");
+    const set = repo.getBuyerSet();
+    expect(set?.email).toBe("buyer@mail.com");
+    expect(set?.nikMasked).toBe("31****99");
+    expect(set?.nikMasked).not.toContain("3171999999999999"); // no raw NIK
+
     const items = [{ categoryId: "c1", attendeeName: "A", attendeeNik: "n" }];
     const b1 = await repo.hold(session.sessionId, items, "idem-1");
     const b2 = await repo.hold(session.sessionId, items, "idem-1");
