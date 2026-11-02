@@ -33,6 +33,7 @@ import { MockEventRepository } from "@infrastructure/__fixtures__/mock-event.rep
 import { MockFileShareAdapter } from "@infrastructure/__fixtures__/mock-file-share.adapter";
 import { MockHttpClient } from "@infrastructure/__fixtures__/mock-http-client";
 import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notification.adapter";
+import { ExpoNotificationAdapter } from "@infrastructure/notifications/expo-notification.adapter";
 import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.repository";
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
@@ -155,6 +156,13 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // ClockPort is a platform primitive (not a backend capability): the real
   // system clock is bound in both modes. Tests inject a fake ClockPort directly.
   const clock: ClockPort = new SystemClock();
+  // Notification adapter is a platform primitive (like the clock): native uses
+  // expo-notifications (RBT-072); web uses the mock until web-push (RBT-073)
+  // lands; the dev/test mock is used when mocks are on. Bound in both modes.
+  const notificationAdapter: NotificationPort =
+    Platform.OS === "web"
+      ? new MockNotificationAdapter()
+      : new ExpoNotificationAdapter();
   // Server-authoritative clock layered over the device clock. Unsynced until a
   // server timestamp arrives (offset 0 → serverNow === device now); the catalog
   // split + timers read through it so a later sync corrects everything at once.
@@ -215,9 +223,9 @@ export function createContainer(options: ContainerOptions = {}): Container {
     bookingRepository: new HttpBookingRepository(httpClient),
     paymentRepository: new HttpPaymentRepository(httpClient),
     userRepository: new HttpUserRepository(httpClient),
-    // Platform adapters are not part of RBT-010 — bound in E6/E8. Until then
-    // the mock adapters keep the container complete without faking a backend.
-    notification: new MockNotificationAdapter(),
+    // RBT-072: native uses expo-notifications; web falls back to the mock until
+    // web-push (RBT-073). fileShare is bound in E6.
+    notification: notificationAdapter,
     fileShare: new MockFileShareAdapter(),
   };
 }

@@ -7,12 +7,22 @@
  * between platforms; only the bound adapter does.
  */
 
-/** Minimal local-notification request placeholder — refined in RBT-072. */
+/** The required notification flows (RBT-072 AC1). */
+export type NotificationKind =
+  | "expiry_reminder" // hold/payment deadline is near
+  | "payment_success" // booking paid & confirmed
+  | "admission" // queue admitted — your turn
+  | "event_reminder"; // event starts soon
+
+/** A local notification + the in-app route a tap should deep-link to. */
 export interface LocalNotification {
+  readonly kind: NotificationKind;
   readonly title: string;
   readonly body: string;
   /** Epoch-ms time to fire; omitted means immediate. */
   readonly scheduledAtMs?: number;
+  /** In-app route a tap opens (e.g. `/payment/bk-1`, `/success/bk-1`). */
+  readonly deepLink?: string;
 }
 
 export interface NotificationPort {
