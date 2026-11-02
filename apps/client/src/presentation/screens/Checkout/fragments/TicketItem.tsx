@@ -7,7 +7,15 @@ import { CATEGORIES } from "../categories";
 import { Field } from "./common";
 import type { TicketItemProps } from "../interface";
 
-export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuyer }: TicketItemProps) {
+const STATUS_TEXT: Record<string, { label: string; className: string }> = {
+  checking: { label: "Mengecek ketersediaan NIK…", className: "text-muted-foreground" },
+  available: { label: "NIK tersedia ✓", className: "text-ok" },
+  blocked: { label: "NIK sudah terdaftar untuk event ini.", className: "text-error" },
+  warning: { label: "Batas pengecekan tercapai — lanjut, server memvalidasi.", className: "text-warn" },
+};
+
+export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuyer, status = "idle" }: TicketItemProps) {
+  const statusInfo = STATUS_TEXT[status];
   return (
     <View className="mt-3 rounded-xl border border-line p-3.5" testID={`ticket-row-${index}`}>
       <View className="flex-row items-center justify-between">
@@ -61,6 +69,16 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
         invalid={!row.useBuyerNik && row.attendeeNik.length > 0 && !isValidNik(row.attendeeNik)}
         testID={`attendee-nik-${index}`}
       />
+
+      {statusInfo ? (
+        <Text
+          className={`mt-1 text-2xs ${statusInfo.className}`}
+          accessibilityLiveRegion="polite"
+          testID={`attendee-status-${index}`}
+        >
+          {statusInfo.label}
+        </Text>
+      ) : null}
 
       <View className="mt-3 flex-row items-center justify-between">
         <Text className="flex-1 pr-2 text-xs text-foreground">

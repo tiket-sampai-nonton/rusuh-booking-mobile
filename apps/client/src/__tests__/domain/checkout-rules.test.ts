@@ -4,6 +4,8 @@ import {
   attendeeNiksUnique,
   buyerNikUsedOnce,
   effectiveCap,
+  isAttendeeBlocked,
+  isAttendeeWarning,
   isCheckoutReady,
   isQuantityValid,
   isValidEmail,
@@ -101,6 +103,55 @@ describe("row-list transforms (RBT-051 add/remove/patch/single-use)", () => {
     const off1 = setBuyerUseAt(on1, 1, false);
     expect(off1[0].useBuyerNik).toBe(false);
     expect(off1[1].useBuyerNik).toBe(false);
+  });
+});
+
+describe("attendee-check interpretation + consent (RBT-052)", () => {
+  it("isAttendeeBlocked only for ALREADY_REGISTERED", () => {
+    expect(isAttendeeBlocked("ALREADY_REGISTERED")).toBe(true);
+    expect(isAttendeeBlocked("CHECK_LIMIT_REACHED")).toBe(false);
+    expect(isAttendeeBlocked("AVAILABLE")).toBe(false);
+  });
+
+  it("isAttendeeWarning only for CHECK_LIMIT_REACHED", () => {
+    expect(isAttendeeWarning("CHECK_LIMIT_REACHED")).toBe(true);
+    expect(isAttendeeWarning("ALREADY_REGISTERED")).toBe(false);
+    expect(isAttendeeWarning("AVAILABLE")).toBe(false);
+  });
+
+  const base = {
+    buyerNik: "3171999999999999",
+    buyerEmail: "buyer@mail.com",
+    maxSelectable: 3,
+  };
+
+  it("blocks readiness when an attendee NIK is ALREADY_REGISTERED", () => {
+    const rows = [row({ attendeeNik: "3171010101010001" })];
+    expect(
+      isCheckoutReady({
+        ...base,
+        rows,
+        attendeeChecks: { "3171010101010001": "ALREADY_REGISTERED" },
+      }),
+    ).toBe(false);
+  });
+
+  it("does NOT block for CHECK_LIMIT_REACHED (advisory only)", () => {
+    const rows = [row({ attendeeNik: "3171010101010001" })];
+    expect(
+      isCheckoutReady({
+        ...base,
+        rows,
+        attendeeChecks: { "3171010101010001": "CHECK_LIMIT_REACHED" },
+      }),
+    ).toBe(true);
+  });
+
+  it("blocks readiness when consent is explicitly withheld, allows when true/undefined", () => {
+    const rows = [row()];
+    expect(isCheckoutReady({ ...base, rows, consentGiven: false })).toBe(false);
+    expect(isCheckoutReady({ ...base, rows, consentGiven: true })).toBe(true);
+    expect(isCheckoutReady({ ...base, rows })).toBe(true); // undefined = not gated here
   });
 });
 

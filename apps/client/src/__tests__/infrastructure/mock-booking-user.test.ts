@@ -14,6 +14,13 @@ describe("MockBookingRepository", () => {
     expect(check.result).toBe("AVAILABLE");
     expect(check.nikMasked).toMatch(/\*\*\*\*/);
 
+    // Deterministic verdicts by NIK suffix (RBT-052 AC2).
+    const blocked = await repo.checkAttendee(session.sessionId, "3201234567890100");
+    expect(blocked.result).toBe("ALREADY_REGISTERED");
+    const limited = await repo.checkAttendee(session.sessionId, "3201234567890199");
+    expect(limited.result).toBe("CHECK_LIMIT_REACHED");
+    expect(limited.checksRemaining).toBe(0);
+
     const items = [{ categoryId: "c1", attendeeName: "A", attendeeNik: "n" }];
     const b1 = await repo.hold(session.sessionId, items, "idem-1");
     const b2 = await repo.hold(session.sessionId, items, "idem-1");
