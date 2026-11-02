@@ -89,6 +89,27 @@ describe("MockPaymentRepository", () => {
     expect((await repo.getStatus(a.attemptId)).attemptId).toBe(a.attemptId);
     await expect(repo.getStatus("ghost")).rejects.toThrow(/unknown attempt ghost/);
   });
+
+  it("serves a payment page: server methods, amount, 10-min deadline (RBT-060)", async () => {
+    const repo = new MockPaymentRepository();
+    const p = await repo.getPaymentPage("book-1");
+    expect(p.bookingId).toBe("book-1");
+    expect(p.amountMinor).toBe(45000000);
+    expect(p.methods).toContain("QRIS");
+    expect(p.methods).not.toContain("CREDIT_CARD" as never);
+    // paymentExpiresAt is ~10 min after serverTime.
+    const delta = Date.parse(p.paymentExpiresAt) - Date.parse(p.serverTime);
+    expect(delta).toBeGreaterThanOrEqual(590_000);
+    expect(delta).toBeLessThanOrEqual(610_000);
+    expect(p.currentAttempt).toBeUndefined(); // none yet
+  });
+
+  it("page restores the in-flight attempt after one is created (refresh-safe)", async () => {
+    const repo = new MockPaymentRepository();
+    const a = await repo.createAttempt("book-1", "QRIS", "k1");
+    const p = await repo.getPaymentPage("book-1");
+    expect(p.currentAttempt?.attemptId).toBe(a.attemptId);
+  });
 });
 
 describe("MockNotificationAdapter", () => {

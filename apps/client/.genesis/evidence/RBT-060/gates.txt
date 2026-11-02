@@ -1,0 +1,58 @@
+RBT-060 — Payment page (summary + method selection + timer)
+Branch: feature/RBT-060-payment-page
+Date: 2026-11-02
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-060 scope) ---
+File                               | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------------|---------|----------|---------|--------
+ application/payment/get-payment-page|    100 |     100 |     100 |     100
+ domain/rules/payment-method.ts     |     100 |     100 |     100 |     100
+ presentation/hooks/usePaymentPage  |     100 |     100 |     100 |     100
+ presentation/screens/Payment/index |     100 |     100 |     100 |     100
+   (all Payment fragments)          |     100 |     100 |     100 |     100
+ infrastructure/.../mock-payment.repo|    100 |     100 |     100 |     100
+ infrastructure/api/http-payment.repo|    100 |     100 |     100 |     100
+
+ALL FOUR METRICS = 100% on every RBT-060 file. Full suite: 75 suites,
+595 tests pass. Green under the husky pre-commit gate.
+(Payment/interface.ts excluded — type-only declarations.)
+
+================================================================
+ACCEPTANCE CRITERIA
+================================================================
+AC1 GET /payments/{id}/page → order summary: Total == amountMinor with NO
+    service/hidden-fee line (D10.1); paymentExpiresAt + serverTime drive a
+    10-min SERVER-authoritative countdown via ServerClock (never device clock,
+    D3.2); onExpire → /expired. ✓
+AC2 method-selection UI driven by SERVER `page.methods` (VA BCA/BNI/BRI/Permata ·
+    QRIS · GoPay, NO credit card); default = first server method; "Bayar
+    Sekarang" enabled on selection. A method the server did not return is not
+    rendered (verified by test). ✓
+
+Clean-Arch: GetPaymentPage framework-free; TanStack confined to usePaymentPage;
+PaymentRepository port extended with getPaymentPage + PaymentPage type (grounded
+in the Payment Service OpenAPI `PaymentPage` schema — bookingId, methods[],
+amountMinor, paymentExpiresAt, serverTime, currentAttempt?). Mock + HTTP adapters
+both implement it; the create-attempt → SNAP handoff is RBT-061 (onPay stub).
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0; /payment/[bookingId] route.
+iOS     : iPhone 16 Pro, Expo Go deep-link payment/demo-bk → ios-payment-page.png
+          — FULL page rendered from the live getPaymentPage mock call: ticking
+          server countdown (09:39), hold banner, Ringkasan Pesanan Total
+          Rp 450.000 (no fee line), all 6 server methods with VA BCA default-
+          selected, enabled "Bayar Sekarang".
+Android : emulator-5554 → android-payment-page.png — identical render
+          (countdown 09:45). The live ticking countdown proves getPaymentPage
+          returned real data (not a static frame), so this ticket's screen IS
+          API-backed-verified on device, beyond mount. (The Bayar handoff is
+          RBT-061; its tap flow is covered by the PaymentScreen RNTL suite.)

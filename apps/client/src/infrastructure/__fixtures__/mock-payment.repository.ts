@@ -8,13 +8,43 @@
 import type {
   PaymentAttempt,
   PaymentMethod,
+  PaymentPage,
   PaymentRepository,
 } from "@domain/repositories/payment.repository";
+
+/** Server-allowed methods the mock page exposes (no credit card). */
+const MOCK_METHODS: readonly PaymentMethod[] = [
+  "VA_BCA",
+  "VA_BNI",
+  "VA_BRI",
+  "VA_PERMATA",
+  "QRIS",
+  "GOPAY",
+];
 
 export class MockPaymentRepository implements PaymentRepository {
   private readonly attemptsByKey = new Map<string, PaymentAttempt>();
   private readonly attemptsById = new Map<string, PaymentAttempt>();
+  private readonly attemptByBooking = new Map<string, PaymentAttempt>();
   private seq = 0;
+
+  /**
+   * GET /payments/{bookingId}/page (RBT-060). Server-authoritative summary +
+   * method list + a 10-min deadline. amountMinor mirrors the checkout mock
+   * (Rp 450.000 = one REG ticket); NO fee line. Restores `currentAttempt` when
+   * one is already in flight for this booking (refresh-safe, RBT-061).
+   */
+  async getPaymentPage(bookingId: string): Promise<PaymentPage> {
+    const now = Date.now();
+    return {
+      bookingId,
+      methods: MOCK_METHODS,
+      amountMinor: 45000000,
+      paymentExpiresAt: new Date(now + 600_000).toISOString(),
+      serverTime: new Date(now).toISOString(),
+      currentAttempt: this.attemptByBooking.get(bookingId),
+    };
+  }
 
   async createAttempt(
     bookingId: string,
@@ -36,6 +66,7 @@ export class MockPaymentRepository implements PaymentRepository {
     };
     this.attemptsByKey.set(idempotencyKey, attempt);
     this.attemptsById.set(attempt.attemptId, attempt);
+    this.attemptByBooking.set(bookingId, attempt);
     return attempt;
   }
 

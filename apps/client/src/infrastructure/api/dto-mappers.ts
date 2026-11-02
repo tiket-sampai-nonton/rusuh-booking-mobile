@@ -20,6 +20,8 @@ import type {
 } from "@domain/repositories/event.repository";
 import type {
   PaymentAttempt,
+  PaymentMethod,
+  PaymentPage,
   PaymentStatus,
 } from "@domain/repositories/payment.repository";
 import type {
@@ -64,6 +66,14 @@ interface WirePaymentAttempt {
   redirectUrl?: string;
   paymentExpiresAt?: string;
   serverTime?: string;
+}
+interface WirePaymentPage {
+  bookingId: string;
+  methods: PaymentMethod[];
+  amountMinor: number;
+  paymentExpiresAt: string;
+  serverTime: string;
+  currentAttempt?: WirePaymentAttempt;
 }
 interface WireBookingSession {
   sessionId: string;
@@ -134,6 +144,19 @@ export function toPaymentAttempt(dto: WirePaymentAttempt): PaymentAttempt {
     redirectUrl: dto.redirectUrl,
     paymentExpiresAt: dto.paymentExpiresAt,
     serverTime: dto.serverTime,
+  };
+}
+
+export function toPaymentPage(dto: WirePaymentPage): PaymentPage {
+  return {
+    bookingId: dto.bookingId,
+    methods: dto.methods,
+    amountMinor: dto.amountMinor,
+    paymentExpiresAt: dto.paymentExpiresAt,
+    serverTime: dto.serverTime,
+    currentAttempt: dto.currentAttempt
+      ? toPaymentAttempt(dto.currentAttempt)
+      : undefined,
   };
 }
 
