@@ -90,6 +90,21 @@ describe("MockPaymentRepository", () => {
     await expect(repo.getStatus("ghost")).rejects.toThrow(/unknown attempt ghost/);
   });
 
+  it("getStatus settles a pending attempt to PAID after 2 polls (RBT-063)", async () => {
+    const repo = new MockPaymentRepository();
+    const a = await repo.createAttempt("book-5", "QRIS", "k5");
+    expect(a.status).toBe("AWAITING_PAYMENT");
+    // poll 1 — still pending
+    expect((await repo.getStatus(a.attemptId)).status).toBe("AWAITING_PAYMENT");
+    // poll 2 — settles to PAID (authoritative)
+    expect((await repo.getStatus(a.attemptId)).status).toBe("PAID");
+    // terminal stays terminal; the page restores the PAID attempt
+    expect((await repo.getStatus(a.attemptId)).status).toBe("PAID");
+    expect((await repo.getPaymentPage("book-5")).currentAttempt?.status).toBe(
+      "PAID",
+    );
+  });
+
   it("serves a payment page: server methods, amount, 10-min deadline (RBT-060)", async () => {
     const repo = new MockPaymentRepository();
     const p = await repo.getPaymentPage("book-1");

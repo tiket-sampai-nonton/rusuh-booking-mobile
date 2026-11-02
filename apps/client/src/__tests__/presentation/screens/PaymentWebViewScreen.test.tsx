@@ -92,7 +92,7 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
     await waitFor(() => expect(screen.getByTestId("paywv-web")).toBeTruthy());
   });
 
-  it("native: a SNAP success return routes to /success", async () => {
+  it("native: a SNAP success return routes to the verify gate, not /success (RBT-063)", async () => {
     Object.defineProperty(RN.Platform, "OS", { value: "ios", configurable: true });
     renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
       container: {
@@ -106,7 +106,7 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
       },
     });
     await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/success/bk-1"),
+      expect(mockRouter.replace).toHaveBeenCalledWith("/payment-result/bk-1"),
     );
   });
 
@@ -164,10 +164,18 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
 });
 
 describe("resolveWebViewNav (RBT-062)", () => {
-  it("routes a success return to /success", () => {
-    expect(resolveWebViewNav("https://app/success/bk-1", "bk-1")).toBe("/success/bk-1");
+  it("routes a success return to the result GATE, not straight to /success (RBT-063)", () => {
+    // never trust the callback — it must go through the authoritative verify.
+    expect(resolveWebViewNav("https://app/success/bk-1", "bk-1")).toBe(
+      "/payment-result/bk-1",
+    );
   });
-  it("routes a failed or expired return to /expired", () => {
+  it("carries attemptId into the result gate when known", () => {
+    expect(resolveWebViewNav("https://app/success/bk-1", "bk-1", "a7")).toBe(
+      "/payment-result/bk-1?attemptId=a7",
+    );
+  });
+  it("routes a failed or expired return straight to /expired", () => {
     expect(resolveWebViewNav("https://app/failed?x=1", "bk-1")).toBe("/expired/bk-1");
     expect(resolveWebViewNav("https://app/expired/bk-1", "bk-1")).toBe("/expired/bk-1");
   });
