@@ -20,6 +20,15 @@ jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
 
+// Responsive hook is mockable per-test: default phone (1 column); a desktop
+// override exercises the multi-column grid branch.
+const mockResponsive = {
+  current: { isWeb: false, isDesktop: false, width: 390, gridColumns: 1, detailTwoCol: false },
+};
+jest.mock("@presentation/hooks/useResponsive", () => ({
+  useResponsive: () => mockResponsive.current,
+}));
+
 // eslint-disable-next-line import/first
 import { HistoryScreen } from "@presentation/screens/History";
 
@@ -65,6 +74,13 @@ describe("HistoryScreen", () => {
   beforeEach(() => {
     mockRouter.push.mockReset();
     mockRouter.replace.mockReset();
+    mockResponsive.current = {
+      isWeb: false,
+      isDesktop: false,
+      width: 390,
+      gridColumns: 1,
+      detailTwoCol: false,
+    };
   });
 
   it("shows the loading state before data resolves", () => {
@@ -127,5 +143,21 @@ describe("HistoryScreen", () => {
     await waitFor(() => screen.getByTestId("history-home"));
     fireEvent.press(screen.getByTestId("history-home"));
     expect(mockRouter.push).toHaveBeenCalledWith("/");
+  });
+
+  it("renders the multi-column grid on desktop web", async () => {
+    mockResponsive.current = {
+      isWeb: true,
+      isDesktop: true,
+      width: 1200,
+      gridColumns: 3,
+      detailTwoCol: true,
+    };
+    renderWithProviders(<HistoryScreen />, {
+      container: { eventRepository: repo(CATALOG) },
+    });
+    await waitFor(() => screen.getByTestId("event-card-rock"));
+    expect(screen.getByTestId("history-grid")).toBeTruthy();
+    expect(screen.getByTestId("event-card-jazz")).toBeTruthy();
   });
 });
