@@ -102,3 +102,57 @@ export function splitCatalog(
   history.sort((a, b) => startMs(b) - startMs(a));
   return { upcoming, history };
 }
+
+/** Time window for the "Konser Terdekat" (nearby) derivation. */
+export type NearbyWindow = "all" | "week" | "month";
+
+/** Days per window (prototype index.html: week ≤ +7d, month ≤ +30d). */
+const WINDOW_DAYS: Record<Exclude<NearbyWindow, "all">, number> = {
+  week: 7,
+  month: 30,
+};
+
+const DAY_MS = 86_400_000;
+
+export interface NearbyOptions {
+  /**
+   * How far ahead to look. `"all"` (default) keeps every upcoming event;
+   * `"week"`/`"month"` keep only events starting within +7d / +30d of
+   * `serverNowMs` (boundary inclusive, matching the prototype filter).
+   */
+  readonly window?: NearbyWindow;
+  /** Cap the result to the soonest N events (applied after the window). */
+  readonly limit?: number;
+}
+
+/**
+ * Derive "Konser Terdekat" — the soonest UPCOMING events, soonest first.
+ *
+ * Reuses `splitCatalog` (never re-implements the upcoming/history split), then
+ * optionally narrows to a "this week"/"this month" window and caps the count.
+ * Pure + framework-free; takes the server clock (`serverNowMs`), never the
+ * device clock, so a skewed device never miscategorises an event.
+ *
+ * Events with no `startsAt` are still upcoming (per `splitCatalog`) and are
+ * never excluded by a window — a dateless event can't fail a date boundary.
+ */
+export function nearbyEvents(
+  events: readonly EventSummary[],
+  serverNowMs: number,
+  opts: NearbyOptions = {},
+): readonly EventSummary[] {
+  const { window = "all", limit } = opts;
+  const { upcoming } = splitCatalog(events, serverNowMs);
+
+  let result = upcoming;
+  if (window !== "all") {
+    const cutoff = serverNowMs + WINDOW_DAYS[window] * DAY_MS;
+    result = upcoming.filter((e) => {
+      if (!e.startsAt) return true; // dateless events aren't window-filtered
+      const t = Date.parse(e.startsAt);
+      return !isFinite(t) || t <= cutoff;
+    });
+  }
+
+  return typeof limit === "number" ? result.slice(0, limit) : result;
+}
