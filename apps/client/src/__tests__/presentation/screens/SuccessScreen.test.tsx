@@ -3,7 +3,7 @@
  * Re-verifies PAID; shows orderId/qty/amount/MASKED NIK; failed → recovery.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, waitFor } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
 
 import type {
@@ -81,6 +81,20 @@ describe("SuccessScreen (RBT-070)", () => {
     expect(screen.getByText("2 tiket")).toBeTruthy();
     expect(screen.getByText("Rp 450.000")).toBeTruthy();
     expect(screen.getByText("31****89")).toBeTruthy();
+    // RBT-071: one e-ticket card per ticket + download/home actions
+    expect(screen.getByTestId("eticket-list")).toBeTruthy();
+    expect(screen.getByTestId("eticket-0")).toBeTruthy();
+    expect(screen.getByTestId("eticket-1")).toBeTruthy();
+    expect(screen.getByTestId("success-download")).toBeTruthy();
+    expect(screen.getByTestId("success-home")).toBeTruthy();
+  });
+
+  it("the home action routes to / (RBT-071)", async () => {
+    useSessionStore.getState().setOrderDetail("31****89", 1);
+    const screen = renderScreen("PAID");
+    await waitFor(() => expect(screen.getByTestId("success-home")).toBeTruthy());
+    fireEvent.press(screen.getByTestId("success-home"));
+    expect(mockRouter.replace).toHaveBeenCalledWith("/");
   });
 
   it("shows the MASKED NIK, never a raw 16-digit NIK", async () => {
@@ -98,6 +112,15 @@ describe("SuccessScreen (RBT-070)", () => {
     expect(screen.getByText("••••")).toBeTruthy();
     // default qty 1 when ticketCount unset
     expect(screen.getByText("1 tiket")).toBeTruthy();
+  });
+
+  it("the download action fires the share without throwing (RBT-071)", async () => {
+    useSessionStore.getState().setOrderDetail("31****89", 1);
+    const screen = renderScreen("PAID");
+    await waitFor(() => expect(screen.getByTestId("success-download")).toBeTruthy());
+    // On web (jest default here RN is 'ios'); the handler is fire-and-forget —
+    // pressing must not throw. Platform default share is covered in its own test.
+    expect(() => fireEvent.press(screen.getByTestId("success-download"))).not.toThrow();
   });
 
   it("a non-PAID (FAILED) status redirects to the recovery screen", async () => {

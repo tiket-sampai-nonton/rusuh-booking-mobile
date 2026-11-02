@@ -55,3 +55,20 @@ jest.mock("react-native-webview", () => {
   }
   return { __esModule: true, WebView: WebViewMock, default: WebViewMock };
 });
+
+// react-native-qrcode-svg renders an SVG QR via react-native-svg; in the unit
+// runner we stub it as a plain View that carries the encoded value as its
+// accessibilityLabel + testID, so tests can assert the QR payload (a safe
+// ticket ref, never PII) without a real SVG rasterizer. The real QR render is
+// verified on-device/manually (RBT-071).
+jest.mock("react-native-qrcode-svg", () => {
+  const ReactMock = require("react");
+  const RNMock = require("react-native");
+  function QRCodeMock(props) {
+    return ReactMock.createElement(RNMock.View, {
+      testID: "qr-code",
+      accessibilityLabel: props.value,
+    });
+  }
+  return { __esModule: true, default: QRCodeMock };
+});
