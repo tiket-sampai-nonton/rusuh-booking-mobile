@@ -36,6 +36,7 @@ import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
+import { useHoldBooking } from "@presentation/hooks/useHoldBooking";
 import { useSetBuyer } from "@presentation/hooks/useSetBuyer";
 import {
   prefillFromProfile,
@@ -74,6 +75,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const { session, isLoading } = useRestoreBookingSession();
   const { checks, pending, request } = useAttendeeCheck(sessionId);
   const { setBuyer } = useSetBuyer();
+  const { hold, isHolding, error: holdError } = useHoldBooking();
   // Select the STABLE profile reference (not a fresh object) so zustand does not
   // re-render every tick; derive the prefill from it with useMemo.
   const profile = useAccountStore((s) => s.profile);
@@ -248,12 +250,22 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
         <CheckoutBar
           totalMinor={totalMinor}
           ready={ready}
-          pending={false}
+          pending={isHolding}
           expired={expired}
+          errorMessage={holdError?.userMessage}
           onSubmit={() => {
-            // RBT-053: persist the buyer on the session before payment
-            // (FE-NEED O1 mock). RBT-054 wires the idempotent hold + navigation.
-            void setBuyer({ sessionId, buyerNik, email: buyerEmail });
+            // RBT-053 set-buyer (O1 mock), then RBT-054 idempotent hold →
+            // redirect to payment. A typed conflict surfaces in CheckoutBar.
+            void (async () => {
+              await setBuyer({ sessionId, buyerNik, email: buyerEmail });
+              try {
+                const booking = await hold({ sessionId, rows, buyerNik });
+                router.replace(`/payment/${booking.bookingId}` as Href);
+              } catch {
+                // holdError (DomainError.userMessage) is shown in CheckoutBar;
+                // no navigation. The idempotency key is retained for retry.
+              }
+            })();
           }}
           bottomInset={insets.bottom}
         />

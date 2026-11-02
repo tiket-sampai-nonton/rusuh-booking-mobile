@@ -41,6 +41,11 @@ describe("domain/errors — mapError", () => {
     expect(mapError({ code: "UNAUTHORIZED" }).kind).toBe("auth");
     expect(mapError({ code: "VALIDATION_ERROR" }).kind).toBe("validation");
     expect(mapError({ code: "DEPENDENCY_UNAVAILABLE" }).kind).toBe("dependency");
+    // RBT-054 hold conflicts (FR-16).
+    expect(mapError({ code: "CATEGORY_UNAVAILABLE" }).kind).toBe("sold_out");
+    expect(mapError({ code: "MIXED_CATEGORIES_NOT_ALLOWED" }).kind).toBe("validation");
+    expect(mapError({ code: "ATTENDEE_NIK_DUPLICATE_IN_ORDER" }).kind).toBe("validation");
+    expect(mapError({ code: "QUANTITY_EXCEEDS_LIMIT" }).kind).toBe("quota");
     expect(mapError({ code: "NOT_FOUND" }).kind).toBe("not_found");
     expect(mapError({ code: "BOOKING_LOCKED" }).kind).toBe("conflict");
   });

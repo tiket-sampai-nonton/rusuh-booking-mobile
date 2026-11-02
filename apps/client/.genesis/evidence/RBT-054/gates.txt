@@ -1,0 +1,72 @@
+RBT-054 — Create booking (idempotent hold) + error handling
+Branch: feature/RBT-054-idempotent-hold
+Date: 2026-11-02
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-054 scope) ---
+File                               | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------------|---------|----------|---------|--------
+ application/booking/hold-booking   |     100 |     100 |     100 |     100
+ presentation/hooks/useHoldBooking  |     100 |     100 |     100 |     100
+ presentation/screens/Checkout/index|     100 |     100 |     100 |     100
+ infrastructure/.../mock-booking.repo|    100 |     100 |     100 |     100
+ domain/errors/messages.id.ts       |     100 |     100 |     100 |     100
+ providers/container.ts             |     100 |   89.47* |     100 |     100
+
+Overall RBT-054 scope: 100 / 97.1 / 100 / 100. 66 tests (7 suites) pass.
+Full suite green under the husky pre-commit gate.
+
+* container.ts line 198 (the real-mode `EXPO_PUBLIC_API_BASE_URL required` throw)
+  is PRE-EXISTING — `git diff develop` on container.ts shows only the added
+  `idempotencyKeys` field + its two bindings (all covered by the new container
+  test). The real-adapter throw branch predates RBT-054. Stmts/funcs/lines 100%.
+
+================================================================
+ACCEPTANCE CRITERIA (AC1 — FR-16, FR-25)
+================================================================
+- POST /bookings with Idempotency-Key → hold: HoldBooking use case mints ONE
+  key per action (hold-<sessionId>) via IdempotencyKeys, REUSES it across
+  retry/refresh, and CLEARS it on success. A double-submit or retry cannot
+  create a second booking (FR-25). useHoldBooking's TanStack mutation is
+  retry-safe for the same reason. ✓
+- Redirect to payment: on success the screen router.replace(`/payment/<id>`);
+  the booking id + amount are recorded in the session store for the payment
+  page. ✓
+- Error mapping (FR-16): CATEGORY_UNAVAILABLE, BUYER_QUOTA_EXHAUSTED,
+  QUANTITY_EXCEEDS_LIMIT, MIXED_CATEGORIES_NOT_ALLOWED,
+  ATTENDEE_NIK_DUPLICATE_IN_ORDER (the real contract code names) → typed
+  DomainError with a Bahasa userMessage, surfaced in CheckoutBar; NO navigation
+  on conflict. Untyped failures map to DEPENDENCY_UNAVAILABLE. ✓
+
+Clean-Arch: HoldBooking is framework-free; TanStack confined to useHoldBooking;
+IdempotencyKeys bound at the composition root (both mock + real modes) over the
+in-memory store. The 5 new error codes added to the single-source ERROR_SPECS
+table (OCP), grounded in the Booking Service OpenAPI contract (3. Booking
+Service API.openapi.json), not invented.
+
+================================================================
+MOCK TRIGGERS (deterministic, no BE — RBT-054)
+================================================================
+MockBookingRepository.hold throws the mapped DomainError for: category id
+"SOLD" → CATEGORY_UNAVAILABLE; >1 distinct category → MIXED_CATEGORIES_NOT_ALLOWED;
+duplicate resolved NIK → ATTENDEE_NIK_DUPLICATE_IN_ORDER; >3 items →
+QUANTITY_EXCEEDS_LIMIT. Same idempotency key → same booking (idempotent).
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0; /checkout and /payment routes.
+iOS     : iPhone 16 Pro, Expo Go deep-link → ios-checkout-mount.png (mounts
+          clean post-RBT-054).
+Android : emulator-5554 → android-checkout-mount.png (mounts; consent present).
+          The hold→/payment redirect and the conflict-error path are
+          text-entry + submit-tap flows → proven by the RNTL flows suite
+          ("submit holds and redirects to the payment page",
+          "a hold conflict shows the mapped Bahasa error and does NOT navigate")
+          since simctl/adb have no scripted-input primitive.

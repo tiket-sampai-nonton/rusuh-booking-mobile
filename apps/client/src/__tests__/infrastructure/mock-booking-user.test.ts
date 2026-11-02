@@ -29,12 +29,53 @@ describe("MockBookingRepository", () => {
     expect(set?.nikMasked).toBe("31****99");
     expect(set?.nikMasked).not.toContain("3171999999999999"); // no raw NIK
 
-    const items = [{ categoryId: "c1", attendeeName: "A", attendeeNik: "n" }];
+    const items = [{ categoryId: "REG", attendeeName: "A", attendeeNik: "3171010101010001" }];
     const b1 = await repo.hold(session.sessionId, items, "idem-1");
     const b2 = await repo.hold(session.sessionId, items, "idem-1");
     expect(b2.bookingId).toBe(b1.bookingId); // idempotent
     const b3 = await repo.hold(session.sessionId, items, "idem-2");
     expect(b3.bookingId).not.toBe(b1.bookingId);
+  });
+
+  it("hold throws deterministic domain conflicts (RBT-054, FR-16)", async () => {
+    const repo = new MockBookingRepository();
+    const s = await repo.createSession("evt-1");
+    const base = { attendeeName: "A", attendeeNik: "3171010101010001" };
+
+    await expect(
+      repo.hold(s.sessionId, [{ ...base, categoryId: "SOLD" }], "k1"),
+    ).rejects.toMatchObject({ code: "CATEGORY_UNAVAILABLE" });
+
+    await expect(
+      repo.hold(
+        s.sessionId,
+        [
+          { ...base, categoryId: "REG" },
+          { categoryId: "VIP", attendeeName: "B", attendeeNik: "3171010101010002" },
+        ],
+        "k2",
+      ),
+    ).rejects.toMatchObject({ code: "MIXED_CATEGORIES_NOT_ALLOWED" });
+
+    await expect(
+      repo.hold(
+        s.sessionId,
+        [
+          { categoryId: "REG", attendeeName: "A", attendeeNik: "3171010101010001" },
+          { categoryId: "REG", attendeeName: "B", attendeeNik: "3171010101010001" },
+        ],
+        "k3",
+      ),
+    ).rejects.toMatchObject({ code: "ATTENDEE_NIK_DUPLICATE_IN_ORDER" });
+
+    const four = [1, 2, 3, 4].map((n) => ({
+      categoryId: "REG",
+      attendeeName: `A${n}`,
+      attendeeNik: `317101010101000${n}`,
+    }));
+    await expect(repo.hold(s.sessionId, four, "k4")).rejects.toMatchObject({
+      code: "QUANTITY_EXCEEDS_LIMIT",
+    });
   });
 });
 

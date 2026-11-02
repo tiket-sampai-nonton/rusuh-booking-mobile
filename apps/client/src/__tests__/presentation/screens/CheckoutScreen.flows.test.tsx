@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
+import { mapError } from "@domain/errors/error-mapper";
 import type {
   AttendeeCheck,
   Booking,
@@ -235,6 +236,65 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     fireEvent.press(screen.getByTestId("checkout-submit"));
     await waitFor(() =>
       expect(calls).toEqual([["sess-1", "3171999999999999", "buyer@mail.com"]]),
+    );
+  });
+
+  // ---- RBT-054: idempotent hold → payment / conflict ----
+
+  it("submit holds and redirects to the payment page (RBT-054)", async () => {
+    useAccountStore.getState().setProfile(LOGGED_IN);
+    renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
+      container: { bookingRepository: verdictRepo(SESSION) },
+    });
+    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
+    fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
+    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
+    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010001");
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("checkout-submit").props.accessibilityState
+            .disabled,
+        ).toBe(false),
+      { timeout: 3000 },
+    );
+    fireEvent.press(screen.getByTestId("checkout-submit"));
+    await waitFor(() =>
+      expect(mockRouter.replace).toHaveBeenCalledWith("/payment/b1"),
+    );
+  });
+
+  it("a hold conflict shows the mapped Bahasa error and does NOT navigate (FR-16)", async () => {
+    useAccountStore.getState().setProfile(LOGGED_IN);
+    const repo: BookingRepository = {
+      ...verdictRepo(SESSION),
+      hold: async () => {
+        throw mapError({ code: "CATEGORY_UNAVAILABLE" });
+      },
+    };
+    renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
+      container: { bookingRepository: repo },
+    });
+    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
+    fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
+    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
+    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010001");
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("checkout-submit").props.accessibilityState
+            .disabled,
+        ).toBe(false),
+      { timeout: 3000 },
+    );
+    fireEvent.press(screen.getByTestId("checkout-submit"));
+    await waitFor(() =>
+      expect(screen.getByText(/sudah tidak tersedia/i)).toBeTruthy(),
+    );
+    expect(mockRouter.replace).not.toHaveBeenCalledWith(
+      expect.stringContaining("/payment/"),
     );
   });
 });
