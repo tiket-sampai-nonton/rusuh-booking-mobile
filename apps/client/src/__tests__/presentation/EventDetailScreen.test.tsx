@@ -96,13 +96,19 @@ describe("EventDetailScreen", () => {
     expect(screen.getByText("Masuk Antrean")).toBeTruthy();
   });
 
-  it("navigates to the waiting room on an active CTA press", async () => {
+  it("joins the queue and navigates to the waiting room with the issued queueId on an active CTA press (RBT-041)", async () => {
     renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
       container: { eventRepository: repo(available) },
     });
     await waitFor(() => screen.getByTestId("join-cta"));
     fireEvent.press(screen.getByTestId("join-cta"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/waiting/evt-1");
+    // The join (RBT-041) issues a queueId via the mock queue repo and the hook
+    // routes to the waiting room with it on success.
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith(
+        "/waiting/evt-1?queueId=q-evt-1",
+      ),
+    );
   });
 
   it("disables the CTA and shows 'Tiket Habis' for a sold-out event", async () => {
