@@ -72,7 +72,11 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
         noindex
       />
       {!confirmed ? (
-        <View className="items-center gap-4" testID="success-verifying">
+        <View
+          className="items-center gap-4"
+          accessibilityLiveRegion="polite"
+          testID="success-verifying"
+        >
           <ActivityIndicator
             size="large"
             accessibilityLabel="Memverifikasi pembayaran"
