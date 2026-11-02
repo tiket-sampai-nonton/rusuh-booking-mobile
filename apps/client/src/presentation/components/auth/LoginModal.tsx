@@ -30,6 +30,7 @@ import {
   View,
 } from "react-native";
 
+import { NIK_LENGTH, validateNik } from "@domain/auth/nik";
 import { DomainError } from "@domain/errors/domain-error";
 import {
   EMAIL_ERROR,
@@ -40,7 +41,7 @@ import {
 import { useAuth } from "@presentation/hooks/useAuth";
 import { tokens } from "@presentation/theme/tokens";
 
-type Step = "email" | "code" | "signed" | "register";
+type Step = "email" | "code" | "register" | "done" | "signed";
 
 export interface LoginModalProps {
   /** Whether the modal is open. */
@@ -69,8 +70,16 @@ export function LoginModal({
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [code, setCode] = useState("");
+  // Register step (RBT-021). The raw NIK lives only in this transient field; it
+  // is sent to the port and never logged/persisted (SECURITY).
+  const [regName, setRegName] = useState("");
+  const [regNik, setRegNik] = useState("");
+  const [regConsent, setRegConsent] = useState(false);
+  const [regNikError, setRegNikError] = useState("");
+  const [regDoneName, setRegDoneName] = useState("");
   const auth = useAuth();
   const codeInputRef = useRef<TextInput>(null);
+  const regNameInputRef = useRef<TextInput>(null);
 
   // Reset the whole flow whenever the modal (re)opens -- a fresh email step.
   useEffect(() => {
@@ -79,6 +88,11 @@ export function LoginModal({
       setEmail("");
       setEmailError("");
       setCode("");
+      setRegName("");
+      setRegNik("");
+      setRegConsent(false);
+      setRegNikError("");
+      setRegDoneName("");
       auth.reset();
     }
     // Intentionally only react to `visible` toggles.
@@ -116,10 +130,13 @@ export function LoginModal({
     try {
       const session = await auth.verifyOtp({ email, code });
       if (session.isNew) {
-        // NEW email -> registration (name + NIK). RBT-021 builds the real form;
-        // here we only present the handoff affordance, no form fields.
-        // TODO(RBT-021): render the name + NIK registration step here.
+        // NEW email -> registration step (name + NIK + consent). RBT-021.
+        setRegName("");
+        setRegNik("");
+        setRegConsent(false);
+        setRegNikError("");
         setStep("register");
+        setTimeout(() => regNameInputRef.current?.focus(), 50);
       } else {
         // Returning user -> straight to the signed-in panel.
         setStep("signed");
@@ -134,6 +151,39 @@ export function LoginModal({
     setCode("");
     setStep("email");
   }, [auth]);
+
+  // ----- Register step: name + NIK + consent --------------------------------
+  const nameOk = regName.trim().length >= 2;
+  const nikOk = validateNik(regNik).ok;
+  const canRegister = nameOk && nikOk && regConsent;
+
+  const onChangeNik = useCallback((raw: string) => {
+    // Keep only digits, capped at the NIK length (mirrors the prototype input).
+    const digits = raw.replace(/\D/g, "").slice(0, NIK_LENGTH);
+    setRegNik(digits);
+    setRegNikError(
+      digits.length > 0 && digits.length < NIK_LENGTH
+        ? `NIK harus ${NIK_LENGTH} digit (${digits.length}/${NIK_LENGTH})`
+        : "",
+    );
+  }, []);
+
+  const onSubmitRegister = useCallback(async () => {
+    if (!canRegister) return;
+    setRegNikError("");
+    try {
+      const profile = await auth.completeRegistration({
+        fullName: regName.trim(),
+        nik: regNik,
+      });
+      setRegDoneName(profile.fullName ?? regName.trim());
+      // Raw NIK no longer needed once submitted — drop it (SECURITY).
+      setRegNik("");
+      setStep("done");
+    } catch {
+      // registerError is surfaced in the register step via the hook state.
+    }
+  }, [auth, canRegister, regName, regNik]);
 
   return (
     <Modal
@@ -326,23 +376,135 @@ export function LoginModal({
                 Lengkapi Pendaftaran
               </Text>
               <Text style={styles.sub}>
-                Email baru (<Text style={styles.bold}>{email}</Text>) sudah
-                terverifikasi. Lanjut lengkapi nama &amp; NIK untuk menyelesaikan
-                pendaftaran.
+                Email baru — isi data diri sekali saja. Dipakai untuk mengisi
+                checkout otomatis.
               </Text>
-              {/* TODO(RBT-021): replace this handoff with the name + NIK
-                  registration step (prototype #lgRegStep). The email above is
-                  already OTP-verified. RBT-020 does NOT build the form. */}
+
+              {/* Email (verified, read-only) */}
+              <View style={styles.fld}>
+                <Text style={styles.label}>Email (untuk e-tiket)</Text>
+                <TextInput
+                  testID="login-reg-email"
+                  accessibilityLabel="Email terverifikasi"
+                  value={email}
+                  editable={false}
+                  style={[styles.input, styles.inputReadonly]}
+                />
+                <Text style={styles.hint}>
+                  Sudah terverifikasi. E-tiket &amp; notifikasi dikirim ke email
+                  ini.
+                </Text>
+              </View>
+
+              {/* Nama Lengkap */}
+              <View style={styles.fld}>
+                <Text style={styles.label}>Nama Lengkap</Text>
+                <TextInput
+                  ref={regNameInputRef}
+                  testID="login-reg-name-input"
+                  accessibilityLabel="Nama Lengkap"
+                  value={regName}
+                  onChangeText={setRegName}
+                  placeholder="Nama sesuai KTP"
+                  placeholderTextColor={tokens.neutral.muted}
+                  autoComplete="name"
+                  textContentType="name"
+                  style={styles.input}
+                />
+              </View>
+
+              {/* NIK */}
+              <View style={styles.fld}>
+                <Text style={styles.label}>NIK (16 digit)</Text>
+                <TextInput
+                  testID="login-reg-nik-input"
+                  accessibilityLabel="NIK 16 digit"
+                  value={regNik}
+                  onChangeText={onChangeNik}
+                  placeholder="16 digit KTP"
+                  placeholderTextColor={tokens.neutral.muted}
+                  keyboardType="number-pad"
+                  inputMode="numeric"
+                  maxLength={NIK_LENGTH}
+                  style={styles.input}
+                />
+                <Text testID="login-reg-nik-error" style={styles.err}>
+                  {regNikError}
+                </Text>
+                <Text style={styles.hint}>
+                  NIK dipakai untuk batas 3 tiket/NIK &amp; divalidasi server.
+                  Aturan NIK: {NIK_LENGTH} digit angka sesuai KTP.
+                </Text>
+              </View>
+
+              {/* Consent */}
+              <Pressable
+                testID="login-reg-consent"
+                accessibilityRole="checkbox"
+                accessibilityLabel="Setujui kebijakan privasi"
+                accessibilityState={{ checked: regConsent }}
+                onPress={() => setRegConsent((v) => !v)}
+                style={styles.consentRow}
+              >
+                <View
+                  style={[
+                    styles.checkbox,
+                    regConsent && styles.checkboxChecked,
+                  ]}
+                >
+                  {regConsent && <Text style={styles.checkboxMark}>✓</Text>}
+                </View>
+                <Text style={styles.consentText}>
+                  Saya menyetujui pemrosesan data sesuai{" "}
+                  <Text style={styles.link}>Kebijakan Privasi</Text>.
+                </Text>
+              </Pressable>
+
+              <Text testID="login-reg-error" style={styles.err}>
+                {auth.registerError
+                  ? messageFor(
+                      auth.registerError,
+                      "Pendaftaran gagal. Periksa data lalu coba lagi.",
+                    )
+                  : ""}
+              </Text>
+
               <View style={styles.actions}>
                 <GhostButton
-                  testID="login-reg-close"
-                  label="Tutup"
-                  onPress={close}
+                  testID="login-reg-cancel"
+                  label="Batal"
+                  onPress={backToEmail}
                 />
                 <PrimaryButton
-                  testID="login-reg-continue"
-                  label="Lanjut lengkapi pendaftaran"
-                  // TODO(RBT-021): advance to the registration form instead of closing.
+                  testID="login-reg-submit"
+                  label={auth.isRegistering ? "Mendaftar…" : "Daftar & Masuk"}
+                  disabled={!canRegister || auth.isRegistering}
+                  onPress={onSubmitRegister}
+                />
+              </View>
+            </View>
+          )}
+
+          {step === "done" && (
+            <View style={{ alignItems: "center" }}>
+              <View style={styles.doneCheck}>
+                <Text style={styles.doneCheckMark}>✓</Text>
+              </View>
+              <Text
+                accessibilityRole="header"
+                style={[styles.title, { marginTop: 14, textAlign: "center" }]}
+              >
+                Pendaftaran Berhasil 🎉
+              </Text>
+              <Text style={[styles.sub, { marginTop: 6, textAlign: "center" }]}>
+                Akun <Text style={styles.bold}>{regDoneName || "—"}</Text> aktif.
+                Data pembeli (nama, NIK, email) akan terisi otomatis saat
+                checkout.
+              </Text>
+              <View style={[styles.actions, { marginTop: 20, width: "100%" }]}>
+                <PrimaryButton
+                  testID="login-done-close"
+                  label="Mulai Pesan Tiket"
                   onPress={close}
                 />
               </View>
@@ -532,4 +694,59 @@ const styles = {
     color: tokens.neutral.ink,
   },
   signedEmail: { fontSize: tokens.fontSize.xs, color: tokens.neutral.muted },
+  inputReadonly: {
+    backgroundColor: "rgba(10,10,12,0.04)",
+    color: tokens.neutral.muted,
+  },
+  consentRow: {
+    flexDirection: "row" as const,
+    alignItems: "flex-start" as const,
+    gap: 10,
+    marginTop: 16,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: tokens.neutral.line,
+    backgroundColor: tokens.neutral.paper,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginTop: 1,
+  },
+  checkboxChecked: {
+    backgroundColor: tokens.neutral.ink,
+    borderColor: tokens.neutral.ink,
+  },
+  checkboxMark: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: tokens.fontWeight.bold,
+  },
+  consentText: {
+    flex: 1,
+    fontSize: tokens.fontSize.sm,
+    color: tokens.neutral.muted,
+    lineHeight: 19,
+  },
+  link: {
+    color: tokens.brand.red,
+    fontWeight: tokens.fontWeight.bold,
+    textDecorationLine: "underline" as const,
+  },
+  doneCheck: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#16a34a",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginTop: 4,
+  },
+  doneCheckMark: {
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: tokens.fontWeight.extrabold,
+  },
 };

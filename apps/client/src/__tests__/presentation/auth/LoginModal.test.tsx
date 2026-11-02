@@ -145,19 +145,111 @@ describe("LoginModal (RBT-020)", () => {
     expect(getByTestId("login-logout")).toBeTruthy();
   });
 
-  it("shows the register handoff (NOT the form) for a new email (isNew=true)", async () => {
-    const repo = new FakeUserRepository();
-    repo.session = { token: "tok-new", isNew: true };
-    const { getByTestId, getByText, queryByTestId } = renderModal(repo);
-    fireEvent.changeText(getByTestId("login-email-input"), "new@mail.com");
+  // Helper: drive the modal to the register step for a NEW email.
+  async function reachRegisterStep(
+    getByTestId: ReturnType<typeof renderModal>["getByTestId"],
+    getByText: ReturnType<typeof renderModal>["getByText"],
+    email = "rizky@telkomsel.co.id",
+  ) {
+    fireEvent.changeText(getByTestId("login-email-input"), email);
     fireEvent.press(getByTestId("login-send"));
     await waitFor(() => getByTestId("login-code-input"));
     fireEvent.changeText(getByTestId("login-code-input"), "123456");
     fireEvent.press(getByTestId("login-verify"));
     await waitFor(() => expect(getByText("Lengkapi Pendaftaran")).toBeTruthy());
-    // Handoff only — the real name/NIK form (RBT-021) is NOT present.
-    expect(getByTestId("login-reg-continue")).toBeTruthy();
-    expect(queryByTestId("login-reg-name-input")).toBeNull();
+  }
+
+  it("renders the name/NIK/consent registration form for a new email (isNew=true)", async () => {
+    const repo = new FakeUserRepository();
+    repo.session = { token: "tok-new", isNew: true };
+    const { getByTestId, getByText } = renderModal(repo);
+    await reachRegisterStep(getByTestId, getByText);
+    expect(getByText("Nama Lengkap")).toBeTruthy();
+    expect(getByTestId("login-reg-name-input")).toBeTruthy();
+    expect(getByTestId("login-reg-nik-input")).toBeTruthy();
+    expect(getByTestId("login-reg-consent")).toBeTruthy();
+    expect(getByText("Kebijakan Privasi")).toBeTruthy();
+    expect(getByTestId("login-reg-submit")).toBeTruthy();
+  });
+
+  it("keeps 'Daftar & Masuk' disabled until name + 16-digit NIK + consent are all valid", async () => {
+    const repo = new FakeUserRepository();
+    repo.session = { token: "tok-new", isNew: true };
+    const { getByTestId, getByText } = renderModal(repo);
+    await reachRegisterStep(getByTestId, getByText);
+    const submit = () => getByTestId("login-reg-submit");
+    expect(submit().props.accessibilityState.disabled).toBe(true);
+
+    fireEvent.changeText(getByTestId("login-reg-name-input"), "Rizky Rachmawan");
+    expect(submit().props.accessibilityState.disabled).toBe(true);
+
+    fireEvent.changeText(getByTestId("login-reg-nik-input"), "3201234567890123");
+    // Still missing consent.
+    expect(submit().props.accessibilityState.disabled).toBe(true);
+
+    fireEvent.press(getByTestId("login-reg-consent"));
+    await waitFor(() =>
+      expect(submit().props.accessibilityState.disabled).toBe(false),
+    );
+  });
+
+  it("shows a NIK error for a short NIK and blocks submit", async () => {
+    const repo = new FakeUserRepository();
+    repo.session = { token: "tok-new", isNew: true };
+    const { getByTestId, getByText } = renderModal(repo);
+    await reachRegisterStep(getByTestId, getByText);
+    fireEvent.changeText(getByTestId("login-reg-name-input"), "Rizky");
+    fireEvent.changeText(getByTestId("login-reg-nik-input"), "320123");
+    fireEvent.press(getByTestId("login-reg-consent"));
+    // 6 digits → still invalid NIK, submit stays disabled.
+    expect(getByTestId("login-reg-submit").props.accessibilityState.disabled).toBe(
+      true,
+    );
+  });
+
+  it("submits trimmed name + NIK via completeRegistration and shows 'Pendaftaran Berhasil'", async () => {
+    const repo = new FakeUserRepository();
+    repo.session = { token: "tok-new", isNew: true };
+    repo.profile = {
+      emailMasked: "r***@telkomsel.co.id",
+      fullName: "Rizky Rachmawan",
+      nikMasked: "32****23",
+      hasNik: true,
+    };
+    const spy = jest.spyOn(repo, "completeRegistration");
+    const { getByTestId, getByText } = renderModal(repo);
+    await reachRegisterStep(getByTestId, getByText);
+    fireEvent.changeText(
+      getByTestId("login-reg-name-input"),
+      "  Rizky Rachmawan  ",
+    );
+    fireEvent.changeText(getByTestId("login-reg-nik-input"), "3201234567890123");
+    fireEvent.press(getByTestId("login-reg-consent"));
+    fireEvent.press(getByTestId("login-reg-submit"));
+    await waitFor(() => expect(getByText("Pendaftaran Berhasil 🎉")).toBeTruthy());
+    expect(spy).toHaveBeenCalledWith({
+      fullName: "Rizky Rachmawan",
+      nik: "3201234567890123",
+    });
+  });
+
+  it("surfaces a Bahasa NIK error from the port on a rejected registration", async () => {
+    const repo = new FakeUserRepository();
+    repo.session = { token: "tok-new", isNew: true };
+    jest
+      .spyOn(repo, "completeRegistration")
+      .mockRejectedValueOnce(new Error("backend NIK reject"));
+    const { getByTestId, getByText } = renderModal(repo);
+    await reachRegisterStep(getByTestId, getByText);
+    fireEvent.changeText(getByTestId("login-reg-name-input"), "Rizky");
+    fireEvent.changeText(getByTestId("login-reg-nik-input"), "3201234567890123");
+    fireEvent.press(getByTestId("login-reg-consent"));
+    fireEvent.press(getByTestId("login-reg-submit"));
+    await waitFor(() => {
+      expect(getByTestId("login-reg-error").props.children).toBeTruthy();
+    });
+    // Still on the register step (no success).
+    expect(getByText("Lengkapi Pendaftaran")).toBeTruthy();
   });
 
   it("returns to the email step via 'Ganti email'", async () => {
