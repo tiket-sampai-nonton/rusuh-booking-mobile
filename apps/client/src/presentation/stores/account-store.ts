@@ -45,8 +45,15 @@ export interface CheckoutPrefill {
   readonly nikMasked?: string;
 }
 
-export function selectCheckoutPrefill(state: AccountState): CheckoutPrefill {
-  const p = state.profile;
+/**
+ * Derive the prefill from a profile directly. Callers that read the store
+ * should select the STABLE `profile` reference and pass it here inside a
+ * `useMemo` — selecting a freshly-built object from the store each render makes
+ * zustand re-render on every tick (its default equality is `Object.is`).
+ */
+export function prefillFromProfile(
+  p: UserProfile | undefined,
+): CheckoutPrefill {
   if (!p) return { fromAccount: false };
   return {
     fromAccount: true,
@@ -54,4 +61,8 @@ export function selectCheckoutPrefill(state: AccountState): CheckoutPrefill {
     emailMasked: p.emailMasked,
     nikMasked: p.nikMasked,
   };
+}
+
+export function selectCheckoutPrefill(state: AccountState): CheckoutPrefill {
+  return prefillFromProfile(state.profile);
 }

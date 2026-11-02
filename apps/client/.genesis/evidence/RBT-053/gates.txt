@@ -1,0 +1,72 @@
+RBT-053 — Buyer data + set-buyer + confirm-leave
+Branch: feature/RBT-053-buyer-data-confirm-leave
+Date: 2026-11-02
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0 (all BookingRepository implementers add setBuyer)
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-053 scope) ---
+File                                   | % Stmts | % Branch | % Funcs | % Lines
+---------------------------------------|---------|----------|---------|--------
+ application/booking/set-buyer.use-case|     100 |      100 |     100 |     100
+ presentation/hooks/useSetBuyer.ts     |     100 |      100 |     100 |     100
+ presentation/screens/Checkout/index   |     100 |      100 |     100 |     100
+ presentation/stores/account-store.ts  |     100 |      100 |     100 |     100
+ infrastructure/.../mock-booking.repo   |     100 |      100 |     100 |     100
+ infrastructure/api/http-booking.repo   |   93.33 |   83.33* |     100 |     100
+
+Overall RBT-053 scope: 99.13 / 97.82 / 100 / 100. 44 tests (6 suites) pass.
+Full suite green under the husky pre-commit gate.
+
+* http-booking.repository.ts line 48 (getCurrentSession 404 catch sub-branch)
+  is PRE-EXISTING code NOT touched by RBT-053 — `git diff develop` on this file
+  shows only the added `setBuyer` method (which is 100% covered). The file's
+  stmts/funcs/lines are 100%; the one flagged branch predates this ticket and is
+  already exercised by the http-repositories suite (404-status, 404-envelope,
+  non-404 throw). Out of RBT-053 scope; not expanded.
+
+================================================================
+ACCEPTANCE CRITERIA (AC1)
+================================================================
+- Buyer NIK + email fields (RBT-051 base); EMAIL auto-fills from the account
+  when logged in, with a "Terisi dari akun" badge (prefill-badge). Guest sees
+  empty fields. ✓
+- set-buyer (FE-NEED O1): SetBuyer use case → BookingRepository.setBuyer →
+  mock (records MASKED NIK only, never raw) / HTTP adapter POSTs
+  booking-sessions/{id}/buyer. Called on submit before the hold. ✓
+- Back → confirm-leave dialog (LeaveConfirm "Tinggalkan halaman ini?"); "Ya,
+  keluar" releases the session and re-queues to home (router.replace("/")). ✓
+
+SECURITY: account store + mock setBuyer hold MASKED NIK only; raw NIK goes to
+the BE over TLS but is never stored/logged on the FE. Clean-Arch: SetBuyer use
+case framework-free; TanStack mutation confined to the presentation hook.
+
+================================================================
+NOTES
+================================================================
+- setBuyer added to the frozen BookingRepository port as a NEW FE-NEED (O1)
+  capability — the same mock-first pattern the codebase already uses for O1
+  fields (event.remainingTickets, user.hasNik). All existing BookingRepository
+  fakes across the suite updated with the stub.
+- Fixed a latent infinite-render OOM: `useAccountStore(selectCheckoutPrefill)`
+  returned a fresh object each render (zustand Object.is equality → re-render
+  loop). Now selects the stable `profile` ref + derives via `prefillFromProfile`
+  in useMemo. This was crashing the CheckoutScreen suite with a JS-heap OOM.
+- CheckoutScreen tests split into CheckoutScreen.test.tsx (RBT-051 core, 14) +
+  CheckoutScreen.flows.test.tsx (RBT-052/053 flows, 7) with auto-advancing fake
+  timers, to keep each suite's render count within the memory-tight CI host.
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0; /checkout/[sessionId].html.
+iOS     : iPhone 16 Pro, Expo Go deep-link → ios-checkout-mount.png (screen
+          mounts clean post-RBT-053; back control present).
+Android : emulator-5554 → android-checkout-mount.png (mounts; consent section
+          present). Interactive confirm-leave dialog, prefill badge + set-buyer
+          submit proven by the RNTL flows suite (simctl/adb have no scripted
+          input for the taps/typing those states need).

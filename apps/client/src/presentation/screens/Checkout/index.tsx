@@ -36,7 +36,11 @@ import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
-import { useAccountStore } from "@presentation/stores/account-store";
+import { useSetBuyer } from "@presentation/hooks/useSetBuyer";
+import {
+  prefillFromProfile,
+  useAccountStore,
+} from "@presentation/stores/account-store";
 import { useServices } from "@providers/service-context";
 
 import { categoryPrice, emptyRow } from "./categories";
@@ -45,6 +49,7 @@ import { CheckoutHero } from "./fragments/CheckoutHero";
 import { CheckoutTopBar } from "./fragments/CheckoutTopBar";
 import { Field, Section } from "./fragments/common";
 import { ConsentGate } from "./fragments/ConsentGate";
+import { LeaveConfirm } from "./fragments/LeaveConfirm";
 import { TicketItem } from "./fragments/TicketItem";
 import type { CheckoutScreenProps, RowCheckStatus } from "./interface";
 import { checkoutScrollContent } from "./style";
@@ -68,13 +73,20 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const { serverClock } = useServices();
   const { session, isLoading } = useRestoreBookingSession();
   const { checks, pending, request } = useAttendeeCheck(sessionId);
+  const { setBuyer } = useSetBuyer();
+  // Select the STABLE profile reference (not a fresh object) so zustand does not
+  // re-render every tick; derive the prefill from it with useMemo.
+  const profile = useAccountStore((s) => s.profile);
+  const prefill = useMemo(() => prefillFromProfile(profile), [profile]);
   // Logged-in users consented at registration; guests consent inline (AC3).
-  const isGuest = useAccountStore((s) => s.profile === undefined);
+  const isGuest = !prefill.fromAccount;
 
   const [buyerNik, setBuyerNik] = useState("");
-  const [buyerEmail, setBuyerEmail] = useState("");
+  // Prefill the email from the account on first render when logged in (AC1).
+  const [buyerEmail, setBuyerEmail] = useState(prefill.emailMasked ?? "");
   const [rows, setRows] = useState<TicketRow[]>([emptyRow()]);
   const [consent, setConsent] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
 
   const cap = effectiveCap(session?.maxSelectable);
 
@@ -145,7 +157,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           remainingMs={remainingMs}
           warn={warnTimer}
           expired={expired}
-          onBack={() => router.replace("/" as Href)}
+          onBack={() => setConfirmLeave(true)}
         />
 
         <ScrollView
@@ -155,6 +167,16 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           {session ? <CheckoutHero eventId={session.eventId} /> : null}
 
           <Section title="Data Pembeli">
+            {prefill.fromAccount ? (
+              <View
+                className="mt-1 self-start rounded-pill bg-ok/10 px-3 py-1"
+                testID="prefill-badge"
+              >
+                <Text className="text-2xs font-bold text-ok">
+                  Terisi dari akun
+                </Text>
+              </View>
+            ) : null}
             <Field
               label="NIK Pembeli (16 digit)"
               value={buyerNik}
@@ -229,9 +251,21 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           pending={false}
           expired={expired}
           onSubmit={() => {
-            // RBT-054 wires the idempotent hold here; RBT-051 lands the item list.
+            // RBT-053: persist the buyer on the session before payment
+            // (FE-NEED O1 mock). RBT-054 wires the idempotent hold + navigation.
+            void setBuyer({ sessionId, buyerNik, email: buyerEmail });
           }}
           bottomInset={insets.bottom}
+        />
+
+        <LeaveConfirm
+          visible={confirmLeave}
+          onStay={() => setConfirmLeave(false)}
+          onLeave={() => {
+            // Leaving releases the selection session → re-queue from home.
+            setConfirmLeave(false);
+            router.replace("/" as Href);
+          }}
         />
       </View>
     </ScreenFade>

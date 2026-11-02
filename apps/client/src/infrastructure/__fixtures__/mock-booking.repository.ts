@@ -52,6 +52,27 @@ export class MockBookingRepository implements BookingRepository {
     };
   }
 
+  /**
+   * FE-NEED (O1) mock: record ONLY that a buyer was set, with the MASKED NIK —
+   * never the raw NIK (SECURITY §3). Deterministic + framework-free.
+   */
+  private buyerSet: { nikMasked: string; email: string } | null = null;
+  async setBuyer(
+    _sessionId: string,
+    buyerNik: string,
+    email: string,
+  ): Promise<void> {
+    this.buyerSet = {
+      nikMasked: `${buyerNik.slice(0, 2)}****${buyerNik.slice(-2)}`,
+      email,
+    };
+  }
+
+  /** Test/diagnostic read of the last set buyer (masked). */
+  getBuyerSet(): { nikMasked: string; email: string } | null {
+    return this.buyerSet;
+  }
+
   async hold(
     sessionId: string,
     items: readonly BookingItemInput[],

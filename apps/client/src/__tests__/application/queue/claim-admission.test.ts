@@ -40,6 +40,7 @@ class FakeBookingRepository implements BookingRepository {
   async checkAttendee(_sessionId: string, nik: string): Promise<AttendeeCheck> {
     return { nikMasked: nik, result: "AVAILABLE" };
   }
+  async setBuyer(): Promise<void> {}
   async hold(
     sessionId: string,
     _items: readonly BookingItemInput[],

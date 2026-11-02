@@ -154,6 +154,18 @@ describe("HttpBookingRepository", () => {
     expect(holdCall.headers).toMatchObject({ "idempotency-key": "idem-9" });
   });
 
+  it("setBuyer POSTs buyerNik + email to the session buyer endpoint (RBT-053)", async () => {
+    const http = new FakeHttpClient();
+    http.queueResponse({ status: 204, headers: {}, data: null });
+    const repo = new HttpBookingRepository(http);
+    await repo.setBuyer("s1", "3171999999999999", "buyer@mail.com");
+    expect(http.calls[0]).toMatchObject({
+      method: "POST",
+      url: "booking-sessions/s1/buyer",
+      body: { buyerNik: "3171999999999999", email: "buyer@mail.com" },
+    });
+  });
+
   it("returns null for current session on a 404 status", async () => {
     const http = new FakeHttpClient();
     http.queueResponse({ status: 404, headers: {}, data: null });

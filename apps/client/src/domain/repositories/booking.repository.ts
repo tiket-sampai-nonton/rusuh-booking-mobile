@@ -52,6 +52,16 @@ export interface BookingRepository {
   /** Check an attendee NIK's availability for this event. */
   checkAttendee(sessionId: string, nik: string): Promise<AttendeeCheck>;
   /**
+   * Set the buyer (NIK + email) on the session before the hold (RBT-053 AC1).
+   *
+   * FE-NEED (O1): the proposed `POST /booking-sessions/{sessionId}/buyer` is not
+   * in the contract yet; mocked until BE delivers (the alternative is carrying
+   * `buyerNik`+`email` in the `POST /bookings` body). The BE remains
+   * authoritative — this persists the buyer for the session so a refresh keeps
+   * it. Raw NIK is sent to the BE over TLS but never stored/logged on the FE.
+   */
+  setBuyer(sessionId: string, buyerNik: string, email: string): Promise<void>;
+  /**
    * Hold the selected items (idempotent).
    * @param idempotencyKey minted in the use case, reused on retry (§4.3).
    */

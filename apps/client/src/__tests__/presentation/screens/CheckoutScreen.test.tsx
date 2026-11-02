@@ -19,21 +19,6 @@ import { CheckoutScreen } from "@presentation/screens/Checkout";
 // eslint-disable-next-line import/first
 import { useAccountStore } from "@presentation/stores/account-store";
 
-/** A repo whose checkAttendee mirrors the mock's suffix rule (...00 blocks). */
-function verdictRepo(session: BookingSession | null): BookingRepository {
-  return {
-    ...bookingRepo(session),
-    checkAttendee: async (_s, nik): Promise<AttendeeCheck> => ({
-      nikMasked: "31****01",
-      result: nik.endsWith("00")
-        ? "ALREADY_REGISTERED"
-        : nik.endsWith("99")
-          ? "CHECK_LIMIT_REACHED"
-          : "AVAILABLE",
-    }),
-  };
-}
-
 const SESSION: BookingSession = {
   sessionId: "sess-1",
   eventId: "evt-1",
@@ -50,6 +35,7 @@ function bookingRepo(session: BookingSession | null): BookingRepository {
       nikMasked: "31****01",
       result: "AVAILABLE",
     }),
+    setBuyer: async (): Promise<void> => {},
     hold: async (
       _s: string,
       _i: readonly BookingItemInput[],
@@ -65,9 +51,18 @@ function bookingRepo(session: BookingSession | null): BookingRepository {
 
 describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
   beforeEach(() => {
+    // Fake timers (auto-advancing) stop the 1s server-countdown setInterval from
+    // spinning a real wall-clock loop per mount — that accumulation OOMs the
+    // suite on the memory-tight CI host. waitFor still flushes via microtasks.
+    jest.useFakeTimers({ advanceTimers: true });
     mockRouter.push.mockReset();
     mockRouter.replace.mockReset();
     useAccountStore.getState().clearProfile(); // default: guest
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 
   it("renders one ticket row by default (min 1)", async () => {
@@ -260,115 +255,6 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     });
     await waitFor(() =>
       expect(mockRouter.replace).toHaveBeenCalledWith("/expired/sess-1"),
-    );
-  });
-
-  // ---- RBT-052: attendee checks + inline consent ----
-
-  it("a guest sees the inline consent gate and cannot submit until it is ticked", async () => {
-    renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
-      container: { bookingRepository: verdictRepo(SESSION) },
-    });
-    await waitFor(() => expect(screen.getByTestId("checkout-consent")).toBeTruthy());
-    // Fill a complete, valid, AVAILABLE order.
-    fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
-    fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
-    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
-    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010001");
-    // The debounced check resolves AVAILABLE and shows the status.
-    await waitFor(
-      () =>
-        expect(screen.getByTestId("attendee-status-0").props.children).toMatch(
-          /tersedia/i,
-        ),
-      { timeout: 3000 },
-    );
-    // Still blocked: consent not given.
-    await waitFor(() =>
-      expect(
-        screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
-      ).toBe(true),
-    );
-    fireEvent.press(screen.getByTestId("checkout-consent")); // give consent
-    await waitFor(() =>
-      expect(
-        screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
-      ).toBe(false),
-    );
-  });
-
-  it("a logged-in user skips the inline consent gate", async () => {
-    useAccountStore.getState().setProfile({
-      fullName: "Rizky",
-      emailMasked: "ri****@mail.com",
-      nikMasked: "31****01",
-      hasNik: true,
-    });
-    renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
-      container: { bookingRepository: verdictRepo(SESSION) },
-    });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
-    expect(screen.queryByTestId("checkout-consent")).toBeNull(); // no gate
-  });
-
-  it("an ALREADY_REGISTERED attendee NIK blocks submit and shows the status", async () => {
-    useAccountStore.getState().setProfile({
-      fullName: "Rizky",
-      emailMasked: "ri****@mail.com",
-      nikMasked: "31****01",
-      hasNik: true,
-    }); // logged-in, so consent is not the blocker here
-    renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
-      container: { bookingRepository: verdictRepo(SESSION) },
-    });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
-    fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
-    fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
-    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
-    // ...00 → ALREADY_REGISTERED
-    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010100");
-    await waitFor(
-      () =>
-        expect(screen.getByTestId("attendee-status-0").props.children).toMatch(
-          /sudah terdaftar/i,
-        ),
-      { timeout: 3000 },
-    );
-    expect(
-      screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
-    ).toBe(true);
-  });
-
-  it("CHECK_LIMIT_REACHED warns but still allows submit", async () => {
-    useAccountStore.getState().setProfile({
-      fullName: "Rizky",
-      emailMasked: "ri****@mail.com",
-      nikMasked: "31****01",
-      hasNik: true,
-    }); // logged-in → consent not the blocker
-    renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
-      container: { bookingRepository: verdictRepo(SESSION) },
-    });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
-    fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
-    fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
-    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
-    // ...99 → CHECK_LIMIT_REACHED (advisory, does not block)
-    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010199");
-    await waitFor(
-      () =>
-        expect(screen.getByTestId("attendee-status-0").props.children).toMatch(
-          /Batas pengecekan/i,
-        ),
-      { timeout: 3000 },
-    );
-    await waitFor(
-      () =>
-        expect(
-          screen.getByTestId("checkout-submit").props.accessibilityState
-            .disabled,
-        ).toBe(false),
-      { timeout: 3000 },
     );
   });
 });
