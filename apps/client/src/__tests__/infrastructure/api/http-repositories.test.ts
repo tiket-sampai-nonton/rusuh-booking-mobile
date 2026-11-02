@@ -123,6 +123,22 @@ describe("HttpPaymentRepository", () => {
     expect(page.amountMinor).toBe(45000000);
   });
 
+  it("mints a page token and exchanges it (RBT-062)", async () => {
+    const http = new FakeHttpClient();
+    http.queueResponse(ok({ pageToken: "pgt_1", pageUrl: "/payment/b1?rb_pay_token=pgt_1" }));
+    http.queueResponse({ status: 204, headers: {}, data: null });
+    const repo = new HttpPaymentRepository(http);
+    const token = await repo.createPageToken("b1");
+    expect(http.calls[0]).toMatchObject({ method: "POST", url: "payments/b1/page-tokens" });
+    expect(token.pageToken).toBe("pgt_1");
+    await repo.exchangePageToken("pgt_1");
+    expect(http.calls[1]).toMatchObject({
+      method: "POST",
+      url: "payment-page-sessions",
+      body: { pageToken: "pgt_1" },
+    });
+  });
+
   it("creates an attempt forwarding the idempotency key as a header", async () => {
     const http = new FakeHttpClient();
     http.queueResponse(

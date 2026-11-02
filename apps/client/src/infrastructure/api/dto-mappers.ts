@@ -19,6 +19,7 @@ import type {
   EventStatus,
 } from "@domain/repositories/event.repository";
 import type {
+  PageToken,
   PaymentAttempt,
   PaymentMethod,
   PaymentPage,
@@ -145,6 +146,14 @@ export function toPaymentAttempt(dto: WirePaymentAttempt): PaymentAttempt {
     paymentExpiresAt: dto.paymentExpiresAt,
     serverTime: dto.serverTime,
   };
+}
+
+interface WirePageToken {
+  pageToken: string;
+  pageUrl: string;
+}
+export function toPageToken(dto: WirePageToken): PageToken {
+  return { pageToken: dto.pageToken, pageUrl: dto.pageUrl };
 }
 
 export function toPaymentPage(dto: WirePaymentPage): PaymentPage {

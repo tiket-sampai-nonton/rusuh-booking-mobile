@@ -34,6 +34,10 @@ class FakeRepo implements PaymentRepository {
   async getStatus(): Promise<PaymentAttempt> {
     return { attemptId: "a", bookingId: "bk-1", status: "AWAITING_PAYMENT" };
   }
+  async createPageToken(bookingId: string) {
+    return { pageToken: "t", pageUrl: `/payment/${bookingId}` };
+  }
+  async exchangePageToken(): Promise<void> {}
 }
 
 function wrapper(repo: PaymentRepository) {
