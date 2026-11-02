@@ -109,6 +109,70 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     ).toBe(false);
   });
 
+  it("pressing Bayar creates an attempt (RBT-061)", async () => {
+    const attempts: PaymentMethod[] = [];
+    const repo: PaymentRepository = {
+      ...paymentRepo(page()),
+      createAttempt: async (bookingId, method): Promise<PaymentAttempt> => {
+        attempts.push(method);
+        return {
+          attemptId: "a1",
+          bookingId,
+          status: "AWAITING_PAYMENT",
+          // no redirectUrl → onSuccess records method, skips the real handoff
+        };
+      },
+    };
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: { paymentRepository: repo },
+    });
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("pay-now").props.accessibilityState.disabled,
+      ).toBe(false),
+    );
+    fireEvent.press(screen.getByTestId("pay-now"));
+    await waitFor(() => expect(attempts).toEqual(["VA_BCA"])); // default method
+  });
+
+  it("refresh-safe: an AWAITING attempt shows 'Kembali ke SNAP' (AC2)", async () => {
+    const withAttempt = page({
+      currentAttempt: {
+        attemptId: "a-existing",
+        bookingId: "bk-1",
+        status: "AWAITING_PAYMENT",
+        // no redirectUrl → resume is a safe no-op in the test
+      },
+    });
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: { paymentRepository: paymentRepo(withAttempt) },
+    });
+    await waitFor(() => expect(screen.getByText("Kembali ke SNAP")).toBeTruthy());
+    // The resume CTA is pressable (does not throw without a redirectUrl).
+    fireEvent.press(screen.getByTestId("pay-now"));
+  });
+
+  it("shows an error message when creating the attempt fails (RBT-061)", async () => {
+    const repo: PaymentRepository = {
+      ...paymentRepo(page()),
+      createAttempt: async (): Promise<PaymentAttempt> => {
+        throw new Error("Gagal memproses pembayaran. Coba lagi.");
+      },
+    };
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: { paymentRepository: repo },
+    });
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("pay-now").props.accessibilityState.disabled,
+      ).toBe(false),
+    );
+    fireEvent.press(screen.getByTestId("pay-now"));
+    await waitFor(() =>
+      expect(screen.getByText(/Gagal memproses pembayaran/i)).toBeTruthy(),
+    );
+  });
+
   it("back navigates home", async () => {
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: { paymentRepository: paymentRepo(page()) },

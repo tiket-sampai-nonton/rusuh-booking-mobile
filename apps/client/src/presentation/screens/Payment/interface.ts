@@ -30,6 +30,8 @@ export interface PaymentBarProps {
   readonly pending: boolean;
   readonly expired: boolean;
   readonly errorMessage?: string;
+  /** When set (an in-flight attempt), the CTA reads this instead of "Bayar" (AC2). */
+  readonly resumeLabel?: string;
   readonly onPay: () => void;
   readonly bottomInset: number;
 }

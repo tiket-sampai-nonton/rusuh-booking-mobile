@@ -10,6 +10,7 @@ export function PaymentBar({
   amountMinor,
   canPay,
   pending,
+  resumeLabel,
   expired,
   errorMessage,
   onPay,
@@ -39,7 +40,11 @@ export function PaymentBar({
           }`}
         >
           <Text className="text-md font-bold text-white">
-            {pending ? "Memproses…" : expired ? "Waktu habis" : "Bayar Sekarang"}
+            {pending
+              ? "Memproses…"
+              : expired
+                ? "Waktu habis"
+                : (resumeLabel ?? "Bayar Sekarang")}
           </Text>
           {canPay ? (
             <View className="h-7 w-7 items-center justify-center rounded-full bg-white/25">
