@@ -82,9 +82,9 @@
 
 | Task group | Owner | Domain | Depends On | Files (disjoint) | Parallel | Status | Delivered |
 |------|-------|--------|-----------|------------------|----------|--------|-----------|
-| E3 (RBT-020…023) | Ray | Auth | E2 | `presentation/screens/Auth*` + auth use-cases | ✅ | Backlog | ☐ |
-| E4 (RBT-030…034) | Ray | Events | E2 | `presentation/screens/Events*` + events use-cases | ✅ | Backlog | ☐ |
-| E5 (RBT-040…044) | Eld | Queue | E2 | `presentation/screens/Waiting*` + queue state machine | ✅ | Backlog | ☐ |
+| E3 (RBT-020…023) | Ray | Auth | E2 | `presentation/screens/Auth*` + auth use-cases | ✅ | 020 ✅ 021 ✅ 023 ✅ merged; 022 chains behind 021 (Wave 4+) | ☐ |
+| E4 (RBT-030…034) | Ray | Events | E2 | `presentation/screens/Events*` + events use-cases | ✅ | 030/031/032/034 ✅ merged; 033 BLOCKED on deferred 005b | ☐ |
+| E5 (RBT-040…044) | Eld | Queue | E2 | `presentation/screens/Waiting*` + queue state machine | ✅ | 040/041/042/043/044 ✅ merged | ☐ |
 
 **Shared-file note:** RBT-002 froze the route tree; any Wave-3 task adding a route edits `src/app` → serialize those edits.
 **Wave 3 gate:** E3 + E5 `Done` (E4 may trail) → start Wave 4.
