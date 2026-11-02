@@ -34,15 +34,25 @@ export interface CreateAttemptInput {
  * caller can await the open.
  */
 export async function openSnapHandoff(url: string): Promise<void> {
+  // An in-app relative path (the mock SNAP simulator route `/snap/...`, RBT-065)
+  // is navigated with the router, NOT window.location / Linking. The real BE
+  // returns an absolute SNAP URL, which takes the external-open path below.
+  // expo-router is required LAZILY (only when a relative path is handed off) so
+  // importing this module in a test does not eagerly load the router internals.
+  if (url.startsWith("/")) {
+    const { router } =
+      require("expo-router") as typeof import("expo-router");
+    router.push(url as import("expo-router").Href);
+    return;
+  }
   if (Platform.OS === "web") {
-    // Full-page redirect to the SNAP gateway (D10.2).
+    // Full-page redirect to the external SNAP gateway (D10.2).
     if (typeof globalThis !== "undefined" && "location" in globalThis) {
       (globalThis as { location: { assign: (u: string) => void } }).location.assign(url);
     }
     return;
   }
-  // Native: open in the in-app browser / WebView surface (RBT-062 refines the
-  // page-token WebView; here we open the SNAP redirectUrl).
+  // Native: open the external SNAP page in the in-app browser / WebView.
   await Linking.openURL(url);
 }
 

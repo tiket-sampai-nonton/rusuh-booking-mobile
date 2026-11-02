@@ -27,6 +27,10 @@ export type PaymentMethod =
   | "QRIS"
   | "GOPAY";
 
+/** The outcome a SNAP callback reports (RBT-065). UNKNOWN keeps the attempt
+ * non-terminal so the result gate keeps verifying (D10.4). */
+export type SnapOutcome = "PAID" | "FAILED" | "UNKNOWN";
+
 /** A payment attempt + the SNAP handoff URL the BE returns. */
 export interface PaymentAttempt {
   readonly attemptId: string;
@@ -37,6 +41,9 @@ export interface PaymentAttempt {
   /** Server-authoritative payment deadline (ISO-8601). */
   readonly paymentExpiresAt?: string;
   readonly serverTime?: string;
+  /** Where SNAP returns on success / failure (contract return URLs, RBT-065). */
+  readonly successReturnUrl?: string;
+  readonly failedReturnUrl?: string;
 }
 
 /**
@@ -98,4 +105,13 @@ export interface PaymentRepository {
   ): Promise<PaymentAttempt>;
   /** Verify the authoritative payment status for an attempt. */
   getStatus(attemptId: string): Promise<PaymentAttempt>;
+  /**
+   * The SNAP callback the gateway (or the local simulator, RBT-065) invokes when
+   * the hosted page settles: the BE webhook sets the authoritative status, then
+   * the FE re-verifies with `getStatus` — it NEVER trusts this callback alone
+   * (D10.2/D10.4). Returns the resulting attempt. On the real adapter this POSTs
+   * the callback endpoint; the mock flips the attempt (PAID/FAILED) or leaves it
+   * non-terminal (UNKNOWN) so the result gate keeps polling.
+   */
+  snapCallback(attemptId: string, outcome: SnapOutcome): Promise<PaymentAttempt>;
 }

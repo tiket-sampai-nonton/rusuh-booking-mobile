@@ -29,6 +29,9 @@ class FakeRepo implements PaymentRepository {
   async exchangePageToken(pageToken: string): Promise<void> {
     this.exchanged.push(pageToken);
   }
+  async snapCallback(attemptId: string): Promise<PaymentAttempt> {
+    return { attemptId, bookingId: "b", status: "PAID" };
+  }
 }
 
 function wrapper(repo: PaymentRepository) {
