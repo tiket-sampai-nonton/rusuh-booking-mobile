@@ -6,8 +6,20 @@
  * and re-navigates on filter change so the URL stays the single source of truth
  * (deep-linkable + back/forward safe). Reached from Home's Filter modal.
  */
+import { Fragment } from "react";
+
+import { Seo } from "@presentation/components/Seo";
 import { BrowseScreen } from "@presentation/screens/Browse";
 
 export default function BrowseRoute() {
-  return <BrowseScreen />;
+  return (
+    <Fragment>
+      <Seo
+        title="Jelajahi Event"
+        description="Jelajahi dan filter event mendatang berdasarkan genre, lokasi, dan waktu."
+        path="/browse"
+      />
+      <BrowseScreen />
+    </Fragment>
+  );
 }

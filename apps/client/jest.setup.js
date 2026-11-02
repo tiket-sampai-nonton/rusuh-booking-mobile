@@ -17,3 +17,14 @@ jest.mock("react-native-safe-area-context", () => {
     initialWindowMetrics: { insets: inset, frame },
   };
 });
+
+// expo-router/head (react-native-helmet-async) writes to the web DOM <head>
+// during static export; in the jsdom/RN test env it is irrelevant and not
+// resolvable the same way. Stub it to render nothing so route screens that
+// mount <Seo> render under plain render(). The real Head output (title,
+// robots, canonical, OG, JSON-LD) is verified against the static export HTML
+// in the RBT-033 evidence, not here.
+jest.mock("expo-router/head", () => {
+  const Head = () => null;
+  return { __esModule: true, default: Head };
+});
