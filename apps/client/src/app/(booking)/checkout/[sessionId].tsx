@@ -1,15 +1,18 @@
 import { useLocalSearchParams } from "expo-router";
-import { Text, View } from "react-native";
+import { Fragment } from "react";
 
-// Booking route `/checkout/[sessionId]` (attendee + quantity + payment
-// method). Skeleton placeholder — real checkout lands in a later RBT.
-export default function CheckoutScreen() {
+import { Seo } from "@presentation/components/Seo";
+import { CheckoutScreen } from "@presentation/screens/Checkout";
+
+// Booking route `/checkout/[sessionId]` — RBT-051 ticket item list + rules.
+// noindex: transactional page (SECURITY / §6.5).
+export default function CheckoutRoute() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
+  const id = sessionId ?? "";
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-lg font-semibold text-brand" accessibilityRole="header">
-        Checkout — /checkout/{sessionId} (RBT-002)
-      </Text>
-    </View>
+    <Fragment>
+      <Seo title="Checkout" description="Pilih tiket." path={`/checkout/${id}`} noindex />
+      <CheckoutScreen sessionId={id} />
+    </Fragment>
   );
 }
