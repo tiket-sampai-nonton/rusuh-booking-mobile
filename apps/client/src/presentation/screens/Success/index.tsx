@@ -12,10 +12,12 @@
  */
 import { useRouter, type Href } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 
 import { minorToIDR } from "@domain/services/money";
+import { ETicketCard } from "@presentation/components/ETicketCard";
 import { Seo } from "@presentation/components/Seo";
+import { useETicketShare } from "@presentation/hooks/useETicketShare";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 import { useSessionStore } from "@presentation/stores/session-store";
 
@@ -45,6 +47,8 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   // pending verdict stays on the processing state (the gate routes here on
   // PAID, so this is a safety re-check, not the primary poll).
   const { verdict, isLoading } = useVerifyPayment(attemptId, bookingId);
+  const { shareTickets } = useETicketShare();
+  const count = ticketCount ?? 1;
 
   useEffect(() => {
     if (verdict === "failed") {
@@ -78,7 +82,10 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
           </Text>
         </View>
       ) : (
-        <View className="w-full max-w-md self-center rounded-4xl border border-line bg-card p-7 shadow-filter">
+        <ScrollView
+          className="w-full"
+          contentContainerClassName="w-full max-w-md self-center rounded-4xl border border-line bg-card p-7 shadow-filter"
+        >
           <Text
             className="text-2xs font-extrabold uppercase tracking-tag text-ok"
             testID="success-eyebrow"
@@ -108,10 +115,40 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
             />
           </View>
 
-          <Text className="text-center text-2xs leading-5 text-muted-foreground">
-            E-tiket & QR siap diunduh di langkah berikutnya.
-          </Text>
-        </View>
+          {/* One e-ticket card + QR per ticket (RBT-071). QR encodes a safe
+              reference, never PII. */}
+          <View className="gap-3" testID="eticket-list">
+            {Array.from({ length: count }, (_, i) => (
+              <ETicketCard
+                key={i}
+                bookingId={bookingId}
+                index={i}
+                total={count}
+              />
+            ))}
+          </View>
+
+          <View className="mt-6 flex-row gap-2.5">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Unduh atau bagikan e-tiket"
+              testID="success-download"
+              onPress={() => void shareTickets(bookingId, count)}
+              className="flex-1 items-center rounded-pill bg-brand py-4"
+            >
+              <Text className="text-sm font-bold text-white">⬇ Unduh E-Tiket</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ke Beranda"
+              testID="success-home"
+              onPress={() => router.replace("/" as Href)}
+              className="flex-1 items-center rounded-pill border border-line bg-card py-4"
+            >
+              <Text className="text-sm font-bold text-foreground">Ke Beranda</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
       )}
     </View>
   );
