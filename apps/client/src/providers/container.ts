@@ -11,6 +11,7 @@
 import { Platform } from "react-native";
 
 import type { TokenStorage } from "@domain/auth/token-storage.port";
+import type { QueueMembershipStorage } from "@domain/queue/queue-membership.port";
 import type { BookingRepository } from "@domain/repositories/booking.repository";
 import type { EventRepository } from "@domain/repositories/event.repository";
 import type { PaymentRepository } from "@domain/repositories/payment.repository";
@@ -34,7 +35,9 @@ import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment
 import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.repository";
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
 import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-token-storage";
+import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
+import { SecureStoreQueueMembership } from "@infrastructure/queue/secure-store-queue-membership";
 import { FetchHttpClient } from "@infrastructure/http/fetch-http-client";
 import type { HttpClient } from "@infrastructure/http/http-client";
 import { SystemClock } from "@infrastructure/time/system-clock";
@@ -60,6 +63,12 @@ export interface Container {
   readonly notification: NotificationPort;
   readonly fileShare: FileSharePort;
   readonly tokenStorage: TokenStorage;
+  /**
+   * Anonymous waiting-room membership persistence (RBT-041). Like
+   * {@link tokenStorage} it is a platform primitive: native binds the
+   * secure-store adapter, web/tests the in-memory fallback. Bound in BOTH modes.
+   */
+  readonly queueMembership: QueueMembershipStorage;
 }
 
 /**
@@ -76,6 +85,22 @@ export function createTokenStorage(
   return platformOs === "web"
     ? new InMemoryTokenStorage()
     : new SecureStoreTokenStorage();
+}
+
+/**
+ * Pick the QueueMembershipStorage adapter for the current platform (RBT-041).
+ * Same platform split as {@link createTokenStorage}: SecureStore is native-only,
+ * so native binds {@link SecureStoreQueueMembership} (OS keychain / KeyStore,
+ * survives restart) while web binds the in-memory fallback (does NOT survive a
+ * reload). Jest runs under the jest-expo web-ish default, so tests get the
+ * in-memory store — deterministic without touching a keychain.
+ */
+export function createQueueMembershipStorage(
+  platformOs: typeof Platform.OS = Platform.OS,
+): QueueMembershipStorage {
+  return platformOs === "web"
+    ? new InMemoryQueueMembership()
+    : new SecureStoreQueueMembership();
 }
 
 export interface ContainerOptions {
@@ -131,12 +156,16 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // store vs web in-memory choice is driven by Platform.OS, not the mock flag,
   // so it is bound in BOTH modes (RBT-023).
   const tokenStorage: TokenStorage = createTokenStorage();
+  // Queue membership persistence is also a platform primitive (native secure
+  // store vs web in-memory, driven by Platform.OS) → bound in BOTH modes (RBT-041).
+  const queueMembership: QueueMembershipStorage = createQueueMembershipStorage();
 
   if (useMocks) {
     return {
       clock,
       serverClock,
       tokenStorage,
+      queueMembership,
       httpClient: new MockHttpClient(),
       eventRepository: new MockEventRepository(),
       queueRepository: new MockQueueRepository(),
@@ -166,6 +195,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
     clock,
     serverClock,
     tokenStorage,
+    queueMembership,
     httpClient,
     eventRepository: new HttpEventRepository(httpClient),
     queueRepository: new HttpQueueRepository(httpClient),

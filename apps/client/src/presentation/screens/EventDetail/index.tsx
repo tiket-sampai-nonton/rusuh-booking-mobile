@@ -21,6 +21,7 @@ import { eventImage } from "@domain/rules/event-image";
 import { formatDateID, formatTimeID } from "@domain/services/date-format";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
+import { useJoinQueue } from "@presentation/hooks/useJoinQueue";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import { Block } from "./fragments/Block";
@@ -53,6 +54,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   const router = useRouter();
   const { data: event, isLoading, isError, error } = useEventDetail(eventId);
   const { isDesktop } = useResponsive();
+  const joinQueue = useJoinQueue();
 
   const goHome = (): void => router.push("/" as Href);
 
@@ -66,12 +68,13 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   const banner = eventImage(event.id, desc.bannerImage);
   const meta = [dateTxt, timeTxt, event.venue].filter(Boolean).join(" · ");
 
-  // On an active CTA press, enter the queue/booking flow (prototype: joinQueue →
-  // waiting room). Join persistence is RBT-041 (not built); the waiting route
-  // accepts the eventId directly, so route there.
+  // On an active CTA press, enter the queue/booking flow: the anonymous join
+  // (RBT-041) issues + PERSISTS the membership, then routes to the waiting room
+  // with the issued queueId (navigation happens inside the hook on success).
+  // Guarded against a double-fire while a join is already in flight.
   const onJoin = (): void => {
-    if (!cta.enabled) return;
-    router.push(`/waiting/${eventId}` as Href);
+    if (!cta.enabled || joinQueue.isPending) return;
+    joinQueue.mutate(eventId);
   };
 
   const chips: string[] = [];

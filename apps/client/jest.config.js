@@ -38,5 +38,7 @@ module.exports = {
     "!src/domain/idempotency/*.port.ts",
     // Token storage PORT — pure interface (zero executable JS), RBT-023.
     "!src/domain/auth/*.port.ts",
+    // Queue membership storage PORT — pure interface (zero executable JS), RBT-041.
+    "!src/domain/queue/*.port.ts",
   ],
 };
