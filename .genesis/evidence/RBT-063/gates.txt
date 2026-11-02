@@ -1,0 +1,73 @@
+RBT-063 — Callback verify + result routing
+Branch: feature/RBT-063-callback-verify
+Date: 2026-11-02
+Evidence path: .genesis/evidence/RBT-063/ (canonical repo-root, per WORKFLOW.md)
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-063 scope) ---
+File                                | % Stmts | % Branch | % Funcs | % Lines
+------------------------------------|---------|----------|---------|--------
+ domain/rules/payment-verify.ts     |    100  |   95.45  |   100   |   100
+ presentation/hooks/useVerifyPayment|    100  |    100   |   100   |   100
+ presentation/screens/PaymentResult |    100  |    100   |   100   |   100
+ infrastructure/.../mock-payment.repo|   100  |    100   |   100   |   100
+ OVERALL                            |    100  |   98.24  |   100   |   100
+
+ALL FOUR METRICS >= 90% on every RBT-063 file. 53 targeted tests pass;
+the broader payment+routes set (13 suites / 79 tests, incl. booking-routes +
+public-routes) stays green with the new /payment-result route.
+(payment-verify branch 95.45% = the TS exhaustiveness `default` label in the
+status switch, functionally covered by the READY/AWAITING cases.)
+
+================================================================
+ACCEPTANCE CRITERIA (AC1 — FR-25, D10.4)
+================================================================
+- The SNAP success/failed callback (successReturnUrl/failedReturnUrl) no longer
+  routes STRAIGHT to /success. resolveWebViewNav now sends a success callback to
+  the result GATE /payment-result/[bookingId] (carrying attemptId when known);
+  a failed/expired callback goes to /expired. ✓ (verified: PaymentWebViewScreen
+  test asserts router.replace("/payment-result/bk-1"), not /success).
+- The gate VERIFIES authoritatively via GET /payments/{id}/status (VerifyPayment
+  → getStatus) and renders success ONLY when that reports PAID — it NEVER trusts
+  the callback (D10.2). classifyPayment: PAID→paid (only success);
+  FAILED/EXPIRED→failed; READY/AWAITING_PAYMENT→pending. ✓
+- VERIFYING/REVIEW/UNKNOWN-equivalent (non-terminal) → processing screen + a
+  backoff poll (computeVerifyRefetchInterval: 1.5s→2.5s→4s→6s→8s, clamped; stops
+  on terminal; reduced-motion raises the floor). One poller per attempt, TanStack
+  owns the interval and cancels on unmount (NFR-05/06). ✓
+- Deadline-passed is reconciled from the SERVER clock (ServerClock.remaining via
+  serverTime+paymentExpiresAt), never the device clock: a pending attempt whose
+  server deadline has passed routes to /expired. ✓ (resolvePaymentRoute +
+  useVerifyPayment tests, incl. the serverTime-absent path).
+
+Clean-Arch: payment-verify is a pure domain rule (no React/RN/Expo/infra); the
+VerifyPayment use case is framework-free; TanStack confined to useVerifyPayment;
+the screen reaches the backend only through the use case → frozen port.
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0; /payment-result/[bookingId]
+          route builds (27.9 kB) alongside payment / payment-webview / success.
+iOS     : iPhone 16 Pro, deep-link exp://…/payment-result/demo-bk →
+          ios-payment-result-verify.png — the processing gate renders live:
+          spinner + "Memverifikasi pembayaran kamu…" +
+          "Jangan tutup halaman ini. Status dikonfirmasi langsung dari server."
+          With an unknown attempt the gate STAYS (never false-routes to success),
+          which is the "never trust the callback" guarantee on screen.
+Android : emulator-5554 (Pixel 7 Pro), same deep-link →
+          android-payment-result-verify.png — identical processing gate.
+          NOTE: the first Android shot hit a stale Expo Go bundle ("Unmatched
+          Route"); force-stopping Expo Go and relaunching fresh resolved the new
+          route and rendered the gate — recorded honestly.
+
+The PAID→/success and FAILED→/expired navigations are state-dependent (need the
+authoritative status to settle) and are proven by RNTL
+(useVerifyPayment.test.tsx, PaymentResultScreen.test.tsx) + the mock's
+deterministic settle-to-PAID-after-2-polls; native confirms the gate renders.

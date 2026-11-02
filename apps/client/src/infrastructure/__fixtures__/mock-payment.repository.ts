@@ -72,12 +72,30 @@ export class MockPaymentRepository implements PaymentRepository {
     return attempt;
   }
 
+  /** Per-attempt poll counter — drives the deterministic settle-to-PAID. */
+  private readonly statusPolls = new Map<string, number>();
+
+  /**
+   * GET /payments/{attemptId}/status (RBT-063) — the AUTHORITATIVE read the FE
+   * verifies against (never the callback). The mock settles a pending attempt
+   * to PAID after 2 polls so the verify backoff poll deterministically
+   * resolves; a terminal attempt stays terminal.
+   */
   async getStatus(attemptId: string): Promise<PaymentAttempt> {
     const found = this.attemptsById.get(attemptId);
     if (!found) {
       throw new Error(`MockPaymentRepository: unknown attempt ${attemptId}`);
     }
-    return found;
+    if (found.status !== "AWAITING_PAYMENT" && found.status !== "READY") {
+      return found;
+    }
+    const polls = (this.statusPolls.get(attemptId) ?? 0) + 1;
+    this.statusPolls.set(attemptId, polls);
+    if (polls < 2) return found;
+    const paid: PaymentAttempt = { ...found, status: "PAID" };
+    this.attemptsById.set(attemptId, paid);
+    this.attemptByBooking.set(paid.bookingId, paid);
+    return paid;
   }
 
   /**

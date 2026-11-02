@@ -25,13 +25,22 @@ export interface PaymentWebViewScreenProps {
 /**
  * Map a WebView navigation URL to the result route, or null to stay. The SNAP
  * gateway returns to successReturnUrl/failedReturnUrl; the FE routes on that
- * but NEVER marks PAID itself (RBT-063 verifies server-side).
+ * but NEVER marks PAID itself. A SUCCESS callback goes to the RBT-063 result
+ * gate (`/payment-result/...`), which verifies the authoritative status before
+ * showing /success — the callback URL alone never renders PAID. A failed/expired
+ * callback can route straight to /expired (no success claim to verify).
+ *
+ * @param attemptId carried into the result gate so it can verify this attempt.
  */
 export function resolveWebViewNav(
   url: string,
   bookingId: string,
+  attemptId?: string,
 ): string | null {
-  if (url.includes("/success/")) return `/success/${bookingId}`;
+  if (url.includes("/success/")) {
+    const q = attemptId ? `?attemptId=${encodeURIComponent(attemptId)}` : "";
+    return `/payment-result/${bookingId}${q}`;
+  }
   if (url.includes("/failed") || url.includes("/expired")) {
     return `/expired/${bookingId}`;
   }
