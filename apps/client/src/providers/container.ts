@@ -34,6 +34,7 @@ import { MockFileShareAdapter } from "@infrastructure/__fixtures__/mock-file-sha
 import { MockHttpClient } from "@infrastructure/__fixtures__/mock-http-client";
 import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notification.adapter";
 import { ExpoNotificationAdapter } from "@infrastructure/notifications/expo-notification.adapter";
+import { WebPushNotificationAdapter } from "@infrastructure/notifications/web-push-notification.adapter";
 import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.repository";
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
@@ -161,7 +162,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // lands; the dev/test mock is used when mocks are on. Bound in both modes.
   const notificationAdapter: NotificationPort =
     Platform.OS === "web"
-      ? new MockNotificationAdapter()
+      ? new WebPushNotificationAdapter()
       : new ExpoNotificationAdapter();
   // Server-authoritative clock layered over the device clock. Unsynced until a
   // server timestamp arrives (offset 0 → serverNow === device now); the catalog

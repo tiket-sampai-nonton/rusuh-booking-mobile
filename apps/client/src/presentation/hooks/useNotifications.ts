@@ -31,14 +31,22 @@ export function useNotifications(): void {
   const { notification } = useServices();
 
   useEffect(() => {
-    if (Platform.OS === "web") return; // web push is RBT-073
     let subscription: { remove: () => void } | undefined;
 
     void (async () => {
-      // Ask permission + register for remote push (token handed to the BE later).
+      // Ask permission + register for remote push (token handed to the BE
+      // later). On web this registers the service worker + push subscription
+      // (RBT-073, degrades gracefully when unsupported); on native it is the
+      // Expo push token (RBT-072).
       await notification.registerForRemotePush();
+
+      if (Platform.OS === "web") {
+        // Web taps are handled by the service worker's `notificationclick`
+        // (clients.navigate to the deep link) — no in-app JS listener needed.
+        return;
+      }
       const api = require("expo-notifications") as typeof import("expo-notifications");
-      // Tap handler: route to the notification's deep link.
+      // Native tap handler: route to the notification's deep link.
       subscription = api.addNotificationResponseReceivedListener((response) => {
         const data = response.notification.request.content.data as
           | TappedNotificationData
