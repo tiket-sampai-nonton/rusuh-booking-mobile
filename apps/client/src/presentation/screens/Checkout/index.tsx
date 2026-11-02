@@ -25,6 +25,7 @@ import {
   isAttendeeWarning,
   isCheckoutReady,
   isValidNik,
+  maskNik,
   patchRowAt,
   removeRowAt,
   setBuyerUseAt,
@@ -42,6 +43,7 @@ import {
   prefillFromProfile,
   useAccountStore,
 } from "@presentation/stores/account-store";
+import { useSessionStore } from "@presentation/stores/session-store";
 import { useServices } from "@providers/service-context";
 
 import { categoryPrice, emptyRow } from "./categories";
@@ -76,6 +78,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const { checks, pending, request } = useAttendeeCheck(sessionId);
   const { setBuyer } = useSetBuyer();
   const { hold, isHolding, error: holdError } = useHoldBooking();
+  const setOrderDetail = useSessionStore((s) => s.setOrderDetail);
   // Select the STABLE profile reference (not a fresh object) so zustand does not
   // re-render every tick; derive the prefill from it with useMemo.
   const profile = useAccountStore((s) => s.profile);
@@ -260,6 +263,9 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               await setBuyer({ sessionId, buyerNik, email: buyerEmail });
               try {
                 const booking = await hold({ sessionId, rows, buyerNik });
+                // RBT-070: record the order detail the success summary shows —
+                // MASKED buyer NIK (never the raw NIK, D7.1/D7.5) + ticket qty.
+                setOrderDetail(maskNik(buyerNik), rows.length);
                 router.replace(`/payment/${booking.bookingId}` as Href);
               } catch {
                 // holdError (DomainError.userMessage) is shown in CheckoutBar;

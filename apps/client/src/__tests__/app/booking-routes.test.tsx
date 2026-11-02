@@ -77,8 +77,10 @@ describe("(booking) routes", () => {
     expect(typeof PaymentScreen).toBe("function");
   });
 
-  it("renders Success with the booking param", () => {
-    render(<SuccessScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/bk-1/);
+  it("exports the Success route as a component", () => {
+    // RBT-070: /success is now a real screen (ServiceProvider + QueryClient
+    // required) — its behavior is covered in SuccessScreen.test.tsx. Here we
+    // only assert the route module exports a renderable component.
+    expect(typeof SuccessScreen).toBe("function");
   });
 });
