@@ -1,0 +1,74 @@
+RBT-062 — Page-token WebView reuse (mobile)
+Branch: feature/RBT-062-page-token-webview
+Date: 2026-11-02
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-062 scope) ---
+File                               | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------------|---------|----------|---------|--------
+ application/.../open-payment-webview|   100 |     100 |     100 |     100
+ presentation/hooks/usePaymentWebView|   100 |     100 |     100 |     100
+ presentation/screens/PaymentWebView |    100 |      95 |     100 |     100
+ infrastructure/.../mock-payment.repo |    100 |     100 |     100 |     100
+ infrastructure/api/http-payment.repo |    100 |     100 |     100 |     100
+
+ALL FOUR METRICS >= 90% on every RBT-062 file. 45 payment-suite tests pass;
+full suite green under the husky pre-commit gate.
+
+================================================================
+ACCEPTANCE CRITERIA (AC1 — FR-24, D10.3)
+================================================================
+- POST /payments/{id}/page-tokens → { pageToken, pageUrl } (createPageToken on
+  the port; mock mints a one-time token, HTTP POSTs the endpoint). ✓
+- Mobile WebView loads `pageUrl` → onLoadEnd → POST /payment-page-sessions
+  { pageToken } (exchangePageToken) sets the rb_pay cookie so the SAME FE
+  payment page is reused inside the WebView. One-time token: a reused/unknown
+  token is rejected PAYMENT_PAGE_TOKEN_INVALID (verified). ✓
+- Timer stays server-authoritative across the handoff: it is computed from
+  paymentExpiresAt + serverTime (ServerClock), not a client clock, so moving
+  into the WebView never resets it (unchanged from RBT-060). ✓
+- SNAP success/failed return routes via onNavigationStateChange →
+  /success or /expired (resolveWebViewNav, unit-tested). The FE never marks
+  PAID itself (RBT-063 verifies). ✓
+- Web: no WebView handoff (the browser is already on the page) → a plain notice.
+
+Clean-Arch: OpenPaymentWebView use case framework-free; the <WebView> + platform
+split confined to the screen; port methods grounded in the Payment Service
+OpenAPI (PageToken, PageSessionRequest). O2 endpoints flagged — mocked until BE.
+
+================================================================
+DEPENDENCY ADDED (user-approved)
+================================================================
+react-native-webview@13.12.5 — installed via `expo install` (SDK-pinned).
+Rizky approved adding it (ask_question, "Install react-native-webview and build
+the real WebView page-reuse"). Node module count 826 → 827 (no prune; no stray
+root package.json). The vulnerabilities npm reports are PRE-EXISTING transitive
+findings in the dev/build tree, not introduced by this package.
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0 WITH react-native-webview
+          added (the native-only dep does not break the web bundle); the new
+          /payment-webview/[bookingId] route builds and renders the web no-op
+          notice.
+iOS     : iPhone 16 Pro → ios-webview-mount.png — the WebView route mounts and
+          the <WebView> attempts to load the mock pageUrl.
+Android : emulator-5554 → android-webview-mount.png — same.
+
+HONEST NOTE: both native shots show a BLANK WebView. This is expected and
+correct for mock-first: the mock `pageUrl` is a relative in-app path
+(`/payment/<id>?rb_pay_token=...`), NOT a real http(s) SNAP page, so a native
+WebView has nothing loadable to render. The WebView component DOES mount and
+attempt the load (the integration is wired), but real rendered content requires
+the real O2 SNAP endpoint, which is not delivered. The full RBT-062 behaviour —
+token mint, WebView mount, onLoadEnd token exchange, one-time-token rejection,
+success/failed nav routing, web vs native split — is proven by the RNTL suites
+(PaymentWebViewScreen.test.tsx, usePaymentWebView.test.tsx,
+open-payment-webview.use-case.test.ts) and the http/mock adapter tests.

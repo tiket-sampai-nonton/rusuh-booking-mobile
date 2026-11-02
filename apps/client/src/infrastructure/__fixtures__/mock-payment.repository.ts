@@ -5,7 +5,9 @@
  * payment, ARCHITECTURE §13 P5). Framework-free; deterministic. Reuses the
  * supplied idempotency key so a repeated create for the same key is idempotent.
  */
+import { mapError } from "@domain/errors/error-mapper";
 import type {
+  PageToken,
   PaymentAttempt,
   PaymentMethod,
   PaymentPage,
@@ -76,5 +78,24 @@ export class MockPaymentRepository implements PaymentRepository {
       throw new Error(`MockPaymentRepository: unknown attempt ${attemptId}`);
     }
     return found;
+  }
+
+  /**
+   * RBT-062 (FE-NEED O2): mint a one-time page token + a WebView URL that points
+   * at the FE payment route (so the SAME page is reused inside the WebView).
+   */
+  private readonly liveTokens = new Set<string>();
+  async createPageToken(bookingId: string): Promise<PageToken> {
+    this.seq += 1;
+    const pageToken = `pgt_${bookingId}_${this.seq}`;
+    this.liveTokens.add(pageToken);
+    return { pageToken, pageUrl: `/payment/${bookingId}?rb_pay_token=${pageToken}` };
+  }
+
+  /** Exchange a one-time token (consumed); an unknown/used token is invalid. */
+  async exchangePageToken(pageToken: string): Promise<void> {
+    if (!this.liveTokens.delete(pageToken)) {
+      throw mapError({ code: "PAYMENT_PAGE_TOKEN_INVALID" });
+    }
   }
 }

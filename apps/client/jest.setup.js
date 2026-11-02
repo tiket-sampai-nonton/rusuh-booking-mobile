@@ -28,3 +28,30 @@ jest.mock("expo-router/head", () => {
   const Head = () => null;
   return { __esModule: true, default: Head };
 });
+
+// react-native-webview renders a native view with no jsdom/RN-test backing.
+// Stub it as a plain View that forwards testID + source, and fires onLoadEnd
+// once on mount so the page-token exchange path (RBT-062) is exercised. The
+// real WebView render is verified on-device/manually, not in the unit runner.
+jest.mock("react-native-webview", () => {
+  const ReactMock = require("react");
+  const RNMock = require("react-native");
+  function WebViewMock(props) {
+    ReactMock.useEffect(() => {
+      if (typeof props.onLoadEnd === "function") props.onLoadEnd();
+      // Drive a navigation event when the test asks for one via a magic uri
+      // query (?rbtest_nav=<url>), so the onNavigationStateChange branch runs.
+      const uri = props.source ? props.source.uri : "";
+      const m = /rbtest_nav=([^&]+)/.exec(uri || "");
+      if (m && typeof props.onNavigationStateChange === "function") {
+        props.onNavigationStateChange({ url: decodeURIComponent(m[1]) });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.onLoadEnd]);
+    return ReactMock.createElement(RNMock.View, {
+      testID: props.testID,
+      accessibilityLabel: props.source ? props.source.uri : undefined,
+    });
+  }
+  return { __esModule: true, WebView: WebViewMock, default: WebViewMock };
+});

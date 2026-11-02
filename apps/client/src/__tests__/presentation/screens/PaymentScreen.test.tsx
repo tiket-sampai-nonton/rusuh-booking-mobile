@@ -44,6 +44,11 @@ function paymentRepo(p: PaymentPage): PaymentRepository {
       bookingId: "bk-1",
       status: "AWAITING_PAYMENT",
     }),
+    createPageToken: async (bookingId: string) => ({
+      pageToken: "t",
+      pageUrl: `/payment/${bookingId}`,
+    }),
+    exchangePageToken: async (): Promise<void> => {},
   };
 }
 

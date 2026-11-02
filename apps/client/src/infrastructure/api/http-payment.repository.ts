@@ -8,6 +8,7 @@
  */
 
 import type {
+  PageToken,
   PaymentAttempt,
   PaymentMethod,
   PaymentPage,
@@ -15,6 +16,7 @@ import type {
 } from "@domain/repositories/payment.repository";
 import { unwrap } from "@infrastructure/api/envelope";
 import {
+  toPageToken,
   toPaymentAttempt,
   toPaymentPage,
 } from "@infrastructure/api/dto-mappers";
@@ -51,5 +53,22 @@ export class HttpPaymentRepository implements PaymentRepository {
       url: `payments/attempts/${encodeURIComponent(attemptId)}`,
     });
     return toPaymentAttempt(unwrap<Parameters<typeof toPaymentAttempt>[0]>(res));
+  }
+
+  async createPageToken(bookingId: string): Promise<PageToken> {
+    const res = await this.http.request({
+      method: "POST",
+      url: `payments/${encodeURIComponent(bookingId)}/page-tokens`,
+    });
+    return toPageToken(unwrap<Parameters<typeof toPageToken>[0]>(res));
+  }
+
+  async exchangePageToken(pageToken: string): Promise<void> {
+    // Sets the rb_pay session cookie server-side; no payload needed back.
+    await this.http.request({
+      method: "POST",
+      url: "payment-page-sessions",
+      body: { pageToken },
+    });
   }
 }
