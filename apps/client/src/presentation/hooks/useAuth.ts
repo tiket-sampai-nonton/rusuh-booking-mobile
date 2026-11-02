@@ -16,6 +16,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 
+import { CompleteRegistration } from "@application/auth/complete-registration.use-case";
 import { RequestOtp } from "@application/auth/request-otp.use-case";
 import { VerifyOtp } from "@application/auth/verify-otp.use-case";
 import type {
@@ -49,6 +50,20 @@ export interface UseAuthResult {
   /** The signed-in profile (masked), populated after a returning-user verify. */
   readonly profile: UserProfile | null;
 
+  /**
+   * Complete registration for a NEW account (RBT-021). Validates NIK + name in
+   * the use case, then resolves with the masked {@link UserProfile}. The raw
+   * NIK is never logged here.
+   */
+  readonly completeRegistration: (input: {
+    fullName: string;
+    nik: string;
+  }) => Promise<UserProfile>;
+  /** True while the registration submit is in flight. */
+  readonly isRegistering: boolean;
+  /** The registration error (typed DomainError, e.g. NIK_INVALID), if any. */
+  readonly registerError: Error | null;
+
   /** Reset all auth state (used by "Ganti email" and when the modal closes). */
   readonly reset: () => void;
 }
@@ -60,10 +75,11 @@ export interface UseAuthResult {
 export function useAuth(): UseAuthResult {
   const { userRepository } = useServices();
 
-  const { requestOtp, verifyOtp } = useMemo(
+  const { requestOtp, verifyOtp, completeRegistration } = useMemo(
     () => ({
       requestOtp: new RequestOtp(userRepository),
       verifyOtp: new VerifyOtp(userRepository),
+      completeRegistration: new CompleteRegistration(userRepository),
     }),
     [userRepository],
   );
@@ -97,11 +113,25 @@ export function useAuth(): UseAuthResult {
     },
   });
 
+  const registerMutation = useMutation<
+    UserProfile,
+    Error,
+    { fullName: string; nik: string }
+  >({
+    mutationFn: (input) => completeRegistration.execute(input),
+    onSuccess: (result) => {
+      // Registration complete → the masked profile powers the signed-in panel
+      // and checkout auto-fill. The raw NIK is never stored/logged here.
+      setProfile(result);
+    },
+  });
+
   const reset = useCallback(() => {
     requestMutation.reset();
     verifyMutation.reset();
+    registerMutation.reset();
     setProfile(null);
-  }, [requestMutation, verifyMutation]);
+  }, [requestMutation, verifyMutation, registerMutation]);
 
   return {
     requestOtp: (email: string) => requestMutation.mutateAsync(email),
@@ -115,6 +145,11 @@ export function useAuth(): UseAuthResult {
     session: verifyMutation.data ?? null,
 
     profile,
+
+    completeRegistration: (input) => registerMutation.mutateAsync(input),
+    isRegistering: registerMutation.isPending,
+    registerError: registerMutation.error,
+
     reset,
   };
 }
