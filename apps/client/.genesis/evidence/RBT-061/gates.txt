@@ -1,0 +1,57 @@
+RBT-061 — Create-attempt + SNAP handoff (web redirect / mobile WebView)
+Branch: feature/RBT-061-create-attempt-snap
+Date: 2026-11-02
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-061 scope) ---
+File                                 | % Stmts | % Branch | % Funcs | % Lines
+-------------------------------------|---------|----------|---------|--------
+ application/.../create-payment-attempt|   100 |     100 |     100 |     100
+ presentation/hooks/usePayment.ts     |    100 |    90.9 |     100 |     100
+ presentation/screens/Payment/index   |    100 |   91.66 |     100 |     100
+ presentation/screens/Payment/PaymentBar|  100 |     100 |     100 |     100
+
+ALL FOUR METRICS >= 90% on every RBT-061 file. Overall 100/93.61/100/100.
+33 payment-suite tests pass; full suite green under the husky pre-commit gate.
+
+================================================================
+ACCEPTANCE CRITERIA
+================================================================
+AC1 "Bayar" → createAttempt(bookingId, method, Idempotency-Key) → BE
+    redirectUrl → SNAP handoff:
+      • web   → openSnapHandoff assigns window.location (full-page redirect)
+      • native→ Linking.openURL(redirectUrl) (in-app browser / WebView surface)
+    Both platform branches unit-tested. CreatePaymentAttempt mints ONE
+    idempotency key per (booking, method) and reuses it on retry (FR-25), so a
+    double-tap cannot create two attempts (verified). The selected method +
+    attemptId are recorded in the session store. ✓
+AC2 refresh-safe: when `page.currentAttempt.status === 'AWAITING_PAYMENT'` the
+    bar CTA switches to "Kembali ke SNAP" and re-opens the handoff for the
+    existing attempt (resumeHandoff) instead of creating a new one. ✓
+
+The FE never marks PAID here — the callback is verified server-side (RBT-063,
+VerifyPayment use case added). Clean-Arch: CreatePaymentAttempt/VerifyPayment
+framework-free; TanStack + the platform open confined to usePayment (the open is
+injected, so it is deterministic in tests). O2 contract detail (exact SNAP
+shapes) flagged — mock-first until BE delivers.
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0; /payment/[bookingId] route.
+iOS     : iPhone 16 Pro → ios-payment-page.png — payment page renders clean
+          post-RBT-061 (live server countdown 09:39, enabled "Bayar Sekarang").
+Android : emulator-5554 → android-payment-page.png — identical render.
+          The create-attempt → SNAP handoff and the "Kembali ke SNAP" resume are
+          state-dependent flows (method select + Bayar tap; currentAttempt from
+          a prior createAttempt) that a static deep-link cannot reach and
+          simctl/adb cannot script, so they are proven by the PaymentScreen +
+          usePayment RNTL suites. Native confirms the page mounts with no
+          regression. The web-redirect vs native-Linking branches are both
+          unit-covered in usePayment.test.tsx.
