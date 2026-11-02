@@ -17,6 +17,8 @@ import type { EventRepository } from "@domain/repositories/event.repository";
 import type { PaymentRepository } from "@domain/repositories/payment.repository";
 import type { QueueRepository } from "@domain/repositories/queue.repository";
 import type { UserRepository } from "@domain/repositories/user.repository";
+import { IdempotencyKeys } from "@domain/idempotency/idempotency-key";
+import { InMemoryIdempotencyStore } from "@infrastructure/__fixtures__/in-memory-idempotency-store";
 import type { ClockPort } from "@domain/services/clock.port";
 import type { FileSharePort } from "@domain/services/file-share.port";
 import type { NotificationPort } from "@domain/services/notification.port";
@@ -69,6 +71,12 @@ export interface Container {
    * secure-store adapter, web/tests the in-memory fallback. Bound in BOTH modes.
    */
   readonly queueMembership: QueueMembershipStorage;
+  /**
+   * Idempotency-Key minting/reuse (RBT-012/054). A client-side primitive (no
+   * backend capability) over an in-memory store → bound in BOTH modes so the
+   * hold/payment can mint one key per action and reuse it across retry/refresh.
+   */
+  readonly idempotencyKeys: IdempotencyKeys;
 }
 
 /**
@@ -159,6 +167,9 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // Queue membership persistence is also a platform primitive (native secure
   // store vs web in-memory, driven by Platform.OS) → bound in BOTH modes (RBT-041).
   const queueMembership: QueueMembershipStorage = createQueueMembershipStorage();
+  // Idempotency keys are a client-side primitive over an in-memory store →
+  // bound in BOTH modes (RBT-012/054).
+  const idempotencyKeys = new IdempotencyKeys(new InMemoryIdempotencyStore());
 
   if (useMocks) {
     return {
@@ -166,6 +177,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
       serverClock,
       tokenStorage,
       queueMembership,
+      idempotencyKeys,
       httpClient: new MockHttpClient(),
       eventRepository: new MockEventRepository(),
       queueRepository: new MockQueueRepository(),
@@ -196,6 +208,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
     serverClock,
     tokenStorage,
     queueMembership,
+    idempotencyKeys,
     httpClient,
     eventRepository: new HttpEventRepository(httpClient),
     queueRepository: new HttpQueueRepository(httpClient),

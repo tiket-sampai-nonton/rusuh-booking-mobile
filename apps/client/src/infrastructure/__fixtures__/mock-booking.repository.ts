@@ -5,6 +5,7 @@
  * idempotency key so a repeated `hold` for the same key returns the same
  * booking (idempotent). RBT-014 may enrich the scenarios.
  */
+import { mapError } from "@domain/errors/error-mapper";
 import type {
   AttendeeCheck,
   Booking,
@@ -79,7 +80,24 @@ export class MockBookingRepository implements BookingRepository {
     idempotencyKey: string,
   ): Promise<Booking> {
     const existing = this.bookingsByKey.get(idempotencyKey);
-    if (existing) return existing;
+    if (existing) return existing; // idempotent: same key → same booking
+
+    // Deterministic conflict triggers so the FE can exercise every hold error
+    // path without the BE (RBT-054, FR-16). A real BE enforces these.
+    const categories = new Set(items.map((i) => i.categoryId));
+    const niks = items.map((i) => i.attendeeNik);
+    if (items.some((i) => i.categoryId === "SOLD")) {
+      throw mapError({ code: "CATEGORY_UNAVAILABLE" });
+    }
+    if (categories.size > 1) {
+      throw mapError({ code: "MIXED_CATEGORIES_NOT_ALLOWED" });
+    }
+    if (new Set(niks).size !== niks.length) {
+      throw mapError({ code: "ATTENDEE_NIK_DUPLICATE_IN_ORDER" });
+    }
+    if (items.length > 3) {
+      throw mapError({ code: "QUANTITY_EXCEEDS_LIMIT" });
+    }
     this.seq += 1;
     const booking: Booking = {
       bookingId: `bk-${sessionId}-${this.seq}`,

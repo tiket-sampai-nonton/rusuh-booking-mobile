@@ -90,6 +90,15 @@ describe("providers/container — createContainer (mock mode)", () => {
     expect(typeof c.queueMembership.clear).toBe("function");
   });
 
+  it("binds IdempotencyKeys in mock mode that mint+reuse+clear (RBT-054)", () => {
+    expect(c.idempotencyKeys).toBeDefined();
+    const k1 = c.idempotencyKeys.mint("action-x");
+    expect(k1).toMatch(/^idem_/);
+    expect(c.idempotencyKeys.mint("action-x")).toBe(k1); // reused
+    c.idempotencyKeys.clear("action-x");
+    expect(c.idempotencyKeys.peek("action-x")).toBeUndefined();
+  });
+
   it("resolves a port to a working mock adapter (wiring proof)", async () => {
     const events = await c.eventRepository.listEvents();
     expect(events.length).toBeGreaterThan(0);

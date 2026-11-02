@@ -25,6 +25,11 @@ export const ERROR_SPECS: Readonly<Record<string, ErrorSpec>> = {
   BUYER_QUOTA_EXHAUSTED: { kind: "quota", message: "Kuota tiket untuk NIK ini sudah habis." },
   QUANTITY_EXCEEDS_LIMIT: { kind: "quota", message: "Jumlah tiket melebihi batas yang diizinkan." },
   ATTENDEE_NIK_ALREADY_REGISTERED: { kind: "quota", message: "NIK peserta sudah terdaftar untuk acara ini." },
+  // Booking hold conflicts (RBT-054, FR-16/FR-25).
+  CATEGORY_UNAVAILABLE: { kind: "sold_out", message: "Kategori tiket ini sudah tidak tersedia. Pilih kategori lain." },
+  MIXED_CATEGORIES_NOT_ALLOWED: { kind: "validation", message: "Dalam satu pesanan, semua tiket harus kategori yang sama." },
+  ATTENDEE_NIK_DUPLICATE_IN_ORDER: { kind: "validation", message: "Ada NIK peserta yang sama dalam pesanan. Setiap tiket butuh NIK berbeda." },
+  IDEMPOTENCY_KEY_REUSED: { kind: "conflict", message: "Pesanan ini sudah diproses. Mohon tunggu." },
   NIK_ALREADY_IN_QUEUE: { kind: "conflict", message: "NIK ini sudah berada dalam antrean." },
   NIK_ALREADY_LINKED: { kind: "conflict", message: "NIK sudah tertaut ke akun lain." },
   CHECK_LIMIT_REACHED: { kind: "quota", message: "Batas pengecekan NIK tercapai." },
