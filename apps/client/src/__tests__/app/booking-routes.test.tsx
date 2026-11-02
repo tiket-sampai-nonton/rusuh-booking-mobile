@@ -63,9 +63,11 @@ describe("(booking) routes", () => {
     );
   });
 
-  it("renders Checkout with the session param", () => {
-    render(<CheckoutScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/sess-1/);
+  it("exports the Checkout route as a component", () => {
+    // RBT-051: /checkout is now a real screen (ServiceProvider + QueryClient
+    // required) — its behavior is covered in CheckoutScreen.test.tsx. Here we
+    // only assert the route module exports a renderable component.
+    expect(typeof CheckoutScreen).toBe("function");
   });
 
   it("renders Payment with the booking param", () => {
