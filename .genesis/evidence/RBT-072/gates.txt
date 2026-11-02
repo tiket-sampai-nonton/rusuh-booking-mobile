@@ -1,0 +1,70 @@
+RBT-072 — Native notifications (expo-notifications)
+Branch: feature/RBT-072-native-notifications
+Date: 2026-11-02
+Evidence path: .genesis/evidence/RBT-072/ (canonical repo-root, per WORKFLOW.md)
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-072 scope) ---
+File                               | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------------|---------|----------|---------|--------
+ domain/rules/notification-flows   |   100   |   100    |   100   |   100
+ infrastructure/.../expo-notification.adapter | 100 | 100 | 100 | 100
+ presentation/hooks/useNotifications|   100   |   100    |   100   |   100
+
+ALL FOUR METRICS = 100% on every RBT-072 file. 34 scoped tests pass.
+
+================================================================
+DEPENDENCY ADDED (locked stack)
+================================================================
+expo-notifications@~0.29.14 — AGENTS.md stack ("expo-notifications (native)"),
+named directly in the AC. `expo install` SDK-pinned. Web export still green
+(web binds the mock adapter; no expo-notifications on the web bundle).
+
+================================================================
+ACCEPTANCE CRITERIA (AC1)
+================================================================
+- permission: ExpoNotificationAdapter.requestPermission() checks the current
+  grant, prompts only when needed. ✓
+- token registration: registerForRemotePush() returns the Expo push token when
+  permitted, null on denial / mint failure (no projectId / simulator) — never
+  throws. ✓
+- required flows (notification-flows domain rule, pure): expiry_reminder →
+  /payment/<booking>, payment_success → /success/<booking>, admission →
+  /checkout/<session>, event_reminder → /events/<event>. Bahasa copy; schedule
+  time carried for the time-based ones. ✓
+- tap → deep link: scheduleLocal carries {deepLink, kind} in the notification
+  data; useNotifications' tap listener resolves the route via the pure
+  notificationRoute rule and router.push()es it (only in-app "/" paths — an
+  external URL is refused). ✓
+- platform split: native binds ExpoNotificationAdapter; web binds the mock until
+  web-push (RBT-073); the shared flow rule is identical on both (D6.1). The
+  NotificationBridge is mounted in the root layout, inside the providers.
+
+Clean-Arch: notification-flows + notificationRoute are pure domain; the port is
+unchanged in shape (LocalNotification gained kind + deepLink); expo-notifications
+is touched ONLY by the adapter + the hook's tap listener, both requiring it
+lazily so web/test load nothing.
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0; / (index) builds (29.2 kB)
+          WITH the notification bridge wired (web uses the mock adapter — no
+          expo-notifications in the web bundle).
+iOS     : iPhone 16 Pro, app launched from index → ios-boot-with-notification-
+          bridge.png — home renders cleanly; the bridge's permission/registration
+          runs in the background without blocking boot (regression check for the
+          _layout + container change).
+Android : emulator-5554 → android-boot-with-notification-bridge.png — same.
+
+HONEST NOTE: an OS notification cannot be scripted/delivered-and-tapped on
+simctl/adb, so the end-to-end "receive → tap → deep-link" is proven by RNTL
+(useNotifications.test.tsx drives the real tap listener with a simulated
+response and asserts router.push to the deep link; the adapter + flow rules are
+100%-covered). Native evidence confirms the app boots with the bridge active.

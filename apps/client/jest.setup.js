@@ -72,3 +72,14 @@ jest.mock("react-native-qrcode-svg", () => {
   }
   return { __esModule: true, default: QRCodeMock };
 });
+
+// expo-notifications touches the native notification SDK; in the unit runner we
+// stub the surface the adapter + useNotifications use (RBT-072). Tests that need
+// specific behavior override these with jest.spyOn / jest.doMock.
+jest.mock("expo-notifications", () => ({
+  getPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
+  getExpoPushTokenAsync: jest.fn().mockResolvedValue({ data: "ExpoPushToken[xyz]" }),
+  scheduleNotificationAsync: jest.fn().mockResolvedValue("notif-id"),
+  addNotificationResponseReceivedListener: jest.fn().mockReturnValue({ remove: jest.fn() }),
+}));

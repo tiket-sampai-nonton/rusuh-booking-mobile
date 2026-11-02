@@ -164,7 +164,7 @@ describe("MockNotificationAdapter", () => {
   it("grants permission, records schedules, and returns a push token", async () => {
     const adapter = new MockNotificationAdapter();
     expect(await adapter.requestPermission()).toBe(true);
-    await adapter.scheduleLocal({ title: "T", body: "B" });
+    await adapter.scheduleLocal({ kind: "payment_success", title: "T", body: "B" });
     expect(adapter.scheduled).toHaveLength(1);
     expect(adapter.scheduled[0].title).toBe("T");
     expect(await adapter.registerForRemotePush()).toBe("mock-push-token");
