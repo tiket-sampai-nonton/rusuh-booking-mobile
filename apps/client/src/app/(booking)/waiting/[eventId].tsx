@@ -1,5 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
+import { Fragment } from "react";
 
+import { Seo } from "@presentation/components/Seo";
 import { WaitingRoomScreen } from "@presentation/screens/Waiting";
 
 /**
@@ -19,5 +21,15 @@ export default function WaitingScreen() {
     eventId: string;
     queueId?: string;
   }>();
-  return <WaitingRoomScreen eventId={eventId} queueId={queueId ?? ""} />;
+  return (
+    <Fragment>
+      <Seo
+        title="Ruang Tunggu"
+        description="Virtual waiting room."
+        path={`/waiting/${eventId}`}
+        noindex
+      />
+      <WaitingRoomScreen eventId={eventId} queueId={queueId ?? ""} />
+    </Fragment>
+  );
 }

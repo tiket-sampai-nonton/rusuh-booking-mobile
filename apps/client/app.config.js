@@ -13,9 +13,10 @@ const config = {
     android: { package: "com.tiketsampainonton.rusuhbooking" },
     web: {
         bundler: "metro",
-        // SPA for the RBT-001 skeleton. Static/SSR SEO output (web.output:"static")
-        // is wired in RBT-033; it needs the router prerender env which is set up there.
-        output: "single",
+        // RBT-033: static rendering so public routes (/, /browse, /events/[id],
+        // /history) emit indexable HTML per route (D6.2 — never ship a public
+        // route as "single"). Transactional routes are marked noindex via Head.
+        output: "static",
     },
     plugins: ["expo-router", "expo-asset", "expo-font"],
     experiments: { typedRoutes: true },
