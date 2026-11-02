@@ -1,13 +1,11 @@
-import { Text, View } from "react-native";
+/**
+ * Public route `/history` ("History Event") — RBT-034. Routing-only: renders
+ * the History PageScreen, which lists past/CLOSED events derived from the
+ * catalog (useEvents → splitCatalog on the server clock). Reached from Home's
+ * History section / nav.
+ */
+import { HistoryScreen } from "@presentation/screens/History";
 
-// Public route `/history` (booking history). Listed under (public) in
-// ARCHITECTURE §3. Skeleton placeholder — real list lands in a later RBT.
-export default function HistoryScreen() {
-  return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-lg font-semibold text-brand" accessibilityRole="header">
-        History — /history (RBT-002)
-      </Text>
-    </View>
-  );
+export default function HistoryRoute() {
+  return <HistoryScreen />;
 }

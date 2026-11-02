@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react-native";
+import { screen, waitFor } from "@testing-library/react-native";
 
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
@@ -49,9 +49,12 @@ describe("(public) routes", () => {
     expect(screen.getByTestId("browse-count")).toBeTruthy();
   });
 
-  it("renders History placeholder", () => {
-    render(<HistoryScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/History/);
+  it("renders the History screen (RBT-034: real past-event list, not a placeholder)", async () => {
+    // The History route wires the mock catalog through the provider stack and
+    // derives past/CLOSED events; the "History Event" section header proves the
+    // real screen mounts.
+    renderWithProviders(<HistoryScreen />);
+    await waitFor(() => expect(screen.getByText("History Event")).toBeTruthy());
   });
 
   it("renders the Event Detail screen for the route param (RBT-032: real detail, not a placeholder)", async () => {
