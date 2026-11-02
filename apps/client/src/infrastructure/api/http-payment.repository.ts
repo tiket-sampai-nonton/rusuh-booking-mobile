@@ -13,6 +13,7 @@ import type {
   PaymentMethod,
   PaymentPage,
   PaymentRepository,
+  SnapOutcome,
 } from "@domain/repositories/payment.repository";
 import { unwrap } from "@infrastructure/api/envelope";
 import {
@@ -70,5 +71,20 @@ export class HttpPaymentRepository implements PaymentRepository {
       url: "payment-page-sessions",
       body: { pageToken },
     });
+  }
+
+  async snapCallback(
+    attemptId: string,
+    outcome: SnapOutcome,
+  ): Promise<PaymentAttempt> {
+    // POST the SNAP callback; the BE webhook sets the authoritative status and
+    // returns the (contract-shaped) attempt. The FE still re-verifies via
+    // getStatus — the callback is never trusted on its own (D10.2).
+    const res = await this.http.request({
+      method: "POST",
+      url: `payments/attempts/${encodeURIComponent(attemptId)}/snap-callback`,
+      body: { outcome },
+    });
+    return toPaymentAttempt(unwrap<Parameters<typeof toPaymentAttempt>[0]>(res));
   }
 }

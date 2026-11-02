@@ -43,6 +43,9 @@ class FakeRepo implements PaymentRepository {
     return { pageToken: "t", pageUrl: `/payment/${bookingId}` };
   }
   async exchangePageToken(): Promise<void> {}
+  async snapCallback(attemptId: string): Promise<PaymentAttempt> {
+    return { attemptId, bookingId: "b", status: this.status };
+  }
 }
 
 function build(): { repo: FakeRepo; keys: IdempotencyKeys } {

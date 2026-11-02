@@ -37,6 +37,9 @@ class FakeRepo implements PaymentRepository {
     return { pageToken: "t", pageUrl: `/payment/${bookingId}` };
   }
   async exchangePageToken(): Promise<void> {}
+  async snapCallback(attemptId: string): Promise<PaymentAttempt> {
+    return { attemptId, bookingId: "b", status: "PAID" };
+  }
 }
 
 function wrapper(repo: PaymentRepository) {
@@ -137,5 +140,14 @@ describe("openSnapHandoff (platform branches)", () => {
     RN.Linking.openURL = openURL as typeof RN.Linking.openURL;
     await openSnapHandoff("https://snap.mock/native");
     expect(openURL).toHaveBeenCalledWith("https://snap.mock/native");
+  });
+
+  it("routes an in-app relative path via the router (RBT-065 /snap)", async () => {
+    // lazily require()'d inside openSnapHandoff; mock the module's router.push
+    const push = jest.fn();
+    jest.doMock("expo-router", () => ({ router: { push } }));
+    await openSnapHandoff("/snap/bk-1");
+    expect(push).toHaveBeenCalledWith("/snap/bk-1");
+    jest.dontMock("expo-router");
   });
 });

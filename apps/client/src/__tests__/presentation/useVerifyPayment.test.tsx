@@ -39,6 +39,9 @@ class StatusRepo implements PaymentRepository {
     return { pageToken: "t", pageUrl: `/payment/${bookingId}` };
   }
   async exchangePageToken(): Promise<void> {}
+  async snapCallback(attemptId: string): Promise<PaymentAttempt> {
+    return { attemptId, bookingId: "bk-1", status: "PAID" };
+  }
 }
 
 function wrapper(repo: PaymentRepository) {

@@ -12,6 +12,7 @@ import type {
   PaymentMethod,
   PaymentPage,
   PaymentRepository,
+  SnapOutcome,
 } from "@domain/repositories/payment.repository";
 
 /** Server-allowed methods the mock page exposes (no credit card). */
@@ -62,9 +63,12 @@ export class MockPaymentRepository implements PaymentRepository {
       attemptId: `pay-${bookingId}-${this.seq}`,
       bookingId,
       status: "AWAITING_PAYMENT",
-      redirectUrl: `https://snap.mock/${bookingId}`,
+      // RBT-065: the local SNAP simulator route stands in for the hosted page.
+      redirectUrl: `/snap/${bookingId}`,
       paymentExpiresAt: new Date(Date.now() + 600_000).toISOString(),
       serverTime: new Date().toISOString(),
+      successReturnUrl: `/payment-result/${bookingId}`,
+      failedReturnUrl: `/expired/${bookingId}?reason=payment&bookingId=${bookingId}`,
     };
     this.attemptsByKey.set(idempotencyKey, attempt);
     this.attemptsById.set(attempt.attemptId, attempt);
@@ -96,6 +100,32 @@ export class MockPaymentRepository implements PaymentRepository {
     this.attemptsById.set(attemptId, paid);
     this.attemptByBooking.set(paid.bookingId, paid);
     return paid;
+  }
+
+  /**
+   * SNAP callback (RBT-065) — the local simulator (or the real gateway webhook)
+   * reports the hosted-page outcome. PAID/FAILED set the authoritative terminal
+   * status; UNKNOWN leaves the attempt AWAITING_PAYMENT so the result gate keeps
+   * verifying (D10.4). The FE still re-reads getStatus; this never renders PAID
+   * on its own.
+   */
+  async snapCallback(
+    attemptId: string,
+    outcome: SnapOutcome,
+  ): Promise<PaymentAttempt> {
+    const found = this.attemptsById.get(attemptId);
+    if (!found) {
+      throw new Error(`MockPaymentRepository: unknown attempt ${attemptId}`);
+    }
+    const next: PaymentAttempt =
+      outcome === "UNKNOWN"
+        ? found
+        : { ...found, status: outcome === "PAID" ? "PAID" : "FAILED" };
+    this.attemptsById.set(attemptId, next);
+    this.attemptByBooking.set(next.bookingId, next);
+    // Also settle the deterministic poll so getStatus agrees immediately.
+    if (outcome !== "UNKNOWN") this.statusPolls.set(attemptId, 2);
+    return next;
   }
 
   /**

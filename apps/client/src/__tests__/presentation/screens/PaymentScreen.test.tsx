@@ -49,6 +49,11 @@ function paymentRepo(p: PaymentPage): PaymentRepository {
       pageUrl: `/payment/${bookingId}`,
     }),
     exchangePageToken: async (): Promise<void> => {},
+    snapCallback: async (attemptId: string): Promise<PaymentAttempt> => ({
+      attemptId,
+      bookingId: "bk-1",
+      status: "PAID",
+    }),
   };
 }
 

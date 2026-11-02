@@ -105,6 +105,39 @@ describe("MockPaymentRepository", () => {
     );
   });
 
+  it("createAttempt returns contract return URLs + the snap redirect (RBT-065)", async () => {
+    const repo = new MockPaymentRepository();
+    const a = await repo.createAttempt("book-7", "QRIS", "k7");
+    expect(a.redirectUrl).toBe("/snap/book-7");
+    expect(a.successReturnUrl).toBe("/payment-result/book-7");
+    expect(a.failedReturnUrl).toContain("/expired/book-7");
+  });
+
+  it("snapCallback PAID/FAILED set terminal status; UNKNOWN stays pending (RBT-065)", async () => {
+    const repo = new MockPaymentRepository();
+    const paid = await repo.createAttempt("book-a", "QRIS", "ka");
+    expect((await repo.snapCallback(paid.attemptId, "PAID")).status).toBe("PAID");
+    // getStatus agrees immediately (settled poll)
+    expect((await repo.getStatus(paid.attemptId)).status).toBe("PAID");
+
+    const failed = await repo.createAttempt("book-b", "QRIS", "kb");
+    expect((await repo.snapCallback(failed.attemptId, "FAILED")).status).toBe(
+      "FAILED",
+    );
+
+    const unknown = await repo.createAttempt("book-c", "QRIS", "kc");
+    expect((await repo.snapCallback(unknown.attemptId, "UNKNOWN")).status).toBe(
+      "AWAITING_PAYMENT",
+    );
+  });
+
+  it("snapCallback throws for an unknown attempt", async () => {
+    const repo = new MockPaymentRepository();
+    await expect(repo.snapCallback("ghost", "PAID")).rejects.toThrow(
+      /unknown attempt ghost/,
+    );
+  });
+
   it("serves a payment page: server methods, amount, 10-min deadline (RBT-060)", async () => {
     const repo = new MockPaymentRepository();
     const p = await repo.getPaymentPage("book-1");

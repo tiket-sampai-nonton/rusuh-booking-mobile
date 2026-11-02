@@ -1,0 +1,37 @@
+/**
+ * RBT-065 — /snap/[bookingId] route renders the SNAP simulator for the booking.
+ */
+import { render, screen } from "@testing-library/react-native";
+import React from "react";
+
+jest.mock("expo-router", () => ({
+  useLocalSearchParams: () => ({ bookingId: "bk-1" }),
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
+}));
+
+// eslint-disable-next-line import/first
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+// eslint-disable-next-line import/first
+import { createContainer } from "@providers/container";
+// eslint-disable-next-line import/first
+import { ServiceProvider } from "@providers/service-context";
+// eslint-disable-next-line import/first
+import SnapRoute from "../../app/(booking)/snap/[bookingId]";
+
+describe("/snap/[bookingId] route", () => {
+  it("exports a component function", () => {
+    expect(typeof SnapRoute).toBe("function");
+  });
+
+  it("renders the SNAP simulator for the booking", () => {
+    const qc = new QueryClient();
+    render(
+      <QueryClientProvider client={qc}>
+        <ServiceProvider container={createContainer({ useMocks: true })}>
+          <SnapRoute />
+        </ServiceProvider>
+      </QueryClientProvider>,
+    );
+    expect(screen.getByTestId("snap-screen")).toBeTruthy();
+  });
+});

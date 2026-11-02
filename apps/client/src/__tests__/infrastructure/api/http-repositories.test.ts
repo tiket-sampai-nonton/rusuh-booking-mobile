@@ -157,6 +157,19 @@ describe("HttpPaymentRepository", () => {
     const repo = new HttpPaymentRepository(http);
     expect((await repo.getStatus("a1")).status).toBe("PAID");
   });
+
+  it("POSTs the SNAP callback and maps the attempt (RBT-065)", async () => {
+    const http = new FakeHttpClient();
+    http.queueResponse(ok({ attemptId: "a1", bookingId: "b1", status: "PAID" }));
+    const repo = new HttpPaymentRepository(http);
+    const out = await repo.snapCallback("a1", "PAID");
+    expect(http.calls[0]).toMatchObject({
+      method: "POST",
+      url: "payments/attempts/a1/snap-callback",
+      body: { outcome: "PAID" },
+    });
+    expect(out.status).toBe("PAID");
+  });
 });
 
 describe("HttpBookingRepository", () => {

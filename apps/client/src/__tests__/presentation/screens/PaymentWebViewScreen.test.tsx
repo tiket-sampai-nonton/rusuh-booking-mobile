@@ -42,6 +42,11 @@ function repo(over: Partial<PaymentRepository> = {}): PaymentRepository {
       pageUrl: `/payment/${bookingId}?rb_pay_token=pgt_1`,
     }),
     exchangePageToken: async (): Promise<void> => {},
+    snapCallback: async (attemptId: string): Promise<PaymentAttempt> => ({
+      attemptId,
+      bookingId: "b",
+      status: "PAID",
+    }),
     ...over,
   };
 }

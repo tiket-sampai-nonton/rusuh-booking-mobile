@@ -1,0 +1,94 @@
+/**
+ * SnapSimulator PageScreen — parent component (orchestration only).
+ *
+ * 1:1 of the prototype `snap.html` (RBT-065, D10.5). Stands in for the Midtrans
+ * SNAP hosted page: a simulate button drives the mock `snapCallback` (the port
+ * method the real gateway webhook also implements — AC1), then routes to the
+ * RESULT GATE which re-verifies with getStatus (never trusts the callback —
+ * D10.2). A SUCCESS/UNKNOWN return goes to /payment-result (the gate keeps
+ * verifying on UNKNOWN); a FAILED return goes to /expired with reason=payment.
+ *
+ * Markup lives in ./fragments/*, inline styles in ./style, types in ./interface.
+ */
+import { useRouter, type Href } from "expo-router";
+import { ScrollView, Text, View } from "react-native";
+
+import type { SnapOutcome } from "@domain/repositories/payment.repository";
+import { ScreenFade } from "@presentation/components/ScreenFade";
+import { useSnapSimulator } from "@presentation/hooks/useSnapSimulator";
+import { useSessionStore } from "@presentation/stores/session-store";
+
+import { SnapActions } from "./fragments/SnapActions";
+import { SnapLogo } from "./fragments/SnapLogo";
+import { SnapSummary } from "./fragments/SnapSummary";
+import type { SnapSimulatorScreenProps } from "./interface";
+import { snapStyles } from "./style";
+
+export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
+  const router = useRouter();
+  const { settle } = useSnapSimulator();
+  const attemptId = useSessionStore((s) => s.attemptId);
+  const amountMinor = useSessionStore((s) => s.amountMinor);
+  const method = useSessionStore((s) => s.paymentMethod);
+
+  const run = (outcome: SnapOutcome): void => {
+    const afterwards = (): void => {
+      // FAILED → recovery screen; PAID/UNKNOWN → the verify gate (keeps polling
+      // on UNKNOWN). The gate re-reads getStatus; we never render PAID here.
+      const route =
+        outcome === "FAILED"
+          ? `/expired/${bookingId}?reason=payment&bookingId=${bookingId}`
+          : `/payment-result/${bookingId}${attemptId ? `?attemptId=${attemptId}` : ""}`;
+      router.replace(route as Href);
+    };
+    if (attemptId) {
+      settle.mutate({ attemptId, outcome }, { onSettled: afterwards });
+    } else {
+      // No attempt in the store (edge) — still route to the gate to verify.
+      afterwards();
+    }
+  };
+
+  return (
+    <ScreenFade>
+      <View className="flex-1 bg-background" testID="snap-screen">
+        <ScrollView contentContainerStyle={snapStyles.scrollContent}>
+          <View className="w-full max-w-md self-center rounded-4xl border border-line bg-card p-7 shadow-filter">
+            <SnapLogo />
+
+            <Text
+              className="mt-8 text-2xs font-extrabold uppercase tracking-tag text-brand"
+              style={snapStyles.eyebrow}
+            >
+              Third-party payment gateway
+            </Text>
+            <Text
+              className="mt-2 text-2xl font-extrabold text-foreground"
+              style={snapStyles.heading}
+              accessibilityRole="header"
+            >
+              Selesaikan pembayaranmu
+            </Text>
+            <Text className="mt-2.5 text-xs leading-5 text-muted-foreground">
+              Ini adalah simulasi halaman SNAP untuk prototype. Pada produksi,
+              halaman ini akan disediakan oleh payment provider.
+            </Text>
+
+            <SnapSummary
+              bookingId={bookingId}
+              method={method}
+              amountMinor={amountMinor}
+            />
+
+            <SnapActions
+              pending={settle.isPending}
+              onSuccess={() => run("PAID")}
+              onFail={() => run("FAILED")}
+              onUnknown={() => run("UNKNOWN")}
+            />
+          </View>
+        </ScrollView>
+      </View>
+    </ScreenFade>
+  );
+}
