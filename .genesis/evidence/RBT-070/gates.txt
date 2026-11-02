@@ -54,3 +54,17 @@ guarantee (never show ticket details without authoritative verification). The
 PAID summary content (orderId / qty / amount / masked NIK, and the FAILED→recovery
 redirect) is proven by RNTL (SuccessScreen.test.tsx, 5 cases); simctl/adb expose
 no scripted taps to drive the full funnel to a verified PAID state on device.
+
+
+================================================================
+ADDENDUM (2026-11-02) — verified-PAID summary captured on device
+================================================================
+screenshots/ios-success-summary-paid.png + android-success-summary-paid.png show
+the REAL verified-PAID order summary rendered on both platforms: "PEMBAYARAN
+BERHASIL / Tiket kamu sudah aktif", Order ID bk-9, Jumlah tiket 2 tiket, Total
+dibayar Rp 450.000, NIK pembeli 31****89 (MASKED). To reach the verified-PAID
+state on a device without scripted funnel taps, a THROWAWAY evidence route seeded
+a real mock attempt (createAttempt → getStatus×2 → PAID) + the order detail, then
+rendered the unmodified SuccessScreen; the route was DELETED after capture and
+never committed. The production gate is unchanged — the summary still renders
+only on an authoritative PAID verdict.
