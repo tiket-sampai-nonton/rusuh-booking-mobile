@@ -39,7 +39,30 @@ export interface PaymentAttempt {
   readonly serverTime?: string;
 }
 
+/**
+ * The payment page the BE serves for a booking (contract `PaymentPage`, RBT-060
+ * AC1). The FE renders the order summary (total == `amountMinor`, with NO
+ * service/hidden-fee line — D10.1), the SERVER-driven method list, and a
+ * server-authoritative countdown from `paymentExpiresAt`/`serverTime`.
+ */
+export interface PaymentPage {
+  readonly bookingId: string;
+  /** Server-allowed methods for this booking (order = display order). */
+  readonly methods: readonly PaymentMethod[];
+  /** Order total in minor IDR — the ONLY amount shown (no fees added). */
+  readonly amountMinor: number;
+  readonly paymentExpiresAt: string;
+  readonly serverTime: string;
+  /** The in-flight attempt, if one exists (refresh-safe restore — RBT-061). */
+  readonly currentAttempt?: PaymentAttempt;
+}
+
 export interface PaymentRepository {
+  /**
+   * Fetch the payment page for a booking (`GET /payments/{bookingId}/page`,
+   * RBT-060). Returns the server-authoritative summary + method list + deadline.
+   */
+  getPaymentPage(bookingId: string): Promise<PaymentPage>;
   /**
    * Create a payment attempt for a booking.
    * @param idempotencyKey minted in the use case/domain, reused on retry

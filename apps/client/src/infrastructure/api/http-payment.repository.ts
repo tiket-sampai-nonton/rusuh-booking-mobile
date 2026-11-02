@@ -10,14 +10,26 @@
 import type {
   PaymentAttempt,
   PaymentMethod,
+  PaymentPage,
   PaymentRepository,
 } from "@domain/repositories/payment.repository";
 import { unwrap } from "@infrastructure/api/envelope";
-import { toPaymentAttempt } from "@infrastructure/api/dto-mappers";
+import {
+  toPaymentAttempt,
+  toPaymentPage,
+} from "@infrastructure/api/dto-mappers";
 import type { HttpClient } from "@infrastructure/http/http-client";
 
 export class HttpPaymentRepository implements PaymentRepository {
   constructor(private readonly http: HttpClient) {}
+
+  async getPaymentPage(bookingId: string): Promise<PaymentPage> {
+    const res = await this.http.request({
+      method: "GET",
+      url: `payments/${encodeURIComponent(bookingId)}/page`,
+    });
+    return toPaymentPage(unwrap<Parameters<typeof toPaymentPage>[0]>(res));
+  }
 
   async createAttempt(
     bookingId: string,

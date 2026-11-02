@@ -70,9 +70,11 @@ describe("(booking) routes", () => {
     expect(typeof CheckoutScreen).toBe("function");
   });
 
-  it("renders Payment with the booking param", () => {
-    render(<PaymentScreen />);
-    expect(screen.getByRole("header")).toHaveTextContent(/bk-1/);
+  it("exports the Payment route as a component", () => {
+    // RBT-060: /payment is now a real screen (ServiceProvider + QueryClient
+    // required) — its behavior is covered in PaymentScreen.test.tsx. Here we
+    // only assert the route module exports a renderable component.
+    expect(typeof PaymentScreen).toBe("function");
   });
 
   it("renders Success with the booking param", () => {

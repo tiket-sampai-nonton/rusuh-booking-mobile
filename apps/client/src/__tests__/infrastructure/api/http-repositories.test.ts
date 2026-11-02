@@ -105,6 +105,24 @@ describe("HttpQueueRepository", () => {
 });
 
 describe("HttpPaymentRepository", () => {
+  it("GETs the payment page and maps it (RBT-060)", async () => {
+    const http = new FakeHttpClient();
+    http.queueResponse(
+      ok({
+        bookingId: "b1",
+        methods: ["VA_BCA", "QRIS"],
+        amountMinor: 45000000,
+        paymentExpiresAt: "2026-01-01T00:10:00Z",
+        serverTime: "2026-01-01T00:00:00Z",
+      }),
+    );
+    const repo = new HttpPaymentRepository(http);
+    const page = await repo.getPaymentPage("b1");
+    expect(http.calls[0]).toMatchObject({ method: "GET", url: "payments/b1/page" });
+    expect(page.methods).toEqual(["VA_BCA", "QRIS"]);
+    expect(page.amountMinor).toBe(45000000);
+  });
+
   it("creates an attempt forwarding the idempotency key as a header", async () => {
     const http = new FakeHttpClient();
     http.queueResponse(
