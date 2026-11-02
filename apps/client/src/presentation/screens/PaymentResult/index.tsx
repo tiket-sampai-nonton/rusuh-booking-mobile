@@ -67,7 +67,13 @@ export function PaymentResultScreen({
           Gagal memeriksa status pembayaran. Mohon tunggu, kami mencoba lagi.
         </Text>
       ) : (
-        <View className="items-center gap-4">
+        // RBT-080: live region so a screen reader announces the status change
+        // (verifying → success) without the user re-focusing.
+        <View
+          className="items-center gap-4"
+          accessibilityLiveRegion="polite"
+          testID="payment-result-status"
+        >
           <ActivityIndicator
             size="large"
             testID="payment-result-spinner"
