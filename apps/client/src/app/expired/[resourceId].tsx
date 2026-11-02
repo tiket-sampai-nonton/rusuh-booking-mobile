@@ -1,22 +1,40 @@
 import { useLocalSearchParams } from "expo-router";
-import { Fragment } from "react";
-import { Text, View } from "react-native";
 
-import { Seo } from "@presentation/components/Seo";
+import type { PaymentStatus } from "@domain/repositories/payment.repository";
+import type { ExpiryReason } from "@domain/rules/payment-recovery";
+import { ExpiredRecoveryScreen } from "@presentation/screens/ExpiredRecovery";
 
-// Top-level route `/expired/[resourceId]` (expired queue session / booking
-// hold / payment). Skeleton placeholder — real expiry screen lands later.
-// noindex: transactional state, never indexed (§6.5).
-export default function ExpiredScreen() {
-  const { resourceId } = useLocalSearchParams<{ resourceId: string }>();
+// Top-level route `/expired/[resourceId]` — RBT-064 failure/expiry recovery
+// (queue session / booking hold / payment). The screen decides retry vs
+// re-queue from the reason + authoritative state. noindex is set by the
+// screen's own <Seo> (transactional state, SECURITY §6.5).
+export default function ExpiredRoute() {
+  const params = useLocalSearchParams<{
+    resourceId: string;
+    reason?: string;
+    bookingId?: string;
+    eventId?: string;
+    status?: string;
+    errorCode?: string;
+    remainingMs?: string;
+  }>();
+  const reason = (
+    ["payment", "hold", "queue"].includes(params.reason ?? "")
+      ? params.reason
+      : undefined
+  ) as ExpiryReason | undefined;
+  const remainingMs = params.remainingMs
+    ? Number(params.remainingMs)
+    : undefined;
   return (
-    <Fragment>
-      <Seo title="Kedaluwarsa" description="Expired." path={`/expired/${resourceId}`} noindex />
-      <View className="flex-1 items-center justify-center bg-background">
-        <Text className="text-lg font-semibold text-brand" accessibilityRole="header">
-          Expired — /expired/{resourceId} (RBT-002)
-        </Text>
-      </View>
-    </Fragment>
+    <ExpiredRecoveryScreen
+      resourceId={params.resourceId ?? ""}
+      reason={reason}
+      bookingId={params.bookingId}
+      eventId={params.eventId}
+      status={params.status as PaymentStatus | undefined}
+      errorCode={params.errorCode}
+      remainingMs={remainingMs}
+    />
   );
 }

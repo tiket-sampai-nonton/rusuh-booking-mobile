@@ -69,8 +69,14 @@ export function resolvePaymentRoute(
   if (!status) return null;
   const verdict = classifyPayment(status);
   if (verdict === "paid") return `/success/${bookingId}`;
-  if (verdict === "failed") return `/expired/${bookingId}`;
+  // Failure/expiry → the recovery screen (RBT-064). Carry reason=payment + the
+  // authoritative status so it can decide retry (FAILED+payable) vs re-queue.
+  if (verdict === "failed") {
+    return `/expired/${bookingId}?reason=payment&bookingId=${bookingId}&status=${status}`;
+  }
   // pending: reconcile the deadline from the server clock.
-  if (remainingMs <= 0) return `/expired/${bookingId}`;
+  if (remainingMs <= 0) {
+    return `/expired/${bookingId}?reason=payment&bookingId=${bookingId}&status=${status}`;
+  }
   return null;
 }

@@ -97,7 +97,9 @@ describe("PaymentResultScreen (RBT-063)", () => {
       attemptId: "a1",
     });
     await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/expired/bk-1"),
+      expect(mockRouter.replace).toHaveBeenCalledWith(
+        "/expired/bk-1?reason=payment&bookingId=bk-1&status=FAILED",
+      ),
     );
   });
 
