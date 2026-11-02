@@ -1,0 +1,70 @@
+RBT-064 — Failure/expiry recovery
+Branch: feature/RBT-064-failure-expiry-recovery
+Date: 2026-11-02
+Evidence path: .genesis/evidence/RBT-064/ (canonical repo-root, per WORKFLOW.md)
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-064 scope) ---
+File                               | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------------|---------|----------|---------|--------
+ domain/rules/payment-recovery.ts  |   100   |   100    |   100   |   100
+ domain/rules/payment-verify.ts    |   100   |  95.45   |   100   |   100
+ presentation/screens/ExpiredRecov |   100   |   100    |   100   |   100
+ OVERALL                           |   100   |  97.82   |   100   |   100
+
+ALL FOUR METRICS >= 90% on every RBT-064 file. 47 targeted tests pass; the
+broader payment+expired+routes+recovery set (16 suites / 100 tests) stays green.
+(payment-verify branch 95.45% = the TS exhaustiveness `default` label, covered
+functionally by the READY/AWAITING cases — unchanged from RBT-063.)
+
+================================================================
+ACCEPTANCE CRITERIA (AC1 — FR-23)
+================================================================
+- FAILED + still payable (deadline NOT passed, no not-payable code) → RETRY: the
+  recovery screen shows "Coba Bayar Lagi" and routes back to /payment/[bookingId]
+  to start a NEW attempt. decideRecovery → {kind:"retry"}. ✓
+- BOOKING_NOT_PAYABLE (or BOOKING_EXPIRED / HOLD_EXPIRED), OR the server deadline
+  has passed → NO retry; the screen offers the RE-QUEUE path only:
+  requeueRoute(payment|hold, eventId) → /waiting/[eventId] ("Antre Lagi"), else
+  /browse ("Cari Event Lain"). decideRecovery → {kind:"requeue"}. ✓
+- expired(reason=payment): RBT-063's resolvePaymentRoute now routes a FAILED /
+  deadline-passed payment to /expired/[bookingId]?reason=payment&bookingId=…&status=…
+  so the recovery screen knows WHY and can decide retry vs re-queue. ✓
+- The retry decision is driven by the AUTHORITATIVE status + the server-reconciled
+  remaining time (never the device clock) + the terminal error code — the UI never
+  offers a retry the backend would reject. ✓
+
+Clean-Arch: payment-recovery is a pure domain rule (no React/RN/Expo/infra); the
+ExpiredRecovery screen reads params + renders, routing via expo-router; no
+infrastructure import. BOOKING_NOT_PAYABLE already in the RBT-013 taxonomy.
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0; /expired/[resourceId]
+          route builds ([resourceId].html).
+iOS     : iPhone 16 Pro, deep-link
+          exp://…/expired/bk-1?reason=payment&status=FAILED&bookingId=bk-1&remainingMs=120000
+          → ios-recovery-retry.png — the FAILED+payable recovery renders:
+          "Pembayaran gagal atau kedaluwarsa" + "Coba Bayar Lagi" (Retry, primary)
+          + "Cari Event Lain" (re-queue → browse, since no eventId was passed).
+Android : emulator-5554 (Pixel 7 Pro), same deep-link WITH eventId=evt-7 →
+          android-recovery-retry-requeue.png — "Coba Bayar Lagi" (Retry) +
+          "Antre Lagi" (re-queue → /waiting/evt-7).
+
+HONEST NOTES:
+- Both platforms first showed a STALE Expo Go bundle (iOS: the RBT-002 skeleton;
+  Android: a params-dropped requeue state). The iOS skeleton was cleared by
+  terminating Expo Go and re-deep-linking; the Android params-drop was the shell
+  NOT escaping the URL's '&' separators (only reason=payment survived) — quoting
+  the URL delivered the full query and rendered the correct retry+requeue UI.
+  Both recorded honestly; the screen logic was correct throughout.
+- The Retry→/payment and Re-queue→/waiting|/browse navigations are press-driven
+  and proven by RNTL (ExpiredRecoveryScreen.test.tsx) + the pure payment-recovery
+  rule tests; native confirms the recovery UI renders with the right actions.

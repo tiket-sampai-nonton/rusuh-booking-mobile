@@ -78,7 +78,9 @@ describe("useVerifyPayment (RBT-063)", () => {
       wrapper: wrapper(new StatusRepo(attempt("FAILED"))),
     });
     await waitFor(() => expect(result.current.verdict).toBe("failed"));
-    expect(result.current.route).toBe("/expired/bk-1");
+    expect(result.current.route).toBe(
+      "/expired/bk-1?reason=payment&bookingId=bk-1&status=FAILED",
+    );
   });
 
   it("pending with time left → verdict pending, route null (keep polling)", async () => {
@@ -113,7 +115,9 @@ describe("useVerifyPayment (RBT-063)", () => {
     });
     await waitFor(() => expect(result.current.attempt).toBeDefined());
     expect(result.current.verdict).toBe("pending");
-    expect(result.current.route).toBe("/expired/bk-1");
+    expect(result.current.route).toBe(
+      "/expired/bk-1?reason=payment&bookingId=bk-1&status=AWAITING_PAYMENT",
+    );
   });
 
   it("reconciles deadline even when serverTime is absent (no sync, uses offset 0)", async () => {
@@ -125,7 +129,9 @@ describe("useVerifyPayment (RBT-063)", () => {
       ),
     });
     await waitFor(() => expect(result.current.attempt).toBeDefined());
-    expect(result.current.route).toBe("/expired/bk-1");
+    expect(result.current.route).toBe(
+      "/expired/bk-1?reason=payment&bookingId=bk-1&status=AWAITING_PAYMENT",
+    );
   });
 
   it("disabled while attemptId is empty (no verify)", async () => {
