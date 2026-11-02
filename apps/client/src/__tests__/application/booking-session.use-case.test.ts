@@ -1,3 +1,4 @@
+import { CheckAttendee } from "@application/booking/check-attendee.use-case";
 import { CreateBookingSession } from "@application/booking/create-booking-session.use-case";
 import { RestoreBookingSession } from "@application/booking/restore-booking-session.use-case";
 import type {
@@ -26,7 +27,9 @@ class FakeBookingRepo implements BookingRepository {
   async getCurrentSession(): Promise<BookingSession | null> {
     return this.current;
   }
-  async checkAttendee(_s: string, _n: string): Promise<AttendeeCheck> {
+  checkedWith: [string, string][] = [];
+  async checkAttendee(sessionId: string, nik: string): Promise<AttendeeCheck> {
+    this.checkedWith.push([sessionId, nik]);
     return { nikMasked: "3***", result: "AVAILABLE" };
   }
   async hold(
@@ -60,5 +63,14 @@ describe("RestoreBookingSession", () => {
     const repo = new FakeBookingRepo();
     repo.current = null;
     expect(await new RestoreBookingSession(repo).execute()).toBeNull();
+  });
+});
+
+describe("CheckAttendee (RBT-052)", () => {
+  it("delegates to the port with the session + NIK and returns the verdict", async () => {
+    const repo = new FakeBookingRepo();
+    const out = await new CheckAttendee(repo).execute("sess-1", "3171010101010001");
+    expect(repo.checkedWith).toEqual([["sess-1", "3171010101010001"]]);
+    expect(out.result).toBe("AVAILABLE");
   });
 });

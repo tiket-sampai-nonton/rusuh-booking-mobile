@@ -1,7 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
 import { CheckoutBar } from "@presentation/screens/Checkout/fragments/CheckoutBar";
+import { ConsentGate } from "@presentation/screens/Checkout/fragments/ConsentGate";
 import { LeaveConfirm } from "@presentation/screens/Checkout/fragments/LeaveConfirm";
+import { TicketItem } from "@presentation/screens/Checkout/fragments/TicketItem";
 
 describe("CheckoutBar (RBT-051)", () => {
   it("renders total + enabled submit when ready and not expired", () => {
@@ -100,5 +102,78 @@ describe("LeaveConfirm (RBT-051 harvested fragment)", () => {
     });
     expect(stopPropagation).toHaveBeenCalledTimes(1);
     expect(onStay).not.toHaveBeenCalled();
+  });
+});
+
+describe("ConsentGate (RBT-052 AC3)", () => {
+  it("toggles the consent checkbox on press", () => {
+    const onToggle = jest.fn();
+    const { rerender } = render(
+      <ConsentGate checked={false} onToggle={onToggle} />,
+    );
+    const box = screen.getByTestId("checkout-consent");
+    expect(box.props.accessibilityState.checked).toBe(false);
+    fireEvent.press(box);
+    expect(onToggle).toHaveBeenCalledWith(true);
+    rerender(<ConsentGate checked onToggle={onToggle} />);
+    expect(
+      screen.getByTestId("checkout-consent").props.accessibilityState.checked,
+    ).toBe(true);
+    fireEvent.press(screen.getByTestId("checkout-consent"));
+    expect(onToggle).toHaveBeenLastCalledWith(false); // ticked → untick
+  });
+});
+
+const ticketRow = {
+  categoryId: "REG",
+  attendeeName: "",
+  attendeeNik: "",
+  useBuyerNik: false,
+};
+
+describe("TicketItem attendee-check status (RBT-052)", () => {
+  const noop = jest.fn();
+  const props = {
+    index: 0,
+    row: ticketRow,
+    canRemove: false,
+    onRemove: noop,
+    onPatch: noop,
+    onUseBuyer: noop,
+  };
+
+  it("renders the blocked message for an ALREADY_REGISTERED row", () => {
+    render(<TicketItem {...props} status="blocked" />);
+    expect(screen.getByTestId("attendee-status-0").props.children).toMatch(
+      /sudah terdaftar/i,
+    );
+  });
+
+  it("renders the warning message for CHECK_LIMIT_REACHED", () => {
+    render(<TicketItem {...props} status="warning" />);
+    expect(screen.getByTestId("attendee-status-0").props.children).toMatch(
+      /Batas pengecekan/i,
+    );
+  });
+
+  it("renders the checking + available states", () => {
+    const { rerender } = render(<TicketItem {...props} status="checking" />);
+    expect(screen.getByTestId("attendee-status-0").props.children).toMatch(
+      /Mengecek/i,
+    );
+    rerender(<TicketItem {...props} status="available" />);
+    expect(screen.getByTestId("attendee-status-0").props.children).toMatch(
+      /tersedia/i,
+    );
+  });
+
+  it("shows no status row when idle", () => {
+    render(<TicketItem {...props} status="idle" />);
+    expect(screen.queryByTestId("attendee-status-0")).toBeNull();
+  });
+
+  it("defaults to idle (no status row) when the status prop is omitted", () => {
+    render(<TicketItem {...props} />);
+    expect(screen.queryByTestId("attendee-status-0")).toBeNull();
   });
 });

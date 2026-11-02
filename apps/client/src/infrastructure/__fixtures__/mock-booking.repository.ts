@@ -34,11 +34,21 @@ export class MockBookingRepository implements BookingRepository {
     return this.current;
   }
 
+  /**
+   * Deterministic mock verdict by NIK suffix so the FE can exercise every
+   * branch without the BE (RBT-052 AC2): `...00` → ALREADY_REGISTERED (blocks),
+   * `...99` → CHECK_LIMIT_REACHED (warns), anything else → AVAILABLE.
+   */
   async checkAttendee(_sessionId: string, nik: string): Promise<AttendeeCheck> {
+    const result: AttendeeCheck["result"] = nik.endsWith("00")
+      ? "ALREADY_REGISTERED"
+      : nik.endsWith("99")
+        ? "CHECK_LIMIT_REACHED"
+        : "AVAILABLE";
     return {
       nikMasked: `${nik.slice(0, 2)}****${nik.slice(-2)}`,
-      result: "AVAILABLE",
-      checksRemaining: 5,
+      result,
+      checksRemaining: result === "CHECK_LIMIT_REACHED" ? 0 : 5,
     };
   }
 

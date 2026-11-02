@@ -121,11 +121,42 @@ export function setBuyerUseAt(
   }));
 }
 
+/* ------------------------------------------------------------------ *
+ * Attendee-check interpretation (RBT-052 AC2).
+ * ALREADY_REGISTERED blocks the hold; CHECK_LIMIT_REACHED only warns
+ * (the user ran out of availability checks, not out of quota).
+ * ------------------------------------------------------------------ */
+export type AttendeeCheckResult =
+  | "AVAILABLE"
+  | "ALREADY_REGISTERED"
+  | "CHECK_LIMIT_REACHED";
+
+/** True when a check result must stop the order (ALREADY_REGISTERED). */
+export function isAttendeeBlocked(result: AttendeeCheckResult): boolean {
+  return result === "ALREADY_REGISTERED";
+}
+
+/** True when a check result is advisory only (CHECK_LIMIT_REACHED). */
+export function isAttendeeWarning(result: AttendeeCheckResult): boolean {
+  return result === "CHECK_LIMIT_REACHED";
+}
+
 export interface CheckoutState {
   readonly buyerNik: string;
   readonly buyerEmail: string;
   readonly rows: readonly TicketRow[];
   readonly maxSelectable: number;
+  /**
+   * Optional attendee-check verdicts keyed by resolved NIK (RBT-052). A NIK
+   * mapped to ALREADY_REGISTERED blocks readiness; absent/AVAILABLE/limit do
+   * not. Consent (RBT-052 AC3) is gated by `consentGiven`.
+   */
+  readonly attendeeChecks?: Readonly<Record<string, AttendeeCheckResult>>;
+  /**
+   * Whether the NIK/data-processing consent has been given. Logged-in users
+   * consented at registration (pass true); guests must tick the inline gate.
+   */
+  readonly consentGiven?: boolean;
 }
 
 /** Overall readiness: valid buyer, valid quantity, every row complete + unique. */
@@ -134,12 +165,18 @@ export function isCheckoutReady(state: CheckoutState): boolean {
   if (!isValidEmail(state.buyerEmail)) return false;
   if (!isQuantityValid(state.rows.length, state.maxSelectable)) return false;
   if (!buyerNikUsedOnce(state.rows)) return false;
+  // Consent is mandatory before the hold (D7.1). Undefined means "not gated
+  // here" (logged-in users consented at registration); false blocks.
+  if (state.consentGiven === false) return false;
+  const checks = state.attendeeChecks ?? {};
   for (const r of state.rows) {
     if (r.categoryId.length === 0) return false;
     const nik = r.useBuyerNik ? state.buyerNik : r.attendeeNik;
     const name = r.useBuyerNik ? "buyer" : r.attendeeName;
     if (!isValidNik(nik)) return false;
     if (name.trim().length === 0) return false;
+    // A NIK the BE already flagged ALREADY_REGISTERED cannot be held.
+    if (isAttendeeBlocked(checks[nik] ?? "AVAILABLE")) return false;
   }
   return attendeeNiksUnique(state.rows, state.buyerNik);
 }

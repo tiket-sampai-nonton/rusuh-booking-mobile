@@ -34,6 +34,14 @@ export interface CheckoutHeroProps {
   readonly eventId: string;
 }
 
+/** Per-row attendee-check status for the ticket row (RBT-052). */
+export type RowCheckStatus =
+  | "idle"
+  | "checking"
+  | "available"
+  | "blocked"
+  | "warning";
+
 export interface TicketItemProps {
   readonly index: number;
   readonly row: TicketRow;
@@ -41,6 +49,13 @@ export interface TicketItemProps {
   readonly onRemove: () => void;
   readonly onPatch: (p: Partial<TicketRow>) => void;
   readonly onUseBuyer: (on: boolean) => void;
+  /** Attendee-NIK availability status for this row (RBT-052 AC2). */
+  readonly status?: RowCheckStatus;
+}
+
+export interface ConsentGateProps {
+  readonly checked: boolean;
+  readonly onToggle: (on: boolean) => void;
 }
 
 export interface CheckoutBarProps {

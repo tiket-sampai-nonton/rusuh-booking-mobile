@@ -14,24 +14,29 @@
  * (D7.1/D7.5). No infrastructure import — ports via useServices/hooks only.
  */
 import { useRouter, type Href } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   appendRow,
   effectiveCap,
+  isAttendeeBlocked,
+  isAttendeeWarning,
   isCheckoutReady,
   isValidNik,
   patchRowAt,
   removeRowAt,
   setBuyerUseAt,
+  type AttendeeCheckResult,
   type TicketRow,
 } from "@domain/rules/checkout";
 import { ScreenFade } from "@presentation/components/ScreenFade";
+import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
+import { useAccountStore } from "@presentation/stores/account-store";
 import { useServices } from "@providers/service-context";
 
 import { categoryPrice, emptyRow } from "./categories";
@@ -39,9 +44,22 @@ import { CheckoutBar } from "./fragments/CheckoutBar";
 import { CheckoutHero } from "./fragments/CheckoutHero";
 import { CheckoutTopBar } from "./fragments/CheckoutTopBar";
 import { Field, Section } from "./fragments/common";
+import { ConsentGate } from "./fragments/ConsentGate";
 import { TicketItem } from "./fragments/TicketItem";
-import type { CheckoutScreenProps } from "./interface";
+import type { CheckoutScreenProps, RowCheckStatus } from "./interface";
 import { checkoutScrollContent } from "./style";
+
+/** Map a resolved NIK verdict (+ pending flag) to the row's display status. */
+function rowStatus(
+  verdict: AttendeeCheckResult | undefined,
+  checking: boolean,
+): RowCheckStatus {
+  if (checking) return "checking";
+  if (!verdict) return "idle";
+  if (isAttendeeBlocked(verdict)) return "blocked";
+  if (isAttendeeWarning(verdict)) return "warning";
+  return "available";
+}
 
 export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const router = useRouter();
@@ -49,10 +67,14 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const { isDesktop } = useResponsive();
   const { serverClock } = useServices();
   const { session, isLoading } = useRestoreBookingSession();
+  const { checks, pending, request } = useAttendeeCheck(sessionId);
+  // Logged-in users consented at registration; guests consent inline (AC3).
+  const isGuest = useAccountStore((s) => s.profile === undefined);
 
   const [buyerNik, setBuyerNik] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [rows, setRows] = useState<TicketRow[]>([emptyRow()]);
+  const [consent, setConsent] = useState(false);
 
   const cap = effectiveCap(session?.maxSelectable);
 
@@ -63,15 +85,35 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     onExpire: () => router.replace(`/expired/${sessionId}` as Href),
   });
 
+  // Guests must tick the inline consent; logged-in users already consented.
+  const consentGiven = isGuest ? consent : true;
+
   const ready = useMemo(
-    () => isCheckoutReady({ buyerNik, buyerEmail, rows, maxSelectable: cap }),
-    [buyerNik, buyerEmail, rows, cap],
+    () =>
+      isCheckoutReady({
+        buyerNik,
+        buyerEmail,
+        rows,
+        maxSelectable: cap,
+        attendeeChecks: checks,
+        consentGiven,
+      }),
+    [buyerNik, buyerEmail, rows, cap, checks, consentGiven],
   );
 
   const totalMinor = useMemo(
     () => rows.reduce((sum, r) => sum + categoryPrice(r.categoryId), 0),
     [rows],
   );
+
+  // Debounced attendee-NIK availability checks (AC2): request for each valid
+  // resolved NIK (a useBuyerNik row resolves to the buyer NIK).
+  useEffect(() => {
+    for (const r of rows) {
+      const nik = r.useBuyerNik ? buyerNik : r.attendeeNik;
+      if (isValidNik(nik)) request(nik);
+    }
+  }, [rows, buyerNik, request]);
 
   // Row mutations delegate to the pure domain rules (cap / min-1 / single-use).
   const addRow = (): void => setRows((r) => appendRow(r, emptyRow(), cap));
@@ -133,17 +175,21 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           </Section>
 
           <Section title="Tiket">
-            {rows.map((row, i) => (
-              <TicketItem
-                key={i}
-                index={i}
-                row={row}
-                canRemove={rows.length > 1}
-                onRemove={() => removeRow(i)}
-                onPatch={(p) => patchRow(i, p)}
-                onUseBuyer={(on) => setUseBuyer(i, on)}
-              />
-            ))}
+            {rows.map((row, i) => {
+              const nik = row.useBuyerNik ? buyerNik : row.attendeeNik;
+              return (
+                <TicketItem
+                  key={i}
+                  index={i}
+                  row={row}
+                  canRemove={rows.length > 1}
+                  onRemove={() => removeRow(i)}
+                  onPatch={(p) => patchRow(i, p)}
+                  onUseBuyer={(on) => setUseBuyer(i, on)}
+                  status={rowStatus(checks[nik], !!pending[nik])}
+                />
+              );
+            })}
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Tambah tiket"
@@ -169,6 +215,12 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               </Text>
             </View>
           </Section>
+
+          {isGuest ? (
+            <Section title="Persetujuan">
+              <ConsentGate checked={consent} onToggle={setConsent} />
+            </Section>
+          ) : null}
         </ScrollView>
 
         <CheckoutBar
