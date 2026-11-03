@@ -17,6 +17,7 @@ import { useHoldBooking } from "@presentation/hooks/useHoldBooking";
 import { useSessionStore } from "@presentation/stores/session-store";
 
 const ROW = {
+  rowId: "row-fixture-1",
   categoryId: "REG",
   attendeeName: "A",
   attendeeNik: "3171010101010001",
