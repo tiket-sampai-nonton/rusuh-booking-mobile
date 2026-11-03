@@ -18,7 +18,7 @@ export function Categories({ categories }: CategoriesProps) {
   if (categories.length === 0) {
     return (
       <Text style={detailStyles.catNote} className="text-white/60">
-        Harga &amp; stok final ditentukan server dan dipilih setelah kamu lolos antrean.
+        Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.
       </Text>
     );
   }
@@ -58,7 +58,7 @@ export function Categories({ categories }: CategoriesProps) {
         })}
       </View>
       <Text style={detailStyles.catNote} className="text-white/45">
-        Harga &amp; stok dari server. Kategori final dipilih setelah kamu lolos antrean.
+        Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.
       </Text>
     </View>
   );

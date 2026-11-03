@@ -148,10 +148,10 @@ describe("EventDetailScreen", () => {
     await waitFor(() => screen.getByTestId("join-cta"));
     expect(screen.getByText("Deskripsi event belum tersedia.")).toBeTruthy();
     expect(screen.getByText("Diumumkan menyusul")).toBeTruthy();
-    // No categories → server note. No price → "Menyusul". No venue → "-".
+    // No categories → read-only server note (prototype 02 .categories-note).
     expect(
       screen.getByText(
-        "Harga & stok final ditentukan server dan dipilih setelah kamu lolos antrean.",
+        "Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.",
       ),
     ).toBeTruthy();
   });
@@ -174,5 +174,42 @@ describe("EventDetailScreen", () => {
     await waitFor(() => screen.getByTestId("join-cta"));
     expect(screen.getByText("Sisa 12")).toBeTruthy();
     expect(screen.getByText("Menyusul")).toBeTruthy();
+  });
+
+  it("renders the NOT_STARTED hero status label", async () => {
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: { eventRepository: repo({ ...available, status: "NOT_STARTED" }) },
+    });
+    await waitFor(() => screen.getByTestId("join-cta"));
+    expect(screen.getByText("Segera Dibuka")).toBeTruthy();
+  });
+
+  it("renders the CLOSED hero status label", async () => {
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: { eventRepository: repo({ ...available, status: "CLOSED" }) },
+    });
+    await waitFor(() => screen.getByTestId("join-cta"));
+    expect(screen.getByText("Ditutup")).toBeTruthy();
+  });
+
+  it("navigates home from the back button (goHome)", async () => {
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: { eventRepository: repo(available) },
+    });
+    await waitFor(() => screen.getByTestId("join-cta"));
+    fireEvent.press(screen.getByLabelText("Kembali ke beranda"));
+    expect(mockRouter.push).toHaveBeenCalledWith("/");
+  });
+
+  it("does not join when the CTA is disabled (SOLD_OUT guard)", async () => {
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: { eventRepository: repo({ ...available, status: "SOLD_OUT" }) },
+    });
+    await waitFor(() => screen.getByTestId("join-cta"));
+    fireEvent.press(screen.getByTestId("join-cta"));
+    // Disabled CTA → onJoin early-returns → no queue navigation.
+    expect(mockRouter.push).not.toHaveBeenCalledWith(
+      expect.stringContaining("/waiting/"),
+    );
   });
 });

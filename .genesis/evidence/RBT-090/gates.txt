@@ -1,0 +1,41 @@
+RBT-090 — V2 Brutalist Mono: Event detail (02-event-detail)
+Branch: feature/RBT-090-v2-event-detail
+Date: 2026-11-03
+
+SCOPE
+  Re-skin the Event detail screen to the V2 prototype (.genesis/prototype/v2/02-event-detail.html),
+  presentation-layer only. Data wiring (useEventDetail/TanStack, useJoinQueue, ctaFor, parseDescription,
+  eventImage) untouched. The READ-ONLY category preview rule is preserved (no selection on detail).
+
+CHANGES
+  presentation/screens/EventDetail/fragments/Block.tsx       restyle: glass label -> brutalist uppercase
+                                                             label + hard red rule; drop dev-only GAP badge
+  presentation/screens/EventDetail/fragments/Categories.tsx  align read-only note to prototype verbatim
+  presentation/screens/EventDetail/index.tsx                 drop `gap` prop from Block callers
+  presentation/screens/EventDetail/interface.ts              drop unused `gap` from BlockProps
+  __tests__/.../EventDetailScreen.test.tsx                   + NOT_STARTED/CLOSED labels, goHome, SOLD_OUT guard
+  __tests__/.../screens/EventDetailFragments.test.tsx        NEW: Block (±heading) + Categories arms
+
+PROTOTYPE FIDELITY
+  - Section blocks: uppercase label + short hard red rule + bold heading. (02 .section / .section-label)
+  - READ-ONLY categories: "Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean."
+    — ported VERBATIM from prototype 02 (.categories-note), for both the empty and populated states.
+    Domain rule intact: event detail NEVER selects a category; final category chosen after the queue.
+  - Dropped the dev-only "GAP: FE-NEED" badge (not part of the prototype).
+  - Hero (DetailHero, parallax), lineup, T&C, BuyBox CTA → waiting room: structure/wiring kept.
+
+GATES
+  tsc --noEmit            : PASS (0 errors)
+  eslint (EventDetail/ + tests) : PASS (0 errors, 0 warnings)
+  jest EventDetailScreen + EventDetailFragments : PASS (16/16)
+
+COVERAGE (touched files, scoped)
+  EventDetail/index.tsx            : stmts 93.9% / branch 92.3% / funcs 100% / lines 96.5%  [>=90% all four]
+  EventDetail/fragments/Block.tsx  : 100% / 100% / 100% / 100%
+  EventDetail/fragments/Categories.tsx : 100% / 100% / 100% / 100%
+  Uncovered index.tsx line 49: the `default:` arm of heroStatusLabel — unreachable (EventStatus is a
+  typed 4-value union); left honestly uncovered rather than faked with an invalid-status cast.
+
+NOTE
+  Presentation restyle preserving the read-only category domain rule. Screenshots (web/iOS/Android)
+  deferred (host memory TIGHT ~3.9GB); gate evidence captured now.

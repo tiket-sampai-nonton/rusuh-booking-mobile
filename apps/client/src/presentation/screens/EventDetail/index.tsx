@@ -103,13 +103,13 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
             chips={chips}
           />
 
-          <Block label="Tentang event" heading={event.name} gap>
+          <Block label="Tentang event" heading={event.name}>
             <Text style={detailStyles.aboutText} className="text-white/60">
               {desc.longDesc || "Deskripsi event belum tersedia."}
             </Text>
           </Block>
 
-          <Block label="Line-up" heading="Yang akan tampil." gap>
+          <Block label="Line-up" heading="Yang akan tampil.">
             <View style={detailStyles.lineupList}>
               {(desc.lineup.length > 0 ? desc.lineup : ["Diumumkan menyusul"]).map((act) => (
                 <View key={act} style={detailStyles.lineupRow}>
@@ -121,7 +121,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
             </View>
           </Block>
 
-          <Block label="Syarat & Ketentuan" heading="Yang perlu kamu tahu." gap>
+          <Block label="Syarat & Ketentuan" heading="Yang perlu kamu tahu.">
             {desc.terms.length > 0 ? (
               <View style={detailStyles.termsList}>
                 {desc.terms.map((t) => (
