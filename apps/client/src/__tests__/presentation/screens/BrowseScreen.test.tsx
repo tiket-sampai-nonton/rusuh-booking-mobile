@@ -120,6 +120,18 @@ describe("BrowseScreen — URL-driven filters", () => {
     );
   });
 
+  it("closes the refine modal without navigating when cancelled", async () => {
+    renderWithProviders(<BrowseScreen />, {
+      container: { eventRepository: repo(CATALOG) },
+    });
+    await waitFor(() => screen.getByTestId("browse-refine"));
+    fireEvent.press(screen.getByTestId("browse-refine"));
+    expect(screen.getByTestId("filter-modal")).toBeTruthy();
+    // Cancel → index.tsx onClose arrow fires; no navigation.
+    fireEvent.press(screen.getByTestId("filter-cancel"));
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+  });
+
   it("reset navigates back to the unfiltered /browse", async () => {
     mockParams.current = { genre: "rock" };
     renderWithProviders(<BrowseScreen />, {
