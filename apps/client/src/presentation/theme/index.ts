@@ -8,3 +8,4 @@
  */
 export * from "./tokens";
 export * from "./theme";
+export * from "./v2-tokens";
