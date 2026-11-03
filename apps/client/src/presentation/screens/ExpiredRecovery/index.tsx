@@ -14,13 +14,14 @@
 import { useRouter, type Href } from "expo-router";
 import { Text, View } from "react-native";
 
-import { Seo } from "@presentation/components/Seo";
+import type { PaymentStatus } from "@domain/repositories/payment.repository";
 import {
   decideRecovery,
   requeueRoute,
   type ExpiryReason,
 } from "@domain/rules/payment-recovery";
-import type { PaymentStatus } from "@domain/repositories/payment.repository";
+import { Seo } from "@presentation/components/Seo";
+import { v2, v2Border } from "@presentation/theme";
 
 export interface ExpiredRecoveryScreenProps {
   readonly resourceId: string;
@@ -78,7 +79,8 @@ export function ExpiredRecoveryScreen({
 
   return (
     <View
-      className="flex-1 items-center justify-center gap-6 bg-background p-6"
+      className="flex-1 items-center justify-center gap-6 p-6"
+      style={{ backgroundColor: v2.ink }}
       testID="expired-recovery"
     >
       <Seo
@@ -87,17 +89,35 @@ export function ExpiredRecoveryScreen({
         path={`/expired/${resourceId}`}
         noindex
       />
-      <View className="items-center gap-3">
+      <View className="w-full max-w-sm items-center gap-4">
+        {/* White-ring icon circle (prototype 09 `.icon`). */}
+        <View
+          className="h-24 w-24 items-center justify-center rounded-full"
+          style={{ borderWidth: v2Border.base, borderColor: v2.ground }}
+        >
+          <Text className="text-4xl" accessibilityElementsHidden>
+            ⏳
+          </Text>
+        </View>
         <Text
-          className="text-center text-xl font-semibold text-foreground"
+          className="text-center text-2xl font-extrabold uppercase text-white"
+          style={{ letterSpacing: -1 }}
           accessibilityRole="header"
           testID="expired-title"
         >
           {copy.title}
         </Text>
-        <Text className="text-center text-base text-muted-foreground">
-          {copy.body}
-        </Text>
+        {/* Info card — translucent on the dark ground (prototype `.info-card`). */}
+        <View
+          className="w-full p-5"
+          style={{
+            backgroundColor: "rgba(255,255,255,0.05)",
+            borderWidth: 1,
+            borderColor: "rgba(255,255,255,0.1)",
+          }}
+        >
+          <Text className="text-sm leading-6 text-white/80">{copy.body}</Text>
+        </View>
       </View>
 
       <View className="w-full max-w-sm gap-3">
@@ -106,7 +126,8 @@ export function ExpiredRecoveryScreen({
             onPress={onRetry}
             accessibilityRole="button"
             testID="expired-retry"
-            className="rounded-xl bg-brand py-3 text-center text-base font-semibold text-white"
+            className="py-4 text-center text-base font-bold uppercase"
+            style={{ backgroundColor: v2.ground, color: v2.ink, letterSpacing: 0.5 }}
           >
             Coba Bayar Lagi
           </Text>
@@ -115,10 +136,11 @@ export function ExpiredRecoveryScreen({
           onPress={onRequeue}
           accessibilityRole="button"
           testID="expired-requeue"
-          className={
+          className="py-4 text-center text-base font-bold uppercase text-white"
+          style={
             canRetry
-              ? "py-3 text-center text-base font-medium text-brand"
-              : "rounded-xl bg-brand py-3 text-center text-base font-semibold text-white"
+              ? { borderWidth: 1, borderColor: "rgba(255,255,255,0.3)", letterSpacing: 0.5 }
+              : { backgroundColor: v2.ground, color: v2.ink, letterSpacing: 0.5 }
           }
         >
           {reason === "queue" || !eventId ? "Cari Event Lain" : "Antre Lagi"}

@@ -100,6 +100,22 @@ describe("HistoryScreen", () => {
     release([]);
   });
 
+  it("renders the error state when loading fails", async () => {
+    renderWithProviders(<HistoryScreen />, {
+      container: {
+        eventRepository: {
+          listEvents: async () => {
+            throw new Error("Jaringan bermasalah");
+          },
+          getEventDetail: async () => ({}) as EventDetail,
+        },
+      },
+    });
+    await waitFor(() => screen.getByTestId("history-error"));
+    expect(screen.getByText("Gagal memuat event")).toBeTruthy();
+    expect(screen.getByText("Jaringan bermasalah")).toBeTruthy();
+  });
+
   it("renders the empty state when there are no past events", async () => {
     renderWithProviders(<HistoryScreen />, {
       container: { eventRepository: repo([ev("future", "Future Fest", 30)]) },
