@@ -1,16 +1,23 @@
 /**
  * V2 Brutalist Mono Hero Section
  *
- * MATCHES: `.oil-ui/v2/02-event-detail.html` .hero
+ * MATCHES: `.genesis/prototype/v2-mobile/02-event-detail.html` (native)
+ * MATCHES: `.oil-ui/v2/02-event-detail.html` (web)
+ *
+ * Mobile-specific:
+ * - Height: 50vh (vs 60vh on web)
+ * - No meta items in hero (moved to info card below)
+ * - No chips in hero
+ * - Grayscale with dark overlay gradient
  *
  * Features:
  * - Grayscale background image (Ken Burns zoom animation on web)
- * - White gradient overlay (bottom to top)
- * - Scan line effect (subtle horizontal lines)
+ * - Gradient overlay (ground at bottom for native, white gradient for web)
+ * - Scan line effect (subtle horizontal lines, web only)
  * - Badge with live dot
  * - Large uppercase title
- * - Meta items (date, time, venue)
  */
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef } from "react";
 import {
   Animated,
@@ -43,6 +50,8 @@ export function DetailHero({
   const scaleAnim = useRef(new Animated.Value(1.1)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
+
+  const isNative = Platform.OS !== "web";
 
   useEffect(() => {
     // Entrance animations
@@ -77,6 +86,13 @@ export function DetailHero({
           }),
         ])
       ).start();
+    } else {
+      // Native: settle animation (scale 1.1 → 1.05)
+      Animated.timing(scaleAnim, {
+        toValue: 1.05,
+        duration: 1200,
+        useNativeDriver: true,
+      }).start();
     }
   }, [fadeAnim, scaleAnim, slideAnim]);
 
@@ -86,7 +102,7 @@ export function DetailHero({
 
   return (
     <View style={styles.hero}>
-      {/* Background Image (Grayscale + Ken Burns) */}
+      {/* Background Image (Grayscale + Ken Burns/Settle) */}
       <Animated.View
         style={[
           StyleSheet.absoluteFill,
@@ -103,10 +119,33 @@ export function DetailHero({
           resizeMode="cover"
           accessibilityIgnoresInvertColors
         />
+        {/* Native: grayscale overlay (two-layer like home hero) */}
+        {isNative && (
+          <>
+            <View style={[StyleSheet.absoluteFill, heroStyles.nativeGrayscaleDark]} />
+            <View style={[StyleSheet.absoluteFill, heroStyles.nativeGrayscaleGray]} />
+          </>
+        )}
       </Animated.View>
 
-      {/* Gradient Overlay (white at bottom) */}
-      <View style={[StyleSheet.absoluteFill, heroStyles.overlay]} />
+      {/* Gradient Overlay */}
+      {/* Native: linear-gradient(to top, ground 0%, rgba(0,0,0,0.3) 50%, transparent 100%) */}
+      {/* Web: linear-gradient(to top, ground 0%, 0.8 30%, 0.3 60%, transparent 100%) */}
+      {isNative ? (
+        <LinearGradient
+          colors={[
+            v2Colors.ground, // 0% - ground at bottom
+            "rgba(0,0,0,0.3)", // 50% - dark overlay
+            "transparent", // 100% - transparent at top
+          ]}
+          locations={[0, 0.5, 1]}
+          start={{ x: 0.5, y: 1 }} // from bottom
+          end={{ x: 0.5, y: 0 }} // to top
+          style={StyleSheet.absoluteFill}
+        />
+      ) : (
+        <View style={[StyleSheet.absoluteFill, heroStyles.overlayWeb]} />
+      )}
 
       {/* Scan Lines (web only) */}
       {Platform.OS === "web" && <View style={styles.heroScanlines} />}
@@ -157,26 +196,28 @@ export function DetailHero({
           </Animated.Text>
         )}
 
-        {/* Meta Items */}
-        <Animated.View
-          style={[
-            styles.heroMeta,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
-          {meta.split(" · ").map((item, i) => (
-            <View key={i} style={styles.heroMetaItem}>
-              <Text style={heroStyles.metaIcon}>{getMetaIcon(i)}</Text>
-              <Text style={styles.heroMetaText}>{item}</Text>
-            </View>
-          ))}
-        </Animated.View>
+        {/* Meta Items (WEB ONLY - native uses info card below) */}
+        {!isNative && (
+          <Animated.View
+            style={[
+              styles.heroMeta,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            {meta.split(" · ").map((item, i) => (
+              <View key={i} style={styles.heroMetaItem}>
+                <Text style={heroStyles.metaIcon}>{getMetaIcon(i)}</Text>
+                <Text style={styles.heroMetaText}>{item}</Text>
+              </View>
+            ))}
+          </Animated.View>
+        )}
 
-        {/* Chips (optional - ticket count, etc) */}
-        {chips && chips.length > 0 && (
+        {/* Chips (WEB ONLY - optional ticket count, etc) */}
+        {!isNative && chips && chips.length > 0 && (
           <Animated.View
             style={[
               heroStyles.chipRow,
@@ -210,9 +251,9 @@ function getMetaIcon(index: number): string {
 
 // Local styles for hero-specific elements
 const heroStyles = StyleSheet.create({
-  overlay: {
+  // Web: gradient from white at bottom
+  overlayWeb: {
     backgroundColor: "transparent",
-    // Gradient effect via linear-gradient on web
     ...(Platform.OS === "web" && {
       backgroundImage: `linear-gradient(
         to top,
@@ -222,10 +263,13 @@ const heroStyles = StyleSheet.create({
         rgba(255,255,255,0) 100%
       )`,
     }),
-    // Native fallback: semi-transparent white at bottom
-    ...(Platform.OS !== "web" && {
-      backgroundColor: "rgba(255,255,255,0.5)",
-    }),
+  },
+  // Native grayscale layers (simulates grayscale filter)
+  nativeGrayscaleDark: {
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+  },
+  nativeGrayscaleGray: {
+    backgroundColor: "rgba(128, 128, 128, 0.65)",
   },
   metaIcon: {
     fontSize: 16,

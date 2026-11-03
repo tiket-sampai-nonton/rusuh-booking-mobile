@@ -1,19 +1,26 @@
 /**
- * V2 Brutalist Mono Lineup Grid
+ * V2 Brutalist Mono Lineup Grid (Web) / Horizontal Scroll (Native)
  *
- * MATCHES: `.oil-ui/v2/02-event-detail.html` .lineup-grid
+ * MATCHES: `.genesis/prototype/v2-mobile/02-event-detail.html` .lineup-scroll (native)
+ * MATCHES: `.oil-ui/v2/02-event-detail.html` .lineup-grid (web)
  *
- * Features:
- * - Grid of artist cards (150px min width, auto-fill)
- * - Grayscale circular avatars, color on hover
- * - Card flips to ink background on hover
- * - Name uppercase bold, role muted
+ * Mobile-specific:
+ * - Horizontal ScrollView with snap
+ * - Smaller item width (100px vs 150px)
+ * - Pop animation on entry (staggered)
+ * - Active state removes grayscale + scale 1.05
+ *
+ * Web:
+ * - Grid layout with wrap
+ * - Hover-based color reveal
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Image,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -23,12 +30,13 @@ import { interFonts } from "@presentation/theme/fonts";
 import {
   v2Borders,
   v2Colors,
+  v2Duration,
   v2FontSizes,
   v2SpacingSemantic,
 } from "@presentation/theme/v2-tokens";
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// LINEUP GRID COMPONENT
+// LINEUP GRID/SCROLL COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
 interface LineupItem {
@@ -42,16 +50,43 @@ interface LineupProps {
 }
 
 export function Lineup({ items }: LineupProps) {
+  const isNative = Platform.OS !== "web";
+
   if (items.length === 0) {
     return (
       <Text style={lineupStyles.empty}>Line-up akan diumumkan menyusul.</Text>
     );
   }
 
+  // Native: horizontal scroll
+  if (isNative) {
+    return (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={lineupStyles.scrollContent}
+        style={lineupStyles.scroll}
+        snapToInterval={100 + v2SpacingSemantic.s} // Item width + gap
+        decelerationRate="fast"
+      >
+        {items.map((item, index) => (
+          <LineupCardNative
+            key={item.name}
+            name={item.name}
+            role={item.role}
+            avatar={item.avatar}
+            index={index}
+          />
+        ))}
+      </ScrollView>
+    );
+  }
+
+  // Web: grid layout
   return (
     <View style={lineupStyles.grid}>
       {items.map((item) => (
-        <LineupCard
+        <LineupCardWeb
           key={item.name}
           name={item.name}
           role={item.role}
@@ -63,7 +98,7 @@ export function Lineup({ items }: LineupProps) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// LINEUP CARD COMPONENT
+// LINEUP CARD - WEB (Hover-based)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 interface LineupCardProps {
@@ -72,7 +107,7 @@ interface LineupCardProps {
   readonly avatar?: string;
 }
 
-function LineupCard({ name, role, avatar }: LineupCardProps) {
+function LineupCardWeb({ name, role, avatar }: LineupCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   // Default avatar placeholder
@@ -83,7 +118,7 @@ function LineupCard({ name, role, avatar }: LineupCardProps) {
   return (
     <Pressable
       style={[
-        lineupStyles.card,
+        lineupStyles.cardWeb,
         isHovered && lineupStyles.cardHover,
       ]}
       onHoverIn={() => setIsHovered(true)}
@@ -125,16 +160,108 @@ function LineupCard({ name, role, avatar }: LineupCardProps) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// LINEUP CARD - NATIVE (Active-based + Pop animation)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface LineupCardNativeProps extends LineupCardProps {
+  readonly index: number;
+}
+
+function LineupCardNative({ name, role, avatar, index }: LineupCardNativeProps) {
+  const [isPressed, setIsPressed] = useState(false);
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  // Default avatar placeholder
+  const avatarUri =
+    avatar ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=000&color=fff&bold=true&size=160`;
+
+  // Pop animation on mount (staggered)
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        delay: 1100 + index * 100, // Staggered delay
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: v2Duration.normal,
+        delay: 1100 + index * 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [scaleAnim, opacityAnim, index]);
+
+  return (
+    <Animated.View
+      style={{
+        opacity: opacityAnim,
+        transform: [{ scale: scaleAnim }],
+      }}
+    >
+      <Pressable
+        style={lineupStyles.cardNative}
+        onPressIn={() => setIsPressed(true)}
+        onPressOut={() => setIsPressed(false)}
+      >
+        <View style={lineupStyles.avatarContainer}>
+          <Image
+            source={{ uri: avatarUri }}
+            style={lineupStyles.avatar}
+            resizeMode="cover"
+            accessibilityIgnoresInvertColors
+          />
+          {/* Native grayscale overlay - fades on press */}
+          {!isPressed && (
+            <>
+              <View style={[StyleSheet.absoluteFill, lineupStyles.grayscaleDark, { borderRadius: 40 }]} />
+              <View style={[StyleSheet.absoluteFill, lineupStyles.grayscaleGray, { borderRadius: 40 }]} />
+            </>
+          )}
+        </View>
+        <Text
+          style={lineupStyles.name}
+          numberOfLines={2}
+        >
+          {name}
+        </Text>
+        <Text
+          style={lineupStyles.role}
+          numberOfLines={1}
+        >
+          {role}
+        </Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const lineupStyles = StyleSheet.create({
+  // Native horizontal scroll
+  scroll: {
+    marginHorizontal: -v2SpacingSemantic.m, // Bleed to edges
+  },
+  scrollContent: {
+    paddingHorizontal: v2SpacingSemantic.m,
+    paddingBottom: v2SpacingSemantic.s,
+    gap: v2SpacingSemantic.s,
+  },
+  // Web grid
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: v2SpacingSemantic.s, // 16px
   },
-  card: {
+  // Web card (150px)
+  cardWeb: {
     width: 150,
     alignItems: "center",
     padding: v2SpacingSemantic.m,
@@ -147,15 +274,36 @@ const lineupStyles = StyleSheet.create({
     backgroundColor: v2Colors.ink,
     transform: [{ translateY: -4 }],
   },
+  // Native card (100px, smaller for horizontal scroll)
+  cardNative: {
+    width: 100,
+    alignItems: "center",
+    padding: v2SpacingSemantic.s,
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.ground,
+  },
+  avatarContainer: {
+    position: "relative",
+    marginBottom: v2SpacingSemantic.xs,
+  },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40, // Exception: avatars are circular
-    marginBottom: v2SpacingSemantic.s,
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+  },
+  // Native grayscale layers
+  grayscaleDark: {
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+  },
+  grayscaleGray: {
+    backgroundColor: "rgba(128, 128, 128, 0.65)",
   },
   name: {
     fontFamily: interFonts.bold,
-    fontSize: v2FontSizes.s, // 14px
+    fontSize: v2FontSizes.xs, // 12px on native (smaller)
     color: v2Colors.ink,
     textTransform: "uppercase",
     textAlign: "center",
@@ -165,7 +313,7 @@ const lineupStyles = StyleSheet.create({
   },
   role: {
     fontFamily: interFonts.regular,
-    fontSize: v2FontSizes.xs, // 12px
+    fontSize: 10, // Smaller on native
     color: v2Colors.inkMuted,
     textAlign: "center",
     marginTop: 2,
