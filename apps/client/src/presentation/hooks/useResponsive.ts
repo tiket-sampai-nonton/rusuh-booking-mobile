@@ -36,8 +36,8 @@ export interface Responsive {
   readonly detailTwoCol: boolean;
   /** Header height: 56px mobile, 60px desktop */
   readonly headerHeight: number;
-  /** Hero height as percentage of viewport: 70 for mobile, 100 for desktop */
-  readonly heroHeightVh: 70 | 100;
+  /** Hero height as percentage of viewport: 70/80 for mobile, 100 for desktop */
+  readonly heroHeightVh: 70 | 80 | 100;
   /** Bottom bar height (mobile nav): 72px on native, 0 on web */
   readonly bottomBarHeight: number;
   /** Minimum tap target size: 44px */
@@ -60,7 +60,7 @@ export function useResponsive(): Responsive {
       gridColumns: 1,
       detailTwoCol: false,
       headerHeight: v2Layout.headerHeightMobile,
-      heroHeightVh: 70,
+      heroHeightVh: 80, // Increased from 70 to 80 for taller mobile hero
       bottomBarHeight: v2Layout.bottomBarHeight,
       tapTarget: v2Layout.tapTarget,
     };

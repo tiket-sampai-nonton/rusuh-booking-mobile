@@ -9,17 +9,18 @@
  * - border: 2px solid #000 (bottom only)
  * - Pure black/white, no shadows, no rounding
  *
- * Mobile differences:
+ * Mobile differences (v2-mobile/01-home.html):
  * - Height: 56px (vs 60px desktop)
  * - Logo: 18px (1.125rem) same as desktop
- * - Icon buttons: 44px × 44px tap target with shadow
- * - Active state: translate + shadow collapse
+ * - Icon buttons: 44px × 44px tap target with shadow (Search + Notifications)
+ * - Active state: translate + shadow collapse, invert colors
+ * - NO "Masuk / Daftar" text button on mobile — use icon buttons instead
  *
  * Links (desktop > 720px): center nav links with hover underline slide
- * CTA: "Masuk / Daftar" black button with ink-spread hover
+ * CTA: "Masuk / Daftar" black button with ink-spread hover (desktop only)
  */
 import { useEffect, useMemo } from 'react';
-import { Pressable, Text, View, type ViewStyle } from 'react-native';
+import { Platform, Pressable, Text, View, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -28,12 +29,119 @@ import Animated, {
   withTiming,
   interpolate,
 } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
 
-import { v2Colors, v2Borders, v2Easing, v2Duration, interFonts } from '@presentation/theme';
+import { v2Colors, v2Borders, v2Easing, v2Duration, v2Layout, interFonts } from '@presentation/theme';
 import { useResponsive } from '@presentation/hooks/useResponsive';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const EASE = Easing.bezier(...v2Easing.primary);
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ICON BUTTONS (v2-mobile/01-home.html: .icon-btn)
+// 44px × 44px tap target, 2px border, 2px shadow, press: translate + invert
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Login/user icon (person entering) */
+function LoginIcon({ color = v2Colors.ink }: { readonly color?: string }) {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M10 17l5-5-5-5M15 12H3"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/** Mobile header icon button (v2-mobile .icon-btn) */
+function IconButton({
+  icon,
+  label,
+  onPress,
+  testID,
+}: {
+  readonly icon: 'login';
+  readonly label: string;
+  readonly onPress?: () => void;
+  readonly testID?: string;
+}) {
+  const reducedMotion = useReducedMotion();
+  const pressed = useSharedValue(0);
+
+  const buttonStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: pressed.value * 2 },
+      { translateY: pressed.value * 2 },
+    ],
+    // Shadow collapses on press (2px → 0)
+    // Web: use boxShadow; Native: use elevation approximation
+  }));
+
+  // Web shadow style (CSS boxShadow)
+  const shadowStyle = useAnimatedStyle(() => {
+    const shadowOffset = 2 - pressed.value * 2;
+    if (Platform.OS === 'web') {
+      return {
+        boxShadow: `${shadowOffset}px ${shadowOffset}px 0 ${v2Colors.ink}`,
+      } as any;
+    }
+    // Native: approximate with elevation (limited)
+    return {
+      elevation: pressed.value > 0.5 ? 0 : 2,
+    };
+  });
+
+  const bgStyle = useAnimatedStyle(() => ({
+    backgroundColor: pressed.value > 0.5 ? v2Colors.ink : v2Colors.ground,
+  }));
+
+  const setPressed = (v: boolean) => {
+    if (reducedMotion) {
+      pressed.value = v ? 1 : 0;
+      return;
+    }
+    pressed.value = withTiming(v ? 1 : 0, { duration: 150, easing: EASE });
+  };
+
+  const iconColor = pressed.value > 0.5 ? v2Colors.ground : v2Colors.ink;
+
+  return (
+    <AnimatedPressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      testID={testID}
+      onPress={onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={[
+        {
+          width: v2Layout.tapTarget,
+          height: v2Layout.tapTarget,
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderWidth: v2Borders.standard,
+          borderColor: v2Colors.ink,
+        },
+        buttonStyle,
+        shadowStyle,
+        bgStyle,
+      ]}
+    >
+      <LoginIcon color={iconColor} />
+    </AnimatedPressable>
+  );
+}
 
 export interface V2HeaderProps {
   /** Safe area top inset */
@@ -42,12 +150,14 @@ export interface V2HeaderProps {
   readonly showLinks?: boolean;
   /** Nav link data */
   readonly links?: readonly { label: string; testID?: string; onPress: () => void }[];
-  /** CTA button press handler */
+  /** CTA button press handler (desktop: "Masuk / Daftar", mobile: login icon) */
   readonly onCtaPress?: () => void;
   /** Logo press handler */
   readonly onLogoPress?: () => void;
-  /** CTA label (default: "Masuk / Daftar") */
+  /** CTA label (default: "Masuk / Daftar") — desktop only */
   readonly ctaLabel?: string;
+  /** Whether user is logged in (mobile: hides login icon when true) */
+  readonly isLoggedIn?: boolean;
 }
 
 /** Nav link with underline slide animation */
@@ -128,11 +238,16 @@ export function V2Header({
   onCtaPress,
   onLogoPress,
   ctaLabel = 'Masuk / Daftar',
+  isLoggedIn = false,
 }: V2HeaderProps) {
   const reducedMotion = useReducedMotion();
-  const { headerHeight } = useResponsive();
+  const { headerHeight, isNative } = useResponsive();
   const slideIn = useSharedValue(reducedMotion ? 1 : 0);
   const ctaHover = useSharedValue(0);
+
+  // Mobile native: show login icon when not logged in, nothing when logged in
+  // Web: always show text CTA button regardless of viewport size
+  const showMobileLoginIcon = isNative && !isLoggedIn;
 
   // Slide in from top on mount (prototype: animation 0.8s, delay 0.5s)
   useEffect(() => {
@@ -253,54 +368,66 @@ export function V2Header({
             </View>
           )}
 
-          {/* CTA button with ink spread hover (prototype .btn-ghost) */}
-          <AnimatedPressable
-            accessibilityRole="button"
-            accessibilityLabel={ctaLabel}
-            testID="header-cta"
-            onPress={onCtaPress}
-            onHoverIn={() => setCtaHover(true)}
-            onHoverOut={() => setCtaHover(false)}
-            onPressIn={() => setCtaHover(true)}
-            onPressOut={() => setCtaHover(false)}
-            style={{
-              borderWidth: v2Borders.standard,
-              borderColor: v2Colors.ink,
-              backgroundColor: v2Colors.ink,
-              paddingVertical: 8,
-              paddingHorizontal: 16,
-              overflow: 'hidden',
-            }}
-          >
-            {/* Fill layer for hover (slides from bottom → reveal ground) */}
-            <Animated.View
-              pointerEvents="none"
-              style={[
-                {
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: v2Colors.ground,
-                },
-                ctaFillStyle,
-              ]}
+          {/* Mobile native (not logged in): Login icon button */}
+          {/* Mobile native (logged in): No CTA */}
+          {/* Web: Always show text CTA button */}
+          {showMobileLoginIcon ? (
+            <IconButton
+              icon="login"
+              label="Masuk"
+              onPress={onCtaPress}
+              testID="header-login"
             />
-            <Animated.Text
-              style={[
-                {
-                  fontSize: 12,
-                  fontFamily: interFonts.bold, // weight 700
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.48, // 0.04em * 12
-                },
-                ctaTextStyle,
-              ]}
+          ) : !isNative ? (
+            /* Desktop/Web: CTA button with ink spread hover (prototype .btn-ghost) */
+            <AnimatedPressable
+              accessibilityRole="button"
+              accessibilityLabel={ctaLabel}
+              testID="header-cta"
+              onPress={onCtaPress}
+              onHoverIn={() => setCtaHover(true)}
+              onHoverOut={() => setCtaHover(false)}
+              onPressIn={() => setCtaHover(true)}
+              onPressOut={() => setCtaHover(false)}
+              style={{
+                borderWidth: v2Borders.standard,
+                borderColor: v2Colors.ink,
+                backgroundColor: v2Colors.ink,
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+                overflow: 'hidden',
+              }}
             >
-              {ctaLabel}
-            </Animated.Text>
-          </AnimatedPressable>
+              {/* Fill layer for hover (slides from bottom → reveal ground) */}
+              <Animated.View
+                pointerEvents="none"
+                style={[
+                  {
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: v2Colors.ground,
+                  },
+                  ctaFillStyle,
+                ]}
+              />
+              <Animated.Text
+                style={[
+                  {
+                    fontSize: 12,
+                    fontFamily: interFonts.bold, // weight 700
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.48, // 0.04em * 12
+                  },
+                  ctaTextStyle,
+                ]}
+              >
+                {ctaLabel}
+              </Animated.Text>
+            </AnimatedPressable>
+          ) : null /* Mobile native + logged in = no CTA */}
         </View>
       </View>
     </Animated.View>

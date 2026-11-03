@@ -25,6 +25,7 @@ import {
   V2ScrollProgress,
   V2Header,
   V2HeroCarousel,
+  V2BottomNav,
 } from '@presentation/components/v2';
 import { useEvents } from '@presentation/hooks/useEvents';
 import { useResponsive } from '@presentation/hooks/useResponsive';
@@ -39,11 +40,14 @@ export function HomeScreen() {
   const scrollRef = useRef<Animated.ScrollView>(null);
   const featuredY = useRef(0);
   const historyY = useRef(0);
-  const { isWeb, isDesktop, width, gridColumns } = useResponsive();
+  const { isWeb, isDesktop, isNative, width, gridColumns, bottomBarHeight } = useResponsive();
   const insets = useSafeAreaInsets();
 
   // Prototype breakpoint: nav center links show > 768px (desktop web only).
   const showNavLinks = isWeb && width > 768;
+
+  // Bottom padding: account for bottom nav on native
+  const bottomPadding = isNative ? bottomBarHeight + insets.bottom : insets.bottom;
 
   // Scroll offset drives the hero parallax + scroll progress.
   const scrollY = useSharedValue(0);
@@ -83,7 +87,7 @@ export function HomeScreen() {
         <Animated.ScrollView
           ref={scrollRef}
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: insets.bottom }}
+          contentContainerStyle={{ paddingBottom: bottomPadding }}
           onScroll={onScroll}
           scrollEventThrottle={16}
           testID="home-scroll"
@@ -135,6 +139,17 @@ export function HomeScreen() {
         {/* Login/OTP + Filter modals */}
         <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
         <FilterModal visible={filterOpen} onClose={() => setFilterOpen(false)} onApply={applyFilter} />
+
+        {/* Bottom Navigation (native only, handled internally by V2BottomNav) */}
+        <V2BottomNav
+          activeRoute="home"
+          onNavigate={(route) => {
+            if (route === 'browse') router.push('/browse' as Href);
+            else if (route === 'tickets') router.push('/my-tickets' as Href);
+            else if (route === 'profile') router.push('/profile' as Href);
+            // home = current screen, no-op
+          }}
+        />
       </View>
     </V2ToastProvider>
   );
