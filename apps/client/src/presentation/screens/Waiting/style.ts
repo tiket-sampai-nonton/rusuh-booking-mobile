@@ -1,61 +1,61 @@
 /**
- * RBT-043 — waiting-room styles. StyleSheet (not NativeWind) because the dark
- * aura surface + SVG ring + exact rgba palette from waiting.html can't be
- * expressed as Tailwind tokens here. Palette lifted verbatim from the prototype
- * `:root` vars (--ink / --ember / --red / --ok / --amber dark tones).
+ * RBT-091 — Waiting-room styles, V2 "Brutalist Mono" TERMINAL variant.
+ *
+ * The waiting room is the ONE screen the V2 prototype (06-waiting) renders in the
+ * mono/terminal variant: pure black ground, white ink, HARD 3px borders, square
+ * corners (no radius), JetBrains Mono. This is deliberate (see v2-tokens:
+ * v2Font.mono / v2Border.heavy) — it reads as a live "terminal" while you wait.
+ *
+ * STYLE ONLY. The screen's logic is untouched: server-authoritative polling
+ * (useQueuePolling — no Math.random, no device clock), the RBT-040 state machine,
+ * RBT-044 auto-claim, and the icon+label (never color-only) zone banners all stay
+ * exactly as before. Every testID is preserved.
  */
 import { StyleSheet } from "react-native";
 
-import { brand, neutral, withAlpha } from "@presentation/theme";
+import { v2, v2Border, v2Font, v2Zone } from "@presentation/theme";
 
 import type { ZoneTone } from "./display";
 
 /**
- * Prototype palette (waiting.html dark surface). Core hues come from the TOKEN
- * set (ink/ember/red/white); the remaining entries are the prototype's
- * dark-context accents (`--ok`/`--amber` dark tones, pill dot) that the light
- * token set does not model — kept here as the single documented source.
+ * V2 Brutalist Mono palette (06-waiting). Pure black/white base; the live dot +
+ * admit/ok and error tints come from the unified V2 token set (no inline rgba).
  */
 export const palette = {
-  ink: neutral.ink,
-  ember: brand.ember,
-  red: brand.red,
-  white: neutral.card,
-  muted: neutral.mutedDark,
-  faint: withAlpha(neutral.card, 0.4),
-  ringBg: withAlpha(neutral.card, 0.08),
-  pillDot: "#ff3b4e", //   dark-context live dot (not a core token)
-  ok: "#4ade80", //        waiting.html dark --ok
-  okText: "#a7f3c4", //    dark --ok text tint
-  amber: "#f5b301", //     waiting.html --amber
-  amberText: "#ffdd8a", // dark amber text tint
-  errText: "#ff9a8f", //   dark error text tint
+  ink: v2.ink, //        black ground
+  ember: v2.accent, //   progress accent (brutalist red)
+  red: v2.accent,
+  white: v2.ground, //   white ink
+  muted: "#999999", //   mono muted gray (on-black readable)
+  faint: "#666666", //   mono faint gray
+  ringBg: "#333333", //  ring track on black
+  pillDot: v2.accent, //  live dot
+  ok: v2Zone.ok.border, //      GUARANTEED border/green
+  okText: v2Zone.ok.border, //  green text on black
+  amber: v2Zone.warn.border, // POSSIBLE amber
+  amberText: v2Zone.warn.border,
+  errText: v2.accent, //  error red text
 } as const;
 
-/** Zone banner tone → {bg, border, text} rgba triple (prototype .zone.*). */
+/**
+ * Zone banner tone → {bg, border, text}. V2 brutalist: WHITE card, hard colored
+ * border, colored bold text — the icon+label still carries the meaning so it is
+ * never color-only (RBT-080). Uses the unified v2Zone tints.
+ */
 export const ZONE_STYLE: Readonly<
   Record<ZoneTone, { bg: string; border: string; text: string }>
 > = {
-  ok: {
-    bg: withAlpha(palette.ok, 0.12),
-    border: withAlpha(palette.ok, 0.3),
-    text: palette.okText,
-  },
-  warn: {
-    bg: withAlpha(palette.amber, 0.12),
-    border: withAlpha(palette.amber, 0.32),
-    text: palette.amberText,
-  },
-  error: {
-    bg: withAlpha(palette.red, 0.12),
-    border: withAlpha(palette.red, 0.34),
-    text: palette.errText,
-  },
+  ok: { bg: v2.ground, border: v2Zone.ok.border, text: v2Zone.ok.text },
+  warn: { bg: v2.ground, border: v2Zone.warn.border, text: v2Zone.warn.text },
+  error: { bg: v2.ground, border: v2Zone.bad.border, text: v2Zone.bad.text },
 };
 
 export const RING_SIZE = 200;
 export const RING_RADIUS = 90;
 export const RING_STROKE = 9;
+
+const B = v2Border.heavy; // 3px hard brutalist border
+const MONO = v2Font.mono; // JetBrains Mono
 
 export const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.ink },
@@ -70,28 +70,34 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: withAlpha(palette.white, 0.14),
-    backgroundColor: withAlpha(palette.white, 0.07),
+    borderWidth: B,
+    borderColor: palette.white,
+    backgroundColor: palette.ink,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginBottom: 22,
   },
   pillDot: { width: 7, height: 7, borderRadius: 999, backgroundColor: palette.pillDot },
-  pillLabel: { fontSize: 13, fontWeight: "600", color: palette.white },
+  pillLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: palette.white,
+    fontFamily: MONO,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
   card: {
     width: "100%",
     maxWidth: 440,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: withAlpha(palette.white, 0.1),
-    backgroundColor: withAlpha(palette.white, 0.04),
+    borderWidth: B,
+    borderColor: palette.white,
+    backgroundColor: palette.ink,
     padding: 9,
   },
   core: {
-    borderRadius: 21,
-    backgroundColor: withAlpha(palette.white, 0.03),
+    borderWidth: 1,
+    borderColor: palette.ringBg,
+    backgroundColor: palette.ink,
     paddingVertical: 34,
     paddingHorizontal: 28,
     alignItems: "center",
@@ -100,8 +106,9 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 2.4,
     textTransform: "uppercase",
-    fontWeight: "600",
+    fontWeight: "700",
     color: palette.muted,
+    fontFamily: MONO,
   },
   ringWrap: {
     width: RING_SIZE,
@@ -135,6 +142,7 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: -1.9,
     color: palette.white,
+    fontFamily: MONO,
     fontVariant: ["tabular-nums"],
   },
   positionLabel: {
@@ -143,6 +151,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: palette.muted,
     marginTop: 6,
+    fontFamily: MONO,
   },
   title: {
     fontSize: 23,
@@ -152,6 +161,7 @@ export const styles = StyleSheet.create({
     marginTop: 14,
     marginBottom: 6,
     textAlign: "center",
+    fontFamily: MONO,
   },
   sub: {
     fontSize: 14,
@@ -159,27 +169,26 @@ export const styles = StyleSheet.create({
     color: palette.muted,
     maxWidth: 300,
     textAlign: "center",
+    fontFamily: MONO,
   },
   zone: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     marginTop: 20,
-    borderRadius: 14,
-    borderWidth: 1,
+    borderWidth: B,
     paddingVertical: 12,
     paddingHorizontal: 14,
   },
-  zoneText: { flex: 1, fontSize: 13, fontWeight: "600", lineHeight: 18 },
+  zoneText: { flex: 1, fontSize: 13, fontWeight: "600", lineHeight: 18, fontFamily: MONO },
   zoneLabel: { fontWeight: "800" },
   stats: { flexDirection: "row", gap: 10, marginTop: 18, width: "100%" },
   stat: {
     flex: 1,
     alignItems: "center",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: withAlpha(palette.white, 0.08),
-    backgroundColor: withAlpha(palette.white, 0.04),
+    borderWidth: B,
+    borderColor: palette.white,
+    backgroundColor: palette.ink,
     paddingVertical: 14,
     paddingHorizontal: 10,
   },
@@ -187,6 +196,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "800",
     color: palette.white,
+    fontFamily: MONO,
     fontVariant: ["tabular-nums"],
   },
   statLabel: {
@@ -195,6 +205,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: palette.muted,
     marginTop: 4,
+    fontFamily: MONO,
   },
   admit: { marginTop: 22, width: "100%" },
   prep: {
@@ -202,14 +213,13 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 11,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: withAlpha(palette.ok, 0.3),
-    backgroundColor: withAlpha(palette.ok, 0.12),
+    borderWidth: B,
+    borderColor: palette.ok,
+    backgroundColor: palette.ink,
     paddingVertical: 16,
     paddingHorizontal: 16,
   },
-  prepText: { fontSize: 14, fontWeight: "700", color: palette.okText },
+  prepText: { fontSize: 14, fontWeight: "700", color: palette.okText, fontFamily: MONO },
   admitTitle: {
     fontSize: 23,
     fontWeight: "800",
@@ -217,14 +227,14 @@ export const styles = StyleSheet.create({
     color: palette.white,
     marginTop: 14,
     textAlign: "center",
+    fontFamily: MONO,
   },
   errBox: {
     marginTop: 18,
     width: "100%",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: withAlpha(palette.red, 0.34),
-    backgroundColor: withAlpha(palette.red, 0.12),
+    borderWidth: B,
+    borderColor: palette.errText,
+    backgroundColor: palette.ink,
     paddingVertical: 16,
     paddingHorizontal: 16,
   },
@@ -234,15 +244,17 @@ export const styles = StyleSheet.create({
     color: palette.errText,
     textAlign: "center",
     marginBottom: 6,
+    fontFamily: MONO,
   },
-  errBody: { fontSize: 13, lineHeight: 20, color: palette.errText, textAlign: "center" },
+  errBody: { fontSize: 13, lineHeight: 20, color: palette.errText, textAlign: "center", fontFamily: MONO },
   leave: { marginTop: 16, paddingVertical: 4 },
-  leaveText: { fontSize: 12, color: palette.faint, textDecorationLine: "underline" },
+  leaveText: { fontSize: 12, color: palette.faint, textDecorationLine: "underline", fontFamily: MONO },
   footnote: {
     fontSize: 11,
     color: palette.faint,
     marginTop: 20,
     textAlign: "center",
     maxWidth: 440,
+    fontFamily: MONO,
   },
 });
