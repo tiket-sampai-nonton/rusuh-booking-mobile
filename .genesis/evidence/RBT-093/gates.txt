@@ -1,0 +1,91 @@
+RBT-093 — V2 Brutalist Mono: Payment (08-payment) + SNAP simulator (08a-snap)
+Branch: feature/RBT-093-v2-payment
+Date: 2026-11-03
+
+SCOPE
+  Re-skin the Payment screen (.genesis/prototype/v2/08-payment.html) and the
+  SNAP simulator screen (.genesis/prototype/v2/08a-snap.html) to the V2
+  "Brutalist Mono" light treatment, presentation-layer only. All domain rules,
+  the PaymentRepository port + mock adapter, and the SERVER-AUTHORITATIVE timer
+  are untouched.
+
+DOMAIN RULES + SERVER TIMER + PORTS PRESERVED (the key constraints)
+  Not touched — all live in domain/hooks/providers and remain as built:
+    - Timer is SERVER-AUTHORITATIVE: useServerCountdown(serverClock,
+      page.paymentExpiresAt, page.serverTime) — NOT the prototype's 10-min
+      client constant / device clock (D3.2). The topbar only DISPLAYS remainingMs;
+      expiry routes to /expired.
+    - Payment method list is SERVER-DRIVEN (page.methods, VA/QRIS/GoPay, no card)
+      — the UI never invents methods (RBT-060 AC2).
+    - NO service/hidden-fee line — total == amountMinor exactly (D10.1).
+    - Refresh-safe resume: an AWAITING_PAYMENT attempt shows "Kembali ke SNAP"
+      instead of a fresh pay (AC2).
+    - Page is fetched through the PaymentRepository PORT (usePaymentPage →
+      GetPaymentPage); no infrastructure import in the screen.
+    - SNAP simulator drives the mock snapCallback (the same port the real
+      Midtrans webhook implements, D10.5); the result gate ALWAYS re-verifies
+      with getStatus and never trusts the callback (D10.2). FAILED → /expired,
+      PAID/UNKNOWN → /payment-result verify gate.
+
+CHANGES (style only)
+  Payment/fragments/PaymentTopBar.tsx  bar → hard 2px bottom border; timer badge →
+                                       square, black, inverts to red on warn/expired,
+                                       tabular-nums, uppercase back
+  Payment/fragments/PaymentSummary.tsx hold banner → solid black bar; summary →
+                                       white panel w/ 2px black border + black panel
+                                       header, uppercase order name, hairline total rule
+  Payment/fragments/PaymentMethods.tsx panel → 2px border + black header; method rows →
+                                       2px border, selected row inverts to black, square
+                                       radio (filled when selected), red icon chip
+  Payment/fragments/PaymentBar.tsx     black bar w/ red top rule; pay button → square,
+                                       white fill + black uppercase label, "↗"
+  Payment/index.tsx                    (unchanged logic) consumes restyled fragments
+  Payment/style.ts                     square timer dot + method chip (red), tabularNum,
+                                       paymentBar → v2.ink ground
+  Snap/fragments/SnapLogo.tsx          square black 40px logo mark, uppercase wordmark
+  Snap/fragments/SnapSummary.tsx       #f9f9f9 panel w/ 2px black border, hairline rows
+  Snap/fragments/SnapActions.tsx       square buttons: green success / white-black fail /
+                                       white-gray unknown, 2px borders, uppercase
+  Snap/index.tsx                       card → white w/ 2px black border (square), centered
+                                       uppercase eyebrow/heading, field-gray page ground
+  Snap/style.ts                        square black logo mark, eyebrow/heading tracking
+
+PROTOTYPE FIDELITY (08 / 08a)
+  - White panels with 2px solid-black borders + black uppercase panel headers, square
+    corners, Inter. (.panel / .panel-header)
+  - Black timer that pulses red on warning (server countdown). (.timer / .timer.warning)
+  - Solid-black status/hold banner. (.status-banner)
+  - SNAP card: white w/ 2px border, square black icon, #f9f9f9 summary, green success
+    button + white/black fail button. (.card / .snap-icon / .summary / .btn-success / .btn-fail)
+
+GATES
+  tsc --noEmit              : PASS (0 errors)
+  eslint (Payment/ + Snap/) : PASS (0 errors, 0 warnings)
+  jest PaymentFragments + PaymentScreen + SnapActions + SnapSimulatorScreen
+       + app/snap-route : PASS (23/23)
+
+COVERAGE (touched files, scoped)
+  Payment/fragments/PaymentTopBar.tsx  : stmts 100% / branch 100% / funcs 100% / lines 100%
+  Payment/fragments/PaymentSummary.tsx : 100% / 100% / 100% / 100%
+  Payment/fragments/PaymentMethods.tsx : 100% / 100% / 100% / 100%
+  Payment/fragments/PaymentBar.tsx     : 100% / 100% / 100% / 100%
+  Payment/index.tsx                    : 100% / 91.66% / 100% / 100%
+  Snap/index.tsx                       : 100% / 100% / 100% / 100%
+  Snap/fragments/SnapLogo.tsx          : 100% / 100% / 100% / 100%
+  Snap/fragments/SnapSummary.tsx       : 100% / 100% / 100% / 100%
+  Snap/fragments/SnapActions.tsx       : 100% / 100% / 100% / 100%
+  Snap/style.ts                        : 100% / 100% / 100% / 100%
+  All screen .tsx files ≥90% on ALL FOUR metrics.
+  Residuals (pre-existing, not from this restyle; all ≥90% or non-executable):
+    - Payment/index.tsx branch 91.66% (L110 error-message ?? fallback; L121 onPay
+      else-if method arm) — pre-existing orchestration branches, above the 90% bar.
+    - Payment/style.ts branch 50% (L20 isDesktop desktop layout arm) — a
+      non-functional layout helper exercised only in desktop mode.
+    - interface.ts files: type-only (0% executable), standard exclusion.
+
+NOTE
+  Pure presentation restyle preserving every domain rule, the PaymentRepository
+  port + mock adapter (D10.5), the verify-never-trust-callback result gate (D10.2),
+  and the server-authoritative countdown (D3.2).
+  Screenshots (web/iOS/Android) deferred (host memory tight earlier in the run);
+  gate evidence (tsc/eslint/jest/coverage) captured now.
