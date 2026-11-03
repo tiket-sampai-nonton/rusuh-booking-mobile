@@ -11,8 +11,6 @@ export interface EventDetailScreenProps {
 export interface BlockProps {
   readonly label: string;
   readonly heading?: string;
-  /** Renders the "GAP: FE-NEED" badge next to the label (opaque description). */
-  readonly gap?: boolean;
   readonly children: ReactNode;
 }
 
