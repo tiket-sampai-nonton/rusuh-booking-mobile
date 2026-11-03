@@ -1,0 +1,29 @@
+RBT-086 — V2 Design System / Tokens — GATES
+Captured: 2026-11-03T03:27:38Z  branch: feature/RBT-086-v2-design-tokens  base: develop@1501dc5
+
+== DECISIONS ==
+1. Unified the prototype's TWO token systems into ONE 'v2' namespace in
+   tailwind.config.js (+ theme/v2-tokens.ts mirror):
+     home/detail  --ground/--ink/--ink-muted/--field/--accent/--danger
+     flow screens --black/--white/--gray/--red/--green
+   -> v2.ink #000, v2.ground #fff, v2.muted #666, v2.gray #888,
+      v2.field #f5f5f5, v2.accent #ff0000, v2.danger #dc2626,
+      v2.success #00aa00, v2.warn #ff6600, v2.info #3b82f6 + zone tints.
+2. Waiting-room outlier: KEPT as a deliberate variant, not normalized —
+   font-v2-mono (JetBrains Mono) + border-v2-heavy (3px), scoped to the
+   queue/terminal screen; all other V2 screens use font-v2 (Inter) + 2px.
+3. V2 fluid display scale (text-v2-hero clamp 3rem..10rem, line-height .85)
+   and V2 eases (--ease/--ease-out/--ease-elastic + expo) added alongside
+   the existing V5 tokens — V5 screens keep working during migration.
+4. tailwind.config.js stays the SINGLE source; theme/v2-tokens.ts mirrors it
+   (a test asserts zero drift between the two).
+
+== tsc --noEmit ==
+exit=0 (0=clean)
+
+== eslint (v2 token files + index) ==
+exit=0 (0=clean, empty=no findings)
+
+== theme token tests + v2-tokens.ts coverage ==
+v2-tokens.test.ts + tokens.test.ts: 18 passed; v2-tokens.ts 100/100/100/100 (stmt/branch/func/line).
+NON-UI ticket (token layer): evidence = gates; no screen render yet (per-screen tickets RBT-088+ carry screenshots).
