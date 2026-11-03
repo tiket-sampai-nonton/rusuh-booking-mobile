@@ -62,8 +62,9 @@ describe("HomeScreen", () => {
     await waitFor(() =>
       expect(screen.getByTestId("section-events")).toBeTruthy(),
     );
-    // V2: Header text is "Event Minggu Ini" instead of "Konser Terdekat"
-    expect(screen.getByText("Event Minggu Ini")).toBeTruthy();
+    // V2: Header text is "Upcoming" on native (matches v2-mobile prototype),
+    // "Event Minggu Ini" on web — Jest runs as native
+    expect(screen.getByText("Upcoming")).toBeTruthy();
     // V2: History section header is "Event Sebelumnya"
     expect(screen.getByText("Event Sebelumnya")).toBeTruthy();
     // "Rusuh Fest 2026" shows in the hero slide AND its catalog card.
@@ -100,9 +101,9 @@ describe("HomeScreen", () => {
     fireEvent(screen.getByTestId("section-events"), "layout", {
       nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
     });
-    // Each hero slide carries its own CTAs (prototype .slide-body); press the
-    // first. V2: hero-detail routes to /browse, hero-book routes to event.
-    fireEvent.press(screen.getAllByTestId("hero-detail")[0]);
+    // Each hero slide carries its own CTAs (prototype .slide-body).
+    // On native: only hero-book (primary CTA) — no secondary hero-detail button
+    // per v2-mobile prototype (HeroInfoMobile has a single CTA).
     fireEvent.press(screen.getAllByTestId("hero-book")[0]);
     expect(mockRouter.push).toHaveBeenCalledWith(
       expect.stringMatching(/^\/events\//),

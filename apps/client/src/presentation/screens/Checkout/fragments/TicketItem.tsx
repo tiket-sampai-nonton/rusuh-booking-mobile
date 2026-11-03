@@ -164,7 +164,7 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
           accessibilityLabel={`Gunakan NIK pembeli untuk tiket ${index + 1}`}
           value={row.useBuyerNik}
           onValueChange={onUseBuyer}
-          trackColor={{ false: "#e0e0e0", true: v2Colors.ink }}
+          trackColor={{ false: v2Colors.field, true: v2Colors.ink }} // Use field per Design Palette Guide
           thumbColor={v2Colors.ground}
           testID={`use-buyer-${index}`}
         />

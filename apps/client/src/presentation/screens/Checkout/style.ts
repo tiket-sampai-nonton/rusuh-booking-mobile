@@ -41,7 +41,7 @@ export const checkoutProgressLine: ViewStyle = {
   left: '10%',
   right: '10%',
   height: 2,
-  backgroundColor: '#e0e0e0',
+  backgroundColor: v2Colors.field, // #f5f5f5 - Use field per Design Palette Guide (no arbitrary grays)
 };
 
 export const checkoutStep: ViewStyle = {
@@ -161,7 +161,7 @@ export const checkoutInputFocus: ViewStyle = {
 
 export const checkoutInputError: ViewStyle = {
   ...checkoutInput,
-  borderColor: '#ff0000',
+  borderColor: v2Colors.danger, // #ff0000 per Design Palette Guide
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -258,7 +258,7 @@ export const checkoutSummaryTotal: ViewStyle = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const checkoutTimerBar: ViewStyle = {
-  backgroundColor: '#ff0000',
+  backgroundColor: v2Colors.danger, // #ff0000 per Design Palette Guide
   paddingVertical: 12,
   paddingHorizontal: 24,
   flexDirection: 'row',

@@ -46,7 +46,7 @@ export function PaymentSummary({ bookingId, amountMinor }: PaymentSummaryProps) 
         {/* NO "biaya layanan" line — total is exactly amountMinor (D10.1). */}
         <View
           className="mt-4 flex-row items-center justify-between pt-3"
-          style={{ borderTopWidth: 1, borderTopColor: "#e0e0e0" }}
+          style={{ borderTopWidth: 1, borderTopColor: v2.field }}
         >
           <Text className="text-base font-extrabold" style={{ color: v2.ink }}>
             Total

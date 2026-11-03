@@ -27,31 +27,32 @@ import type { ZoneTone } from "./display";
 
 /**
  * V2 Brutalist Mono palette (06-waiting.html). WHITE background, BLACK text.
+ * DESIGN PALETTE GUIDE: NO GRAYS in main UI — only use inkMuted (#666666).
  */
 export const palette = {
   // Core
   ground: v2Colors.ground, // #fff - background
   ink: v2Colors.ink, // #000 - text/borders
-  gray: "#888888", // gray for muted text
-  muted: "#888888",
-  field: "#f5f5f5", // subtle background (estimated time block)
-  ringBg: "#f0f0f0", // ring track background
+  gray: v2Colors.inkMuted, // #666666 - the only allowed gray per Design Palette Guide
+  muted: v2Colors.inkMuted, // #666666 - same
+  field: v2Colors.field, // #f5f5f5 - subtle background (estimated time block)
+  ringBg: v2Colors.field, // #f5f5f5 - ring track background (use field, not arbitrary gray)
 
   // Functional
-  red: "#ff0000", // accent/danger
-  green: "#00aa00", // success
-  orange: "#ff6600", // warning/offline
+  red: v2Colors.danger, // #ff0000 - accent/danger
+  green: v2Colors.success, // #00aa00 - success
+  orange: v2Colors.warning, // #ff6600 - warning/offline
 
   // Legacy aliases for compatibility
   white: v2Colors.ground,
-  ember: "#ff0000",
-  pillDot: "#ff0000",
-  okText: "#00aa00",
-  errText: "#ff0000",
+  ember: v2Colors.danger,
+  pillDot: v2Colors.danger,
+  okText: v2Colors.success,
+  errText: v2Colors.danger,
   ok: v2ZoneBanners.guaranteed.border,
   amber: v2ZoneBanners.possible.border,
   amberText: v2ZoneBanners.possible.text,
-  faint: "#888888",
+  faint: v2Colors.inkMuted, // #666666 - the only allowed gray
 } as const;
 
 /**

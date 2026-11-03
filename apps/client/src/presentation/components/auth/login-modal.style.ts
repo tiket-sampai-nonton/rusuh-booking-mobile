@@ -28,9 +28,9 @@ import {
 export const SCRIM = "rgba(0,0,0,0.8)";
 
 /**
- * Success green from prototype #16a34a (distinct from v2Colors.success).
+ * Success green - use v2Colors.success (#00aa00) per Design Palette Guide.
  */
-export const DONE_GREEN = "#16a34a";
+export const DONE_GREEN = v2Colors.success;
 
 /**
  * OTP input box dimensions (prototype: 48x56px).

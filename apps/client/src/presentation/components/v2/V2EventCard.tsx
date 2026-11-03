@@ -10,18 +10,14 @@
  * - border: 2px solid #000
  * - Gap: 2px creates border effect (handled by parent grid)
  *
- * Mobile prototype v2-mobile/01-home.html:
- * - Stagger animation: cards reveal with delay(index * 100ms)
- * - Animation: fadeSlideUp 0.5s (opacity 0→1, translateY 20→0)
- *
- * Prototype .event-card styling:
- * - .event-image: aspect-ratio 4/3
- * - .event-badge: top:8, left:8, uppercase, bg ink
- * - .event-content: padding 24px (--space-m)
- * - .event-date: color muted, text-s
- * - .event-title: text-l, font-800, uppercase
- * - .event-venue: color muted, text-s
- * - .event-footer: border-top, price left, buy btn right
+ * Mobile prototype v2-mobile/01-home.html differences:
+ * - Card: always has 4px 4px hard shadow
+ * - Content padding: --space-s (16px) not --space-m (24px)
+ * - Date: 12px, uppercase, letter-spacing 0.05em
+ * - Title: 16px, weight 700, NOT uppercase, line-height 1.3
+ * - Venue: 12px with icon
+ * - Footer: 1px dashed border (not 2px solid), 32x32 icon btn
+ * - Badge: 10px, red bg (danger)
  */
 import { useCallback, useEffect, useState } from 'react';
 import { Image, Platform, Pressable, Text, View, type ImageStyle, type ViewStyle } from 'react-native';
@@ -34,6 +30,7 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
 
 import type { EventSummary } from '@domain/repositories/event.repository';
 import { badgeFor, type BadgeTone } from '@domain/rules/event-display';
@@ -41,10 +38,52 @@ import { eventImage } from '@domain/rules/event-image';
 import { formatDateID } from '@domain/services/date-format';
 import { minorToIDR } from '@domain/services/money';
 import { v2Colors, v2Borders, v2Easing, v2Duration, v2SpacingSemantic, v2Shadows, interFonts } from '@presentation/theme';
+import { useResponsive } from '@presentation/hooks/useResponsive';
 
 const EASE = Easing.bezier(...v2Easing.primary);
 const STAGGER_DELAY_MS = 100; // Mobile prototype: stagger 100ms per card
 const isWeb = Platform.OS === 'web';
+
+// Mobile design tokens (v2-mobile/design-tokens.css)
+const MOBILE_CONTENT_PADDING = 16; // --space-s
+const MOBILE_DATE_SIZE = 12;       // --text-xs
+const MOBILE_TITLE_SIZE = 16;      // --text-m
+const MOBILE_VENUE_SIZE = 12;      // --text-xs
+const MOBILE_BADGE_SIZE = 10;
+const MOBILE_ACTION_SIZE = 32;
+
+// Desktop design tokens
+const DESKTOP_CONTENT_PADDING = v2SpacingSemantic.m; // 24px
+const DESKTOP_DATE_SIZE = 14;      // --text-s
+const DESKTOP_TITLE_SIZE = 20;     // --text-l
+const DESKTOP_VENUE_SIZE = 14;     // --text-s
+
+/** Map pin icon (12x12) for mobile venue */
+function MapPinIconSmall({ color = v2Colors.inkMuted }: { readonly color?: string }) {
+  return (
+    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"
+        stroke={color}
+        strokeWidth={2}
+      />
+      <Path
+        d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
+        stroke={color}
+        strokeWidth={2}
+      />
+    </Svg>
+  );
+}
+
+/** Arrow icon (16x16) for mobile action button */
+function ArrowRightIcon({ color = v2Colors.ink }: { readonly color?: string }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+      <Path d="M5 12h14M12 5l7 7-7 7" stroke={color} strokeWidth={2.5} />
+    </Svg>
+  );
+}
 
 export interface V2EventCardProps {
   readonly event: EventSummary;
@@ -53,6 +92,8 @@ export interface V2EventCardProps {
   readonly history?: boolean;
   /** Index for stagger animation (mobile: delay(index * 100ms)) */
   readonly staggerIndex?: number;
+  /** List view mode: use 16:9 aspect ratio instead of 1:1 */
+  readonly listMode?: boolean;
 }
 
 /** Badge label per tone */
@@ -64,8 +105,9 @@ const BADGE_LABEL: Record<BadgeTone, string> = {
   done: 'Selesai',
 };
 
-export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 }: V2EventCardProps) {
+export function V2EventCard({ event, onPress, history = false, staggerIndex = 0, listMode = false }: V2EventCardProps) {
   const reducedMotion = useReducedMotion();
+  const { isNative } = useResponsive();
   const hovered = useSharedValue(0);
   const staggerOpacity = useSharedValue(reducedMotion ? 1 : 0);
   const staggerTranslateY = useSharedValue(reducedMotion ? 0 : 20);
@@ -74,6 +116,12 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 
   const disabled = badge.disabled || history;
   const dateTxt = formatDateID(event.startsAt);
   const image = eventImage(event.id);
+
+  // Mobile vs Desktop sizing
+  const contentPadding = isNative ? MOBILE_CONTENT_PADDING : DESKTOP_CONTENT_PADDING;
+  const dateSize = isNative ? MOBILE_DATE_SIZE : DESKTOP_DATE_SIZE;
+  const titleSize = isNative ? MOBILE_TITLE_SIZE : DESKTOP_TITLE_SIZE;
+  const venueSize = isNative ? MOBILE_VENUE_SIZE : DESKTOP_VENUE_SIZE;
 
   // Stagger animation on mount (mobile: FadeInUp.delay(index * 100))
   useEffect(() => {
@@ -104,23 +152,33 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 
   );
 
   // Card hover: translateY(-8px) rotateX(2deg) + shadow
+  // Mobile: always has 4px 4px shadow (no hover transform, but press feedback)
   // Plus stagger animation for entry
+  // Note: Shadow properties are set in containerStyle for native to avoid NOBRIDGE errors
   const cardStyle = useAnimatedStyle(() => ({
     opacity: staggerOpacity.value,
-    transform: [
-      { translateY: interpolate(hovered.value, [0, 1], [staggerTranslateY.value, -8]) },
-      { perspective: 1000 },
-      { rotateX: `${interpolate(hovered.value, [0, 1], [0, 2])}deg` },
-    ],
-    // React Native shadow (approximating hard offset)
-    shadowColor: v2Colors.ink,
-    shadowOffset: {
-      width: interpolate(hovered.value, [0, 1], [0, v2Shadows.lg.x]),
-      height: interpolate(hovered.value, [0, 1], [0, v2Shadows.lg.y]),
-    },
-    shadowOpacity: interpolate(hovered.value, [0, 1], [0, 0.15]),
-    shadowRadius: 0,
-    elevation: interpolate(hovered.value, [0, 1], [0, 8]),
+    transform: isNative
+      ? [
+          // Mobile: press feedback (translate down on press)
+          { translateY: staggerTranslateY.value + interpolate(hovered.value, [0, 1], [0, 4]) },
+        ]
+      : [
+          // Desktop: hover lift
+          { translateY: interpolate(hovered.value, [0, 1], [staggerTranslateY.value, -8]) },
+          { perspective: 1000 },
+          { rotateX: `${interpolate(hovered.value, [0, 1], [0, 2])}deg` },
+        ],
+    // Web only: animate shadow (native shadow is static in containerStyle)
+    ...(isWeb ? {
+      shadowColor: v2Colors.ink,
+      shadowOffset: {
+        width: interpolate(hovered.value, [0, 1], [0, v2Shadows.lg.x]),
+        height: interpolate(hovered.value, [0, 1], [0, v2Shadows.lg.y]),
+      },
+      shadowOpacity: interpolate(hovered.value, [0, 1], [0, 0.15]),
+      shadowRadius: 0,
+      elevation: interpolate(hovered.value, [0, 1], [0, 8]),
+    } : {}),
     zIndex: hovered.value > 0.5 ? 10 : 0,
   }));
 
@@ -129,9 +187,15 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 
     transform: [{ scale: interpolate(hovered.value, [0, 1], [1, 1.05]) }],
   }));
 
-  // For native: grayscale overlay fades out on hover
+  // For native: grayscale effect via overlays
+  // Gray overlay fades out on press to reveal color
   const nativeGrayscaleStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(hovered.value, [0, 1], [0.7, 0]),
+    opacity: interpolate(hovered.value, [0, 1], [0.6, 0]),
+  }));
+
+  // Dark overlay for contrast (also fades out on press)
+  const nativeDarkOverlayStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(hovered.value, [0, 1], [0.25, 0]),
   }));
 
   // Badge slides in from left on hover (or always visible for certain states)
@@ -155,11 +219,25 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 
   const containerStyle: ViewStyle = {
     backgroundColor: v2Colors.ground,
     opacity: disabled ? 0.62 : 1,
-    borderWidth: 0, // Border comes from grid gap + ink background
+    // Mobile: explicit 2px solid border (prototype has border: var(--border))
+    // Desktop: border comes from grid gap + ink background
+    borderWidth: isNative ? v2Borders.standard : 0,
+    borderColor: isNative ? v2Colors.ink : undefined,
+    // Mobile: static shadow (4px 4px) to avoid NOBRIDGE errors with animated shadowOffset
+    ...(isNative ? {
+      shadowColor: v2Colors.ink,
+      shadowOffset: { width: 4, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 0,
+      elevation: 4,
+    } : {}),
   };
 
   const imageContainerStyle: ViewStyle = {
-    aspectRatio: 4 / 3,
+    // Mobile grid: square aspect ratio (1:1) for taller image
+    // Mobile list: 16:9 aspect ratio for shorter image
+    // Desktop: 4:3 aspect ratio
+    aspectRatio: isNative ? (listMode ? 16 / 9 : 1) : 4 / 3,
     overflow: 'hidden',
     position: 'relative',
   };
@@ -178,7 +256,11 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 
       };
 
   const contentStyle: ViewStyle = {
-    padding: v2SpacingSemantic.m,
+    padding: contentPadding,
+    // Mobile: fixed height content area for consistent card heights
+    // Date (16) + gap (4) + Title (2 lines * 16 * 1.3 = 42) + gap (8) + Venue (12) + gap (16) + Footer (~50) ≈ 148
+    minHeight: isNative ? 160 : undefined,
+    justifyContent: isNative ? 'space-between' : undefined,
   };
 
   const footerStyle: ViewStyle = {
@@ -186,9 +268,10 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: v2SpacingSemantic.s,
-    borderTopWidth: v2Borders.standard,
+    borderTopWidth: isNative ? 1 : v2Borders.standard, // Mobile: 1px, Desktop: 2px
+    borderStyle: isNative ? 'dashed' : 'solid', // Mobile: dashed, Desktop: solid
     borderTopColor: v2Colors.ink,
-    marginTop: v2SpacingSemantic.m,
+    marginTop: isNative ? v2SpacingSemantic.s : v2SpacingSemantic.m,
   };
 
   return (
@@ -216,22 +299,42 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 
             />
           </Animated.View>
 
-          {/* Native only: grayscale approximation overlay (fades out on hover) */}
+          {/* Native only: grayscale approximation via high-contrast gray overlay */}
+          {/* This desaturates colors by blending with gray - not perfect but works on RN */}
           {!isWeb && (
-            <Animated.View
-              pointerEvents="none"
-              style={[
-                {
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: '#808080',
-                },
-                nativeGrayscaleStyle,
-              ]}
-            />
+            <>
+              {/* Dark overlay to reduce color vibrancy */}
+              <Animated.View
+                pointerEvents="none"
+                style={[
+                  {
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: '#000000',
+                  },
+                  nativeDarkOverlayStyle,
+                ]}
+              />
+              {/* Gray overlay for desaturation effect */}
+              {/* NOTE: Using inkMuted (#666666) per Design Palette Guide - NO arbitrary grays */}
+              <Animated.View
+                pointerEvents="none"
+                style={[
+                  {
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: v2Colors.inkMuted, // #666666 - the only allowed gray
+                  },
+                  nativeGrayscaleStyle,
+                ]}
+              />
+            </>
           )}
 
           {/* Badge */}
@@ -239,11 +342,12 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 
             style={[
               {
                 position: 'absolute',
-                top: v2SpacingSemantic.s,
-                left: v2SpacingSemantic.s,
-                backgroundColor: badge.tone === 'soldout' ? v2Colors.danger : v2Colors.ink,
-                paddingHorizontal: 10,
-                paddingVertical: 4,
+                top: v2SpacingSemantic.xs,
+                left: v2SpacingSemantic.xs,
+                // Mobile: red bg (danger), Desktop: black bg (ink) unless soldout
+                backgroundColor: isNative ? v2Colors.danger : (badge.tone === 'soldout' ? v2Colors.danger : v2Colors.ink),
+                paddingHorizontal: isNative ? 8 : 10, // Mobile: 0.5rem = 8px
+                paddingVertical: isNative ? 4 : 4,    // Mobile: 0.25rem = 4px
               },
               badgeStyle,
             ]}
@@ -251,7 +355,7 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 
             <Text
               style={{
                 color: v2Colors.ground,
-                fontSize: 12,
+                fontSize: isNative ? MOBILE_BADGE_SIZE : 12, // Mobile: 10px
                 fontFamily: interFonts.bold, // weight 700
                 textTransform: 'uppercase',
                 letterSpacing: 0.48, // 0.04em
@@ -264,84 +368,134 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 
 
         {/* Content */}
         <View style={contentStyle}>
-          {/* Date */}
-          {dateTxt && (
-            <Text
-              style={{
-                color: v2Colors.inkMuted,
-                fontSize: 14,
-                fontFamily: interFonts.medium, // weight 500
-                marginBottom: 8,
-              }}
-            >
-              {dateTxt}
-            </Text>
-          )}
-
-          {/* Title */}
-          <Animated.Text
-            style={[
-              {
-                color: v2Colors.ink,
-                fontSize: 20,
-                fontFamily: interFonts.black, // weight 900 (prototype uses 800, closest is 900)
-                textTransform: 'uppercase',
-              },
-              titleStyle,
-            ]}
-            numberOfLines={2}
-          >
-            {event.name}
-          </Animated.Text>
-
-          {/* Venue */}
-          {event.venue && (
-            <Text
-              style={{
-                color: v2Colors.inkMuted,
-                fontSize: 14,
-                fontFamily: interFonts.regular, // weight 400
-                marginTop: 8,
-              }}
-              numberOfLines={1}
-            >
-              {event.venue}
-            </Text>
-          )}
-
-          {/* Footer: price + buy button */}
-          <View style={footerStyle}>
-            <Text
-              style={{
-                color: v2Colors.ink,
-                fontSize: 16,
-                fontFamily: interFonts.black, // weight 900 (prototype uses 800)
-              }}
-            >
-              {minorToIDR(event.minPriceMinor, { compact: true })}
-            </Text>
-
-            <View
-              style={{
-                backgroundColor: disabled ? v2Colors.inkMuted : v2Colors.ink,
-                borderWidth: v2Borders.standard,
-                borderColor: v2Colors.ink,
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-              }}
-            >
+          {/* Top section: date, title, venue */}
+          <View>
+            {/* Date: Mobile: 12px uppercase, Desktop: 14px */}
+            {dateTxt && (
               <Text
                 style={{
-                  color: v2Colors.ground,
-                  fontSize: 14,
-                  fontFamily: interFonts.bold, // weight 700
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.56,
+                  color: v2Colors.inkMuted,
+                  fontSize: dateSize,
+                  fontFamily: interFonts.medium, // weight 500
+                  textTransform: isNative ? 'uppercase' : 'none', // Mobile: uppercase
+                  letterSpacing: isNative ? 0.6 : 0, // Mobile: 0.05em at 12px
+                  marginBottom: isNative ? 4 : 8, // Mobile: 0.25rem = 4px
                 }}
               >
-                {disabled ? 'Habis' : 'Beli'}
+                {dateTxt}
+              </Text>
+            )}
+
+            {/* Title: Mobile: 16px weight 700 not-uppercase, Desktop: 20px weight 900 uppercase */}
+            <Animated.Text
+              style={[
+                {
+                  color: v2Colors.ink,
+                  fontSize: titleSize,
+                  fontFamily: isNative ? interFonts.bold : interFonts.black, // Mobile: 700, Desktop: 900
+                  textTransform: isNative ? 'none' : 'uppercase', // Mobile: NOT uppercase
+                  lineHeight: isNative ? titleSize * 1.3 : undefined, // Mobile: line-height 1.3
+                  // Mobile: fixed height for 2 lines to ensure consistent card height
+                  height: isNative ? titleSize * 1.3 * 2 : undefined,
+                },
+                !isNative && titleStyle, // Desktop: hover letter-spacing animation
+              ]}
+              numberOfLines={2}
+            >
+              {event.name}
+            </Animated.Text>
+
+            {/* Venue: Mobile: 12px with icon, Desktop: 14px text only */}
+            {event.venue && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: isNative ? 4 : 0, // Mobile: 0.25rem gap for icon
+                  marginTop: 8,
+                }}
+              >
+                {isNative && <MapPinIconSmall color={v2Colors.inkMuted} />}
+                <Text
+                  style={{
+                    color: v2Colors.inkMuted,
+                    fontSize: venueSize,
+                    fontFamily: interFonts.regular, // weight 400
+                  }}
+                  numberOfLines={1}
+                >
+                  {event.venue}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Footer: price + action */}
+          <View style={footerStyle}>
+            {/* Price: Mobile shows "Mulai dari" subtext */}
+            <View>
+              {isNative && (
+                <Text
+                  style={{
+                    color: v2Colors.inkMuted,
+                    fontSize: MOBILE_VENUE_SIZE,
+                    fontFamily: interFonts.regular,
+                  }}
+                >
+                  Mulai dari
+                </Text>
+              )}
+              <Text
+                style={{
+                  color: v2Colors.ink,
+                  fontSize: isNative ? 14 : 16,
+                  fontFamily: interFonts.bold, // Mobile: 700, Desktop: similar
+                }}
+              >
+                {minorToIDR(event.minPriceMinor, { compact: true })}
               </Text>
             </View>
+
+            {/* Action: Mobile: 32x32 icon button, Desktop: text button */}
+            {isNative ? (
+              // Mobile: 32x32 icon box
+              <View
+                style={{
+                  width: MOBILE_ACTION_SIZE,
+                  height: MOBILE_ACTION_SIZE,
+                  borderWidth: v2Borders.standard,
+                  borderColor: v2Colors.ink,
+                  backgroundColor: disabled ? v2Colors.inkMuted : v2Colors.ground,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ArrowRightIcon color={disabled ? v2Colors.ground : v2Colors.ink} />
+              </View>
+            ) : (
+              // Desktop: text button
+              <View
+                style={{
+                  backgroundColor: disabled ? v2Colors.inkMuted : v2Colors.ink,
+                  borderWidth: v2Borders.standard,
+                  borderColor: v2Colors.ink,
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                }}
+              >
+                <Text
+                  style={{
+                    color: v2Colors.ground,
+                    fontSize: 14,
+                    fontFamily: interFonts.bold, // weight 700
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.56,
+                  }}
+                >
+                  {disabled ? 'Habis' : 'Beli'}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </Pressable>

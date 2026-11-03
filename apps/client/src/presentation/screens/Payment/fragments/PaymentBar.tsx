@@ -44,11 +44,11 @@ export function PaymentBar({
           onPress={onPay}
           testID="pay-now"
           className="flex-row items-center gap-3 py-3.5 pl-6 pr-6"
-          style={{ backgroundColor: canPay ? v2.ground : "#444444" }}
+          style={{ backgroundColor: canPay ? v2.ground : v2.inkMuted }}
         >
           <Text
             className="text-md font-extrabold uppercase"
-            style={{ color: canPay ? v2.ink : "#999999", letterSpacing: 0.5 }}
+            style={{ color: canPay ? v2.ink : v2.ground, letterSpacing: 0.5 }}
           >
             {pending
               ? "Memproses…"

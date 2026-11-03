@@ -58,7 +58,7 @@ const trustStyles = StyleSheet.create({
   check: {
     fontFamily: interFonts.black,
     fontSize: v2FontSizes.s,
-    color: "#16a34a", // Success green
+    color: v2Colors.success, // #00aa00 per Design Palette Guide
     lineHeight: v2FontSizes.s * 1.5,
   },
   text: {
