@@ -1,7 +1,11 @@
 /** EventDetail styles — prototype event.html → RN StyleSheet (refactor rule). */
 import { StyleSheet, type DimensionValue } from "react-native";
 
-import { brand, neutral, status as statusTokens } from "@presentation/theme";
+import { brand, neutral, status as statusTokens, withAlpha } from "@presentation/theme";
+
+/** Dark-context accents from event.html (not modelled by the light token set). */
+const LIVE_DOT = "#ff3b4e"; //    live status dot
+const GAP_BADGE_TEXT = "#ffcf99"; // warn gap-badge text tint
 
 export const detailStyles = StyleSheet.create({
   // Root dark surface (prototype --ink) + aura glow.
@@ -26,7 +30,7 @@ export const detailStyles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: neutral.lineDark,
-    backgroundColor: "rgba(10,10,12,0.7)",
+    backgroundColor: withAlpha(neutral.ink, 0.7),
   },
   navBack: { fontSize: 13 },
 
@@ -36,7 +40,7 @@ export const detailStyles = StyleSheet.create({
 
   // Block (dark glass panel).
   block: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: withAlpha(neutral.card, 0.04),
     borderWidth: 1,
     borderColor: neutral.lineDark,
     borderRadius: 22,
@@ -52,11 +56,11 @@ export const detailStyles = StyleSheet.create({
     paddingVertical: 3,
     paddingHorizontal: 7,
     borderRadius: 999,
-    backgroundColor: "rgba(232,131,12,0.16)",
+    backgroundColor: withAlpha(statusTokens.warn, 0.16),
     borderWidth: 1,
-    borderColor: "rgba(232,131,12,0.3)",
+    borderColor: withAlpha(statusTokens.warn, 0.3),
   },
-  gapBadgeText: { fontSize: 8, letterSpacing: 1, color: "#ffcf99" },
+  gapBadgeText: { fontSize: 8, letterSpacing: 1, color: GAP_BADGE_TEXT },
 
   // Body text
   aboutText: { fontSize: 14, lineHeight: 24 },
@@ -64,7 +68,7 @@ export const detailStyles = StyleSheet.create({
   lineupRow: {
     paddingVertical: 13,
     paddingHorizontal: 15,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: withAlpha(neutral.card, 0.04),
     borderRadius: 14,
   },
   lineupText: { fontSize: 13 },
@@ -101,21 +105,21 @@ export const detailStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(10,10,12,0.55)",
+    backgroundColor: withAlpha(neutral.ink, 0.55),
   },
   heroPad: { padding: 20 },
   statusPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: withAlpha(neutral.card, 0.1),
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
+    borderColor: withAlpha(neutral.card, 0.18),
     borderRadius: 999,
     paddingVertical: 7,
     paddingHorizontal: 12,
   },
-  statusDot: { width: 7, height: 7, borderRadius: 999, backgroundColor: "#ff3b4e" },
+  statusDot: { width: 7, height: 7, borderRadius: 999, backgroundColor: LIVE_DOT },
   statusText: { fontSize: 11 },
   heroName: { fontSize: 30, lineHeight: 32, letterSpacing: -0.9, marginTop: 14, marginBottom: 8 },
   heroMeta: { fontSize: 13 },
@@ -124,7 +128,7 @@ export const detailStyles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: withAlpha(neutral.card, 0.2),
     borderRadius: 999,
   },
   chipText: { fontSize: 11 },
@@ -132,7 +136,7 @@ export const detailStyles = StyleSheet.create({
   // Buy box
   buyBox: {
     marginTop: 20,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: withAlpha(neutral.card, 0.05),
     borderWidth: 1,
     borderColor: neutral.lineDark,
     borderRadius: 22,
@@ -145,7 +149,7 @@ export const detailStyles = StyleSheet.create({
   factsRow: { flexDirection: "row", gap: 8 },
   fact: {
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: withAlpha(neutral.card, 0.04),
     borderWidth: 1,
     borderColor: neutral.lineDark,
     borderRadius: 13,
@@ -162,7 +166,7 @@ export const detailStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  ctaPinText: { fontSize: 14, color: "#fff" },
+  ctaPinText: { fontSize: 14, color: neutral.card },
   buyFine: { fontSize: 11, lineHeight: 17, marginTop: 13 },
 
   // TrustBox
@@ -182,7 +186,7 @@ export const detailStyles = StyleSheet.create({
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(23,163,74,0.2)",
+    backgroundColor: withAlpha(statusTokens.ok, 0.2),
   },
   trustCheck: { fontSize: 11, color: statusTokens.okDark },
   trustText: { fontSize: 12 },
@@ -197,7 +201,7 @@ export const detailCta = (disabled: boolean) => ({
   gap: 12,
   borderRadius: 999,
   paddingVertical: 16,
-  backgroundColor: "#fff",
+  backgroundColor: neutral.card,
   opacity: disabled ? 0.45 : 1,
 });
 

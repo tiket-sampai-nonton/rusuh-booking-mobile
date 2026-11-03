@@ -1,6 +1,8 @@
 /** Checkout screen styles — extracted from inline `style={{…}}` (refactor rule). */
 import { StyleSheet, type DimensionValue } from "react-native";
 
+import { neutral, withAlpha } from "@presentation/theme";
+
 export const checkoutStyles = StyleSheet.create({
   timerDot: { width: 8, height: 8, borderRadius: 999 },
   hero: {
@@ -8,7 +10,7 @@ export const checkoutStyles = StyleSheet.create({
     borderRadius: 24,
     overflow: "hidden",
     justifyContent: "flex-end",
-    backgroundColor: "#222",
+    backgroundColor: withAlpha(neutral.ink, 0.87),
   },
   heroScrim: {
     position: "absolute",
@@ -16,7 +18,7 @@ export const checkoutStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(10,10,12,0.4)",
+    backgroundColor: withAlpha(neutral.ink, 0.4),
   },
   heroPad: { padding: 22 },
 });
@@ -33,6 +35,6 @@ export const checkoutScrollContent = (isDesktop: boolean) => ({
 
 /** Dark sticky checkout bar — fixed ink bg + bottom safe-area inset. */
 export const checkoutBar = (bottom: number) => ({
-  backgroundColor: "#0a0a0c",
+  backgroundColor: neutral.ink,
   paddingBottom: bottom + 16,
 });

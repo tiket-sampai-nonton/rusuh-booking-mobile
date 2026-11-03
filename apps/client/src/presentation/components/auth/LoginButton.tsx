@@ -10,7 +10,7 @@ import React, { useCallback, useState } from "react";
 import { Pressable, Text } from "react-native";
 
 import { LoginModal } from "@presentation/components/auth/LoginModal";
-import { tokens } from "@presentation/theme/tokens";
+import { tokens, withAlpha } from "@presentation/theme";
 
 export interface LoginButtonProps {
   /** Optional style override for host-specific nav placement. */
@@ -36,7 +36,7 @@ export function LoginButton({
           borderColor: tokens.neutral.line,
           paddingVertical: 10,
           paddingHorizontal: 18,
-          backgroundColor: "rgba(10,10,12,0.05)",
+          backgroundColor: withAlpha(tokens.neutral.ink, 0.05),
         }}
       >
         <Text

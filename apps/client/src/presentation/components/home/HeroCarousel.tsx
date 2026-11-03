@@ -27,11 +27,24 @@ import Animated, {
 import type { EventSummary } from "@domain/repositories/event.repository";
 import { eventImage } from "@domain/rules/event-image";
 import { formatDateID } from "@domain/services/date-format";
-import { brand } from "@presentation/theme";
+import { brand, neutral, withAlpha } from "@presentation/theme";
 
 const EASE = Easing.bezier(0.32, 0.72, 0, 1);
 const SLIDE_MS = 4200;
 const FADE_MS = 1200;
+/** Prototype `--live` pulse-dot accent (a lightened brand red, not a core token). */
+const LIVE_DOT = "#ff3b4e";
+/** Prototype `.aura` red lobe (a lightened brand red, not a core token). */
+const AURA_RED = "#ff2d3f";
+/** Scrim gradient stops — the --ink token at the prototype's four opacities. */
+const SCRIM_STOPS = [
+  withAlpha(neutral.ink, 0.35),
+  withAlpha(neutral.ink, 0.2),
+  withAlpha(neutral.ink, 0.78),
+  withAlpha(neutral.ink, 0.96),
+] as const;
+/** Inactive dot fill — the --card (white) token at 28%. */
+const DOT_INACTIVE = withAlpha(neutral.card, 0.28);
 
 /** Absolute-fill (RN has no `inset` shorthand). */
 const FILL = { position: "absolute" as const, top: 0, left: 0, right: 0, bottom: 0 };
@@ -116,7 +129,7 @@ export function HeroCarousel({ events, onBook, onSeeAll, scrollY }: HeroCarousel
 
       {/* Scrim gradient (prototype .hero-scrim). */}
       <LinearGradient
-        colors={["rgba(10,10,12,0.35)", "rgba(10,10,12,0.2)", "rgba(10,10,12,0.78)", "rgba(10,10,12,0.96)"]}
+        colors={SCRIM_STOPS}
         locations={[0, 0.38, 0.82, 1]}
         style={FILL}
       />
@@ -240,13 +253,13 @@ function AuraGlow({ reduced }: { readonly reduced: boolean }) {
       style={[{ position: "absolute", top: "-25%", left: "-25%", right: "-25%", bottom: "-25%" }, style]}
     >
       <LinearGradient
-        colors={["#ff2d3f", "transparent"]}
+        colors={[AURA_RED, "transparent"]}
         start={{ x: 0.24, y: 0.32 }}
         end={{ x: 0.9, y: 1 }}
         style={FILL}
       />
       <LinearGradient
-        colors={["#ff5a2d", "transparent"]}
+        colors={[brand.ember, "transparent"]}
         start={{ x: 0.8, y: 0.26 }}
         end={{ x: 0.1, y: 1 }}
         style={[FILL, { opacity: 0.8 }]}
@@ -264,11 +277,11 @@ function PulseDot({ pulse }: { readonly pulse: SharedValue<number> }) {
     <View style={{ width: 7, height: 7, alignItems: "center", justifyContent: "center" }}>
       <Animated.View
         style={[
-          { position: "absolute", width: 7, height: 7, borderRadius: 999, backgroundColor: "#ff3b4e" },
+          { position: "absolute", width: 7, height: 7, borderRadius: 999, backgroundColor: LIVE_DOT },
           ring,
         ]}
       />
-      <View style={{ width: 7, height: 7, borderRadius: 999, backgroundColor: "#ff3b4e" }} />
+      <View style={{ width: 7, height: 7, borderRadius: 999, backgroundColor: LIVE_DOT }} />
     </View>
   );
 }
@@ -381,7 +394,7 @@ function Dot({ i, current }: { readonly i: number; readonly current: SharedValue
     const on = Math.round(current.value) === i;
     return {
       width: withTiming(on ? 26 : 8, { duration: 500, easing: EASE }),
-      backgroundColor: on ? brand.red : "rgba(255,255,255,0.28)",
+      backgroundColor: on ? brand.red : DOT_INACTIVE,
     };
   });
   return <Animated.View style={[{ height: 8, borderRadius: 999 }, style]} />;

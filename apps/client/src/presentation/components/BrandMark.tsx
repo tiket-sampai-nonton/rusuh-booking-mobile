@@ -6,7 +6,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Text, View } from "react-native";
 
-import { brand } from "@presentation/theme";
+import { brand, neutral } from "@presentation/theme";
 
 export interface BrandMarkProps {
   /** Wordmark color (defaults to ink for light surfaces). */
@@ -14,7 +14,7 @@ export interface BrandMarkProps {
   readonly testID?: string;
 }
 
-export function BrandMark({ color = "#0a0a0c", testID }: BrandMarkProps) {
+export function BrandMark({ color = neutral.ink, testID }: BrandMarkProps) {
   return (
     <View className="flex-row items-center gap-2" testID={testID}>
       <LinearGradient
@@ -23,7 +23,7 @@ export function BrandMark({ color = "#0a0a0c", testID }: BrandMarkProps) {
         end={{ x: 1, y: 1 }}
         style={{ width: 24, height: 24, borderRadius: 7, alignItems: "center", justifyContent: "center" }}
       >
-        <Text style={{ color: "#fff", fontSize: 12 }} accessibilityElementsHidden>
+        <Text style={{ color: neutral.card, fontSize: 12 }} accessibilityElementsHidden>
           ▶
         </Text>
       </LinearGradient>
