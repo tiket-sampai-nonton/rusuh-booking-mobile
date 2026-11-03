@@ -1,0 +1,43 @@
+RBT-091 — V2 Brutalist Mono: Waiting room (06-waiting, TERMINAL mono variant)
+Branch: feature/RBT-091-v2-waiting
+Date: 2026-11-03
+
+SCOPE
+  Re-skin the waiting room to the V2 prototype (.genesis/prototype/v2/06-waiting.html),
+  the ONE screen the prototype renders in the mono/terminal variant. STYLE ONLY —
+  style.ts retuned; index.tsx and display.ts untouched.
+
+CRITICAL — SERVER-AUTHORITATIVE LOGIC UNCHANGED (the key constraint)
+  The screen already drives everything from the server, and this change does NOT touch it:
+    - useQueuePolling (RBT-042): the single adaptive poller for position/zone/status.
+      NO Math.random, NO device clock — unlike the prototype's client-side simulation.
+    - useAutoClaim (RBT-044): claim fires only on ADMITTED (RBT-040 state machine).
+    - Zone banners carry icon + bold label (never color-only) — RBT-080 a11y preserved.
+    - PositionRing is a static render (no animation to suppress) — reduced-motion safe.
+  Only style.ts (palette + StyleSheet) changed. index.tsx/display.ts/interface.ts: NO diff.
+
+CHANGES
+  presentation/screens/Waiting/style.ts   dark cinematic palette -> V2 mono terminal:
+                                           pure black ground, white ink, HARD 3px borders
+                                           (v2Border.heavy), square corners (no radius),
+                                           JetBrains Mono (v2Font.mono), zone tints from v2Zone.
+                                           All inline rgba replaced by unified V2 tokens.
+
+PROTOTYPE FIDELITY (06-waiting mono variant)
+  - Black bg + white 3px-bordered card/pill/stats; JetBrains Mono throughout. (06 :root --black/--white, 3px, mono)
+  - Zone banners: white card, hard colored border, colored bold text + icon/label. (.zone.*)
+  - Ring + position + ETA + "people ahead" stats kept; values still server-driven.
+
+GATES
+  tsc --noEmit            : PASS (0 errors)
+  eslint (Waiting/)       : PASS (0 errors, 0 warnings)
+  jest WaitingRoom + waiting-display : PASS (29/29) — no regression (style-only change)
+
+COVERAGE (touched + screen files, scoped)
+  Waiting/style.ts   : stmts 100% / branch 100% / funcs 100% / lines 100%
+  Waiting/display.ts : 100% / 100% / 100% / 100%
+  Waiting/index.tsx  : stmts 100% / branch 90% / funcs 100% / lines 100%  [>=90% all four; untouched]
+
+NOTE
+  Pure style retune — no logic/testID change, so the existing suite fully re-validates behavior.
+  Screenshots (web/iOS/Android) deferred (host memory TIGHT ~3.9GB); gate evidence captured now.
