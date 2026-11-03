@@ -1,0 +1,39 @@
+RBT-089 — V2 Brutalist Mono: Browse screen (05-browse)
+Branch: feature/RBT-089-v2-browse
+Date: 2026-11-03
+
+SCOPE
+  Re-skin the Browse (filtered-results) screen to the V2 prototype
+  (.genesis/prototype/v2/05-browse.html), presentation-layer only. URL-param
+  data wiring (useLocalSearchParams genre/time/sort, filterEvents, router.replace,
+  testIDs) untouched. Domain/application/infrastructure untouched.
+
+CHANGES
+  presentation/screens/Browse/fragments/BrowseTopBar.tsx  restyle: brand bar -> brutalist bordered bar
+  presentation/screens/Browse/fragments/BrowseChips.tsx   restyle: pill chips -> hard-bordered square chips
+  presentation/screens/Browse/index.tsx                   restyle: inked tag + uppercase title + count
+  __tests__/.../BrowseScreen.test.tsx                      + cancel-refine test (covers onClose handler)
+
+PROTOTYPE FIDELITY
+  - Top bar: fixed white bar, 2px hard bottom border, uppercase wordmark, "← Beranda" back link. (05 .header)
+  - Page head: inked tag pill (● Hasil Filter) + uppercase "Event Terfilter" title + muted subtitle. (.page-head)
+  - Filter chips: hard-bordered SQUARE chips (Genre/Waktu/Urut), inked "⛃ Ubah Filter", bordered "↺ Reset Filter". (.filter-tag/.filter-controls)
+  - Result count: uppercase ink label ("N event ditemukan"). Grid via BrowseGrid (unchanged — cards carry their own V2 pass).
+  - Pure black/white, 2px borders, no shadow/rounding throughout.
+
+GATES
+  tsc --noEmit            : PASS (0 errors)
+  eslint (Browse/ + test) : PASS (0 errors, 0 warnings)
+  jest BrowseScreen + browse-fragments : PASS (15/15)
+
+COVERAGE (touched files, scoped)
+  Browse/index.tsx        : stmts 100% / branch 100% / funcs 100% / lines 100%
+  Browse/fragments/BrowseTopBar.tsx : 100% / 100% / 100% / 100%
+  Browse/fragments/BrowseChips.tsx  : 100% / 100% / 100% / 100%
+  All four metrics clear the >=90% bar (pure restyle; existing suites + one added
+  cancel-refine test fully exercise the changed files).
+
+NOTE
+  Pure presentation restyle — no new logic, no domain/contract change. Rendered
+  screenshots (web/iOS/Android) deferred (host memory TIGHT ~3.9GB); gate evidence
+  captured now, screenshots to batch under screenshots/ when a Metro/sim run is affordable.

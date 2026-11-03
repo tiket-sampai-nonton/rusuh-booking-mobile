@@ -24,6 +24,7 @@ import {
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
+import { v2 } from "@presentation/theme";
 
 import { BrowseChips } from "./fragments/BrowseChips";
 import { BrowseGrid } from "./fragments/BrowseGrid";
@@ -87,16 +88,32 @@ export function BrowseScreen() {
           contentContainerStyle={browseScrollContent(insets.bottom, isDesktop)}
           testID="browse-scroll"
         >
-          <Text
-            className="text-xs font-bold uppercase tracking-widest text-brand"
-            accessibilityRole="header"
+          {/* Brutalist inked tag + uppercase title (prototype 05 .page-head). */}
+          <View
+            style={{
+              alignSelf: "flex-start",
+              borderWidth: 2,
+              borderColor: v2.ink,
+              backgroundColor: v2.ink,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+            }}
           >
-            ● Hasil Filter
-          </Text>
-          <Text className="mt-2 text-2xl font-extrabold text-foreground">
+            <Text
+              accessibilityRole="header"
+              style={{ color: v2.ground, letterSpacing: 2 }}
+              className="text-2xs font-v2 font-bold uppercase"
+            >
+              ● Hasil Filter
+            </Text>
+          </View>
+          <Text
+            style={{ color: v2.ink, letterSpacing: -0.5, marginTop: 14 }}
+            className="text-3xl font-v2 font-black uppercase"
+          >
             Event Terfilter
           </Text>
-          <Text className="mt-1 text-sm text-muted-foreground">
+          <Text style={{ color: v2.muted, marginTop: 8 }} className="text-base font-v2">
             Menampilkan event mendatang sesuai filter yang kamu pilih.
           </Text>
 
@@ -110,7 +127,8 @@ export function BrowseScreen() {
           />
 
           <Text
-            className="mt-4 text-sm font-semibold text-muted-foreground"
+            style={{ color: v2.ink, letterSpacing: 1, marginTop: 18 }}
+            className="text-xs font-v2 font-bold uppercase"
             testID="browse-count"
           >
             {isLoading ? "Memuat…" : `${results.length} event ditemukan`}
