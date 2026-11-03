@@ -1,10 +1,27 @@
 /** History screen styles — extracted from inline style (refactor rule). */
 import { StyleSheet, type DimensionValue } from "react-native";
 
+import { v2, v2Border } from "@presentation/theme";
+
 const GAP = 22;
 
 export const historyStyles = StyleSheet.create({
   gridList: { marginTop: 20, gap: 22 },
+});
+
+/** V2 brutalist state cards — dashed empty box, hard-bordered error box. */
+export const historyStateStyles = StyleSheet.create({
+  emptyCard: {
+    borderWidth: v2Border.base,
+    borderStyle: "dashed",
+    borderColor: v2.ink,
+    backgroundColor: v2.ground,
+  },
+  errorCard: {
+    borderWidth: v2Border.base,
+    borderColor: v2.accent,
+    backgroundColor: v2.ground,
+  },
 });
 
 /** Top-bar padding depends on the safe-area inset (runtime factory). */

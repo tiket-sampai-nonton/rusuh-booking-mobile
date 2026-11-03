@@ -18,11 +18,12 @@ import { SectionHead } from "@presentation/components/home/SectionHead";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
+import { v2 } from "@presentation/theme";
 
 import { HistoryGrid } from "./fragments/HistoryGrid";
 import { HistoryEmpty, HistoryLoading } from "./fragments/HistoryStates";
 import { HistoryTopBar } from "./fragments/HistoryTopBar";
-import { historyScrollContent } from "./style";
+import { historyScrollContent, historyStateStyles } from "./style";
 
 export function HistoryScreen() {
   const router = useRouter();
@@ -32,10 +33,10 @@ export function HistoryScreen() {
 
   const history = data?.history ?? [];
 
-  // Past cards are disabled in EventCard (history mode), so this never fires;
-  // kept for the shared EventCard signature.
-  const goToEvent = (eventId: string): void =>
-    router.push(`/events/${eventId}` as Href);
+  // Past cards are disabled in EventCard (history mode) — the shared signature
+  // requires an onPress, but a history card never fires it, so this is a no-op
+  // by design (navigating to a closed event is intentionally unreachable here).
+  const noop = (): void => undefined;
   const goHome = (): void => router.push("/" as Href);
 
   return (
@@ -58,25 +59,22 @@ export function HistoryScreen() {
             <HistoryLoading />
           ) : isError ? (
             <View
-              className="mt-8 rounded-2xl border border-line p-6"
+              className="mt-8 p-6"
+              style={historyStateStyles.errorCard}
               testID="history-error"
               accessibilityLiveRegion="polite"
             >
-              <Text className="text-base font-bold text-error">
+              <Text className="text-base font-extrabold uppercase" style={{ color: v2.accent }}>
                 Gagal memuat event
               </Text>
-              <Text className="mt-1 text-sm text-muted-foreground">
+              <Text className="mt-1 text-sm" style={{ color: v2.gray }}>
                 {error?.message || "Terjadi kesalahan. Silakan coba lagi."}
               </Text>
             </View>
           ) : history.length === 0 ? (
             <HistoryEmpty />
           ) : (
-            <HistoryGrid
-              events={history}
-              onPress={goToEvent}
-              columns={gridColumns}
-            />
+            <HistoryGrid events={history} onPress={noop} columns={gridColumns} />
           )}
         </ScrollView>
       </View>
