@@ -106,6 +106,8 @@ export interface V2HeroCarouselProps {
   readonly events: readonly EventSummary[];
   readonly onBook: (eventId: string) => void;
   readonly onSeeAll: () => void;
+  /** Mobile Home prototype uses one static featured hero. */
+  readonly autoPlay?: boolean;
 }
 
 // ═══════════════════════════════════════
@@ -1055,12 +1057,12 @@ function ScrollIndicator() {
 // ═══════════════════════════════════════
 // MAIN COMPONENT (prototype .hero)
 // ═══════════════════════════════════════
-export function V2HeroCarousel({ events, onBook, onSeeAll }: V2HeroCarouselProps) {
+export function V2HeroCarousel({ events, onBook, onSeeAll, autoPlay = true }: V2HeroCarouselProps) {
   const reducedMotion = useReducedMotion();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [glitchIndex, setGlitchIndex] = useState<number | null>(null);
-  const top = events.slice(0, 3);
+  const top = events.slice(0, autoPlay ? 3 : 1);
   const zoom = useSharedValue(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { width: screenWidth, height: screenHeight, heroHeightVh, isNative } = useResponsive();
@@ -1100,7 +1102,7 @@ export function V2HeroCarousel({ events, onBook, onSeeAll }: V2HeroCarouselProps
 
   // Auto-advance slides (6s interval)
   useEffect(() => {
-    if (reducedMotion || top.length <= 1) return;
+    if (reducedMotion || !autoPlay || top.length <= 1) return;
     intervalRef.current = setInterval(() => {
       setCurrentIndex((prev) => {
         const next = (prev + 1) % top.length;
@@ -1116,7 +1118,7 @@ export function V2HeroCarousel({ events, onBook, onSeeAll }: V2HeroCarouselProps
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [reducedMotion, top.length]);
+  }, [autoPlay, reducedMotion, top.length]);
 
   const handleDotPress = (index: number) => {
     showSlide(index);

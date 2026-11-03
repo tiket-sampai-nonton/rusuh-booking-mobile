@@ -83,7 +83,8 @@ describe("EventDetailScreen", () => {
     // description
     expect(screen.getByText("Festival musik tahunan.")).toBeTruthy();
     expect(screen.getByText("Band A")).toBeTruthy();
-    expect(screen.getByText("Wajib membawa KTP.")).toBeTruthy();
+    // Terms are intentionally web-only; the v2 mobile prototype omits this section.
+    expect(screen.queryByText("Wajib membawa KTP.")).toBeNull();
     // categories + availability
     expect(screen.getByText("VIP")).toBeTruthy();
     expect(screen.getByText("Reguler")).toBeTruthy();

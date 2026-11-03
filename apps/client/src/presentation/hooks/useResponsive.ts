@@ -60,7 +60,7 @@ export function useResponsive(): Responsive {
       gridColumns: 1,
       detailTwoCol: false,
       headerHeight: v2Layout.headerHeightMobile,
-      heroHeightVh: 80, // Increased from 70 to 80 for taller mobile hero
+      heroHeightVh: 70,
       bottomBarHeight: v2Layout.bottomBarHeight,
       tapTarget: v2Layout.tapTarget,
     };

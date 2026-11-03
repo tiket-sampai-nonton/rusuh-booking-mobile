@@ -12,6 +12,7 @@
 import type { ReactNode } from "react";
 import { Animated, Platform, Pressable, Text, View } from "react-native";
 import Svg, { Line, Path, Polyline } from "react-native-svg";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { interFonts } from "@presentation/theme/fonts";
 import { v2Borders, v2Colors } from "@presentation/theme/v2-tokens";
@@ -59,11 +60,13 @@ export function V2Header({
   isScrolled = false,
 }: HeaderProps) {
   const isNative = Platform.OS !== "web";
+  const insets = useSafeAreaInsets();
 
   // Native: animate header background/border based on scroll
   const headerStyle = isNative
     ? [
         styles.header,
+        { paddingTop: insets.top + 8 },
         isScrolled && {
           backgroundColor: v2Colors.ground,
           borderBottomWidth: v2Borders.standard,

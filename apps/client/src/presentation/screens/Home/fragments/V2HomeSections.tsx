@@ -28,6 +28,7 @@ import { v2Colors, v2Borders, v2SpacingSemantic, interFonts } from '@presentatio
 
 import type { HomeSectionsProps } from '../interface';
 import { V2HomeFooter } from './V2HomeFooter';
+import { MobileStats } from './MobileStats';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CATEGORY DATA (prototype .categories-grid)
@@ -389,7 +390,7 @@ export function V2HomeSections({
           ═══════════════════════════════════════════════════════════════════════ */}
       <View
         style={{
-          backgroundColor: v2Colors.field, // prototype .events { background: var(--field) }
+          backgroundColor: isNative ? v2Colors.ground : v2Colors.field,
           paddingTop: v2SpacingSemantic.xl,
           paddingHorizontal: v2SpacingSemantic.m,
           paddingBottom: v2SpacingSemantic.xl,
@@ -453,7 +454,7 @@ export function V2HomeSections({
       {/* ═══════════════════════════════════════════════════════════════════════
           HISTORY SECTION (prototype .events with archive styling)
           ═══════════════════════════════════════════════════════════════════════ */}
-      {data.history.length > 0 && (
+      {!isNative && data.history.length > 0 && (
         <View
           style={{
             paddingTop: v2SpacingSemantic.xl,
@@ -479,7 +480,7 @@ export function V2HomeSections({
       {/* ═══════════════════════════════════════════════════════════════════════
           FOOTER (prototype .footer)
           ═══════════════════════════════════════════════════════════════════════ */}
-      <V2HomeFooter />
+      {isNative ? <MobileStats /> : <V2HomeFooter />}
     </View>
   );
 }

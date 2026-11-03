@@ -19,7 +19,7 @@ import { browseGridCell, browseGridRow, browseGridList } from '../style';
 
 const isNative = Platform.OS !== 'web';
 
-export function BrowseGrid({ events, onPress, columns = 1 }: BrowseGridProps) {
+export function BrowseGrid({ events, onPress, columns = 1, wishlistedIds = new Set(), onToggleWishlist }: BrowseGridProps) {
   const isListMode = columns <= 1;
   
   if (isListMode) {
@@ -27,7 +27,7 @@ export function BrowseGrid({ events, onPress, columns = 1 }: BrowseGridProps) {
       <View style={browseGridList(isNative)} testID="browse-grid">
         {events.map((ev, i) => (
           <V2Reveal key={ev.id} delay={i * 80}>
-            <V2EventCard event={ev} onPress={onPress} listMode />
+            <V2EventCard event={ev} onPress={onPress} listMode showWishlist={!isNative} wishlisted={wishlistedIds.has(ev.id)} onToggleWishlist={onToggleWishlist} />
           </V2Reveal>
         ))}
       </View>
@@ -39,7 +39,7 @@ export function BrowseGrid({ events, onPress, columns = 1 }: BrowseGridProps) {
       {events.map((ev, i) => (
         <View key={ev.id} style={browseGridCell(columns, isNative)}>
           <V2Reveal delay={i * 80}>
-            <V2EventCard event={ev} onPress={onPress} />
+            <V2EventCard event={ev} onPress={onPress} showWishlist wishlisted={wishlistedIds.has(ev.id)} onToggleWishlist={onToggleWishlist} />
           </V2Reveal>
         </View>
       ))}

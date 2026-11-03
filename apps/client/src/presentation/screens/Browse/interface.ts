@@ -23,4 +23,6 @@ export interface BrowseGridProps {
   readonly events: readonly EventSummary[];
   readonly onPress: (id: string) => void;
   readonly columns?: 1 | 2 | 3;
+  readonly wishlistedIds?: ReadonlySet<string>;
+  readonly onToggleWishlist?: (id: string) => void;
 }

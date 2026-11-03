@@ -30,6 +30,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Circle } from "react-native-svg";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { isAdmitted, isTerminal } from "@domain/state-machines/queue-state-machine";
 import { useAutoClaim } from "@presentation/hooks/useAutoClaim";
@@ -71,8 +72,9 @@ const ADMISSION_RATE_PER_MIN = 1400; // ~23/sec
 
 function Header() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
       <Pressable onPress={() => router.push("/" as Href)}>
         <Text style={styles.logo}>
           Rusuh<Text style={styles.logoAccent}>Tiket</Text>

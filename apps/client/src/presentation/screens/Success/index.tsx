@@ -22,6 +22,7 @@ import { ETicketCard } from "@presentation/components/ETicketCard";
 import { Seo } from "@presentation/components/Seo";
 import { useETicketShare } from "@presentation/hooks/useETicketShare";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
+import { useEventDetail } from "@presentation/hooks/useEventDetail";
 import { useSessionStore } from "@presentation/stores/session-store";
 import { v2, v2Border } from "@presentation/theme";
 
@@ -44,6 +45,8 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   const amountMinor = useSessionStore((s) => s.amountMinor);
   const buyerNikMasked = useSessionStore((s) => s.buyerNikMasked);
   const ticketCount = useSessionStore((s) => s.ticketCount);
+  const eventId = useSessionStore((s) => s.eventId);
+  const { data: event } = useEventDetail(eventId ?? "");
 
   // Re-verify authoritatively. verdict "failed" → the recovery screen; a
   // pending verdict stays on the processing state (the gate routes here on
@@ -95,9 +98,9 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
           <View className="mb-6 items-center">
             <View
               className="h-20 w-20 items-center justify-center rounded-full"
-              style={{ borderWidth: 3, borderColor: v2.success }}
+                style={{ borderWidth: 2, borderColor: v2.ground }}
             >
-              <Text className="text-3xl font-extrabold" style={{ color: v2.success }} accessibilityElementsHidden>
+              <Text className="text-3xl font-extrabold" style={{ color: v2.ground }} accessibilityElementsHidden>
                 ✓
               </Text>
             </View>
@@ -147,6 +150,10 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
                 bookingId={bookingId}
                 index={i}
                 total={count}
+                eventName={event?.name}
+                venue={event?.venue}
+                startsAt={event?.startsAt}
+                attendeeNikMasked={buyerNikMasked}
               />
             ))}
           </View>

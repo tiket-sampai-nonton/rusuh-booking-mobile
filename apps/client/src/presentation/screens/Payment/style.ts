@@ -20,8 +20,9 @@ export const paymentScrollContent = (isDesktop: boolean) => ({
   ...(isDesktop ? { maxWidth: 620, width: "100%" as DimensionValue, alignSelf: "center" as const } : {}),
 });
 
-/** V2 brutalist sticky checkout bar — black ground + bottom safe-area inset. */
+/** V2 mobile prototype sticky checkout bar — white ground + bottom safe-area inset. */
 export const paymentBar = (bottom: number) => ({
-  backgroundColor: v2.ink,
+  backgroundColor: v2.ground,
+  borderTopColor: v2.ink,
   paddingBottom: bottom + 16,
 });

@@ -14,7 +14,7 @@
  */
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { useMemo, useState, useRef } from 'react';
-import { Pressable, ScrollView, Text, View, Platform } from 'react-native';
+import { Pressable, ScrollView, Text, View, Platform, TextInput } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -52,6 +52,9 @@ import {
   browseSortSelect,
   browseLoadMore,
   browseLoadMoreBtn,
+  browseSearchBox,
+  browseSearchInput,
+  browseSearchBtn,
 } from './style';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -59,12 +62,11 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const CATEGORIES = [
-  { key: 'all', label: 'All Events' },
+  { key: 'all', label: 'All' },
   { key: 'concert', label: 'Concerts' },
   { key: 'festival', label: 'Festivals' },
-  { key: 'electronic', label: 'Electronic' },
-  { key: 'rock', label: 'Rock' },
-  { key: 'jazz', label: 'Jazz' },
+  { key: 'sports', label: 'Sports' },
+  { key: 'theater', label: 'Theater' },
 ] as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -105,6 +107,8 @@ export function BrowseScreen() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState(params.sort ?? 'date');
   const [loadMoreDisabled, setLoadMoreDisabled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(String(params.q ?? ''));
+  const [wishlist, setWishlist] = useState<ReadonlySet<string>>(new Set());
 
   // Hydrate filter from URL
   const genre = readGenre(params.genre);
@@ -129,8 +133,15 @@ export function BrowseScreen() {
       );
     }
 
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      filtered = filtered.filter((ev) =>
+        `${ev.name} ${ev.venue ?? ''}`.toLowerCase().includes(query),
+      );
+    }
+
     return filtered;
-  }, [allResults, activeCategory]);
+  }, [allResults, activeCategory, searchQuery]);
 
   const goToEvent = (eventId: string): void =>
     router.push(`/events/${eventId}` as Href);
@@ -160,12 +171,13 @@ export function BrowseScreen() {
           contentContainerStyle={browseScrollContent(insets.bottom, isDesktop)}
           onScroll={onScroll}
           scrollEventThrottle={16}
+          stickyHeaderIndices={isNative ? [1] : undefined}
           testID="browse-scroll"
         >
           {/* ═══════════════════════════════════════════════════════════════════
               HERO SECTION (prototype .hero)
               ═══════════════════════════════════════════════════════════════════ */}
-          <View style={[browseHero, { paddingTop: insets.top + 96 }]}>
+          <View style={[browseHero, { paddingTop: insets.top + 80 }]}>
             {/* Hero title with slide-up animation */}
             <View style={{ marginBottom: 24 }}>
               <Text
@@ -193,6 +205,28 @@ export function BrowseScreen() {
               >
                 Next Event
               </Text>
+            </View>
+            <View style={browseSearchBox}>
+              <TextInput
+                accessibilityLabel="Cari event"
+                placeholder="Search events..."
+                placeholderTextColor={v2Colors.inkMuted}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onSubmitEditing={() => undefined}
+                returnKeyType="search"
+                style={[browseSearchInput, { color: v2Colors.ground, fontFamily: interFonts.regular, fontSize: 14 }]}
+                testID="browse-search-input"
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Cari"
+                onPress={() => undefined}
+                style={browseSearchBtn}
+                testID="browse-search-button"
+              >
+                <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, textTransform: 'uppercase' }}>Search</Text>
+              </Pressable>
             </View>
           </View>
 
@@ -325,7 +359,7 @@ export function BrowseScreen() {
               </Text>
 
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
-                {/* Sort select */}
+                {/* The mobile prototype has no sort control; retain it only on web. */}
                 {Platform.OS === 'web' ? (
                   <View style={browseSortSelect}>
                     <select
@@ -348,19 +382,7 @@ export function BrowseScreen() {
                       ))}
                     </select>
                   </View>
-                ) : (
-                  <Pressable style={browseSortSelect}>
-                    <Text
-                      style={{
-                        color: v2Colors.ink,
-                        fontFamily: interFonts.medium,
-                        fontSize: 14,
-                      }}
-                    >
-                      Sort by Date ▼
-                    </Text>
-                  </Pressable>
-                )}
+                ) : null}
 
                 {/* View toggle (prototype .view-toggle) */}
                 <View style={browseViewToggle}>
@@ -405,11 +427,19 @@ export function BrowseScreen() {
                 events={results}
                 onPress={goToEvent}
                 columns={viewMode === 'list' ? 1 : (isNative ? 2 : gridColumns)}
+                wishlistedIds={wishlist}
+                onToggleWishlist={(id) => {
+                  setWishlist((current) => {
+                    const next = new Set(current);
+                    if (next.has(id)) next.delete(id); else next.add(id);
+                    return next;
+                  });
+                }}
               />
             )}
 
             {/* Load more button (prototype .load-more) */}
-            {results.length > 0 && (
+            {!isNative && results.length > 0 && (
               <View style={browseLoadMore}>
                 <Pressable
                   style={({ pressed }) => [
@@ -443,10 +473,11 @@ export function BrowseScreen() {
           showLinks={showNavLinks}
           links={[
             { label: 'Browse', onPress: () => {}, testID: 'nav-browse' },
-            { label: 'My Tickets', onPress: () => router.push('/history' as Href), testID: 'nav-tickets' },
+            { label: 'My Tickets', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
           ]}
           onCtaPress={() => {}}
           onLogoPress={goHome}
+          actions={[{ icon: 'heart', label: 'Wishlist', count: wishlist.size, testID: 'header-wishlist' }]}
         />
 
         {/* Bottom Navigation (native only, handled internally by V2BottomNav) */}
@@ -455,7 +486,7 @@ export function BrowseScreen() {
           onNavigate={(route) => {
             if (route === 'home') router.push('/' as Href);
             else if (route === 'browse') { /* already here */ }
-            else if (route === 'tickets') router.push('/history' as Href);
+            else if (route === 'tickets') router.push('/my-tickets' as Href);
             else if (route === 'profile') router.push('/profile' as Href);
           }}
         />
