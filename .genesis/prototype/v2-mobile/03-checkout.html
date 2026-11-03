@@ -1,564 +1,973 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Checkout — Rusuh Tiket</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Checkout — RUSUH TIKET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="design-tokens.css">
 <style>
 /*
-  ═══════════════════════════════════════════════════════════════════════════════
-  RUSUH TIKET — Mobile Checkout Screen
-  V2 Brutalist Mono Theme — Mobile App Optimized
-  ═══════════════════════════════════════════════════════════════════════════════
+  RUSUH TIKET — Checkout (Mobile)
+  V2 Brutalist Mono — Strict #000/#fff, 2px borders
 */
 
-.app {
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding-top: var(--safe-top);
-  padding-bottom: calc(100px + var(--safe-bottom));
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #fff;
+  color: #000;
+  margin: 0;
+  padding-bottom: 100px;
 }
 
-/* ═══════════════════════════════════════
-   HEADER with Timer
-   ═══════════════════════════════════════ */
-.header {
+/* Header */
+header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: var(--z-header);
-  background: var(--ground);
-  border-bottom: var(--border);
-  padding-top: var(--safe-top);
-}
-
-.header-top {
+  height: calc(56px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  background: #fff;
+  border-bottom: 2px solid #000;
+  z-index: 100;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: var(--space-s) var(--frame);
+  justify-content: space-between;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.back-btn {
+.header-back {
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--tap-target);
-  height: var(--tap-target);
-  border: var(--border);
-  background: var(--ground);
+  border: 2px solid #000;
+  background: #fff;
 }
 
-.back-btn:active {
-  background: var(--ink);
-  color: var(--ground);
-}
-
-.back-btn svg {
-  width: 20px;
-  height: 20px;
+.header-back:active {
+  background: #000;
+  color: #fff;
 }
 
 .header-title {
-  font-size: var(--text-m);
-  font-weight: 900;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.session-timer {
+.header-timer {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: var(--ink);
-  color: var(--ground);
-  font-family: var(--font-mono);
-  font-size: var(--text-s);
-  font-weight: 700;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #000;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.session-timer.warning {
-  background: var(--danger);
+.header-timer.warning {
+  background: #ff0000;
 }
 
-.session-timer svg {
-  width: 16px;
-  height: 16px;
+/* Main */
+main {
+  padding-top: calc(56px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 32px);
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
-/* Progress steps */
+/* Progress Steps */
 .progress-steps {
+  padding: 24px 16px;
+  border-bottom: 2px solid #000;
+  background: #f5f5f5;
+}
+
+.steps-container {
   display: flex;
-  padding: var(--space-s) var(--frame);
-  gap: 4px;
-  background: var(--field);
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.progress-line {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: #000;
+  opacity: 0.2;
+  transform: translateY(-50%);
 }
 
 .step {
-  flex: 1;
-  height: 4px;
-  background: var(--ink-muted);
-  opacity: 0.3;
-}
-
-.step.active,
-.step.completed {
-  background: var(--ink);
-  opacity: 1;
-}
-
-/* ═══════════════════════════════════════
-   MAIN CONTENT
-   ═══════════════════════════════════════ */
-.main {
-  padding: calc(var(--header-height) + 40px + var(--safe-top)) var(--frame) var(--space-m);
-}
-
-/* Sections */
-.section {
-  margin-bottom: var(--space-l);
-}
-
-.section-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-s);
-  margin-bottom: var(--space-m);
-  padding-bottom: var(--space-s);
-  border-bottom: var(--border);
+  gap: 8px;
+  position: relative;
+  z-index: 1;
 }
 
-.section-number {
-  width: 28px;
-  height: 28px;
-  background: var(--ink);
-  color: var(--ground);
+.step-number {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #000;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
   font-weight: 700;
-  font-size: var(--text-xs);
-  flex-shrink: 0;
+}
+
+.step.active .step-number,
+.step.completed .step-number {
+  background: #000;
+  color: #fff;
+}
+
+.step-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+}
+
+.step.active .step-label,
+.step.completed .step-label {
+  opacity: 1;
+}
+
+/* Checkout Content */
+.checkout-content {
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Sections */
+.checkout-section {
+  background: #fff;
+  border: 2px solid #000;
+}
+
+.section-header {
+  padding: 16px;
+  border-bottom: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .section-title {
-  font-size: var(--text-s);
-  font-weight: 900;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
 }
 
-/* Order summary card */
-.order-card {
-  border: var(--border);
-  margin-bottom: var(--space-l);
+.section-badge {
+  padding: 4px 8px;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.order-header {
+.section-body {
+  padding: 16px;
+}
+
+/* Order Summary */
+.order-item {
   display: flex;
-  align-items: center;
-  gap: var(--space-s);
-  padding: var(--space-s);
-  background: var(--field);
-  border-bottom: var(--border);
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed #000;
+  margin-bottom: 16px;
 }
 
-.order-thumb {
-  width: 48px;
-  height: 48px;
-  border: var(--border);
+.order-image {
+  width: 80px;
+  height: 80px;
+  border: 2px solid #000;
   overflow: hidden;
   flex-shrink: 0;
 }
 
-.order-thumb img {
+.order-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(100%);
-}
-
-.order-info h3 {
-  font-size: var(--text-s);
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.order-info p {
-  font-size: var(--text-xs);
-  color: var(--ink-muted);
 }
 
 .order-details {
-  padding: var(--space-s);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.order-row {
+.order-event {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.order-tier {
+  font-size: 12px;
+  color: #666;
+}
+
+.order-qty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 4px 8px;
+  background: #f5f5f5;
+  border: 1px solid #000;
+  display: inline-block;
+  width: fit-content;
+}
+
+.order-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.total-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: var(--space-xs) 0;
-  font-size: var(--text-s);
+  font-size: 14px;
 }
 
-.order-row:not(:last-child) {
-  border-bottom: var(--border-thin);
+.total-row.discount {
+  color: #000;
+  display: none;
 }
 
-.order-row.total {
-  font-weight: 900;
-  font-size: var(--text-m);
-  padding-top: var(--space-s);
-  margin-top: var(--space-xs);
-  border-top: var(--border);
+.total-row.discount.show {
+  display: flex;
 }
 
-/* Form fields */
-.form-group {
-  margin-bottom: var(--space-m);
-}
-
-.form-group label {
-  display: block;
-  font-size: var(--text-xs);
+.total-row.final {
+  padding-top: 16px;
+  border-top: 2px solid #000;
   font-weight: 700;
+  font-size: 18px;
+}
+
+.total-amount {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Form Fields */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: var(--space-xs);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
 }
 
-.form-group input,
-.form-group select {
+.form-label .required {
+  color: #ff0000;
+}
+
+.form-input {
   width: 100%;
-  min-height: var(--input-height);
-  padding: var(--input-padding-y) var(--input-padding-x);
-  border: var(--border);
-  background: var(--ground);
-  font-family: inherit;
-  font-size: var(--input-font-size);
-  transition: var(--transition-fast);
+  padding: 14px 16px;
+  border: 2px solid #000;
+  background: #fff;
+  font-size: 16px;
+  min-height: 48px;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-input:focus {
   outline: none;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 2px 2px 0 #000;
 }
 
-.form-group input.error {
-  border-color: var(--danger);
+.form-input.error {
+  border-color: #ff0000;
+}
+
+.form-input.valid {
+  border-color: #000;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-s);
+  gap: 16px;
 }
 
-.field-hint {
-  font-size: var(--text-xs);
-  color: var(--ink-muted);
+.error-message {
+  font-size: 12px;
+  color: #ff0000;
   margin-top: 4px;
+  display: none;
 }
 
-.field-error {
-  font-size: var(--text-xs);
-  color: var(--danger);
-  font-weight: 600;
-  margin-top: 4px;
+.error-message.show {
+  display: block;
 }
 
-/* Ticket holder cards */
-.holder-card {
-  border: var(--border);
-  padding: var(--space-s);
-  margin-bottom: var(--space-s);
-}
-
-.holder-header {
+/* Payment Methods */
+.payment-methods {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-s);
-  padding-bottom: var(--space-xs);
-  border-bottom: var(--border-thin);
+  flex-direction: column;
+  gap: 8px;
 }
 
-.holder-title {
-  font-size: var(--text-s);
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.holder-tier {
-  font-size: var(--text-xs);
-  color: var(--ink-muted);
-}
-
-/* Same as buyer checkbox */
-.checkbox-group {
+.payment-method {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
-  min-height: var(--tap-target);
+  gap: 16px;
+  padding: 16px;
+  border: 2px solid #000;
+  background: #fff;
+  min-height: 48px;
 }
 
-.checkbox-group input[type="checkbox"] {
+.payment-method:active {
+  background: #f5f5f5;
+}
+
+.payment-method.selected {
+  background: #000;
+  color: #fff;
+}
+
+.payment-radio {
   width: 20px;
   height: 20px;
-  accent-color: var(--ink);
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.checkbox-group label {
-  font-size: var(--text-s);
-  font-weight: 500;
-  margin: 0;
+.payment-method.selected .payment-radio::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
 }
 
-/* ═══════════════════════════════════════
-   STICKY FOOTER — CTA
-   ═══════════════════════════════════════ */
-.sticky-footer {
+.payment-icon {
+  width: 40px;
+  height: 24px;
+  border: 1px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.payment-info {
+  flex: 1;
+}
+
+.payment-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.payment-desc {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Card Details */
+.card-details {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #000;
+  display: none;
+}
+
+.card-details.show {
+  display: block;
+}
+
+/* Promo Code */
+.promo-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border: 1px dashed #000;
+  font-size: 14px;
+  min-height: 48px;
+}
+
+.promo-toggle:active {
+  background: #f5f5f5;
+}
+
+.promo-form {
+  display: none;
+  margin-top: 16px;
+}
+
+.promo-form.show {
+  display: flex;
+  gap: 8px;
+}
+
+.promo-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  text-transform: uppercase;
+  min-height: 48px;
+}
+
+.promo-input:focus {
+  outline: none;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.promo-btn {
+  padding: 12px 16px;
+  background: #000;
+  color: #fff;
+  border: 2px solid #000;
+  font-weight: 600;
+  font-size: 14px;
+  min-height: 48px;
+}
+
+.promo-btn:active {
+  background: #333;
+}
+
+.promo-applied {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: #000;
+  color: #fff;
+}
+
+.promo-applied.show {
+  display: flex;
+}
+
+.promo-code-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+}
+
+.promo-remove {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #000;
+  font-size: 18px;
+}
+
+.promo-remove:active {
+  background: #f5f5f5;
+}
+
+/* Bottom Bar */
+.bottom-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: var(--z-sticky);
-  background: var(--ground);
-  border-top: var(--border);
-  padding: var(--space-s) var(--frame);
-  padding-bottom: calc(var(--space-s) + var(--safe-bottom));
-}
-
-.footer-content {
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-top: 2px solid #000;
+  z-index: 100;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: var(--space-m);
+  gap: 16px;
 }
 
-.footer-total {
-  flex-shrink: 0;
-}
-
-.footer-total .label {
-  font-size: var(--text-xs);
-  color: var(--ink-muted);
-}
-
-.footer-total .value {
-  font-size: var(--text-l);
-  font-weight: 900;
-}
-
-.btn {
+.bottom-total {
   flex: 1;
+}
+
+.bottom-total-label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.bottom-total-amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.pay-btn {
+  flex: 1;
+  padding: 16px;
+  background: #000;
+  color: #fff;
+  border: 2px solid #000;
+  font-weight: 700;
+  font-size: 16px;
+  min-height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--tap-target-large);
-  padding: var(--space-s);
-  font-size: var(--text-s);
+  gap: 8px;
+}
+
+.pay-btn:active:not(:disabled) {
+  background: #333;
+}
+
+.pay-btn:disabled {
+  opacity: 0.3;
+}
+
+/* Processing Overlay */
+.processing-overlay {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.processing-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.processing-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #000;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.processing-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border: var(--border);
-  background: var(--ink);
-  color: var(--ground);
-  text-decoration: none;
-  transition: var(--transition-fast);
 }
 
-.btn:active {
-  transform: scale(0.97);
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 16px);
+  left: 16px;
+  right: 16px;
+  padding: 16px;
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  transform: translateY(100px);
+  opacity: 0;
+  z-index: 200;
 }
 
-.btn:disabled {
-  opacity: 0.5;
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }
 </style>
 </head>
 <body>
-<div class="app">
-  <!-- Header -->
-  <header class="header">
-    <div class="header-top">
-      <a href="07-ticket-selection.html" class="back-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-      </a>
-      <span class="header-title">Checkout</span>
-      <div class="session-timer" id="sessionTimer">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span id="timerDisplay">07:32</span>
-      </div>
-    </div>
-    <div class="progress-steps">
-      <div class="step completed"></div>
-      <div class="step completed"></div>
-      <div class="step active"></div>
-      <div class="step"></div>
-    </div>
-  </header>
 
-  <!-- Main -->
-  <main class="main">
-    <!-- Order Summary -->
-    <div class="order-card">
-      <div class="order-header">
-        <div class="order-thumb">
-          <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=200&q=80" alt="Dewa 19">
-        </div>
-        <div class="order-info">
-          <h3>Dewa 19</h3>
-          <p>15 Mar 2025 • Jakarta International Stadium</p>
-        </div>
-      </div>
-      <div class="order-details">
-        <div class="order-row">
-          <span>Tribune × 2</span>
-          <span>Rp 900.000</span>
-        </div>
-        <div class="order-row">
-          <span>Biaya layanan</span>
-          <span>Rp 20.000</span>
-        </div>
-        <div class="order-row total">
-          <span>Total</span>
-          <span>Rp 920.000</span>
-        </div>
-      </div>
-    </div>
+<!-- Header -->
+<header>
+  <a href="02-event-detail.html" class="header-back">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+  </a>
+  <span class="header-title">Checkout</span>
+  <div class="header-timer" id="timerBar">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12,6 12,12 16,14"/>
+    </svg>
+    <span id="timer">15:00</span>
+  </div>
+</header>
 
-    <!-- Buyer Information -->
-    <section class="section">
-      <div class="section-header">
-        <div class="section-number">1</div>
-        <h2 class="section-title">Data Pembeli</h2>
+<!-- Main -->
+<main>
+  <!-- Progress Steps -->
+  <div class="progress-steps">
+    <div class="steps-container">
+      <div class="progress-line"></div>
+      
+      <div class="step completed">
+        <div class="step-number">1</div>
+        <span class="step-label">Select</span>
       </div>
-      <div class="form-group">
-        <label for="buyerName">Nama Lengkap</label>
-        <input type="text" id="buyerName" placeholder="Sesuai KTP">
+      
+      <div class="step active">
+        <div class="step-number">2</div>
+        <span class="step-label">Details</span>
       </div>
-      <div class="form-group">
-        <label for="buyerEmail">Email</label>
-        <input type="email" id="buyerEmail" placeholder="email@contoh.com">
-        <span class="field-hint">E-ticket akan dikirim ke email ini</span>
+      
+      <div class="step">
+        <div class="step-number">3</div>
+        <span class="step-label">Payment</span>
       </div>
-      <div class="form-group">
-        <label for="buyerPhone">Nomor HP</label>
-        <input type="tel" id="buyerPhone" placeholder="08xxxxxxxxxx" inputmode="numeric">
+      
+      <div class="step">
+        <div class="step-number">4</div>
+        <span class="step-label">Done</span>
       </div>
-    </section>
-
-    <!-- Ticket Holders -->
-    <section class="section">
-      <div class="section-header">
-        <div class="section-number">2</div>
-        <h2 class="section-title">Data Pemegang Tiket</h2>
-      </div>
-
-      <!-- Holder 1 -->
-      <div class="holder-card">
-        <div class="holder-header">
-          <span class="holder-title">Tiket 1</span>
-          <span class="holder-tier">Tribune</span>
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="sameAsBuyer1" checked>
-          <label for="sameAsBuyer1">Sama dengan pembeli</label>
-        </div>
-        <div class="holder-fields" id="holder1Fields" style="display: none;">
-          <div class="form-group">
-            <label>Nama Lengkap</label>
-            <input type="text" placeholder="Sesuai KTP">
-          </div>
-          <div class="form-group">
-            <label>NIK</label>
-            <input type="text" placeholder="16 digit NIK" inputmode="numeric" maxlength="16">
-          </div>
-        </div>
-      </div>
-
-      <!-- Holder 2 -->
-      <div class="holder-card">
-        <div class="holder-header">
-          <span class="holder-title">Tiket 2</span>
-          <span class="holder-tier">Tribune</span>
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="sameAsBuyer2">
-          <label for="sameAsBuyer2">Sama dengan pembeli</label>
-        </div>
-        <div class="holder-fields" id="holder2Fields">
-          <div class="form-group">
-            <label>Nama Lengkap</label>
-            <input type="text" placeholder="Sesuai KTP">
-          </div>
-          <div class="form-group">
-            <label>NIK</label>
-            <input type="text" placeholder="16 digit NIK" inputmode="numeric" maxlength="16">
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Sticky Footer -->
-  <div class="sticky-footer">
-    <div class="footer-content">
-      <div class="footer-total">
-        <div class="label">Total</div>
-        <div class="value">Rp 920.000</div>
-      </div>
-      <a href="08-payment.html" class="btn">Bayar</a>
     </div>
   </div>
+  
+  <!-- Content -->
+  <div class="checkout-content">
+    <!-- Order Summary -->
+    <section class="checkout-section">
+      <div class="section-header">
+        <h2 class="section-title">Order Summary</h2>
+        <span class="section-badge">2 Tickets</span>
+      </div>
+      <div class="section-body">
+        <div class="order-item">
+          <div class="order-image">
+            <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=200&h=200&fit=crop" alt="Concert">
+          </div>
+          <div class="order-details">
+            <h3 class="order-event">Midnight Echoes World Tour 2025</h3>
+            <p class="order-tier">VIP Standing • Dec 28, 2025</p>
+            <span class="order-qty">× 2 tickets</span>
+          </div>
+        </div>
+        
+        <div class="order-totals">
+          <div class="total-row">
+            <span>Subtotal</span>
+            <span class="total-amount">Rp 3,800,000</span>
+          </div>
+          <div class="total-row">
+            <span>Service Fee</span>
+            <span class="total-amount">Rp 127,000</span>
+          </div>
+          <div class="total-row discount" id="discountRow">
+            <span>Discount</span>
+            <span class="total-amount" id="discountAmount">-Rp 0</span>
+          </div>
+          <div class="total-row final">
+            <span>Total</span>
+            <span class="total-amount" id="totalAmount">Rp 3,927,000</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Contact Info -->
+    <section class="checkout-section">
+      <div class="section-header">
+        <h2 class="section-title">Contact Info</h2>
+      </div>
+      <div class="section-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name <span class="required">*</span></label>
+            <input type="text" class="form-input" id="firstName" placeholder="John">
+            <span class="error-message">Required</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name <span class="required">*</span></label>
+            <input type="text" class="form-input" id="lastName" placeholder="Doe">
+            <span class="error-message">Required</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email <span class="required">*</span></label>
+          <input type="email" class="form-input" id="email" placeholder="john@example.com">
+          <span class="error-message">Invalid email</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone <span class="required">*</span></label>
+          <input type="tel" class="form-input" id="phone" placeholder="08123456789">
+          <span class="error-message">Invalid phone</span>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Payment Method -->
+    <section class="checkout-section">
+      <div class="section-header">
+        <h2 class="section-title">Payment</h2>
+      </div>
+      <div class="section-body">
+        <div class="payment-methods">
+          <div class="payment-method" data-method="cc">
+            <div class="payment-radio"></div>
+            <div class="payment-icon">CC</div>
+            <div class="payment-info">
+              <div class="payment-name">Credit Card</div>
+              <div class="payment-desc">Visa, Mastercard, JCB</div>
+            </div>
+          </div>
+          <div class="payment-method" data-method="va">
+            <div class="payment-radio"></div>
+            <div class="payment-icon">VA</div>
+            <div class="payment-info">
+              <div class="payment-name">Virtual Account</div>
+              <div class="payment-desc">BCA, Mandiri, BNI, BRI</div>
+            </div>
+          </div>
+          <div class="payment-method" data-method="qris">
+            <div class="payment-radio"></div>
+            <div class="payment-icon">QR</div>
+            <div class="payment-info">
+              <div class="payment-name">QRIS</div>
+              <div class="payment-desc">All e-wallets & banks</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Card Details -->
+        <div class="card-details" id="cardDetails">
+          <div class="form-group">
+            <label class="form-label">Card Number <span class="required">*</span></label>
+            <input type="text" class="form-input" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Expiry <span class="required">*</span></label>
+              <input type="text" class="form-input" id="cardExpiry" placeholder="MM/YY" maxlength="5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CVV <span class="required">*</span></label>
+              <input type="text" class="form-input" id="cardCvv" placeholder="123" maxlength="4">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Promo Code -->
+    <section class="checkout-section">
+      <div class="section-body">
+        <button class="promo-toggle" id="promoToggle">
+          <span>Have a promo code?</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="promo-form" id="promoForm">
+          <input type="text" class="promo-input" id="promoInput" placeholder="Enter code">
+          <button class="promo-btn" onclick="applyPromo()">Apply</button>
+        </div>
+        <div class="promo-applied" id="promoApplied">
+          <span class="promo-code-display" id="promoCodeDisplay">RUSUH20</span>
+          <button class="promo-remove" onclick="removePromo()">×</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Bottom Bar -->
+<div class="bottom-bar">
+  <div class="bottom-total">
+    <div class="bottom-total-label">Total</div>
+    <div class="bottom-total-amount" id="bottomTotal">Rp 3,927,000</div>
+  </div>
+  <button class="pay-btn" id="payBtn" disabled>
+    <span>Pay Now</span>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M5 12h14M12 5l7 7-7 7"/>
+    </svg>
+  </button>
 </div>
 
+<!-- Processing Overlay -->
+<div class="processing-overlay" id="processingOverlay">
+  <div class="processing-spinner"></div>
+  <div class="processing-text">Processing Payment</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
-// Session timer
-let sessionSeconds = 7 * 60 + 32;
-const timerEl = document.getElementById('sessionTimer');
-const timerDisplay = document.getElementById('timerDisplay');
+// Timer
+let timeLeft = 15 * 60;
+const timerEl = document.getElementById('timer');
+const timerBar = document.getElementById('timerBar');
 
 setInterval(() => {
-  sessionSeconds--;
-  const min = Math.floor(sessionSeconds / 60);
-  const sec = sessionSeconds % 60;
-  timerDisplay.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  timeLeft--;
+  const mins = Math.floor(timeLeft / 60);
+  const secs = timeLeft % 60;
+  timerEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
   
-  if (sessionSeconds <= 60) {
-    timerEl.classList.add('warning');
-  }
+  if (timeLeft <= 120) timerBar.classList.add('warning');
   
-  if (sessionSeconds <= 0) {
-    window.location.href = '09-expired.html';
+  if (timeLeft <= 0) {
+    location.href = '09-expired.html?reason=checkout';
   }
 }, 1000);
 
-// Toggle holder fields based on checkbox
-document.querySelectorAll('[id^="sameAsBuyer"]').forEach((checkbox, index) => {
-  const fieldsEl = document.getElementById(`holder${index + 1}Fields`);
-  
-  checkbox.addEventListener('change', () => {
-    fieldsEl.style.display = checkbox.checked ? 'none' : 'block';
+// Payment Method Selection
+const paymentMethods = document.querySelectorAll('.payment-method');
+const cardDetails = document.getElementById('cardDetails');
+let selectedPayment = null;
+
+paymentMethods.forEach(method => {
+  method.addEventListener('click', () => {
+    paymentMethods.forEach(m => m.classList.remove('selected'));
+    method.classList.add('selected');
+    selectedPayment = method.dataset.method;
+    
+    if (selectedPayment === 'cc') {
+      cardDetails.classList.add('show');
+    } else {
+      cardDetails.classList.remove('show');
+    }
+    
+    validateForm();
   });
-  
-  // Initial state
-  if (fieldsEl) {
-    fieldsEl.style.display = checkbox.checked ? 'none' : 'block';
-  }
 });
+
+// Form Validation
+const firstName = document.getElementById('firstName');
+const lastName = document.getElementById('lastName');
+const email = document.getElementById('email');
+const phone = document.getElementById('phone');
+const payBtn = document.getElementById('payBtn');
+
+[firstName, lastName, email, phone].forEach(input => {
+  input.addEventListener('input', validateForm);
+});
+
+function validateForm() {
+  const isValid = firstName.value.trim() && 
+                  lastName.value.trim() && 
+                  email.value.includes('@') && 
+                  phone.value.length >= 10 &&
+                  selectedPayment;
+  
+  payBtn.disabled = !isValid;
+}
+
+// Promo Toggle
+const promoToggle = document.getElementById('promoToggle');
+const promoForm = document.getElementById('promoForm');
+const promoApplied = document.getElementById('promoApplied');
+const promoInput = document.getElementById('promoInput');
+const discountRow = document.getElementById('discountRow');
+const discountAmount = document.getElementById('discountAmount');
+const totalAmount = document.getElementById('totalAmount');
+const bottomTotal = document.getElementById('bottomTotal');
+
+promoToggle.addEventListener('click', () => {
+  promoForm.classList.toggle('show');
+});
+
+function applyPromo() {
+  const code = promoInput.value.trim().toUpperCase();
+  if (code === 'RUSUH20') {
+    promoForm.classList.remove('show');
+    promoApplied.classList.add('show');
+    document.getElementById('promoCodeDisplay').textContent = code;
+    discountRow.classList.add('show');
+    discountAmount.textContent = '-Rp 785,400';
+    totalAmount.textContent = 'Rp 3,141,600';
+    bottomTotal.textContent = 'Rp 3,141,600';
+    showToast('Promo applied!');
+  } else {
+    showToast('Invalid promo code');
+  }
+}
+
+function removePromo() {
+  promoApplied.classList.remove('show');
+  promoForm.classList.add('show');
+  promoInput.value = '';
+  discountRow.classList.remove('show');
+  totalAmount.textContent = 'Rp 3,927,000';
+  bottomTotal.textContent = 'Rp 3,927,000';
+}
+
+// Pay Button
+const processingOverlay = document.getElementById('processingOverlay');
+
+payBtn.addEventListener('click', () => {
+  processingOverlay.classList.add('show');
+  setTimeout(() => {
+    location.href = '08a-snap.html';
+  }, 2000);
+});
+
+// Toast
+const toast = document.getElementById('toast');
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
 </script>
 </body>
 </html>

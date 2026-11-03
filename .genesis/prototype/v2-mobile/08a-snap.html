@@ -1,281 +1,503 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>Midtrans SNAP — Rusuh Tiket</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>SNAP Payment — RUSUH TIKET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="design-tokens.css">
 <style>
 /*
-  ═══════════════════════════════════════════════════════════════════════════════
-  RUSUH TIKET — Mobile SNAP Payment Screen (Simulated)
-  V2 Brutalist Mono Theme — Mobile App Optimized
-  
-  Note: This is a simulation of the Midtrans SNAP experience.
-  In production, this would be an embedded WebView/iframe from Midtrans.
-  ═══════════════════════════════════════════════════════════════════════════════
+  RUSUH TIKET — SNAP Payment Gateway (Mobile)
+  V2 Brutalist Mono — Strict #000/#fff, 2px borders
 */
 
-body {
-  background: #f5f5f5;
-}
+* { box-sizing: border-box; }
 
-.app {
+body {
+  font-family: 'Inter', sans-serif;
+  background: #fff;
+  color: #000;
+  margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: var(--safe-top) 0 var(--safe-bottom);
 }
 
-/* ═══════════════════════════════════════
-   SNAP HEADER (Simulated Midtrans)
-   ═══════════════════════════════════════ */
-.snap-header {
+/* Header */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(56px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
   background: #fff;
-  padding: var(--space-s) var(--frame);
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 2px solid #000;
+  z-index: 100;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.header-back {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #000;
+  background: #fff;
+}
+
+.header-back:active {
+  background: #000;
+  color: #fff;
+}
+
+.header-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.header-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #000;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.header-timer.warning {
+  background: #ff0000;
+}
+
+/* Main */
+main {
+  padding-top: calc(56px + env(safe-area-inset-top, 0px));
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.snap-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+}
+
+/* SNAP Header */
+.snap-header {
+  text-align: center;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #000;
 }
 
 .snap-logo {
-  font-size: var(--text-s);
-  font-weight: 700;
-  color: #0070ba;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
 }
 
-.snap-merchant {
-  font-size: var(--text-xs);
+.snap-subtitle {
+  font-size: 14px;
   color: #666;
 }
 
-/* ═══════════════════════════════════════
-   ORDER SUMMARY BANNER
-   ═══════════════════════════════════════ */
-.order-banner {
-  background: #fff;
-  padding: var(--space-m) var(--frame);
-  border-bottom: 1px solid #e0e0e0;
-  text-align: center;
+/* Order Card */
+.order-card {
+  border: 2px solid #000;
+  margin: 24px 0;
 }
 
-.order-amount {
-  font-size: var(--text-2xl);
-  font-weight: 900;
+.order-card-header {
+  padding: 12px 16px;
+  border-bottom: 2px solid #000;
+  background: #f5f5f5;
+}
+
+.order-card-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.order-card-body {
+  padding: 16px;
+}
+
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.order-row:not(:last-child) {
+  border-bottom: 1px dashed #000;
+}
+
+.order-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.order-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.order-total {
+  padding-top: 16px;
+  margin-top: 8px;
+  border-top: 2px solid #000;
+}
+
+.order-total .order-label {
+  font-weight: 700;
   color: #000;
 }
 
-.order-merchant {
-  font-size: var(--text-s);
-  color: #666;
-  margin-top: 4px;
+.order-total .order-value {
+  font-size: 18px;
 }
 
-/* ═══════════════════════════════════════
-   PAYMENT METHODS LIST
-   ═══════════════════════════════════════ */
-.snap-content {
-  padding: var(--space-m) var(--frame);
+/* Payment Methods */
+.payment-methods {
+  margin: 24px 0;
 }
 
-.snap-section-title {
-  font-size: var(--text-xs);
+.methods-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
   font-weight: 700;
-  color: #666;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: var(--space-s);
+  margin-bottom: 16px;
 }
 
-.payment-list {
+.method-tabs {
+  display: flex;
+  border: 2px solid #000;
+  margin-bottom: 16px;
+}
+
+.method-tab {
+  flex: 1;
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
   background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #e0e0e0;
+  border: none;
+  min-height: 48px;
 }
 
-.payment-item {
+.method-tab:not(:last-child) {
+  border-right: 2px solid #000;
+}
+
+.method-tab.active {
+  background: #000;
+  color: #fff;
+}
+
+.method-content {
+  display: none;
+}
+
+.method-content.active {
+  display: block;
+}
+
+/* Bank List */
+.bank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bank-item {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
-  padding: var(--space-s) var(--frame);
-  border-bottom: 1px solid #f0f0f0;
-  min-height: var(--tap-target-large);
-  transition: background 0.2s;
+  gap: 16px;
+  padding: 16px;
+  border: 2px solid #000;
+  background: #fff;
+  min-height: 48px;
 }
 
-.payment-item:last-child {
-  border-bottom: none;
-}
-
-.payment-item:active {
+.bank-item:active {
   background: #f5f5f5;
 }
 
-.payment-item.selected {
-  background: #e8f4fd;
+.bank-item.selected {
+  background: #000;
+  color: #fff;
 }
 
-.payment-icon-wrapper {
-  width: 40px;
-  height: 28px;
-  background: #f5f5f5;
-  border-radius: 4px;
+.bank-radio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.payment-icon {
-  font-size: var(--text-xs);
+.bank-item.selected .bank-radio::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.bank-icon {
+  width: 40px;
+  height: 28px;
+  border: 1px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
   font-weight: 700;
-  color: #333;
 }
 
-.payment-details {
-  flex: 1;
-}
+.bank-info { flex: 1; }
 
-.payment-name {
-  font-size: var(--text-s);
+.bank-name {
   font-weight: 600;
-  color: #000;
+  font-size: 14px;
 }
 
-.payment-desc {
-  font-size: var(--text-xs);
-  color: #888;
+.bank-desc {
+  font-size: 12px;
+  opacity: 0.7;
 }
 
-.payment-arrow {
-  width: 20px;
-  height: 20px;
-  color: #ccc;
-}
-
-/* ═══════════════════════════════════════
-   EXPANDED PAYMENT - E-Wallet
-   ═══════════════════════════════════════ */
-.ewallet-expanded {
+/* VA Details */
+.va-details {
+  margin-top: 24px;
+  padding: 24px;
+  border: 2px solid #000;
+  background: #f5f5f5;
+  text-align: center;
   display: none;
-  padding: var(--space-s) var(--frame);
-  background: #fafafa;
-  border-bottom: 1px solid #f0f0f0;
 }
 
-.ewallet-expanded.show {
+.va-details.show {
   display: block;
 }
 
-.ewallet-options {
+.va-label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.va-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+
+.va-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 2px solid #000;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 44px;
+}
+
+.va-copy:active {
+  background: #000;
+  color: #fff;
+}
+
+.va-copy.copied {
+  background: #000;
+  color: #fff;
+}
+
+.va-instructions {
+  margin-top: 24px;
+  text-align: left;
+  padding: 16px;
+  background: #fff;
+  border: 2px solid #000;
+}
+
+.va-instructions-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.va-instructions ol {
+  font-size: 12px;
+  color: #666;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.va-instructions li {
+  margin-bottom: 4px;
+}
+
+/* E-Wallet List */
+.ewallet-list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-s);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
 }
 
 .ewallet-item {
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: var(--space-s);
-  text-align: center;
-  min-height: var(--tap-target-large);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  transition: all 0.2s;
+  gap: 8px;
+  padding: 24px;
+  border: 2px solid #000;
+  background: #fff;
+  min-height: 80px;
 }
 
 .ewallet-item:active {
-  border-color: #0070ba;
-  background: #e8f4fd;
+  background: #f5f5f5;
 }
 
 .ewallet-item.selected {
-  border-color: #0070ba;
-  border-width: 2px;
-  background: #e8f4fd;
-}
-
-.ewallet-item .icon {
-  font-size: var(--text-m);
-  font-weight: 700;
-}
-
-.ewallet-item .name {
-  font-size: var(--text-xs);
-  color: #333;
-}
-
-/* ═══════════════════════════════════════
-   PAY BUTTON
-   ═══════════════════════════════════════ */
-.snap-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #fff;
-  padding: var(--space-s) var(--frame);
-  padding-bottom: calc(var(--space-s) + var(--safe-bottom));
-  border-top: 1px solid #e0e0e0;
-}
-
-.snap-pay-btn {
-  width: 100%;
-  min-height: var(--tap-target-large);
-  background: #0070ba;
+  background: #000;
   color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: var(--text-m);
+}
+
+.ewallet-icon {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.ewallet-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* QR Container */
+.qr-container {
+  margin-top: 24px;
+  text-align: center;
+  display: none;
+}
+
+.qr-container.show {
+  display: block;
+}
+
+.qr-code {
+  width: 180px;
+  height: 180px;
+  border: 2px solid #000;
+  background: #000;
+  margin: 0 auto 16px;
+  padding: 16px;
+}
+
+.qr-code svg {
+  width: 100%;
+  height: 100%;
+}
+
+.qr-text {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Pay Section */
+.pay-section {
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.pay-btn {
+  width: 100%;
+  padding: 16px;
+  background: #000;
+  color: #fff;
+  border: 2px solid #000;
   font-weight: 700;
-  transition: background 0.2s;
+  font-size: 16px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.snap-pay-btn:active {
-  background: #005a96;
+.pay-btn:active:not(:disabled) {
+  background: #fff;
+  color: #000;
 }
 
-.snap-pay-btn:disabled {
-  background: #ccc;
+.pay-btn:disabled {
+  opacity: 0.3;
 }
 
-/* ═══════════════════════════════════════
-   PROCESSING STATE
-   ═══════════════════════════════════════ */
+/* Processing Overlay */
 .processing-overlay {
   position: fixed;
   inset: 0;
-  z-index: 100;
-  background: rgba(255,255,255,0.95);
-  display: none;
+  background: #fff;
+  z-index: 1000;
+  display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  text-align: center;
-  padding: var(--frame);
+  justify-content: center;
+  gap: 24px;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .processing-overlay.show {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
 }
 
 .processing-spinner {
-  width: 60px;
-  height: 60px;
-  border: 4px solid #e0e0e0;
-  border-top-color: #0070ba;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: var(--space-m);
+  width: 48px;
+  height: 48px;
+  border: 3px solid #000;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -283,177 +505,285 @@ body {
 }
 
 .processing-text {
-  font-size: var(--text-m);
-  font-weight: 600;
-  color: #333;
-  margin-bottom: var(--space-xs);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
-.processing-subtext {
-  font-size: var(--text-s);
-  color: #666;
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  left: 16px;
+  right: 16px;
+  padding: 16px;
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  transform: translateY(100px);
+  opacity: 0;
+  z-index: 200;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }
 </style>
 </head>
 <body>
-<div class="app">
-  <!-- SNAP Header -->
-  <header class="snap-header">
-    <div class="snap-logo">Midtrans</div>
-    <div class="snap-merchant">rusuhtiket.com</div>
-  </header>
 
-  <!-- Order Banner -->
-  <div class="order-banner">
-    <div class="order-amount">Rp 920.000</div>
-    <div class="order-merchant">Rusuh Tiket — Dewa 19 Tribune × 2</div>
+<header>
+  <a href="08-payment.html" class="header-back">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+  </a>
+  <span class="header-title">SNAP Payment</span>
+  <div class="header-timer" id="timerBar">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12,6 12,12 16,14"/>
+    </svg>
+    <span id="timer">15:00</span>
   </div>
+</header>
 
-  <!-- Payment Methods -->
-  <div class="snap-content">
-    <h2 class="snap-section-title">Pilih Metode Pembayaran</h2>
+<main>
+  <div class="snap-container">
+    <div class="snap-header">
+      <div class="snap-logo">SNAP</div>
+      <div class="snap-subtitle">Secure Payment Gateway</div>
+    </div>
     
-    <div class="payment-list">
-      <!-- E-Wallet -->
-      <div class="payment-item selected" id="ewalletToggle">
-        <div class="payment-icon-wrapper">
-          <span class="payment-icon">💳</span>
-        </div>
-        <div class="payment-details">
-          <div class="payment-name">E-Wallet</div>
-          <div class="payment-desc">GoPay, OVO, DANA, ShopeePay</div>
-        </div>
-        <svg class="payment-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
+    <div class="order-card">
+      <div class="order-card-header">
+        <div class="order-card-title">Order Details</div>
       </div>
-      
-      <!-- E-Wallet Options -->
-      <div class="ewallet-expanded show" id="ewalletExpanded">
-        <div class="ewallet-options">
-          <button class="ewallet-item selected" data-wallet="gopay">
-            <span class="icon">G</span>
-            <span class="name">GoPay</span>
-          </button>
-          <button class="ewallet-item" data-wallet="ovo">
-            <span class="icon">O</span>
-            <span class="name">OVO</span>
-          </button>
-          <button class="ewallet-item" data-wallet="dana">
-            <span class="icon">D</span>
-            <span class="name">DANA</span>
-          </button>
-          <button class="ewallet-item" data-wallet="shopeepay">
-            <span class="icon">S</span>
-            <span class="name">ShopeePay</span>
-          </button>
-          <button class="ewallet-item" data-wallet="linkaja">
-            <span class="icon">L</span>
-            <span class="name">LinkAja</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Virtual Account -->
-      <div class="payment-item" data-method="va">
-        <div class="payment-icon-wrapper">
-          <span class="payment-icon">🏦</span>
-        </div>
-        <div class="payment-details">
-          <div class="payment-name">Bank Transfer</div>
-          <div class="payment-desc">Virtual Account BCA, BNI, Mandiri</div>
-        </div>
-        <svg class="payment-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </div>
-
-      <!-- Credit Card -->
-      <div class="payment-item" data-method="cc">
-        <div class="payment-icon-wrapper">
-          <span class="payment-icon">💳</span>
-        </div>
-        <div class="payment-details">
-          <div class="payment-name">Kartu Kredit/Debit</div>
-          <div class="payment-desc">Visa, Mastercard, JCB, AMEX</div>
-        </div>
-        <svg class="payment-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </div>
-
-      <!-- Convenience Store -->
-      <div class="payment-item" data-method="cstore">
-        <div class="payment-icon-wrapper">
-          <span class="payment-icon">🏪</span>
-        </div>
-        <div class="payment-details">
-          <div class="payment-name">Convenience Store</div>
-          <div class="payment-desc">Indomaret, Alfamart</div>
-        </div>
-        <svg class="payment-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
+      <div class="order-card-body">
+        <div class="order-row"><span class="order-label">Merchant</span><span class="order-value">RUSUH TIKET</span></div>
+        <div class="order-row"><span class="order-label">Order ID</span><span class="order-value">#RSH-847291</span></div>
+        <div class="order-row"><span class="order-label">Item</span><span class="order-value">VIP × 2</span></div>
+        <div class="order-row order-total"><span class="order-label">Total</span><span class="order-value">Rp 3,927,000</span></div>
       </div>
     </div>
+    
+    <div class="payment-methods">
+      <div class="methods-title">Payment Method</div>
+      <div class="method-tabs">
+        <button class="method-tab active" data-tab="va">Bank Transfer</button>
+        <button class="method-tab" data-tab="ewallet">E-Wallet</button>
+      </div>
+      
+      <div class="method-content active" id="va">
+        <div class="bank-list">
+          <button class="bank-item" data-bank="bca">
+            <div class="bank-radio"></div>
+            <div class="bank-icon">BCA</div>
+            <div class="bank-info"><div class="bank-name">BCA Virtual Account</div><div class="bank-desc">Transfer via ATM, m-BCA, or KlikBCA</div></div>
+          </button>
+          <button class="bank-item" data-bank="mandiri">
+            <div class="bank-radio"></div>
+            <div class="bank-icon">MDR</div>
+            <div class="bank-info"><div class="bank-name">Mandiri Virtual Account</div><div class="bank-desc">Transfer via ATM or Livin' by Mandiri</div></div>
+          </button>
+          <button class="bank-item" data-bank="bni">
+            <div class="bank-radio"></div>
+            <div class="bank-icon">BNI</div>
+            <div class="bank-info"><div class="bank-name">BNI Virtual Account</div><div class="bank-desc">Transfer via ATM or BNI Mobile</div></div>
+          </button>
+          <button class="bank-item" data-bank="bri">
+            <div class="bank-radio"></div>
+            <div class="bank-icon">BRI</div>
+            <div class="bank-info"><div class="bank-name">BRI Virtual Account</div><div class="bank-desc">Transfer via ATM or BRImo</div></div>
+          </button>
+        </div>
+        
+        <div class="va-details" id="vaDetails">
+          <div class="va-label">Virtual Account Number</div>
+          <div class="va-number" id="vaNumber">8277 0847 2910 0001</div>
+          <button class="va-copy" onclick="copyVA()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
+          <div class="va-instructions">
+            <div class="va-instructions-title">How to Pay</div>
+            <ol>
+              <li>Open your mobile banking app</li>
+              <li>Select Transfer → Virtual Account</li>
+              <li>Enter the VA number above</li>
+              <li>Verify amount and confirm</li>
+              <li>Payment will be verified automatically</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      
+      <div class="method-content" id="ewallet">
+        <div class="ewallet-list">
+          <button class="ewallet-item" data-wallet="gopay"><div class="ewallet-icon">GP</div><div class="ewallet-name">GoPay</div></button>
+          <button class="ewallet-item" data-wallet="ovo"><div class="ewallet-icon">OVO</div><div class="ewallet-name">OVO</div></button>
+          <button class="ewallet-item" data-wallet="dana"><div class="ewallet-icon">DNA</div><div class="ewallet-name">DANA</div></button>
+          <button class="ewallet-item" data-wallet="shopeepay"><div class="ewallet-icon">SP</div><div class="ewallet-name">ShopeePay</div></button>
+        </div>
+        
+        <div class="qr-container" id="qrContainer">
+          <div class="qr-code">
+            <svg viewBox="0 0 100 100" fill="white">
+              <rect x="10" y="10" width="20" height="20"/><rect x="35" y="10" width="5" height="5"/>
+              <rect x="45" y="10" width="5" height="5"/><rect x="55" y="10" width="5" height="5"/>
+              <rect x="70" y="10" width="20" height="20"/><rect x="15" y="15" width="10" height="10" fill="black"/>
+              <rect x="75" y="15" width="10" height="10" fill="black"/><rect x="10" y="35" width="5" height="5"/>
+              <rect x="20" y="35" width="5" height="5"/><rect x="35" y="35" width="5" height="5"/>
+              <rect x="50" y="35" width="10" height="5"/><rect x="70" y="35" width="5" height="5"/>
+              <rect x="85" y="35" width="5" height="5"/><rect x="10" y="45" width="5" height="10"/>
+              <rect x="25" y="45" width="15" height="5"/><rect x="45" y="45" width="5" height="10"/>
+              <rect x="60" y="45" width="10" height="5"/><rect x="80" y="45" width="10" height="10"/>
+              <rect x="10" y="60" width="5" height="5"/><rect x="20" y="60" width="10" height="5"/>
+              <rect x="40" y="60" width="5" height="5"/><rect x="55" y="60" width="15" height="5"/>
+              <rect x="10" y="70" width="20" height="20"/><rect x="15" y="75" width="10" height="10" fill="black"/>
+              <rect x="35" y="70" width="5" height="5"/><rect x="45" y="70" width="10" height="5"/>
+              <rect x="60" y="70" width="5" height="10"/><rect x="70" y="70" width="5" height="5"/>
+              <rect x="80" y="70" width="10" height="10"/><rect x="35" y="80" width="5" height="10"/>
+              <rect x="50" y="80" width="5" height="5"/><rect x="70" y="85" width="5" height="5"/>
+            </svg>
+          </div>
+          <div class="qr-text">Scan with your e-wallet app to pay</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="pay-section">
+      <button class="pay-btn" id="payBtn" disabled>
+        <span>Confirm Payment</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
   </div>
-</div>
+</main>
 
-<!-- Pay Button -->
-<div class="snap-footer">
-  <button class="snap-pay-btn" id="payBtn">Bayar dengan GoPay</button>
-</div>
-
-<!-- Processing Overlay -->
 <div class="processing-overlay" id="processingOverlay">
   <div class="processing-spinner"></div>
-  <div class="processing-text">Memproses pembayaran...</div>
-  <div class="processing-subtext">Mohon tunggu, jangan tutup halaman ini</div>
+  <div class="processing-text">Verifying Payment</div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-// E-wallet toggle
-const ewalletToggle = document.getElementById('ewalletToggle');
-const ewalletExpanded = document.getElementById('ewalletExpanded');
+// Timer
+let timeLeft = 15 * 60;
+const timerDisplay = document.getElementById('timer');
+const timerBar = document.getElementById('timerBar');
+
+const timerInterval = setInterval(() => {
+  timeLeft--;
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  timerDisplay.textContent = minutes + ':' + seconds.toString().padStart(2, '0');
+  
+  if (timeLeft <= 120) timerBar.classList.add('warning');
+  
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    showToast('Session expired');
+    setTimeout(() => window.location.href = '08-payment.html', 2000);
+  }
+}, 1000);
+
+// Tab switching
+const methodTabs = document.querySelectorAll('.method-tab');
+const methodContents = document.querySelectorAll('.method-content');
+
+methodTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    methodTabs.forEach(t => t.classList.remove('active'));
+    methodContents.forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    document.getElementById('payBtn').disabled = true;
+    document.querySelectorAll('.bank-item, .ewallet-item').forEach(i => i.classList.remove('selected'));
+    document.getElementById('vaDetails').classList.remove('show');
+    document.getElementById('qrContainer').classList.remove('show');
+  });
+});
+
+// Bank selection
+const bankItems = document.querySelectorAll('.bank-item');
+const vaDetails = document.getElementById('vaDetails');
+const vaNumber = document.getElementById('vaNumber');
 const payBtn = document.getElementById('payBtn');
-const processingOverlay = document.getElementById('processingOverlay');
+const vaNumbers = {
+  'bca': '8277 0847 2910 0001',
+  'mandiri': '8900 0847 2910 0001',
+  'bni': '8800 0847 2910 0001',
+  'bri': '8850 0847 2910 0001'
+};
 
-let selectedWallet = 'gopay';
-
-ewalletToggle.addEventListener('click', () => {
-  ewalletExpanded.classList.toggle('show');
+bankItems.forEach(item => {
+  item.addEventListener('click', () => {
+    bankItems.forEach(i => i.classList.remove('selected'));
+    item.classList.add('selected');
+    vaNumber.textContent = vaNumbers[item.dataset.bank];
+    vaDetails.classList.add('show');
+    payBtn.disabled = false;
+  });
 });
 
 // E-wallet selection
-document.querySelectorAll('.ewallet-item').forEach(item => {
+const ewalletItems = document.querySelectorAll('.ewallet-item');
+const qrContainer = document.getElementById('qrContainer');
+
+ewalletItems.forEach(item => {
   item.addEventListener('click', () => {
-    document.querySelectorAll('.ewallet-item').forEach(i => i.classList.remove('selected'));
+    ewalletItems.forEach(i => i.classList.remove('selected'));
     item.classList.add('selected');
-    selectedWallet = item.dataset.wallet;
-    payBtn.textContent = `Bayar dengan ${item.querySelector('.name').textContent}`;
+    qrContainer.classList.add('show');
+    payBtn.disabled = false;
   });
 });
 
-// Payment method selection
-document.querySelectorAll('.payment-item[data-method]').forEach(item => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.payment-item').forEach(i => i.classList.remove('selected'));
-    item.classList.add('selected');
-    ewalletExpanded.classList.remove('show');
-    const methodName = item.querySelector('.payment-name').textContent;
-    payBtn.textContent = `Lanjut ke ${methodName}`;
-  });
-});
+// Copy VA
+function copyVA() {
+  const btn = document.querySelector('.va-copy');
+  navigator.clipboard.writeText(vaNumber.textContent.replace(/\s/g, ''));
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Copied!';
+  btn.classList.add('copied');
+  showToast('VA number copied!');
+  setTimeout(() => {
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy';
+    btn.classList.remove('copied');
+  }, 2000);
+}
 
 // Pay button
+const processingOverlay = document.getElementById('processingOverlay');
 payBtn.addEventListener('click', () => {
   processingOverlay.classList.add('show');
-  
-  // Simulate payment processing
   setTimeout(() => {
     window.location.href = '10-success.html';
   }, 3000);
 });
+
+// Toast
+const toast = document.getElementById('toast');
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
 </script>
 </body>
 </html>
