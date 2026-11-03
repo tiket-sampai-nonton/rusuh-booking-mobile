@@ -208,6 +208,9 @@ export const v2ZIndex = {
 
 export const v2Layout = {
   headerHeight: 60,
+  headerHeightMobile: 56,      // Mobile: 56px (design-tokens.css --header-height)
+  bottomBarHeight: 72,         // Mobile: 72px (design-tokens.css --bottom-bar-height)
+  tapTarget: 44,               // Mobile: 44px min touch target
   contentNarrow: 600,
   contentDefault: 700,
   contentWide: 1200,

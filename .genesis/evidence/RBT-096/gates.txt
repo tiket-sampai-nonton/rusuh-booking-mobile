@@ -1,0 +1,86 @@
+# RBT-096 Gate Evidence
+# V2 Brutalist Mono Design System Re-implementation
+# Date: 2025-01-15
+
+## G3 Gate Evidence
+
+### TypeScript Compilation
+```
+npm run typecheck
+tsc --noEmit
+Exit: 0 (PASS)
+```
+
+### ESLint
+```
+npm run lint
+ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx
+Exit: 0 (PASS)
+```
+
+### Jest Test Suite
+```
+npm test -- --coverage --forceExit --no-watchman --maxWorkers=1
+Test Suites: 103 passed, 103 total
+Tests:       803 passed, 803 total
+Exit: 0 (PASS)
+```
+
+### Coverage Summary (maintained above threshold)
+- Statements: 86%+
+- Branches: 70%+
+- Functions: 80%+
+- Lines: 86%+
+
+## Changes Summary
+
+### Core V2 Components Added/Updated
+- V2Button: solid black/white, 2px borders, no rounded corners
+- V2Card: stark borders, high contrast
+- V2Block: section containers with label prop
+- V2Loader: animated brutalist loading with mutable values pattern
+- V2Toast: slide-in notifications with proper useEffect pattern
+- V2EventCard: v2-event-card-<id> testIDs
+- V2Header: fixed header with nav links
+- V2HeroCarousel: full viewport hero carousel
+- V2CategoryCard: category selection cards
+- V2Input: brutalist form inputs
+
+### Theme System
+- v2Colors: ink (#000), ground (#FFF), accent, muted palette
+- v2Typography: Inter font family (400/500/600/700/900 weights)
+- v2Borders: 2px standard borders throughout
+- v2Spacing: 4/8/12/16/24/32/48 semantic scale
+
+### Screen Updates
+- Home: v2-hero testID, section-events, Event Minggu Ini/Event Sebelumnya
+- WaitingRoom: English status messages (Ready!, ~1 min, Sold Out, etc.)
+- EventDetail: V2 Block sections (ignores heading prop)
+- Browse: Categories hero, v2-event-card testIDs, Tidak Ada Event empty
+- Checkout: 800px maxWidth, 140px paddingBottom, Pilih Tiketmu hero
+- History: Arsip Event header, Belum Ada Arsip empty state
+- LoginModal: 6 separate OTP inputs (login-otp-0 to login-otp-5)
+
+### Test Files Updated
+- _layout.test.tsx: Added expo-font mock
+- HomeScreen.test.tsx: V2 testIDs (v2-hero, section-events)
+- HomeScreen.desktop.test.tsx: V2 nav links, filter-btn testID
+- public-routes.test.tsx: V2 section headers
+- HistoryScreen.test.tsx: V2 testIDs, V2 copy
+- HistoryGrid.test.tsx: v2-event-card testIDs
+- BrowseScreen.test.tsx: V2 testIDs, header-logo
+- browse-fragments.test.tsx: v2-event-card testIDs
+- WaitingRoom.test.tsx: English status messages
+- waiting-display.test.ts: English display strings
+- EventDetailScreen.test.tsx: V2 Block behavior
+- EventDetailFragments.test.tsx: Block ignores heading
+- LoginModal.test.tsx: 6 OTP inputs
+- booking-routes.test.tsx: V2 copy
+- checkout-categories.test.ts: V2 style values
+- CheckoutScreen.test.tsx: Pilih Tiketmu case fix
+- V2Primitives.test.tsx: V2Loader mutable values, V2Toast useEffect
+
+## PR Reference
+- PR #105: feat(RBT-096): V2 Brutalist Mono Design System
+- Merged to develop: 2025-01-15
+- Commit: eb87826

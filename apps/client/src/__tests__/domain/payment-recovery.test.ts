@@ -66,6 +66,9 @@ describe("requeueRoute", () => {
   it("queue reason → browse", () => {
     expect(requeueRoute("queue", "evt-7")).toBe("/browse");
   });
+  it("turn reason → browse (must rejoin from the back)", () => {
+    expect(requeueRoute("turn", "evt-7")).toBe("/browse");
+  });
   it("no eventId → browse (cannot target a waiting room)", () => {
     expect(requeueRoute("payment")).toBe("/browse");
     expect(requeueRoute("hold")).toBe("/browse");

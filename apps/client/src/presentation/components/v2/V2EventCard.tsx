@@ -1,5 +1,6 @@
 /**
  * RBT-096 — V2EventCard
+ * RBT-097 — Mobile: stagger animation (FadeInUp.delay(index * 100))
  *
  * MASTER-SPEC §3.1 Event Card:
  * - Background: #fff
@@ -8,6 +9,10 @@
  * - Badge slides in from left on hover
  * - border: 2px solid #000
  * - Gap: 2px creates border effect (handled by parent grid)
+ *
+ * Mobile prototype v2-mobile/01-home.html:
+ * - Stagger animation: cards reveal with delay(index * 100ms)
+ * - Animation: fadeSlideUp 0.5s (opacity 0→1, translateY 20→0)
  *
  * Prototype .event-card styling:
  * - .event-image: aspect-ratio 4/3
@@ -18,7 +23,7 @@
  * - .event-venue: color muted, text-s
  * - .event-footer: border-top, price left, buy btn right
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Image, Platform, Pressable, Text, View, type ImageStyle, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
@@ -26,6 +31,7 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withDelay,
   withTiming,
 } from 'react-native-reanimated';
 
@@ -37,6 +43,7 @@ import { minorToIDR } from '@domain/services/money';
 import { v2Colors, v2Borders, v2Easing, v2Duration, v2SpacingSemantic, v2Shadows, interFonts } from '@presentation/theme';
 
 const EASE = Easing.bezier(...v2Easing.primary);
+const STAGGER_DELAY_MS = 100; // Mobile prototype: stagger 100ms per card
 const isWeb = Platform.OS === 'web';
 
 export interface V2EventCardProps {
@@ -44,6 +51,8 @@ export interface V2EventCardProps {
   readonly onPress: (eventId: string) => void;
   /** History/archive mode: dimmed, disabled */
   readonly history?: boolean;
+  /** Index for stagger animation (mobile: delay(index * 100ms)) */
+  readonly staggerIndex?: number;
 }
 
 /** Badge label per tone */
@@ -55,14 +64,28 @@ const BADGE_LABEL: Record<BadgeTone, string> = {
   done: 'Selesai',
 };
 
-export function V2EventCard({ event, onPress, history = false }: V2EventCardProps) {
+export function V2EventCard({ event, onPress, history = false, staggerIndex = 0 }: V2EventCardProps) {
   const reducedMotion = useReducedMotion();
   const hovered = useSharedValue(0);
+  const staggerOpacity = useSharedValue(reducedMotion ? 1 : 0);
+  const staggerTranslateY = useSharedValue(reducedMotion ? 0 : 20);
   const [isHovered, setIsHovered] = useState(false); // For web CSS filter
   const badge = badgeFor(event);
   const disabled = badge.disabled || history;
   const dateTxt = formatDateID(event.startsAt);
   const image = eventImage(event.id);
+
+  // Stagger animation on mount (mobile: FadeInUp.delay(index * 100))
+  useEffect(() => {
+    if (reducedMotion) {
+      staggerOpacity.value = 1;
+      staggerTranslateY.value = 0;
+      return;
+    }
+    const delay = staggerIndex * STAGGER_DELAY_MS;
+    staggerOpacity.value = withDelay(delay, withTiming(1, { duration: 500, easing: EASE }));
+    staggerTranslateY.value = withDelay(delay, withTiming(0, { duration: 500, easing: EASE }));
+  }, [reducedMotion, staggerIndex, staggerOpacity, staggerTranslateY]);
 
   const setHovered = useCallback(
     (v: boolean) => {
@@ -81,9 +104,11 @@ export function V2EventCard({ event, onPress, history = false }: V2EventCardProp
   );
 
   // Card hover: translateY(-8px) rotateX(2deg) + shadow
+  // Plus stagger animation for entry
   const cardStyle = useAnimatedStyle(() => ({
+    opacity: staggerOpacity.value,
     transform: [
-      { translateY: interpolate(hovered.value, [0, 1], [0, -8]) },
+      { translateY: interpolate(hovered.value, [0, 1], [staggerTranslateY.value, -8]) },
       { perspective: 1000 },
       { rotateX: `${interpolate(hovered.value, [0, 1], [0, 2])}deg` },
     ],

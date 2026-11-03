@@ -1,6 +1,7 @@
 /**
  * ExpiredRecoveryScreen — failure/expiry recovery (RBT-064, E7 Payment,
  * AC1/FR-23). Rendered behind `/expired/[resourceId]`.
+ * RBT-097 — Mobile: white background (not dark), add "turn" variant.
  *
  * Decides the RIGHT recovery from the authoritative state (never the callback,
  * never the device clock):
@@ -25,7 +26,7 @@ import { v2, v2Border } from "@presentation/theme";
 
 export interface ExpiredRecoveryScreenProps {
   readonly resourceId: string;
-  /** Why we are here (payment / hold / queue). Defaults to a generic expiry. */
+  /** Why we are here (payment / hold / queue / turn). Defaults to a generic expiry. */
   readonly reason?: ExpiryReason;
   /** Booking to retry paying (when payable). */
   readonly bookingId?: string;
@@ -38,18 +39,54 @@ export interface ExpiredRecoveryScreenProps {
   readonly remainingMs?: number;
 }
 
-const REASON_COPY: Record<ExpiryReason, { title: string; body: string }> = {
+// Icon per reason (prototype 09-expired.html variants)
+const REASON_ICON: Record<ExpiryReason, string> = {
+  payment: "💳",
+  hold: "⏱️",
+  queue: "👋",
+  turn: "⚡",
+};
+
+const REASON_COPY: Record<ExpiryReason, { title: string; body: string; infoText: string; infoList: string[] }> = {
   payment: {
-    title: "Pembayaran gagal atau kedaluwarsa",
-    body: "Pembayaran kamu tidak selesai. Kamu bisa mencoba membayar lagi selama pemesanan masih berlaku.",
+    title: "Pembayaran Timeout",
+    body: "Batas waktu pembayaran sudah lewat. Silakan coba lagi.",
+    infoText: "Pembayaran harus diselesaikan dalam 15 menit setelah checkout.",
+    infoList: [
+      "Tidak ada biaya yang dikenakan",
+      "Tiket dikembalikan ke inventori",
+      "Kuota NIK kamu dipulihkan",
+    ],
   },
   hold: {
-    title: "Waktu pemesanan habis",
-    body: "Batas waktu menyelesaikan pemesanan sudah lewat. Tiket dilepas kembali — silakan antre lagi.",
+    title: "Pemesanan Kedaluwarsa",
+    body: "Batas waktu pemesanan 10 menit telah berakhir. Tiket sudah dilepas.",
+    infoText: "Sesi pemesanan dibatasi untuk memastikan akses yang adil bagi semua pengguna.",
+    infoList: [
+      "Tiket yang dipilih dikembalikan ke inventori",
+      "Tidak ada pembayaran yang diproses",
+      "Kamu bisa masuk antrean lagi sekarang",
+    ],
   },
   queue: {
-    title: "Sesi antrean kedaluwarsa",
-    body: "Sesi antrean kamu sudah berakhir. Silakan masuk antrean lagi untuk melanjutkan.",
+    title: "Sesi Antrean Berakhir",
+    body: "Kamu meninggalkan antrean atau sesi terganggu.",
+    infoText: "Meninggalkan halaman antrean akan melepaskan posisi kamu.",
+    infoList: [
+      "Posisi kamu diberikan ke orang berikutnya",
+      "Tidak ada tiket yang dipesan",
+      "Masuk lagi kapan saja",
+    ],
+  },
+  turn: {
+    title: "Giliran Terlewat",
+    body: "Giliran kamu tiba tapi kamu tidak melanjutkan tepat waktu.",
+    infoText: "Saat giliran tiba, kamu punya 60 detik untuk melanjutkan.",
+    infoList: [
+      "Giliran kamu dilewati",
+      "Posisi diberikan ke orang berikutnya dalam antrean",
+      "Kamu harus masuk antrean lagi dari belakang",
+    ],
   },
 };
 
@@ -65,6 +102,7 @@ export function ExpiredRecoveryScreen({
   const router = useRouter();
   const recovery = decideRecovery(status, remainingMs, errorCode);
   const copy = REASON_COPY[reason];
+  const icon = REASON_ICON[reason];
 
   // Retry is only reachable when canRetry (below) is true, which already
   // requires a bookingId — so no redundant guard here.
@@ -77,10 +115,17 @@ export function ExpiredRecoveryScreen({
 
   const canRetry = recovery.kind === "retry" && !!bookingId;
 
+  // Primary button text based on reason
+  const primaryText = canRetry
+    ? "Coba Lagi"
+    : reason === "queue" || reason === "turn" || !eventId
+      ? "Cari Event Lain"
+      : "Masuk Antrean Lagi";
+
   return (
     <View
       className="flex-1 items-center justify-center gap-6 p-6"
-      style={{ backgroundColor: v2.ink }}
+      style={{ backgroundColor: v2.ground }}
       testID="expired-recovery"
     >
       <Seo
@@ -90,61 +135,94 @@ export function ExpiredRecoveryScreen({
         noindex
       />
       <View className="w-full max-w-sm items-center gap-4">
-        {/* White-ring icon circle (prototype 09 `.icon`). */}
+        {/* Red-ring icon circle (prototype 09-expired `.expired-icon`). */}
         <View
           className="h-24 w-24 items-center justify-center rounded-full"
-          style={{ borderWidth: v2Border.base, borderColor: v2.ground }}
+          style={{ borderWidth: v2Border.base, borderColor: v2.danger }}
         >
           <Text className="text-4xl" accessibilityElementsHidden>
-            ⏳
+            {icon}
           </Text>
         </View>
         <Text
-          className="text-center text-2xl font-extrabold uppercase text-white"
-          style={{ letterSpacing: -1 }}
+          className="text-center text-2xl font-extrabold uppercase"
+          style={{ letterSpacing: -0.5, color: v2.ink }}
           accessibilityRole="header"
           testID="expired-title"
         >
           {copy.title}
         </Text>
-        {/* Info card — translucent on the dark ground (prototype `.info-card`). */}
+        <Text
+          className="text-center text-sm leading-6"
+          style={{ color: v2.inkMuted, maxWidth: 280 }}
+        >
+          {copy.body}
+        </Text>
+
+        {/* Info box (prototype `.info-box`) */}
         <View
-          className="w-full p-5"
+          className="w-full p-4"
           style={{
-            backgroundColor: "rgba(255,255,255,0.05)",
-            borderWidth: 1,
-            borderColor: "rgba(255,255,255,0.1)",
+            backgroundColor: v2.field,
+            borderWidth: v2Border.base,
+            borderColor: v2.ink,
           }}
         >
-          <Text className="text-sm leading-6 text-white/80">{copy.body}</Text>
+          <Text
+            className="text-xs font-extrabold uppercase"
+            style={{ letterSpacing: 1.2, color: v2.ink, marginBottom: 8 }}
+          >
+            Apa yang terjadi?
+          </Text>
+          <Text className="text-xs leading-5" style={{ color: v2.inkMuted }}>
+            {copy.infoText}
+          </Text>
+          <View className="mt-2 gap-1">
+            {copy.infoList.map((item, i) => (
+              <View key={i} className="flex-row gap-2">
+                <Text style={{ color: v2.ink }}>→</Text>
+                <Text className="flex-1 text-xs" style={{ color: v2.inkMuted }}>
+                  {item}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
       </View>
 
       <View className="w-full max-w-sm gap-3">
-        {canRetry ? (
-          <Text
-            onPress={onRetry}
-            accessibilityRole="button"
-            testID="expired-retry"
-            className="py-4 text-center text-base font-bold uppercase"
-            style={{ backgroundColor: v2.ground, color: v2.ink, letterSpacing: 0.5 }}
-          >
-            Coba Bayar Lagi
-          </Text>
-        ) : null}
         <Text
-          onPress={onRequeue}
+          onPress={canRetry ? onRetry : onRequeue}
           accessibilityRole="button"
-          testID="expired-requeue"
-          className="py-4 text-center text-base font-bold uppercase text-white"
-          style={
-            canRetry
-              ? { borderWidth: 1, borderColor: "rgba(255,255,255,0.3)", letterSpacing: 0.5 }
-              : { backgroundColor: v2.ground, color: v2.ink, letterSpacing: 0.5 }
-          }
+          testID={canRetry ? "expired-retry" : "expired-requeue"}
+          className="min-h-[48px] items-center justify-center py-4 text-center text-sm font-bold uppercase"
+          style={{
+            backgroundColor: v2.ink,
+            color: v2.ground,
+            letterSpacing: 0.5,
+            borderWidth: v2Border.base,
+            borderColor: v2.ink,
+          }}
         >
-          {reason === "queue" || !eventId ? "Cari Event Lain" : "Antre Lagi"}
+          {primaryText}
         </Text>
+        {canRetry && (
+          <Text
+            onPress={onRequeue}
+            accessibilityRole="button"
+            testID="expired-requeue"
+            className="min-h-[48px] items-center justify-center py-4 text-center text-sm font-bold uppercase"
+            style={{
+              backgroundColor: v2.ground,
+              color: v2.ink,
+              letterSpacing: 0.5,
+              borderWidth: v2Border.base,
+              borderColor: v2.ink,
+            }}
+          >
+            Cari Event Lain
+          </Text>
+        )}
       </View>
     </View>
   );

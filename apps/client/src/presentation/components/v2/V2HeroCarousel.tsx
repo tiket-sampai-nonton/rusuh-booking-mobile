@@ -29,7 +29,6 @@
  */
 import { useEffect, useRef, useState } from "react";
 import {
-  Dimensions,
   Image,
   Platform,
   Pressable,
@@ -60,6 +59,7 @@ import {
   v2Easing,
   interFonts,
 } from "@presentation/theme";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 
 // ═══════════════════════════════════════
 // CONSTANTS (from prototype CSS variables)
@@ -807,14 +807,15 @@ export function V2HeroCarousel({ events, onBook, onSeeAll }: V2HeroCarouselProps
   const top = events.slice(0, 3);
   const zoom = useSharedValue(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight, heroHeightVh, isNative } = useResponsive();
 
-  // Viewport height (prototype: min-height 100vh/100dvh)
-  const { height: screenHeight } = Dimensions.get("window");
-  const heroHeight = Math.max(760, screenHeight);
+  // Viewport height: 70vh on mobile/native, 100vh on desktop web
+  // v2-mobile prototype: .hero { min-height: 70vh }
+  // v2 desktop prototype: .hero { min-height: 100vh }
+  const heroHeight = Math.max(480, (screenHeight * heroHeightVh) / 100);
 
   // Responsive: single column on narrow screens (<900px per prototype @media query)
-  const isNarrow = screenWidth < 900;
+  const isNarrow = screenWidth < 900 || isNative;
 
   // Ken Burns zoom loop (20s): scale 1 → 1.05 → 1
   useEffect(() => {

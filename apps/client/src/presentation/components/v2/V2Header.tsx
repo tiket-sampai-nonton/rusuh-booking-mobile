@@ -1,12 +1,19 @@
 /**
  * RBT-096 — V2Header (Home Screen)
+ * RBT-097 — Mobile height: 56px (vs 60px desktop)
  *
- * MASTER-SPEC + 01-home.html:
- * - Fixed top, height 60px
+ * MASTER-SPEC + 01-home.html + v2-mobile/01-home.html:
+ * - Fixed top, height 60px (desktop) / 56px (mobile)
  * - Logo: fontSize 18, fontWeight 900, uppercase
  * - Slide in from top on mount (translateY -100% → 0)
  * - border: 2px solid #000 (bottom only)
  * - Pure black/white, no shadows, no rounding
+ *
+ * Mobile differences:
+ * - Height: 56px (vs 60px desktop)
+ * - Logo: 18px (1.125rem) same as desktop
+ * - Icon buttons: 44px × 44px tap target with shadow
+ * - Active state: translate + shadow collapse
  *
  * Links (desktop > 720px): center nav links with hover underline slide
  * CTA: "Masuk / Daftar" black button with ink-spread hover
@@ -22,7 +29,8 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated';
 
-import { v2Colors, v2Borders, v2Easing, v2Duration, v2Layout, interFonts } from '@presentation/theme';
+import { v2Colors, v2Borders, v2Easing, v2Duration, interFonts } from '@presentation/theme';
+import { useResponsive } from '@presentation/hooks/useResponsive';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const EASE = Easing.bezier(...v2Easing.primary);
@@ -122,6 +130,7 @@ export function V2Header({
   ctaLabel = 'Masuk / Daftar',
 }: V2HeaderProps) {
   const reducedMotion = useReducedMotion();
+  const { headerHeight } = useResponsive();
   const slideIn = useSharedValue(reducedMotion ? 1 : 0);
   const ctaHover = useSharedValue(0);
 
@@ -143,7 +152,7 @@ export function V2Header({
   const headerStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateY: interpolate(slideIn.value, [0, 1], [-v2Layout.headerHeight - topInset, 0]),
+        translateY: interpolate(slideIn.value, [0, 1], [-headerHeight - topInset, 0]),
       },
     ],
   }));
@@ -197,13 +206,13 @@ export function V2Header({
 
   const rowStyle = useMemo<ViewStyle>(
     () => ({
-      height: v2Layout.headerHeight,
+      height: headerHeight,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 20,
     }),
-    [],
+    [headerHeight],
   );
 
   return (
