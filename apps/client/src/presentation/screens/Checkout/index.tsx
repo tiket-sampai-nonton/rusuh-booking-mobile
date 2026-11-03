@@ -33,6 +33,7 @@ import {
   type TicketRow,
 } from "@domain/rules/checkout";
 import { ScreenFade } from "@presentation/components/ScreenFade";
+import { v2 } from "@presentation/theme";
 import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
@@ -174,10 +175,18 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           <Section title="Data Pembeli">
             {prefill.fromAccount ? (
               <View
-                className="mt-1 self-start rounded-pill bg-ok/10 px-3 py-1"
+                style={{
+                  marginTop: 4,
+                  alignSelf: "flex-start",
+                  borderWidth: 2,
+                  borderColor: v2.success,
+                  backgroundColor: v2.ground,
+                  paddingHorizontal: 12,
+                  paddingVertical: 5,
+                }}
                 testID="prefill-badge"
               >
-                <Text className="text-2xs font-bold text-ok">
+                <Text style={{ color: v2.success }} className="text-2xs font-v2 font-bold uppercase">
                   Terisi dari akun
                 </Text>
               </View>
@@ -227,21 +236,43 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               disabled={rows.length >= cap}
               onPress={addRow}
               testID="add-ticket"
-              className={`mt-3 items-center rounded-md border border-dashed border-line py-3 ${rows.length >= cap ? "opacity-50" : ""}`}
+              style={{
+                marginTop: 12,
+                alignItems: "center",
+                borderWidth: 2,
+                borderStyle: "dashed",
+                borderColor: v2.ink,
+                backgroundColor: v2.ground,
+                paddingVertical: 14,
+                opacity: rows.length >= cap ? 0.4 : 1,
+              }}
             >
-              <Text className="text-sm font-bold text-foreground">
+              <Text style={{ color: v2.ink }} className="text-sm font-v2 font-bold uppercase">
                 ＋ Tambah tiket
               </Text>
             </Pressable>
-            <View className="mt-3 flex-row items-center gap-2.25 rounded-md border border-warn/20 bg-warn/[0.08] px-3.5 py-3">
-              <Text className="text-sm" accessibilityElementsHidden>
+            <View
+              style={{
+                marginTop: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 9,
+                borderWidth: 2,
+                borderColor: v2.warn,
+                backgroundColor: v2.ground,
+                paddingHorizontal: 14,
+                paddingVertical: 12,
+              }}
+            >
+              <Text style={{ color: v2.warn }} className="text-sm" accessibilityElementsHidden>
                 ⚠
               </Text>
-              <Text className="flex-1 text-xs text-muted-foreground">
+              <Text style={{ color: v2.ink, flex: 1 }} className="text-xs font-v2">
                 Batas{" "}
-                <Text className="font-bold text-warn">{cap} tiket per NIK</Text>{" "}
-                divalidasi server saat Lanjut Bayar. Tiap tiket butuh 1 NIK
-                penonton.
+                <Text style={{ color: v2.warn }} className="font-v2 font-bold">
+                  {cap} tiket per NIK
+                </Text>{" "}
+                divalidasi server saat Lanjut Bayar. Tiap tiket butuh 1 NIK penonton.
               </Text>
             </View>
           </Section>
