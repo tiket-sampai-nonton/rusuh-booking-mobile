@@ -30,20 +30,20 @@ const EVENTS: readonly EventSummary[] = [ev("a", "A Fest"), ev("b", "B Fest")];
 describe("BrowseGrid", () => {
   it("renders a single-column list (phone)", () => {
     render(<BrowseGrid events={EVENTS} onPress={() => {}} columns={1} />);
-    expect(screen.getByTestId("event-card-a")).toBeTruthy();
-    expect(screen.getByTestId("event-card-b")).toBeTruthy();
+    expect(screen.getByTestId("v2-event-card-a")).toBeTruthy();
+    expect(screen.getByTestId("v2-event-card-b")).toBeTruthy();
   });
 
   it("renders a multi-column grid (desktop web, columns > 1)", () => {
     render(<BrowseGrid events={EVENTS} onPress={() => {}} columns={3} />);
     expect(screen.getByTestId("browse-grid")).toBeTruthy();
-    expect(screen.getByTestId("event-card-a")).toBeTruthy();
-    expect(screen.getByTestId("event-card-b")).toBeTruthy();
+    expect(screen.getByTestId("v2-event-card-a")).toBeTruthy();
+    expect(screen.getByTestId("v2-event-card-b")).toBeTruthy();
   });
 
   it("defaults to a single column when no columns prop is given", () => {
     render(<BrowseGrid events={EVENTS} onPress={() => {}} />);
-    expect(screen.getByTestId("event-card-a")).toBeTruthy();
+    expect(screen.getByTestId("v2-event-card-a")).toBeTruthy();
   });
 });
 

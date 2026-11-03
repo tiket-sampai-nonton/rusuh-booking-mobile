@@ -1,21 +1,74 @@
-/** hero-ev banner (16:7) — image from the session's event (O2: no name yet). */
-import { ImageBackground, Text, View } from "react-native";
+/**
+ * RBT-092 — V2 Brutalist Mono Checkout Hero
+ *
+ * PROTOTYPE 03-checkout.html .summary-event EXACT COPY:
+ * - 2px border, no rounded corners
+ * - Grayscale image filter (web-only, RN needs library)
+ * - Black/white typography with uppercase title
+ */
+import { Image, Text, View, StyleSheet } from "react-native";
 
 import { eventImage } from "@domain/rules/event-image";
+import { v2Colors, v2Borders, interFonts } from "@presentation/theme";
 
 import type { CheckoutHeroProps } from "../interface";
-import { checkoutStyles } from "../style";
 
 export function CheckoutHero({ eventId }: CheckoutHeroProps) {
   return (
-    <ImageBackground source={{ uri: eventImage(eventId) }} resizeMode="cover" style={checkoutStyles.hero}>
-      <View style={checkoutStyles.heroScrim} />
-      <View style={checkoutStyles.heroPad}>
-        <Text className="text-xl font-extrabold text-white">Pilih tiketmu</Text>
-        <Text className="mt-1.5 text-xs text-white/85">
+    <View style={styles.container}>
+      {/* Event image with grayscale filter */}
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: eventImage(eventId) }}
+          resizeMode="cover"
+          style={styles.image}
+        />
+      </View>
+
+      {/* Event info */}
+      <View style={styles.info}>
+        <Text style={styles.title}>Pilih Tiketmu</Text>
+        <Text style={styles.subtitle}>
           Lengkapi data pembeli &amp; penonton sebelum lanjut bayar.
         </Text>
       </View>
-    </ImageBackground>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.ground,
+    overflow: "hidden",
+  },
+  imageContainer: {
+    height: 180,
+    overflow: "hidden",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    // Note: grayscale filter is web-only; RN needs react-native-image-filter-kit
+  },
+  info: {
+    padding: 24,
+    borderTopWidth: v2Borders.standard,
+    borderTopColor: v2Colors.ink,
+  },
+  title: {
+    color: v2Colors.ink,
+    fontSize: 20,
+    fontFamily: interFonts.black,
+    textTransform: "uppercase",
+    letterSpacing: -0.4,
+  },
+  subtitle: {
+    color: v2Colors.gray,
+    fontSize: 14,
+    fontFamily: interFonts.regular,
+    marginTop: 8,
+    lineHeight: 22,
+  },
+});

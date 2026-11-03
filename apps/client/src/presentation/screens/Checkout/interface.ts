@@ -9,6 +9,7 @@ export interface CheckoutScreenProps {
 
 export interface SectionProps {
   readonly title: string;
+  readonly number?: number;
   readonly children: ReactNode;
 }
 

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SNAP Payment — RUSUH TIKET</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--black:#000;--white:#fff;--gray:#888;--red:#ff0000;--green:#00aa00;--border:2px solid var(--black)}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:#f5f5f5;color:var(--black);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+    
+    .card{background:var(--white);border:var(--border);padding:2.5rem;max-width:480px;width:100%;text-align:center}
+    
+    .snap-header{display:flex;align-items:center;justify-content:center;gap:.75rem;margin-bottom:2rem}
+    .snap-icon{width:40px;height:40px;background:var(--black);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:900}
+    .snap-title{font-size:1rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+    
+    .eyebrow{font-size:.625rem;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:var(--gray);margin-bottom:.5rem}
+    
+    h1{font-size:1.75rem;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:1.2;margin-bottom:1rem}
+    
+    .description{font-size:.875rem;color:var(--gray);line-height:1.6;margin-bottom:2rem}
+    
+    .summary{background:#f9f9f9;border:var(--border);padding:1.5rem;margin-bottom:2rem;text-align:left}
+    .summary-row{display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid #e0e0e0;font-size:.875rem}
+    .summary-row:last-child{border-bottom:none}
+    .summary-row .label{color:var(--gray)}
+    .summary-row .value{font-weight:700;text-align:right}
+    .summary-row.total{padding-top:1rem;font-size:1.125rem}
+    .summary-row.total .value{font-weight:900}
+    
+    .actions{display:grid;gap:1rem}
+    
+    .btn{padding:1rem 2rem;border:var(--border);font-family:inherit;font-size:.875rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:all .3s ease}
+    .btn-success{background:var(--green);color:var(--white);border-color:var(--green)}
+    .btn-success:hover{background:#009900}
+    .btn-fail{background:var(--white);color:var(--black)}
+    .btn-fail:hover{background:#f5f5f5}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    
+    .note{font-size:.75rem;color:var(--gray);line-height:1.6;margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e0e0e0}
+    
+    .processing{display:none;flex-direction:column;align-items:center;gap:1.5rem;padding:2rem 0}
+    .processing.active{display:flex}
+    .processing .spinner{width:48px;height:48px;border:4px solid #e0e0e0;border-top-color:var(--black);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .processing p{font-size:.875rem;color:var(--gray)}
+    
+    .content.hidden{display:none}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="snap-header">
+      <div class="snap-icon">↗</div>
+      <div class="snap-title">SNAP Payment</div>
+    </div>
+    
+    <div class="content" id="content">
+      <div class="eyebrow">Third-Party Payment Gateway</div>
+      <h1>Complete Your Payment</h1>
+      <p class="description">This is a SNAP simulation page for the prototype. In production, this page is provided by the payment provider.</p>
+      
+      <div class="summary" id="summary">
+        <div class="summary-row">
+          <span class="label">Order ID</span>
+          <span class="value" id="orderId">Loading...</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Event</span>
+          <span class="value" id="eventName">Loading...</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Method</span>
+          <span class="value">SNAP</span>
+        </div>
+        <div class="summary-row total">
+          <span class="label">Total</span>
+          <span class="value" id="amount">Loading...</span>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <button class="btn btn-success" id="successBtn">
+          ✓ Simulate Successful Payment
+        </button>
+        <button class="btn btn-fail" id="failBtn">
+          ✗ Simulate Failed Payment
+        </button>
+      </div>
+      
+      <p class="note">
+        ⚠️ SNAP will return user to Rusuh Tiket result page. The result page still verifies the payment status from the backend.
+      </p>
+    </div>
+    
+    <div class="processing" id="processing">
+      <div class="spinner"></div>
+      <p>Processing payment callback...</p>
+    </div>
+  </main>
+  
+  <script>
+    // Load payment data from sessionStorage
+    const paymentData = JSON.parse(sessionStorage.getItem('snapPayment') || '{}');
+    
+    if (!paymentData.orderId) {
+      document.getElementById('orderId').textContent = 'Not found';
+      document.getElementById('eventName').textContent = '—';
+      document.getElementById('amount').textContent = '—';
+      document.getElementById('successBtn').disabled = true;
+      document.getElementById('failBtn').disabled = true;
+    } else {
+      document.getElementById('orderId').textContent = paymentData.orderId;
+      document.getElementById('eventName').textContent = paymentData.eventName || 'Unknown Event';
+      document.getElementById('amount').textContent = 'Rp ' + (paymentData.amount || 0).toLocaleString('id-ID');
+    }
+    
+    function processPayment(success) {
+      // Show processing state
+      document.getElementById('content').classList.add('hidden');
+      document.getElementById('processing').classList.add('active');
+      
+      // Store result for success page to verify
+      sessionStorage.setItem('paymentResult', JSON.stringify({
+        success: success,
+        orderId: paymentData.orderId,
+        timestamp: Date.now()
+      }));
+      
+      // Simulate callback processing delay
+      setTimeout(() => {
+        if (success) {
+          // Clear the snap payment data
+          sessionStorage.removeItem('snapPayment');
+          window.location.href = '10-success.html';
+        } else {
+          // Clear the snap payment data
+          sessionStorage.removeItem('snapPayment');
+          window.location.href = '09-expired.html?reason=payment_failed';
+        }
+      }, 2000);
+    }
+    
+    document.getElementById('successBtn').addEventListener('click', () => {
+      processPayment(true);
+    });
+    
+    document.getElementById('failBtn').addEventListener('click', () => {
+      processPayment(false);
+    });
+  </script>
+</body>
+</html>

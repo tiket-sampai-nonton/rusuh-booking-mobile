@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Sukses — Rusuh Tiket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-tokens.css">
+<style>
+/*
+  ═══════════════════════════════════════════════════════════════════════════════
+  RUSUH TIKET — Mobile Success Screen
+  V2 Brutalist Mono Theme — Mobile App Optimized
+  ═══════════════════════════════════════════════════════════════════════════════
+*/
+
+body {
+  background: var(--ground);
+}
+
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--safe-top) var(--frame) calc(var(--space-l) + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══════════════════════════════════════
+   SUCCESS HEADER
+   ═══════════════════════════════════════ */
+.success-header {
+  text-align: center;
+  padding: var(--space-xl) 0 var(--space-l);
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--space-m);
+  border: var(--border-thick);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  color: var(--ground);
+  animation: pop 0.5s var(--ease-bounce);
+}
+
+@keyframes pop {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+.success-icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.success-title {
+  font-size: var(--text-2xl);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-xs);
+}
+
+.success-subtitle {
+  font-size: var(--text-s);
+  color: var(--ink-muted);
+}
+
+/* ═══════════════════════════════════════
+   TICKET CARD — E-Ticket display
+   ═══════════════════════════════════════ */
+.ticket-card {
+  border: var(--border);
+  background: var(--ground);
+  margin-bottom: var(--space-m);
+  position: relative;
+}
+
+/* Ticket perforations */
+.ticket-card::before,
+.ticket-card::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: var(--ground);
+  border: var(--border);
+  border-radius: 50%;
+}
+
+.ticket-card::before {
+  left: -10px;
+  top: 120px;
+}
+
+.ticket-card::after {
+  right: -10px;
+  top: 120px;
+}
+
+.ticket-header {
+  padding: var(--space-m);
+  border-bottom: var(--border);
+  border-bottom-style: dashed;
+}
+
+.ticket-event {
+  display: flex;
+  gap: var(--space-s);
+  margin-bottom: var(--space-s);
+}
+
+.ticket-thumb {
+  width: 56px;
+  height: 56px;
+  border: var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ticket-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%);
+}
+
+.ticket-info h3 {
+  font-size: var(--text-m);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.ticket-info .tier {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  padding: 2px 6px;
+  background: var(--ink);
+  color: var(--ground);
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.ticket-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-s);
+}
+
+.ticket-meta-item .label {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ticket-meta-item .value {
+  font-size: var(--text-s);
+  font-weight: 700;
+}
+
+/* QR Code */
+.ticket-qr {
+  padding: var(--space-l);
+  text-align: center;
+}
+
+.qr-wrapper {
+  display: inline-block;
+  padding: var(--space-s);
+  border: var(--border);
+  background: var(--ground);
+  margin-bottom: var(--space-s);
+}
+
+.qr-code {
+  width: 180px;
+  height: 180px;
+  background: var(--ink);
+  /* Simulated QR pattern */
+  background-image: 
+    repeating-linear-gradient(90deg, transparent, transparent 10px, var(--ground) 10px, var(--ground) 15px),
+    repeating-linear-gradient(0deg, transparent, transparent 10px, var(--ground) 10px, var(--ground) 15px);
+}
+
+.qr-label {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.ticket-id {
+  font-family: var(--font-mono);
+  font-size: var(--text-m);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-top: var(--space-xs);
+}
+
+/* Holder info */
+.ticket-holder {
+  padding: var(--space-s) var(--space-m);
+  background: var(--field);
+  border-top: var(--border);
+  border-top-style: dashed;
+}
+
+.holder-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+}
+
+.holder-row .label {
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.holder-row .value {
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════
+   ACTIONS
+   ═══════════════════════════════════════ */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  margin-top: auto;
+  padding-top: var(--space-l);
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: var(--tap-target-large);
+  padding: var(--space-s);
+  font-size: var(--text-s);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: var(--border);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.btn-secondary {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+/* ═══════════════════════════════════════
+   ORDER DETAILS
+   ═══════════════════════════════════════ */
+.order-details {
+  margin-top: var(--space-l);
+  padding-top: var(--space-m);
+  border-top: var(--border);
+}
+
+.order-details h4 {
+  font-size: var(--text-xs);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-s);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+  font-size: var(--text-s);
+}
+
+.detail-row .label {
+  color: var(--ink-muted);
+}
+
+.detail-row.total {
+  font-weight: 900;
+  padding-top: var(--space-s);
+  margin-top: var(--space-xs);
+  border-top: var(--border-thin);
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Success Header -->
+  <div class="success-header">
+    <div class="success-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    <h1 class="success-title">Pembayaran Berhasil</h1>
+    <p class="success-subtitle">E-ticket sudah dikirim ke email kamu</p>
+  </div>
+
+  <!-- Ticket Card -->
+  <div class="ticket-card">
+    <div class="ticket-header">
+      <div class="ticket-event">
+        <div class="ticket-thumb">
+          <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=200&q=80" alt="Dewa 19">
+        </div>
+        <div class="ticket-info">
+          <h3>Dewa 19</h3>
+          <span class="tier">Tribune</span>
+        </div>
+      </div>
+      <div class="ticket-meta">
+        <div class="ticket-meta-item">
+          <div class="label">Tanggal</div>
+          <div class="value">15 Mar 2025</div>
+        </div>
+        <div class="ticket-meta-item">
+          <div class="label">Waktu</div>
+          <div class="value">19:00 WIB</div>
+        </div>
+        <div class="ticket-meta-item">
+          <div class="label">Lokasi</div>
+          <div class="value">Jakarta Int'l Stadium</div>
+        </div>
+        <div class="ticket-meta-item">
+          <div class="label">Gate</div>
+          <div class="value">Gate B</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ticket-qr">
+      <div class="qr-wrapper">
+        <div class="qr-code"></div>
+      </div>
+      <div class="qr-label">Scan untuk masuk venue</div>
+      <div class="ticket-id">RT-2025-0315-7X9K2</div>
+    </div>
+
+    <div class="ticket-holder">
+      <div class="holder-row">
+        <span class="label">Pemegang Tiket</span>
+        <span class="value">Budi Santoso</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Details -->
+  <div class="order-details">
+    <h4>Detail Pesanan</h4>
+    <div class="detail-row">
+      <span class="label">No. Pesanan</span>
+      <span>ORD-20250115-4829</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Tribune × 2</span>
+      <span>Rp 900.000</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Biaya layanan</span>
+      <span>Rp 20.000</span>
+    </div>
+    <div class="detail-row total">
+      <span>Total Dibayar</span>
+      <span>Rp 920.000</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <a href="04-my-tickets.html" class="btn btn-primary">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+      </svg>
+      Lihat Tiket Saya
+    </a>
+    <a href="01-home.html" class="btn btn-secondary">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+      Kembali ke Home
+    </a>
+  </div>
+</div>
+</body>
+</html>

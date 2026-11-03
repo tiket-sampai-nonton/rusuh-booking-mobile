@@ -1,14 +1,11 @@
 /**
  * Checkout PageScreen (folder index) — RBT-051 item-list slice.
  *
- * 1:1 of prototype `detail.html` checkout. This ticket (RBT-051) lands the
- * ticket ITEM LIST + quantity/category rules: min 1, max = effective cap
- * (≤ 3 per buyer-NIK), add/remove rows, per-row category + attendee fields, and
- * the single-use "Gunakan NIK pembeli" switch. Buyer-data validation detail is
- * RBT-052, buyer auto-fill + confirm-leave is RBT-053, the idempotent hold is
- * RBT-054 — each enriches this screen. The session + deadline come from RBT-050
- * (useBookingSession + useServerCountdown). Markup → ./fragments, styles →
- * ./style, types → ./interface, categories → ./categories.
+ * V2 Brutalist Mono implementation matching 03-checkout.html:
+ * - Progress steps bar at top (4 steps: Pilih, Detail, Bayar, Selesai)
+ * - Numbered sections with black boxes (1, 2, 3)
+ * - 2px solid borders, no rounded corners
+ * - Inter font family
  *
  * NIK is never logged; the buyer/attendee NIK fields are masked on handoff
  * (D7.1/D7.5). No infrastructure import — ports via useServices/hooks only.
@@ -54,6 +51,7 @@ import { CheckoutTopBar } from "./fragments/CheckoutTopBar";
 import { Field, Section } from "./fragments/common";
 import { ConsentGate } from "./fragments/ConsentGate";
 import { LeaveConfirm } from "./fragments/LeaveConfirm";
+import { ProgressSteps } from "./fragments/ProgressSteps";
 import { TicketItem } from "./fragments/TicketItem";
 import type { CheckoutScreenProps, RowCheckStatus } from "./interface";
 import { checkoutScrollContent } from "./style";
@@ -166,13 +164,16 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           onBack={() => setConfirmLeave(true)}
         />
 
+        {/* Progress Steps Bar (prototype .progress-container) */}
+        <ProgressSteps currentStep={2} />
+
         <ScrollView
           contentContainerStyle={checkoutScrollContent(isDesktop)}
           testID="checkout-scroll"
         >
           {session ? <CheckoutHero eventId={session.eventId} /> : null}
 
-          <Section title="Data Pembeli">
+          <Section title="Data Pembeli" number={1}>
             {prefill.fromAccount ? (
               <View
                 style={{
@@ -210,7 +211,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
             />
           </Section>
 
-          <Section title="Tiket">
+          <Section title="Tiket" number={2}>
             {rows.map((row, i) => {
               const nik = row.useBuyerNik ? buyerNik : row.attendeeNik;
               return (
@@ -237,39 +238,39 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               onPress={addRow}
               testID="add-ticket"
               style={{
-                marginTop: 12,
+                marginTop: 16,
                 alignItems: "center",
                 borderWidth: 2,
                 borderStyle: "dashed",
                 borderColor: v2.ink,
                 backgroundColor: v2.ground,
-                paddingVertical: 14,
+                paddingVertical: 16,
                 opacity: rows.length >= cap ? 0.4 : 1,
               }}
             >
-              <Text style={{ color: v2.ink }} className="text-sm font-v2 font-bold uppercase">
+              <Text style={{ color: v2.ink, fontSize: 14, fontWeight: "700", textTransform: "uppercase" }}>
                 ＋ Tambah tiket
               </Text>
             </Pressable>
             <View
               style={{
-                marginTop: 12,
+                marginTop: 16,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 9,
+                gap: 12,
                 borderWidth: 2,
                 borderColor: v2.warn,
                 backgroundColor: v2.ground,
-                paddingHorizontal: 14,
-                paddingVertical: 12,
+                paddingHorizontal: 16,
+                paddingVertical: 14,
               }}
             >
-              <Text style={{ color: v2.warn }} className="text-sm" accessibilityElementsHidden>
+              <Text style={{ color: v2.warn, fontSize: 16 }} accessibilityElementsHidden>
                 ⚠
               </Text>
-              <Text style={{ color: v2.ink, flex: 1 }} className="text-xs font-v2">
+              <Text style={{ color: v2.ink, flex: 1, fontSize: 13 }}>
                 Batas{" "}
-                <Text style={{ color: v2.warn }} className="font-v2 font-bold">
+                <Text style={{ color: v2.warn, fontWeight: "700" }}>
                   {cap} tiket per NIK
                 </Text>{" "}
                 divalidasi server saat Lanjut Bayar. Tiap tiket butuh 1 NIK penonton.
@@ -278,7 +279,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           </Section>
 
           {isGuest ? (
-            <Section title="Persetujuan">
+            <Section title="Persetujuan" number={3}>
               <ConsentGate checked={consent} onToggle={setConsent} />
             </Section>
           ) : null}

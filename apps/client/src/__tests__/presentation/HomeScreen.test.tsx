@@ -43,11 +43,14 @@ describe("HomeScreen", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: pending },
     });
-    expect(screen.getByTestId("home-loading")).toBeTruthy();
+    // V2: Loading uses V2Loader with visible prop which renders letters.
+    // Check for the first letter "R" of "RUSUH" to verify loading state.
+    expect(screen.queryAllByText("R").length).toBeGreaterThanOrEqual(1);
     // Settle the query so the suite leaves no pending work behind.
     release([]);
     await waitFor(() =>
-      expect(screen.queryByTestId("home-loading")).toBeNull(),
+      // V2: Once loaded, letters disappear and section-events appears
+      expect(screen.queryByTestId("section-events")).toBeTruthy(),
     );
   });
 
@@ -55,17 +58,20 @@ describe("HomeScreen", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
+    // V2: testID is section-events instead of section-upcoming
     await waitFor(() =>
-      expect(screen.getByTestId("section-upcoming")).toBeTruthy(),
+      expect(screen.getByTestId("section-events")).toBeTruthy(),
     );
-    expect(screen.getByText("Konser Terdekat")).toBeTruthy();
-    expect(screen.getByText("History Event")).toBeTruthy();
+    // V2: Header text is "Event Minggu Ini" instead of "Konser Terdekat"
+    expect(screen.getByText("Event Minggu Ini")).toBeTruthy();
+    // V2: History section header is "Event Sebelumnya"
+    expect(screen.getByText("Event Sebelumnya")).toBeTruthy();
     // "Rusuh Fest 2026" shows in the hero slide AND its catalog card.
     expect(screen.getAllByText("Rusuh Fest 2026").length).toBeGreaterThanOrEqual(1);
     // evt-5 is CLOSED → history card only.
     expect(screen.getByText("Jazz in the Park 2025")).toBeTruthy();
     // Measure BOTH section scroll targets (onFeaturedLayout + onHistoryLayout).
-    fireEvent(screen.getByTestId("section-upcoming"), "layout", {
+    fireEvent(screen.getByTestId("section-events"), "layout", {
       nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
     });
     fireEvent(screen.getByTestId("section-history"), "layout", {
@@ -77,23 +83,26 @@ describe("HomeScreen", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    await waitFor(() => screen.getByTestId("event-card-evt-1"));
-    fireEvent.press(screen.getByTestId("event-card-evt-1"));
+    // V2: testID is v2-event-card-<id>
+    await waitFor(() => screen.getByTestId("v2-event-card-evt-1"));
+    fireEvent.press(screen.getByTestId("v2-event-card-evt-1"));
     expect(mockRouter.push).toHaveBeenCalledWith("/events/evt-1");
   });
 
-  it("renders the photo hero and books the featured event + sees all", async () => {
+  it("renders the V2 hero and books the featured event + sees all", async () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    await waitFor(() => screen.getByTestId("home-hero"));
+    // V2: testID is v2-hero instead of home-hero
+    await waitFor(() => screen.getByTestId("v2-hero"));
     // Fire onLayout so the featured-section Y is measured (scroll target).
-    fireEvent(screen.getByTestId("section-upcoming"), "layout", {
+    // V2: testID is section-events instead of section-upcoming
+    fireEvent(screen.getByTestId("section-events"), "layout", {
       nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
     });
     // Each hero slide carries its own CTAs (prototype .slide-body); press the
-    // first. "Lihat Semua" scrolls to the catalog, "Booking Sekarang" routes.
-    fireEvent.press(screen.getAllByTestId("hero-see-all")[0]);
+    // first. V2: hero-detail routes to /browse, hero-book routes to event.
+    fireEvent.press(screen.getAllByTestId("hero-detail")[0]);
     fireEvent.press(screen.getAllByTestId("hero-book")[0]);
     expect(mockRouter.push).toHaveBeenCalledWith(
       expect.stringMatching(/^\/events\//),
@@ -104,10 +113,11 @@ describe("HomeScreen", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning([]) },
     });
+    // V2: Only shows "Belum ada event yang cocok." for upcoming events.
+    // History section is not rendered when empty (per V2 prototype).
     await waitFor(() =>
       expect(screen.getByText("Belum ada event yang cocok.")).toBeTruthy(),
     );
-    expect(screen.getByText("Belum ada event yang berlalu.")).toBeTruthy();
   });
 
   it("renders the error state when the catalog fetch fails", async () => {

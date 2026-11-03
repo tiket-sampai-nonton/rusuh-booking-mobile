@@ -25,7 +25,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       longDesc: "Festival musik tahunan terbesar dengan line-up lintas genre.",
       lineup: ["Band A", "Band B", "DJ C"],
       terms: "Tiket tidak dapat dikembalikan. Wajib membawa KTP sesuai NIK.",
-      bannerImage: "https://cdn.example/evt-1/banner.jpg",
+      bannerImage: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80&auto=format&fit=crop",
       // FE-NEED (O2): pricing categories + availability, mocked until the BE
       // typed `priceMinor`/`available` contract lands. Read defensively by the
       // detail screen (parseDescription).
@@ -51,7 +51,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       longDesc: "Nobar final dengan layar raksasa dan zona komunitas.",
       lineup: [],
       terms: "Masuk sesuai sesi pada tiket.",
-      bannerImage: "https://cdn.example/evt-2/banner.jpg",
+      bannerImage: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=1200&q=80&auto=format&fit=crop",
       categories: [
         { code: "REG", name: "Reguler", priceMinor: 30000000, available: 8 },
         { code: "VIP", name: "VIP Lounge", priceMinor: 75000000, available: 0 },
@@ -73,7 +73,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       longDesc: "Malam musik indie dengan 12 penampil.",
       lineup: ["Indie X", "Indie Y"],
       terms: "Penjualan dibuka 20 Desember.",
-      bannerImage: "https://cdn.example/evt-3/banner.jpg",
+      bannerImage: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=1200&q=80&auto=format&fit=crop",
     },
   },
   {
@@ -91,7 +91,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       longDesc: "Konser stadion dengan kapasitas penuh.",
       lineup: ["Headliner Z"],
       terms: "Sold out. Tidak ada penjualan di lokasi.",
-      bannerImage: "https://cdn.example/evt-4/banner.jpg",
+      bannerImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80&auto=format&fit=crop",
       categories: [
         { code: "REG", name: "Reguler", priceMinor: 75000000, available: 0 },
         { code: "VIP", name: "VIP", priceMinor: 150000000, available: 0 },
@@ -113,7 +113,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       longDesc: "Acara jazz tahunan (telah berlalu).",
       lineup: ["Jazz Trio"],
       terms: "Acara telah selesai.",
-      bannerImage: "https://cdn.example/evt-5/banner.jpg",
+      bannerImage: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1200&q=80&auto=format&fit=crop",
     },
   },
   {
@@ -131,7 +131,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       longDesc: "Pesta musik elektronik dengan panggung 360°.",
       lineup: ["DJ One", "DJ Two", "DJ Three"],
       terms: "Usia 18+. Wajib NIK.",
-      bannerImage: "https://cdn.example/evt-6/banner.jpg",
+      bannerImage: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&q=80&auto=format&fit=crop",
       categories: [
         { code: "GA", name: "General Admission", priceMinor: 35000000, available: 300 },
         { code: "FRONT", name: "Front of Stage", priceMinor: 90000000, available: 40 },

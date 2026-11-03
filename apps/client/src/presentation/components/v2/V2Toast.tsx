@@ -1,107 +1,180 @@
 /**
- * V2Toast — Brutalist Mono toast (RBT-087).
+ * RBT-096 — V2Toast (Re-implementation)
  *
- * Prototype `.toast`: a hard-edged ink/green/red pill that slides in from the
- * edge, holds ~3s, slides out. Exposed as a `useV2Toast()` hook returning
- * `{ show, toast }` — render `toast` once near the root and call `show(msg,
- * type)` from anywhere in that subtree. Reanimated-driven; honors reduced-
- * motion (instant show/hide, no slide).
+ * MASTER-SPEC §2.5:
+ * - position: fixed, bottom: 120px (above checkout bar)
+ * - background: #000, color: #fff
+ * - padding: 16px 32px
+ * - fontWeight: 700
+ *
+ * success variant: background: #00aa00
+ * error variant: background: #ff0000
+ *
+ * ENTRANCE: translateY 100→0, opacity 0→1
  */
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
-import { Text } from "react-native";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { Text, StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withTiming,
-} from "react-native-reanimated";
+  runOnJS,
+} from 'react-native-reanimated';
 
-import { v2, v2Motion } from "@presentation/theme";
+import { v2Colors, v2Easing, v2ZIndex, interFonts } from '@presentation/theme';
 
-const EASE = Easing.bezier(...v2Motion.expoBezier);
+const EASE = Easing.bezier(...v2Easing.out);
+const ENTRANCE_DURATION = 400; // 0.4s
+const EXIT_DURATION = 300;
+const DEFAULT_DURATION = 3000; // 3s auto-dismiss
 
-export type V2ToastType = "info" | "success" | "error";
+export type V2ToastVariant = 'default' | 'success' | 'error';
 
-function bgFor(type: V2ToastType): string {
-  if (type === "success") return v2.success;
-  if (type === "error") return v2.accent;
-  return v2.ink;
+export interface V2ToastData {
+  id: string;
+  message: string;
+  variant: V2ToastVariant;
+  duration: number;
 }
 
-export interface V2ToastController {
-  show: (message: string, type?: V2ToastType) => void;
+interface V2ToastContextValue {
+  show: (message: string, variant?: V2ToastVariant, duration?: number) => void;
+  hide: (id: string) => void;
 }
 
-/** Standalone toast host + controller (no context needed for single use). */
-export function useV2Toast(): { show: V2ToastController["show"]; toast: ReactNode } {
-  const reduced = useReducedMotion();
-  const [message, setMessage] = useState("");
-  const [type, setType] = useState<V2ToastType>("info");
-  const p = useSharedValue(0);
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+const V2ToastContext = createContext<V2ToastContextValue | null>(null);
 
-  const show = useCallback<V2ToastController["show"]>(
-    (msg, t = "info") => {
-      setMessage(msg);
-      setType(t);
-      if (hideTimer.current) clearTimeout(hideTimer.current);
-      if (reduced) {
-        p.value = 1;
-      } else {
-        p.value = withTiming(1, { duration: 400, easing: EASE });
-      }
-      hideTimer.current = setTimeout(() => {
-        p.value = reduced ? 0 : withTiming(0, { duration: 400, easing: EASE });
-      }, 3000);
+/**
+ * Hook to show toasts from any component.
+ */
+export function useV2Toast() {
+  const context = useContext(V2ToastContext);
+  if (!context) {
+    throw new Error('useV2Toast must be used within V2ToastProvider');
+  }
+  return context;
+}
+
+/**
+ * Toast provider - wrap your app/screen with this.
+ */
+export function V2ToastProvider({ children }: { children: ReactNode }) {
+  const [toasts, setToasts] = useState<V2ToastData[]>([]);
+
+  const show = useCallback(
+    (message: string, variant: V2ToastVariant = 'default', duration = DEFAULT_DURATION) => {
+      const id = `${Date.now()}-${Math.random()}`;
+      setToasts((prev) => [...prev, { id, message, variant, duration }]);
     },
-    [reduced, p],
+    [],
   );
 
-  const style = useAnimatedStyle(() => ({
-    position: "absolute",
-    bottom: 24,
-    alignSelf: "center",
-    opacity: p.value,
-    transform: [{ translateY: (1 - p.value) * 80 }],
-  }));
+  const hide = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
-  const toast = useMemo(
-    () => (
-      <Animated.View
-        testID="v2-toast"
-        accessibilityRole="alert"
-        pointerEvents="none"
-        style={[style, { backgroundColor: bgFor(type), paddingVertical: 16, paddingHorizontal: 32 }]}
-      >
-        <Text style={{ color: v2.ground }} className="text-sm font-v2 font-bold">
-          {message}
-        </Text>
-      </Animated.View>
-    ),
-    [style, type, message],
-  );
+  const value = useMemo(() => ({ show, hide }), [show, hide]);
 
-  return { show, toast };
-}
-
-/** Optional context form when many descendants need `show`. */
-const V2ToastContext = createContext<V2ToastController | null>(null);
-
-export function V2ToastProvider({ children }: { readonly children: ReactNode }) {
-  const { show, toast } = useV2Toast();
-  const value = useMemo(() => ({ show }), [show]);
   return (
     <V2ToastContext.Provider value={value}>
       {children}
-      {toast}
+      {/* Toast container */}
+      {toasts.map((toast) => (
+        <V2ToastItem key={toast.id} toast={toast} onDismiss={() => hide(toast.id)} />
+      ))}
     </V2ToastContext.Provider>
   );
 }
 
-export function useV2ToastContext(): V2ToastController {
-  const ctx = useContext(V2ToastContext);
-  if (!ctx) throw new Error("useV2ToastContext must be used within a V2ToastProvider");
-  return ctx;
+/**
+ * Single toast item with entrance/exit animation.
+ */
+function V2ToastItem({
+  toast,
+  onDismiss,
+}: {
+  toast: V2ToastData;
+  onDismiss: () => void;
+}) {
+  const progress = useSharedValue(0);
+
+  // Get background color based on variant
+  const backgroundColor = useMemo(() => {
+    switch (toast.variant) {
+      case 'success':
+        return v2Colors.success;
+      case 'error':
+        return v2Colors.danger;
+      default:
+        return v2Colors.ink;
+    }
+  }, [toast.variant]);
+
+  // Entrance + auto-dismiss animation (runs once on mount)
+  useEffect(() => {
+    // Start entrance animation
+    progress.value = withTiming(1, { duration: ENTRANCE_DURATION, easing: EASE });
+
+    // Auto-dismiss after duration
+    if (toast.duration > 0) {
+      const timeout = setTimeout(() => {
+        progress.value = withTiming(
+          0,
+          { duration: EXIT_DURATION, easing: EASE },
+          (finished) => {
+            if (finished) {
+              runOnJS(onDismiss)();
+            }
+          },
+        );
+      }, toast.duration);
+      return () => clearTimeout(timeout);
+    }
+    return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [
+      { translateY: (1 - progress.value) * 100 },
+    ],
+  }));
+
+  return (
+    <Animated.View
+      accessibilityRole="alert"
+      accessibilityLiveRegion="polite"
+      style={[
+        styles.toast,
+        { backgroundColor },
+        animatedStyle,
+      ]}
+    >
+      <Text style={styles.message}>{toast.message}</Text>
+    </Animated.View>
+  );
 }
+
+const styles = StyleSheet.create({
+  toast: {
+    position: 'absolute',
+    bottom: 120, // Above checkout bar
+    left: 24,
+    right: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    zIndex: v2ZIndex.toast,
+    alignItems: 'center',
+  },
+  message: {
+    color: v2Colors.ground,
+    fontSize: 14,
+    fontWeight: '700',
+    textAlign: 'center',
+    fontFamily: interFonts.medium,
+  },
+});
+

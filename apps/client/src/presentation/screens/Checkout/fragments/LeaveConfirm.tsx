@@ -1,5 +1,15 @@
-/** "Tinggalkan halaman ini?" confirm modal (prototype detail.html confirmBack). */
-import { Modal, Pressable, Text, View } from "react-native";
+/**
+ * RBT-092 — V2 Brutalist Mono Leave Confirm Modal
+ *
+ * PROTOTYPE 03-checkout.html .modal EXACT COPY:
+ * - Dark overlay (rgba(0,0,0,0.8))
+ * - 2px solid border, no rounded corners
+ * - Uppercase button labels
+ * - Black/white color scheme
+ */
+import { Modal, Pressable, Text, View, StyleSheet } from "react-native";
+
+import { v2Colors, v2Borders, interFonts } from "@presentation/theme";
 
 import type { LeaveConfirmProps } from "../interface";
 
@@ -9,39 +19,39 @@ export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
       <Pressable
         accessibilityLabel="Tutup"
         onPress={onStay}
-        className="flex-1 items-center justify-center bg-ink/70 p-5"
+        style={styles.overlay}
         testID="checkout-leave-backdrop"
       >
         <Pressable
           onPress={(e) => e.stopPropagation()}
-          className="w-full max-w-md rounded-3xl border border-line bg-card p-6"
+          style={styles.modal}
           testID="checkout-leave-modal"
         >
-          <Text className="text-lg font-extrabold text-foreground" accessibilityRole="header">
-            Tinggalkan halaman ini?
+          <Text style={styles.title} accessibilityRole="header">
+            ⚠️ Tinggalkan halaman?
           </Text>
-          <Text className="mt-2 text-sm leading-5 text-muted-foreground">
+          <Text style={styles.body}>
             Kalau kamu keluar sekarang, sesi pemilihan tiket dilepas dan kamu harus
             mengulang antrean dari awal. Yakin mau keluar?
           </Text>
-          <View className="mt-5 flex-row justify-end gap-2.5">
+          <View style={styles.actions}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Tetap di sini"
               onPress={onStay}
               testID="checkout-stay"
-              className="rounded-pill border border-line px-5 py-3"
+              style={styles.stayButton}
             >
-              <Text className="text-sm font-semibold text-foreground">Tetap di sini</Text>
+              <Text style={styles.stayButtonText}>Tetap di sini</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Ya, keluar"
               onPress={onLeave}
               testID="checkout-leave-confirm"
-              className="rounded-pill bg-error px-5 py-3"
+              style={styles.leaveButton}
             >
-              <Text className="text-sm font-bold text-white">Ya, keluar ↗</Text>
+              <Text style={styles.leaveButtonText}>Ya, keluar</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -49,3 +59,72 @@ export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.8)",
+    padding: 32,
+  },
+  modal: {
+    width: "100%",
+    maxWidth: 400,
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.ground,
+    padding: 32,
+  },
+  title: {
+    fontSize: 20,
+    fontFamily: interFonts.black,
+    textTransform: "uppercase",
+    letterSpacing: -0.4,
+    color: v2Colors.ink,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  body: {
+    fontSize: 14,
+    fontFamily: interFonts.regular,
+    lineHeight: 22,
+    color: v2Colors.gray,
+    textAlign: "center",
+    marginBottom: 32,
+  },
+  actions: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  stayButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.ink,
+    alignItems: "center",
+  },
+  stayButtonText: {
+    fontSize: 12,
+    fontFamily: interFonts.bold,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    color: v2Colors.ground,
+  },
+  leaveButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.ground,
+    alignItems: "center",
+  },
+  leaveButtonText: {
+    fontSize: 12,
+    fontFamily: interFonts.bold,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    color: v2Colors.ink,
+  },
+});

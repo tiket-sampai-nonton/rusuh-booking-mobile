@@ -12,7 +12,7 @@ import { Text, TextInput, View } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
 
 import { V2Button, V2Reveal, V2RevealStagger, useV2ToastContext } from "@presentation/components/v2";
-import { v2 } from "@presentation/theme";
+import { v2, interFonts } from "@presentation/theme";
 
 const COUNT_MS = 1600;
 
@@ -277,7 +277,7 @@ export function HomeMarketing() {
                 color: v2.ink,
                 paddingVertical: 14,
                 paddingHorizontal: 16,
-                fontFamily: "Inter",
+                fontFamily: interFonts.regular,
                 fontSize: 16,
               }}
             />

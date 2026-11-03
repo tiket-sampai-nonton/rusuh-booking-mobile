@@ -1,27 +1,48 @@
-/** Browse loading + empty states (prototype browse.html). */
-import { ActivityIndicator, Text, View } from "react-native";
+/**
+ * RBT-089 — V2 Brutalist Mono Browse States
+ *
+ * PROTOTYPE 05-browse.html EXACT COPY:
+ * - Loading: V2Loader with "BROWSE" label
+ * - Empty: dashed 2px border, no rounded corners
+ * - Pure black/white, Inter font
+ */
+import { Text, View } from 'react-native';
 
-import { brand } from "@presentation/theme";
+import { V2Loader } from '@presentation/components/v2';
+import { v2Colors, interFonts } from '@presentation/theme';
+
+import { browseEmpty } from '../style';
 
 export function BrowseLoading() {
-  return (
-    <View className="mt-10 items-center" testID="browse-loading">
-      <ActivityIndicator accessibilityLabel="Memuat event" color={brand.red} />
-    </View>
-  );
+  return <V2Loader visible label="BROWSE" testID="browse-loading" />;
 }
 
 export function BrowseEmpty() {
   return (
-    <View
-      className="mt-8 rounded-2xl border border-dashed border-line p-8"
-      testID="browse-empty"
-    >
-      <Text className="text-center text-base font-bold text-foreground">
-        Tidak ada event yang cocok
+    <View style={browseEmpty} testID="browse-empty">
+      <Text
+        style={{
+          color: v2Colors.ink,
+          fontSize: 18,
+          fontFamily: interFonts.black,
+          textTransform: 'uppercase',
+          letterSpacing: -0.36,
+          textAlign: 'center',
+          marginBottom: 8,
+        }}
+      >
+        Tidak Ada Event
       </Text>
-      <Text className="mt-1 text-center text-sm text-muted-foreground">
-        Coba ubah filter genre atau waktu, atau kembali ke beranda.
+      <Text
+        style={{
+          color: v2Colors.inkMuted,
+          fontSize: 14,
+          fontFamily: interFonts.regular,
+          textAlign: 'center',
+          maxWidth: 320,
+        }}
+      >
+        Tidak ada event yang cocok dengan filter ini. Coba ubah filter atau kembali ke beranda.
       </Text>
     </View>
   );

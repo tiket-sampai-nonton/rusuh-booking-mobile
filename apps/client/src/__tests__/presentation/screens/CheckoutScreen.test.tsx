@@ -219,7 +219,8 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByText("Pilih tiketmu")).toBeTruthy());
+    // V2: CheckoutHero shows "Pilih Tiketmu" (uppercase T)
+    await waitFor(() => expect(screen.getByText("Pilih Tiketmu")).toBeTruthy());
   });
 
   it("renders without the hero when no session is restored", async () => {
@@ -229,7 +230,8 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     // Loading clears → the add-ticket control appears (post-restore render),
     // and the session-dependent hero stays absent (false arm of the ternary).
     await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
-    expect(screen.queryByText("Pilih tiketmu")).toBeNull();
+    // V2: CheckoutHero shows "Pilih Tiketmu" (uppercase T)
+    expect(screen.queryByText("Pilih Tiketmu")).toBeNull();
     expect(screen.getByTestId("ticket-row-0")).toBeTruthy();
   });
 

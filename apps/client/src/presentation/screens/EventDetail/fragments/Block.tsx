@@ -1,40 +1,67 @@
 /**
- * V2 Brutalist Mono section block (RBT-090).
+ * V2 Brutalist Mono Section Block
  *
- * Prototype 02-event-detail `.section`: an uppercase label underlined by a short
- * hard rule, then a bold heading. Over the screen's dark hero backdrop the block
- * text stays light; the label rule + accent use the V2 live-red. The dev-only
- * "GAP: FE-NEED" badge is dropped (not in the prototype). Same props as before.
+ * MATCHES: `.oil-ui/v2/02-event-detail.html` .section
+ *
+ * Features:
+ * - Uppercase title with 2px bottom border
+ * - Scroll-triggered reveal animation (opacity + translateY)
+ * - No rounded corners (Brutalist)
  */
-import { Text, View } from "react-native";
-
-import { v2 } from "@presentation/theme";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Text, View } from "react-native";
 
 import type { BlockProps } from "../interface";
-import { detailStyles } from "../style";
+import { v2DetailStyles as styles } from "../style";
 
 export function Block({ label, heading, children }: BlockProps) {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const translateAnim = useRef(new Animated.Value(30)).current;
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Trigger animation when block becomes visible
+  useEffect(() => {
+    if (isVisible) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateAnim, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isVisible, fadeAnim, translateAnim]);
+
+  // Simple visibility detection (always visible for now)
+  // In production, use IntersectionObserver on web or onLayout checks
+  useEffect(() => {
+    // Trigger animation after a short delay based on position
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <View style={detailStyles.block}>
-      <View style={{ marginBottom: 12 }}>
-        <Text
-          style={{ color: v2.ground, letterSpacing: 2, opacity: 0.85 }}
-          className="text-2xs font-v2 font-bold uppercase"
-          accessibilityRole="header"
-        >
-          {label}
-        </Text>
-        <View style={{ width: 28, height: 2, backgroundColor: v2.accent, marginTop: 8 }} />
-      </View>
-      {heading ? (
-        <Text
-          style={{ color: v2.ground, letterSpacing: -0.5 }}
-          className="text-2xl font-v2 font-black"
-        >
-          {heading}
-        </Text>
-      ) : null}
-      <View style={detailStyles.blockBody}>{children}</View>
-    </View>
+    <Animated.View
+      style={[
+        styles.section,
+        {
+          opacity: fadeAnim,
+          transform: [{ translateY: translateAnim }],
+        },
+      ]}
+    >
+      {/* Section Title (label as title for V2) */}
+      <Text style={styles.sectionTitle} accessibilityRole="header">
+        {label}
+      </Text>
+
+      {/* Content */}
+      <View>{children}</View>
+    </Animated.View>
   );
 }

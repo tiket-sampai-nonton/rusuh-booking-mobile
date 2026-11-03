@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Rusuh Tiket — Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-tokens.css">
+<style>
+/*
+  ═══════════════════════════════════════════════════════════════════════════════
+  RUSUH TIKET — Mobile Home Screen
+  V2 Brutalist Mono Theme — Mobile App Optimized
+  ═══════════════════════════════════════════════════════════════════════════════
+  
+  北极星: Bauhaus meets punk zine — optimized for touch
+  
+  Mobile adaptations:
+  - No custom cursor
+  - Touch states instead of hover
+  - Safe area handling
+  - Bottom navigation
+  - Smaller hero for mobile viewport
+  - Pull-to-refresh ready
+  ═══════════════════════════════════════════════════════════════════════════════
+*/
+
+/* Page wrapper with safe areas */
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(var(--bottom-nav-height) + var(--space-s));
+}
+
+/* ═══════════════════════════════════════
+   LOADING SCREEN
+   ═══════════════════════════════════════ */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s var(--ease), visibility 0.4s;
+}
+
+.loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-text {
+  color: var(--ground);
+  font-size: clamp(1.25rem, 5vw, 2rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ═══════════════════════════════════════
+   HEADER — Fixed, minimal for mobile
+   ═══════════════════════════════════════ */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-s) var(--frame);
+  padding-top: calc(var(--safe-top) + var(--space-s));
+  background: var(--ground);
+  border-bottom: var(--border);
+  height: calc(var(--header-height) + var(--safe-top));
+}
+
+.logo {
+  font-size: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+/* ═══════════════════════════════════════
+   BUTTONS — Touch-optimized
+   ═══════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: var(--tap-target);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  font-size: var(--btn-font-size);
+  font-weight: var(--btn-font-weight);
+  text-transform: var(--btn-text-transform);
+  letter-spacing: var(--btn-letter-spacing);
+  border: var(--border);
+  transition: var(--transition-fast);
+}
+
+.btn:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn-ghost:active {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.btn-primary:active {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+.btn-icon {
+  width: var(--tap-target);
+  min-width: var(--tap-target);
+  padding: 0;
+}
+
+.btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-large {
+  padding: 1rem 1.5rem;
+  font-size: var(--text-m);
+  min-height: var(--tap-target-large);
+}
+
+.btn-full {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════
+   HERO — Mobile-optimized carousel
+   ═══════════════════════════════════════ */
+.hero {
+  position: relative;
+  min-height: 70vh;
+  min-height: 70dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: calc(var(--header-height) + var(--safe-top) + var(--space-l)) var(--frame) var(--space-l);
+  overflow: hidden;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s var(--ease), visibility 0.8s;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.hero-slide-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(100%) contrast(1.1);
+}
+
+.hero-slide-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    var(--ground) 0%,
+    rgba(255,255,255,0.8) 30%,
+    rgba(255,255,255,0.4) 100%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+}
+
+.hero-title {
+  font-size: var(--text-hero);
+  font-weight: 900;
+  line-height: 0.85;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-s);
+}
+
+.hero-tagline {
+  font-size: var(--text-m);
+  font-weight: 500;
+  margin-bottom: var(--space-m);
+  max-width: 280px;
+}
+
+.hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--text-s);
+  font-weight: 500;
+  margin-bottom: var(--space-s);
+}
+
+.hero-meta span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.hero-meta svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.hero-price {
+  font-size: var(--text-xl);
+  font-weight: 900;
+  margin-bottom: var(--space-m);
+}
+
+.hero-cta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Slide Navigation — swipe-friendly dots */
+.hero-nav {
+  position: absolute;
+  bottom: calc(var(--space-l) + 100px);
+  left: var(--frame);
+  right: var(--frame);
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 20;
+}
+
+.hero-nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+  border: none;
+  padding: 0;
+  transition: var(--transition-fast);
+  /* Larger touch area */
+  position: relative;
+}
+
+.hero-nav-dot::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+}
+
+.hero-nav-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: var(--ink);
+}
+
+/* ═══════════════════════════════════════
+   SECTIONS — Shared layout
+   ═══════════════════════════════════════ */
+section {
+  padding: var(--space-l) var(--frame);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-m);
+  padding-bottom: var(--space-s);
+  border-bottom: var(--border);
+}
+
+.section-title {
+  font-size: var(--text-l);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.section-link {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--tap-target);
+  padding: var(--space-xs);
+  margin: calc(-1 * var(--space-xs));
+}
+
+.section-link:active {
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════
+   EVENTS GRID — Mobile card list
+   ═══════════════════════════════════════ */
+.events {
+  background: var(--field);
+}
+
+.events-scroll {
+  display: flex;
+  gap: var(--space-s);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--space-s);
+  margin: 0 calc(-1 * var(--frame));
+  padding-left: var(--frame);
+  padding-right: var(--frame);
+}
+
+.events-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.event-card {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  background: var(--ground);
+  border: var(--border);
+  transition: var(--transition-fast);
+}
+
+.event-card:active {
+  transform: scale(0.98);
+}
+
+.event-image {
+  position: relative;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+}
+
+.event-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%);
+}
+
+.event-badge {
+  position: absolute;
+  top: var(--space-s);
+  left: var(--space-s);
+  padding: 4px 8px;
+  background: var(--ink);
+  color: var(--ground);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.event-badge.sold-out {
+  background: var(--danger);
+}
+
+.event-content {
+  padding: var(--space-m);
+}
+
+.event-date {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.event-title {
+  font-size: var(--text-m);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.event-venue {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  margin-bottom: var(--space-s);
+}
+
+.event-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-s);
+  border-top: var(--border-thin);
+}
+
+.event-price {
+  font-size: var(--text-s);
+  font-weight: 800;
+}
+
+.event-btn {
+  min-height: var(--tap-target);
+  padding: 8px 12px;
+  background: var(--ink);
+  border: var(--border);
+  color: var(--ground);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: var(--transition-fast);
+}
+
+.event-btn:active {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+/* ═══════════════════════════════════════
+   CATEGORIES — 2-column grid
+   ═══════════════════════════════════════ */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+  background: var(--ink);
+}
+
+.category-card {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--ground);
+}
+
+.category-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%) brightness(0.5);
+}
+
+.category-card:active img {
+  filter: grayscale(0%) brightness(0.6);
+}
+
+.category-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-m);
+  color: var(--ground);
+}
+
+.category-name {
+  font-size: var(--text-m);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.category-count {
+  font-size: var(--text-xs);
+  opacity: 0.8;
+}
+
+/* ═══════════════════════════════════════
+   STATS — Horizontal scroll on mobile
+   ═══════════════════════════════════════ */
+.stats {
+  background: var(--ink);
+  color: var(--ground);
+  overflow: hidden;
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  gap: var(--space-m);
+}
+
+.stat-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-number {
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  font-size: var(--text-2xs);
+  font-weight: 500;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ═══════════════════════════════════════
+   HOW IT WORKS — Vertical steps on mobile
+   ═══════════════════════════════════════ */
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step-card {
+  padding: var(--space-m);
+  background: var(--ground);
+  position: relative;
+  border-bottom: var(--border);
+}
+
+.step-card:last-child {
+  border-bottom: none;
+}
+
+.step-number {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 0.8;
+  opacity: 0.08;
+  position: absolute;
+  top: var(--space-s);
+  right: var(--space-s);
+}
+
+.step-title {
+  font-size: var(--text-s);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+
+.step-desc {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  line-height: 1.5;
+  max-width: 80%;
+}
+
+/* ═══════════════════════════════════════
+   BOTTOM NAVIGATION
+   ═══════════════════════════════════════ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-bottom-nav);
+  background: var(--ground);
+  border-top: var(--border);
+  padding-bottom: var(--safe-bottom);
+}
+
+.bottom-nav-inner {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 56px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: var(--tap-target-large);
+  min-height: var(--tap-target-large);
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.nav-item.active {
+  color: var(--ink);
+}
+
+.nav-item:active {
+  transform: scale(0.95);
+}
+
+.nav-item svg {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-item span {
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ═══════════════════════════════════════
+   MODAL — Full-screen on mobile
+   ═══════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: var(--z-modal);
+  display: none;
+  align-items: flex-end;
+  padding: 0;
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal {
+  background: var(--ground);
+  width: 100%;
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  padding: var(--space-m);
+  padding-bottom: calc(var(--space-m) + var(--safe-bottom));
+  animation: modalSlideUp 0.3s var(--ease);
+}
+
+@keyframes modalSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.modal-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--ink-muted);
+  border-radius: 2px;
+  margin: 0 auto var(--space-m);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-m);
+}
+
+.modal h3 {
+  font-size: var(--text-l);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.modal-close {
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: var(--border);
+  background: var(--ground);
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:active {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+/* Form fields */
+.modal-field {
+  margin-bottom: var(--space-m);
+}
+
+.modal-field label {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-xs);
+}
+
+.modal-field input {
+  width: 100%;
+  min-height: var(--input-height);
+  padding: var(--input-padding-y) var(--input-padding-x);
+  border: var(--border);
+  background: var(--field);
+  font-family: inherit;
+  font-size: var(--input-font-size);
+  font-weight: 500;
+  transition: var(--transition-fast);
+}
+
+.modal-field input:focus {
+  outline: none;
+  background: var(--ground);
+  box-shadow: var(--shadow-sm);
+}
+</style>
+</head>
+<body>
+<!-- Loading Screen -->
+<div class="loader" id="loader">
+  <div class="loader-text">RUSUH</div>
+</div>
+
+<div class="app">
+  <!-- Header -->
+  <header class="header">
+    <a href="/" class="logo">Rusuh</a>
+    <div class="header-actions">
+      <button class="btn btn-icon btn-ghost" aria-label="Search">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
+      <button class="btn btn-ghost" id="loginBtn">Masuk</button>
+    </div>
+  </header>
+
+  <!-- Hero Carousel -->
+  <section class="hero">
+    <!-- Slide 1 -->
+    <div class="hero-slide active" id="slide-1">
+      <div class="hero-slide-bg" style="background-image: url('https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=1200&q=80')"></div>
+      <div class="hero-slide-overlay"></div>
+    </div>
+    
+    <!-- Slide 2 -->
+    <div class="hero-slide" id="slide-2">
+      <div class="hero-slide-bg" style="background-image: url('https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80')"></div>
+      <div class="hero-slide-overlay"></div>
+    </div>
+
+    <div class="hero-content">
+      <h1 class="hero-title">Dewa 19</h1>
+      <p class="hero-tagline">30 Years Anniversary Tour — Jakarta Edition</p>
+      <div class="hero-meta">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          15 Maret 2025
+        </span>
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Jakarta International Stadium
+        </span>
+      </div>
+      <div class="hero-price">Mulai Rp 250.000</div>
+      <div class="hero-cta">
+        <a href="02-event-detail.html" class="btn btn-primary btn-large btn-full">Beli Tiket</a>
+      </div>
+    </div>
+
+    <!-- Slide Navigation -->
+    <nav class="hero-nav">
+      <button class="hero-nav-dot active" data-slide="1"></button>
+      <button class="hero-nav-dot" data-slide="2"></button>
+    </nav>
+  </section>
+
+  <!-- Upcoming Events -->
+  <section class="events">
+    <div class="section-header">
+      <h2 class="section-title">Event Mendatang</h2>
+      <a href="05-browse.html" class="section-link">
+        Lihat Semua
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+    
+    <div class="events-scroll">
+      <!-- Event Card 1 -->
+      <article class="event-card">
+        <div class="event-image">
+          <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80" alt="Sheila on 7">
+          <span class="event-badge">Segera</span>
+        </div>
+        <div class="event-content">
+          <time class="event-date">22 Mar 2025 • 19:00</time>
+          <h3 class="event-title">Sheila on 7</h3>
+          <p class="event-venue">Istora Senayan, Jakarta</p>
+          <div class="event-footer">
+            <span class="event-price">Rp 350K</span>
+            <button class="event-btn">Beli</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Event Card 2 -->
+      <article class="event-card">
+        <div class="event-image">
+          <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&q=80" alt="Tulus">
+          <span class="event-badge">Hot</span>
+        </div>
+        <div class="event-content">
+          <time class="event-date">5 Apr 2025 • 20:00</time>
+          <h3 class="event-title">Tulus Manusia</h3>
+          <p class="event-venue">ICE BSD, Tangerang</p>
+          <div class="event-footer">
+            <span class="event-price">Rp 450K</span>
+            <button class="event-btn">Beli</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Event Card 3 -->
+      <article class="event-card">
+        <div class="event-image">
+          <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&q=80" alt="Festival">
+          <span class="event-badge sold-out">Sold Out</span>
+        </div>
+        <div class="event-content">
+          <time class="event-date">12 Apr 2025 • 14:00</time>
+          <h3 class="event-title">Soundrenaline</h3>
+          <p class="event-venue">Allianz Ecopark, Ancol</p>
+          <div class="event-footer">
+            <span class="event-price">Rp 750K</span>
+            <button class="event-btn" disabled>Habis</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Event Card 4 -->
+      <article class="event-card">
+        <div class="event-image">
+          <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80" alt="Maliq">
+        </div>
+        <div class="event-content">
+          <time class="event-date">20 Apr 2025 • 19:30</time>
+          <h3 class="event-title">Maliq & D'Essentials</h3>
+          <p class="event-venue">The Pallas, SCBD</p>
+          <div class="event-footer">
+            <span class="event-price">Rp 400K</span>
+            <button class="event-btn">Beli</button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="categories">
+    <div class="section-header">
+      <h2 class="section-title">Kategori</h2>
+    </div>
+    <div class="categories-grid">
+      <a href="05-browse.html?cat=concert" class="category-card">
+        <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&q=80" alt="Concert">
+        <div class="category-content">
+          <h3 class="category-name">Konser</h3>
+          <span class="category-count">42 events</span>
+        </div>
+      </a>
+      <a href="05-browse.html?cat=festival" class="category-card">
+        <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&q=80" alt="Festival">
+        <div class="category-content">
+          <h3 class="category-name">Festival</h3>
+          <span class="category-count">18 events</span>
+        </div>
+      </a>
+      <a href="05-browse.html?cat=theater" class="category-card">
+        <img src="https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=400&q=80" alt="Theater">
+        <div class="category-content">
+          <h3 class="category-name">Teater</h3>
+          <span class="category-count">15 events</span>
+        </div>
+      </a>
+      <a href="05-browse.html?cat=sport" class="category-card">
+        <img src="https://images.unsplash.com/photo-1461896836934- voices?w=400&q=80" alt="Sport">
+        <div class="category-content">
+          <h3 class="category-name">Olahraga</h3>
+          <span class="category-count">28 events</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number">500K+</div>
+        <div class="stat-label">Pengguna</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">1.2K+</div>
+        <div class="stat-label">Event</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">2M+</div>
+        <div class="stat-label">Tiket</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works">
+    <div class="section-header">
+      <h2 class="section-title">Cara Kerja</h2>
+    </div>
+    <div class="steps-list">
+      <div class="step-card">
+        <span class="step-number">01</span>
+        <h3 class="step-title">Pilih Event</h3>
+        <p class="step-desc">Jelajahi event dan temukan yang kamu suka</p>
+      </div>
+      <div class="step-card">
+        <span class="step-number">02</span>
+        <h3 class="step-title">Antri Fair</h3>
+        <p class="step-desc">Masuk waiting room untuk giliran adil</p>
+      </div>
+      <div class="step-card">
+        <span class="step-number">03</span>
+        <h3 class="step-title">Pilih Tiket</h3>
+        <p class="step-desc">Pilih kategori dan jumlah tiket</p>
+      </div>
+      <div class="step-card">
+        <span class="step-number">04</span>
+        <h3 class="step-title">Bayar & Selesai</h3>
+        <p class="step-desc">E-ticket langsung masuk ke akunmu</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="01-home.html" class="nav-item active">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="05-browse.html" class="nav-item">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <span>Cari</span>
+    </a>
+    <a href="04-my-tickets.html" class="nav-item">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+      </svg>
+      <span>Tiket</span>
+    </a>
+    <a href="#" class="nav-item" id="profileNav">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+      <span>Profil</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Login Modal -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3>Masuk</h3>
+      <button class="modal-close" id="closeModal">&times;</button>
+    </div>
+    <p style="font-size: var(--text-s); color: var(--ink-muted); margin-bottom: var(--space-m);">
+      Masukkan nomor HP untuk menerima kode OTP
+    </p>
+    <div class="modal-field">
+      <label for="phone">Nomor HP</label>
+      <input type="tel" id="phone" placeholder="08xxxxxxxxxx" inputmode="numeric">
+    </div>
+    <button class="btn btn-primary btn-large btn-full">Kirim OTP</button>
+  </div>
+</div>
+
+<script>
+// Hide loader
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hidden');
+  }, 800);
+});
+
+// Hero carousel
+const slides = document.querySelectorAll('.hero-slide');
+const dots = document.querySelectorAll('.hero-nav-dot');
+let currentSlide = 0;
+
+function showSlide(index) {
+  slides.forEach((slide, i) => {
+    slide.classList.toggle('active', i === index);
+  });
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('active', i === index);
+  });
+  currentSlide = index;
+}
+
+dots.forEach((dot, i) => {
+  dot.addEventListener('click', () => showSlide(i));
+});
+
+// Auto-advance slides
+setInterval(() => {
+  showSlide((currentSlide + 1) % slides.length);
+}, 6000);
+
+// Touch swipe for hero
+let touchStartX = 0;
+let touchEndX = 0;
+const hero = document.querySelector('.hero');
+
+hero.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+hero.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  const diff = touchStartX - touchEndX;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) {
+      showSlide((currentSlide + 1) % slides.length);
+    } else {
+      showSlide((currentSlide - 1 + slides.length) % slides.length);
+    }
+  }
+}, { passive: true });
+
+// Login modal
+const loginBtn = document.getElementById('loginBtn');
+const profileNav = document.getElementById('profileNav');
+const loginModal = document.getElementById('loginModal');
+const closeModal = document.getElementById('closeModal');
+
+[loginBtn, profileNav].forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginModal.classList.add('show');
+  });
+});
+
+closeModal.addEventListener('click', () => {
+  loginModal.classList.remove('show');
+});
+
+loginModal.addEventListener('click', (e) => {
+  if (e.target === loginModal) {
+    loginModal.classList.remove('show');
+  }
+});
+
+// Prevent body scroll when modal is open
+const observer = new MutationObserver(() => {
+  document.body.style.overflow = loginModal.classList.contains('show') ? 'hidden' : '';
+});
+observer.observe(loginModal, { attributes: true, attributeFilter: ['class'] });
+</script>
+</body>
+</html>

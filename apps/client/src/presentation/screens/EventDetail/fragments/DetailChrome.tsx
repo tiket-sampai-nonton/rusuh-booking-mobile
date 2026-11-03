@@ -1,13 +1,23 @@
-/** Shared detail chrome: dark aura background + sticky mini-nav + steps row. */
+/**
+ * V2 Brutalist Mono Detail Chrome — Header + Steps
+ *
+ * MATCHES: `.oil-ui/v2/02-event-detail.html`
+ *
+ * - Header: fixed top bar with back button, logo, action icons
+ * - Steps: numbered circles with connectors (Detail → Antre → Pilih → Bayar → Selesai)
+ */
 import type { ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Animated, Pressable, Text, View } from "react-native";
 
-import { BrandMark } from "@presentation/components/BrandMark";
-import { neutral } from "@presentation/theme";
+import { interFonts } from "@presentation/theme/fonts";
+import { v2Colors } from "@presentation/theme/v2-tokens";
 
-import { detailStyles } from "../style";
+import { v2DetailStyles as styles } from "../style";
 
-/** Dark root with the prototype's ember aura glow behind the content. */
+// ═══════════════════════════════════════════════════════════════════════════════
+// DETAIL BACKGROUND (V2 Light Theme)
+// ═══════════════════════════════════════════════════════════════════════════════
+
 export function DetailBackground({
   children,
   testID,
@@ -16,42 +26,150 @@ export function DetailBackground({
   readonly testID?: string;
 }) {
   return (
-    <View style={detailStyles.root} testID={testID}>
-      <View style={detailStyles.aura} pointerEvents="none" />
+    <View style={styles.root} testID={testID}>
       {children}
     </View>
   );
 }
 
-/** Sticky mini-nav: brand mark + "← Beranda" back link. */
-export function MiniNav({ onBack }: { readonly onBack: () => void }) {
+// ═══════════════════════════════════════════════════════════════════════════════
+// HEADER (Fixed Top Bar)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface HeaderProps {
+  readonly onBack: () => void;
+  readonly onWishlist?: () => void;
+  readonly onShare?: () => void;
+  readonly isWishlisted?: boolean;
+}
+
+export function V2Header({
+  onBack,
+  onWishlist,
+  onShare,
+  isWishlisted = false,
+}: HeaderProps) {
   return (
-    <View style={detailStyles.miniNav}>
-      <BrandMark color={neutral.card} />
-      <Pressable accessibilityRole="button" accessibilityLabel="Kembali ke beranda" onPress={onBack}>
-        <Text style={detailStyles.navBack} className="font-semibold text-white/60">
-          ← Beranda
-        </Text>
-      </Pressable>
+    <Animated.View style={styles.header}>
+      <View style={styles.headerLeft}>
+        {/* Back Button */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Kembali"
+          onPress={onBack}
+          style={styles.backBtn}
+        >
+          <Text style={{ fontFamily: interFonts.semiBold, fontSize: 14, color: v2Colors.ink }}>
+            ←
+          </Text>
+          <Text style={styles.backBtnText}>Kembali</Text>
+        </Pressable>
+
+        {/* Logo */}
+        <Text style={styles.logo}>Rusuh Tiket</Text>
+      </View>
+
+      <View style={styles.headerActions}>
+        {/* Wishlist Button */}
+        {onWishlist && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={isWishlisted ? "Hapus dari wishlist" : "Tambah ke wishlist"}
+            onPress={onWishlist}
+            style={styles.iconBtn}
+          >
+            <Text style={{ fontFamily: interFonts.bold, fontSize: 18, color: v2Colors.ink }}>
+              {isWishlisted ? "♥" : "♡"}
+            </Text>
+          </Pressable>
+        )}
+
+        {/* Share Button */}
+        {onShare && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Bagikan"
+            onPress={onShare}
+            style={styles.iconBtn}
+          >
+            <Text style={{ fontFamily: interFonts.bold, fontSize: 16, color: v2Colors.ink }}>
+              ⤴
+            </Text>
+          </Pressable>
+        )}
+      </View>
+    </Animated.View>
+  );
+}
+
+/** @deprecated Use V2Header instead */
+export function MiniNav({ onBack }: { readonly onBack: () => void }) {
+  return <V2Header onBack={onBack} />;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FLOW STEPS (Numbered Circles)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const FLOW_STEPS = [
+  { num: 1, label: "Detail" },
+  { num: 2, label: "Antre" },
+  { num: 3, label: "Pilih" },
+  { num: 4, label: "Bayar" },
+  { num: 5, label: "Selesai" },
+] as const;
+
+interface StepsProps {
+  /** Active step (1-based index). Default = 1 (Detail). */
+  readonly activeStep?: number;
+}
+
+export function V2Steps({ activeStep = 1 }: StepsProps) {
+  return (
+    <View style={styles.stepsContainer}>
+      {FLOW_STEPS.map((step, index) => {
+        const isActive = step.num === activeStep;
+        const isLast = index === FLOW_STEPS.length - 1;
+
+        return (
+          <View key={step.num} style={styles.step}>
+            {/* Number Circle */}
+            <View
+              style={[
+                styles.stepNum,
+                isActive ? styles.stepNumActive : styles.stepNumInactive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.stepNumText,
+                  isActive ? styles.stepNumTextActive : styles.stepNumTextInactive,
+                ]}
+              >
+                {step.num}
+              </Text>
+            </View>
+
+            {/* Label */}
+            <Text
+              style={[
+                styles.stepLabel,
+                isActive ? styles.stepLabelActive : styles.stepLabelInactive,
+              ]}
+            >
+              {step.label}
+            </Text>
+
+            {/* Connector (except last) */}
+            {!isLast && <View style={styles.stepConnector} />}
+          </View>
+        );
+      })}
     </View>
   );
 }
 
-const STEPS = ["0 Detail", "1 Antre", "2 Pilih", "3 Bayar"] as const;
-
-/** Funnel progress — Detail is the active (first) step. */
+/** @deprecated Use V2Steps instead */
 export function Steps() {
-  return (
-    <View style={detailStyles.stepsRow}>
-      {STEPS.map((s, i) => (
-        <Text
-          key={s}
-          style={detailStyles.step}
-          className={i === 0 ? "font-semibold uppercase text-brand-ember" : "uppercase text-white/40"}
-        >
-          {s}
-        </Text>
-      ))}
-    </View>
-  );
+  return <V2Steps activeStep={1} />;
 }

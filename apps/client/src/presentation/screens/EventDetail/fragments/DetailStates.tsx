@@ -1,20 +1,50 @@
-/** EventDetail loading + error states (prototype event.html). */
-import { ActivityIndicator, Text, View } from "react-native";
+/**
+ * V2 Brutalist Mono Loading + Error States
+ *
+ * MATCHES: `.oil-ui/v2/02-event-detail.html` .loader
+ *
+ * Features:
+ * - Loader: Black background with white progress bar
+ * - Error: White background with black text
+ */
+import { useEffect, useRef } from "react";
+import { Animated, Pressable, Text, View } from "react-native";
 
-import { neutral } from "@presentation/theme";
+import { DetailBackground, V2Header } from "./DetailChrome";
+import { v2DetailStyles as styles } from "../style";
 
-import { DetailBackground, MiniNav } from "./DetailChrome";
+// ═══════════════════════════════════════════════════════════════════════════════
+// LOADING STATE
+// ═══════════════════════════════════════════════════════════════════════════════
 
 export function DetailLoading({ onBack }: { readonly onBack: () => void }) {
+  const progressAnim = useRef(new Animated.Value(-200)).current;
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: 0,
+      duration: 1500,
+      useNativeDriver: true,
+    }).start();
+  }, [progressAnim]);
+
   return (
-    <DetailBackground testID="detail-loading">
-      <MiniNav onBack={onBack} />
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator accessibilityLabel="Memuat detail event" color={neutral.card} />
+    <View style={styles.loader} testID="detail-loading">
+      <View style={styles.loaderBar}>
+        <Animated.View
+          style={[
+            styles.loaderProgress,
+            { transform: [{ translateX: progressAnim }] },
+          ]}
+        />
       </View>
-    </DetailBackground>
+    </View>
   );
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ERROR STATE
+// ═══════════════════════════════════════════════════════════════════════════════
 
 export function DetailError({
   message,
@@ -25,14 +55,25 @@ export function DetailError({
 }) {
   return (
     <DetailBackground testID="detail-error">
-      <MiniNav onBack={onBack} />
-      <View className="flex-1 items-center justify-center p-6" accessibilityLiveRegion="polite">
-        <Text className="text-base font-bold text-white" accessibilityRole="header">
+      <V2Header onBack={onBack} />
+      <View
+        style={styles.errorContainer}
+        accessibilityLiveRegion="polite"
+      >
+        <Text style={styles.errorText} accessibilityRole="header">
           Gagal memuat event
         </Text>
-        <Text className="mt-1 text-sm text-white/60">
+        <Text style={[styles.description, { textAlign: "center" }]}>
           {message || "Event tidak ditemukan."}
         </Text>
+        <Pressable
+          style={styles.floatingCtaBtn}
+          onPress={onBack}
+          accessibilityRole="button"
+          accessibilityLabel="Kembali ke beranda"
+        >
+          <Text style={styles.floatingCtaBtnText}>Kembali</Text>
+        </Pressable>
       </View>
     </DetailBackground>
   );

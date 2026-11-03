@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dewa 19 — Rusuh Tiket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+/*
+  ═══════════════════════════════════════════════════════════════════════════════
+  oil-ui Direction Card — V2 Brutalist Mono — Event Detail Page
+  ═══════════════════════════════════════════════════════════════════════════════
+  
+  北极星: Concert poster brought to life — information architecture meets punk energy
+  主角: Artist hero image + event information
+  主动作: Enter waiting room queue to buy tickets
+  
+  Flow: Event Detail → Waiting Room → Ticket Selection → Payment → Success
+  
+  Animation System:
+  - Hero parallax with Ken Burns zoom
+  - Section reveal on scroll
+  - Lineup cards with magnetic hover
+  - Gallery lightbox with FLIP transitions
+  - Floating CTA with pulse animation
+  ═══════════════════════════════════════════════════════════════════════════════
+*/
+
+:root {
+  --ground: #ffffff;
+  --ink: #000000;
+  --ink-muted: #666666;
+  --field: #f5f5f5;
+  --accent: #000000;
+  --success: #16a34a;
+  --warning: #eab308;
+  --danger: #dc2626;
+  --frame: clamp(1rem, 4vw, 3rem);
+  
+  --space-xs: 0.5rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 3rem;
+  --space-xl: 5rem;
+  
+  --text-xs: 0.75rem;
+  --text-s: 0.875rem;
+  --text-m: 1rem;
+  --text-l: 1.25rem;
+  --text-xl: clamp(1.5rem, 3vw, 2rem);
+  --text-hero: clamp(2.5rem, 8vw, 6rem);
+  
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --border: 2px solid var(--ink);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--ground);
+  color: var(--ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; }
+
+/* ═══════════════════════════════════════
+   LOADING
+   ═══════════════════════════════════════ */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s var(--ease), visibility 0.6s;
+}
+
+.loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.loader-bar {
+  width: 200px;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  overflow: hidden;
+}
+
+.loader-bar::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--ground);
+  animation: loaderProgress 1.5s var(--ease) forwards;
+}
+
+@keyframes loaderProgress {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* ═══════════════════════════════════════
+   SCROLL PROGRESS
+   ═══════════════════════════════════════ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--ink);
+  z-index: 1000;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+/* ═══════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════ */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-s) var(--frame);
+  background: var(--ground);
+  border-bottom: var(--border);
+  transform: translateY(-100%);
+  animation: slideDown 0.6s 0.3s var(--ease) forwards;
+}
+
+@keyframes slideDown {
+  to { transform: translateY(0); }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-m);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-s);
+  background: none;
+  border: var(--border);
+  font-size: var(--text-s);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.3s var(--ease);
+}
+
+.back-btn:hover {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.back-btn svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s var(--ease);
+}
+
+.back-btn:hover svg {
+  transform: translateX(-4px);
+}
+
+.logo {
+  font-size: 1.125rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 0.625rem 1.25rem;
+  font-size: var(--text-s);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: color 0.4s var(--ease);
+  z-index: 1;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transition: transform 0.4s var(--ease);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn-ghost::before {
+  background: var(--ink);
+  transform: translateY(100%);
+}
+
+.btn-ghost:hover {
+  color: var(--ground);
+}
+
+.btn-ghost:hover::before {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.btn-primary::before {
+  background: var(--ground);
+  transform: translateY(-100%);
+}
+
+.btn-primary:hover {
+  color: var(--ink);
+}
+
+.btn-primary:hover::before {
+  transform: translateY(0);
+}
+
+.btn-large {
+  padding: 1rem 2rem;
+  font-size: var(--text-m);
+}
+
+.btn-icon {
+  padding: 0.625rem;
+}
+
+.btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ═══════════════════════════════════════
+   FLOW STEPS INDICATOR
+   ═══════════════════════════════════════ */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-m) var(--frame);
+  padding-top: calc(60px + var(--space-m));
+  overflow-x: auto;
+  background: var(--ground);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  white-space: nowrap;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  opacity: 0;
+  animation: fadeIn 0.4s var(--ease) forwards;
+}
+
+.step:nth-child(1) { animation-delay: 0.4s; }
+.step:nth-child(2) { animation-delay: 0.5s; }
+.step:nth-child(3) { animation-delay: 0.6s; }
+.step:nth-child(4) { animation-delay: 0.7s; }
+.step:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+.step-num {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: 10px;
+  transition: all 0.3s var(--ease);
+}
+
+.step.active {
+  color: var(--ink);
+}
+
+.step.active .step-num {
+  background: var(--ink);
+  color: var(--ground);
+  border-color: var(--ink);
+}
+
+.step:not(:last-child)::after {
+  content: '';
+  width: 30px;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.3;
+  margin-left: var(--space-xs);
+}
+
+/* ═══════════════════════════════════════
+   HERO — Monochrome concert banner
+   ═══════════════════════════════════════ */
+.hero {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=1920&q=80') center/cover;
+  filter: grayscale(100%) contrast(1.2);
+  transform: scale(1.1);
+  animation: heroZoom 20s ease-in-out infinite alternate;
+}
+
+@keyframes heroZoom {
+  from { transform: scale(1.1); }
+  to { transform: scale(1); }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    var(--ground) 0%,
+    rgba(255,255,255,0.8) 30%,
+    rgba(255,255,255,0.3) 60%,
+    rgba(255,255,255,0) 100%
+  );
+}
+
+/* Scan line effect */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  padding: var(--space-xl) var(--frame);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-s);
+  background: var(--ink);
+  color: var(--ground);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-m);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.6s 0.5s var(--ease) forwards;
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-badge.live::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.hero-title {
+  font-size: var(--text-hero);
+  font-weight: 900;
+  line-height: 0.9;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-s);
+  overflow: hidden;
+}
+
+.hero-title span {
+  display: inline-block;
+  transform: translateY(100%);
+  animation: charReveal 0.8s var(--ease) forwards;
+}
+
+.hero-title span:nth-child(2) { animation-delay: 0.1s; }
+
+@keyframes charReveal {
+  to { transform: translateY(0); }
+}
+
+.hero-subtitle {
+  font-size: var(--text-l);
+  font-weight: 500;
+  color: var(--ink-muted);
+  margin-bottom: var(--space-m);
+  opacity: 0;
+  animation: fadeUp 0.6s 0.7s var(--ease) forwards;
+}
+
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-m);
+  opacity: 0;
+  animation: fadeUp 0.6s 0.8s var(--ease) forwards;
+}
+
+.hero-meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-m);
+  font-weight: 600;
+}
+
+.hero-meta-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ═══════════════════════════════════════
+   CONTENT LAYOUT — Single column
+   ═══════════════════════════════════════ */
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-l) var(--frame);
+  padding-bottom: calc(var(--space-xl) + 100px);
+}
+
+/* ═══════════════════════════════════════
+   SECTIONS
+   ═══════════════════════════════════════ */
+.section {
+  margin-bottom: var(--space-l);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s var(--ease);
+}
+
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.section-title {
+  font-size: var(--text-xl);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding-bottom: var(--space-s);
+  border-bottom: var(--border);
+  margin-bottom: var(--space-m);
+}
+
+.event-description {
+  font-size: var(--text-m);
+  line-height: 1.8;
+  color: var(--ink-muted);
+}
+
+.event-description p {
+  margin-bottom: var(--space-m);
+}
+
+/* Ticket Categories Preview (read-only) */
+.categories-preview {
+  display: grid;
+  gap: var(--space-s);
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-m);
+  border: var(--border);
+  transition: all 0.3s var(--ease);
+}
+
+.category-item:hover {
+  background: var(--field);
+  transform: translateX(4px);
+}
+
+.category-info h4 {
+  font-size: var(--text-m);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.category-info p {
+  font-size: var(--text-s);
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+
+.category-price {
+  text-align: right;
+}
+
+.category-price strong {
+  display: block;
+  font-size: var(--text-l);
+  font-weight: 900;
+}
+
+.category-price span {
+  font-size: var(--text-xs);
+  color: var(--success);
+  font-weight: 600;
+}
+
+.category-price span.sold-out {
+  color: var(--ink-muted);
+}
+
+.categories-note {
+  margin-top: var(--space-s);
+  padding: var(--space-s);
+  background: var(--field);
+  font-size: var(--text-s);
+  color: var(--ink-muted);
+  border-left: 4px solid var(--ink);
+}
+
+/* Lineup */
+.lineup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-s);
+}
+
+.lineup-item {
+  text-align: center;
+  padding: var(--space-m);
+  border: var(--border);
+  transition: all 0.3s var(--ease);
+}
+
+.lineup-item:hover {
+  background: var(--ink);
+  color: var(--ground);
+  transform: translateY(-4px);
+}
+
+.lineup-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto var(--space-s);
+  filter: grayscale(100%);
+  transition: filter 0.4s var(--ease);
+  object-fit: cover;
+}
+
+.lineup-item:hover .lineup-avatar {
+  filter: grayscale(0%);
+}
+
+.lineup-name {
+  font-weight: 700;
+  font-size: var(--text-s);
+  text-transform: uppercase;
+}
+
+.lineup-role {
+  font-size: var(--text-xs);
+  opacity: 0.7;
+}
+
+/* Venue Map */
+.venue-map {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: var(--field);
+  border: var(--border);
+  overflow: hidden;
+}
+
+.venue-map img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%);
+  transition: filter 0.4s var(--ease);
+}
+
+.venue-map:hover img {
+  filter: grayscale(0%);
+}
+
+.venue-map-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+
+.venue-map:hover .venue-map-overlay {
+  opacity: 1;
+}
+
+.venue-map-btn {
+  padding: var(--space-s) var(--space-m);
+  background: var(--ground);
+  border: none;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.venue-info {
+  margin-top: var(--space-m);
+}
+
+.venue-name {
+  font-size: var(--text-l);
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+}
+
+.venue-address {
+  color: var(--ink-muted);
+  font-size: var(--text-s);
+}
+
+/* Gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: var(--ink);
+}
+
+.gallery-item {
+  aspect-ratio: 1;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%);
+  transition: all 0.5s var(--ease);
+}
+
+.gallery-item:hover img {
+  filter: grayscale(0%);
+  transform: scale(1.1);
+}
+
+.gallery-item::after {
+  content: '+';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--ground);
+  background: rgba(0,0,0,0.5);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+
+.gallery-item:hover::after {
+  opacity: 1;
+}
+
+/* Terms */
+.terms-list {
+  list-style: none;
+}
+
+.terms-list li {
+  padding: var(--space-s) 0;
+  border-bottom: 1px solid var(--field);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-s);
+  font-size: var(--text-s);
+}
+
+.terms-list li::before {
+  content: '✓';
+  font-weight: 900;
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   FLOATING CTA — Join Queue
+   ═══════════════════════════════════════ */
+.floating-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-m) var(--frame);
+  background: var(--ground);
+  border-top: var(--border);
+  z-index: 99;
+  transform: translateY(100%);
+  animation: slideUp 0.6s 1s var(--ease) forwards;
+}
+
+@keyframes slideUp {
+  to { transform: translateY(0); }
+}
+
+.floating-cta-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-m);
+}
+
+.floating-cta-info {
+  flex: 1;
+}
+
+.floating-cta-price {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.floating-cta-price strong {
+  display: block;
+  font-size: var(--text-xl);
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.floating-cta-btn {
+  padding: var(--space-m) var(--space-l);
+  font-size: var(--text-m);
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.3); }
+  50% { box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.2); }
+}
+
+.floating-cta-btn .arrow {
+  display: inline-block;
+  transition: transform 0.3s var(--ease);
+}
+
+.floating-cta-btn:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* Trust badges */
+.trust-badges {
+  display: flex;
+  gap: var(--space-s);
+  margin-top: var(--space-s);
+}
+
+.trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.trust-badge svg {
+  width: 14px;
+  height: 14px;
+  color: var(--success);
+}
+
+/* ═══════════════════════════════════════
+   LIGHTBOX
+   ═══════════════════════════════════════ */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s var(--ease);
+}
+
+.lightbox.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: var(--space-m);
+  right: var(--space-m);
+  width: 50px;
+  height: 50px;
+  background: none;
+  border: 2px solid var(--ground);
+  color: var(--ground);
+  font-size: var(--text-l);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+}
+
+.lightbox-close:hover {
+  background: var(--ground);
+  color: var(--ink);
+  transform: rotate(90deg);
+}
+
+.lightbox-content {
+  max-width: 90vw;
+  max-height: 90vh;
+  transform: scale(0.9);
+  transition: transform 0.4s var(--ease);
+}
+
+.lightbox.active .lightbox-content {
+  transform: scale(1);
+}
+
+.lightbox-content img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  background: none;
+  border: 2px solid var(--ground);
+  color: var(--ground);
+  font-size: var(--text-l);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+}
+
+.lightbox-nav:hover {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+.lightbox-prev { left: var(--space-m); }
+.lightbox-next { right: var(--space-m); }
+
+/* ═══════════════════════════════════════
+   TOAST NOTIFICATIONS
+   ═══════════════════════════════════════ */
+.toast-container {
+  position: fixed;
+  bottom: calc(80px + var(--space-m));
+  right: var(--space-m);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.toast {
+  padding: var(--space-s) var(--space-m);
+  background: var(--ink);
+  color: var(--ground);
+  font-size: var(--text-s);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  transform: translateX(120%);
+  transition: transform 0.4s var(--ease);
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+
+/* ═══════════════════════════════════════
+   CUSTOM CURSOR
+   ═══════════════════════════════════════ */
+.cursor {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: transform 0.15s var(--ease), opacity 0.3s;
+  mix-blend-mode: difference;
+  box-shadow: 0 0 0 1px var(--ground);
+}
+
+.cursor.hover {
+  transform: scale(2.5);
+  background: var(--ground);
+}
+
+.cursor-dot {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: var(--ink);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  box-shadow: 0 0 0 1px var(--ground);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor, .cursor-dot { display: none; }
+  body { cursor: auto; }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════ */
+@media (max-width: 768px) {
+  .hero {
+    height: 50vh;
+    min-height: 350px;
+  }
+  
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .lineup-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .floating-cta-inner {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .floating-cta-btn {
+    width: 100%;
+  }
+  
+  .trust-badges {
+    justify-content: center;
+  }
+  
+  .steps {
+    padding-left: var(--space-s);
+    padding-right: var(--space-s);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loader">
+  <div class="loader-bar"></div>
+</div>
+
+<!-- Custom Cursor -->
+<div class="cursor"></div>
+<div class="cursor-dot"></div>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress"></div>
+
+<!-- Toast Container -->
+<div class="toast-container"></div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close">×</button>
+  <button class="lightbox-nav lightbox-prev">←</button>
+  <button class="lightbox-nav lightbox-next">→</button>
+  <div class="lightbox-content">
+    <img src="" alt="" id="lightboxImg">
+  </div>
+</div>
+
+<header class="header">
+  <div class="header-left">
+    <a href="01-home.html" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Kembali
+    </a>
+    <a href="01-home.html" class="logo">Rusuh Tiket</a>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-icon btn-ghost" onclick="toggleWishlist()" id="wishlistBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+    <button class="btn btn-icon btn-ghost" onclick="shareEvent()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Flow Steps -->
+<div class="steps">
+  <span class="step active"><span class="step-num">1</span> Detail</span>
+  <span class="step"><span class="step-num">2</span> Antre</span>
+  <span class="step"><span class="step-num">3</span> Pilih</span>
+  <span class="step"><span class="step-num">4</span> Bayar</span>
+  <span class="step"><span class="step-num">5</span> Selesai</span>
+</div>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge live">
+      <span>Penjualan Dibuka</span>
+    </div>
+    <h1 class="hero-title">
+      <span>Dewa</span> <span>19</span>
+    </h1>
+    <p class="hero-subtitle">Reunion Tour 2025 — Panggung Legendaris Kembali</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span>15 Maret 2025</span>
+      </div>
+      <div class="hero-meta-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span>19:00 WIB</span>
+      </div>
+      <div class="hero-meta-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>JIS Stadium, Jakarta</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="content">
+  <!-- Description -->
+  <section class="section" id="description">
+    <h2 class="section-title">Tentang Event</h2>
+    <div class="event-description">
+      <p>Setelah penantian panjang, DEWA 19 kembali menggebrak panggung musik Indonesia dengan Reunion Tour 2025! Konser spektakuler ini akan menghadirkan formasi lengkap dengan Ahmad Dhani, Once Mekel, dan seluruh personel legendaris.</p>
+      <p>Nikmati perjalanan nostalgia melalui lagu-lagu hits yang telah menjadi soundtrack generasi seperti "Kangen", "Pupus", "Risalah Hati", "Cinta Kan Membawamu Kembali", dan masih banyak lagi.</p>
+      <p>Dengan tata panggung megah, sound system berkualitas internasional, dan pengalaman konser yang tak terlupakan, malam ini akan menjadi momen bersejarah yang wajib kamu saksikan.</p>
+    </div>
+  </section>
+
+  <!-- Ticket Categories Preview -->
+  <section class="section" id="tickets">
+    <h2 class="section-title">Kategori Tiket</h2>
+    <div class="categories-preview">
+      <div class="category-item">
+        <div class="category-info">
+          <h4>VVIP</h4>
+          <p>Front stage, Meet & Greet</p>
+        </div>
+        <div class="category-price">
+          <strong>Rp 1.500.000</strong>
+          <span>Sisa 50</span>
+        </div>
+      </div>
+      
+      <div class="category-item">
+        <div class="category-info">
+          <h4>VIP</h4>
+          <p>Premium seating area</p>
+        </div>
+        <div class="category-price">
+          <strong>Rp 950.000</strong>
+          <span>Tersedia</span>
+        </div>
+      </div>
+      
+      <div class="category-item">
+        <div class="category-info">
+          <h4>CAT 1</h4>
+          <p>Tribune bawah</p>
+        </div>
+        <div class="category-price">
+          <strong>Rp 550.000</strong>
+          <span>Tersedia</span>
+        </div>
+      </div>
+      
+      <div class="category-item">
+        <div class="category-info">
+          <h4>CAT 2</h4>
+          <p>Tribune atas</p>
+        </div>
+        <div class="category-price">
+          <strong>Rp 350.000</strong>
+          <span>Tersedia</span>
+        </div>
+      </div>
+      
+      <div class="category-item" style="opacity: 0.5;">
+        <div class="category-info">
+          <h4>Festival</h4>
+          <p>Standing area</p>
+        </div>
+        <div class="category-price">
+          <strong>Rp 200.000</strong>
+          <span class="sold-out">Habis</span>
+        </div>
+      </div>
+    </div>
+    <p class="categories-note">Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.</p>
+  </section>
+
+  <!-- Lineup -->
+  <section class="section" id="lineup">
+    <h2 class="section-title">Line Up</h2>
+    <div class="lineup-grid">
+      <div class="lineup-item">
+        <img src="https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=200&q=80" alt="Ahmad Dhani" class="lineup-avatar">
+        <p class="lineup-name">Ahmad Dhani</p>
+        <p class="lineup-role">Keyboards</p>
+      </div>
+      <div class="lineup-item">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80" alt="Once Mekel" class="lineup-avatar">
+        <p class="lineup-name">Once Mekel</p>
+        <p class="lineup-role">Vocal</p>
+      </div>
+      <div class="lineup-item">
+        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80" alt="Andra Ramadhan" class="lineup-avatar">
+        <p class="lineup-name">Andra Ramadhan</p>
+        <p class="lineup-role">Guitar</p>
+      </div>
+      <div class="lineup-item">
+        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80" alt="Yuke Sampurna" class="lineup-avatar">
+        <p class="lineup-name">Yuke Sampurna</p>
+        <p class="lineup-role">Bass</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Venue -->
+  <section class="section" id="venue">
+    <h2 class="section-title">Lokasi</h2>
+    <div class="venue-map" onclick="openMap()">
+      <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&q=80" alt="JIS Stadium">
+      <div class="venue-map-overlay">
+        <button class="venue-map-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Buka di Maps
+        </button>
+      </div>
+    </div>
+    <div class="venue-info">
+      <h3 class="venue-name">Jakarta International Stadium (JIS)</h3>
+      <p class="venue-address">Jl. Benyamin Sueb, Papanggo, Tanjung Priok, Jakarta Utara 14340</p>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section class="section" id="gallery">
+    <h2 class="section-title">Galeri</h2>
+    <div class="gallery-grid">
+      <div class="gallery-item" onclick="openLightbox(0)">
+        <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&q=80" alt="Gallery 1">
+      </div>
+      <div class="gallery-item" onclick="openLightbox(1)">
+        <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80" alt="Gallery 2">
+      </div>
+      <div class="gallery-item" onclick="openLightbox(2)">
+        <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&q=80" alt="Gallery 3">
+      </div>
+      <div class="gallery-item" onclick="openLightbox(3)">
+        <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&q=80" alt="Gallery 4">
+      </div>
+    </div>
+  </section>
+
+  <!-- Terms -->
+  <section class="section" id="terms">
+    <h2 class="section-title">Syarat & Ketentuan</h2>
+    <ul class="terms-list">
+      <li>Tiket yang sudah dibeli tidak dapat dikembalikan atau ditukar</li>
+      <li>Satu NIK hanya dapat membeli maksimal 4 tiket</li>
+      <li>Penonton di bawah 17 tahun wajib didampingi orang tua</li>
+      <li>Dilarang membawa senjata tajam, minuman keras, dan obat-obatan terlarang</li>
+      <li>Penyelenggara berhak menolak pengunjung yang tidak memenuhi syarat</li>
+      <li>Dress code: Smart casual, tidak diperkenankan menggunakan sandal jepit</li>
+      <li>Gate open: 17:00 WIB</li>
+    </ul>
+  </section>
+</div>
+
+<!-- Floating CTA -->
+<div class="floating-cta">
+  <div class="floating-cta-inner">
+    <div class="floating-cta-info">
+      <p class="floating-cta-price">
+        Mulai dari
+        <strong>Rp 350.000</strong>
+      </p>
+      <div class="trust-badges">
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Tiket resmi
+        </span>
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Antrean adil
+        </span>
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          E-ticket
+        </span>
+      </div>
+    </div>
+    <a href="06-waiting.html" class="btn btn-primary floating-cta-btn" onclick="prepareQueueEntry()">
+      Masuk Antrean <span class="arrow">→</span>
+    </a>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// QUEUE ENTRY PREPARATION
+// ═══════════════════════════════════════
+function prepareQueueEntry() {
+  // Set session markers for valid waiting room entry
+  sessionStorage.setItem('waitingRoomEntry', Date.now().toString());
+  
+  // Store selected event data for waiting room display
+  sessionStorage.setItem('selectedEvent', JSON.stringify({
+    id: 'dewa19-reunion-2025',
+    name: 'DEWA 19 - REUNION TOUR 2025',
+    date: '15 Maret 2025',
+    venue: 'Gelora Bung Karno Stadium, Jakarta'
+  }));
+  
+  // Clear any previous admission status
+  localStorage.removeItem('rusuh_admitted');
+}
+
+// ═══════════════════════════════════════
+// LOADER
+// ═══════════════════════════════════════
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.querySelector('.loader').classList.add('hidden');
+  }, 1500);
+});
+
+// ═══════════════════════════════════════
+// SCROLL PROGRESS
+// ═══════════════════════════════════════
+const scrollProgress = document.querySelector('.scroll-progress');
+
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = scrollTop / docHeight;
+  scrollProgress.style.transform = `scaleX(${progress})`;
+});
+
+// ═══════════════════════════════════════
+// SECTION REVEAL
+// ═══════════════════════════════════════
+const sections = document.querySelectorAll('.section');
+
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+sections.forEach(section => sectionObserver.observe(section));
+
+// ═══════════════════════════════════════
+// WISHLIST
+// ═══════════════════════════════════════
+let isWishlisted = false;
+
+function toggleWishlist() {
+  isWishlisted = !isWishlisted;
+  const btn = document.getElementById('wishlistBtn');
+  const svg = btn.querySelector('svg');
+  
+  if (isWishlisted) {
+    svg.setAttribute('fill', 'currentColor');
+    showToast('Ditambahkan ke wishlist', 'success');
+  } else {
+    svg.setAttribute('fill', 'none');
+    showToast('Dihapus dari wishlist');
+  }
+  
+  const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+  if (isWishlisted) {
+    wishlist.push('dewa-19-reunion');
+  } else {
+    const index = wishlist.indexOf('dewa-19-reunion');
+    if (index > -1) wishlist.splice(index, 1);
+  }
+  localStorage.setItem('wishlist', JSON.stringify(wishlist));
+}
+
+// Check if already wishlisted
+const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+if (savedWishlist.includes('dewa-19-reunion')) {
+  isWishlisted = true;
+  document.getElementById('wishlistBtn').querySelector('svg').setAttribute('fill', 'currentColor');
+}
+
+// ═══════════════════════════════════════
+// SHARE
+// ═══════════════════════════════════════
+function shareEvent() {
+  if (navigator.share) {
+    navigator.share({
+      title: 'Dewa 19 - Reunion Tour 2025',
+      text: 'Jangan lewatkan konser legendaris Dewa 19!',
+      url: window.location.href
+    });
+  } else {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      showToast('Link berhasil disalin!', 'success');
+    });
+  }
+}
+
+// ═══════════════════════════════════════
+// LIGHTBOX
+// ═══════════════════════════════════════
+const galleryImages = [
+  'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=1200&q=80',
+  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200&q=80',
+  'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&q=80',
+  'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80'
+];
+
+let currentImage = 0;
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+
+function openLightbox(index) {
+  currentImage = index;
+  lightboxImg.src = galleryImages[index];
+  lightbox.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function navigateLightbox(delta) {
+  currentImage = (currentImage + delta + galleryImages.length) % galleryImages.length;
+  lightboxImg.style.opacity = '0';
+  setTimeout(() => {
+    lightboxImg.src = galleryImages[currentImage];
+    lightboxImg.style.opacity = '1';
+  }, 200);
+}
+
+lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+lightbox.querySelector('.lightbox-prev').addEventListener('click', () => navigateLightbox(-1));
+lightbox.querySelector('.lightbox-next').addEventListener('click', () => navigateLightbox(1));
+
+lightbox.addEventListener('click', (e) => {
+  if (e.target === lightbox) closeLightbox();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (!lightbox.classList.contains('active')) return;
+  
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') navigateLightbox(-1);
+  if (e.key === 'ArrowRight') navigateLightbox(1);
+});
+
+lightboxImg.style.transition = 'opacity 0.2s';
+
+// ═══════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════
+function openMap() {
+  window.open('https://maps.google.com/?q=Jakarta+International+Stadium', '_blank');
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function showToast(message, type = 'info') {
+  const container = document.querySelector('.toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  
+  setTimeout(() => toast.classList.add('show'), 10);
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+// ═══════════════════════════════════════
+// HERO PARALLAX
+// ═══════════════════════════════════════
+const heroBg = document.querySelector('.hero-bg');
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const heroHeight = document.querySelector('.hero').offsetHeight;
+  
+  if (scrollY < heroHeight) {
+    heroBg.style.transform = `scale(1.1) translateY(${scrollY * 0.3}px)`;
+  }
+});
+
+// ═══════════════════════════════════════
+// CUSTOM CURSOR
+// ═══════════════════════════════════════
+const cursor = document.querySelector('.cursor');
+const cursorDot = document.querySelector('.cursor-dot');
+
+if (cursor && cursorDot) {
+  let mouseX = 0, mouseY = 0;
+  let cursorX = 0, cursorY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    
+    cursorDot.style.left = mouseX - 2 + 'px';
+    cursorDot.style.top = mouseY - 2 + 'px';
+  });
+
+  function animateCursor() {
+    cursorX += (mouseX - cursorX) * 0.15;
+    cursorY += (mouseY - cursorY) * 0.15;
+    
+    cursor.style.left = cursorX - 10 + 'px';
+    cursor.style.top = cursorY - 10 + 'px';
+    
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  const interactiveElements = document.querySelectorAll('a, button, .gallery-item, .lineup-item, .venue-map, .category-item');
+  
+  interactiveElements.forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+}
+</script>
+
+</body>
+</html>

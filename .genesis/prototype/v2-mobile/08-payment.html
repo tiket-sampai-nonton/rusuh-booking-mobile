@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Pembayaran — Rusuh Tiket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-tokens.css">
+<style>
+/*
+  ═══════════════════════════════════════════════════════════════════════════════
+  RUSUH TIKET — Mobile Payment Screen
+  V2 Brutalist Mono Theme — Mobile App Optimized
+  ═══════════════════════════════════════════════════════════════════════════════
+*/
+
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(100px + var(--safe-bottom));
+}
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
+  background: var(--ground);
+  border-bottom: var(--border);
+  padding-top: var(--safe-top);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-s) var(--frame);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: var(--border);
+  background: var(--ground);
+}
+
+.back-btn:active {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.back-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.header-title {
+  font-size: var(--text-m);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.session-timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--font-mono);
+  font-size: var(--text-s);
+  font-weight: 700;
+}
+
+.session-timer.warning {
+  background: var(--danger);
+}
+
+/* Progress steps */
+.progress-steps {
+  display: flex;
+  padding: var(--space-s) var(--frame);
+  gap: 4px;
+  background: var(--field);
+}
+
+.step {
+  flex: 1;
+  height: 4px;
+  background: var(--ink-muted);
+  opacity: 0.3;
+}
+
+.step.active,
+.step.completed {
+  background: var(--ink);
+  opacity: 1;
+}
+
+/* Main */
+.main {
+  padding: calc(var(--header-height) + 40px + var(--safe-top)) var(--frame) var(--space-m);
+}
+
+/* Order summary */
+.order-summary {
+  background: var(--ink);
+  color: var(--ground);
+  padding: var(--space-m);
+  margin-bottom: var(--space-l);
+}
+
+.order-summary h3 {
+  font-size: var(--text-s);
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: var(--space-s);
+  padding-bottom: var(--space-xs);
+  border-bottom: 2px solid var(--ground);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+  font-size: var(--text-s);
+}
+
+.summary-row.total {
+  font-weight: 900;
+  font-size: var(--text-l);
+  padding-top: var(--space-s);
+  margin-top: var(--space-xs);
+  border-top: 2px solid var(--ground);
+}
+
+/* Payment countdown */
+.countdown-section {
+  text-align: center;
+  padding: var(--space-l) 0;
+  margin-bottom: var(--space-l);
+  border-bottom: var(--border);
+}
+
+.countdown-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+  margin-bottom: var(--space-s);
+}
+
+.countdown-timer {
+  font-family: var(--font-mono);
+  font-size: clamp(2.5rem, 12vw, 4rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.countdown-timer.warning {
+  color: var(--danger);
+}
+
+/* Payment methods */
+.section-title {
+  font-size: var(--text-s);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-m);
+  padding-bottom: var(--space-xs);
+  border-bottom: var(--border);
+}
+
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+
+.payment-method {
+  border: var(--border);
+  padding: var(--space-s);
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  min-height: var(--tap-target-large);
+  transition: var(--transition-fast);
+}
+
+.payment-method:active {
+  background: var(--field);
+}
+
+.payment-method.selected {
+  box-shadow: var(--shadow-sm);
+  transform: translate(-2px, -2px);
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.payment-radio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.payment-radio::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.2s var(--ease);
+}
+
+.payment-method.selected .payment-radio::after {
+  transform: scale(1);
+}
+
+.payment-icon {
+  width: 40px;
+  height: 28px;
+  border: 1px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.payment-info {
+  flex: 1;
+}
+
+.payment-info h4 {
+  font-size: var(--text-s);
+  font-weight: 700;
+}
+
+.payment-info p {
+  font-size: var(--text-xs);
+  opacity: 0.7;
+}
+
+/* E-wallet grid */
+.ewallet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xs);
+  margin-top: var(--space-s);
+}
+
+.ewallet-option {
+  border: var(--border);
+  padding: var(--space-s);
+  text-align: center;
+  min-height: var(--tap-target-large);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: var(--transition-fast);
+}
+
+.ewallet-option:active {
+  background: var(--field);
+}
+
+.ewallet-option.selected {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.ewallet-option .icon {
+  font-size: var(--text-m);
+  font-weight: 700;
+}
+
+.ewallet-option .name {
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+/* Sticky footer */
+.sticky-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  background: var(--ground);
+  border-top: var(--border);
+  padding: var(--space-s) var(--frame);
+  padding-bottom: calc(var(--space-s) + var(--safe-bottom));
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--tap-target-large);
+  padding: var(--space-s);
+  font-size: var(--text-s);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: var(--border);
+  background: var(--ink);
+  color: var(--ground);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-top">
+      <a href="03-checkout.html" class="back-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+      <span class="header-title">Pembayaran</span>
+      <div class="session-timer" id="sessionTimer">
+        <span id="timerDisplay">05:00</span>
+      </div>
+    </div>
+    <div class="progress-steps">
+      <div class="step completed"></div>
+      <div class="step completed"></div>
+      <div class="step completed"></div>
+      <div class="step active"></div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Order Summary -->
+    <div class="order-summary">
+      <h3>Ringkasan Pesanan</h3>
+      <div class="summary-row">
+        <span>Dewa 19 — Tribune × 2</span>
+        <span>Rp 900.000</span>
+      </div>
+      <div class="summary-row">
+        <span>Biaya layanan</span>
+        <span>Rp 20.000</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total</span>
+        <span>Rp 920.000</span>
+      </div>
+    </div>
+
+    <!-- Payment Countdown -->
+    <div class="countdown-section">
+      <div class="countdown-label">Selesaikan pembayaran dalam</div>
+      <div class="countdown-timer" id="countdownTimer">14:59</div>
+    </div>
+
+    <!-- Payment Methods -->
+    <section>
+      <h2 class="section-title">Pilih Metode Pembayaran</h2>
+      <div class="payment-methods" id="paymentMethods">
+        <div class="payment-method selected" data-method="gopay">
+          <div class="payment-radio"></div>
+          <div class="payment-icon">GP</div>
+          <div class="payment-info">
+            <h4>GoPay</h4>
+            <p>Bayar dengan saldo GoPay</p>
+          </div>
+        </div>
+
+        <div class="payment-method" data-method="ovo">
+          <div class="payment-radio"></div>
+          <div class="payment-icon">OV</div>
+          <div class="payment-info">
+            <h4>OVO</h4>
+            <p>Bayar dengan saldo OVO</p>
+          </div>
+        </div>
+
+        <div class="payment-method" data-method="dana">
+          <div class="payment-radio"></div>
+          <div class="payment-icon">DA</div>
+          <div class="payment-info">
+            <h4>DANA</h4>
+            <p>Bayar dengan saldo DANA</p>
+          </div>
+        </div>
+
+        <div class="payment-method" data-method="va">
+          <div class="payment-radio"></div>
+          <div class="payment-icon">VA</div>
+          <div class="payment-info">
+            <h4>Virtual Account</h4>
+            <p>Transfer via ATM/M-Banking</p>
+          </div>
+        </div>
+
+        <div class="payment-method" data-method="cc">
+          <div class="payment-radio"></div>
+          <div class="payment-icon">CC</div>
+          <div class="payment-info">
+            <h4>Kartu Kredit</h4>
+            <p>Visa, Mastercard, JCB</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Sticky Footer -->
+  <div class="sticky-footer">
+    <a href="08a-snap.html" class="btn" id="payBtn">Bayar Rp 920.000</a>
+  </div>
+</div>
+
+<script>
+// Session timer (short)
+let sessionSeconds = 5 * 60;
+const timerDisplay = document.getElementById('timerDisplay');
+
+setInterval(() => {
+  sessionSeconds--;
+  const min = Math.floor(sessionSeconds / 60);
+  const sec = sessionSeconds % 60;
+  timerDisplay.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  
+  if (sessionSeconds <= 0) {
+    window.location.href = '09-expired.html';
+  }
+}, 1000);
+
+// Payment countdown (longer - for completing payment)
+let paymentSeconds = 15 * 60 - 1; // 14:59
+const countdownTimer = document.getElementById('countdownTimer');
+
+setInterval(() => {
+  paymentSeconds--;
+  const min = Math.floor(paymentSeconds / 60);
+  const sec = paymentSeconds % 60;
+  countdownTimer.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  
+  if (paymentSeconds <= 60) {
+    countdownTimer.classList.add('warning');
+  }
+}, 1000);
+
+// Payment method selection
+const methods = document.querySelectorAll('.payment-method');
+methods.forEach(method => {
+  method.addEventListener('click', () => {
+    methods.forEach(m => m.classList.remove('selected'));
+    method.classList.add('selected');
+  });
+});
+</script>
+</body>
+</html>

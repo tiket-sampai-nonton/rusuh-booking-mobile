@@ -1,24 +1,35 @@
 /**
  * RBT-043 — Waiting room screen (E5 Queue, FR-05/08).
  *
- * A 1:1 port of the prototype `.genesis/prototype/Final/waiting.html`, REWIRED to
- * the real merged seams:
- *   - useQueuePolling (RBT-042) — the single adaptive poller for live
- *     position / zone / status. This screen never rebuilds polling.
- *   - useAutoClaim (RBT-044) — auto-claims on ADMITTED and surfaces the
- *     TURN_MISSED / EVENT_SOLD_OUT error states. This screen never rebuilds
- *     the claim; it only routes on `claimedSessionId`.
- *   - the RBT-040 state machine (isTerminal / isAdmitted) for conditional
- *     rendering (waiting vs admitted vs terminal).
+ * V2 "Brutalist Mono" implementation matching `06-waiting.html`:
+ * - WHITE background, BLACK text/borders
+ * - JetBrains Mono font throughout
+ * - SVG ring progress indicator (220px)
+ * - Status badge with pulse animation
+ * - Zone banners with semantic colors
+ * - Estimated time in minute/second blocks
+ * - Auto-redirect countdown (5s) with pulsing red background
+ * - Leave confirmation modal
+ * - Network status bar
+ * - Loading overlay
  *
  * ARCHITECTURE: presentation only — consumes application/domain via the hooks;
  * no infrastructure import, no TanStack here (it lives in the hooks). Status is
  * never color-only: every zone/state carries an icon + text label (RBT-080 a11y).
  */
 import { useRouter, type Href } from "expo-router";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
+import Animated, {
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
+import Svg, { Circle } from "react-native-svg";
 
 import { isAdmitted, isTerminal } from "@domain/state-machines/queue-state-machine";
 import { useAutoClaim } from "@presentation/hooks/useAutoClaim";
@@ -28,150 +39,478 @@ import {
   claimErrorBody,
   claimErrorTitle,
   COPY,
-  etaText,
   formatCount,
-  peopleAhead,
   ringProgress,
   terminalBody,
   terminalTitle,
   zoneCopy,
 } from "./display";
 import type {
-  PositionRingProps,
-  ShellProps,
-  StatProps,
-  WaitingActiveProps,
   WaitingRoomScreenProps,
-  ZoneBannerProps,
 } from "./interface";
-import { palette, styles, ZONE_STYLE } from "./style";
+import {
+  palette,
+  styles,
+  ZONE_STYLE,
+  RING_SIZE,
+  RING_RADIUS,
+  RING_STROKE,
+  RING_CIRCUMFERENCE,
+} from "./style";
 
-/** Dark aura shell + glass event-pill + double-frame card + footnote. */
-function Shell({ children, testID }: ShellProps) {
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const REDIRECT_COUNTDOWN_SECONDS = 5;
+const ADMISSION_RATE_PER_MIN = 1400; // ~23/sec
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HEADER
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function Header() {
+  const router = useRouter();
   return (
-    <View style={styles.root} testID={testID}>
-      <View style={styles.shell}>
-        <View style={styles.pill}>
-          <View style={styles.pillDot} />
-          <Text style={styles.pillLabel}>Waiting Room</Text>
-        </View>
-        <View style={styles.card}>
-          <View style={styles.core}>
-            <Text style={styles.eyebrow} accessibilityRole="header">
-              {COPY.eyebrow}
-            </Text>
-            {children}
-          </View>
-        </View>
-        <Text style={styles.footnote}>{COPY.footnote}</Text>
+    <View style={styles.header}>
+      <Pressable onPress={() => router.push("/" as Href)}>
+        <Text style={styles.logo}>
+          Rusuh<Text style={styles.logoAccent}>Tiket</Text>
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATUS BADGE (with pulse animation matching prototype)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+type BadgeVariant = "queue" | "yourTurn" | "soldOut" | "expired" | "offline" | "paused";
+
+function StatusBadge({
+  variant,
+  label,
+}: {
+  readonly variant: BadgeVariant;
+  readonly label: string;
+}) {
+  const reducedMotion = useReducedMotion() ?? false;
+  const opacity = useSharedValue(1);
+
+  // Pulse animation for "queue" variant (prototype: animation: pulse 2s infinite)
+  useEffect(() => {
+    if (variant === "queue" && !reducedMotion) {
+      opacity.value = withRepeat(
+        withSequence(
+          withTiming(0.7, { duration: 1000 }),
+          withTiming(1, { duration: 1000 })
+        ),
+        -1, // infinite
+        false
+      );
+    } else {
+      opacity.value = 1;
+    }
+    return () => {
+      cancelAnimation(opacity);
+    };
+  }, [variant, reducedMotion, opacity]);
+
+  // Blink animation for "offline" variant (prototype: animation: blink 1s infinite)
+  useEffect(() => {
+    if (variant === "offline" && !reducedMotion) {
+      opacity.value = withRepeat(
+        withSequence(
+          withTiming(0.3, { duration: 500 }),
+          withTiming(1, { duration: 500 })
+        ),
+        -1,
+        false
+      );
+    }
+  }, [variant, reducedMotion, opacity]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  const badgeStyle = [
+    styles.statusBadge,
+    variant === "yourTurn" && styles.statusBadgeYourTurn,
+    (variant === "soldOut" || variant === "expired") && styles.statusBadgeSoldOut,
+    (variant === "offline" || variant === "paused") && styles.statusBadgeOffline,
+  ];
+
+  return (
+    <Animated.View style={[badgeStyle, animatedStyle]} testID="waiting-status-badge">
+      <Text style={styles.statusBadgeText}>{label}</Text>
+    </Animated.View>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SVG RING PROGRESS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface RingProgressProps {
+  readonly progress: number; // 0..1
+  readonly position: number;
+  readonly isWarning?: boolean;
+}
+
+function RingProgress({ progress, position, isWarning = false }: RingProgressProps) {
+  const clamped = Math.max(0, Math.min(1, progress));
+  // strokeDashoffset: full circumference = 0% progress, 0 = 100% progress
+  const offset = RING_CIRCUMFERENCE * (1 - clamped);
+  const strokeColor = isWarning || position <= 10 ? palette.red : palette.ink;
+
+  return (
+    <View style={styles.ringWrap} testID="waiting-ring">
+      <Svg
+        width={RING_SIZE}
+        height={RING_SIZE}
+        viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
+        style={{ transform: [{ rotate: "-90deg" }] }}
+      >
+        {/* Background track */}
+        <Circle
+          cx={RING_SIZE / 2}
+          cy={RING_SIZE / 2}
+          r={RING_RADIUS}
+          fill="none"
+          stroke={palette.ringBg}
+          strokeWidth={RING_STROKE}
+        />
+        {/* Progress arc */}
+        <Circle
+          cx={RING_SIZE / 2}
+          cy={RING_SIZE / 2}
+          r={RING_RADIUS}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth={RING_STROKE}
+          strokeDasharray={RING_CIRCUMFERENCE}
+          strokeDashoffset={offset}
+          strokeLinecap="square"
+        />
+      </Svg>
+      <View style={styles.ringCenter}>
+        <Text
+          style={styles.position}
+          testID="waiting-position"
+          accessibilityLabel={`Posisi nomor ${position}`}
+        >
+          {formatCount(position)}
+        </Text>
+        <Text style={styles.positionLabel}>Your Position</Text>
       </View>
     </View>
   );
 }
 
-/**
- * 200px ember→red progress ring with the position in the center.
- *
- * Drawn with pure RN Views (no native SVG dependency): a track ring under an
- * ember-tinted progress arc whose sweep is driven by `progress`. The rendering
- * is static (no running animation), so the reduced-motion flag simply confirms
- * there is nothing to suppress — honored by construction.
- */
-function PositionRing({ progress, children }: PositionRingProps) {
-  const clamped = Math.max(0, Math.min(1, progress));
-  // Tint the ring border from the track color toward ember as progress grows,
-  // so it reads as "fuller" the closer to the front — a reduced-motion-safe
-  // static cue (no sweep animation to disable).
-  const ringColor = clamped >= 0.5 ? palette.ember : palette.red;
-  return (
-    <View style={styles.ringWrap} testID="waiting-ring">
-      {/* reducedMotion is honored by construction: the ring is a static render
-          with no running animation to suppress. */}
-      {/* Track ring. */}
-      <View style={[styles.ringTrack, { borderColor: palette.ringBg }]} />
-      {/* Progress ring (opacity scales with progress for a static fill cue). */}
-      <View
-        style={[
-          styles.ringProgress,
-          { borderColor: ringColor, opacity: 0.35 + 0.65 * clamped },
-        ]}
-      />
-      <View style={styles.ringCenter}>{children}</View>
-    </View>
-  );
-}
+// ═══════════════════════════════════════════════════════════════════════════════
+// ZONE BANNER
+// ═══════════════════════════════════════════════════════════════════════════════
 
-/** Zone banner — icon + bold label + body (never color-only). */
-function ZoneBanner({ zone }: ZoneBannerProps) {
-  const copy = zoneCopy(zone);
+function ZoneBanner({ zone }: { readonly zone: string }) {
+  const copy = zoneCopy(zone as "GUARANTEED" | "POSSIBLE" | "NOT_ENOUGH");
   const tone = ZONE_STYLE[copy.tone];
+
   return (
     <View
       testID="waiting-zone"
       accessibilityLiveRegion="polite"
       style={[styles.zone, { backgroundColor: tone.bg, borderColor: tone.border }]}
     >
-      <Text style={[styles.zoneText, { color: tone.text }]}>
-        {copy.icon} <Text style={styles.zoneLabel}>{copy.label}</Text> {copy.body}
-      </Text>
+      <Text style={styles.zoneIcon}>{copy.icon}</Text>
+      <View style={styles.zoneTextWrap}>
+        <Text style={[styles.zoneLabel, { color: tone.text }]}>{copy.label}</Text>
+        <Text style={[styles.zoneBody, { color: tone.text }]}>{copy.body}</Text>
+      </View>
     </View>
   );
 }
 
-function Stat({ value, label, testID }: StatProps) {
+// ═══════════════════════════════════════════════════════════════════════════════
+// ESTIMATED TIME
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function EstimatedTime({ position }: { readonly position: number }) {
+  const totalSeconds = Math.ceil((position / ADMISSION_RATE_PER_MIN) * 60);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
   return (
-    <View style={styles.stat}>
-      <Text style={styles.statValue} testID={testID}>
-        {value}
-      </Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={styles.estimatedTime} testID="waiting-eta">
+      <View style={styles.timeBlock}>
+        <Text style={styles.timeValue}>{String(minutes).padStart(2, "0")}</Text>
+        <Text style={styles.timeLabel}>Minutes</Text>
+      </View>
+      <View style={styles.timeBlock}>
+        <Text style={styles.timeValue}>{String(seconds).padStart(2, "0")}</Text>
+        <Text style={styles.timeLabel}>Seconds</Text>
+      </View>
     </View>
   );
 }
 
-/** Active-queue content: ring + heading + persistence sub + zone + stats. */
-function WaitingActive({ entry }: WaitingActiveProps) {
+// ═══════════════════════════════════════════════════════════════════════════════
+// REDIRECT COUNTDOWN (with pulsing background animation)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function RedirectCountdown({
+  seconds,
+  onComplete,
+}: {
+  readonly seconds: number;
+  readonly onComplete: () => void;
+}) {
+  const [countdown, setCountdown] = useState(seconds);
+  const reducedMotion = useReducedMotion() ?? false;
+  const bgOpacity = useSharedValue(1);
+
+  // Pulse background animation (prototype: @keyframes pulseBackground)
+  useEffect(() => {
+    if (!reducedMotion) {
+      bgOpacity.value = withRepeat(
+        withSequence(
+          withTiming(0.8, { duration: 500 }),
+          withTiming(1, { duration: 500 })
+        ),
+        -1,
+        false
+      );
+    }
+    return () => {
+      cancelAnimation(bgOpacity);
+    };
+  }, [reducedMotion, bgOpacity]);
+
+  useEffect(() => {
+    if (countdown <= 0) {
+      onComplete();
+      return;
+    }
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [countdown, onComplete]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: bgOpacity.value,
+  }));
+
+  return (
+    <Animated.View style={[styles.redirectCountdown, animatedStyle]} testID="waiting-redirect">
+      <Text style={styles.redirectTitle}>🎉 It's Your Turn!</Text>
+      <Text style={styles.redirectNumber}>{countdown}</Text>
+      <Text style={styles.redirectText}>Redirecting to ticket selection...</Text>
+    </Animated.View>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LEAVE CONFIRMATION MODAL
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function LeaveModal({
+  visible,
+  onStay,
+  onLeave,
+}: {
+  readonly visible: boolean;
+  readonly onStay: () => void;
+  readonly onLeave: () => void;
+}) {
+  if (!visible) return null;
+
+  return (
+    <View style={styles.modalOverlay} testID="waiting-leave-modal">
+      <View style={styles.modal}>
+        <Text style={styles.modalTitle}>⚠️ Leave Queue?</Text>
+        <Text style={styles.modalText}>
+          If you leave now, you will lose your position in the queue and will
+          need to rejoin from the back.
+        </Text>
+        <View style={styles.modalActions}>
+          <Pressable style={styles.modalBtnStay} onPress={onStay}>
+            <Text style={styles.modalBtnStayText}>Stay in Queue</Text>
+          </Pressable>
+          <Pressable style={styles.modalBtnLeave} onPress={onLeave}>
+            <Text style={styles.modalBtnLeaveText}>Leave Queue</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// NETWORK STATUS BAR
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function NetworkStatusBar({
+  isOffline,
+  isReconnected,
+}: {
+  readonly isOffline: boolean;
+  readonly isReconnected: boolean;
+}) {
+  if (!isOffline && !isReconnected) return null;
+
+  return (
+    <View
+      style={[
+        styles.networkStatus,
+        isReconnected && styles.networkStatusReconnected,
+      ]}
+      testID="waiting-network-status"
+    >
+      <Text style={styles.networkStatusText}>
+        {isReconnected
+          ? "Reconnected! Resuming queue..."
+          : "Connection lost. Your position is being held..."}
+      </Text>
+    </View>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LOADING OVERLAY
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function LoadingOverlay() {
+  return (
+    <View style={styles.loadingOverlay} testID="waiting-loading-overlay">
+      <ActivityIndicator size="large" color={palette.ink} />
+    </View>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LEAVE BUTTON
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function LeaveButton({ onPress }: { readonly onPress: () => void }) {
+  return (
+    <Pressable
+      style={styles.leaveBtn}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel="Leave Queue"
+      testID="waiting-leave"
+    >
+      <Text style={styles.leaveBtnText}>Leave Queue</Text>
+    </Pressable>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ERROR STATES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function ErrorState({
+  icon,
+  title,
+  message,
+  buttonText,
+  onPress,
+  testID,
+}: {
+  readonly icon: string;
+  readonly title: string;
+  readonly message: string;
+  readonly buttonText: string;
+  readonly onPress: () => void;
+  readonly testID: string;
+}) {
+  return (
+    <View style={styles.errorState} testID={testID}>
+      <Text style={styles.errorTitle}>
+        {icon} {title}
+      </Text>
+      <Text style={styles.errorText}>{message}</Text>
+      <Pressable style={styles.errorBtn} onPress={onPress}>
+        <Text style={styles.errorBtnText}>{buttonText}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ACTIVE WAITING STATE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface WaitingActiveProps {
+  readonly position: number;
+  readonly zone: string;
+  readonly onLeavePress: () => void;
+}
+
+function WaitingActive({ position, zone, onLeavePress }: WaitingActiveProps) {
+  const progress = ringProgress(position);
+
   return (
     <>
-      <PositionRing progress={ringProgress(entry.position)}>
-        <Text
-          style={styles.position}
-          testID="waiting-position"
-          accessibilityLabel={`${COPY.positionLabel} nomor ${entry.position}`}
-        >
-          {formatCount(entry.position)}
-        </Text>
-        <Text style={styles.positionLabel}>{COPY.positionLabel}</Text>
-      </PositionRing>
+      <StatusBadge variant="queue" label="In Queue" />
 
-      <Text style={styles.title} accessibilityRole="header">
-        {COPY.title}
+      <RingProgress
+        progress={progress}
+        position={position}
+        isWarning={position <= 10}
+      />
+
+      <ZoneBanner zone={zone} />
+
+      <EstimatedTime position={position} />
+
+      <Text style={styles.infoText}>
+        Please keep this page open. Your position is automatically updated. Do
+        not refresh or leave this page, or you will lose your spot.
       </Text>
-      <Text style={styles.sub}>{COPY.persistenceSub}</Text>
 
-      <ZoneBanner zone={entry.zone ?? "GUARANTEED"} />
-
-      <View style={styles.stats}>
-        <Stat value={formatCount(peopleAhead(entry.position))} label={COPY.aheadLabel} testID="waiting-ahead" />
-        <Stat value={etaText(entry.position)} label={COPY.etaLabel} testID="waiting-eta" />
-      </View>
+      <LeaveButton onPress={onLeavePress} />
     </>
   );
 }
 
-function LeaveLink({ onPress }: { readonly onPress: () => void }) {
+// ═══════════════════════════════════════════════════════════════════════════════
+// YOUR TURN STATE (with auto-redirect countdown)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface YourTurnStateProps {
+  readonly onRedirect: () => void;
+  readonly onLeavePress: () => void;
+  readonly claiming: boolean;
+}
+
+function YourTurnState({ onRedirect, onLeavePress, claiming }: YourTurnStateProps) {
   return (
-    <Pressable
-      style={styles.leave}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={COPY.leave}
-      testID="waiting-leave"
-    >
-      <Text style={styles.leaveText}>{COPY.leave}</Text>
-    </Pressable>
+    <>
+      <StatusBadge variant="yourTurn" label="It's Your Turn!" />
+
+      <RingProgress progress={1} position={0} />
+
+      <RedirectCountdown
+        seconds={REDIRECT_COUNTDOWN_SECONDS}
+        onComplete={onRedirect}
+      />
+
+      {claiming && (
+        <View style={styles.prep}>
+          <ActivityIndicator color={palette.green} />
+          <Text style={styles.prepText}>{COPY.admitSub}</Text>
+        </View>
+      )}
+
+      <LeaveButton onPress={onLeavePress} />
+    </>
   );
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN SCREEN
+// ═══════════════════════════════════════════════════════════════════════════════
 
 /**
  * Waiting room screen. Driven by `queueId`; renders the correct state view via
@@ -180,6 +519,13 @@ function LeaveLink({ onPress }: { readonly onPress: () => void }) {
 export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) {
   const router = useRouter();
   const reducedMotion = useReducedMotion() ?? false;
+
+  // Modal state
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+
+  // Network state (simplified - could be enhanced with real network detection)
+  const [isOffline] = useState(false);
+  const [isReconnected] = useState(false);
 
   const { entry, isLoading, isError, error, leave } = useQueuePolling(
     queueId,
@@ -193,117 +539,205 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
     status: admitted ? entry.status : undefined,
   });
 
-  // On successful claim, route to checkout. Guard: the checkout route exists on
-  // develop (`/checkout/[sessionId]`); if it were missing this is E6 territory.
-  useEffect(() => {
+  // Redirect to checkout on successful claim
+  const handleRedirect = useCallback(() => {
     if (claimedSessionId) {
       router.replace(`/checkout/${claimedSessionId}` as Href);
     }
   }, [claimedSessionId, router]);
 
-  const onLeave = (): void => {
+  useEffect(() => {
+    if (claimedSessionId) {
+      // Auto-redirect handled by RedirectCountdown component
+    }
+  }, [claimedSessionId]);
+
+  const handleLeavePress = useCallback(() => {
+    setShowLeaveModal(true);
+  }, []);
+
+  const handleStay = useCallback(() => {
+    setShowLeaveModal(false);
+  }, []);
+
+  const handleConfirmLeave = useCallback(() => {
+    setShowLeaveModal(false);
     void leave();
     router.replace("/" as Href);
-  };
+  }, [leave, router]);
 
-  // --- Guards + non-active states ---
-  if (!queueId) {
-    return (
-      <Shell testID="waiting-noqueue">
-        <Text style={styles.title} accessibilityRole="header">
-          {COPY.noQueueTitle}
-        </Text>
-        <Text style={styles.sub}>{COPY.noQueueSub}</Text>
-        <LeaveLink onPress={onLeave} />
-      </Shell>
-    );
-  }
+  const handleBrowseEvents = useCallback(() => {
+    router.replace("/browse" as Href);
+  }, [router]);
 
+  const handleRejoinQueue = useCallback(() => {
+    if (eventId) {
+      router.replace(`/events/${eventId}` as Href);
+    } else {
+      router.replace("/" as Href);
+    }
+  }, [eventId, router]);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // LOADING STATE
+  // ─────────────────────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <Shell testID="waiting-loading">
-        <View style={{ marginTop: 26 }}>
-          <ActivityIndicator accessibilityLabel="Memuat antrean" color={palette.white} />
-        </View>
-        <Text style={styles.sub}>{COPY.loadingSub}</Text>
-        <LeaveLink onPress={onLeave} />
-      </Shell>
+      <View style={styles.root} testID="waiting-loading">
+        <Header />
+        <LoadingOverlay />
+      </View>
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // NO QUEUE ID
+  // ─────────────────────────────────────────────────────────────────────────────
+  if (!queueId) {
+    return (
+      <View style={styles.root} testID="waiting-noqueue">
+        <Header />
+        <View style={styles.shell}>
+          <View style={styles.waitingContainer}>
+            <ErrorState
+              icon="❓"
+              title={COPY.noQueueTitle}
+              message={COPY.noQueueSub}
+              buttonText="Browse Events"
+              onPress={handleBrowseEvents}
+              testID="waiting-noqueue-error"
+            />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // ERROR STATE
+  // ─────────────────────────────────────────────────────────────────────────────
   if (isError || !entry) {
     return (
-      <Shell testID="waiting-error">
-        <Text style={styles.title} accessibilityRole="header">
-          {COPY.errorTitle}
-        </Text>
-        <Text style={styles.sub}>{error?.message ?? COPY.errorSub}</Text>
-        <LeaveLink onPress={onLeave} />
-      </Shell>
-    );
-  }
-
-  // Terminal entry (sold-out / ended / etc.) — the poller has stopped.
-  if (isTerminal(entry.status)) {
-    return (
-      <Shell testID="waiting-terminal">
-        <Text
-          style={styles.admitTitle}
-          accessibilityRole="header"
-          accessibilityLiveRegion="polite"
-        >
-          {terminalTitle(entry.status)}
-        </Text>
-        <View style={styles.errBox} accessibilityLiveRegion="polite">
-          <Text style={styles.errBody}>{terminalBody(entry.status)}</Text>
-        </View>
-        <LeaveLink onPress={onLeave} />
-      </Shell>
-    );
-  }
-
-  // Admitted — claim is firing (RBT-044). Show the aria-live admit region, or a
-  // claim-error state if the claim failed (TURN_MISSED / EVENT_SOLD_OUT).
-  if (admitted) {
-    return (
-      <Shell testID="waiting-admitted">
-        <PositionRing progress={1}>
-          <Text style={styles.position} testID="waiting-position">
-            0
-          </Text>
-          <Text style={styles.positionLabel}>Giliranmu</Text>
-        </PositionRing>
-
-        {errorState ? (
-          <View style={styles.errBox} testID="waiting-claim-error" accessibilityLiveRegion="polite">
-            <Text style={styles.errTitle}>{claimErrorTitle(errorState)}</Text>
-            <Text style={styles.errBody}>{claimErrorBody(errorState)}</Text>
+      <View style={styles.root} testID="waiting-error">
+        <Header />
+        <View style={styles.shell}>
+          <View style={styles.waitingContainer}>
+            <ErrorState
+              icon="⚠️"
+              title={COPY.errorTitle}
+              message={error?.message ?? COPY.errorSub}
+              buttonText="Try Again"
+              onPress={handleRejoinQueue}
+              testID="waiting-error-state"
+            />
           </View>
-        ) : (
-          <View style={styles.admit} testID="waiting-admit" accessibilityLiveRegion="polite">
-            <Text style={styles.admitTitle} accessibilityRole="header">
-              {COPY.admitTitle}
-            </Text>
-            <View style={styles.prep}>
-              {claiming ? (
-                <ActivityIndicator accessibilityLabel="Menyiapkan halaman tiket" color={palette.okText} />
-              ) : null}
-              <Text style={styles.prepText}>{COPY.admitSub}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // TERMINAL STATE (sold-out, ended)
+  // ─────────────────────────────────────────────────────────────────────────────
+  if (isTerminal(entry.status)) {
+    const isSoldOut = entry.status === "SOLD_OUT";
+    return (
+      <View style={styles.root} testID="waiting-terminal">
+        <Header />
+        <View style={styles.shell}>
+          <View style={styles.waitingContainer}>
+            <StatusBadge
+              variant={isSoldOut ? "soldOut" : "expired"}
+              label={isSoldOut ? "Sold Out" : "Sale Ended"}
+            />
+            <ErrorState
+              icon={isSoldOut ? "😔" : "⏰"}
+              title={terminalTitle(entry.status)}
+              message={terminalBody(entry.status)}
+              buttonText="Browse Other Events"
+              onPress={handleBrowseEvents}
+              testID={`waiting-${isSoldOut ? "soldout" : "ended"}-state`}
+            />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // ADMITTED STATE (your turn - with auto-redirect)
+  // ─────────────────────────────────────────────────────────────────────────────
+  if (admitted) {
+    // Check for claim error
+    if (errorState) {
+      const isSoldOut = errorState === "EVENT_SOLD_OUT";
+      return (
+        <View style={styles.root} testID="waiting-claim-error">
+          <Header />
+          <View style={styles.shell}>
+            <View style={styles.waitingContainer}>
+              <StatusBadge
+                variant={isSoldOut ? "soldOut" : "expired"}
+                label={isSoldOut ? "Sold Out" : "Turn Expired"}
+              />
+              <ErrorState
+                icon={isSoldOut ? "😔" : "⏱️"}
+                title={claimErrorTitle(errorState)}
+                message={claimErrorBody(errorState)}
+                buttonText={isSoldOut ? "Browse Other Events" : "Rejoin Queue"}
+                onPress={isSoldOut ? handleBrowseEvents : handleRejoinQueue}
+                testID="waiting-claim-error-state"
+              />
             </View>
           </View>
-        )}
+        </View>
+      );
+    }
 
-        <LeaveLink onPress={onLeave} />
-      </Shell>
+    return (
+      <View style={styles.root} testID="waiting-admitted">
+        <Header />
+        <View style={styles.shell}>
+          <View style={styles.waitingContainer}>
+            <YourTurnState
+              onRedirect={handleRedirect}
+              onLeavePress={handleLeavePress}
+              claiming={claiming}
+            />
+          </View>
+        </View>
+        <LeaveModal
+          visible={showLeaveModal}
+          onStay={handleStay}
+          onLeave={handleConfirmLeave}
+        />
+        <NetworkStatusBar isOffline={isOffline} isReconnected={isReconnected} />
+      </View>
     );
   }
 
-  // --- Active waiting ---
+  // ─────────────────────────────────────────────────────────────────────────────
+  // ACTIVE WAITING STATE
+  // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <Shell testID="waiting-active">
-      <WaitingActive entry={entry} />
-      <LeaveLink onPress={onLeave} />
-    </Shell>
+    <View style={styles.root} testID="waiting-active">
+      <Header />
+      <View style={styles.shell}>
+        <View style={styles.waitingContainer}>
+          <WaitingActive
+            position={entry.position}
+            zone={entry.zone ?? "GUARANTEED"}
+            onLeavePress={handleLeavePress}
+          />
+        </View>
+      </View>
+      <LeaveModal
+        visible={showLeaveModal}
+        onStay={handleStay}
+        onLeave={handleConfirmLeave}
+      />
+      <NetworkStatusBar isOffline={isOffline} isReconnected={isReconnected} />
+    </View>
   );
 }
 
