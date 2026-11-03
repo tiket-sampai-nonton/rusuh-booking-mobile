@@ -1,17 +1,19 @@
 /**
- * Floating glass nav (prototype .nav): brand + center links (web > 720px) +
- * "Masuk / Daftar" CTA. Links scroll in-page; the CTA opens the login modal.
+ * V2 Brutalist Mono nav (RBT-088) — replaces the V5 glass pill.
+ *
+ * Prototype 01-home `.header`: a fixed white bar with a hard 2px bottom border,
+ * an uppercase wordmark, center links (web > 720px) and a "Masuk / Daftar" CTA.
+ * Pure black/white; no shadow, no rounding. Links scroll in-page; the CTA opens
+ * the login modal. Same props/wiring as before — this is a restyle only.
  */
 import { Pressable, Text, View } from "react-native";
 
-import { BrandMark } from "@presentation/components/BrandMark";
+import { v2 } from "@presentation/theme";
 
 import type { HomeNavProps } from "../interface";
-import { homeNavPill, homeNavWrap, homeStyles } from "../style";
 
 export function HomeNav({
   showLinks,
-  width,
   topInset,
   onJelajah,
   onHistory,
@@ -19,59 +21,74 @@ export function HomeNav({
   onAccount,
 }: HomeNavProps) {
   return (
-    <View pointerEvents="box-none" style={homeNavWrap(topInset)}>
+    <View
+      pointerEvents="box-none"
+      style={{ position: "absolute", top: 0, left: 0, right: 0, paddingTop: topInset }}
+    >
       <View
-        style={homeNavPill(width)}
-        className="flex-row items-center gap-[22px] rounded-pill border border-white/60 bg-card/80 shadow-filter"
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          backgroundColor: v2.ground,
+          borderBottomWidth: 2,
+          borderBottomColor: v2.ink,
+          paddingHorizontal: 20,
+          paddingVertical: 14,
+        }}
       >
-        <BrandMark />
+        <Text
+          accessibilityRole="header"
+          style={{ color: v2.ink, letterSpacing: 0.5 }}
+          className="text-lg font-v2 font-black uppercase"
+        >
+          Rusuh Tiket
+        </Text>
+
         {showLinks ? (
-          <View className="flex-row gap-1">
-            {/* Prototype nav links are in-page anchors (scroll, no navigation). */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Jelajah event"
-              testID="nav-jelajah"
-              onPress={onJelajah}
-              style={homeStyles.navLink}
-              className="rounded-pill"
-            >
-              <Text style={homeStyles.navLinkText} className="font-semibold text-muted-foreground">Jelajah</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="History event"
-              testID="nav-history"
-              onPress={onHistory}
-              style={homeStyles.navLink}
-              className="rounded-pill"
-            >
-              <Text style={homeStyles.navLinkText} className="font-semibold text-muted-foreground">History</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Kategori event"
-              testID="nav-kategori"
-              onPress={onKategori}
-              style={homeStyles.navLink}
-              className="rounded-pill"
-            >
-              <Text style={homeStyles.navLinkText} className="font-semibold text-muted-foreground">Kategori</Text>
-            </Pressable>
+          <View className="flex-row" style={{ gap: 24 }}>
+            {[
+              { label: "Jelajah", onPress: onJelajah, testID: "nav-jelajah" },
+              { label: "History", onPress: onHistory, testID: "nav-history" },
+              { label: "Kategori", onPress: onKategori, testID: "nav-kategori" },
+            ].map((l) => (
+              <Pressable
+                key={l.testID}
+                accessibilityRole="button"
+                accessibilityLabel={`${l.label} event`}
+                testID={l.testID}
+                onPress={l.onPress}
+              >
+                <Text
+                  style={{ color: v2.ink }}
+                  className="text-sm font-v2 font-bold uppercase"
+                >
+                  {l.label}
+                </Text>
+              </Pressable>
+            ))}
           </View>
         ) : null}
+
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Masuk atau Daftar"
           testID="nav-cta"
           onPress={onAccount}
-          style={homeStyles.ctaInner}
-          className="flex-row items-center gap-2.25 rounded-pill bg-ink"
+          style={{
+            backgroundColor: v2.ink,
+            borderWidth: 2,
+            borderColor: v2.ink,
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+          }}
         >
-          <Text style={homeStyles.ctaText} className="font-bold text-white">Masuk / Daftar</Text>
-          <View style={homeStyles.ctaPin} className="items-center justify-center rounded-full bg-brand">
-            <Text style={homeStyles.ctaText} className="text-white" accessibilityElementsHidden>↗</Text>
-          </View>
+          <Text
+            style={{ color: v2.ground }}
+            className="text-xs font-v2 font-bold uppercase"
+          >
+            Masuk / Daftar
+          </Text>
         </Pressable>
       </View>
     </View>
