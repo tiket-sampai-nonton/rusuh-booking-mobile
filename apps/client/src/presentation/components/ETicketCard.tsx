@@ -20,6 +20,11 @@ export interface ETicketCardProps {
   readonly bookingId: string;
   readonly index: number;
   readonly total: number;
+  readonly eventName?: string;
+  readonly venue?: string;
+  readonly startsAt?: string;
+  readonly attendeeName?: string;
+  readonly attendeeNikMasked?: string;
 }
 
 /** The QR payload — a safe, verifiable reference, no PII (D7.1). */
@@ -27,7 +32,7 @@ export function ticketRef(bookingId: string, index: number): string {
   return `RBT|${bookingId}|${index + 1}`;
 }
 
-export function ETicketCard({ bookingId, index, total }: ETicketCardProps) {
+export function ETicketCard({ bookingId, index, total, eventName, venue, startsAt, attendeeName, attendeeNikMasked }: ETicketCardProps) {
   const value = ticketRef(bookingId, index);
   return (
     <View
@@ -52,6 +57,14 @@ export function ETicketCard({ bookingId, index, total }: ETicketCardProps) {
         <Text className="mt-3 text-xs font-extrabold" style={{ color: v2.ink, letterSpacing: 1.5 }}>
           {value}
         </Text>
+        {eventName ? (
+          <View className="mt-5 w-full gap-2" style={{ borderTopWidth: v2Border.base, borderTopColor: v2.ink, paddingTop: 16 }}>
+            <Text className="text-lg font-extrabold uppercase" style={{ color: v2.ink }}>{eventName}</Text>
+            <Text className="text-xs" style={{ color: v2.gray }}>{attendeeName ?? 'Ticket holder'} · {attendeeNikMasked ?? '••••'}</Text>
+            <Text className="text-xs" style={{ color: v2.gray }}>{startsAt ?? 'Date TBA'} · {venue ?? 'Venue TBA'}</Text>
+            <Text className="text-xs font-bold uppercase" style={{ color: v2.ink }}>General Admission · Ticket code {value}</Text>
+          </View>
+        ) : null}
         <Text className="mt-1 text-2xs" style={{ color: v2.gray }}>
           Tunjukkan QR ini di gerbang masuk.
         </Text>

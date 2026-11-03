@@ -250,36 +250,39 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
               <Lineup items={lineup} />
             </Block>
 
-            {/* Venue Map */}
-            <Block label="Lokasi">
-              <Venue
-                name={venueInfo.name}
-                address={venueInfo.address}
-                mapImage={venueInfo.mapImage}
-                mapsUrl={venueInfo.mapsUrl}
-              />
-            </Block>
+            {/* These sections belong to the desktop/detail prototype. The
+                mobile reference ends after Line Up before the fixed CTA. */}
+            {!isNative && (
+              <>
+                <Block label="Lokasi">
+                  <Venue
+                    name={venueInfo.name}
+                    address={venueInfo.address}
+                    mapImage={venueInfo.mapImage}
+                    mapsUrl={venueInfo.mapsUrl}
+                  />
+                </Block>
 
-            {/* Gallery */}
-            <Block label="Galeri">
-              <Gallery images={galleryImages} onImagePress={openLightbox} />
-            </Block>
+                <Block label="Galeri">
+                  <Gallery images={galleryImages} onImagePress={openLightbox} />
+                </Block>
 
-            {/* Terms & Conditions */}
-            <Block label="Syarat & Ketentuan">
-              {desc.terms.length > 0 ? (
-                <View style={styles.termsList}>
-                  {desc.terms.map((t) => (
-                    <View key={t} style={styles.termsItem}>
-                      <Text style={styles.termsCheck}>✓</Text>
-                      <Text style={styles.termsText}>{t}</Text>
+                <Block label="Syarat & Ketentuan">
+                  {desc.terms.length > 0 ? (
+                    <View style={styles.termsList}>
+                      {desc.terms.map((t) => (
+                        <View key={t} style={styles.termsItem}>
+                          <Text style={styles.termsCheck}>✓</Text>
+                          <Text style={styles.termsText}>{t}</Text>
+                        </View>
+                      ))}
                     </View>
-                  ))}
-                </View>
-              ) : (
-                <Text style={styles.description}>Ketentuan menyusul.</Text>
-              )}
-            </Block>
+                  ) : (
+                    <Text style={styles.description}>Ketentuan menyusul.</Text>
+                  )}
+                </Block>
+              </>
+            )}
 
             {/* Trust Box (web only - can be removed if using inline badges) */}
             {!isNative && (

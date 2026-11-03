@@ -85,6 +85,19 @@ function ArrowRightIcon({ color = v2Colors.ink }: { readonly color?: string }) {
   );
 }
 
+function HeartIcon({ color = v2Colors.ink, filled = false }: { readonly color?: string; readonly filled?: boolean }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" fill={filled ? color : 'none'}>
+      <Path
+        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 export interface V2EventCardProps {
   readonly event: EventSummary;
   readonly onPress: (eventId: string) => void;
@@ -94,6 +107,10 @@ export interface V2EventCardProps {
   readonly staggerIndex?: number;
   /** List view mode: use 16:9 aspect ratio instead of 1:1 */
   readonly listMode?: boolean;
+  /** Browse-only wishlist affordance. */
+  readonly showWishlist?: boolean;
+  readonly wishlisted?: boolean;
+  readonly onToggleWishlist?: (eventId: string) => void;
 }
 
 /** Badge label per tone */
@@ -105,7 +122,7 @@ const BADGE_LABEL: Record<BadgeTone, string> = {
   done: 'Selesai',
 };
 
-export function V2EventCard({ event, onPress, history = false, staggerIndex = 0, listMode = false }: V2EventCardProps) {
+export function V2EventCard({ event, onPress, history = false, staggerIndex = 0, listMode = false, showWishlist = false, wishlisted = false, onToggleWishlist }: V2EventCardProps) {
   const reducedMotion = useReducedMotion();
   const { isNative } = useResponsive();
   const hovered = useSharedValue(0);
@@ -336,6 +353,33 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
               />
             </>
           )}
+
+          {showWishlist && !disabled ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${wishlisted ? 'Hapus dari' : 'Simpan ke'} wishlist: ${event.name}`}
+              accessibilityState={{ selected: wishlisted }}
+              onPress={(pressEvent) => {
+                pressEvent.stopPropagation();
+                onToggleWishlist?.(event.id);
+              }}
+              style={({ pressed }) => ({
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                width: 36,
+                height: 36,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: pressed || wishlisted ? v2Colors.ink : v2Colors.ground,
+                borderWidth: v2Borders.standard,
+                borderColor: v2Colors.ink,
+              })}
+              testID={`wishlist-${event.id}`}
+            >
+              <HeartIcon color={wishlisted ? v2Colors.ground : v2Colors.ink} filled={wishlisted} />
+            </Pressable>
+          ) : null}
 
           {/* Badge */}
           <Animated.View

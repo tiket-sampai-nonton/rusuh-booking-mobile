@@ -81,9 +81,9 @@ export const ZONE_STYLE: Readonly<
 };
 
 // Ring dimensions (SVG-based, 220px as per prototype)
-export const RING_SIZE = 220;
-export const RING_RADIUS = 100; // SVG circle r=100
-export const RING_STROKE = 8;
+export const RING_SIZE = 200;
+export const RING_RADIUS = 90;
+export const RING_STROKE = 6;
 export const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ~628
 
 const B = v2Borders.thick; // 3px for waiting room
@@ -112,8 +112,8 @@ export const styles = StyleSheet.create({
     width: "100%",
     borderBottomWidth: B,
     borderBottomColor: palette.ink,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -124,7 +124,7 @@ export const styles = StyleSheet.create({
     }),
   },
   logo: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: -1,
@@ -144,7 +144,7 @@ export const styles = StyleSheet.create({
     borderWidth: B,
     borderColor: palette.ink,
     backgroundColor: palette.ink,
-    marginBottom: 32,
+    marginBottom: 24,
   },
   statusBadgeText: {
     fontSize: 12,
@@ -180,11 +180,11 @@ export const styles = StyleSheet.create({
   // EVENT INFO
   // ═══════════════════════════════════════════════════════════════════════════
   eventInfo: {
-    marginBottom: 48,
+    marginBottom: 32,
     alignItems: "center",
   },
   eventName: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: -1,
@@ -200,12 +200,12 @@ export const styles = StyleSheet.create({
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // RING PROGRESS (SVG-based, 220px)
+  // RING PROGRESS (SVG-based, 200px)
   // ═══════════════════════════════════════════════════════════════════════════
   ringWrap: {
     width: RING_SIZE,
     height: RING_SIZE,
-    marginBottom: 32,
+    marginBottom: 24,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -242,7 +242,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderWidth: B,
-    marginBottom: 32,
+    marginBottom: 24,
     width: "100%",
   },
   zoneIcon: {

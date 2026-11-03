@@ -97,9 +97,10 @@ export function HomeScreen() {
           {/* Hero Carousel - Full viewport (prototype .hero) */}
           {data && data.upcoming.length > 0 && (
             <V2HeroCarousel
-              events={data.upcoming}
+              events={data.upcoming.slice(0, 1)}
               onBook={goToEvent}
               onSeeAll={goBrowse}
+              autoPlay={false}
             />
           )}
 
@@ -134,6 +135,10 @@ export function HomeScreen() {
           ]}
           onCtaPress={() => setLoginOpen(true)}
           onLogoPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+          actions={[
+            { icon: 'search', label: 'Cari event', onPress: goBrowse, testID: 'header-search' },
+            { icon: 'bell', label: 'Notifikasi', onPress: () => setLoginOpen(true), testID: 'header-notifications' },
+          ]}
         />
 
         {/* Login/OTP + Filter modals */}

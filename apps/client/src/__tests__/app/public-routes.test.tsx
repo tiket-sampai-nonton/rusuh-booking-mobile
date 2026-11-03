@@ -18,6 +18,10 @@ import BrowseScreen from "../../app/(public)/browse";
 // eslint-disable-next-line import/first
 import HistoryScreen from "../../app/(public)/history";
 // eslint-disable-next-line import/first
+import MyTicketsScreen from "../../app/(public)/my-tickets";
+// eslint-disable-next-line import/first
+import ProfileScreen from "../../app/(public)/profile";
+// eslint-disable-next-line import/first
 import EventDetailScreen from "../../app/(public)/events/[eventId]";
 
 describe("(public) routes", () => {
@@ -25,6 +29,8 @@ describe("(public) routes", () => {
     expect(typeof HomeScreen).toBe("function");
     expect(typeof BrowseScreen).toBe("function");
     expect(typeof HistoryScreen).toBe("function");
+    expect(typeof MyTicketsScreen).toBe("function");
+    expect(typeof ProfileScreen).toBe("function");
     expect(typeof EventDetailScreen).toBe("function");
   });
 
@@ -37,8 +43,7 @@ describe("(public) routes", () => {
     await waitFor(() =>
       expect(screen.getByText("Upcoming")).toBeTruthy(),
     );
-    // V2 history section shows "Event Sebelumnya" when history events exist
-    expect(screen.getByText("Event Sebelumnya")).toBeTruthy();
+    expect(screen.getByTestId("home-mobile-stats")).toBeTruthy();
   });
 
   it("renders the Browse screen (RBT-031: real URL-driven results, not a placeholder)", async () => {

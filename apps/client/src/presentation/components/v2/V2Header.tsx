@@ -64,6 +64,33 @@ function LoginIcon({ color = v2Colors.ink }: { readonly color?: string }) {
   );
 }
 
+function SearchIcon({ color = v2Colors.ink }: { readonly color?: string }) {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke={color} strokeWidth={2} />
+      <Path d="m21 21-4.35-4.35" stroke={color} strokeWidth={2} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function BellIcon({ color = v2Colors.ink }: { readonly color?: string }) {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+function HeartIcon({ color = v2Colors.ink }: { readonly color?: string }) {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z" stroke={color} strokeWidth={2} strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+type HeaderIcon = 'login' | 'search' | 'bell' | 'heart';
+
 /** Mobile header icon button (v2-mobile .icon-btn) */
 function IconButton({
   icon,
@@ -71,7 +98,7 @@ function IconButton({
   onPress,
   testID,
 }: {
-  readonly icon: 'login';
+  readonly icon: HeaderIcon;
   readonly label: string;
   readonly onPress?: () => void;
   readonly testID?: string;
@@ -138,7 +165,10 @@ function IconButton({
         bgStyle,
       ]}
     >
-      <LoginIcon color={iconColor} />
+      {icon === 'login' ? <LoginIcon color={iconColor} /> : null}
+      {icon === 'search' ? <SearchIcon color={iconColor} /> : null}
+      {icon === 'bell' ? <BellIcon color={iconColor} /> : null}
+      {icon === 'heart' ? <HeartIcon color={iconColor} /> : null}
     </AnimatedPressable>
   );
 }
@@ -158,6 +188,14 @@ export interface V2HeaderProps {
   readonly ctaLabel?: string;
   /** Whether user is logged in (mobile: hides login icon when true) */
   readonly isLoggedIn?: boolean;
+  /** Screen-specific mobile actions. When provided, replaces the generic login action. */
+  readonly actions?: readonly {
+    icon: HeaderIcon;
+    label: string;
+    onPress?: () => void;
+    testID?: string;
+    count?: number;
+  }[];
 }
 
 /** Nav link with underline slide animation */
@@ -239,6 +277,7 @@ export function V2Header({
   onLogoPress,
   ctaLabel = 'Masuk / Daftar',
   isLoggedIn = false,
+  actions = [],
 }: V2HeaderProps) {
   const reducedMotion = useReducedMotion();
   const { headerHeight, isNative } = useResponsive();
@@ -247,7 +286,7 @@ export function V2Header({
 
   // Mobile native: show login icon when not logged in, nothing when logged in
   // Web: always show text CTA button regardless of viewport size
-  const showMobileLoginIcon = isNative && !isLoggedIn;
+  const showMobileLoginIcon = isNative && !isLoggedIn && actions.length === 0;
 
   // Slide in from top on mount (prototype: animation 0.8s, delay 0.5s)
   useEffect(() => {
@@ -371,13 +410,42 @@ export function V2Header({
           {/* Mobile native (not logged in): Login icon button */}
           {/* Mobile native (logged in): No CTA */}
           {/* Web: Always show text CTA button */}
-          {showMobileLoginIcon ? (
-            <IconButton
-              icon="login"
-              label="Masuk"
-              onPress={onCtaPress}
-              testID="header-login"
-            />
+          {isNative && actions.length > 0 ? (
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {actions.map((action) => (
+                <View key={action.testID ?? action.label} style={{ position: 'relative' }}>
+                  <IconButton
+                    icon={action.icon}
+                    label={action.label}
+                    onPress={action.onPress}
+                    testID={action.testID}
+                  />
+                  {typeof action.count === 'number' && action.count > 0 ? (
+                    <View
+                      pointerEvents="none"
+                      style={{
+                        position: 'absolute',
+                        top: -4,
+                        right: -4,
+                        minWidth: 18,
+                        height: 18,
+                        paddingHorizontal: 3,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: v2Colors.danger,
+                        borderRadius: 9,
+                      }}
+                    >
+                      <Text style={{ color: v2Colors.ground, fontSize: 10, fontFamily: interFonts.bold }}>
+                        {action.count > 99 ? '99+' : action.count}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          ) : showMobileLoginIcon ? (
+            <IconButton icon="login" label="Masuk" onPress={onCtaPress} testID="header-login" />
           ) : !isNative ? (
             /* Desktop/Web: CTA button with ink spread hover (prototype .btn-ghost) */
             <AnimatedPressable

@@ -13,7 +13,7 @@
  * noindex: a crawler must never see a transactional failure state (SECURITY §6.5).
  */
 import { useRouter, type Href } from "expo-router";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import type { PaymentStatus } from "@domain/repositories/payment.repository";
 import {
@@ -137,7 +137,7 @@ export function ExpiredRecoveryScreen({
       <View className="w-full max-w-sm items-center gap-4">
         {/* Red-ring icon circle (prototype 09-expired `.expired-icon`). */}
         <View
-          className="h-24 w-24 items-center justify-center rounded-full"
+          className="h-[100px] w-[100px] items-center justify-center rounded-full"
           style={{ borderWidth: v2Border.base, borderColor: v2.danger }}
         >
           <Text className="text-4xl" accessibilityElementsHidden>
@@ -191,37 +191,41 @@ export function ExpiredRecoveryScreen({
       </View>
 
       <View className="w-full max-w-sm gap-3">
-        <Text
+        <Pressable
           onPress={canRetry ? onRetry : onRequeue}
           accessibilityRole="button"
+          accessibilityLabel={primaryText}
           testID={canRetry ? "expired-retry" : "expired-requeue"}
-          className="min-h-[48px] items-center justify-center py-4 text-center text-sm font-bold uppercase"
-          style={{
-            backgroundColor: v2.ink,
-            color: v2.ground,
-            letterSpacing: 0.5,
+          style={({ pressed }) => ({
+            minHeight: 48,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingVertical: 16,
+            backgroundColor: pressed ? v2.inkMuted : v2.ink,
             borderWidth: v2Border.base,
             borderColor: v2.ink,
-          }}
+          })}
         >
-          {primaryText}
-        </Text>
+          <Text style={{ color: v2.ground, letterSpacing: 0.5, fontSize: 14, fontWeight: "700", textTransform: "uppercase" }}>{primaryText}</Text>
+        </Pressable>
         {canRetry && (
-          <Text
+          <Pressable
             onPress={onRequeue}
             accessibilityRole="button"
+            accessibilityLabel="Cari Event Lain"
             testID="expired-requeue"
-            className="min-h-[48px] items-center justify-center py-4 text-center text-sm font-bold uppercase"
-            style={{
-              backgroundColor: v2.ground,
-              color: v2.ink,
-              letterSpacing: 0.5,
+            style={({ pressed }) => ({
+              minHeight: 48,
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 16,
+              backgroundColor: pressed ? v2.field : v2.ground,
               borderWidth: v2Border.base,
               borderColor: v2.ink,
-            }}
+            })}
           >
-            Cari Event Lain
-          </Text>
+            <Text style={{ color: v2.ink, letterSpacing: 0.5, fontSize: 14, fontWeight: "700", textTransform: "uppercase" }}>Cari Event Lain</Text>
+          </Pressable>
         )}
       </View>
     </View>

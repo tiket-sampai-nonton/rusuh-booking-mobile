@@ -108,8 +108,8 @@ export const v2SpacingSemantic = {
   xs: 8,      // 0.5rem
   s: 16,      // 1rem
   m: 24,      // 1.5rem
-  l: 48,      // 3rem
-  xl: 80,     // 5rem
+  l: 32,      // 2rem — mobile prototype --space-l
+  xl: 48,     // 3rem — mobile prototype --space-xl
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════

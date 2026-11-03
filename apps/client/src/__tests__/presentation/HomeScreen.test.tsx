@@ -54,7 +54,7 @@ describe("HomeScreen", () => {
     );
   });
 
-  it("renders upcoming + history sections from the fixtures", async () => {
+  it("renders the mobile upcoming section and prototype stats banner", async () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
@@ -65,18 +65,13 @@ describe("HomeScreen", () => {
     // V2: Header text is "Upcoming" on native (matches v2-mobile prototype),
     // "Event Minggu Ini" on web — Jest runs as native
     expect(screen.getByText("Upcoming")).toBeTruthy();
-    // V2: History section header is "Event Sebelumnya"
-    expect(screen.getByText("Event Sebelumnya")).toBeTruthy();
-    // "Rusuh Fest 2026" shows in the hero slide AND its catalog card.
+    expect(screen.getByTestId("home-mobile-stats")).toBeTruthy();
+    // "Rusuh Fest 2026" shows in the static hero and catalog card.
     expect(screen.getAllByText("Rusuh Fest 2026").length).toBeGreaterThanOrEqual(1);
-    // evt-5 is CLOSED → history card only.
-    expect(screen.getByText("Jazz in the Park 2025")).toBeTruthy();
-    // Measure BOTH section scroll targets (onFeaturedLayout + onHistoryLayout).
+    // History/archive is a separate route in the mobile prototype.
+    expect(screen.queryByTestId("section-history")).toBeNull();
     fireEvent(screen.getByTestId("section-events"), "layout", {
       nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
-    });
-    fireEvent(screen.getByTestId("section-history"), "layout", {
-      nativeEvent: { layout: { x: 0, y: 1500, width: 393, height: 600 } },
     });
   });
 

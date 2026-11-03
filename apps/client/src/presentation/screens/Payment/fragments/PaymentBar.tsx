@@ -33,8 +33,8 @@ export function PaymentBar({
       ) : null}
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-2xs uppercase tracking-tag text-white/50">Total Bayar</Text>
-          <Text className="text-xl font-extrabold text-white">{minorToIDR(amountMinor)}</Text>
+          <Text className="text-2xs uppercase tracking-tag" style={{ color: v2.gray }}>Total Bayar</Text>
+          <Text className="text-xl font-extrabold" style={{ color: v2.ink }}>{minorToIDR(amountMinor)}</Text>
         </View>
         <Pressable
           accessibilityRole="button"
