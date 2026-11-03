@@ -18,13 +18,22 @@ import {
   type TicketRow,
 } from "@domain/rules/checkout";
 
-const row = (over: Partial<TicketRow> = {}): TicketRow => ({
-  categoryId: "REG",
-  attendeeName: "A",
-  attendeeNik: "3171010101010001",
-  useBuyerNik: false,
-  ...over,
-});
+// `rowId` defaults to a value DERIVED from the row's content, so two rows with
+// equal content compare equal under toEqual (a counter would make them differ).
+// Pass an explicit `rowId` in `over` when a test needs distinct ids.
+const row = (over: Partial<TicketRow> = {}): TicketRow => {
+  const base = {
+    categoryId: "REG",
+    attendeeName: "A",
+    attendeeNik: "3171010101010001",
+    useBuyerNik: false,
+    ...over,
+  };
+  return {
+    rowId: over.rowId ?? `row-${base.categoryId}-${base.attendeeName}-${base.attendeeNik}`,
+    ...base,
+  };
+};
 
 describe("checkout quantity + category rules (RBT-051)", () => {
   it("effectiveCap never exceeds MAX_TICKETS (3)", () => {

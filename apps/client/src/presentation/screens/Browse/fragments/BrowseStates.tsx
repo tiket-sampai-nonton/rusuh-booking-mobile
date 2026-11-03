@@ -1,10 +1,12 @@
 /** Browse loading + empty states (prototype browse.html). */
 import { ActivityIndicator, Text, View } from "react-native";
 
+import { brand } from "@presentation/theme";
+
 export function BrowseLoading() {
   return (
     <View className="mt-10 items-center" testID="browse-loading">
-      <ActivityIndicator accessibilityLabel="Memuat event" color="#e8320c" />
+      <ActivityIndicator accessibilityLabel="Memuat event" color={brand.red} />
     </View>
   );
 }

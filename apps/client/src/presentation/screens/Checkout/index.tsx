@@ -205,8 +205,11 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
             {rows.map((row, i) => {
               const nik = row.useBuyerNik ? buyerNik : row.attendeeNik;
               return (
+                // Key on the STABLE rowId (not the array index): rows are
+                // add/remove-able, so an index key would remount the wrong
+                // row's input state when a middle row is removed.
                 <TicketItem
-                  key={i}
+                  key={row.rowId}
                   index={i}
                   row={row}
                   canRemove={rows.length > 1}

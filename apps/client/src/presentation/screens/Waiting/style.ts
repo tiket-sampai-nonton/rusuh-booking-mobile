@@ -6,23 +6,30 @@
  */
 import { StyleSheet } from "react-native";
 
+import { brand, neutral, withAlpha } from "@presentation/theme";
+
 import type { ZoneTone } from "./display";
 
-/** Prototype palette (waiting.html dark surface). */
+/**
+ * Prototype palette (waiting.html dark surface). Core hues come from the TOKEN
+ * set (ink/ember/red/white); the remaining entries are the prototype's
+ * dark-context accents (`--ok`/`--amber` dark tones, pill dot) that the light
+ * token set does not model — kept here as the single documented source.
+ */
 export const palette = {
-  ink: "#0a0a0c",
-  ember: "#ff5a2d",
-  red: "#EC1C24",
-  white: "#ffffff",
-  muted: "rgba(255,255,255,0.62)",
-  faint: "rgba(255,255,255,0.4)",
-  ringBg: "rgba(255,255,255,0.08)",
-  pillDot: "#ff3b4e",
-  ok: "#4ade80",
-  okText: "#a7f3c4",
-  amber: "#f5b301",
-  amberText: "#ffdd8a",
-  errText: "#ff9a8f",
+  ink: neutral.ink,
+  ember: brand.ember,
+  red: brand.red,
+  white: neutral.card,
+  muted: neutral.mutedDark,
+  faint: withAlpha(neutral.card, 0.4),
+  ringBg: withAlpha(neutral.card, 0.08),
+  pillDot: "#ff3b4e", //   dark-context live dot (not a core token)
+  ok: "#4ade80", //        waiting.html dark --ok
+  okText: "#a7f3c4", //    dark --ok text tint
+  amber: "#f5b301", //     waiting.html --amber
+  amberText: "#ffdd8a", // dark amber text tint
+  errText: "#ff9a8f", //   dark error text tint
 } as const;
 
 /** Zone banner tone → {bg, border, text} rgba triple (prototype .zone.*). */
@@ -30,18 +37,18 @@ export const ZONE_STYLE: Readonly<
   Record<ZoneTone, { bg: string; border: string; text: string }>
 > = {
   ok: {
-    bg: "rgba(74,222,128,0.12)",
-    border: "rgba(74,222,128,0.3)",
+    bg: withAlpha(palette.ok, 0.12),
+    border: withAlpha(palette.ok, 0.3),
     text: palette.okText,
   },
   warn: {
-    bg: "rgba(245,179,1,0.12)",
-    border: "rgba(245,179,1,0.32)",
+    bg: withAlpha(palette.amber, 0.12),
+    border: withAlpha(palette.amber, 0.32),
     text: palette.amberText,
   },
   error: {
-    bg: "rgba(236,28,36,0.12)",
-    border: "rgba(236,28,36,0.34)",
+    bg: withAlpha(palette.red, 0.12),
+    border: withAlpha(palette.red, 0.34),
     text: palette.errText,
   },
 };
@@ -65,8 +72,8 @@ export const styles = StyleSheet.create({
     gap: 10,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.14)",
-    backgroundColor: "rgba(255,255,255,0.07)",
+    borderColor: withAlpha(palette.white, 0.14),
+    backgroundColor: withAlpha(palette.white, 0.07),
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginBottom: 22,
@@ -78,13 +85,13 @@ export const styles = StyleSheet.create({
     maxWidth: 440,
     borderRadius: 30,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    backgroundColor: "rgba(255,255,255,0.04)",
+    borderColor: withAlpha(palette.white, 0.1),
+    backgroundColor: withAlpha(palette.white, 0.04),
     padding: 9,
   },
   core: {
     borderRadius: 21,
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: withAlpha(palette.white, 0.03),
     paddingVertical: 34,
     paddingHorizontal: 28,
     alignItems: "center",
@@ -171,8 +178,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    backgroundColor: "rgba(255,255,255,0.04)",
+    borderColor: withAlpha(palette.white, 0.08),
+    backgroundColor: withAlpha(palette.white, 0.04),
     paddingVertical: 14,
     paddingHorizontal: 10,
   },
@@ -197,8 +204,8 @@ export const styles = StyleSheet.create({
     gap: 11,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(74,222,128,0.3)",
-    backgroundColor: "rgba(74,222,128,0.12)",
+    borderColor: withAlpha(palette.ok, 0.3),
+    backgroundColor: withAlpha(palette.ok, 0.12),
     paddingVertical: 16,
     paddingHorizontal: 16,
   },
@@ -216,8 +223,8 @@ export const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "rgba(236,28,36,0.34)",
-    backgroundColor: "rgba(236,28,36,0.12)",
+    borderColor: withAlpha(palette.red, 0.34),
+    backgroundColor: withAlpha(palette.red, 0.12),
     paddingVertical: 16,
     paddingHorizontal: 16,
   },

@@ -12,7 +12,9 @@ import type {
 import { InMemoryIdempotencyStore } from "@infrastructure/__fixtures__/in-memory-idempotency-store";
 import type { TicketRow } from "@domain/rules/checkout";
 
+let rowSeq = 0;
 const row = (over: Partial<TicketRow> = {}): TicketRow => ({
+  rowId: `row-${++rowSeq}`,
   categoryId: "REG",
   attendeeName: "A",
   attendeeNik: "3171010101010001",

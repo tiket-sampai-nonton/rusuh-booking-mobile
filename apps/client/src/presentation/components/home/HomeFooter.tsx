@@ -6,6 +6,10 @@
 import { Text, View } from "react-native";
 
 import { BrandMark } from "@presentation/components/BrandMark";
+import { neutral, withAlpha } from "@presentation/theme";
+
+/** Hairline over the ink footer surface (prototype rgba white .08). */
+const FOOTER_HAIRLINE = withAlpha(neutral.card, 0.08);
 
 const COLUMNS: readonly { title: string; links: readonly string[] }[] = [
   { title: "Kategori", links: ["Musik", "Festival", "Jazz", "Rock"] },
@@ -15,12 +19,12 @@ const COLUMNS: readonly { title: string; links: readonly string[] }[] = [
 
 export function HomeFooter() {
   return (
-    <View style={{ backgroundColor: "#0a0a0c", paddingTop: 60, paddingBottom: 40, paddingHorizontal: 20, marginTop: 40 }} testID="home-footer">
+    <View style={{ backgroundColor: neutral.ink, paddingTop: 60, paddingBottom: 40, paddingHorizontal: 20, marginTop: 40 }} testID="home-footer">
       <View
-        style={{ borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)", paddingBottom: 30, marginBottom: 24 }}
+        style={{ borderBottomWidth: 1, borderBottomColor: FOOTER_HAIRLINE, paddingBottom: 30, marginBottom: 24 }}
       >
         <View style={{ maxWidth: 300 }}>
-          <BrandMark color="#ffffff" />
+          <BrandMark color={neutral.card} />
           <Text style={{ fontSize: 13, marginTop: 12, lineHeight: 21 }} className="text-white/60">
             Platform booking tiket konser online yang tetap adil dan stabil saat
             ribuan orang menyerbu sekaligus.

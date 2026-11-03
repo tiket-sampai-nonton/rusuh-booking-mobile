@@ -25,6 +25,13 @@ export function isValidEmail(email: string): boolean {
 
 /** One ticket row in the checkout form. */
 export interface TicketRow {
+  /**
+   * Stable identity for React list reconciliation. Rows are add/remove-able,
+   * so the list MUST key on this (not the array index) — keying on the index
+   * remounts the wrong row's input state when a middle row is removed. Minted
+   * once by `emptyRow()` and preserved verbatim through every row transform.
+   */
+  readonly rowId: string;
   readonly categoryId: string;
   readonly attendeeName: string;
   readonly attendeeNik: string;

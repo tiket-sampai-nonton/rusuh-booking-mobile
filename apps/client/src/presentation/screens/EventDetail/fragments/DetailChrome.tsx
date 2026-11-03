@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { BrandMark } from "@presentation/components/BrandMark";
+import { neutral } from "@presentation/theme";
 
 import { detailStyles } from "../style";
 
@@ -26,7 +27,7 @@ export function DetailBackground({
 export function MiniNav({ onBack }: { readonly onBack: () => void }) {
   return (
     <View style={detailStyles.miniNav}>
-      <BrandMark color="#fff" />
+      <BrandMark color={neutral.card} />
       <Pressable accessibilityRole="button" accessibilityLabel="Kembali ke beranda" onPress={onBack}>
         <Text style={detailStyles.navBack} className="font-semibold text-white/60">
           ← Beranda

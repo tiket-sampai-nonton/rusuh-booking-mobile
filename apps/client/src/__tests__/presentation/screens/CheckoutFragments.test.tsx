@@ -125,6 +125,7 @@ describe("ConsentGate (RBT-052 AC3)", () => {
 });
 
 const ticketRow = {
+  rowId: "row-fixture-1",
   categoryId: "REG",
   attendeeName: "",
   attendeeNik: "",
