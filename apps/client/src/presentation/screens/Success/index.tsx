@@ -1,5 +1,5 @@
 /**
- * SuccessScreen — confirmed-order summary (RBT-070, E8, AC1/FR-22).
+ * SuccessScreen — confirmed-order summary (RBT-070, E8, AC1/FR-22), V2 Brutalist Mono.
  *
  * Reached only after the RBT-063 verify gate confirmed PAID; this screen
  * RE-VERIFIES the authoritative status (never trusts navigation alone, D10.2)
@@ -9,6 +9,9 @@
  *
  * SECURITY: renders the MASKED buyer NIK only (first 2 + last 2, D7.1/D7.5) —
  * the raw NIK never reaches the FE. noindex (transactional, SECURITY §6.5).
+ *
+ * V2 look (prototype 10-success): dark ground, green success ring, white
+ * success card with a dark summary, white-primary / outline-secondary actions.
  */
 import { useRouter, type Href } from "expo-router";
 import { useEffect } from "react";
@@ -20,6 +23,7 @@ import { Seo } from "@presentation/components/Seo";
 import { useETicketShare } from "@presentation/hooks/useETicketShare";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 import { useSessionStore } from "@presentation/stores/session-store";
+import { v2, v2Border } from "@presentation/theme";
 
 export interface SuccessScreenProps {
   readonly bookingId: string;
@@ -27,11 +31,9 @@ export interface SuccessScreenProps {
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <View className="flex-row items-center justify-between gap-3.5">
-      <Text className="text-xs text-muted-foreground">{label}</Text>
-      <Text className="flex-1 text-right text-sm font-bold text-foreground">
-        {value}
-      </Text>
+    <View className="flex-row items-center justify-between gap-3.5 py-1">
+      <Text className="text-xs text-white/60">{label}</Text>
+      <Text className="flex-1 text-right text-sm font-bold text-white">{value}</Text>
     </View>
   );
 }
@@ -62,7 +64,8 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
 
   return (
     <View
-      className="flex-1 items-center justify-center bg-background p-6"
+      className="flex-1 items-center justify-center p-6"
+      style={{ backgroundColor: v2.ink }}
       testID="success-screen"
     >
       <Seo
@@ -79,49 +82,63 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
         >
           <ActivityIndicator
             size="large"
+            color={v2.ground}
             accessibilityLabel="Memverifikasi pembayaran"
           />
-          <Text className="text-center text-base text-foreground">
+          <Text className="text-center text-base text-white">
             {isLoading ? "Memverifikasi pembayaran…" : "Menyiapkan tiket…"}
           </Text>
         </View>
       ) : (
-        <ScrollView
-          className="w-full"
-          contentContainerClassName="w-full max-w-md self-center rounded-4xl border border-line bg-card p-7 shadow-filter"
-        >
+        <ScrollView className="w-full" contentContainerClassName="w-full max-w-md self-center">
+          {/* Green success ring (prototype `.success-icon`). */}
+          <View className="mb-6 items-center">
+            <View
+              className="h-20 w-20 items-center justify-center rounded-full"
+              style={{ borderWidth: 3, borderColor: v2.success }}
+            >
+              <Text className="text-3xl font-extrabold" style={{ color: v2.success }} accessibilityElementsHidden>
+                ✓
+              </Text>
+            </View>
+          </View>
+
           <Text
-            className="text-2xs font-extrabold uppercase tracking-tag text-ok"
+            className="text-center text-2xs font-extrabold uppercase"
+            style={{ color: v2.success, letterSpacing: 2 }}
             testID="success-eyebrow"
           >
             Pembayaran berhasil
           </Text>
           <Text
-            className="mt-2 text-2xl font-extrabold text-foreground"
+            className="mt-2 text-center text-2xl font-extrabold uppercase text-white"
+            style={{ letterSpacing: -1 }}
             accessibilityRole="header"
           >
             Tiket kamu sudah aktif
           </Text>
-          <Text className="mt-2.5 text-xs leading-5 text-muted-foreground">
+          <Text className="mt-2.5 text-center text-xs leading-5 text-white/70">
             Simpan e-tiket ini. Tunjukkan QR di pintu masuk.
           </Text>
 
-          <View className="my-5.5 gap-3 rounded-xl bg-background p-4">
+          {/* Summary card — translucent on the dark ground (prototype `.summary-card`). */}
+          <View
+            className="my-6 gap-1 p-5"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.05)",
+              borderWidth: 1,
+              borderColor: "rgba(255,255,255,0.1)",
+            }}
+          >
             <SummaryRow label="Order ID" value={bookingId} />
-            <SummaryRow
-              label="Jumlah tiket"
-              value={`${ticketCount ?? 1} tiket`}
-            />
+            <SummaryRow label="Jumlah tiket" value={`${ticketCount ?? 1} tiket`} />
             <SummaryRow label="Total dibayar" value={minorToIDR(amountMinor)} />
-            <SummaryRow
-              label="NIK pembeli"
-              value={buyerNikMasked ?? "••••"}
-            />
+            <SummaryRow label="NIK pembeli" value={buyerNikMasked ?? "••••"} />
           </View>
 
           {/* One e-ticket card + QR per ticket (RBT-071). QR encodes a safe
               reference, never PII. */}
-          <View className="gap-3" testID="eticket-list">
+          <View className="gap-6" testID="eticket-list">
             {Array.from({ length: count }, (_, i) => (
               // Static derived list (fixed length, never reordered): the
               // booking id + ticket index IS the stable identity.
@@ -134,24 +151,30 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
             ))}
           </View>
 
-          <View className="mt-6 flex-row gap-2.5">
+          <View className="mt-7 flex-row gap-3">
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Unduh atau bagikan e-tiket"
               testID="success-download"
               onPress={() => void shareTickets(bookingId, count)}
-              className="flex-1 items-center rounded-pill bg-brand py-4"
+              className="flex-1 items-center py-4"
+              style={{ backgroundColor: v2.ground, borderWidth: v2Border.base, borderColor: v2.ground }}
             >
-              <Text className="text-sm font-bold text-white">⬇ Unduh E-Tiket</Text>
+              <Text className="text-sm font-bold uppercase" style={{ color: v2.ink, letterSpacing: 0.5 }}>
+                ⬇ Unduh E-Tiket
+              </Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Ke Beranda"
               testID="success-home"
               onPress={() => router.replace("/" as Href)}
-              className="flex-1 items-center rounded-pill border border-line bg-card py-4"
+              className="flex-1 items-center py-4"
+              style={{ borderWidth: 1, borderColor: "rgba(255,255,255,0.3)" }}
             >
-              <Text className="text-sm font-bold text-foreground">Ke Beranda</Text>
+              <Text className="text-sm font-bold uppercase text-white" style={{ letterSpacing: 0.5 }}>
+                Ke Beranda
+              </Text>
             </Pressable>
           </View>
         </ScrollView>
