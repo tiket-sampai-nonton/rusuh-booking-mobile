@@ -1,5 +1,8 @@
 # RBT-097: V2 Mobile Design Divergences — Implementation Summary
 
+## PR
+https://github.com/tiket-sampai-nonton/rusuh-booking-mobile/pull/106
+
 ## Overview
 Implements mobile-specific design divergences from `.genesis/prototype/v2-mobile/` into the V2 Brutalist Mono codebase.
 
