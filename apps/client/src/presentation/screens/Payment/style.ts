@@ -1,6 +1,8 @@
 /** Payment screen styles — extracted from inline `style={{…}}` (refactor rule). */
 import { StyleSheet, type DimensionValue } from "react-native";
 
+import { neutral } from "@presentation/theme";
+
 export const paymentStyles = StyleSheet.create({
   timerDot: { width: 8, height: 8, borderRadius: 999 },
   methodIcon: { width: 44, height: 30, borderRadius: 7 },
@@ -18,6 +20,6 @@ export const paymentScrollContent = (isDesktop: boolean) => ({
 
 /** Dark sticky checkout bar — fixed ink bg + bottom safe-area inset. */
 export const paymentBar = (bottom: number) => ({
-  backgroundColor: "#0a0a0c",
+  backgroundColor: neutral.ink,
   paddingBottom: bottom + 16,
 });

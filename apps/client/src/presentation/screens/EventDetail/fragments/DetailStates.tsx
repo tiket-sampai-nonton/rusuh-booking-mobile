@@ -1,6 +1,8 @@
 /** EventDetail loading + error states (prototype event.html). */
 import { ActivityIndicator, Text, View } from "react-native";
 
+import { neutral } from "@presentation/theme";
+
 import { DetailBackground, MiniNav } from "./DetailChrome";
 
 export function DetailLoading({ onBack }: { readonly onBack: () => void }) {
@@ -8,7 +10,7 @@ export function DetailLoading({ onBack }: { readonly onBack: () => void }) {
     <DetailBackground testID="detail-loading">
       <MiniNav onBack={onBack} />
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator accessibilityLabel="Memuat detail event" color="#fff" />
+        <ActivityIndicator accessibilityLabel="Memuat detail event" color={neutral.card} />
       </View>
     </DetailBackground>
   );

@@ -20,6 +20,7 @@ import { badgeFor, type BadgeTone } from "@domain/rules/event-display";
 import { eventImage } from "@domain/rules/event-image";
 import { formatDateID } from "@domain/services/date-format";
 import { minorToIDR } from "@domain/services/money";
+import { neutral, status, withAlpha } from "@presentation/theme";
 
 export interface EventCardProps {
   readonly event: EventSummary;
@@ -27,22 +28,30 @@ export interface EventCardProps {
   readonly history?: boolean;
 }
 
+/** `--info` hue (prototype b-soon blue). Not a core token; local prototype value. */
+const INFO = "#3b82f6";
+
+/** Surface tints derived from the --ink token, not literals. */
+const CARD_BG = withAlpha(neutral.ink, 0.03);
+const INK_72 = withAlpha(neutral.ink, 0.72);
+const INK_30 = withAlpha(neutral.ink, 0.3);
+
 /** Badge background per tone (prototype b-ok/b-low/b-soon/b-soldout/b-done). */
 const BADGE_BG: Record<BadgeTone, string> = {
-  ok: "rgba(23,163,74,0.85)",
-  low: "rgba(232,131,12,0.9)",
-  soon: "rgba(59,130,246,0.85)",
-  soldout: "rgba(10,10,12,0.72)",
-  done: "rgba(10,10,12,0.72)",
+  ok: withAlpha(status.ok, 0.85),
+  low: withAlpha(status.warn, 0.9),
+  soon: withAlpha(INFO, 0.85),
+  soldout: INK_72,
+  done: INK_72,
 };
 
 /** Foot availability text color per tone (prototype .avail.lo/.ok/.soon). */
 const AVAIL_COLOR: Record<BadgeTone, string> = {
-  ok: "#17a34a",
-  low: "#e8830c",
-  soon: "#3b82f6",
-  soldout: "#6b6b76",
-  done: "#6b6b76",
+  ok: status.ok,
+  low: status.warn,
+  soon: INFO,
+  soldout: neutral.muted,
+  done: neutral.muted,
 };
 
 export function EventCard({ event, onPress, history = false }: EventCardProps) {
@@ -61,8 +70,8 @@ export function EventCard({ event, onPress, history = false }: EventCardProps) {
       onPress={() => onPress(event.id)}
       testID={`event-card-${event.id}`}
       style={{
-        backgroundColor: "rgba(10,10,12,0.03)",
-        borderColor: "rgba(10,10,12,0.08)",
+        backgroundColor: CARD_BG,
+        borderColor: neutral.line,
         borderWidth: 1,
         borderRadius: 26,
         padding: 7,
@@ -70,7 +79,7 @@ export function EventCard({ event, onPress, history = false }: EventCardProps) {
       }}
     >
       {/* Thumb (4:3) with badge + price overlays. */}
-      <View style={{ borderRadius: 20, overflow: "hidden", aspectRatio: 4 / 3, backgroundColor: "#0a0a0c" }}>
+      <View style={{ borderRadius: 20, overflow: "hidden", aspectRatio: 4 / 3, backgroundColor: neutral.ink }}>
         <Image
           source={{ uri: image }}
           resizeMode="cover"
@@ -87,7 +96,7 @@ export function EventCard({ event, onPress, history = false }: EventCardProps) {
         </View>
         {!badge.disabled ? (
           <View
-            style={{ position: "absolute", bottom: 12, right: 12, backgroundColor: "rgba(255,255,255,0.92)" }}
+            style={{ position: "absolute", bottom: 12, right: 12, backgroundColor: withAlpha(neutral.card, 0.92) }}
             className="rounded-pill px-3 py-1.75"
           >
             <Text style={{ fontSize: 13 }} className="font-extrabold text-ink">
@@ -114,7 +123,7 @@ export function EventCard({ event, onPress, history = false }: EventCardProps) {
         ) : null}
 
         <View
-          style={{ marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: "rgba(10,10,12,0.08)" }}
+          style={{ marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: neutral.line }}
           className="flex-row items-center justify-between"
         >
           {disabled ? (
@@ -127,7 +136,7 @@ export function EventCard({ event, onPress, history = false }: EventCardProps) {
             </Text>
           )}
           <View
-            style={{ width: 36, height: 36, backgroundColor: disabled ? "rgba(10,10,12,0.3)" : "#0a0a0c" }}
+            style={{ width: 36, height: 36, backgroundColor: disabled ? INK_30 : neutral.ink }}
             className="items-center justify-center rounded-full"
           >
             <Text style={{ fontSize: 15 }} className="text-white" accessibilityElementsHidden>

@@ -5,12 +5,18 @@
  */
 import { Text, View } from "react-native";
 
+import { brand, neutral, withAlpha } from "@presentation/theme";
+
 export interface SectionHeadProps {
   readonly tag: string;
   readonly title: string;
   readonly subtitle: string;
   readonly archive?: boolean;
 }
+
+// Prototype `.tag` tints: brand (--red) for live sections, --ink for archive.
+const TAG_BORDER = { brand: withAlpha(brand.red, 0.18), ink: withAlpha(neutral.ink, 0.08) };
+const TAG_BG = { brand: withAlpha(brand.red, 0.08), ink: withAlpha(neutral.ink, 0.05) };
 
 export function SectionHead({ tag, title, subtitle, archive = false }: SectionHeadProps) {
   return (
@@ -19,15 +25,20 @@ export function SectionHead({ tag, title, subtitle, archive = false }: SectionHe
         style={{
           alignSelf: "flex-start",
           borderWidth: 1,
-          borderColor: archive ? "rgba(10,10,12,0.08)" : "rgba(236,28,36,0.18)",
-          backgroundColor: archive ? "rgba(10,10,12,0.05)" : "rgba(236,28,36,0.08)",
+          borderColor: archive ? TAG_BORDER.ink : TAG_BORDER.brand,
+          backgroundColor: archive ? TAG_BG.ink : TAG_BG.brand,
           paddingHorizontal: 13,
           paddingVertical: 6,
         }}
         className="rounded-pill"
       >
         <Text
-          style={{ fontSize: 10, letterSpacing: 2, color: archive ? "#6b6b76" : "#EC1C24" }}
+          style={{
+            fontSize: 10,
+            letterSpacing: 2,
+            // Token values (not literals): archive uses --muted, brand uses --red.
+            color: archive ? neutral.muted : brand.red,
+          }}
           className="font-bold uppercase"
         >
           {tag}

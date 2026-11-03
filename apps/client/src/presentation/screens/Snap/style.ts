@@ -4,7 +4,7 @@
  */
 import { StyleSheet } from "react-native";
 
-import { brand } from "@presentation/theme";
+import { brand, neutral } from "@presentation/theme";
 
 export const snapStyles = StyleSheet.create({
   scrollContent: { flexGrow: 1, justifyContent: "center", padding: 20 },
@@ -14,7 +14,7 @@ export const snapStyles = StyleSheet.create({
     borderRadius: 9,
     backgroundColor: brand.red,
   },
-  logoArrow: { fontSize: 14, color: "#fff" },
+  logoArrow: { fontSize: 14, color: neutral.card },
   eyebrow: { letterSpacing: 1.5 },
   heading: { letterSpacing: -1 },
 });

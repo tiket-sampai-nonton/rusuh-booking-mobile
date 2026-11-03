@@ -8,4 +8,5 @@
  */
 export * from "./tokens";
 export * from "./theme";
+export * from "./color";
 export * from "./v2-tokens";

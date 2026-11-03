@@ -1,10 +1,12 @@
 /** History loading + empty states (prototype index.html #historyEmpty). */
 import { ActivityIndicator, Text, View } from "react-native";
 
+import { brand } from "@presentation/theme";
+
 export function HistoryLoading() {
   return (
     <View className="mt-10 items-center" testID="history-loading">
-      <ActivityIndicator accessibilityLabel="Memuat event" color="#e8320c" />
+      <ActivityIndicator accessibilityLabel="Memuat event" color={brand.red} />
     </View>
   );
 }

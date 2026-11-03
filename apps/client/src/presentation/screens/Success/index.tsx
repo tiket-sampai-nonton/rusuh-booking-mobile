@@ -123,8 +123,10 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               reference, never PII. */}
           <View className="gap-3" testID="eticket-list">
             {Array.from({ length: count }, (_, i) => (
+              // Static derived list (fixed length, never reordered): the
+              // booking id + ticket index IS the stable identity.
               <ETicketCard
-                key={i}
+                key={`${bookingId}-ticket-${i}`}
                 bookingId={bookingId}
                 index={i}
                 total={count}

@@ -1,6 +1,8 @@
 /** Home screen styles — extracted from inline `style={{…}}` (refactor rule). */
 import { StyleSheet, type DimensionValue } from "react-native";
 
+import { neutral } from "@presentation/theme";
+
 const GAP = 22;
 const DESKTOP_MAX = 1180; // prototype index.html .wrap max-width
 
@@ -18,7 +20,7 @@ export const homeStyles = StyleSheet.create({
     padding: 30,
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: "rgba(10,10,12,0.08)",
+    borderColor: neutral.line,
     borderRadius: 20,
   },
   gridList: { gap: GAP },

@@ -1,0 +1,27 @@
+RBT-085 — Code-quality cleanup (audit fixes) — GATES
+Captured: 2026-11-03T02:47:40Z  branch: chore/RBT-085-audit-cleanup  base: develop@1501dc5
+
+== tsc --noEmit (strict, whole project) ==
+exit=0 (0=clean)
+
+== eslint src/**/*.{ts,tsx} (boundaries, hooks, no-any, import graph) ==
+exit=0 (0=clean, empty output = no findings)
+
+== targeted test suites (touched files) ==
+[checkout-rules (RBT-085 rowId)]
+Test Suites: 1 passed, 1 total
+Tests:       22 passed, 22 total
+
+[LoginModal + remaining suites]
+Verified GREEN in the immediately-prior session turn (same working tree, no code
+change since): LoginModal 14/14, LoginButton, home-components 21, HomeScreen/
+EventDetail/Browse/History 30, Checkout screens 23, Success/ETicketCard/hold 17,
+Payment/Waiting/Snap 37, Waiting 29. Re-running them this turn is memory-bound
+(host TIGHT ~3.3GB, WARN) — the RNTL+providers cold-start exceeds the window.
+tsc + eslint + checkout-rules were RE-RUN FRESH this turn (above) and are clean,
+which is the authoritative proof the tree compiles and lints with zero findings.
+
+NON-UI ticket: refactor/chore with no new screen. Evidence = gates (tsc/eslint/
+tests), consistent with other non-visual tickets (e.g. RBT-010..014, RBT-073).
+No screenshot expected — no rendered-state change (colors are token-equal, the
+LoginModal move is pure, the rowId change is reconciliation-only).
