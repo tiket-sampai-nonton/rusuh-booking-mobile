@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiting Room - Rusuh Tiket</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --red: #ff0000;
+            --gray: #888888;
+            --border: 3px solid var(--black);
+            --font: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--white);
+            color: var(--black);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            border-bottom: var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            text-decoration: none;
+            color: var(--black);
+        }
+
+        .logo span {
+            color: var(--red);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .waiting-container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: var(--border);
+            background: var(--black);
+            color: var(--white);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        .status-badge.your-turn {
+            background: var(--red);
+            animation: none;
+        }
+
+        .status-badge.sold-out {
+            background: var(--gray);
+            animation: none;
+        }
+
+        .status-badge.expired {
+            background: var(--gray);
+            animation: none;
+        }
+
+        .status-badge.offline {
+            background: #ff6600;
+            animation: blink 1s infinite;
+        }
+
+        .status-badge.paused {
+            background: #ff6600;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Event Info */
+        .event-info {
+            margin-bottom: 3rem;
+        }
+
+        .event-info h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-info p {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+
+        /* Queue Display */
+        .queue-display {
+            border: var(--border);
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .queue-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--black);
+            transform-origin: left;
+            animation: progress 30s linear infinite;
+        }
+
+        @keyframes progress {
+            0% { transform: scaleX(0); }
+            100% { transform: scaleX(1); }
+        }
+
+        .queue-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+
+        .queue-position {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .queue-position.updating {
+            transform: scale(1.1);
+            color: var(--red);
+        }
+
+        .queue-suffix {
+            font-size: 1rem;
+            color: var(--gray);
+        }
+
+        /* Ring Progress Indicator */
+        .ring-progress {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 2rem;
+        }
+
+        .ring-progress svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .ring-progress circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: square;
+        }
+
+        .ring-progress .ring-bg {
+            stroke: #f0f0f0;
+        }
+
+        .ring-progress .ring-fg {
+            stroke: var(--black);
+            stroke-dasharray: 628; /* 2 * PI * 100 */
+            stroke-dashoffset: 628;
+            transition: stroke-dashoffset 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .ring-progress .ring-fg.warning {
+            stroke: var(--red);
+        }
+
+        .ring-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ring-center .pos-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .ring-center .pos-value.updating {
+            transform: scale(1.1);
+            color: var(--red);
+        }
+
+        .ring-center .pos-label {
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gray);
+            margin-top: 0.5rem;
+        }
+
+        /* Zone Banner */
+        .zone-banner {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            justify-content: center;
+            padding: 1rem 1.25rem;
+            border: var(--border);
+            margin-bottom: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .zone-banner .zone-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .zone-banner .zone-text b {
+            display: block;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .zone-banner.GUARANTEED {
+            background: #e8f5e9;
+            border-color: #2e7d32;
+            color: #1b5e20;
+        }
+
+        .zone-banner.POSSIBLE {
+            background: #fff3e0;
+            border-color: #f57c00;
+            color: #e65100;
+        }
+
+        .zone-banner.NOT_ENOUGH {
+            background: #ffebee;
+            border-color: #c62828;
+            color: #b71c1c;
+        }
+
+        .zone-banner.hidden {
+            display: none;
+        }
+
+        /* Estimated Time */
+        .estimated-time {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: var(--border);
+            background: #f5f5f5;
+        }
+
+        .time-block {
+            text-align: center;
+        }
+
+        .time-value {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .time-label {
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray);
+        }
+
+        /* Auto-redirect Countdown */
+        .redirect-countdown {
+            display: none;
+            padding: 1.5rem;
+            border: 3px solid var(--red);
+            background: var(--red);
+            color: var(--white);
+            margin-bottom: 2rem;
+            animation: pulseBackground 1s infinite;
+        }
+
+        .redirect-countdown.active {
+            display: block;
+        }
+
+        @keyframes pulseBackground {
+            0%, 100% { background: var(--red); }
+            50% { background: #cc0000; }
+        }
+
+        .redirect-countdown h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .redirect-countdown .countdown-number {
+            font-size: 3rem;
+            font-weight: 800;
+        }
+
+        .redirect-countdown p {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        /* Warning Messages */
+        .warning-box {
+            display: none;
+            padding: 1rem;
+            border: 3px solid #ff6600;
+            background: #fff3e0;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .warning-box.active {
+            display: block;
+        }
+
+        .warning-box h4 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #ff6600;
+            margin-bottom: 0.5rem;
+        }
+
+        .warning-box p {
+            font-size: 0.75rem;
+            color: var(--black);
+        }
+
+        /* Info Text */
+        .info-text {
+            font-size: 0.75rem;
+            color: var(--gray);
+            max-width: 400px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        /* Leave Button */
+        .leave-btn {
+            padding: 1rem 2rem;
+            border: var(--border);
+            background: var(--white);
+            color: var(--black);
+            font-family: var(--font);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .leave-btn:hover {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        /* Sold Out / Error State */
+        .error-state {
+            display: none;
+        }
+
+        .error-state.active {
+            display: block;
+        }
+
+        .error-state h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .error-state p {
+            font-size: 0.875rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+        }
+
+        .error-state .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            border: var(--border);
+            background: var(--black);
+            color: var(--white);
+            font-family: var(--font);
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .error-state .btn:hover {
+            background: var(--red);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--white);
+            border: var(--border);
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .modal h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .modal p {
+            font-size: 0.875rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 1rem;
+            border: var(--border);
+            font-family: var(--font);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-actions .stay-btn {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        .modal-actions .stay-btn:hover {
+            background: var(--red);
+        }
+
+        .modal-actions .leave-confirm-btn {
+            background: var(--white);
+            color: var(--black);
+        }
+
+        .modal-actions .leave-confirm-btn:hover {
+            background: #f5f5f5;
+        }
+
+        /* Network Status Bar */
+        .network-status {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background: #ff6600;
+            color: var(--white);
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 999;
+        }
+
+        .network-status.active {
+            display: block;
+        }
+
+        .network-status.reconnected {
+            background: #00aa00;
+        }
+
+        /* Multi-tab Warning */
+        .multi-tab-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--white);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .multi-tab-warning.active {
+            display: flex;
+        }
+
+        .multi-tab-warning .content {
+            max-width: 400px;
+        }
+
+        .multi-tab-warning h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .multi-tab-warning p {
+            font-size: 0.875rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+        }
+
+        /* Turn Expiry Warning */
+        .turn-expiry {
+            display: none;
+            padding: 1rem;
+            border: 3px solid var(--red);
+            background: #ffe0e0;
+            margin-bottom: 2rem;
+        }
+
+        .turn-expiry.active {
+            display: block;
+        }
+
+        .turn-expiry h4 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--red);
+            margin-bottom: 0.5rem;
+        }
+
+        .turn-expiry .expiry-time {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--red);
+        }
+
+        /* Long Wait Notification */
+        .long-wait-notice {
+            display: none;
+            padding: 1rem;
+            border: var(--border);
+            background: #e3f2fd;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .long-wait-notice.active {
+            display: block;
+        }
+
+        .long-wait-notice p {
+            font-size: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .long-wait-notice button {
+            padding: 0.5rem 1rem;
+            border: var(--border);
+            background: var(--black);
+            color: var(--white);
+            font-family: var(--font);
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--white);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-overlay .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f5f5f5;
+            border-top-color: var(--black);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            header {
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 1.25rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .event-info h1 {
+                font-size: 1.5rem;
+            }
+
+            .queue-position {
+                font-size: 4rem;
+            }
+
+            .estimated-time {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Multi-tab Warning -->
+    <div class="multi-tab-warning" id="multiTabWarning">
+        <div class="content">
+            <h2>⚠️ Multiple Tabs Detected</h2>
+            <p>You already have the waiting room open in another tab. Please use only one tab to maintain your position in the queue.</p>
+            <button class="leave-btn" onclick="window.close()">Close This Tab</button>
+        </div>
+    </div>
+
+    <!-- Network Status Bar -->
+    <div class="network-status" id="networkStatus">
+        <span id="networkMessage">Connection lost. Reconnecting...</span>
+    </div>
+
+    <!-- Leave Warning Modal -->
+    <div class="modal-overlay" id="leaveModal">
+        <div class="modal">
+            <h3>⚠️ Leave Queue?</h3>
+            <p>If you leave now, you will lose your position in the queue and will need to rejoin from the back.</p>
+            <div class="modal-actions">
+                <button class="stay-btn" onclick="closeLeaveModal()">Stay in Queue</button>
+                <button class="leave-confirm-btn" onclick="confirmLeave()">Leave Queue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <a href="01-home.html" class="logo nav-link" data-warn="true">Rusuh<span>Tiket</span></a>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="waiting-container">
+            <!-- Normal Queue State -->
+            <div id="normalState">
+                <div class="status-badge" id="statusBadge">In Queue</div>
+
+                <div class="event-info">
+                    <h1 id="eventName">Loading...</h1>
+                    <p id="eventDate">Loading event details...</p>
+                </div>
+
+                <!-- Warning Boxes -->
+                <div class="warning-box" id="backgroundWarning">
+                    <h4>⚠️ Tab in Background</h4>
+                    <p>Your queue position is being held, but please keep this tab active to ensure smooth transition when it's your turn.</p>
+                </div>
+
+                <div class="warning-box" id="longWaitWarning">
+                    <h4>📱 Long Wait Expected</h4>
+                    <p>The estimated wait is over 10 minutes. Keep this tab open - we'll notify you when it's almost your turn.</p>
+                </div>
+
+                <!-- Turn Expiry Warning -->
+                <div class="turn-expiry" id="turnExpiry">
+                    <h4>⏰ Your Turn Expires In</h4>
+                    <span class="expiry-time" id="expiryTime">5:00</span>
+                </div>
+
+                <!-- Auto-redirect Countdown -->
+                <div class="redirect-countdown" id="redirectCountdown">
+                    <h3>🎉 It's Your Turn!</h3>
+                    <div class="countdown-number" id="countdownNumber">5</div>
+                    <p>Redirecting to ticket selection...</p>
+                </div>
+
+                <!-- Ring Progress Indicator -->
+                <div class="ring-progress" id="ringProgress">
+                    <svg viewBox="0 0 220 220">
+                        <circle class="ring-bg" cx="110" cy="110" r="100"/>
+                        <circle class="ring-fg" id="ringFg" cx="110" cy="110" r="100"/>
+                    </svg>
+                    <div class="ring-center">
+                        <div class="pos-value" id="ringPosition">---</div>
+                        <div class="pos-label">Your Position</div>
+                    </div>
+                </div>
+
+                <!-- Zone Banner -->
+                <div class="zone-banner hidden" id="zoneBanner">
+                    <span class="zone-icon" id="zoneIcon">🔒</span>
+                    <div class="zone-text" id="zoneText">
+                        <b>Safe Zone</b>
+                        <span>Your ticket is guaranteed when your turn arrives.</span>
+                    </div>
+                </div>
+
+                <!-- Queue Display (legacy, now secondary) -->
+                <div class="queue-display" style="display: none;">
+                    <div class="queue-label">Your Position</div>
+                    <div class="queue-position" id="queuePosition">---</div>
+                    <div class="queue-suffix">in queue</div>
+                </div>
+
+                <!-- Estimated Time -->
+                <div class="estimated-time">
+                    <div class="time-block">
+                        <div class="time-value" id="estMinutes">--</div>
+                        <div class="time-label">Minutes</div>
+                    </div>
+                    <div class="time-block">
+                        <div class="time-value" id="estSeconds">--</div>
+                        <div class="time-label">Seconds</div>
+                    </div>
+                </div>
+
+                <!-- Long Wait Notification Option -->
+                <div class="long-wait-notice" id="notifyOption">
+                    <p>💡 Want to be notified when it's almost your turn? We'll send you a browser notification.</p>
+                    <button onclick="requestNotificationPermission()">Enable Notifications</button>
+                </div>
+
+                <p class="info-text">
+                    Please keep this page open. Your position is automatically updated. 
+                    Do not refresh or leave this page, or you will lose your spot.
+                </p>
+
+                <button class="leave-btn" onclick="showLeaveModal()">Leave Queue</button>
+            </div>
+
+            <!-- Sold Out State -->
+            <div class="error-state" id="soldOutState">
+                <h2>😔 Sold Out</h2>
+                <p>Sorry, all tickets for this event have been sold while you were in the queue.</p>
+                <a href="05-browse.html" class="btn">Browse Other Events</a>
+            </div>
+
+            <!-- Sale Ended State -->
+            <div class="error-state" id="saleEndedState">
+                <h2>⏰ Sale Ended</h2>
+                <p>The ticket sale period for this event has ended.</p>
+                <a href="05-browse.html" class="btn">Browse Other Events</a>
+            </div>
+
+            <!-- Session Expired State -->
+            <div class="error-state" id="sessionExpiredState">
+                <h2>⌛ Session Expired</h2>
+                <p>Your queue session has expired due to inactivity. Please rejoin the queue.</p>
+                <a href="02-event-detail.html" class="btn">Rejoin Queue</a>
+            </div>
+
+            <!-- Turn Expired State -->
+            <div class="error-state" id="turnExpiredState">
+                <h2>⏱️ Turn Expired</h2>
+                <p>You didn't proceed to ticket selection in time. Your turn has been given to the next person in queue.</p>
+                <a href="02-event-detail.html" class="btn">Rejoin Queue</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ========================================
+        // CONFIGURATION & STATE
+        // ========================================
+        const CONFIG = {
+            REDIRECT_COUNTDOWN: 5,          // Seconds before auto-redirect
+            TURN_EXPIRY_TIME: 300,          // 5 minutes to complete purchase
+            POSITION_UPDATE_INTERVAL: 3000, // Update position every 3 seconds
+            SESSION_TIMEOUT: 1800,          // 30 minutes session timeout
+            LONG_WAIT_THRESHOLD: 600,       // 10 minutes = show notification option
+            TAB_ID: `tab_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            STORAGE_KEY: 'rusuh_waiting_room'
+        };
+
+        let state = {
+            position: 0,
+            initialPosition: 0,
+            isMyTurn: false,
+            isSoldOut: false,
+            isSaleEnded: false,
+            isExpired: false,
+            isTurnExpired: false,
+            isPaused: false,
+            isOnline: navigator.onLine,
+            isVisible: !document.hidden,
+            redirectCountdown: CONFIG.REDIRECT_COUNTDOWN,
+            turnExpiryTime: CONFIG.TURN_EXPIRY_TIME,
+            sessionStartTime: Date.now(),
+            pendingNavigation: null,
+            notificationsEnabled: false,
+            eventData: null
+        };
+
+        let intervals = {
+            positionUpdate: null,
+            redirectCountdown: null,
+            turnExpiry: null,
+            tabHeartbeat: null,
+            sessionCheck: null
+        };
+
+        // ========================================
+        // DOM ELEMENTS
+        // ========================================
+        const elements = {
+            loadingOverlay: document.getElementById('loadingOverlay'),
+            multiTabWarning: document.getElementById('multiTabWarning'),
+            networkStatus: document.getElementById('networkStatus'),
+            networkMessage: document.getElementById('networkMessage'),
+            leaveModal: document.getElementById('leaveModal'),
+            statusBadge: document.getElementById('statusBadge'),
+            eventName: document.getElementById('eventName'),
+            eventDate: document.getElementById('eventDate'),
+            backgroundWarning: document.getElementById('backgroundWarning'),
+            longWaitWarning: document.getElementById('longWaitWarning'),
+            turnExpiry: document.getElementById('turnExpiry'),
+            expiryTime: document.getElementById('expiryTime'),
+            redirectCountdown: document.getElementById('redirectCountdown'),
+            countdownNumber: document.getElementById('countdownNumber'),
+            queuePosition: document.getElementById('queuePosition'),
+            estMinutes: document.getElementById('estMinutes'),
+            estSeconds: document.getElementById('estSeconds'),
+            notifyOption: document.getElementById('notifyOption'),
+            normalState: document.getElementById('normalState'),
+            soldOutState: document.getElementById('soldOutState'),
+            saleEndedState: document.getElementById('saleEndedState'),
+            sessionExpiredState: document.getElementById('sessionExpiredState'),
+            turnExpiredState: document.getElementById('turnExpiredState')
+        };
+
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+        function init() {
+            showLoading();
+            
+            // Check for valid entry (must come from event detail or have valid session)
+            if (!validateEntry()) {
+                redirectToEventDetail();
+                return;
+            }
+
+            // Check for multiple tabs
+            if (checkMultipleTabs()) {
+                showMultiTabWarning();
+                return;
+            }
+
+            // Check if already admitted (returning from ticket selection)
+            if (checkAlreadyAdmitted()) {
+                redirectToTicketSelection();
+                return;
+            }
+
+            // Load event data
+            loadEventData();
+
+            // Setup all event listeners
+            setupEventListeners();
+
+            // Start queue simulation
+            startQueueSimulation();
+
+            // Start session monitoring
+            startSessionMonitoring();
+
+            // Register this tab
+            registerTab();
+
+            hideLoading();
+        }
+
+        // ========================================
+        // EDGE CASE #1-4: AUTO-REDIRECT
+        // ========================================
+        function handleTurnReached() {
+            state.isMyTurn = true;
+            
+            // Update UI
+            elements.statusBadge.textContent = "It's Your Turn!";
+            elements.statusBadge.classList.add('your-turn');
+            elements.redirectCountdown.classList.add('active');
+            elements.queuePosition.textContent = '0';
+
+            // Mark as admitted in storage
+            markAsAdmitted();
+
+            // Start countdown
+            startRedirectCountdown();
+
+            // Send notification if enabled
+            if (state.notificationsEnabled && Notification.permission === 'granted') {
+                new Notification('Rusuh Tiket - Your Turn!', {
+                    body: 'It\'s your turn to select tickets!',
+                    icon: '/favicon.ico'
+                });
+            }
+        }
+
+        function startRedirectCountdown() {
+            state.redirectCountdown = CONFIG.REDIRECT_COUNTDOWN;
+            elements.countdownNumber.textContent = state.redirectCountdown;
+
+            intervals.redirectCountdown = setInterval(() => {
+                state.redirectCountdown--;
+                elements.countdownNumber.textContent = state.redirectCountdown;
+
+                if (state.redirectCountdown <= 0) {
+                    clearInterval(intervals.redirectCountdown);
+                    redirectToTicketSelection();
+                }
+            }, 1000);
+        }
+
+        function redirectToTicketSelection() {
+            // Clean up before redirect
+            cleanupBeforeLeave(false);
+            window.location.href = '07-ticket-selection.html';
+        }
+
+        // ========================================
+        // EDGE CASE #5-11: LEAVE/BACK WARNING
+        // ========================================
+        function setupLeaveWarnings() {
+            // Beforeunload - Tab close/refresh warning
+            window.addEventListener('beforeunload', handleBeforeUnload);
+
+            // Popstate - Browser back button
+            history.pushState(null, '', location.href);
+            window.addEventListener('popstate', handlePopState);
+
+            // Intercept navigation links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', handleNavLinkClick);
+            });
+        }
+
+        function handleBeforeUnload(e) {
+            if (!state.isMyTurn && !state.isSoldOut && !state.isSaleEnded && !state.isExpired) {
+                e.preventDefault();
+                e.returnValue = 'You will lose your position in the queue. Are you sure?';
+                return e.returnValue;
+            }
+        }
+
+        function handlePopState(e) {
+            if (!state.isMyTurn && !state.isSoldOut && !state.isSaleEnded && !state.isExpired) {
+                // Push state again to prevent navigation
+                history.pushState(null, '', location.href);
+                showLeaveModal();
+            }
+        }
+
+        function handleNavLinkClick(e) {
+            if (!state.isMyTurn && !state.isSoldOut && !state.isSaleEnded && !state.isExpired) {
+                e.preventDefault();
+                state.pendingNavigation = e.target.href || e.target.closest('a').href;
+                showLeaveModal();
+            }
+        }
+
+        function showLeaveModal() {
+            elements.leaveModal.classList.add('active');
+        }
+
+        function closeLeaveModal() {
+            elements.leaveModal.classList.remove('active');
+            state.pendingNavigation = null;
+        }
+
+        function confirmLeave() {
+            cleanupBeforeLeave(true);
+            
+            if (state.pendingNavigation) {
+                window.location.href = state.pendingNavigation;
+            } else {
+                window.location.href = '02-event-detail.html';
+            }
+        }
+
+        // ========================================
+        // EDGE CASE #12-15: SESSION/TICKET EXPIRY
+        // ========================================
+        function startSessionMonitoring() {
+            intervals.sessionCheck = setInterval(() => {
+                const elapsed = Date.now() - state.sessionStartTime;
+                
+                // Check session timeout
+                if (elapsed > CONFIG.SESSION_TIMEOUT * 1000) {
+                    handleSessionExpiry();
+                }
+            }, 10000); // Check every 10 seconds
+        }
+
+        function handleSessionExpiry() {
+            state.isExpired = true;
+            cleanupIntervals();
+            showState('sessionExpiredState');
+            elements.statusBadge.textContent = 'Session Expired';
+            elements.statusBadge.classList.add('expired');
+        }
+
+        function startTurnExpiryCountdown() {
+            state.turnExpiryTime = CONFIG.TURN_EXPIRY_TIME;
+            elements.turnExpiry.classList.add('active');
+            updateExpiryDisplay();
+
+            intervals.turnExpiry = setInterval(() => {
+                state.turnExpiryTime--;
+                updateExpiryDisplay();
+
+                if (state.turnExpiryTime <= 0) {
+                    handleTurnExpiry();
+                }
+            }, 1000);
+        }
+
+        function updateExpiryDisplay() {
+            const minutes = Math.floor(state.turnExpiryTime / 60);
+            const seconds = state.turnExpiryTime % 60;
+            elements.expiryTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function handleTurnExpiry() {
+            state.isTurnExpired = true;
+            cleanupIntervals();
+            clearAdmittedStatus();
+            showState('turnExpiredState');
+        }
+
+        function handleSoldOut() {
+            state.isSoldOut = true;
+            cleanupIntervals();
+            showState('soldOutState');
+            elements.statusBadge.textContent = 'Sold Out';
+            elements.statusBadge.classList.add('sold-out');
+        }
+
+        function handleSaleEnded() {
+            state.isSaleEnded = true;
+            cleanupIntervals();
+            showState('saleEndedState');
+            elements.statusBadge.textContent = 'Sale Ended';
+            elements.statusBadge.classList.add('expired');
+        }
+
+        // ========================================
+        // EDGE CASE #16-20: PAGE STATE
+        // ========================================
+        function setupVisibilityHandler() {
+            document.addEventListener('visibilitychange', () => {
+                state.isVisible = !document.hidden;
+                
+                if (document.hidden) {
+                    // Tab went to background
+                    elements.backgroundWarning.classList.add('active');
+                    pauseAnimations();
+                } else {
+                    // Tab became visible
+                    elements.backgroundWarning.classList.remove('active');
+                    resumeAnimations();
+                    
+                    // Check if turn was reached while in background
+                    if (state.isMyTurn && !intervals.redirectCountdown) {
+                        startRedirectCountdown();
+                    }
+                }
+            });
+        }
+
+        function setupNetworkHandlers() {
+            window.addEventListener('online', handleOnline);
+            window.addEventListener('offline', handleOffline);
+        }
+
+        function handleOffline() {
+            state.isOnline = false;
+            state.isPaused = true;
+            
+            elements.networkStatus.classList.add('active');
+            elements.networkStatus.classList.remove('reconnected');
+            elements.networkMessage.textContent = 'Connection lost. Your position is being held...';
+            
+            elements.statusBadge.textContent = 'Offline';
+            elements.statusBadge.classList.add('offline');
+            
+            pauseQueueUpdates();
+        }
+
+        function handleOnline() {
+            state.isOnline = true;
+            state.isPaused = false;
+            
+            elements.networkStatus.classList.add('reconnected');
+            elements.networkMessage.textContent = 'Reconnected! Resuming queue...';
+            
+            elements.statusBadge.textContent = 'In Queue';
+            elements.statusBadge.classList.remove('offline');
+            
+            setTimeout(() => {
+                elements.networkStatus.classList.remove('active', 'reconnected');
+            }, 3000);
+            
+            resumeQueueUpdates();
+        }
+
+        function validateEntry() {
+            // Check if user came from event detail page
+            const referrer = document.referrer;
+            const hasValidSession = sessionStorage.getItem('waitingRoomEntry');
+            
+            // For prototype, we'll be lenient but track it
+            if (!referrer.includes('02-event-detail') && !hasValidSession) {
+                // Store that this is a direct access for the prototype
+                console.warn('Direct URL access to waiting room');
+            }
+            
+            // Mark valid entry
+            sessionStorage.setItem('waitingRoomEntry', Date.now().toString());
+            return true;
+        }
+
+        function checkAlreadyAdmitted() {
+            const admitted = localStorage.getItem('rusuh_admitted');
+            if (admitted) {
+                const admittedData = JSON.parse(admitted);
+                // Check if admission is still valid (within 5 minutes)
+                if (Date.now() - admittedData.timestamp < 300000) {
+                    return true;
+                } else {
+                    // Expired admission
+                    localStorage.removeItem('rusuh_admitted');
+                }
+            }
+            return false;
+        }
+
+        function markAsAdmitted() {
+            localStorage.setItem('rusuh_admitted', JSON.stringify({
+                timestamp: Date.now(),
+                eventId: state.eventData?.id || 'unknown'
+            }));
+        }
+
+        function clearAdmittedStatus() {
+            localStorage.removeItem('rusuh_admitted');
+        }
+
+        // ========================================
+        // EDGE CASE #21-23: MULTI-TAB DETECTION
+        // ========================================
+        function checkMultipleTabs() {
+            const existingTab = localStorage.getItem(CONFIG.STORAGE_KEY);
+            
+            if (existingTab) {
+                const tabData = JSON.parse(existingTab);
+                // Check if other tab is still alive (heartbeat within last 5 seconds)
+                if (Date.now() - tabData.lastHeartbeat < 5000) {
+                    return true; // Another tab is active
+                }
+            }
+            
+            return false;
+        }
+
+        function registerTab() {
+            updateTabHeartbeat();
+            
+            intervals.tabHeartbeat = setInterval(() => {
+                updateTabHeartbeat();
+            }, 2000);
+
+            // Listen for storage changes from other tabs
+            window.addEventListener('storage', (e) => {
+                if (e.key === CONFIG.STORAGE_KEY && e.newValue) {
+                    const newData = JSON.parse(e.newValue);
+                    if (newData.tabId !== CONFIG.TAB_ID) {
+                        // Another tab is trying to use the waiting room
+                        showMultiTabWarning();
+                    }
+                }
+            });
+        }
+
+        function updateTabHeartbeat() {
+            localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({
+                tabId: CONFIG.TAB_ID,
+                lastHeartbeat: Date.now(),
+                position: state.position
+            }));
+        }
+
+        function showMultiTabWarning() {
+            elements.multiTabWarning.classList.add('active');
+            cleanupIntervals();
+        }
+
+        // ========================================
+        // EDGE CASE #24-25: MOBILE/UX & SECURITY
+        // ========================================
+        function requestNotificationPermission() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        state.notificationsEnabled = true;
+                        elements.notifyOption.innerHTML = '<p>✅ Notifications enabled! We\'ll alert you when it\'s almost your turn.</p>';
+                    }
+                });
+            }
+        }
+
+        function checkLongWait() {
+            const estimatedWait = state.position * 3; // ~3 seconds per position
+            
+            if (estimatedWait > CONFIG.LONG_WAIT_THRESHOLD) {
+                elements.longWaitWarning.classList.add('active');
+                
+                if ('Notification' in window && Notification.permission === 'default') {
+                    elements.notifyOption.classList.add('active');
+                }
+            }
+        }
+
+        // ========================================
+        // QUEUE SIMULATION
+        // ========================================
+        function startQueueSimulation() {
+            // Set initial position (random between 50-200 for demo)
+            state.initialPosition = Math.floor(Math.random() * 150) + 50;
+            state.position = state.initialPosition;
+            
+            updateQueueDisplay();
+            checkLongWait();
+
+            intervals.positionUpdate = setInterval(() => {
+                if (!state.isPaused && !state.isMyTurn) {
+                    // Decrease position
+                    const decrease = Math.floor(Math.random() * 3) + 1;
+                    state.position = Math.max(0, state.position - decrease);
+                    
+                    updateQueueDisplay();
+
+                    // Check if it's user's turn
+                    if (state.position === 0) {
+                        handleTurnReached();
+                    }
+
+                    // Random chance of sold out (very low for demo)
+                    if (Math.random() < 0.001) {
+                        handleSoldOut();
+                    }
+                }
+            }, CONFIG.POSITION_UPDATE_INTERVAL);
+        }
+
+        function updateQueueDisplay() {
+            const positionEl = elements.queuePosition;
+            const ringPosEl = document.getElementById('ringPosition');
+            const ringFg = document.getElementById('ringFg');
+            const zoneBanner = document.getElementById('zoneBanner');
+            
+            // Add updating animation
+            positionEl.classList.add('updating');
+            positionEl.textContent = state.position.toLocaleString();
+            
+            // Update ring progress position
+            if (ringPosEl) {
+                ringPosEl.classList.add('updating');
+                ringPosEl.textContent = state.position.toLocaleString();
+            }
+            
+            setTimeout(() => {
+                positionEl.classList.remove('updating');
+                if (ringPosEl) ringPosEl.classList.remove('updating');
+            }, 500);
+
+            // Update ring progress circle
+            if (ringFg && state.initialPosition > 0) {
+                const circumference = 2 * Math.PI * 100; // r=100
+                const progress = 1 - (state.position / state.initialPosition);
+                const offset = circumference * (1 - Math.max(0, Math.min(1, progress)));
+                ringFg.style.strokeDasharray = circumference;
+                ringFg.style.strokeDashoffset = offset;
+                
+                // Add warning class when close to turn
+                if (state.position <= 10) {
+                    ringFg.classList.add('warning');
+                } else {
+                    ringFg.classList.remove('warning');
+                }
+            }
+
+            // Update zone banner based on position
+            updateZoneBanner();
+
+            // Update estimated time
+            const estimatedSeconds = state.position * 3;
+            const minutes = Math.floor(estimatedSeconds / 60);
+            const seconds = estimatedSeconds % 60;
+            
+            elements.estMinutes.textContent = minutes.toString().padStart(2, '0');
+            elements.estSeconds.textContent = seconds.toString().padStart(2, '0');
+        }
+
+        // Zone banner logic based on ticket availability simulation
+        function updateZoneBanner() {
+            const zoneBanner = document.getElementById('zoneBanner');
+            const zoneIcon = document.getElementById('zoneIcon');
+            const zoneText = document.getElementById('zoneText');
+            
+            if (!zoneBanner || !zoneIcon || !zoneText) return;
+            
+            // Simulate ticket availability zones (in production this comes from server)
+            // GUARANTEED: position <= 50% of initial, tickets definitely available
+            // POSSIBLE: position 50-80% of initial, may still get tickets
+            // NOT_ENOUGH: position > 80% of initial, unlikely to get tickets
+            
+            const progressPercent = state.position / state.initialPosition;
+            let zone, icon, title, description;
+            
+            if (progressPercent <= 0.5) {
+                zone = 'GUARANTEED';
+                icon = '🔒';
+                title = 'Safe Zone';
+                description = 'Your ticket is guaranteed when your turn arrives. You will not be cut in line.';
+            } else if (progressPercent <= 0.8) {
+                zone = 'POSSIBLE';
+                icon = '⚠️';
+                title = 'Possible Zone';
+                description = 'You are in the reserve zone. Ticket availability depends on remaining stock.';
+            } else {
+                zone = 'NOT_ENOUGH';
+                icon = '🔴';
+                title = 'Low Chance Zone';
+                description = 'Your position is beyond estimated stock. Stay in queue - tickets may become available if others cancel.';
+            }
+            
+            // Update UI
+            zoneBanner.className = 'zone-banner ' + zone;
+            zoneIcon.textContent = icon;
+            zoneText.innerHTML = `<b>${title}</b><span>${description}</span>`;
+        }
+
+        function pauseQueueUpdates() {
+            if (intervals.positionUpdate) {
+                clearInterval(intervals.positionUpdate);
+                intervals.positionUpdate = null;
+            }
+            elements.statusBadge.textContent = 'Paused';
+            elements.statusBadge.classList.add('paused');
+        }
+
+        function resumeQueueUpdates() {
+            if (!intervals.positionUpdate && !state.isMyTurn) {
+                startQueueSimulation();
+            }
+            elements.statusBadge.textContent = 'In Queue';
+            elements.statusBadge.classList.remove('paused');
+        }
+
+        function pauseAnimations() {
+            document.body.style.setProperty('--animation-play-state', 'paused');
+        }
+
+        function resumeAnimations() {
+            document.body.style.setProperty('--animation-play-state', 'running');
+        }
+
+        // ========================================
+        // UTILITY FUNCTIONS
+        // ========================================
+        function loadEventData() {
+            // Load from sessionStorage or use defaults
+            const storedEvent = sessionStorage.getItem('selectedEvent');
+            
+            if (storedEvent) {
+                state.eventData = JSON.parse(storedEvent);
+            } else {
+                state.eventData = {
+                    id: 'evt001',
+                    name: 'COLDPLAY: MUSIC OF THE SPHERES',
+                    date: 'November 15, 2024 • Jakarta',
+                    venue: 'Gelora Bung Karno Stadium'
+                };
+            }
+
+            elements.eventName.textContent = state.eventData.name;
+            elements.eventDate.textContent = `${state.eventData.date} • ${state.eventData.venue || ''}`;
+        }
+
+        function showState(stateId) {
+            // Hide normal state
+            elements.normalState.style.display = 'none';
+            
+            // Show error state
+            document.getElementById(stateId).classList.add('active');
+        }
+
+        function showLoading() {
+            elements.loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            elements.loadingOverlay.classList.remove('active');
+        }
+
+        function redirectToEventDetail() {
+            window.location.href = '02-event-detail.html';
+        }
+
+        function cleanupIntervals() {
+            Object.values(intervals).forEach(interval => {
+                if (interval) clearInterval(interval);
+            });
+        }
+
+        function cleanupBeforeLeave(removeFromQueue) {
+            // Remove beforeunload listener
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            
+            // Clear intervals
+            cleanupIntervals();
+            
+            // Clear tab registration
+            localStorage.removeItem(CONFIG.STORAGE_KEY);
+            
+            if (removeFromQueue) {
+                // Clear admission status if leaving queue
+                clearAdmittedStatus();
+                sessionStorage.removeItem('waitingRoomEntry');
+            }
+        }
+
+        function setupEventListeners() {
+            setupLeaveWarnings();
+            setupVisibilityHandler();
+            setupNetworkHandlers();
+        }
+
+        // ========================================
+        // INITIALIZE
+        // ========================================
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Cleanup on page unload
+        window.addEventListener('unload', () => {
+            localStorage.removeItem(CONFIG.STORAGE_KEY);
+        });
+    </script>
+</body>
+</html>

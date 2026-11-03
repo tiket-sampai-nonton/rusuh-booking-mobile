@@ -30,31 +30,31 @@ describe("(public) routes", () => {
 
   it("renders the Home screen (RBT-030: real event catalog, not a placeholder)", async () => {
     // The Home route wires the mock catalog through the provider stack; the
-    // "Konser Terdekat" / "History Event" sections prove the real screen mounts.
+    // V2 "Event Minggu Ini" / "Event Sebelumnya" sections prove the real screen mounts.
     renderWithProviders(<HomeScreen />);
     await waitFor(() =>
-      expect(screen.getByText("Konser Terdekat")).toBeTruthy(),
+      expect(screen.getByText("Event Minggu Ini")).toBeTruthy(),
     );
-    expect(screen.getByText("History Event")).toBeTruthy();
+    // V2 history section shows "Event Sebelumnya" when history events exist
+    expect(screen.getByText("Event Sebelumnya")).toBeTruthy();
   });
 
   it("renders the Browse screen (RBT-031: real URL-driven results, not a placeholder)", async () => {
     // The Browse route wires the mock catalog through the provider stack and
-    // reads filters from the URL; the "Event Terfilter" header + a result count
-    // prove the real screen mounts.
+    // reads filters from the URL; V2 shows "Categories" + result count
+    // to prove the real screen mounts.
     renderWithProviders(<BrowseScreen />);
     await waitFor(() =>
-      expect(screen.getByText("Event Terfilter")).toBeTruthy(),
+      expect(screen.getByText("Categories")).toBeTruthy(),
     );
     expect(screen.getByTestId("browse-count")).toBeTruthy();
   });
 
   it("renders the History screen (RBT-034: real past-event list, not a placeholder)", async () => {
     // The History route wires the mock catalog through the provider stack and
-    // derives past/CLOSED events; the "History Event" section header proves the
-    // real screen mounts.
+    // derives past/CLOSED events; V2 shows "Arsip Event" header.
     renderWithProviders(<HistoryScreen />);
-    await waitFor(() => expect(screen.getByText("History Event")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Arsip Event")).toBeTruthy());
   });
 
   it("renders the Event Detail screen for the route param (RBT-032: real detail, not a placeholder)", async () => {

@@ -1,90 +1,119 @@
 /**
- * V2Modal — Brutalist Mono modal shell (RBT-087).
+ * RBT-096 — V2Modal (Re-implementation)
  *
- * Prototype `.modal-overlay` + `.modal`: a dimmed backdrop (tap-to-close) with
- * a hard 2px-bordered white card that scales/fades in. Built on RN `Modal` so
- * it layers correctly on native and web, with a backdrop press + Escape/back
- * (onRequestClose) close. Reanimated card entrance; honors reduced-motion.
+ * MASTER-SPEC §2.4:
+ * OVERLAY:
+ * - background: rgba(0,0,0,0.8)
+ * - backdropFilter: blur(4px)
  *
- * Presentation-only; the caller owns the content and open/close state.
+ * MODAL:
+ * - background: #fff
+ * - border: 2px solid #000
+ * - padding: 48px
+ * - maxWidth: 400
+ *
+ * ENTRANCE: opacity 0→1, translateY 20→0, scale 0.95→1, 0.4s
  */
-import { useEffect } from "react";
-import type { ReactNode } from "react";
-import { Modal, Platform, Pressable, Text, View } from "react-native";
+import { useEffect } from 'react';
+import type { ReactNode } from 'react';
+import { Modal, Platform, Pressable, Text, View, StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   withTiming,
-} from "react-native-reanimated";
+} from 'react-native-reanimated';
 
-import { v2, v2Motion } from "@presentation/theme";
+import { v2Colors, v2Borders, v2Modal, v2Easing, interFonts } from '@presentation/theme';
 
-const EASE = Easing.bezier(...v2Motion.easeBezier);
+const EASE = Easing.bezier(...v2Easing.primary);
+const ENTRANCE_DURATION = 400; // 0.4s
 
 export interface V2ModalProps {
+  /** Whether the modal is visible */
   readonly visible: boolean;
+  /** Close handler (backdrop tap, escape key, back button) */
   readonly onClose: () => void;
+  /** Modal content */
   readonly children: ReactNode;
-  /** Optional title rendered in a brutalist header. */
+  /** Optional title in brutalist header style */
   readonly title?: string;
+  /** Test ID */
   readonly testID?: string;
 }
 
-export function V2Modal({ visible, onClose, children, title, testID }: V2ModalProps) {
-  const reduced = useReducedMotion();
-  const p = useSharedValue(0);
+export function V2Modal({
+  visible,
+  onClose,
+  children,
+  title,
+  testID,
+}: V2ModalProps) {
+  const reducedMotion = useReducedMotion();
+  const progress = useSharedValue(0);
 
   useEffect(() => {
     if (!visible) {
-      p.value = 0;
+      progress.value = 0;
       return;
     }
-    p.value = reduced ? 1 : withTiming(1, { duration: 400, easing: EASE });
-  }, [visible, reduced, p]);
 
+    if (reducedMotion) {
+      progress.value = 1;
+      return;
+    }
+
+    progress.value = withTiming(1, {
+      duration: ENTRANCE_DURATION,
+      easing: EASE,
+    });
+  }, [visible, reducedMotion, progress]);
+
+  // Card entrance animation: opacity, translateY, scale
   const cardStyle = useAnimatedStyle(() => ({
-    opacity: p.value,
-    transform: [{ translateY: (1 - p.value) * 20 }, { scale: 0.95 + p.value * 0.05 }],
+    opacity: progress.value,
+    transform: [
+      { translateY: (1 - progress.value) * 20 },
+      { scale: 0.95 + progress.value * 0.05 },
+    ],
   }));
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      {/* Backdrop */}
       <Pressable
-        testID={testID ? `${testID}-backdrop` : "v2-modal-backdrop"}
+        testID={testID ? `${testID}-backdrop` : 'v2-modal-backdrop'}
         accessibilityLabel="Tutup dialog"
         onPress={onClose}
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.8)",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-        }}
+        style={styles.backdrop}
       >
+        {/* Modal card - stop propagation to prevent close on card tap */}
         <Pressable
-          testID={testID ?? "v2-modal-card"}
+          testID={testID ?? 'v2-modal-card'}
           accessibilityViewIsModal
-          accessibilityRole={Platform.OS === "web" ? "none" : undefined}
+          accessibilityRole={Platform.OS === 'web' ? ('dialog' as 'none') : undefined}
           onPress={(e) => e.stopPropagation()}
-          style={{ width: "100%", maxWidth: 420 }}
+          style={styles.cardWrapper}
         >
-          <Animated.View
-            style={[
-              cardStyle,
-              { backgroundColor: v2.ground, borderWidth: 2, borderColor: v2.ink, padding: 24 },
-            ]}
-          >
-            {title ? (
+          <Animated.View style={[styles.card, cardStyle]}>
+            {/* Title */}
+            {title && (
               <Text
                 accessibilityRole="header"
-                style={{ color: v2.ink, marginBottom: 12 }}
-                className="text-xl font-v2 font-black uppercase"
+                style={styles.title}
               >
                 {title}
               </Text>
-            ) : null}
+            )}
+
+            {/* Content */}
             <View>{children}</View>
           </Animated.View>
         </Pressable>
@@ -92,3 +121,35 @@ export function V2Modal({ visible, onClose, children, title, testID }: V2ModalPr
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    // Note: backdropFilter blur not available in RN, handled by semi-transparent bg
+  },
+  cardWrapper: {
+    width: '100%',
+    maxWidth: v2Modal.maxWidth,
+  },
+  card: {
+    backgroundColor: v2Colors.ground,
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    padding: v2Modal.padding,
+  },
+  title: {
+    color: v2Colors.ink,
+    fontSize: 20,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: -0.02 * 20, // --tracking-tight
+    marginBottom: 12,
+    fontFamily: interFonts.bold,
+  },
+});
+
+export default V2Modal;

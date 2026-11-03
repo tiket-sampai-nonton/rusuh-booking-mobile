@@ -1,17 +1,20 @@
 /**
- * EventDetail PageScreen (folder index) — parent component (orchestration only).
+ * EventDetail V2 PageScreen — V2 Brutalist Mono Design
  *
- * 1:1 of the prototype `event.html` (RBT-032, E4 Events). Wiring: useEventDetail
- * (TanStack Query) → GetEventDetail → EventRepository port → mock. The CTA is
- * anonymous (D8.5, no login) and status-driven: enabled "Masuk Antrean" only
- * when AVAILABLE, otherwise a disabled status label (Tiket Habis / Belum Dibuka
- * / Penjualan Ditutup). On an active press it enters the queue/booking flow by
- * navigating to the waiting room (`/waiting/<eventId>`) — the join-persistence
- * ticket (RBT-041) is not built yet, and the waiting route already accepts the
- * eventId. The opaque `description` record is read DEFENSIVELY via
- * `parseDescription`. Markup → ./fragments, styles → ./style, types →
- * ./interface (presentation refactor rule).
+ * MATCHES: `.oil-ui/v2/02-event-detail.html`
+ *
+ * V2 Changes:
+ * - WHITE background (not dark theme)
+ * - Grayscale images with color on hover
+ * - 2px black borders (NO border-radius)
+ * - Ken Burns zoom on hero
+ * - Scroll-triggered section reveals
+ * - Floating CTA with pulse glow animation
+ * - New sections: Lineup grid, Venue map, Gallery + Lightbox
+ *
+ * Flow: Event Detail → Waiting Room → Ticket Selection → Payment → Success
  */
+import { useCallback, useState } from "react";
 import { useRouter, type Href } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 
@@ -25,30 +28,42 @@ import { useJoinQueue } from "@presentation/hooks/useJoinQueue";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import { Block } from "./fragments/Block";
-import { BuyBox } from "./fragments/BuyBox";
 import { Categories } from "./fragments/Categories";
-import { DetailBackground, MiniNav, Steps } from "./fragments/DetailChrome";
+import { DetailBackground, V2Header, V2Steps } from "./fragments/DetailChrome";
 import { DetailHero } from "./fragments/DetailHero";
 import { DetailError, DetailLoading } from "./fragments/DetailStates";
+import { FloatingCTA } from "./fragments/FloatingCTA";
+import { Gallery, DEMO_GALLERY } from "./fragments/Gallery";
+import { Lightbox } from "./fragments/Lightbox";
+import { Lineup, DEMO_LINEUP } from "./fragments/Lineup";
 import { TrustBox } from "./fragments/TrustBox";
-import type { EventDetailScreenProps } from "./interface";
-import { detailScrollContent, detailStyles } from "./style";
+import { Venue, DEMO_VENUE } from "./fragments/Venue";
+import type { EventDetailScreenProps, LightboxState, LineupItem } from "./interface";
+import { v2DetailScrollContent, v2DetailStyles as styles } from "./style";
 
-/** Hero status pill copy (prototype `statusLabel`). */
+// ═══════════════════════════════════════════════════════════════════════════════
+// HERO STATUS LABEL
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Hero status pill copy (V2 prototype: `statusLabel`). */
 function heroStatusLabel(status: string): string {
   switch (status) {
     case "AVAILABLE":
-      return "LIVE · Tersedia";
+      return "Penjualan Dibuka";
     case "SOLD_OUT":
       return "Sold Out";
     case "NOT_STARTED":
       return "Segera Dibuka";
     case "CLOSED":
-      return "Ditutup";
+      return "Penjualan Ditutup";
     default:
       return status;
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN SCREEN COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════════
 
 export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   const router = useRouter();
@@ -56,11 +71,59 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   const { isDesktop } = useResponsive();
   const joinQueue = useJoinQueue();
 
-  const goHome = (): void => router.push("/" as Href);
+  // Lightbox state
+  const [lightbox, setLightbox] = useState<LightboxState>({
+    visible: false,
+    currentIndex: 0,
+  });
 
-  if (isLoading) return <DetailLoading onBack={goHome} />;
-  if (isError || !event) return <DetailError message={error?.message} onBack={goHome} />;
+  // Wishlist state (local for now)
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
+  // Navigation handlers
+  const goHome = useCallback((): void => {
+    router.push("/" as Href);
+  }, [router]);
+
+  const handleWishlist = useCallback(() => {
+    setIsWishlisted((prev) => !prev);
+    // TODO: Persist to backend/storage
+  }, []);
+
+  const handleShare = useCallback(() => {
+    // TODO: Implement native share sheet
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({
+        title: event?.name ?? "Event",
+        url: window.location.href,
+      });
+    }
+  }, [event?.name]);
+
+  // Lightbox handlers
+  const openLightbox = useCallback((index: number) => {
+    setLightbox({ visible: true, currentIndex: index });
+  }, []);
+
+  const closeLightbox = useCallback(() => {
+    setLightbox((prev) => ({ ...prev, visible: false }));
+  }, []);
+
+  const navigateLightbox = useCallback((index: number) => {
+    setLightbox((prev) => ({ ...prev, currentIndex: index }));
+  }, []);
+
+  // Loading state
+  if (isLoading) {
+    return <DetailLoading onBack={goHome} />;
+  }
+
+  // Error state
+  if (isError || !event) {
+    return <DetailError message={error?.message} onBack={goHome} />;
+  }
+
+  // Parse event description (categories, lineup, terms, gallery from opaque bag)
   const desc = parseDescription(event.description);
   const cta = ctaFor(event.status);
   const dateTxt = formatDateID(event.startsAt);
@@ -68,15 +131,13 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   const banner = eventImage(event.id, desc.bannerImage);
   const meta = [dateTxt, timeTxt, event.venue].filter(Boolean).join(" · ");
 
-  // On an active CTA press, enter the queue/booking flow: the anonymous join
-  // (RBT-041) issues + PERSISTS the membership, then routes to the waiting room
-  // with the issued queueId (navigation happens inside the hook on success).
-  // Guarded against a double-fire while a join is already in flight.
+  // CTA handler: enter queue/booking flow
   const onJoin = (): void => {
     if (!cta.enabled || joinQueue.isPending) return;
     joinQueue.mutate(eventId);
   };
 
+  // Hero chips (ticket availability info)
   const chips: string[] = [];
   if (
     typeof event.remainingTickets === "number" &&
@@ -87,76 +148,130 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   }
   chips.push("Maks 3 tiket / NIK");
 
+  // Parse lineup from description or use demo data
+  const lineup: LineupItem[] =
+    desc.lineup.length > 0
+      ? desc.lineup.map((name) => ({ name, role: "Performer" }))
+      : DEMO_LINEUP;
+
+  // Parse gallery from description or use demo data
+  const galleryImages = desc.gallery?.length ? desc.gallery : DEMO_GALLERY;
+
+  // Parse venue info from event or use demo
+  const venueInfo = event.venue
+    ? {
+        name: event.venue.split("·")[0]?.trim() ?? event.venue,
+        address: event.venue.includes("·")
+          ? event.venue.split("·").slice(1).join("·").trim()
+          : "",
+        mapImage: undefined as string | undefined,
+        mapsUrl: undefined as string | undefined,
+      }
+    : DEMO_VENUE;
+
   return (
     <ScreenFade>
-      <DetailBackground>
-        <MiniNav onBack={goHome} />
+      <DetailBackground testID="event-detail-screen">
+        {/* Fixed Header */}
+        <V2Header
+          onBack={goHome}
+          onWishlist={handleWishlist}
+          onShare={handleShare}
+          isWishlisted={isWishlisted}
+        />
 
-        <ScrollView contentContainerStyle={detailScrollContent(isDesktop)} testID="detail-scroll">
-          <Steps />
+        {/* Scrollable Content */}
+        <ScrollView
+          contentContainerStyle={v2DetailScrollContent(isDesktop)}
+          testID="detail-scroll"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Flow Steps Indicator */}
+          <V2Steps activeStep={1} />
 
+          {/* Hero Section (Grayscale + Ken Burns) */}
           <DetailHero
             banner={banner}
             statusLabel={heroStatusLabel(event.status)}
             name={event.name}
             meta={meta}
             chips={chips}
+            subtitle={desc.subtitle}
           />
 
-          <Block label="Tentang event" heading={event.name}>
-            <Text style={detailStyles.aboutText} className="text-white/60">
-              {desc.longDesc || "Deskripsi event belum tersedia."}
-            </Text>
-          </Block>
-
-          <Block label="Line-up" heading="Yang akan tampil.">
-            <View style={detailStyles.lineupList}>
-              {(desc.lineup.length > 0 ? desc.lineup : ["Diumumkan menyusul"]).map((act) => (
-                <View key={act} style={detailStyles.lineupRow}>
-                  <Text style={detailStyles.lineupText} className="font-bold text-white">
-                    {act}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </Block>
-
-          <Block label="Syarat & Ketentuan" heading="Yang perlu kamu tahu.">
-            {desc.terms.length > 0 ? (
-              <View style={detailStyles.termsList}>
-                {desc.terms.map((t) => (
-                  <View key={t} style={detailStyles.termsRow}>
-                    <Text style={detailStyles.termsCheck} accessibilityElementsHidden>
-                      ✓
-                    </Text>
-                    <Text style={detailStyles.termsText} className="text-white/60">
-                      {t}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <Text style={detailStyles.lineupText} className="text-white/60">
-                Ketentuan menyusul.
+          {/* Content Sections */}
+          <View style={styles.content}>
+            {/* About Event */}
+            <Block label="Tentang Event">
+              <Text style={styles.description}>
+                {desc.longDesc || "Deskripsi event belum tersedia."}
               </Text>
-            )}
-          </Block>
+            </Block>
 
-          <Block label="Kategori tiket" heading="Pilihan tempatmu.">
-            <Categories categories={desc.categories} />
-          </Block>
+            {/* Ticket Categories Preview */}
+            <Block label="Kategori Tiket">
+              <Categories categories={desc.categories} />
+            </Block>
 
-          <BuyBox
-            event={event}
-            dateTxt={dateTxt}
-            timeTxt={timeTxt}
-            canJoin={cta.enabled}
-            ctaLabel={cta.label}
-            onJoin={onJoin}
-          />
+            {/* Lineup Grid */}
+            <Block label="Line Up">
+              <Lineup items={lineup} />
+            </Block>
 
-          <TrustBox />
+            {/* Venue Map */}
+            <Block label="Lokasi">
+              <Venue
+                name={venueInfo.name}
+                address={venueInfo.address}
+                mapImage={venueInfo.mapImage}
+                mapsUrl={venueInfo.mapsUrl}
+              />
+            </Block>
+
+            {/* Gallery */}
+            <Block label="Galeri">
+              <Gallery images={galleryImages} onImagePress={openLightbox} />
+            </Block>
+
+            {/* Terms & Conditions */}
+            <Block label="Syarat & Ketentuan">
+              {desc.terms.length > 0 ? (
+                <View style={styles.termsList}>
+                  {desc.terms.map((t) => (
+                    <View key={t} style={styles.termsItem}>
+                      <Text style={styles.termsCheck}>✓</Text>
+                      <Text style={styles.termsText}>{t}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.description}>Ketentuan menyusul.</Text>
+              )}
+            </Block>
+
+            {/* Trust Box (optional - can be removed if using inline badges) */}
+            <Block label="Jaminan Kami">
+              <TrustBox />
+            </Block>
+          </View>
         </ScrollView>
+
+        {/* Floating CTA (fixed bottom) */}
+        <FloatingCTA
+          event={event}
+          canJoin={cta.enabled}
+          ctaLabel={cta.label}
+          onJoin={onJoin}
+        />
+
+        {/* Lightbox Modal */}
+        <Lightbox
+          images={galleryImages}
+          currentIndex={lightbox.currentIndex}
+          visible={lightbox.visible}
+          onClose={closeLightbox}
+          onNavigate={navigateLightbox}
+        />
       </DetailBackground>
     </ScreenFade>
   );

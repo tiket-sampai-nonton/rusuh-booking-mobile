@@ -1,129 +1,643 @@
 /**
- * RBT-091 — Waiting-room styles, V2 "Brutalist Mono" TERMINAL variant.
+ * RBT-091 — Waiting-room styles, V2 "Brutalist Mono" (Light variant).
  *
- * The waiting room is the ONE screen the V2 prototype (06-waiting) renders in the
- * mono/terminal variant: pure black ground, white ink, HARD 3px borders, square
- * corners (no radius), JetBrains Mono. This is deliberate (see v2-tokens:
- * v2Font.mono / v2Border.heavy) — it reads as a live "terminal" while you wait.
+ * Matches the V2 prototype `06-waiting.html`:
+ * - WHITE background, BLACK text/borders
+ * - JetBrains Mono font throughout
+ * - 3px solid black borders
+ * - SVG ring progress indicator (220px)
+ * - Pulse animation on status badge
+ * - Zone banners with semantic colors
+ * - Auto-redirect countdown with pulsing red background
+ * - Warning boxes (background, long wait, turn expiry)
+ * - Modal overlay for leave confirmation
+ * - Network status bar (fixed bottom)
+ * - Loading overlay with spinner
  *
  * STYLE ONLY. The screen's logic is untouched: server-authoritative polling
  * (useQueuePolling — no Math.random, no device clock), the RBT-040 state machine,
  * RBT-044 auto-claim, and the icon+label (never color-only) zone banners all stay
  * exactly as before. Every testID is preserved.
  */
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 
-import { v2, v2Border, v2Font, v2Zone } from "@presentation/theme";
+import { v2Colors, v2Fonts, v2Borders, v2ZoneBanners } from "@presentation/theme";
 
 import type { ZoneTone } from "./display";
 
 /**
- * V2 Brutalist Mono palette (06-waiting). Pure black/white base; the live dot +
- * admit/ok and error tints come from the unified V2 token set (no inline rgba).
+ * V2 Brutalist Mono palette (06-waiting.html). WHITE background, BLACK text.
  */
 export const palette = {
-  ink: v2.ink, //        black ground
-  ember: v2.accent, //   progress accent (brutalist red)
-  red: v2.accent,
-  white: v2.ground, //   white ink
-  muted: "#999999", //   mono muted gray (on-black readable)
-  faint: "#666666", //   mono faint gray
-  ringBg: "#333333", //  ring track on black
-  pillDot: v2.accent, //  live dot
-  ok: v2Zone.ok.border, //      GUARANTEED border/green
-  okText: v2Zone.ok.border, //  green text on black
-  amber: v2Zone.warn.border, // POSSIBLE amber
-  amberText: v2Zone.warn.border,
-  errText: v2.accent, //  error red text
+  // Core
+  ground: v2Colors.ground, // #fff - background
+  ink: v2Colors.ink, // #000 - text/borders
+  gray: "#888888", // gray for muted text
+  muted: "#888888",
+  field: "#f5f5f5", // subtle background (estimated time block)
+  ringBg: "#f0f0f0", // ring track background
+
+  // Functional
+  red: "#ff0000", // accent/danger
+  green: "#00aa00", // success
+  orange: "#ff6600", // warning/offline
+
+  // Legacy aliases for compatibility
+  white: v2Colors.ground,
+  ember: "#ff0000",
+  pillDot: "#ff0000",
+  okText: "#00aa00",
+  errText: "#ff0000",
+  ok: v2ZoneBanners.guaranteed.border,
+  amber: v2ZoneBanners.possible.border,
+  amberText: v2ZoneBanners.possible.text,
+  faint: "#888888",
 } as const;
 
 /**
- * Zone banner tone → {bg, border, text}. V2 brutalist: WHITE card, hard colored
- * border, colored bold text — the icon+label still carries the meaning so it is
- * never color-only (RBT-080). Uses the unified v2Zone tints.
+ * Zone banner tone → {bg, border, text}. V2 brutalist: colored background,
+ * hard colored border, colored bold text — the icon+label still carries the
+ * meaning so it is never color-only (RBT-080).
  */
 export const ZONE_STYLE: Readonly<
   Record<ZoneTone, { bg: string; border: string; text: string }>
 > = {
-  ok: { bg: v2.ground, border: v2Zone.ok.border, text: v2Zone.ok.text },
-  warn: { bg: v2.ground, border: v2Zone.warn.border, text: v2Zone.warn.text },
-  error: { bg: v2.ground, border: v2Zone.bad.border, text: v2Zone.bad.text },
+  ok: {
+    bg: v2ZoneBanners.guaranteed.bg,
+    border: v2ZoneBanners.guaranteed.border,
+    text: v2ZoneBanners.guaranteed.text,
+  },
+  warn: {
+    bg: v2ZoneBanners.possible.bg,
+    border: v2ZoneBanners.possible.border,
+    text: v2ZoneBanners.possible.text,
+  },
+  error: {
+    bg: v2ZoneBanners.notEnough.bg,
+    border: v2ZoneBanners.notEnough.border,
+    text: v2ZoneBanners.notEnough.text,
+  },
 };
 
-export const RING_SIZE = 200;
-export const RING_RADIUS = 90;
-export const RING_STROKE = 9;
+// Ring dimensions (SVG-based, 220px as per prototype)
+export const RING_SIZE = 220;
+export const RING_RADIUS = 100; // SVG circle r=100
+export const RING_STROKE = 8;
+export const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ~628
 
-const B = v2Border.heavy; // 3px hard brutalist border
-const MONO = v2Font.mono; // JetBrains Mono
+const B = v2Borders.thick; // 3px for waiting room
+const MONO = v2Fonts.mono; // JetBrains Mono
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: palette.ink },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ROOT & SHELL
+  // ═══════════════════════════════════════════════════════════════════════════
+  root: {
+    flex: 1,
+    backgroundColor: palette.ground,
+  },
   shell: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 28,
+    paddingHorizontal: 16,
+    paddingVertical: 32,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // HEADER (sticky top bar with logo)
+  // ═══════════════════════════════════════════════════════════════════════════
+  header: {
+    width: "100%",
+    borderBottomWidth: B,
+    borderBottomColor: palette.ink,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: palette.ground,
+    ...Platform.select({
+      web: { position: "sticky" as unknown as undefined, top: 0, zIndex: 100 },
+      default: {},
+    }),
+  },
+  logo: {
+    fontSize: 24,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: -1,
+    color: palette.ink,
+    fontFamily: MONO,
+  },
+  logoAccent: {
+    color: palette.red,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // STATUS BADGE (top, with pulse animation)
+  // ═══════════════════════════════════════════════════════════════════════════
+  statusBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: B,
+    borderColor: palette.ink,
+    backgroundColor: palette.ink,
+    marginBottom: 32,
+  },
+  statusBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    color: palette.ground,
+    fontFamily: MONO,
+  },
+  statusBadgeYourTurn: {
+    backgroundColor: palette.red,
+    borderColor: palette.red,
+  },
+  statusBadgeSoldOut: {
+    backgroundColor: palette.gray,
+    borderColor: palette.gray,
+  },
+  statusBadgeOffline: {
+    backgroundColor: palette.orange,
+    borderColor: palette.orange,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // WAITING CONTAINER
+  // ═══════════════════════════════════════════════════════════════════════════
+  waitingContainer: {
+    maxWidth: 600,
+    width: "100%",
+    alignItems: "center",
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // EVENT INFO
+  // ═══════════════════════════════════════════════════════════════════════════
+  eventInfo: {
+    marginBottom: 48,
+    alignItems: "center",
+  },
+  eventName: {
+    fontSize: 32,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: -1,
+    color: palette.ink,
+    textAlign: "center",
+    marginBottom: 8,
+    fontFamily: MONO,
+  },
+  eventDate: {
+    fontSize: 14,
+    color: palette.gray,
+    fontFamily: MONO,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RING PROGRESS (SVG-based, 220px)
+  // ═══════════════════════════════════════════════════════════════════════════
+  ringWrap: {
+    width: RING_SIZE,
+    height: RING_SIZE,
+    marginBottom: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ringCenter: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  position: {
+    fontSize: 56,
+    fontWeight: "800",
+    lineHeight: 56,
+    color: palette.ink,
+    fontFamily: MONO,
+    fontVariant: ["tabular-nums"],
+  },
+  positionLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    color: palette.gray,
+    marginTop: 8,
+    fontFamily: MONO,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ZONE BANNER
+  // ═══════════════════════════════════════════════════════════════════════════
+  zone: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderWidth: B,
+    marginBottom: 32,
+    width: "100%",
+  },
+  zoneIcon: {
+    fontSize: 20,
+    lineHeight: 24,
+  },
+  zoneTextWrap: {
+    flex: 1,
+  },
+  zoneLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 4,
+    fontFamily: MONO,
+  },
+  zoneBody: {
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+    fontFamily: MONO,
+  },
+  // Legacy zone text (single line)
+  zoneText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+    fontFamily: MONO,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ESTIMATED TIME (minute/second blocks)
+  // ═══════════════════════════════════════════════════════════════════════════
+  estimatedTime: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 32,
+    marginBottom: 32,
+    paddingVertical: 24,
+    paddingHorizontal: 32,
+    borderWidth: B,
+    borderColor: palette.ink,
+    backgroundColor: palette.field,
+    width: "100%",
+  },
+  timeBlock: {
+    alignItems: "center",
+  },
+  timeValue: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: palette.ink,
+    fontFamily: MONO,
+    fontVariant: ["tabular-nums"],
+  },
+  timeLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    color: palette.gray,
+    marginTop: 4,
+    fontFamily: MONO,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // REDIRECT COUNTDOWN (pulsing red background)
+  // ═══════════════════════════════════════════════════════════════════════════
+  redirectCountdown: {
+    paddingVertical: 24,
+    paddingHorizontal: 32,
+    borderWidth: B,
+    borderColor: palette.red,
+    backgroundColor: palette.red,
+    marginBottom: 32,
+    width: "100%",
+    alignItems: "center",
+  },
+  redirectTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    color: palette.ground,
+    marginBottom: 8,
+    fontFamily: MONO,
+  },
+  redirectNumber: {
+    fontSize: 48,
+    fontWeight: "800",
+    color: palette.ground,
+    fontFamily: MONO,
+    fontVariant: ["tabular-nums"],
+  },
+  redirectText: {
+    fontSize: 12,
+    color: palette.ground,
+    opacity: 0.9,
+    marginTop: 8,
+    fontFamily: MONO,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // WARNING BOXES
+  // ═══════════════════════════════════════════════════════════════════════════
+  warningBox: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderWidth: B,
+    borderColor: palette.orange,
+    backgroundColor: "#fff3e0",
+    marginBottom: 32,
+    width: "100%",
+  },
+  warningTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    color: palette.orange,
+    marginBottom: 8,
+    fontFamily: MONO,
+  },
+  warningText: {
+    fontSize: 12,
+    color: palette.ink,
+    lineHeight: 18,
+    fontFamily: MONO,
+  },
+
+  // Turn expiry warning (red variant)
+  turnExpiryBox: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderWidth: B,
+    borderColor: palette.red,
+    backgroundColor: "#ffe0e0",
+    marginBottom: 32,
+    width: "100%",
+    alignItems: "center",
+  },
+  turnExpiryTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    color: palette.red,
+    marginBottom: 8,
+    fontFamily: MONO,
+  },
+  turnExpiryTime: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: palette.red,
+    fontFamily: MONO,
+    fontVariant: ["tabular-nums"],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // INFO TEXT
+  // ═══════════════════════════════════════════════════════════════════════════
+  infoText: {
+    fontSize: 12,
+    color: palette.gray,
+    maxWidth: 400,
+    textAlign: "center",
+    lineHeight: 19,
+    marginBottom: 32,
+    fontFamily: MONO,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LEAVE BUTTON
+  // ═══════════════════════════════════════════════════════════════════════════
+  leaveBtn: {
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderWidth: B,
+    borderColor: palette.ink,
+    backgroundColor: palette.ground,
+  },
+  leaveBtnText: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    color: palette.ink,
+    fontFamily: MONO,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ERROR STATES (sold-out, sale-ended, session-expired, turn-expired)
+  // ═══════════════════════════════════════════════════════════════════════════
+  errorState: {
+    alignItems: "center",
+  },
+  errorTitle: {
+    fontSize: 32,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    color: palette.ink,
+    marginBottom: 16,
+    textAlign: "center",
+    fontFamily: MONO,
+  },
+  errorText: {
+    fontSize: 14,
+    color: palette.gray,
+    marginBottom: 32,
+    textAlign: "center",
+    maxWidth: 400,
+    fontFamily: MONO,
+  },
+  errorBtn: {
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderWidth: B,
+    borderColor: palette.ink,
+    backgroundColor: palette.ink,
+  },
+  errorBtnText: {
+    fontSize: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    color: palette.ground,
+    fontFamily: MONO,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MODAL (leave confirmation)
+  // ═══════════════════════════════════════════════════════════════════════════
+  modalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.8)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: palette.ground,
+    borderWidth: B,
+    borderColor: palette.ink,
+    paddingVertical: 32,
+    paddingHorizontal: 32,
+    maxWidth: 400,
+    width: "100%",
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    color: palette.ink,
+    marginBottom: 16,
+    textAlign: "center",
+    fontFamily: MONO,
+  },
+  modalText: {
+    fontSize: 14,
+    color: palette.gray,
+    marginBottom: 32,
+    textAlign: "center",
+    lineHeight: 22,
+    fontFamily: MONO,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 16,
+    width: "100%",
+  },
+  modalBtnStay: {
+    flex: 1,
+    paddingVertical: 16,
+    borderWidth: B,
+    borderColor: palette.ink,
+    backgroundColor: palette.ink,
+    alignItems: "center",
+  },
+  modalBtnStayText: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    color: palette.ground,
+    fontFamily: MONO,
+  },
+  modalBtnLeave: {
+    flex: 1,
+    paddingVertical: 16,
+    borderWidth: B,
+    borderColor: palette.ink,
+    backgroundColor: palette.ground,
+    alignItems: "center",
+  },
+  modalBtnLeaveText: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    color: palette.ink,
+    fontFamily: MONO,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // NETWORK STATUS BAR (fixed bottom)
+  // ═══════════════════════════════════════════════════════════════════════════
+  networkStatus: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingVertical: 16,
+    backgroundColor: palette.orange,
+    alignItems: "center",
+    zIndex: 999,
+  },
+  networkStatusReconnected: {
+    backgroundColor: palette.green,
+  },
+  networkStatusText: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    color: palette.ground,
+    fontFamily: MONO,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LOADING OVERLAY
+  // ═══════════════════════════════════════════════════════════════════════════
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: palette.ground,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 3000,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LEGACY STYLES (for backwards compatibility)
+  // ═══════════════════════════════════════════════════════════════════════════
   pill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     borderWidth: B,
-    borderColor: palette.white,
+    borderColor: palette.ink,
     backgroundColor: palette.ink,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    marginBottom: 22,
+    marginBottom: 32,
   },
-  pillDot: { width: 7, height: 7, borderRadius: 999, backgroundColor: palette.pillDot },
+  pillDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 999,
+    backgroundColor: palette.red,
+  },
   pillLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: palette.white,
+    color: palette.ground,
     fontFamily: MONO,
-    letterSpacing: 1,
+    letterSpacing: 2,
     textTransform: "uppercase",
   },
   card: {
     width: "100%",
-    maxWidth: 440,
-    borderWidth: B,
-    borderColor: palette.white,
-    backgroundColor: palette.ink,
-    padding: 9,
+    maxWidth: 600,
   },
   core: {
-    borderWidth: 1,
-    borderColor: palette.ringBg,
-    backgroundColor: palette.ink,
-    paddingVertical: 34,
-    paddingHorizontal: 28,
     alignItems: "center",
+    width: "100%",
   },
   eyebrow: {
-    fontSize: 10,
-    letterSpacing: 2.4,
-    textTransform: "uppercase",
-    fontWeight: "700",
-    color: palette.muted,
-    fontFamily: MONO,
+    display: "none", // Hidden in V2 prototype
   },
-  ringWrap: {
-    width: RING_SIZE,
-    height: RING_SIZE,
-    marginTop: 26,
-    marginBottom: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+
+  // Legacy ring styles (View-based fallback)
   ringTrack: {
     position: "absolute",
     width: RING_SIZE,
     height: RING_SIZE,
     borderRadius: RING_SIZE / 2,
     borderWidth: RING_STROKE,
+    borderColor: palette.ringBg,
   },
   ringProgress: {
     position: "absolute",
@@ -131,71 +645,52 @@ export const styles = StyleSheet.create({
     height: RING_SIZE,
     borderRadius: RING_SIZE / 2,
     borderWidth: RING_STROKE,
+    borderColor: palette.ink,
     borderLeftColor: "transparent",
     borderBottomColor: "transparent",
     transform: [{ rotate: "-45deg" }],
   },
-  ringCenter: { position: "absolute", alignItems: "center", justifyContent: "center" },
-  position: {
-    fontSize: 48,
-    lineHeight: 48,
-    fontWeight: "800",
-    letterSpacing: -1.9,
-    color: palette.white,
-    fontFamily: MONO,
-    fontVariant: ["tabular-nums"],
-  },
-  positionLabel: {
-    fontSize: 11,
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
-    color: palette.muted,
-    marginTop: 6,
-    fontFamily: MONO,
-  },
+
+  // Legacy text styles
   title: {
-    fontSize: 23,
+    fontSize: 32,
     fontWeight: "800",
-    letterSpacing: -0.4,
-    color: palette.white,
-    marginTop: 14,
-    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: -1,
+    color: palette.ink,
     textAlign: "center",
+    marginBottom: 16,
     fontFamily: MONO,
   },
   sub: {
     fontSize: 14,
     lineHeight: 22,
-    color: palette.muted,
-    maxWidth: 300,
+    color: palette.gray,
+    maxWidth: 400,
     textAlign: "center",
     fontFamily: MONO,
   },
-  zone: {
+
+  // Legacy stats (now using estimatedTime blocks)
+  stats: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginTop: 20,
-    borderWidth: B,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    gap: 16,
+    marginBottom: 32,
+    width: "100%",
   },
-  zoneText: { flex: 1, fontSize: 13, fontWeight: "600", lineHeight: 18, fontFamily: MONO },
-  zoneLabel: { fontWeight: "800" },
-  stats: { flexDirection: "row", gap: 10, marginTop: 18, width: "100%" },
   stat: {
     flex: 1,
     alignItems: "center",
     borderWidth: B,
-    borderColor: palette.white,
-    backgroundColor: palette.ink,
-    paddingVertical: 14,
-    paddingHorizontal: 10,
+    borderColor: palette.ink,
+    backgroundColor: palette.field,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "800",
-    color: palette.white,
+    color: palette.ink,
     fontFamily: MONO,
     fontVariant: ["tabular-nums"],
   },
@@ -203,56 +698,91 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 1,
     textTransform: "uppercase",
-    color: palette.muted,
+    color: palette.gray,
     marginTop: 4,
     fontFamily: MONO,
   },
-  admit: { marginTop: 22, width: "100%" },
+
+  // Legacy admit styles
+  admit: {
+    marginTop: 16,
+    width: "100%",
+    alignItems: "center",
+  },
   prep: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 11,
+    gap: 12,
     borderWidth: B,
-    borderColor: palette.ok,
-    backgroundColor: palette.ink,
+    borderColor: palette.green,
+    backgroundColor: "#e8f5e9",
     paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
+    width: "100%",
   },
-  prepText: { fontSize: 14, fontWeight: "700", color: palette.okText, fontFamily: MONO },
+  prepText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: v2ZoneBanners.guaranteed.text,
+    fontFamily: MONO,
+  },
   admitTitle: {
-    fontSize: 23,
+    fontSize: 24,
     fontWeight: "800",
-    letterSpacing: -0.4,
-    color: palette.white,
-    marginTop: 14,
+    color: palette.ink,
+    marginBottom: 16,
     textAlign: "center",
     fontFamily: MONO,
   },
+
+  // Legacy error box
   errBox: {
-    marginTop: 18,
+    marginTop: 16,
     width: "100%",
     borderWidth: B,
-    borderColor: palette.errText,
-    backgroundColor: palette.ink,
+    borderColor: palette.red,
+    backgroundColor: "#ffebee",
     paddingVertical: 16,
     paddingHorizontal: 16,
   },
   errTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: palette.errText,
+    color: palette.red,
     textAlign: "center",
-    marginBottom: 6,
+    marginBottom: 8,
     fontFamily: MONO,
   },
-  errBody: { fontSize: 13, lineHeight: 20, color: palette.errText, textAlign: "center", fontFamily: MONO },
-  leave: { marginTop: 16, paddingVertical: 4 },
-  leaveText: { fontSize: 12, color: palette.faint, textDecorationLine: "underline", fontFamily: MONO },
+  errBody: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: palette.red,
+    textAlign: "center",
+    fontFamily: MONO,
+  },
+
+  // Legacy leave link
+  leave: {
+    marginTop: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderWidth: B,
+    borderColor: palette.ink,
+    backgroundColor: palette.ground,
+  },
+  leaveText: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    color: palette.ink,
+    fontFamily: MONO,
+  },
   footnote: {
     fontSize: 11,
-    color: palette.faint,
-    marginTop: 20,
+    color: palette.gray,
+    marginTop: 24,
     textAlign: "center",
     maxWidth: 440,
     fontFamily: MONO,

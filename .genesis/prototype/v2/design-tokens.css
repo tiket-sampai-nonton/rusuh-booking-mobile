@@ -1,0 +1,402 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * RUSUH TIKET — Design Token System
+ * V2 Brutalist Mono Theme
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * 
+ * 北极星: Bauhaus meets punk zine — raw honesty in a refined grid
+ * 
+ * This file establishes the unified design language for all V2 pages.
+ * Import this file at the top of each page's <style> block, or link as external CSS.
+ * 
+ * Usage:
+ *   <link rel="stylesheet" href="design-tokens.css">
+ *   
+ * Or copy the :root block into each file's existing <style>.
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
+
+:root {
+  /* ═══════════════════════════════════════
+     CORE COLORS
+     ═══════════════════════════════════════
+     
+     Primary palette: Pure black and white
+     No grays in main UI — grays only for muted/disabled states
+  */
+  
+  /* Semantic naming (preferred) */
+  --ground: #ffffff;              /* Page background */
+  --ink: #000000;                 /* Primary text, borders, UI elements */
+  --ink-muted: #666666;           /* Secondary text, placeholders */
+  --field: #f5f5f5;               /* Input backgrounds, subtle surfaces */
+  
+  /* Legacy naming (for backwards compatibility) */
+  --black: #000000;
+  --white: #ffffff;
+  --gray: #888888;
+  
+  /* Functional colors */
+  --accent: #000000;              /* CTAs, highlights (same as ink for brutalist) */
+  --danger: #ff0000;              /* Errors, warnings, urgent states */
+  --success: #00aa00;             /* Success states, confirmations */
+  --warning: #ff6600;             /* Warnings, caution states */
+  
+  /* Legacy functional (for backwards compatibility) */
+  --red: #ff0000;
+  --green: #00aa00;
+  
+  
+  /* ═══════════════════════════════════════
+     TYPOGRAPHY
+     ═══════════════════════════════════════
+     
+     Primary: Inter — geometric neutrality, Swiss precision
+     Mono: JetBrains Mono — for waiting room, code, counters
+  */
+  
+  /* Font families */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  
+  /* Legacy naming */
+  --font: var(--font-sans);
+  
+  /* Font weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-black: 900;
+  
+  /* Type scale — fluid sizing with clamp() */
+  --text-2xs: 0.625rem;           /* 10px — micro labels */
+  --text-xs: 0.75rem;             /* 12px — captions, badges */
+  --text-s: 0.875rem;             /* 14px — body small, buttons */
+  --text-m: 1rem;                 /* 16px — body default */
+  --text-l: 1.125rem;             /* 18px — body large */
+  --text-xl: 1.25rem;             /* 20px — subheadings */
+  --text-2xl: clamp(1.5rem, 3vw, 2rem);       /* 24-32px — section titles */
+  --text-3xl: clamp(2rem, 5vw, 3rem);         /* 32-48px — page titles */
+  --text-hero: clamp(3rem, 12vw, 10rem);      /* 48-160px — hero headlines */
+  
+  /* Line heights */
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  
+  /* Letter spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
+  --tracking-widest: 0.15em;
+  
+  
+  /* ═══════════════════════════════════════
+     SPACING
+     ═══════════════════════════════════════
+     
+     8px base unit system
+     Use multiples of --space-unit for consistency
+  */
+  
+  --space-unit: 0.5rem;           /* 8px base unit */
+  
+  --space-0: 0;
+  --space-1: 0.25rem;             /* 4px */
+  --space-2: 0.5rem;              /* 8px */
+  --space-3: 0.75rem;             /* 12px */
+  --space-4: 1rem;                /* 16px */
+  --space-5: 1.25rem;             /* 20px */
+  --space-6: 1.5rem;              /* 24px */
+  --space-8: 2rem;                /* 32px */
+  --space-10: 2.5rem;             /* 40px */
+  --space-12: 3rem;               /* 48px */
+  --space-16: 4rem;               /* 64px */
+  --space-20: 5rem;               /* 80px */
+  --space-24: 6rem;               /* 96px */
+  
+  /* Semantic spacing (legacy naming) */
+  --space-xs: 0.5rem;             /* 8px */
+  --space-s: 1rem;                /* 16px */
+  --space-m: 1.5rem;              /* 24px */
+  --space-l: 3rem;                /* 48px */
+  --space-xl: 5rem;               /* 80px */
+  
+  /* Frame — page margin responsive */
+  --frame: clamp(1rem, 4vw, 3rem);
+  
+  
+  /* ═══════════════════════════════════════
+     BORDERS & OUTLINES
+     ═══════════════════════════════════════
+     
+     Brutalist aesthetic: hard 2-3px borders
+  */
+  
+  --border-width: 2px;
+  --border-width-thick: 3px;
+  --border-width-thin: 1px;
+  
+  --border: var(--border-width) solid var(--ink);
+  --border-thick: var(--border-width-thick) solid var(--ink);
+  --border-thin: var(--border-width-thin) solid var(--ink);
+  --border-muted: var(--border-width-thin) solid var(--ink-muted);
+  
+  /* For light borders on dark backgrounds */
+  --border-light: var(--border-width) solid var(--ground);
+  
+  /* Focus rings */
+  --focus-ring: 0 0 0 2px var(--ground), 0 0 0 4px var(--ink);
+  --focus-ring-invert: 0 0 0 2px var(--ink), 0 0 0 4px var(--ground);
+  
+  
+  /* ═══════════════════════════════════════
+     RADII
+     ═══════════════════════════════════════
+     
+     Brutalist = sharp edges, but some components need subtle rounding
+  */
+  
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+  
+  
+  /* ═══════════════════════════════════════
+     SHADOWS
+     ═══════════════════════════════════════
+     
+     Hard offset shadows for brutalist depth
+     No blur — clean, graphic shadows
+  */
+  
+  --shadow-none: none;
+  --shadow-sm: 2px 2px 0 var(--ink);
+  --shadow-md: 4px 4px 0 var(--ink);
+  --shadow-lg: 6px 6px 0 var(--ink);
+  --shadow-xl: 8px 8px 0 var(--ink);
+  
+  /* Inverted shadows (for dark backgrounds) */
+  --shadow-sm-light: 2px 2px 0 var(--ground);
+  --shadow-md-light: 4px 4px 0 var(--ground);
+  
+  /* Soft shadows (for subtle elevation when needed) */
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-soft-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+  
+  
+  /* ═══════════════════════════════════════
+     ANIMATIONS & TRANSITIONS
+     ═══════════════════════════════════════
+     
+     Custom easing curves for premium feel
+  */
+  
+  /* Durations */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 800ms;
+  
+  /* Easing curves */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);              /* Smooth deceleration */
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);         /* Gentle ease out */
+  --ease-in: cubic-bezier(0.32, 0, 0.67, 0);          /* Gentle ease in */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);      /* Symmetric */
+  --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6); /* Playful bounce */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);   /* Subtle bounce */
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Spring pop */
+  
+  /* Common transitions */
+  --transition-fast: all var(--duration-fast) var(--ease);
+  --transition-normal: all var(--duration-normal) var(--ease);
+  --transition-slow: all var(--duration-slow) var(--ease);
+  
+  
+  /* ═══════════════════════════════════════
+     Z-INDEX SCALE
+     ═══════════════════════════════════════
+     
+     Layering system to prevent z-index wars
+  */
+  
+  --z-behind: -1;
+  --z-base: 0;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-header: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-toast: 700;
+  --z-tooltip: 800;
+  --z-cursor: 10000;
+  --z-max: 99999;
+  
+  
+  /* ═══════════════════════════════════════
+     LAYOUT
+     ═══════════════════════════════════════
+     
+     Max widths and container sizing
+  */
+  
+  --max-width-xs: 20rem;          /* 320px */
+  --max-width-sm: 24rem;          /* 384px */
+  --max-width-md: 28rem;          /* 448px */
+  --max-width-lg: 32rem;          /* 512px */
+  --max-width-xl: 36rem;          /* 576px */
+  --max-width-2xl: 42rem;         /* 672px */
+  --max-width-3xl: 48rem;         /* 768px */
+  --max-width-4xl: 56rem;         /* 896px */
+  --max-width-5xl: 64rem;         /* 1024px */
+  --max-width-6xl: 72rem;         /* 1152px */
+  --max-width-7xl: 80rem;         /* 1280px */
+  --max-width-full: 100%;
+  
+  /* Content widths */
+  --content-narrow: 600px;
+  --content-default: 700px;
+  --content-wide: 1200px;
+  --content-full: 100%;
+  
+  
+  /* ═══════════════════════════════════════
+     BREAKPOINTS (as CSS reference)
+     ═══════════════════════════════════════
+     
+     Note: CSS custom properties can't be used in @media queries.
+     These are documented here for reference. Use the actual values.
+     
+     --bp-xs: 320px    — Small phones
+     --bp-sm: 480px    — Large phones
+     --bp-md: 768px    — Tablets
+     --bp-lg: 1024px   — Small laptops
+     --bp-xl: 1280px   — Desktops
+     --bp-2xl: 1536px  — Large desktops
+  */
+  
+  
+  /* ═══════════════════════════════════════
+     COMPONENT TOKENS
+     ═══════════════════════════════════════
+     
+     Pre-composed tokens for common components
+  */
+  
+  /* Buttons */
+  --btn-padding-y: 0.75rem;
+  --btn-padding-x: 1.5rem;
+  --btn-font-size: var(--text-s);
+  --btn-font-weight: var(--weight-bold);
+  --btn-text-transform: uppercase;
+  --btn-letter-spacing: var(--tracking-wide);
+  
+  /* Inputs */
+  --input-padding-y: 0.875rem;
+  --input-padding-x: 1rem;
+  --input-font-size: var(--text-m);
+  --input-bg: var(--ground);
+  --input-border: var(--border);
+  
+  /* Cards */
+  --card-padding: var(--space-6);
+  --card-border: var(--border);
+  --card-bg: var(--ground);
+  
+  /* Header */
+  --header-height: 60px;
+  --header-padding-y: 1rem;
+  --header-padding-x: 2rem;
+  
+  /* Timer/Counter (waiting room) */
+  --timer-font: var(--font-mono);
+  --timer-font-size: clamp(4rem, 15vw, 12rem);
+  --timer-font-weight: var(--weight-black);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DARK MODE TOKENS (Optional)
+   ═══════════════════════════════════════════════════════════════════════════════
+   
+   Uncomment and use with:
+   - <html data-theme="dark">
+   - @media (prefers-color-scheme: dark)
+*/
+
+/*
+[data-theme="dark"] {
+  --ground: #000000;
+  --ink: #ffffff;
+  --ink-muted: #999999;
+  --field: #111111;
+  --accent: #ffffff;
+  
+  --black: #000000;
+  --white: #ffffff;
+  
+  --shadow-sm: 2px 2px 0 var(--ground);
+  --shadow-md: 4px 4px 0 var(--ground);
+  --shadow-lg: 6px 6px 0 var(--ground);
+}
+*/
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BASE RESET & DEFAULTS
+   ═══════════════════════════════════════════════════════════════════════════════
+   
+   Optional: Include these for consistent base styles across pages
+*/
+
+/*
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-m);
+  line-height: var(--leading-normal);
+  background: var(--ground);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+input, button, textarea, select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+*/

@@ -48,11 +48,14 @@ describe("HomeScreen (web desktop)", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    await waitFor(() => screen.getByTestId("section-upcoming"));
-    // Nav center link only shown on web > 720px (showNavLinks branch).
-    expect(screen.getByText("Jelajah")).toBeTruthy();
-    // Multi-column CardGrid still renders enterable cards + routes on press.
-    fireEvent.press(screen.getByTestId("event-card-evt-1"));
+    // V2: wait for header with nav links (Konser etc.) to be visible
+    await waitFor(() => screen.getByTestId("nav-konser"));
+    // Nav center link only shown on web > 768px (showNavLinks branch).
+    // V2 uses genre labels: verify nav link exists by testID (label may appear elsewhere too)
+    expect(screen.getByTestId("nav-konser")).toBeTruthy();
+    expect(screen.getByTestId("nav-festival")).toBeTruthy();
+    // V2: Multi-column CardGrid uses v2-event-card-<id> testIDs
+    fireEvent.press(screen.getByTestId("v2-event-card-evt-1"));
     expect(mockRouter.push).toHaveBeenCalledWith("/events/evt-1");
     // Drive the scroll handler (hero parallax) — covers the onScroll path.
     fireEvent.scroll(screen.getByTestId("home-scroll"), {
@@ -68,8 +71,9 @@ describe("HomeScreen (web desktop)", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    await waitFor(() => screen.getByTestId("filter-open"));
-    fireEvent.press(screen.getByTestId("filter-open"));
+    // V2: wait for filter button (testID="filter-btn")
+    await waitFor(() => screen.getByTestId("filter-btn"));
+    fireEvent.press(screen.getByTestId("filter-btn"));
     // The popup appears; no navigation yet (prototype opens a dialog).
     expect(screen.getByTestId("filter-modal")).toBeTruthy();
     expect(mockRouter.push).not.toHaveBeenCalled();
@@ -84,20 +88,23 @@ describe("HomeScreen (web desktop)", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    await waitFor(() => screen.getByTestId("nav-cta"));
-    fireEvent.press(screen.getByTestId("nav-cta"));
-    // Develop's LoginModal (RBT-020) renders the email step: card + input.
+    // V2: header CTA is testID="header-cta"
+    await waitFor(() => screen.getByTestId("header-cta"));
+    fireEvent.press(screen.getByTestId("header-cta"));
+    // V2 LoginModal renders the email step: card + input.
     expect(screen.getByTestId("login-card")).toBeTruthy();
     expect(screen.getByTestId("login-email-input")).toBeTruthy();
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 
-  it("nav Jelajah / History / Kategori scroll in-page (no navigation)", async () => {
+  it("nav Konser / Festival / Olahraga / Theater scroll in-page (no navigation)", async () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    await waitFor(() => screen.getByTestId("nav-jelajah"));
-    const feat = screen.queryByTestId("section-upcoming");
+    // V2: wait for header nav links
+    await waitFor(() => screen.getByTestId("nav-konser"));
+    // V2: section testID is section-events (not section-upcoming)
+    const feat = screen.queryByTestId("section-events");
     if (feat) {
       fireEvent(feat, "layout", {
         nativeEvent: { layout: { x: 0, y: 800, width: 1200, height: 600 } },
@@ -109,10 +116,12 @@ describe("HomeScreen (web desktop)", () => {
         nativeEvent: { layout: { x: 0, y: 1400, width: 1200, height: 600 } },
       });
     }
-    fireEvent.press(screen.getByTestId("nav-jelajah"));
-    fireEvent.press(screen.getByTestId("nav-history"));
-    fireEvent.press(screen.getByTestId("nav-kategori"));
-    // All three scroll in-page; none navigate.
+    // V2: nav links are genre-based (Konser, Festival, etc.)
+    fireEvent.press(screen.getByTestId("nav-konser"));
+    fireEvent.press(screen.getByTestId("nav-festival"));
+    fireEvent.press(screen.getByTestId("nav-olahraga"));
+    fireEvent.press(screen.getByTestId("nav-theater"));
+    // All scroll in-page; none navigate.
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 });

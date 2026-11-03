@@ -10,6 +10,11 @@ jest.mock("expo-router", () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
 }));
 
+// Mock expo-font's useFonts for V2 Inter font loading (RBT-096)
+jest.mock("expo-font", () => ({
+  useFonts: () => [true, null], // fonts loaded, no error
+}));
+
 // eslint-disable-next-line import/first
 import RootLayout from "../../app/_layout";
 

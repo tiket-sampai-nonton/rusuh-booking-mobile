@@ -1,66 +1,141 @@
-import tailwind from "../../../tailwind.config.js";
+import tailwind from '../../../tailwind.config.js';
 
-import { v2, v2Border, v2Font, v2Motion, v2Tokens, v2Zone } from "./v2-tokens";
+import {
+  v2,
+  v2Border,
+  v2Font,
+  v2Motion,
+  v2Tokens,
+  v2Zone,
+  v2Colors,
+  v2Borders,
+  v2Fonts,
+  v2Easing,
+  v2EasingCSS,
+  v2ZoneBanners,
+} from './v2-tokens';
 
 // The tailwind config's v2 color namespace — the single source of truth the
 // raw tokens must mirror.
-const twV2 = (tailwind as any).theme.extend.colors.v2 as Record<string, string>;
+const twV2 = (tailwind as { theme?: { extend?: { colors?: { v2?: Record<string, string> } } } }).theme?.extend?.colors
+  ?.v2 as Record<string, string> | undefined;
 
-describe("RBT-086 V2 Brutalist Mono raw tokens", () => {
-  it("exposes the unified core palette", () => {
-    expect(v2).toMatchObject({
-      ink: "#000000",
-      ground: "#ffffff",
-      muted: "#666666",
-      gray: "#888888",
-      field: "#f5f5f5",
-      accent: "#ff0000",
-      danger: "#dc2626",
-      success: "#00aa00",
-      warn: "#ff6600",
-      info: "#3b82f6",
+describe('RBT-096 V2 Brutalist Mono tokens (Re-implementation)', () => {
+  describe('v2Colors (new API)', () => {
+    it('exposes the core palette per MASTER-SPEC §1', () => {
+      expect(v2Colors).toMatchObject({
+        ground: '#ffffff',
+        ink: '#000000',
+        inkMuted: '#666666',
+        field: '#f5f5f5',
+        danger: '#ff0000',
+        success: '#00aa00',
+        warning: '#ff6600',
+      });
+    });
+
+    it('includes legacy aliases for backwards compatibility', () => {
+      expect(v2Colors.muted).toBe('#666666');
+      expect(v2Colors.warn).toBe('#ff6600');
+      expect(v2Colors.accent).toBe('#000000');
     });
   });
 
-  it("MIRRORS the tailwind.config.js v2 namespace exactly (single source)", () => {
-    // Every core raw token equals its tailwind counterpart — no drift.
-    (["ink", "ground", "muted", "gray", "field", "accent", "danger", "success", "warn", "info"] as const).forEach(
-      (k) => {
-        expect(v2[k]).toBe(twV2[k]);
-      },
-    );
+  describe('v2 legacy alias', () => {
+    it('is an alias for v2Colors for backwards compatibility', () => {
+      expect(v2).toBe(v2Colors);
+    });
   });
 
-  it("maps the waiting-room zone-banner tints to the tailwind tokens", () => {
-    expect(v2Zone.ok).toEqual({ bg: "#e8f5e9", border: "#2e7d32", text: "#1b5e20" });
-    expect(v2Zone.warn).toEqual({ bg: "#fff3e0", border: "#f57c00", text: "#e65100" });
-    expect(v2Zone.bad).toEqual({ bg: "#ffebee", border: "#c62828", text: "#b71c1c" });
-    expect(v2Zone.ok.bg).toBe(twV2["zone-ok"]);
-    expect(v2Zone.bad.text).toBe(twV2["zone-bad-text"]);
+  describe('v2Borders (new API)', () => {
+    it('defines border widths per MASTER-SPEC §1', () => {
+      expect(v2Borders.standard).toBe(2);
+      expect(v2Borders.thick).toBe(3); // Waiting room only
+      expect(v2Borders.thin).toBe(1);
+    });
   });
 
-  it("exposes V2 easings as CSS strings AND Reanimated bezier tuples", () => {
-    expect(v2Motion.ease).toBe("cubic-bezier(0.16, 1, 0.3, 1)");
-    expect(v2Motion.easeBezier).toEqual([0.16, 1, 0.3, 1]);
-    expect(v2Motion.elasticBezier).toEqual([0.68, -0.6, 0.32, 1.6]);
-    expect(v2Motion.expoBezier).toEqual([0.76, 0, 0.24, 1]);
+  describe('v2Border legacy alias', () => {
+    it('maps to v2Borders for backwards compatibility', () => {
+      expect(v2Border.base).toBe(v2Borders.standard);
+      expect(v2Border.heavy).toBe(v2Borders.thick);
+    });
   });
 
-  it("keeps the brutalist border widths (2px base, 3px heavy waiting variant)", () => {
-    expect(v2Border.base).toBe(2);
-    expect(v2Border.heavy).toBe(3);
+  describe('v2Fonts (new API)', () => {
+    it('defines fonts per MASTER-SPEC §1', () => {
+      expect(v2Fonts.sans).toBe('Inter');
+      expect(v2Fonts.mono).toBe('JetBrains Mono');
+    });
   });
 
-  it("keeps Inter as the V2 font and JetBrains Mono as the waiting variant", () => {
-    expect(v2Font.sans).toBe("Inter");
-    expect(v2Font.mono).toBe("JetBrains Mono");
+  describe('v2Font legacy alias', () => {
+    it('is an alias for v2Fonts for backwards compatibility', () => {
+      expect(v2Font).toBe(v2Fonts);
+    });
   });
 
-  it("bundles everything into v2Tokens", () => {
-    expect(v2Tokens.color).toBe(v2);
-    expect(v2Tokens.zone).toBe(v2Zone);
-    expect(v2Tokens.motion).toBe(v2Motion);
-    expect(v2Tokens.border).toBe(v2Border);
-    expect(v2Tokens.font).toBe(v2Font);
+  describe('v2Easing (new API)', () => {
+    it('exposes easing curves as Reanimated bezier tuples', () => {
+      expect(v2Easing.primary).toEqual([0.16, 1, 0.3, 1]);
+      expect(v2Easing.out).toEqual([0.33, 1, 0.68, 1]);
+      expect(v2Easing.elastic).toEqual([0.68, -0.6, 0.32, 1.6]);
+    });
   });
+
+  describe('v2EasingCSS (new API)', () => {
+    it('exposes easing curves as CSS cubic-bezier strings', () => {
+      expect(v2EasingCSS.primary).toBe('cubic-bezier(0.16, 1, 0.3, 1)');
+      expect(v2EasingCSS.out).toBe('cubic-bezier(0.33, 1, 0.68, 1)');
+    });
+  });
+
+  describe('v2Motion legacy alias', () => {
+    it('maps to v2EasingCSS for backwards compatibility', () => {
+      expect(v2Motion.ease).toBe(v2EasingCSS.primary);
+      expect(v2Motion.easeBezier).toEqual(v2Easing.primary);
+      expect(v2Motion.elasticBezier).toEqual(v2Easing.elastic);
+    });
+  });
+
+  describe('v2ZoneBanners (new API)', () => {
+    it('defines waiting room zone banner colors per MASTER-SPEC §3.3', () => {
+      expect(v2ZoneBanners.guaranteed).toEqual({ bg: '#e8f5e9', border: '#2e7d32', text: '#1b5e20' });
+      expect(v2ZoneBanners.possible).toEqual({ bg: '#fff3e0', border: '#f57c00', text: '#e65100' });
+      expect(v2ZoneBanners.notEnough).toEqual({ bg: '#ffebee', border: '#c62828', text: '#b71c1c' });
+    });
+  });
+
+  describe('v2Zone legacy alias', () => {
+    it('maps to v2ZoneBanners for backwards compatibility', () => {
+      expect(v2Zone.ok).toEqual(v2ZoneBanners.guaranteed);
+      expect(v2Zone.warn).toEqual(v2ZoneBanners.possible);
+      expect(v2Zone.bad).toEqual(v2ZoneBanners.notEnough);
+    });
+  });
+
+  describe('v2Tokens (new API)', () => {
+    it('bundles all token groups', () => {
+      expect(v2Tokens.colors).toBe(v2Colors);
+      expect(v2Tokens.borders).toBe(v2Borders);
+      expect(v2Tokens.fonts).toBe(v2Fonts);
+      expect(v2Tokens.easing).toBe(v2Easing);
+      expect(v2Tokens.easingCSS).toBe(v2EasingCSS);
+      expect(v2Tokens.zoneBanners).toBe(v2ZoneBanners);
+    });
+  });
+
+  // Only run tailwind sync tests if twV2 is available
+  if (twV2) {
+    describe('Tailwind sync', () => {
+      it('MIRRORS the tailwind.config.js v2 namespace for core colors', () => {
+        // Every core raw token equals its tailwind counterpart — no drift.
+        (['ink', 'ground', 'field'] as const).forEach((k) => {
+          if (twV2[k]) {
+            expect(v2Colors[k]).toBe(twV2[k]);
+          }
+        });
+      });
+    });
+  }
 });

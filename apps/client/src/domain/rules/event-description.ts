@@ -28,6 +28,10 @@ export interface ParsedDescription {
   readonly terms: readonly string[];
   readonly bannerImage?: string;
   readonly categories: readonly EventCategory[];
+  /** V2: Optional subtitle shown below hero title. */
+  readonly subtitle?: string;
+  /** V2: Gallery image URLs for the event detail page. */
+  readonly gallery?: readonly string[];
 }
 
 const EMPTY: ParsedDescription = {
@@ -36,6 +40,8 @@ const EMPTY: ParsedDescription = {
   terms: [],
   bannerImage: undefined,
   categories: [],
+  subtitle: undefined,
+  gallery: undefined,
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -104,6 +110,15 @@ function parseCategories(v: unknown): EventCategory[] {
   return out;
 }
 
+/** Parse gallery images array. */
+function parseGallery(v: unknown): string[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  const urls = v
+    .map((item) => asString(item).trim())
+    .filter((url) => url.length > 0);
+  return urls.length > 0 ? urls : undefined;
+}
+
 /**
  * Parse the opaque `EventDetail.description` into a safe, typed view. A nullish
  * or non-object value yields all-empty defaults (the screen renders its
@@ -114,11 +129,14 @@ export function parseDescription(
 ): ParsedDescription {
   if (!isRecord(description)) return EMPTY;
   const banner = asString(description.bannerImage).trim();
+  const subtitle = asString(description.subtitle).trim();
   return {
     longDesc: asString(description.longDesc),
     lineup: parseLineup(description.lineup),
     terms: parseTerms(description.terms),
     bannerImage: banner.length > 0 ? banner : undefined,
     categories: parseCategories(description.categories),
+    subtitle: subtitle.length > 0 ? subtitle : undefined,
+    gallery: parseGallery(description.gallery),
   };
 }

@@ -2,16 +2,18 @@
  * RBT-020 — LoginModal component tests (RNTL).
  *
  * Renders the modal inside a ServiceProvider (fake UserRepository) + a real
- * QueryClientProvider, then drives the prototype flow:
+ * QueryClientProvider, then drives the V2 prototype flow:
  *  - open modal
  *  - invalid email blocked ("Format email belum benar")
- *  - email submit → code step with echoed email
+ *  - email submit → OTP step with 6 separate digit boxes
  *  - <6 digits keeps Verifikasi disabled
  *  - wrong code → Bahasa OTP error
  *  - correct code (123456) isNew=false → signed-in panel
- *  - isNew=true → register handoff (NOT the form)
- *  - "Ganti email" returns to email step
+ *  - isNew=true → register form (name + NIK + consent)
+ *  - "Ubah Email" returns to email step
  *  - backdrop + hardware-back (Escape) close
+ *
+ * V2 OTP input: 6 individual boxes (login-otp-0 to login-otp-5), NOT a single input.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
@@ -86,25 +88,33 @@ describe("LoginModal (RBT-020)", () => {
     });
   });
 
-  it("advances to the code step and echoes the entered email", async () => {
+  it("advances to the OTP step and echoes the entered email", async () => {
     const { getByTestId, getByText } = renderModal(new FakeUserRepository());
     fireEvent.changeText(getByTestId("login-email-input"), "kamu@email.com");
     fireEvent.press(getByTestId("login-send"));
-    await waitFor(() => expect(getByText("Masukkan Kode")).toBeTruthy());
-    expect(getByTestId("login-code-input")).toBeTruthy();
+    // V2: "Verifikasi OTP" title, 6 separate digit boxes
+    await waitFor(() => expect(getByText("Verifikasi OTP")).toBeTruthy());
+    expect(getByTestId("login-otp-0")).toBeTruthy();
+    expect(getByTestId("login-otp-5")).toBeTruthy();
     expect(getByText("kamu@email.com")).toBeTruthy();
   });
 
   it("keeps Verifikasi disabled until 6 digits are entered", async () => {
-    const { getByTestId } = renderModal(new FakeUserRepository());
+    const { getByTestId, getByText } = renderModal(new FakeUserRepository());
     fireEvent.changeText(getByTestId("login-email-input"), "kamu@email.com");
     fireEvent.press(getByTestId("login-send"));
-    await waitFor(() => getByTestId("login-code-input"));
-    fireEvent.changeText(getByTestId("login-code-input"), "123");
+    await waitFor(() => getByText("Verifikasi OTP"));
+    // Enter 3 digits (incomplete)
+    fireEvent.changeText(getByTestId("login-otp-0"), "1");
+    fireEvent.changeText(getByTestId("login-otp-1"), "2");
+    fireEvent.changeText(getByTestId("login-otp-2"), "3");
     expect(getByTestId("login-verify").props.accessibilityState.disabled).toBe(
       true,
     );
-    fireEvent.changeText(getByTestId("login-code-input"), "123456");
+    // Complete all 6 digits
+    fireEvent.changeText(getByTestId("login-otp-3"), "4");
+    fireEvent.changeText(getByTestId("login-otp-4"), "5");
+    fireEvent.changeText(getByTestId("login-otp-5"), "6");
     await waitFor(() =>
       expect(
         getByTestId("login-verify").props.accessibilityState.disabled,
@@ -115,14 +125,21 @@ describe("LoginModal (RBT-020)", () => {
   it("shows a Bahasa OTP error on a wrong code", async () => {
     const repo = new FakeUserRepository();
     repo.throwOnVerify = true;
-    const { getByTestId } = renderModal(repo);
+    const { getByTestId, getByText } = renderModal(repo);
     fireEvent.changeText(getByTestId("login-email-input"), "kamu@email.com");
     fireEvent.press(getByTestId("login-send"));
-    await waitFor(() => getByTestId("login-code-input"));
-    fireEvent.changeText(getByTestId("login-code-input"), "000000");
+    await waitFor(() => getByText("Verifikasi OTP"));
+    // Enter wrong code via separate boxes
+    fireEvent.changeText(getByTestId("login-otp-0"), "0");
+    fireEvent.changeText(getByTestId("login-otp-1"), "0");
+    fireEvent.changeText(getByTestId("login-otp-2"), "0");
+    fireEvent.changeText(getByTestId("login-otp-3"), "0");
+    fireEvent.changeText(getByTestId("login-otp-4"), "0");
+    fireEvent.changeText(getByTestId("login-otp-5"), "0");
     fireEvent.press(getByTestId("login-verify"));
     await waitFor(() => {
-      expect(getByTestId("login-code-error").props.children).toBe(
+      // V2 testID: login-otp-error — DomainError message from OTP_INVALID
+      expect(getByTestId("login-otp-error").props.children).toBe(
         "Kode OTP salah atau kedaluwarsa. Coba lagi.",
       );
     });
@@ -134,10 +151,17 @@ describe("LoginModal (RBT-020)", () => {
     const { getByTestId, getByText } = renderModal(repo);
     fireEvent.changeText(getByTestId("login-email-input"), "budi@mail.com");
     fireEvent.press(getByTestId("login-send"));
-    await waitFor(() => getByTestId("login-code-input"));
-    fireEvent.changeText(getByTestId("login-code-input"), "123456");
+    await waitFor(() => getByText("Verifikasi OTP"));
+    // Enter code via separate boxes
+    fireEvent.changeText(getByTestId("login-otp-0"), "1");
+    fireEvent.changeText(getByTestId("login-otp-1"), "2");
+    fireEvent.changeText(getByTestId("login-otp-2"), "3");
+    fireEvent.changeText(getByTestId("login-otp-3"), "4");
+    fireEvent.changeText(getByTestId("login-otp-4"), "5");
+    fireEvent.changeText(getByTestId("login-otp-5"), "6");
     fireEvent.press(getByTestId("login-verify"));
-    await waitFor(() => expect(getByText("Akun kamu")).toBeTruthy());
+    // V2: "Akun Kamu" (capitalized)
+    await waitFor(() => expect(getByText("Akun Kamu")).toBeTruthy());
     expect(getByTestId("login-signed-name").props.children).toBe("Budi");
     expect(getByTestId("login-signed-email").props.children).toBe(
       "b***@mail.com",
@@ -145,7 +169,7 @@ describe("LoginModal (RBT-020)", () => {
     expect(getByTestId("login-logout")).toBeTruthy();
   });
 
-  // Helper: drive the modal to the register step for a NEW email.
+  // Helper: drive the modal to the register step for a NEW email (V2 uses 6 boxes).
   async function reachRegisterStep(
     getByTestId: ReturnType<typeof renderModal>["getByTestId"],
     getByText: ReturnType<typeof renderModal>["getByText"],
@@ -153,8 +177,14 @@ describe("LoginModal (RBT-020)", () => {
   ) {
     fireEvent.changeText(getByTestId("login-email-input"), email);
     fireEvent.press(getByTestId("login-send"));
-    await waitFor(() => getByTestId("login-code-input"));
-    fireEvent.changeText(getByTestId("login-code-input"), "123456");
+    await waitFor(() => getByText("Verifikasi OTP"));
+    // Enter code via separate boxes
+    fireEvent.changeText(getByTestId("login-otp-0"), "1");
+    fireEvent.changeText(getByTestId("login-otp-1"), "2");
+    fireEvent.changeText(getByTestId("login-otp-2"), "3");
+    fireEvent.changeText(getByTestId("login-otp-3"), "4");
+    fireEvent.changeText(getByTestId("login-otp-4"), "5");
+    fireEvent.changeText(getByTestId("login-otp-5"), "6");
     fireEvent.press(getByTestId("login-verify"));
     await waitFor(() => expect(getByText("Lengkapi Pendaftaran")).toBeTruthy());
   }
@@ -207,7 +237,7 @@ describe("LoginModal (RBT-020)", () => {
     );
   });
 
-  it("submits trimmed name + NIK via completeRegistration and shows 'Pendaftaran Berhasil'", async () => {
+  it("submits trimmed name + NIK via completeRegistration and shows success", async () => {
     const repo = new FakeUserRepository();
     repo.session = { token: "tok-new", isNew: true };
     repo.profile = {
@@ -226,7 +256,8 @@ describe("LoginModal (RBT-020)", () => {
     fireEvent.changeText(getByTestId("login-reg-nik-input"), "3201234567890123");
     fireEvent.press(getByTestId("login-reg-consent"));
     fireEvent.press(getByTestId("login-reg-submit"));
-    await waitFor(() => expect(getByText("Pendaftaran Berhasil 🎉")).toBeTruthy());
+    // V2: "Berhasil!" success title
+    await waitFor(() => expect(getByText("Berhasil!")).toBeTruthy());
     expect(spy).toHaveBeenCalledWith({
       fullName: "Rizky Rachmawan",
       nik: "3201234567890123",
@@ -252,10 +283,11 @@ describe("LoginModal (RBT-020)", () => {
     expect(getByText("Lengkapi Pendaftaran")).toBeTruthy();
   });
 
-  it("returns to the email step via 'Ganti email'", async () => {
+  it("returns to the email step via 'Ubah Email'", async () => {
     const { getByTestId, getByText } = renderModal(new FakeUserRepository());
     fireEvent.changeText(getByTestId("login-email-input"), "kamu@email.com");
     fireEvent.press(getByTestId("login-send"));
+    // V2: testID is login-change-email with label "← Ubah Email"
     await waitFor(() => getByTestId("login-change-email"));
     fireEvent.press(getByTestId("login-change-email"));
     await waitFor(() => expect(getByText("Masuk / Daftar")).toBeTruthy());

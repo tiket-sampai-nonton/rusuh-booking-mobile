@@ -35,4 +35,6 @@ export interface HomeSectionsProps {
   readonly onFilter: () => void;
   readonly onFeaturedLayout: (y: number) => void;
   readonly onHistoryLayout: (y: number) => void;
+  /** "Lihat Semua" → /browse */
+  readonly onSeeAll: () => void;
 }

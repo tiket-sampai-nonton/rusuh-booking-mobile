@@ -11,14 +11,16 @@ import {
 describe("Checkout style helpers (RBT-051)", () => {
   it("scroll content adds a desktop max-width container", () => {
     const desktop = checkoutScrollContent(true) as Record<string, unknown>;
-    expect(desktop.maxWidth).toBe(760);
+    // V2 uses 800px max-width (was 760 in V1)
+    expect(desktop.maxWidth).toBe(800);
     expect(desktop.alignSelf).toBe("center");
   });
 
   it("scroll content stays full-width on mobile (no max-width)", () => {
     const mobile = checkoutScrollContent(false) as Record<string, unknown>;
     expect(mobile.maxWidth).toBeUndefined();
-    expect(mobile.paddingBottom).toBe(120);
+    // V2 uses 140px paddingBottom for sticky bar (was 120 in V1)
+    expect(mobile.paddingBottom).toBe(140);
   });
 
   it("topbar padding adds the safe-area inset", () => {

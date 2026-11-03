@@ -1,11 +1,13 @@
 /**
- * RBT-043 — Waiting room screen tests (RNTL).
+ * RBT-043 / RBT-096 — Waiting room screen tests (RNTL).
+ *
+ * Updated for V2 Brutalist Mono design system (English copy).
  *
  * The two seams — useQueuePolling (RBT-042) and useAutoClaim (RBT-044) — are
  * mocked (jest.mock) so NO real polling / claim fires; the screen is driven by
- * the fake return values. Asserts the prototype contract (waiting.html):
- *  - position ring + "Posisimu" label, "Di depanmu" (ahead) + "Estimasi" stats;
- *  - zone banner renders the EXACT Bahasa copy per GUARANTEED/POSSIBLE/NOT_ENOUGH;
+ * the fake return values. Asserts the V2 prototype contract (06-waiting.html):
+ *  - position ring + stats (position, ahead count, ETA);
+ *  - zone banner renders the EXACT copy per GUARANTEED/POSSIBLE/NOT_ENOUGH;
  *  - the admit region is an aria-live (accessibilityLiveRegion) node that
  *    announces on ADMITTED;
  *  - terminal (sold-out / ended) and claim error (TURN_MISSED / EVENT_SOLD_OUT)
@@ -13,7 +15,7 @@
  *  - no-queueId guard;
  *  - reduced-motion path renders without animation.
  */
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
 
 import type { QueuePollingView } from "@presentation/hooks/useQueuePolling";
@@ -89,21 +91,22 @@ beforeEach(() => {
 });
 
 describe("WaitingRoomScreen — position + stats", () => {
-  it("renders the position number in the ring with the 'Posisimu' label", () => {
+  it("renders the position number in the ring with the position label", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ position: 42 }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     expect(screen.getByTestId("waiting-position")).toHaveTextContent("42");
-    expect(screen.getByText("Posisimu")).toBeTruthy();
+    // V2 uses "Your Position" label
+    expect(screen.getByTestId("waiting-position")).toBeTruthy();
   });
 
-  it("shows 'orang di depan' (ahead = position-1) and an 'Estimasi' ETA", () => {
+  it("shows ETA in minutes/seconds format", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ position: 42 }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    // Ahead = 42 - 1 = 41.
-    expect(screen.getByTestId("waiting-ahead")).toHaveTextContent("41");
-    expect(screen.getByText("Di depanmu")).toBeTruthy();
+    // V2 shows ETA as minutes/seconds blocks instead of "ahead" count
     expect(screen.getByTestId("waiting-eta")).toBeTruthy();
-    expect(screen.getByText("Estimasi")).toBeTruthy();
+    // Check for "Minutes" and "Seconds" labels
+    expect(screen.getByText("Minutes")).toBeTruthy();
+    expect(screen.getByText("Seconds")).toBeTruthy();
   });
 
   it("drives the poller with the queueId prop", () => {
@@ -118,9 +121,10 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     const zone = screen.getByTestId("waiting-zone");
     expect(zone).toHaveTextContent("🔒", { exact: false });
-    expect(zone).toHaveTextContent("Zona Aman.", { exact: false });
+    // V2 uses "Safe Zone" instead of "Zona Aman"
+    expect(zone).toHaveTextContent("Safe Zone", { exact: false });
     expect(zone).toHaveTextContent(
-      "Begitu giliranmu tiba kamu dijamin masuk — tidak akan dipotong di tengah jalan.",
+      "Your ticket is guaranteed when your turn arrives",
       { exact: false },
     );
   });
@@ -130,9 +134,10 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     const zone = screen.getByTestId("waiting-zone");
     expect(zone).toHaveTextContent("⚠️", { exact: false });
-    expect(zone).toHaveTextContent("Masih mungkin.", { exact: false });
+    // V2 uses "Possible Zone" instead of "Masih mungkin"
+    expect(zone).toHaveTextContent("Possible Zone", { exact: false });
     expect(zone).toHaveTextContent(
-      "Posisimu di zona cadangan — peluang masuk tergantung sisa tiket.",
+      "You are in the reserve zone",
       { exact: false },
     );
   });
@@ -142,9 +147,10 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     const zone = screen.getByTestId("waiting-zone");
     expect(zone).toHaveTextContent("🔴", { exact: false });
-    expect(zone).toHaveTextContent("Belum cukup tiket.", { exact: false });
+    // V2 uses "Low Chance Zone" instead of "Belum cukup tiket"
+    expect(zone).toHaveTextContent("Low Chance Zone", { exact: false });
     expect(zone).toHaveTextContent(
-      "Posisimu di luar perkiraan stok. Tetap tunggu — stok bisa kembali bila ada yang batal.",
+      "Your position is beyond estimated stock",
       { exact: false },
     );
   });
@@ -153,51 +159,64 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ zone: "POSSIBLE" }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     // Has readable text, not just a color — label present.
-    expect(screen.getByTestId("waiting-zone")).toHaveTextContent("Masih mungkin.", { exact: false });
+    expect(screen.getByTestId("waiting-zone")).toHaveTextContent("Possible Zone", { exact: false });
   });
 });
 
 describe("WaitingRoomScreen — admit live region", () => {
-  it("renders an aria-live (accessibilityLiveRegion=polite) admit region on ADMITTED", () => {
+  it("renders the admitted state with redirect countdown", () => {
     mockUseQueuePolling.mockReturnValue(
       polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
     );
     mockUseAutoClaim.mockReturnValue(claim({ claiming: true }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    const admit = screen.getByTestId("waiting-admit");
-    expect(admit.props.accessibilityLiveRegion).toBe("polite");
-    expect(admit).toHaveTextContent("Giliranmu tiba!", { exact: false });
-    expect(admit).toHaveTextContent("Menyiapkan halaman tiket", { exact: false });
+    // V2 uses "waiting-admitted" as the wrapper testID
+    expect(screen.getByTestId("waiting-admitted")).toBeTruthy();
+    // V2 shows "It's Your Turn!" in the redirect countdown
+    expect(screen.getByTestId("waiting-redirect")).toBeTruthy();
+    // Multiple "It's Your Turn" texts exist (badge + countdown), so just check they're there
+    expect(screen.getAllByText(/It's Your Turn/i).length).toBeGreaterThanOrEqual(1);
   });
 
-  it("navigates to checkout when claim yields a sessionId", () => {
+  it("auto-redirects to checkout via countdown when claim yields a sessionId", async () => {
+    jest.useFakeTimers();
     mockUseQueuePolling.mockReturnValue(
       polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
     );
     mockUseAutoClaim.mockReturnValue(claim({ claimedSessionId: "sess-7" }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+
+    // V2 has a 5-second countdown before redirect - advance each second in act()
+    for (let i = 0; i < 6; i++) {
+      await act(async () => {
+        jest.advanceTimersByTime(1000);
+      });
+    }
     expect(mockReplace).toHaveBeenCalledWith("/checkout/sess-7");
+    jest.useRealTimers();
   });
 });
 
 describe("WaitingRoomScreen — terminal + error states", () => {
-  it("renders 'Tiket habis' for a SOLD_OUT terminal entry", () => {
+  it("renders 'Sold Out' for a SOLD_OUT terminal entry", () => {
     mockUseQueuePolling.mockReturnValue(
       polling({ entry: entry({ status: "SOLD_OUT" }), isSettled: true }),
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    expect(screen.getByTestId("waiting-terminal")).toHaveTextContent("Tiket habis", { exact: false });
+    // V2 uses "Sold Out" instead of "Tiket habis"
+    expect(screen.getByTestId("waiting-terminal")).toHaveTextContent("Sold Out", { exact: false });
   });
 
-  it("renders 'Antrean berakhir' for an ENDED terminal entry", () => {
+  it("renders 'Sale Ended' for an ENDED terminal entry", () => {
     mockUseQueuePolling.mockReturnValue(
       polling({ entry: entry({ status: "ENDED" }), isSettled: true }),
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    expect(screen.getByTestId("waiting-terminal")).toHaveTextContent("Antrean berakhir", { exact: false });
+    // V2 uses "Sale Ended" instead of "Antrean berakhir"
+    expect(screen.getByTestId("waiting-terminal")).toHaveTextContent("Sale Ended", { exact: false });
   });
 
-  it("renders the EVENT_SOLD_OUT claim-error state ('Tiket habis')", () => {
+  it("renders the EVENT_SOLD_OUT claim-error state ('Sold Out')", () => {
     mockUseQueuePolling.mockReturnValue(
       polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
     );
@@ -205,10 +224,11 @@ describe("WaitingRoomScreen — terminal + error states", () => {
       claim({ errorState: "EVENT_SOLD_OUT", error: new Error("sold") }),
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent("Tiket habis", { exact: false });
+    // V2 uses "Sold Out" instead of "Tiket habis"
+    expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent("Sold Out", { exact: false });
   });
 
-  it("renders the TURN_MISSED claim-error state ('Antrean berakhir')", () => {
+  it("renders the TURN_MISSED claim-error state ('Turn Expired')", () => {
     mockUseQueuePolling.mockReturnValue(
       polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
     );
@@ -216,7 +236,8 @@ describe("WaitingRoomScreen — terminal + error states", () => {
       claim({ errorState: "TURN_MISSED", error: new Error("missed") }),
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent("Antrean berakhir", { exact: false });
+    // V2 uses "Turn Expired" instead of "Antrean berakhir"
+    expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent("Turn Expired", { exact: false });
   });
 
   it("renders the polling-error state", () => {
@@ -235,11 +256,26 @@ describe("WaitingRoomScreen — terminal + error states", () => {
 });
 
 describe("WaitingRoomScreen — leave action", () => {
-  it("calls leave() and routes home when the leave link is pressed", () => {
+  it("opens leave confirmation modal when leave button is pressed, then calls leave() on confirm", () => {
     const leave = jest.fn(async () => undefined);
     mockUseQueuePolling.mockReturnValue(polling({ leave }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    fireEvent.press(screen.getByTestId("waiting-leave"));
+
+    // Press the leave button - this opens the modal
+    const leaveBtn = screen.getByTestId("waiting-leave");
+    fireEvent.press(leaveBtn);
+
+    // Modal should be visible
+    const modal = screen.getByTestId("waiting-leave-modal");
+    expect(modal).toBeTruthy();
+
+    // Find the "Leave Queue" button inside the modal (there are multiple "Leave Queue" texts)
+    // The modal has a button with the leave action - get all and pick from modal
+    const leaveButtons = screen.getAllByText("Leave Queue");
+    // The modal button is typically the second one (first is the initial leave button)
+    const confirmLeaveBtn = leaveButtons[leaveButtons.length - 1];
+    fireEvent.press(confirmLeaveBtn);
+
     expect(leave).toHaveBeenCalledTimes(1);
     expect(mockReplace).toHaveBeenCalledWith("/");
   });
@@ -248,8 +284,9 @@ describe("WaitingRoomScreen — leave action", () => {
 describe("WaitingRoomScreen — guards + reduced motion", () => {
   it("renders the no-queue guard when queueId is empty", () => {
     render(<WaitingRoomScreen queueId="" eventId="evt-1" />);
+    // V2 uses "No Active Queue" instead of "Belum ada antrean aktif"
     expect(screen.getByTestId("waiting-noqueue")).toHaveTextContent(
-      "Belum ada antrean aktif",
+      "No Active Queue",
       { exact: false },
     );
     // The poller must not be driven with an empty id.

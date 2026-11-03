@@ -1,27 +1,28 @@
 /**
- * LoginModal -- the landing "Masuk / Daftar" OTP modal (RBT-020).
+ * LoginModal — V2 Brutalist Mono OTP Authentication Modal
  *
- * Rebuilt to match the prototype EXACTLY (`.genesis/prototype/Final/index.html`
- * `#lgBack` dialog, lines ~320-402 markup / ~137-162 styles / ~700-762 JS). This
- * is a MODAL launched from the Home landing -- NOT a route or standalone screen.
+ * MATCHES: `.genesis/prototype/v2/01-home.html` lines ~1359-1520 (CSS),
+ * ~2100-2250 (HTML), ~2700-2900 (JS).
  *
- * Steps (prototype step ids -> local `step` state):
- *   lgEmailStep  -> "email"   : enter email, send OTP.
- *   lgCodeStep   -> "code"    : enter the 6-digit OTP, verify.
- *   lgSignedStep -> "signed"  : returning user -- masked account panel.
- *   lgRegStep    -> "register": NEW email handoff placeholder (RBT-021 builds the
- *                               real name+NIK form; here we only show the affordance).
+ * V2 Design Rules:
+ * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000
+ * - Borders: 2px solid black (NO border-radius)
+ * - Shadows: hard offset, NO blur (4px 4px 0 #000)
+ * - Fonts: Inter (weight 900 for titles, 700 for labels/buttons)
+ * - Animation: modalIn (translateY 20→0, scale 0.95→1, opacity 0→1, 400ms)
  *
- * Sign-in is OPTIONAL and NON-BLOCKING (D8.5): the modal can be dismissed at any
- * time (backdrop / Escape / "Batal" / "Tutup") without completing sign-in.
+ * Steps (prototype flow):
+ *   loginStep1  -> "phone"    : enter phone/email, send OTP
+ *   loginStep2  -> "otp"      : 6 separate OTP digit boxes, verify
+ *   loginStep3  -> "success"  : success confirmation
+ *   lgRegStep   -> "register" : NEW user → name + NIK + consent (RBT-021)
+ *   lgSignedStep-> "signed"   : returning user profile panel
  *
- * Boundaries: presentation only. Reaches the backend via `useAuth()` ->
- * use cases -> the `UserRepository` port; never imports infrastructure. The raw
- * OTP code and issued token are never logged. Validation is dependency-free
- * (see `auth.schema.ts`) -- no react-hook-form / zod.
+ * Sign-in is OPTIONAL (D8.5): modal can be dismissed at any time.
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Modal,
   Platform,
   Pressable,
@@ -36,14 +37,13 @@ import {
   EMAIL_ERROR,
   isValidCode,
   isValidEmail,
-  normalizeCode,
 } from "@presentation/components/auth/auth.schema";
 import { useAuth } from "@presentation/hooks/useAuth";
-import { tokens } from "@presentation/theme";
+import { v2Colors, v2Duration } from "@presentation/theme/v2-tokens";
 
-import { SCRIM, loginStyles as styles } from "./login-modal.style";
+import { loginStyles as styles } from "./login-modal.style";
 
-type Step = "email" | "code" | "register" | "done" | "signed";
+type Step = "phone" | "otp" | "register" | "success" | "signed";
 
 export interface LoginModalProps {
   /** Whether the modal is open. */
@@ -58,46 +58,103 @@ function messageFor(error: Error | null, fallback: string): string {
   return fallback;
 }
 
-/** First-letter avatar initial, mirroring the prototype `#lgAv`. */
+/** First-letter avatar initial. */
 function initialOf(name: string | undefined, emailMasked: string): string {
   const source = (name ?? emailMasked ?? "").trim();
   return source.length > 0 ? source.charAt(0).toUpperCase() : "B";
 }
 
+/** Resend OTP cooldown in seconds (prototype: 60s). */
+const RESEND_COOLDOWN = 60;
+
 export function LoginModal({
   visible,
   onClose,
 }: LoginModalProps): React.ReactElement {
-  const [step, setStep] = useState<Step>("email");
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+  const translateYAnim = useRef(new Animated.Value(20)).current;
+
+  const [step, setStep] = useState<Step>("phone");
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [code, setCode] = useState("");
-  // Register step (RBT-021). The raw NIK lives only in this transient field; it
-  // is sent to the port and never logged/persisted (SECURITY).
+  const [emailFocused, setEmailFocused] = useState(false);
+
+  // OTP as array of 6 digits
+  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const otpRefs = useRef<(TextInput | null)[]>([]);
+
+  // Resend timer
+  const [resendTimer, setResendTimer] = useState(0);
+  const resendIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Register step (RBT-021)
   const [regName, setRegName] = useState("");
   const [regNik, setRegNik] = useState("");
   const [regConsent, setRegConsent] = useState(false);
   const [regNikError, setRegNikError] = useState("");
   const [regDoneName, setRegDoneName] = useState("");
+
   const auth = useAuth();
-  const codeInputRef = useRef<TextInput>(null);
+  const emailInputRef = useRef<TextInput>(null);
   const regNameInputRef = useRef<TextInput>(null);
 
-  // Reset the whole flow whenever the modal (re)opens -- a fresh email step.
+  // Compose OTP code from digits
+  const otpCode = otpDigits.join("");
+  const canVerify = isValidCode(otpCode);
+
+  // ---------------------------------------------------------------------------
+  // Animation: modal entrance (prototype: modalIn 0.4s)
+  // ---------------------------------------------------------------------------
   useEffect(() => {
     if (visible) {
-      setStep("email");
+      // Reset animation values
+      fadeAnim.setValue(0);
+      scaleAnim.setValue(0.95);
+      translateYAnim.setValue(20);
+
+      // Animate in
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: v2Duration.slow, // 500ms ≈ 400ms
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: v2Duration.slow,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateYAnim, {
+          toValue: 0,
+          duration: v2Duration.slow,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible, fadeAnim, scaleAnim, translateYAnim]);
+
+  // Reset flow when modal opens
+  useEffect(() => {
+    if (visible) {
+      setStep("phone");
       setEmail("");
       setEmailError("");
-      setCode("");
+      setOtpDigits(["", "", "", "", "", ""]);
+      setResendTimer(0);
       setRegName("");
       setRegNik("");
       setRegConsent(false);
       setRegNikError("");
       setRegDoneName("");
       auth.reset();
+      // Focus email input after animation
+      setTimeout(() => emailInputRef.current?.focus(), 500);
     }
-    // Intentionally only react to `visible` toggles.
+    return () => {
+      if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
@@ -105,7 +162,9 @@ export function LoginModal({
     onClose();
   }, [onClose]);
 
-  // ----- Email step: send OTP -----------------------------------------------
+  // ---------------------------------------------------------------------------
+  // Step 1: Phone/Email → send OTP
+  // ---------------------------------------------------------------------------
   const onSendOtp = useCallback(async () => {
     const trimmed = email.trim();
     if (!isValidEmail(trimmed)) {
@@ -116,23 +175,58 @@ export function LoginModal({
     try {
       await auth.requestOtp(trimmed);
       setEmail(trimmed);
-      setCode("");
-      setStep("code");
-      setTimeout(() => codeInputRef.current?.focus(), 50);
+      setOtpDigits(["", "", "", "", "", ""]);
+      setStep("otp");
+      // Start resend timer
+      setResendTimer(RESEND_COOLDOWN);
+      resendIntervalRef.current = setInterval(() => {
+        setResendTimer((t) => {
+          if (t <= 1) {
+            if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+            return 0;
+          }
+          return t - 1;
+        });
+      }, 1000);
+      // Focus first OTP box
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
     } catch {
-      // requestError is surfaced in the email step via the hook state.
+      // Error surfaced via auth.requestError
     }
   }, [auth, email]);
 
-  // ----- Code step: verify OTP ----------------------------------------------
-  const canVerify = isValidCode(code);
+  // ---------------------------------------------------------------------------
+  // OTP digit handling (6 separate boxes like prototype)
+  // ---------------------------------------------------------------------------
+  const handleOtpChange = useCallback((index: number, value: string) => {
+    // Only allow single digit
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const newDigits = [...otpDigits];
+    newDigits[index] = digit;
+    setOtpDigits(newDigits);
 
+    // Auto-advance to next box
+    if (digit && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  }, [otpDigits]);
+
+  const handleOtpKeyPress = useCallback((index: number, key: string) => {
+    // Handle backspace to go to previous box
+    if (key === "Backspace" && !otpDigits[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  }, [otpDigits]);
+
+  // ---------------------------------------------------------------------------
+  // Step 2: Verify OTP
+  // ---------------------------------------------------------------------------
   const onVerify = useCallback(async () => {
     if (!canVerify) return;
     try {
-      const session = await auth.verifyOtp({ email, code });
+      const session = await auth.verifyOtp({ email, code: otpCode });
       if (session.isNew) {
-        // NEW email -> registration step (name + NIK + consent). RBT-021.
+        // NEW user → registration step
         setRegName("");
         setRegNik("");
         setRegConsent(false);
@@ -140,27 +234,51 @@ export function LoginModal({
         setStep("register");
         setTimeout(() => regNameInputRef.current?.focus(), 50);
       } else {
-        // Returning user -> straight to the signed-in panel.
+        // Returning user → signed-in panel
         setStep("signed");
       }
     } catch {
-      // verifyError is surfaced in the code step via the hook state.
+      // Error surfaced via auth.verifyError
     }
-  }, [auth, canVerify, code, email]);
+  }, [auth, canVerify, email, otpCode]);
 
-  const backToEmail = useCallback(() => {
+  const onResendOtp = useCallback(async () => {
+    if (resendTimer > 0) return;
+    try {
+      await auth.requestOtp(email);
+      setOtpDigits(["", "", "", "", "", ""]);
+      setResendTimer(RESEND_COOLDOWN);
+      resendIntervalRef.current = setInterval(() => {
+        setResendTimer((t) => {
+          if (t <= 1) {
+            if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+            return 0;
+          }
+          return t - 1;
+        });
+      }, 1000);
+      otpRefs.current[0]?.focus();
+    } catch {
+      // Error handled
+    }
+  }, [auth, email, resendTimer]);
+
+  const backToPhone = useCallback(() => {
     auth.reset();
-    setCode("");
-    setStep("email");
+    setOtpDigits(["", "", "", "", "", ""]);
+    setStep("phone");
+    if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+    setResendTimer(0);
   }, [auth]);
 
-  // ----- Register step: name + NIK + consent --------------------------------
+  // ---------------------------------------------------------------------------
+  // Register step: name + NIK + consent
+  // ---------------------------------------------------------------------------
   const nameOk = regName.trim().length >= 2;
   const nikOk = validateNik(regNik).ok;
   const canRegister = nameOk && nikOk && regConsent;
 
   const onChangeNik = useCallback((raw: string) => {
-    // Keep only digits, capped at the NIK length (mirrors the prototype input).
     const digits = raw.replace(/\D/g, "").slice(0, NIK_LENGTH);
     setRegNik(digits);
     setRegNikError(
@@ -179,11 +297,10 @@ export function LoginModal({
         nik: regNik,
       });
       setRegDoneName(profile.fullName ?? regName.trim());
-      // Raw NIK no longer needed once submitted — drop it (SECURITY).
-      setRegNik("");
-      setStep("done");
+      setRegNik(""); // Clear NIK immediately (SECURITY)
+      setStep("success");
     } catch {
-      // registerError is surfaced in the register step via the hook state.
+      // Error surfaced via auth.registerError
     }
   }, [auth, canRegister, regName, regNik]);
 
@@ -191,335 +308,379 @@ export function LoginModal({
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType="none" // We handle animation ourselves
       onRequestClose={close}
-      // Escape on web / hardware back on native both close the dialog.
     >
-      {/* Backdrop -- tapping outside the card closes (prototype lgBack click). */}
+      {/* Overlay backdrop */}
       <Pressable
         testID="login-backdrop"
         accessibilityLabel="Tutup dialog"
         onPress={close}
-        style={{
-          flex: 1,
-          backgroundColor: SCRIM,
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 20,
-        }}
+        style={styles.overlay}
       >
-        {/* Card -- stopPropagation so taps inside don't close. */}
-        <Pressable
-          testID="login-card"
-          accessibilityViewIsModal
-          accessibilityRole={Platform.OS === "web" ? "none" : undefined}
-          onPress={(e) => e.stopPropagation()}
+        {/* Animated card */}
+        <Animated.View
           style={{
             width: "100%",
             maxWidth: 400,
-            backgroundColor: tokens.neutral.card,
-            borderWidth: 1,
-            borderColor: tokens.neutral.line,
-            borderRadius: tokens.radius["3xl"],
-            padding: 24,
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }, { translateY: translateYAnim }],
           }}
         >
-          {step === "email" && (
-            <View>
-              <Text accessibilityRole="header" style={styles.title}>
-                Masuk / Daftar
-              </Text>
-              <Text style={styles.sub}>
-                Masukkan email, kami kirim kode OTP. Email baru akan diminta
-                melengkapi nama &amp; NIK.
-              </Text>
-              <View style={styles.fld}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                  testID="login-email-input"
-                  accessibilityLabel="Email"
-                  value={email}
-                  onChangeText={(t) => {
-                    setEmail(t);
-                    if (emailError) setEmailError("");
-                  }}
-                  placeholder="kamu@email.com"
-                  placeholderTextColor={tokens.neutral.muted}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  textContentType="emailAddress"
-                  style={styles.input}
-                />
-                <Text testID="login-email-error" style={styles.err}>
-                  {emailError ||
-                    (auth.requestError
-                      ? messageFor(
-                          auth.requestError,
-                          "Terjadi kesalahan. Silakan coba lagi.",
-                        )
-                      : "")}
-                </Text>
-              </View>
-              <View style={styles.actions}>
-                <GhostButton
-                  testID="login-cancel"
-                  label="Batal"
-                  onPress={close}
-                />
-                <PrimaryButton
-                  testID="login-send"
-                  label={auth.isRequesting ? "Mengirim…" : "Kirim OTP"}
-                  disabled={auth.isRequesting}
-                  onPress={onSendOtp}
-                />
-              </View>
-            </View>
-          )}
+          <Pressable
+            testID="login-card"
+            accessibilityViewIsModal
+            accessibilityRole={Platform.OS === "web" ? "none" : undefined}
+            onPress={(e) => e.stopPropagation()}
+            style={styles.card}
+          >
+            {/* Close button */}
+            <Pressable
+              testID="login-close"
+              accessibilityLabel="Tutup"
+              onPress={close}
+              style={styles.closeBtn}
+            >
+              <Text style={styles.closeBtnText}>×</Text>
+            </Pressable>
 
-          {step === "code" && (
-            <View>
-              <Text accessibilityRole="header" style={styles.title}>
-                Masukkan Kode
-              </Text>
-              <Text style={styles.sub}>
-                Kami kirim 6 digit ke <Text style={styles.bold}>{email}</Text>.
-              </Text>
-              <View style={styles.fld}>
-                <Text style={styles.label}>Kode OTP</Text>
-                <TextInput
-                  ref={codeInputRef}
-                  testID="login-code-input"
-                  accessibilityLabel="Kode OTP"
-                  value={code}
-                  onChangeText={(t) => setCode(normalizeCode(t))}
-                  placeholder="••••••"
-                  placeholderTextColor={tokens.neutral.muted}
-                  keyboardType="number-pad"
-                  inputMode="numeric"
-                  maxLength={6}
-                  style={styles.input}
-                />
-                <Text testID="login-code-error" style={styles.err}>
-                  {auth.verifyError
+            {/* Step 1: Phone/Email */}
+            {step === "phone" && (
+              <View>
+                <Text accessibilityRole="header" style={styles.title}>
+                  Masuk / Daftar
+                </Text>
+                <Text style={styles.sub}>
+                  Masukkan email untuk menerima kode OTP
+                </Text>
+                <View style={styles.fld}>
+                  <Text style={styles.label}>Email</Text>
+                  <TextInput
+                    ref={emailInputRef}
+                    testID="login-email-input"
+                    accessibilityLabel="Email"
+                    value={email}
+                    onChangeText={(t) => {
+                      setEmail(t);
+                      if (emailError) setEmailError("");
+                    }}
+                    onFocus={() => setEmailFocused(true)}
+                    onBlur={() => setEmailFocused(false)}
+                    placeholder="kamu@email.com"
+                    placeholderTextColor={v2Colors.inkMuted}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    textContentType="emailAddress"
+                    style={[
+                      styles.input,
+                      emailFocused && styles.inputFocused,
+                      emailError && styles.inputError,
+                    ]}
+                  />
+                  <Text testID="login-email-error" style={styles.err}>
+                    {emailError ||
+                      (auth.requestError
+                        ? messageFor(
+                            auth.requestError,
+                            "Terjadi kesalahan. Silakan coba lagi.",
+                          )
+                        : "")}
+                  </Text>
+                </View>
+                <View style={styles.actions}>
+                  <GhostButton
+                    testID="login-cancel"
+                    label="Batal"
+                    onPress={close}
+                  />
+                  <PrimaryButton
+                    testID="login-send"
+                    label={auth.isRequesting ? "Mengirim…" : "Kirim OTP"}
+                    disabled={auth.isRequesting}
+                    onPress={onSendOtp}
+                  />
+                </View>
+              </View>
+            )}
+
+            {/* Step 2: OTP verification (6 separate boxes) */}
+            {step === "otp" && (
+              <View>
+                <Text accessibilityRole="header" style={styles.title}>
+                  Verifikasi OTP
+                </Text>
+                <Text style={styles.sub}>
+                  Masukkan 6 digit kode yang dikirim ke{" "}
+                  <Text style={styles.bold}>{email}</Text>
+                </Text>
+
+                <View style={styles.fld}>
+                  <View style={styles.otpRow}>
+                    {otpDigits.map((digit, idx) => (
+                      <TextInput
+                        key={idx}
+                        ref={(ref) => { otpRefs.current[idx] = ref; }}
+                        testID={`login-otp-${idx}`}
+                        value={digit}
+                        onChangeText={(v) => handleOtpChange(idx, v)}
+                        onKeyPress={({ nativeEvent }) =>
+                          handleOtpKeyPress(idx, nativeEvent.key)
+                        }
+                        keyboardType="number-pad"
+                        inputMode="numeric"
+                        maxLength={1}
+                        selectTextOnFocus
+                        style={[
+                          styles.otpBox,
+                          digit && styles.otpBoxFocused,
+                        ]}
+                      />
+                    ))}
+                  </View>
+                  <Text testID="login-otp-error" style={styles.err}>
+                    {auth.verifyError
+                      ? messageFor(
+                          auth.verifyError,
+                          "Kode OTP salah atau kedaluwarsa.",
+                        )
+                      : ""}
+                  </Text>
+                  <Text style={styles.hint}>
+                    Kode demo: <Text style={styles.bold}>123456</Text>
+                  </Text>
+                </View>
+
+                {/* Resend timer */}
+                <View style={styles.resendRow}>
+                  <Text style={styles.resendText}>
+                    Tidak menerima kode?{" "}
+                  </Text>
+                  <Pressable
+                    testID="login-resend"
+                    disabled={resendTimer > 0}
+                    onPress={onResendOtp}
+                    style={styles.resendBtn}
+                  >
+                    <Text
+                      style={[
+                        styles.resendBtnText,
+                        resendTimer > 0 && styles.resendBtnDisabled,
+                      ]}
+                    >
+                      {resendTimer > 0
+                        ? `Kirim ulang (${resendTimer}s)`
+                        : "Kirim ulang"}
+                    </Text>
+                  </Pressable>
+                </View>
+
+                <View style={styles.actions}>
+                  <GhostButton
+                    testID="login-change-email"
+                    label="← Ubah Email"
+                    onPress={backToPhone}
+                  />
+                  <PrimaryButton
+                    testID="login-verify"
+                    label={auth.isVerifying ? "Memeriksa…" : "Verifikasi"}
+                    disabled={!canVerify || auth.isVerifying}
+                    onPress={onVerify}
+                  />
+                </View>
+              </View>
+            )}
+
+            {/* Register step: name + NIK + consent */}
+            {step === "register" && (
+              <View>
+                <Text accessibilityRole="header" style={styles.title}>
+                  Lengkapi Pendaftaran
+                </Text>
+                <Text style={styles.sub}>
+                  Email baru — isi data diri sekali saja untuk checkout otomatis.
+                </Text>
+
+                {/* Email (verified, read-only) */}
+                <View style={styles.fld}>
+                  <Text style={styles.label}>Email (untuk e-tiket)</Text>
+                  <TextInput
+                    testID="login-reg-email"
+                    accessibilityLabel="Email terverifikasi"
+                    value={email}
+                    editable={false}
+                    style={[styles.input, styles.inputReadonly]}
+                  />
+                  <Text style={styles.hint}>
+                    Sudah terverifikasi. E-tiket dikirim ke email ini.
+                  </Text>
+                </View>
+
+                {/* Nama Lengkap */}
+                <View style={styles.fld}>
+                  <Text style={styles.label}>Nama Lengkap</Text>
+                  <TextInput
+                    ref={regNameInputRef}
+                    testID="login-reg-name-input"
+                    accessibilityLabel="Nama Lengkap"
+                    value={regName}
+                    onChangeText={setRegName}
+                    placeholder="Nama sesuai KTP"
+                    placeholderTextColor={v2Colors.inkMuted}
+                    autoComplete="name"
+                    textContentType="name"
+                    style={styles.input}
+                  />
+                </View>
+
+                {/* NIK */}
+                <View style={styles.fld}>
+                  <Text style={styles.label}>NIK (16 digit)</Text>
+                  <TextInput
+                    testID="login-reg-nik-input"
+                    accessibilityLabel="NIK 16 digit"
+                    value={regNik}
+                    onChangeText={onChangeNik}
+                    placeholder="16 digit KTP"
+                    placeholderTextColor={v2Colors.inkMuted}
+                    keyboardType="number-pad"
+                    inputMode="numeric"
+                    maxLength={NIK_LENGTH}
+                    style={styles.input}
+                  />
+                  <Text testID="login-reg-nik-error" style={styles.err}>
+                    {regNikError}
+                  </Text>
+                  <Text style={styles.hint}>
+                    NIK dipakai untuk batas 3 tiket/NIK & divalidasi server.
+                  </Text>
+                </View>
+
+                {/* Consent */}
+                <Pressable
+                  testID="login-reg-consent"
+                  accessibilityRole="checkbox"
+                  accessibilityLabel="Setujui kebijakan privasi"
+                  accessibilityState={{ checked: regConsent }}
+                  onPress={() => setRegConsent((v) => !v)}
+                  style={styles.consentRow}
+                >
+                  <View
+                    style={[
+                      styles.checkbox,
+                      regConsent && styles.checkboxChecked,
+                    ]}
+                  >
+                    {regConsent && <Text style={styles.checkboxMark}>✓</Text>}
+                  </View>
+                  <Text style={styles.consentText}>
+                    Saya menyetujui pemrosesan data sesuai{" "}
+                    <Text style={styles.link}>Kebijakan Privasi</Text>.
+                  </Text>
+                </Pressable>
+
+                <Text testID="login-reg-error" style={styles.err}>
+                  {auth.registerError
                     ? messageFor(
-                        auth.verifyError,
-                        "Kode OTP salah atau kedaluwarsa. Coba lagi.",
+                        auth.registerError,
+                        "Pendaftaran gagal. Periksa data lalu coba lagi.",
                       )
                     : ""}
                 </Text>
-                <Text style={styles.hint}>
-                  Kode demo: <Text style={styles.bold}>123456</Text>
-                </Text>
-              </View>
-              <View style={styles.actions}>
-                <GhostButton
-                  testID="login-change-email"
-                  label="Ganti email"
-                  onPress={backToEmail}
-                />
-                <PrimaryButton
-                  testID="login-verify"
-                  label={auth.isVerifying ? "Memeriksa…" : "Verifikasi"}
-                  disabled={!canVerify || auth.isVerifying}
-                  onPress={onVerify}
-                />
-              </View>
-            </View>
-          )}
 
-          {step === "signed" && (
-            <View>
-              <Text accessibilityRole="header" style={styles.title}>
-                Akun kamu
-              </Text>
-              <View style={styles.signedin}>
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
-                    {initialOf(
-                      auth.profile?.fullName,
-                      auth.profile?.emailMasked ?? email,
-                    )}
-                  </Text>
-                </View>
-                <View>
-                  <Text testID="login-signed-name" style={styles.signedName}>
-                    {auth.profile?.fullName ?? "—"}
-                  </Text>
-                  <Text testID="login-signed-email" style={styles.signedEmail}>
-                    {auth.profile?.emailMasked ?? email}
-                  </Text>
+                <View style={styles.actions}>
+                  <GhostButton
+                    testID="login-reg-cancel"
+                    label="Batal"
+                    onPress={backToPhone}
+                  />
+                  <PrimaryButton
+                    testID="login-reg-submit"
+                    label={auth.isRegistering ? "Mendaftar…" : "Daftar & Masuk"}
+                    disabled={!canRegister || auth.isRegistering}
+                    onPress={onSubmitRegister}
+                  />
                 </View>
               </View>
-              <Text style={[styles.sub, { marginTop: 14 }]}>
-                Data pembeli akan terisi otomatis saat checkout.
-              </Text>
-              <View style={styles.actions}>
-                <GhostButton
-                  testID="login-close"
-                  label="Tutup"
-                  onPress={close}
-                />
-                {/* Keluar is a visual stub -- real logout/persistence is RBT-023. */}
-                <PrimaryButton
-                  testID="login-logout"
-                  label="Keluar"
-                  variant="danger"
-                  // TODO(RBT-023): clear the secure session + persist logout.
-                  onPress={close}
-                />
-              </View>
-            </View>
-          )}
+            )}
 
-          {step === "register" && (
-            <View>
-              <Text accessibilityRole="header" style={styles.title}>
-                Lengkapi Pendaftaran
-              </Text>
-              <Text style={styles.sub}>
-                Email baru — isi data diri sekali saja. Dipakai untuk mengisi
-                checkout otomatis.
-              </Text>
-
-              {/* Email (verified, read-only) */}
-              <View style={styles.fld}>
-                <Text style={styles.label}>Email (untuk e-tiket)</Text>
-                <TextInput
-                  testID="login-reg-email"
-                  accessibilityLabel="Email terverifikasi"
-                  value={email}
-                  editable={false}
-                  style={[styles.input, styles.inputReadonly]}
-                />
-                <Text style={styles.hint}>
-                  Sudah terverifikasi. E-tiket &amp; notifikasi dikirim ke email
-                  ini.
+            {/* Signed-in panel (returning user) */}
+            {step === "signed" && (
+              <View>
+                <Text accessibilityRole="header" style={styles.title}>
+                  Akun Kamu
                 </Text>
-              </View>
-
-              {/* Nama Lengkap */}
-              <View style={styles.fld}>
-                <Text style={styles.label}>Nama Lengkap</Text>
-                <TextInput
-                  ref={regNameInputRef}
-                  testID="login-reg-name-input"
-                  accessibilityLabel="Nama Lengkap"
-                  value={regName}
-                  onChangeText={setRegName}
-                  placeholder="Nama sesuai KTP"
-                  placeholderTextColor={tokens.neutral.muted}
-                  autoComplete="name"
-                  textContentType="name"
-                  style={styles.input}
-                />
-              </View>
-
-              {/* NIK */}
-              <View style={styles.fld}>
-                <Text style={styles.label}>NIK (16 digit)</Text>
-                <TextInput
-                  testID="login-reg-nik-input"
-                  accessibilityLabel="NIK 16 digit"
-                  value={regNik}
-                  onChangeText={onChangeNik}
-                  placeholder="16 digit KTP"
-                  placeholderTextColor={tokens.neutral.muted}
-                  keyboardType="number-pad"
-                  inputMode="numeric"
-                  maxLength={NIK_LENGTH}
-                  style={styles.input}
-                />
-                <Text testID="login-reg-nik-error" style={styles.err}>
-                  {regNikError}
+                <View style={styles.signedin}>
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>
+                      {initialOf(
+                        auth.profile?.fullName,
+                        auth.profile?.emailMasked ?? email,
+                      )}
+                    </Text>
+                  </View>
+                  <View>
+                    <Text testID="login-signed-name" style={styles.signedName}>
+                      {auth.profile?.fullName ?? "—"}
+                    </Text>
+                    <Text testID="login-signed-email" style={styles.signedEmail}>
+                      {auth.profile?.emailMasked ?? email}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={[styles.sub, { marginTop: 14 }]}>
+                  Data pembeli akan terisi otomatis saat checkout.
                 </Text>
-                <Text style={styles.hint}>
-                  NIK dipakai untuk batas 3 tiket/NIK &amp; divalidasi server.
-                  Aturan NIK: {NIK_LENGTH} digit angka sesuai KTP.
-                </Text>
+                <View style={styles.actions}>
+                  <GhostButton
+                    testID="login-close-signed"
+                    label="Tutup"
+                    onPress={close}
+                  />
+                  <PrimaryButton
+                    testID="login-logout"
+                    label="Keluar"
+                    variant="danger"
+                    onPress={close}
+                  />
+                </View>
               </View>
+            )}
 
-              {/* Consent */}
-              <Pressable
-                testID="login-reg-consent"
-                accessibilityRole="checkbox"
-                accessibilityLabel="Setujui kebijakan privasi"
-                accessibilityState={{ checked: regConsent }}
-                onPress={() => setRegConsent((v) => !v)}
-                style={styles.consentRow}
-              >
-                <View
-                  style={[
-                    styles.checkbox,
-                    regConsent && styles.checkboxChecked,
-                  ]}
+            {/* Success step (new registration complete) */}
+            {step === "success" && (
+              <View style={styles.doneContainer}>
+                <View style={styles.doneCheck}>
+                  <Text style={styles.doneCheckMark}>✓</Text>
+                </View>
+                <Text
+                  accessibilityRole="header"
+                  style={[styles.title, styles.doneTitle]}
                 >
-                  {regConsent && <Text style={styles.checkboxMark}>✓</Text>}
-                </View>
-                <Text style={styles.consentText}>
-                  Saya menyetujui pemrosesan data sesuai{" "}
-                  <Text style={styles.link}>Kebijakan Privasi</Text>.
+                  Berhasil!
                 </Text>
-              </Pressable>
-
-              <Text testID="login-reg-error" style={styles.err}>
-                {auth.registerError
-                  ? messageFor(
-                      auth.registerError,
-                      "Pendaftaran gagal. Periksa data lalu coba lagi.",
-                    )
-                  : ""}
-              </Text>
-
-              <View style={styles.actions}>
-                <GhostButton
-                  testID="login-reg-cancel"
-                  label="Batal"
-                  onPress={backToEmail}
-                />
-                <PrimaryButton
-                  testID="login-reg-submit"
-                  label={auth.isRegistering ? "Mendaftar…" : "Daftar & Masuk"}
-                  disabled={!canRegister || auth.isRegistering}
-                  onPress={onSubmitRegister}
-                />
+                <Text style={[styles.sub, styles.doneSub]}>
+                  Akun <Text style={styles.bold}>{regDoneName || "—"}</Text>{" "}
+                  aktif. Data pembeli akan terisi otomatis saat checkout.
+                </Text>
+                <View style={[styles.actions, styles.doneActions]}>
+                  <PrimaryButton
+                    testID="login-done-close"
+                    label="Mulai Belanja"
+                    onPress={close}
+                  />
+                </View>
               </View>
-            </View>
-          )}
-
-          {step === "done" && (
-            <View style={{ alignItems: "center" }}>
-              <View style={styles.doneCheck}>
-                <Text style={styles.doneCheckMark}>✓</Text>
-              </View>
-              <Text
-                accessibilityRole="header"
-                style={[styles.title, { marginTop: 14, textAlign: "center" }]}
-              >
-                Pendaftaran Berhasil 🎉
-              </Text>
-              <Text style={[styles.sub, { marginTop: 6, textAlign: "center" }]}>
-                Akun <Text style={styles.bold}>{regDoneName || "—"}</Text> aktif.
-                Data pembeli (nama, NIK, email) akan terisi otomatis saat
-                checkout.
-              </Text>
-              <View style={[styles.actions, { marginTop: 20, width: "100%" }]}>
-                <PrimaryButton
-                  testID="login-done-close"
-                  label="Mulai Pesan Tiket"
-                  onPress={close}
-                />
-              </View>
-            </View>
-          )}
-        </Pressable>
+            )}
+          </Pressable>
+        </Animated.View>
       </Pressable>
     </Modal>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Buttons (prototype .ghost / .go)
+// V2 Brutalist Buttons
 // ---------------------------------------------------------------------------
 
 interface ButtonProps {
@@ -542,7 +703,7 @@ function GhostButton({
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={styles.ghost}
+      style={[styles.ghost, disabled && { opacity: 0.45 }]}
     >
       <Text style={styles.ghostText}>{label}</Text>
     </Pressable>
@@ -565,18 +726,12 @@ function PrimaryButton({
       onPress={onPress}
       style={[
         styles.go,
-        variant === "danger" && { backgroundColor: tokens.brand.red },
-        disabled && { opacity: 0.45 },
+        variant === "danger" && { backgroundColor: v2Colors.danger },
+        disabled && styles.goDisabled,
       ]}
     >
       <Text style={styles.goText}>{label}</Text>
-      {variant !== "danger" && (
-        <View style={styles.pin}>
-          <Text style={styles.pinText}>›</Text>
-        </View>
-      )}
+      {variant !== "danger" && <Text style={styles.arrow}>→</Text>}
     </Pressable>
   );
 }
-
-

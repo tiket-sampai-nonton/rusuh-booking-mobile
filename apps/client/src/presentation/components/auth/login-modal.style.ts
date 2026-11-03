@@ -1,182 +1,421 @@
 /**
- * LoginModal styles — extracted from the component (refactor rule: screens/
- * components carry no inline `style={{…}}` StyleSheet bodies). Mirrors the
- * prototype `.lg` / `.lg-actions` / `.go` / `.ghost` rules. Every color is a
- * TOKEN value (or a documented prototype accent), never a raw literal.
+ * LoginModal V2 Brutalist Mono styles
+ *
+ * MATCHES: `.genesis/prototype/v2/01-home.html` lines ~1359-1520
+ *
+ * V2 Design Rules:
+ * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000
+ * - Borders: 2px solid black (NO border-radius)
+ * - Shadows: hard offset, NO blur (4px 4px 0 #000)
+ * - Fonts: Inter (weight 900 for titles, 700 for labels)
+ * - Spacing: 48px modal padding (--space-l), 24px (--space-m) for fields
  */
-import { tokens, withAlpha } from "@presentation/theme";
+import { Platform, StyleSheet } from "react-native";
 
-/** Modal scrim — prototype `#lgBack` rgba(5,5,7,.6) (deeper than --ink by design). */
-export const SCRIM = "rgba(5,5,7,0.6)";
-/** "Done" confirm CTA green — prototype `#16a34a` (distinct from the --ok token). */
+import { interFonts } from "@presentation/theme/fonts";
+import {
+  v2Borders,
+  v2Colors,
+  v2FontSizes,
+  v2Modal,
+  v2SpacingSemantic,
+} from "@presentation/theme/v2-tokens";
+
+/**
+ * Modal overlay — prototype rgba(0,0,0,0.8) + backdrop-filter blur(4px).
+ * Note: blur is web-only; native uses plain dark overlay.
+ */
+export const SCRIM = "rgba(0,0,0,0.8)";
+
+/**
+ * Success green from prototype #16a34a (distinct from v2Colors.success).
+ */
 export const DONE_GREEN = "#16a34a";
 
-export const loginStyles = {
-  title: {
-    fontSize: tokens.fontSize["2xl"],
-    fontWeight: tokens.fontWeight.extrabold,
-    letterSpacing: -0.4,
-    color: tokens.neutral.ink,
+/**
+ * OTP input box dimensions (prototype: 48x56px).
+ */
+export const OTP_BOX = {
+  width: 48,
+  height: 56,
+};
+
+export const loginStyles = StyleSheet.create({
+  // ---------------------------------------------------------------------------
+  // Overlay + backdrop
+  // ---------------------------------------------------------------------------
+  overlay: {
+    flex: 1,
+    backgroundColor: SCRIM,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: v2SpacingSemantic.s, // 16px
+    // Web: backdrop-filter blur
+    ...(Platform.OS === "web" && {
+      backdropFilter: "blur(4px)",
+      WebkitBackdropFilter: "blur(4px)",
+    }),
   },
-  sub: {
-    fontSize: tokens.fontSize.sm,
-    color: tokens.neutral.muted,
-    marginTop: 6,
+
+  // ---------------------------------------------------------------------------
+  // Modal card — prototype .modal
+  // ---------------------------------------------------------------------------
+  card: {
+    width: "100%",
+    maxWidth: v2Modal.maxWidth, // 400px
+    backgroundColor: v2Colors.ground,
+    borderWidth: v2Borders.standard, // 2px
+    borderColor: v2Colors.ink,
+    borderRadius: 0, // Brutalist: NO border-radius
+    padding: v2Modal.padding, // 48px
+    position: "relative",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Close button — prototype .modal-close
+  // ---------------------------------------------------------------------------
+  closeBtn: {
+    position: "absolute",
+    top: v2SpacingSemantic.s, // 16px
+    right: v2SpacingSemantic.s,
+    width: 40,
+    height: 40,
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.ground,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  closeBtnText: {
+    fontFamily: interFonts.bold,
+    fontSize: 20,
+    color: v2Colors.ink,
     lineHeight: 20,
   },
-  bold: { fontWeight: tokens.fontWeight.bold, color: tokens.neutral.ink },
-  fld: { marginTop: 16 },
+
+  // ---------------------------------------------------------------------------
+  // Typography
+  // ---------------------------------------------------------------------------
+  title: {
+    fontFamily: interFonts.black, // weight 900
+    fontSize: v2FontSizes.l, // 18px (--text-l)
+    color: v2Colors.ink,
+    textTransform: "uppercase",
+    letterSpacing: v2FontSizes.l * -0.02, // -0.02em
+    marginBottom: v2SpacingSemantic.xs, // 8px
+  },
+  sub: {
+    fontFamily: interFonts.regular,
+    fontSize: v2FontSizes.s, // 14px (--text-s)
+    color: v2Colors.inkMuted, // #666
+    lineHeight: v2FontSizes.s * 1.5, // 21px
+    marginBottom: v2SpacingSemantic.m, // 24px
+  },
+  bold: {
+    fontFamily: interFonts.bold,
+    color: v2Colors.ink,
+  },
+
+  // ---------------------------------------------------------------------------
+  // Field container — prototype .modal-field
+  // ---------------------------------------------------------------------------
+  fld: {
+    marginBottom: v2SpacingSemantic.m, // 24px
+  },
   label: {
-    fontSize: tokens.fontSize.xs,
-    fontWeight: tokens.fontWeight.bold,
-    marginBottom: 6,
-    color: tokens.neutral.ink,
+    fontFamily: interFonts.bold, // weight 700
+    fontSize: v2FontSizes.xs, // 12px (--text-xs)
+    color: v2Colors.ink,
+    textTransform: "uppercase",
+    letterSpacing: v2FontSizes.xs * 0.1, // 0.1em
+    marginBottom: v2SpacingSemantic.xs, // 8px
   },
+
+  // ---------------------------------------------------------------------------
+  // Input — prototype .modal-field input
+  // ---------------------------------------------------------------------------
   input: {
-    width: "100%" as const,
-    fontSize: tokens.fontSize.md,
-    fontWeight: tokens.fontWeight.semibold,
-    paddingVertical: 13,
-    paddingHorizontal: 14,
-    borderRadius: tokens.radius.md,
-    borderWidth: 1.5,
-    borderColor: tokens.neutral.line,
-    backgroundColor: tokens.neutral.paper,
-    color: tokens.neutral.ink,
-    letterSpacing: 0.6,
+    width: "100%",
+    fontFamily: interFonts.medium, // weight 500
+    fontSize: v2FontSizes.m, // 16px (--text-m)
+    color: v2Colors.ink,
+    letterSpacing: v2FontSizes.m * 0.1, // 0.1em
+    paddingVertical: 16, // 1rem
+    paddingHorizontal: 16,
+    borderWidth: v2Borders.standard, // 2px
+    borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.field, // #f5f5f5
+    borderRadius: 0, // Brutalist: NO border-radius
   },
+  // Focus state (applied via separate focused style)
+  inputFocused: {
+    backgroundColor: v2Colors.ground,
+    // Shadow offset effect
+    shadowColor: v2Colors.ink,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
+    transform: [{ translateX: -2 }, { translateY: -2 }],
+  },
+  inputReadonly: {
+    backgroundColor: v2Colors.field,
+    color: v2Colors.inkMuted,
+  },
+  inputError: {
+    borderColor: v2Colors.danger, // #ff0000
+  },
+  inputValid: {
+    borderColor: DONE_GREEN,
+  },
+
+  // ---------------------------------------------------------------------------
+  // Error + hint text
+  // ---------------------------------------------------------------------------
   err: {
-    color: tokens.brand.red,
-    fontSize: 11,
-    marginTop: 6,
-    minHeight: 14,
-    fontWeight: tokens.fontWeight.semibold,
+    fontFamily: interFonts.semiBold,
+    fontSize: v2FontSizes.xs, // 12px
+    color: v2Colors.danger, // #ff0000
+    marginTop: v2SpacingSemantic.xs, // 8px
+    minHeight: 16,
   },
   hint: {
-    fontSize: 11,
-    color: tokens.neutral.muted,
-    marginTop: 8,
+    fontFamily: interFonts.regular,
+    fontSize: v2FontSizes.xs, // 12px
+    color: v2Colors.inkMuted, // #666
+    marginTop: v2SpacingSemantic.xs, // 8px
   },
-  actions: { flexDirection: "row" as const, gap: 10, marginTop: 20 },
+
+  // ---------------------------------------------------------------------------
+  // Actions row — prototype .modal-actions
+  // ---------------------------------------------------------------------------
+  actions: {
+    flexDirection: "row",
+    gap: v2SpacingSemantic.s, // 16px
+    marginTop: v2SpacingSemantic.m, // 24px
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ghost button — prototype .btn-ghost
+  // ---------------------------------------------------------------------------
   ghost: {
     flexGrow: 0,
     flexShrink: 0,
-    backgroundColor: withAlpha(tokens.neutral.ink, 0.05),
-    borderWidth: 1,
-    borderColor: tokens.neutral.line,
-    borderRadius: tokens.radius.pill,
-    paddingVertical: 13,
-    paddingHorizontal: 18,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
+    backgroundColor: v2Colors.ground,
+    borderWidth: v2Borders.standard, // 2px
+    borderColor: v2Colors.ink,
+    borderRadius: 0, // Brutalist: NO border-radius
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
   ghostText: {
-    color: tokens.neutral.ink,
-    fontWeight: tokens.fontWeight.semibold,
-    fontSize: tokens.fontSize.base,
+    fontFamily: interFonts.bold, // weight 700
+    fontSize: v2FontSizes.s, // 14px (--text-s)
+    color: v2Colors.ink,
+    textTransform: "uppercase",
+    letterSpacing: v2FontSizes.s * 0.04, // 0.04em
   },
+
+  // ---------------------------------------------------------------------------
+  // Primary button — prototype .btn-primary (ink fill with arrow)
+  // ---------------------------------------------------------------------------
   go: {
     flex: 1,
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    gap: 9,
-    backgroundColor: tokens.neutral.ink,
-    borderRadius: tokens.radius.pill,
-    paddingVertical: 13,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: v2Colors.ink, // black
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    borderRadius: 0, // Brutalist: NO border-radius
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
   goText: {
-    color: tokens.neutral.card,
-    fontWeight: tokens.fontWeight.bold,
-    fontSize: tokens.fontSize.base,
+    fontFamily: interFonts.bold, // weight 700
+    fontSize: v2FontSizes.s, // 14px
+    color: v2Colors.ground, // white
+    textTransform: "uppercase",
+    letterSpacing: v2FontSizes.s * 0.04, // 0.04em
   },
-  pin: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: tokens.brand.red,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
+  goDisabled: {
+    opacity: 0.45,
   },
-  pinText: { color: tokens.neutral.card, fontSize: 12, fontWeight: tokens.fontWeight.bold },
+
+  // Arrow icon in button
+  arrow: {
+    fontFamily: interFonts.bold,
+    fontSize: v2FontSizes.s,
+    color: v2Colors.ground,
+  },
+
+  // ---------------------------------------------------------------------------
+  // OTP Input group — prototype .otp-input-group
+  // ---------------------------------------------------------------------------
+  otpRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: v2SpacingSemantic.xs, // 8px
+  },
+  otpBox: {
+    width: OTP_BOX.width,
+    height: OTP_BOX.height,
+    borderWidth: v2Borders.standard, // 2px
+    borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.field,
+    borderRadius: 0, // Brutalist: NO border-radius
+    textAlign: "center",
+    fontFamily: interFonts.black, // weight 900
+    fontSize: v2FontSizes.l, // 18px (--text-l)
+    color: v2Colors.ink,
+    padding: 0,
+    letterSpacing: 0,
+  },
+  otpBoxFocused: {
+    backgroundColor: v2Colors.ground,
+    shadowColor: v2Colors.ink,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    transform: [{ translateX: -2 }, { translateY: -2 }],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Resend timer — prototype .otp-resend
+  // ---------------------------------------------------------------------------
+  resendRow: {
+    alignItems: "center",
+    marginTop: v2SpacingSemantic.m, // 24px
+  },
+  resendText: {
+    fontFamily: interFonts.regular,
+    fontSize: v2FontSizes.xs, // 12px
+    color: v2Colors.inkMuted,
+  },
+  resendBtn: {
+    backgroundColor: "transparent",
+    padding: 4,
+  },
+  resendBtnText: {
+    fontFamily: interFonts.bold,
+    fontSize: v2FontSizes.xs,
+    color: v2Colors.ink,
+    textDecorationLine: "underline",
+  },
+  resendBtnDisabled: {
+    color: v2Colors.inkMuted,
+    textDecorationLine: "none",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Signed-in state (avatar + name)
+  // ---------------------------------------------------------------------------
   signedin: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
     marginTop: 4,
   },
   avatar: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: tokens.brand.ember,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.field,
+    alignItems: "center",
+    justifyContent: "center",
   },
   avatarText: {
-    color: tokens.neutral.card,
-    fontWeight: tokens.fontWeight.extrabold,
-    fontSize: tokens.fontSize.xl,
+    fontFamily: interFonts.black,
+    fontSize: v2FontSizes.xl, // 20px
+    color: v2Colors.ink,
   },
   signedName: {
-    fontWeight: tokens.fontWeight.extrabold,
-    fontSize: tokens.fontSize.md,
-    color: tokens.neutral.ink,
+    fontFamily: interFonts.black,
+    fontSize: v2FontSizes.m, // 16px
+    color: v2Colors.ink,
   },
-  signedEmail: { fontSize: tokens.fontSize.xs, color: tokens.neutral.muted },
-  inputReadonly: {
-    backgroundColor: withAlpha(tokens.neutral.ink, 0.04),
-    color: tokens.neutral.muted,
+  signedEmail: {
+    fontFamily: interFonts.regular,
+    fontSize: v2FontSizes.xs, // 12px
+    color: v2Colors.inkMuted,
   },
+
+  // ---------------------------------------------------------------------------
+  // Consent checkbox (register step)
+  // ---------------------------------------------------------------------------
   consentRow: {
-    flexDirection: "row" as const,
-    alignItems: "flex-start" as const,
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: 10,
-    marginTop: 16,
+    marginTop: v2SpacingSemantic.s, // 16px
   },
   checkbox: {
     width: 20,
     height: 20,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: tokens.neutral.line,
-    backgroundColor: tokens.neutral.paper,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.ground,
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 1,
   },
   checkboxChecked: {
-    backgroundColor: tokens.neutral.ink,
-    borderColor: tokens.neutral.ink,
+    backgroundColor: v2Colors.ink,
   },
   checkboxMark: {
-    color: tokens.neutral.card,
+    fontFamily: interFonts.bold,
     fontSize: 13,
-    fontWeight: tokens.fontWeight.bold,
+    color: v2Colors.ground,
   },
   consentText: {
     flex: 1,
-    fontSize: tokens.fontSize.sm,
-    color: tokens.neutral.muted,
+    fontFamily: interFonts.regular,
+    fontSize: v2FontSizes.s, // 14px
+    color: v2Colors.inkMuted,
     lineHeight: 19,
   },
   link: {
-    color: tokens.brand.red,
-    fontWeight: tokens.fontWeight.bold,
-    textDecorationLine: "underline" as const,
+    fontFamily: interFonts.bold,
+    color: v2Colors.ink,
+    textDecorationLine: "underline",
+  },
+
+  // ---------------------------------------------------------------------------
+  // Done/success step
+  // ---------------------------------------------------------------------------
+  doneContainer: {
+    alignItems: "center",
   },
   doneCheck: {
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
     backgroundColor: DONE_GREEN,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 4,
   },
   doneCheckMark: {
-    color: tokens.neutral.card,
+    fontFamily: interFonts.black,
     fontSize: 28,
-    fontWeight: tokens.fontWeight.extrabold,
+    color: v2Colors.ground,
   },
-};
+  doneTitle: {
+    marginTop: 14,
+    textAlign: "center",
+  },
+  doneSub: {
+    marginTop: 6,
+    textAlign: "center",
+  },
+  doneActions: {
+    marginTop: 20,
+    width: "100%",
+  },
+});

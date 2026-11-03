@@ -1,95 +1,142 @@
 /**
- * V2Button — Brutalist Mono button with an ink-spread fill on press (RBT-087).
+ * RBT-096 — V2Button (Re-implementation)
  *
- * Prototype `.btn` (01-home): a hard 2px-bordered button whose fill slides in
- * from an edge on hover/press, inverting fg/bg. On native there is no hover, so
- * the fill animates on press-in/out; on web it also responds to pointer hover.
- * Reanimated-driven; honors reduced-motion (instant fill, no slide).
+ * MASTER-SPEC §2.1:
+ * - padding: 10px 20px (default), 16px 32px (large)
+ * - fontSize: 14 (default), 16 (large)
+ * - fontWeight: 700
+ * - textTransform: uppercase
+ * - letterSpacing: 0.04em
+ * - border: 2px solid #000
  *
- * Variants: `primary` (ink bg → ground fill) and `ghost` (ground bg → ink fill),
- * plus `danger` (accent bg). Presentation-only; no domain/infra import.
+ * GHOST: bg transparent, text #000
+ * GHOST hover: bg #000, text #fff (fill animation from bottom)
+ *
+ * PRIMARY: bg #000, text #fff
+ * PRIMARY hover: bg #fff, text #000 (reveal animation from top)
  */
-import { useCallback } from "react";
-import type { ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
+import { useCallback } from 'react';
+import type { ReactNode } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import Animated, {
   Easing,
+  interpolateColor,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   withTiming,
-} from "react-native-reanimated";
+} from 'react-native-reanimated';
 
-import { v2, v2Motion } from "@presentation/theme";
+import { v2Colors, v2Button, v2Borders, v2Easing, v2Duration, interFonts } from '@presentation/theme';
 
-const EASE = Easing.bezier(...v2Motion.easeBezier);
-const DURATION = 400;
+const EASE = Easing.bezier(...v2Easing.primary);
+const DURATION = v2Duration.slow; // 400ms for button fill per MASTER-SPEC
 
-export type V2ButtonVariant = "primary" | "ghost" | "danger";
+export type V2ButtonVariant = 'primary' | 'ghost' | 'danger';
 
 export interface V2ButtonProps {
+  /** Button label text */
   readonly label: string;
+  /** Press handler */
   readonly onPress?: () => void;
+  /** Visual variant: primary (black bg), ghost (transparent bg), danger (red bg) */
   readonly variant?: V2ButtonVariant;
+  /** Disabled state */
   readonly disabled?: boolean;
+  /** Large size: 16px 32px padding, 16px font */
   readonly large?: boolean;
+  /** Test ID for testing */
   readonly testID?: string;
-  /** Trailing glyph (e.g. "→"); optional. */
+  /** Trailing element (e.g. arrow "→") */
   readonly trailing?: ReactNode;
 }
 
-/** fg/bg per variant: [base bg, base fg, fill color, filled fg]. */
-function palette(variant: V2ButtonVariant): {
-  bg: string;
-  fg: string;
-  fill: string;
-  filledFg: string;
-} {
+/**
+ * Get palette colors for each variant.
+ * Returns: [baseBg, baseFg, fillColor, filledFg]
+ */
+function getPalette(variant: V2ButtonVariant) {
   switch (variant) {
-    case "ghost":
-      return { bg: v2.ground, fg: v2.ink, fill: v2.ink, filledFg: v2.ground };
-    case "danger":
-      return { bg: v2.accent, fg: v2.ground, fill: v2.ink, filledFg: v2.ground };
-    case "primary":
+    case 'ghost':
+      // Ghost: transparent → ink fill from bottom
+      return {
+        bg: v2Colors.ground,
+        fg: v2Colors.ink,
+        fill: v2Colors.ink,
+        filledFg: v2Colors.ground,
+      };
+    case 'danger':
+      // Danger: red bg → ink fill
+      return {
+        bg: v2Colors.danger,
+        fg: v2Colors.ground,
+        fill: v2Colors.ink,
+        filledFg: v2Colors.ground,
+      };
+    case 'primary':
     default:
-      return { bg: v2.ink, fg: v2.ground, fill: v2.ground, filledFg: v2.ink };
+      // Primary: ink bg → ground reveal from top
+      return {
+        bg: v2Colors.ink,
+        fg: v2Colors.ground,
+        fill: v2Colors.ground,
+        filledFg: v2Colors.ink,
+      };
   }
 }
 
 export function V2Button({
   label,
   onPress,
-  variant = "primary",
+  variant = 'primary',
   disabled = false,
   large = false,
   testID,
   trailing,
 }: V2ButtonProps) {
-  const reduced = useReducedMotion();
-  const p = useSharedValue(0); // 0 = base, 1 = filled
-  const pal = palette(variant);
+  const reducedMotion = useReducedMotion();
+  const progress = useSharedValue(0); // 0 = base, 1 = filled/hovered
+
+  const palette = getPalette(variant);
 
   const setFilled = useCallback(
-    (on: boolean) => {
+    (filled: boolean) => {
       if (disabled) return;
-      if (reduced) {
-        p.value = on ? 1 : 0;
+
+      if (reducedMotion) {
+        // Instant change for reduced motion
+        progress.value = filled ? 1 : 0;
         return;
       }
-      p.value = withTiming(on ? 1 : 0, { duration: DURATION, easing: EASE });
+
+      progress.value = withTiming(filled ? 1 : 0, {
+        duration: DURATION,
+        easing: EASE,
+      });
     },
-    [disabled, reduced, p],
+    [disabled, reducedMotion, progress],
   );
 
-  // The sliding fill layer.
+  // Fill layer slides in from bottom (ghost) or top (primary)
+  const fillDirection = variant === 'primary' ? -1 : 1; // -1 = from top, 1 = from bottom
+
   const fillStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: `${(1 - p.value) * 101}%` as `${number}%` }],
+    transform: [
+      {
+        translateY: `${(1 - progress.value) * 100 * fillDirection}%` as `${number}%`,
+      },
+    ],
   }));
 
-  // Label color crossfades between base fg and filled fg.
+  // Label color interpolates between base and filled
   const labelStyle = useAnimatedStyle(() => ({
-    color: p.value > 0.5 ? pal.filledFg : pal.fg,
+    color: interpolateColor(progress.value, [0, 1], [palette.fg, palette.filledFg]),
   }));
+
+  // Padding based on size
+  const paddingVertical = large ? v2Button.paddingYLarge : v2Button.paddingY;
+  const paddingHorizontal = large ? v2Button.paddingXLarge : v2Button.paddingX;
+  const fontSize = large ? v2Button.fontSizeLarge : v2Button.fontSize;
 
   return (
     <Pressable
@@ -100,49 +147,76 @@ export function V2Button({
       onPress={onPress}
       onPressIn={() => setFilled(true)}
       onPressOut={() => setFilled(false)}
-      // Pressable accepts hover handlers on every platform; they only fire on
-      // web (hover), so no Platform branch is needed.
+      // Web hover handlers - only fire on web
       onHoverIn={() => setFilled(true)}
       onHoverOut={() => setFilled(false)}
       style={{
-        borderWidth: 2,
-        borderColor: v2.ink,
-        backgroundColor: pal.bg,
-        paddingVertical: large ? 16 : 10,
-        paddingHorizontal: large ? 32 : 20,
-        overflow: "hidden",
+        borderWidth: v2Borders.standard,
+        borderColor: v2Colors.ink,
+        backgroundColor: palette.bg,
+        paddingVertical,
+        paddingHorizontal,
+        overflow: 'hidden',
         opacity: disabled ? 0.5 : 1,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
         gap: 8,
       }}
     >
+      {/* Fill layer */}
       <Animated.View
         pointerEvents="none"
         style={[
-          { position: "absolute", top: 0, bottom: 0, left: 0, right: 0, backgroundColor: pal.fill },
+          {
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: palette.fill,
+          },
           fillStyle,
         ]}
       />
+
+      {/* Label */}
       <Animated.Text
-        style={labelStyle}
-        className="text-sm font-v2 font-bold uppercase"
-        accessibilityElementsHidden={false}
+        style={[
+          labelStyle,
+          {
+            fontSize,
+            fontWeight: v2Button.fontWeight,
+            textTransform: 'uppercase',
+            letterSpacing: fontSize * v2Button.letterSpacing,
+            fontFamily: interFonts.bold,
+          },
+        ]}
       >
         {label}
       </Animated.Text>
-      {trailing != null ? (
+
+      {/* Trailing element */}
+      {trailing != null && (
         <View pointerEvents="none">
-          {typeof trailing === "string" ? (
-            <Text style={{ color: pal.fg }} className="text-sm font-v2 font-bold">
+          {typeof trailing === 'string' ? (
+            <Text
+              style={{
+                color: palette.fg,
+                fontSize,
+                fontWeight: v2Button.fontWeight,
+                fontFamily: interFonts.bold,
+              }}
+            >
               {trailing}
             </Text>
           ) : (
             trailing
           )}
         </View>
-      ) : null}
+      )}
     </Pressable>
   );
 }
+
+export default V2Button;

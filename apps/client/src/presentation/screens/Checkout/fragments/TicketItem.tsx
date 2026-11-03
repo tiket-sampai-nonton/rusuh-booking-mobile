@@ -1,25 +1,52 @@
-/** One ticket row: category pills + attendee name/NIK + "use buyer NIK" switch. */
+/**
+ * RBT-092 — V2 Brutalist Mono Ticket Item
+ *
+ * PROTOTYPE 03-checkout.html ticket row styling:
+ * - 2px solid black border, no rounded corners
+ * - Category pills with filled/outlined states
+ * - Uppercase labels
+ */
 import { Pressable, Switch, Text, View } from "react-native";
 
 import { isValidNik } from "@domain/rules/checkout";
+import { v2Colors, interFonts } from "@presentation/theme";
 
 import { CATEGORIES } from "../categories";
 import { Field } from "./common";
 import type { TicketItemProps } from "../interface";
 
-const STATUS_TEXT: Record<string, { label: string; className: string }> = {
-  checking: { label: "Mengecek ketersediaan NIK…", className: "text-muted-foreground" },
-  available: { label: "NIK tersedia ✓", className: "text-ok" },
-  blocked: { label: "NIK sudah terdaftar untuk event ini.", className: "text-error" },
-  warning: { label: "Batas pengecekan tercapai — lanjut, server memvalidasi.", className: "text-warn" },
+const STATUS_TEXT: Record<string, { label: string; color: string }> = {
+  checking: { label: "Mengecek ketersediaan NIK…", color: v2Colors.gray },
+  available: { label: "NIK tersedia ✓", color: v2Colors.success },
+  blocked: { label: "NIK sudah terdaftar untuk event ini.", color: "#ff0000" },
+  warning: { label: "Batas pengecekan tercapai — lanjut, server memvalidasi.", color: v2Colors.warning },
 };
 
 export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuyer, status = "idle" }: TicketItemProps) {
   const statusInfo = STATUS_TEXT[status];
   return (
-    <View className="mt-3 rounded-xl border border-line p-3.5" testID={`ticket-row-${index}`}>
-      <View className="flex-row items-center justify-between">
-        <Text className="text-sm font-bold text-foreground">Tiket #{index + 1}</Text>
+    <View
+      style={{
+        marginTop: 16,
+        borderWidth: 2,
+        borderColor: v2Colors.ink,
+        backgroundColor: v2Colors.ground,
+        padding: 20,
+      }}
+      testID={`ticket-row-${index}`}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontFamily: interFonts.bold,
+            color: v2Colors.ink,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
+          }}
+        >
+          Tiket #{index + 1}
+        </Text>
         {canRemove ? (
           <Pressable
             accessibilityRole="button"
@@ -27,28 +54,64 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
             onPress={onRemove}
             testID={`remove-ticket-${index}`}
           >
-            <Text className="text-xs font-bold text-error">Hapus</Text>
+            <Text
+              style={{
+                fontSize: 12,
+                fontFamily: interFonts.bold,
+                color: "#ff0000",
+                textTransform: "uppercase",
+              }}
+            >
+              Hapus
+            </Text>
           </Pressable>
         ) : null}
       </View>
 
-      <Text className="mt-2 text-2xs font-bold text-muted-foreground">Kategori</Text>
-      <View className="mt-1 flex-row gap-2">
-        {CATEGORIES.map((c) => (
-          <Pressable
-            key={c.id}
-            accessibilityRole="button"
-            accessibilityLabel={`Kategori ${c.label}`}
-            accessibilityState={{ selected: row.categoryId === c.id }}
-            onPress={() => onPatch({ categoryId: c.id })}
-            testID={`cat-${index}-${c.id}`}
-            className={`rounded-pill border px-4 py-2 ${row.categoryId === c.id ? "border-brand bg-brand" : "border-line"}`}
-          >
-            <Text className={`text-xs font-bold ${row.categoryId === c.id ? "text-white" : "text-foreground"}`}>
-              {c.label}
-            </Text>
-          </Pressable>
-        ))}
+      <Text
+        style={{
+          marginTop: 16,
+          fontSize: 10,
+          fontFamily: interFonts.bold,
+          color: v2Colors.gray,
+          textTransform: "uppercase",
+          letterSpacing: 0.5,
+        }}
+      >
+        Kategori
+      </Text>
+      <View style={{ marginTop: 8, flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+        {CATEGORIES.map((c) => {
+          const selected = row.categoryId === c.id;
+          return (
+            <Pressable
+              key={c.id}
+              accessibilityRole="button"
+              accessibilityLabel={`Kategori ${c.label}`}
+              accessibilityState={{ selected }}
+              onPress={() => onPatch({ categoryId: c.id })}
+              testID={`cat-${index}-${c.id}`}
+              style={{
+                borderWidth: 2,
+                borderColor: v2Colors.ink,
+                backgroundColor: selected ? v2Colors.ink : v2Colors.ground,
+                paddingHorizontal: 16,
+                paddingVertical: 10,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontFamily: interFonts.bold,
+                  color: selected ? v2Colors.ground : v2Colors.ink,
+                  textTransform: "uppercase",
+                }}
+              >
+                {c.label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       <Field
@@ -72,7 +135,12 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
 
       {statusInfo ? (
         <Text
-          className={`mt-1 text-2xs ${statusInfo.className}`}
+          style={{
+            marginTop: 8,
+            fontSize: 11,
+            fontFamily: interFonts.medium,
+            color: statusInfo.color,
+          }}
           accessibilityLiveRegion="polite"
           testID={`attendee-status-${index}`}
         >
@@ -80,14 +148,24 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
         </Text>
       ) : null}
 
-      <View className="mt-3 flex-row items-center justify-between">
-        <Text className="flex-1 pr-2 text-xs text-foreground">
+      <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <Text
+          style={{
+            flex: 1,
+            paddingRight: 12,
+            fontSize: 13,
+            fontFamily: interFonts.regular,
+            color: v2Colors.ink,
+          }}
+        >
           Gunakan NIK pembeli (pembeli ikut nonton)
         </Text>
         <Switch
           accessibilityLabel={`Gunakan NIK pembeli untuk tiket ${index + 1}`}
           value={row.useBuyerNik}
           onValueChange={onUseBuyer}
+          trackColor={{ false: "#e0e0e0", true: v2Colors.ink }}
+          thumbColor={v2Colors.ground}
           testID={`use-buyer-${index}`}
         />
       </View>

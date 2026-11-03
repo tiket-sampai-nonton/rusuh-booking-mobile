@@ -57,8 +57,9 @@ describe("(booking) routes", () => {
 
   it("renders the Waiting room (no-queue guard without a queueId)", () => {
     render(<WaitingScreen />);
+    // V2 uses English copy: "No Active Queue"
     expect(screen.getByTestId("waiting-noqueue")).toHaveTextContent(
-      "Belum ada antrean aktif",
+      "No Active Queue",
       { exact: false },
     );
   });

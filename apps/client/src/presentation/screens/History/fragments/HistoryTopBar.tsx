@@ -1,21 +1,25 @@
-/** V2 brutalist History top bar — brand + back to home (prototype 04-my-tickets). */
-import { Pressable, Text, View } from "react-native";
+/**
+ * V2 brutalist History top bar — DEPRECATED in favor of V2Header.
+ *
+ * Keeping for backwards compatibility, but the main History screen now uses V2Header.
+ */
+import { Pressable, Text, View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BrandMark } from "@presentation/components/BrandMark";
-import { v2, v2Border } from "@presentation/theme";
+import { v2Colors, v2Borders, interFonts } from "@presentation/theme";
 
 import type { HistoryTopBarProps } from "../interface";
-import { historyTopBar } from "../style";
 
 export function HistoryTopBar({ onHome }: HistoryTopBarProps) {
   const insets = useSafeAreaInsets();
   return (
     <View
-      className="flex-row items-center justify-between px-5 pb-3"
       style={[
-        historyTopBar(insets.top),
-        { backgroundColor: v2.ground, borderBottomWidth: v2Border.base, borderBottomColor: v2.ink },
+        styles.container,
+        {
+          paddingTop: insets.top + 12,
+        },
       ]}
     >
       <BrandMark />
@@ -25,10 +29,28 @@ export function HistoryTopBar({ onHome }: HistoryTopBarProps) {
         onPress={onHome}
         testID="history-home"
       >
-        <Text className="text-sm font-bold uppercase tracking-tag" style={{ color: v2.ink }}>
-          ← Beranda
-        </Text>
+        <Text style={styles.backText}>← Beranda</Text>
       </Pressable>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+    backgroundColor: v2Colors.ground,
+    borderBottomWidth: v2Borders.standard,
+    borderBottomColor: v2Colors.ink,
+  },
+  backText: {
+    fontSize: 14,
+    fontFamily: interFonts.bold,
+    textTransform: "uppercase",
+    letterSpacing: 0.56,
+    color: v2Colors.ink,
+  },
+});

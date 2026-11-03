@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Checkout — Rusuh Tiket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-tokens.css">
+<style>
+/*
+  ═══════════════════════════════════════════════════════════════════════════════
+  RUSUH TIKET — Mobile Checkout Screen
+  V2 Brutalist Mono Theme — Mobile App Optimized
+  ═══════════════════════════════════════════════════════════════════════════════
+*/
+
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(100px + var(--safe-bottom));
+}
+
+/* ═══════════════════════════════════════
+   HEADER with Timer
+   ═══════════════════════════════════════ */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
+  background: var(--ground);
+  border-bottom: var(--border);
+  padding-top: var(--safe-top);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-s) var(--frame);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: var(--border);
+  background: var(--ground);
+}
+
+.back-btn:active {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.back-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.header-title {
+  font-size: var(--text-m);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.session-timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--font-mono);
+  font-size: var(--text-s);
+  font-weight: 700;
+}
+
+.session-timer.warning {
+  background: var(--danger);
+}
+
+.session-timer svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Progress steps */
+.progress-steps {
+  display: flex;
+  padding: var(--space-s) var(--frame);
+  gap: 4px;
+  background: var(--field);
+}
+
+.step {
+  flex: 1;
+  height: 4px;
+  background: var(--ink-muted);
+  opacity: 0.3;
+}
+
+.step.active,
+.step.completed {
+  background: var(--ink);
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════
+   MAIN CONTENT
+   ═══════════════════════════════════════ */
+.main {
+  padding: calc(var(--header-height) + 40px + var(--safe-top)) var(--frame) var(--space-m);
+}
+
+/* Sections */
+.section {
+  margin-bottom: var(--space-l);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  margin-bottom: var(--space-m);
+  padding-bottom: var(--space-s);
+  border-bottom: var(--border);
+}
+
+.section-number {
+  width: 28px;
+  height: 28px;
+  background: var(--ink);
+  color: var(--ground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--text-xs);
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: var(--text-s);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Order summary card */
+.order-card {
+  border: var(--border);
+  margin-bottom: var(--space-l);
+}
+
+.order-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  background: var(--field);
+  border-bottom: var(--border);
+}
+
+.order-thumb {
+  width: 48px;
+  height: 48px;
+  border: var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.order-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%);
+}
+
+.order-info h3 {
+  font-size: var(--text-s);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.order-info p {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.order-details {
+  padding: var(--space-s);
+}
+
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xs) 0;
+  font-size: var(--text-s);
+}
+
+.order-row:not(:last-child) {
+  border-bottom: var(--border-thin);
+}
+
+.order-row.total {
+  font-weight: 900;
+  font-size: var(--text-m);
+  padding-top: var(--space-s);
+  margin-top: var(--space-xs);
+  border-top: var(--border);
+}
+
+/* Form fields */
+.form-group {
+  margin-bottom: var(--space-m);
+}
+
+.form-group label {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-xs);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  min-height: var(--input-height);
+  padding: var(--input-padding-y) var(--input-padding-x);
+  border: var(--border);
+  background: var(--ground);
+  font-family: inherit;
+  font-size: var(--input-font-size);
+  transition: var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.form-group input.error {
+  border-color: var(--danger);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-s);
+}
+
+.field-hint {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  margin-top: 4px;
+}
+
+.field-error {
+  font-size: var(--text-xs);
+  color: var(--danger);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Ticket holder cards */
+.holder-card {
+  border: var(--border);
+  padding: var(--space-s);
+  margin-bottom: var(--space-s);
+}
+
+.holder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-s);
+  padding-bottom: var(--space-xs);
+  border-bottom: var(--border-thin);
+}
+
+.holder-title {
+  font-size: var(--text-s);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.holder-tier {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+/* Same as buyer checkbox */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  min-height: var(--tap-target);
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--ink);
+}
+
+.checkbox-group label {
+  font-size: var(--text-s);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════
+   STICKY FOOTER — CTA
+   ═══════════════════════════════════════ */
+.sticky-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  background: var(--ground);
+  border-top: var(--border);
+  padding: var(--space-s) var(--frame);
+  padding-bottom: calc(var(--space-s) + var(--safe-bottom));
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-m);
+}
+
+.footer-total {
+  flex-shrink: 0;
+}
+
+.footer-total .label {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.footer-total .value {
+  font-size: var(--text-l);
+  font-weight: 900;
+}
+
+.btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-target-large);
+  padding: var(--space-s);
+  font-size: var(--text-s);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: var(--border);
+  background: var(--ink);
+  color: var(--ground);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-top">
+      <a href="07-ticket-selection.html" class="back-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+      <span class="header-title">Checkout</span>
+      <div class="session-timer" id="sessionTimer">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span id="timerDisplay">07:32</span>
+      </div>
+    </div>
+    <div class="progress-steps">
+      <div class="step completed"></div>
+      <div class="step completed"></div>
+      <div class="step active"></div>
+      <div class="step"></div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Order Summary -->
+    <div class="order-card">
+      <div class="order-header">
+        <div class="order-thumb">
+          <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=200&q=80" alt="Dewa 19">
+        </div>
+        <div class="order-info">
+          <h3>Dewa 19</h3>
+          <p>15 Mar 2025 • Jakarta International Stadium</p>
+        </div>
+      </div>
+      <div class="order-details">
+        <div class="order-row">
+          <span>Tribune × 2</span>
+          <span>Rp 900.000</span>
+        </div>
+        <div class="order-row">
+          <span>Biaya layanan</span>
+          <span>Rp 20.000</span>
+        </div>
+        <div class="order-row total">
+          <span>Total</span>
+          <span>Rp 920.000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buyer Information -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-number">1</div>
+        <h2 class="section-title">Data Pembeli</h2>
+      </div>
+      <div class="form-group">
+        <label for="buyerName">Nama Lengkap</label>
+        <input type="text" id="buyerName" placeholder="Sesuai KTP">
+      </div>
+      <div class="form-group">
+        <label for="buyerEmail">Email</label>
+        <input type="email" id="buyerEmail" placeholder="email@contoh.com">
+        <span class="field-hint">E-ticket akan dikirim ke email ini</span>
+      </div>
+      <div class="form-group">
+        <label for="buyerPhone">Nomor HP</label>
+        <input type="tel" id="buyerPhone" placeholder="08xxxxxxxxxx" inputmode="numeric">
+      </div>
+    </section>
+
+    <!-- Ticket Holders -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-number">2</div>
+        <h2 class="section-title">Data Pemegang Tiket</h2>
+      </div>
+
+      <!-- Holder 1 -->
+      <div class="holder-card">
+        <div class="holder-header">
+          <span class="holder-title">Tiket 1</span>
+          <span class="holder-tier">Tribune</span>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="sameAsBuyer1" checked>
+          <label for="sameAsBuyer1">Sama dengan pembeli</label>
+        </div>
+        <div class="holder-fields" id="holder1Fields" style="display: none;">
+          <div class="form-group">
+            <label>Nama Lengkap</label>
+            <input type="text" placeholder="Sesuai KTP">
+          </div>
+          <div class="form-group">
+            <label>NIK</label>
+            <input type="text" placeholder="16 digit NIK" inputmode="numeric" maxlength="16">
+          </div>
+        </div>
+      </div>
+
+      <!-- Holder 2 -->
+      <div class="holder-card">
+        <div class="holder-header">
+          <span class="holder-title">Tiket 2</span>
+          <span class="holder-tier">Tribune</span>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="sameAsBuyer2">
+          <label for="sameAsBuyer2">Sama dengan pembeli</label>
+        </div>
+        <div class="holder-fields" id="holder2Fields">
+          <div class="form-group">
+            <label>Nama Lengkap</label>
+            <input type="text" placeholder="Sesuai KTP">
+          </div>
+          <div class="form-group">
+            <label>NIK</label>
+            <input type="text" placeholder="16 digit NIK" inputmode="numeric" maxlength="16">
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Sticky Footer -->
+  <div class="sticky-footer">
+    <div class="footer-content">
+      <div class="footer-total">
+        <div class="label">Total</div>
+        <div class="value">Rp 920.000</div>
+      </div>
+      <a href="08-payment.html" class="btn">Bayar</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// Session timer
+let sessionSeconds = 7 * 60 + 32;
+const timerEl = document.getElementById('sessionTimer');
+const timerDisplay = document.getElementById('timerDisplay');
+
+setInterval(() => {
+  sessionSeconds--;
+  const min = Math.floor(sessionSeconds / 60);
+  const sec = sessionSeconds % 60;
+  timerDisplay.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  
+  if (sessionSeconds <= 60) {
+    timerEl.classList.add('warning');
+  }
+  
+  if (sessionSeconds <= 0) {
+    window.location.href = '09-expired.html';
+  }
+}, 1000);
+
+// Toggle holder fields based on checkbox
+document.querySelectorAll('[id^="sameAsBuyer"]').forEach((checkbox, index) => {
+  const fieldsEl = document.getElementById(`holder${index + 1}Fields`);
+  
+  checkbox.addEventListener('change', () => {
+    fieldsEl.style.display = checkbox.checked ? 'none' : 'block';
+  });
+  
+  // Initial state
+  if (fieldsEl) {
+    fieldsEl.style.display = checkbox.checked ? 'none' : 'block';
+  }
+});
+</script>
+</body>
+</html>

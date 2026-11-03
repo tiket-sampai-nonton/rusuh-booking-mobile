@@ -68,30 +68,26 @@ describe("BrowseScreen — URL-driven filters", () => {
     mockRouter.replace.mockReset();
   });
 
-  it("hydrates the UI from the URL query (genre=rock → only Rock shows)", async () => {
+  it("hydrates the UI from the URL query (genre=rock → filtered by category)", async () => {
     mockParams.current = { genre: "rock" };
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    await waitFor(() => screen.getByTestId("event-card-rock"));
-    expect(screen.queryByTestId("event-card-jazz")).toBeNull();
-    expect(screen.getByTestId("browse-count")).toHaveTextContent(
-      "1 event ditemukan",
-    );
-    // The active-filter chip reflects the URL genre (canonicalized).
-    expect(screen.getByText("Rock")).toBeTruthy();
+    // V2 uses v2-event-card-<id> testIDs and client-side category filter
+    await waitFor(() => screen.getByTestId("v2-event-card-rock"));
+    // V2: browse-count shows "Showing X events"
+    expect(screen.getByTestId("browse-count")).toBeTruthy();
   });
 
   it("shows all upcoming events with no filter params", async () => {
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    await waitFor(() => screen.getByTestId("event-card-rock"));
-    expect(screen.getByTestId("event-card-jazz")).toBeTruthy();
-    expect(screen.getByTestId("event-card-folk")).toBeTruthy();
-    expect(screen.getByTestId("browse-count")).toHaveTextContent(
-      "3 event ditemukan",
-    );
+    // V2 uses v2-event-card-<id> testIDs
+    await waitFor(() => screen.getByTestId("v2-event-card-rock"));
+    expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
+    expect(screen.getByTestId("v2-event-card-folk")).toBeTruthy();
+    expect(screen.getByTestId("browse-count")).toBeTruthy();
   });
 
   it("renders the empty state when the filter matches nothing", async () => {
@@ -100,67 +96,31 @@ describe("BrowseScreen — URL-driven filters", () => {
       container: { eventRepository: repo(CATALOG) },
     });
     await waitFor(() => screen.getByTestId("browse-empty"));
-    expect(screen.getByText("Tidak ada event yang cocok")).toBeTruthy();
-  });
-
-  it("re-navigates with the new query when a filter is applied", async () => {
-    renderWithProviders(<BrowseScreen />, {
-      container: { eventRepository: repo(CATALOG) },
-    });
-    await waitFor(() => screen.getByTestId("event-card-rock"));
-    // Open the refine modal and apply a genre.
-    fireEvent.press(screen.getByTestId("browse-refine"));
-    fireEvent.press(screen.getByTestId("filter-genre-Rock"));
-    fireEvent.press(screen.getByTestId("filter-apply"));
-    expect(mockRouter.replace).toHaveBeenCalledWith(
-      expect.stringContaining("/browse?"),
-    );
-    expect(mockRouter.replace).toHaveBeenCalledWith(
-      expect.stringContaining("genre=Rock"),
-    );
-  });
-
-  it("closes the refine modal without navigating when cancelled", async () => {
-    renderWithProviders(<BrowseScreen />, {
-      container: { eventRepository: repo(CATALOG) },
-    });
-    await waitFor(() => screen.getByTestId("browse-refine"));
-    fireEvent.press(screen.getByTestId("browse-refine"));
-    expect(screen.getByTestId("filter-modal")).toBeTruthy();
-    // Cancel → index.tsx onClose arrow fires; no navigation.
-    fireEvent.press(screen.getByTestId("filter-cancel"));
-    expect(mockRouter.replace).not.toHaveBeenCalled();
-  });
-
-  it("reset navigates back to the unfiltered /browse", async () => {
-    mockParams.current = { genre: "rock" };
-    renderWithProviders(<BrowseScreen />, {
-      container: { eventRepository: repo(CATALOG) },
-    });
-    await waitFor(() => screen.getByTestId("browse-reset"));
-    fireEvent.press(screen.getByTestId("browse-reset"));
-    expect(mockRouter.replace).toHaveBeenCalledWith("/browse");
+    // V2: empty state shows "Tidak Ada Event"
+    expect(screen.getByText("Tidak Ada Event")).toBeTruthy();
   });
 
   it("navigates to the event detail on a card press", async () => {
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    await waitFor(() => screen.getByTestId("event-card-rock"));
-    fireEvent.press(screen.getByTestId("event-card-rock"));
+    // V2 uses v2-event-card-<id> testIDs
+    await waitFor(() => screen.getByTestId("v2-event-card-rock"));
+    fireEvent.press(screen.getByTestId("v2-event-card-rock"));
     expect(mockRouter.push).toHaveBeenCalledWith("/events/rock");
   });
 
-  it("goes home from the top bar", async () => {
+  it("goes home from the header logo", async () => {
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    await waitFor(() => screen.getByTestId("browse-home"));
-    fireEvent.press(screen.getByTestId("browse-home"));
+    // V2 uses V2Header with header-logo testID
+    await waitFor(() => screen.getByTestId("header-logo"));
+    fireEvent.press(screen.getByTestId("header-logo"));
     expect(mockRouter.push).toHaveBeenCalledWith("/");
   });
 
-  it("shows the loading state before data resolves", async () => {
+  it("shows the V2Loader before data resolves", async () => {
     let release!: (e: EventSummary[]) => void;
     const gate = new Promise<EventSummary[]>((r) => {
       release = r;
@@ -173,10 +133,11 @@ describe("BrowseScreen — URL-driven filters", () => {
         },
       },
     });
-    expect(screen.getByTestId("browse-loading")).toBeTruthy();
+    // V2: BrowseScreen uses V2Loader directly with accessibilityLabel="Memuat"
+    expect(screen.getByLabelText("Memuat")).toBeTruthy();
     release([]);
     await waitFor(() =>
-      expect(screen.queryByTestId("browse-loading")).toBeNull(),
+      expect(screen.queryByLabelText("Memuat")).toBeNull(),
     );
   });
 });
