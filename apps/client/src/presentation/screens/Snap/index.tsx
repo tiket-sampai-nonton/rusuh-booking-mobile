@@ -17,6 +17,7 @@ import type { SnapOutcome } from "@domain/repositories/payment.repository";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useSnapSimulator } from "@presentation/hooks/useSnapSimulator";
 import { useSessionStore } from "@presentation/stores/session-store";
+import { v2, v2Border } from "@presentation/theme";
 
 import { SnapActions } from "./fragments/SnapActions";
 import { SnapLogo } from "./fragments/SnapLogo";
@@ -51,25 +52,28 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
 
   return (
     <ScreenFade>
-      <View className="flex-1 bg-background" testID="snap-screen">
+      <View className="flex-1" style={{ backgroundColor: v2.field }} testID="snap-screen">
         <ScrollView contentContainerStyle={snapStyles.scrollContent}>
-          <View className="w-full max-w-md self-center rounded-4xl border border-line bg-card p-7 shadow-filter">
+          <View
+            className="w-full max-w-md self-center p-7"
+            style={{ backgroundColor: v2.ground, borderWidth: v2Border.base, borderColor: v2.ink }}
+          >
             <SnapLogo />
 
             <Text
-              className="mt-8 text-2xs font-extrabold uppercase tracking-tag text-brand"
-              style={snapStyles.eyebrow}
+              className="mt-8 text-center text-2xs font-extrabold uppercase"
+              style={[snapStyles.eyebrow, { color: v2.gray }]}
             >
               Third-party payment gateway
             </Text>
             <Text
-              className="mt-2 text-2xl font-extrabold text-foreground"
-              style={snapStyles.heading}
+              className="mt-2 text-center text-2xl font-extrabold uppercase"
+              style={[snapStyles.heading, { color: v2.ink }]}
               accessibilityRole="header"
             >
               Selesaikan pembayaranmu
             </Text>
-            <Text className="mt-2.5 text-xs leading-5 text-muted-foreground">
+            <Text className="mt-2.5 text-center text-xs leading-5" style={{ color: v2.gray }}>
               Ini adalah simulasi halaman SNAP untuk prototype. Pada produksi,
               halaman ini akan disediakan oleh payment provider.
             </Text>

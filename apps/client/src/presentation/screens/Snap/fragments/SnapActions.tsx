@@ -1,5 +1,7 @@
-/** SNAP simulate-success / simulate-fail / simulate-unknown actions + verify note. */
+/** V2 brutalist SNAP simulate-success / -fail / -unknown actions + verify note. */
 import { Pressable, Text, View } from "react-native";
+
+import { v2, v2Border } from "@presentation/theme";
 
 import type { SnapActionsProps } from "../interface";
 
@@ -9,8 +11,9 @@ export function SnapActions({
   onUnknown,
   pending = false,
 }: SnapActionsProps) {
+  const btnBase = { borderWidth: v2Border.base, opacity: pending ? 0.5 : 1 };
   return (
-    <View>
+    <View className="gap-3">
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Simulasikan pembayaran berhasil"
@@ -18,9 +21,10 @@ export function SnapActions({
         disabled={pending}
         onPress={onSuccess}
         testID="snap-success"
-        className="items-center rounded-pill bg-brand py-3.5"
+        className="items-center py-3.5"
+        style={{ ...btnBase, backgroundColor: v2.success, borderColor: v2.success }}
       >
-        <Text className="text-sm font-extrabold text-white">
+        <Text className="text-sm font-bold uppercase text-white" style={{ letterSpacing: 0.5 }}>
           Simulasikan pembayaran berhasil
         </Text>
       </Pressable>
@@ -31,9 +35,10 @@ export function SnapActions({
         disabled={pending}
         onPress={onFail}
         testID="snap-fail"
-        className="mt-2.5 items-center rounded-pill border border-line bg-card py-3.5"
+        className="items-center py-3.5"
+        style={{ ...btnBase, backgroundColor: v2.ground, borderColor: v2.ink }}
       >
-        <Text className="text-sm font-extrabold text-foreground">
+        <Text className="text-sm font-bold uppercase" style={{ color: v2.ink, letterSpacing: 0.5 }}>
           Simulasikan pembayaran gagal
         </Text>
       </Pressable>
@@ -44,14 +49,18 @@ export function SnapActions({
         disabled={pending}
         onPress={onUnknown}
         testID="snap-unknown"
-        className="mt-2.5 items-center rounded-pill border border-line bg-card py-3.5"
+        className="items-center py-3.5"
+        style={{ ...btnBase, backgroundColor: v2.ground, borderColor: v2.ink }}
       >
-        <Text className="text-sm font-extrabold text-muted-foreground">
+        <Text className="text-sm font-bold uppercase" style={{ color: v2.gray, letterSpacing: 0.5 }}>
           Simulasikan status belum pasti (verifying)
         </Text>
       </Pressable>
 
-      <Text className="mt-4.5 text-center text-2xs leading-5 text-muted-foreground">
+      <Text
+        className="mt-4 pt-4 text-center text-2xs leading-5"
+        style={{ color: v2.gray, borderTopWidth: 1, borderTopColor: "#e0e0e0" }}
+      >
         SNAP akan mengembalikan pengguna ke halaman hasil Rusuh Tiket. Halaman
         hasil tetap memverifikasi status dari backend.
       </Text>
