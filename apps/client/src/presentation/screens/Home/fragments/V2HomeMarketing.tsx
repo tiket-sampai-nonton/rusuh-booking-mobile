@@ -688,8 +688,8 @@ function V2NewsletterSection() {
     setTimeout(() => setStatus('idle'), 3000);
   }, [email, toast]);
 
-  const inputBgColor = status === 'success' ? '#dcfce7' : v2Colors.field;
-  const inputBorderColor = status === 'success' ? '#16a34a' : status === 'error' ? v2Colors.danger : v2Colors.ink;
+  const inputBgColor = status === 'success' ? v2Colors.field : v2Colors.field;
+  const inputBorderColor = status === 'success' ? v2Colors.success : status === 'error' ? v2Colors.danger : v2Colors.ink;
 
   return (
     <View

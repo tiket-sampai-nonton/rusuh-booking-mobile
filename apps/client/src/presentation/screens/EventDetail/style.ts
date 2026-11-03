@@ -1,7 +1,8 @@
 /**
  * EventDetail V2 Brutalist Mono styles
  *
- * MATCHES: `.oil-ui/v2/02-event-detail.html`
+ * MATCHES: `.genesis/prototype/v2-mobile/02-event-detail.html` (native)
+ * MATCHES: `.oil-ui/v2/02-event-detail.html` (web)
  *
  * V2 Design Rules:
  * - Background: WHITE (#ffffff) — not dark
@@ -10,14 +11,24 @@
  * - Shadows: hard offset, NO blur (4px 4px 0 #000)
  * - Images: grayscale(100%) default, color on hover
  * - Fonts: Inter (weight 900 for titles, 700 for labels)
+ *
+ * Mobile-specific (native only):
+ * - Header: transparent → solid on scroll
+ * - Hero: 50vh height, parallax scroll
+ * - Info card below hero with date/location
+ * - Categories: staggered slide-in animation
+ * - Lineup: horizontal scroll (not grid)
+ * - Floating CTA: native shadow + pulse animation
  */
-import { Platform, StyleSheet } from "react-native";
+import { Dimensions, Platform, StyleSheet } from "react-native";
 
 import { interFonts } from "@presentation/theme/fonts";
 import {
   v2Borders,
   v2Colors,
   v2FontSizes,
+  v2Layout,
+  v2Shadows,
   v2SpacingSemantic,
 } from "@presentation/theme/v2-tokens";
 
@@ -25,11 +36,20 @@ import {
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
+/** Screen dimensions for viewport-based calculations */
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+/** Hero height: 50vh on native (matches prototype), 400px on web */
+export const HERO_HEIGHT = Platform.OS === "web" ? 400 : Math.max(SCREEN_HEIGHT * 0.5, 300);
+
 /** Header height for padding calculations */
-export const HEADER_HEIGHT = 60;
+export const HEADER_HEIGHT = Platform.OS === "web" ? 60 : v2Layout.headerHeightMobile;
 
 /** Floating CTA height */
 export const FLOATING_CTA_HEIGHT = 100;
+
+/** Safe area bottom padding for native */
+export const SAFE_AREA_BOTTOM = Platform.OS === "web" ? 0 : 34;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN STYLES
@@ -58,6 +78,8 @@ export const v2DetailStyles = StyleSheet.create({
 
   // ---------------------------------------------------------------------------
   // Header (fixed top bar)
+  // Mobile: transparent by default, solid on scroll (controlled by component)
+  // Web: always solid with bottom border
   // ---------------------------------------------------------------------------
   header: {
     position: "absolute",
@@ -70,6 +92,13 @@ export const v2DetailStyles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: v2SpacingSemantic.s, // 16px
     paddingHorizontal: v2SpacingSemantic.m, // 24px
+    // Web: solid background, Native: controlled by headerScrolled
+    backgroundColor: Platform.OS === "web" ? v2Colors.ground : "transparent",
+    borderBottomWidth: Platform.OS === "web" ? v2Borders.standard : 0,
+    borderBottomColor: v2Colors.ink,
+  },
+  // Native only: scrolled header state (applied via Animated)
+  headerScrolled: {
     backgroundColor: v2Colors.ground,
     borderBottomWidth: v2Borders.standard,
     borderBottomColor: v2Colors.ink,
@@ -80,13 +109,18 @@ export const v2DetailStyles = StyleSheet.create({
     gap: v2SpacingSemantic.m,
   },
   backBtn: {
-    flexDirection: "row",
+    // Native: square 44x44 icon-only button
+    // Web: wider button with "← Kembali" text
+    width: Platform.OS === "web" ? "auto" : v2Layout.tapTarget, // 44px on native
+    height: v2Layout.tapTarget,
+    flexDirection: Platform.OS === "web" ? "row" : "column",
+    gap: Platform.OS === "web" ? 8 : 0,
+    paddingHorizontal: Platform.OS === "web" ? 16 : 0,
     alignItems: "center",
-    gap: v2SpacingSemantic.xs,
-    paddingVertical: v2SpacingSemantic.xs,
-    paddingHorizontal: v2SpacingSemantic.s,
+    justifyContent: "center",
     borderWidth: v2Borders.standard,
     borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.ground,
   },
   backBtnText: {
     fontFamily: interFonts.semiBold,
@@ -107,16 +141,17 @@ export const v2DetailStyles = StyleSheet.create({
     gap: v2SpacingSemantic.xs,
   },
   iconBtn: {
-    width: 40,
-    height: 40,
+    width: v2Layout.tapTarget, // 44px
+    height: v2Layout.tapTarget,
     borderWidth: v2Borders.standard,
     borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.ground,
     alignItems: "center",
     justifyContent: "center",
   },
 
   // ---------------------------------------------------------------------------
-  // Flow Steps Indicator
+  // Flow Steps Indicator (WEB ONLY - hidden on native mobile)
   // ---------------------------------------------------------------------------
   stepsContainer: {
     flexDirection: "row",
@@ -126,6 +161,8 @@ export const v2DetailStyles = StyleSheet.create({
     paddingHorizontal: v2SpacingSemantic.m,
     paddingTop: HEADER_HEIGHT + v2SpacingSemantic.m,
     backgroundColor: v2Colors.ground,
+    // Hidden on native
+    display: Platform.OS === "web" ? "flex" : "none",
   },
   step: {
     flexDirection: "row",
@@ -180,11 +217,12 @@ export const v2DetailStyles = StyleSheet.create({
 
   // ---------------------------------------------------------------------------
   // Hero Section (monochrome concert banner)
+  // Mobile: 50vh (actual viewport height), Web: 400px
   // ---------------------------------------------------------------------------
   hero: {
     position: "relative",
-    height: 400, // 60vh equivalent
-    minHeight: 350,
+    height: HERO_HEIGHT,
+    minHeight: 300,
     justifyContent: "flex-end",
     overflow: "hidden",
   },
@@ -222,10 +260,17 @@ export const v2DetailStyles = StyleSheet.create({
     }),
   },
   heroContent: {
-    position: "relative",
+    // Native: absolute bottom positioning like prototype
+    // Web: relative with flex-end from parent
+    position: Platform.OS === "web" ? "relative" : "absolute",
+    bottom: Platform.OS === "web" ? undefined : 0,
+    left: Platform.OS === "web" ? undefined : 0,
+    right: Platform.OS === "web" ? undefined : 0,
     zIndex: 10,
-    padding: v2SpacingSemantic.xl, // 80px
-    paddingHorizontal: v2SpacingSemantic.m, // 24px
+    // Native: padding-m (24px) top/bottom, frame (16px) horizontal - matches prototype
+    // Web: larger padding for desktop layout
+    padding: Platform.OS === "web" ? v2SpacingSemantic.xl : v2SpacingSemantic.m,
+    paddingHorizontal: Platform.OS === "web" ? v2SpacingSemantic.m : 16, // frame = 16px
     maxWidth: 1200,
     width: "100%",
   },
@@ -237,7 +282,8 @@ export const v2DetailStyles = StyleSheet.create({
     paddingVertical: v2SpacingSemantic.xs,
     paddingHorizontal: v2SpacingSemantic.s,
     backgroundColor: v2Colors.ink,
-    marginBottom: v2SpacingSemantic.m,
+    // Native: space-xs (8px), Web: space-m (24px)
+    marginBottom: Platform.OS === "web" ? v2SpacingSemantic.m : v2SpacingSemantic.xs,
   },
   heroBadgeText: {
     fontFamily: interFonts.bold,
@@ -250,16 +296,17 @@ export const v2DetailStyles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#ef4444", // Live red dot
+    backgroundColor: v2Colors.danger, // #ff0000 - Live red dot per Design Palette Guide
   },
   heroTitle: {
     fontFamily: interFonts.black,
-    fontSize: 48, // Will be clamped responsively
-    lineHeight: 48 * 0.9,
+    fontSize: Platform.OS === "web" ? 48 : v2FontSizes["2xl"], // 24px on mobile
+    lineHeight: (Platform.OS === "web" ? 48 : v2FontSizes["2xl"]) * 1.1,
     color: v2Colors.ink,
     textTransform: "uppercase",
-    letterSpacing: -0.03 * 48,
-    marginBottom: v2SpacingSemantic.s,
+    letterSpacing: -0.03 * (Platform.OS === "web" ? 48 : v2FontSizes["2xl"]),
+    // Native: space-xs (8px), Web: space-s (16px)
+    marginBottom: Platform.OS === "web" ? v2SpacingSemantic.s : v2SpacingSemantic.xs,
   },
   heroSubtitle: {
     fontFamily: interFonts.medium,
@@ -284,14 +331,54 @@ export const v2DetailStyles = StyleSheet.create({
   },
 
   // ---------------------------------------------------------------------------
+  // Info Card (Mobile only - date/location below hero)
+  // ---------------------------------------------------------------------------
+  infoCard: {
+    borderWidth: v2Borders.standard,
+    borderColor: v2Colors.ink,
+    padding: v2SpacingSemantic.m,
+    marginBottom: v2SpacingSemantic.m,
+    backgroundColor: v2Colors.ground,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: v2SpacingSemantic.s,
+    marginBottom: v2SpacingSemantic.s,
+  },
+  infoRowLast: {
+    marginBottom: 0,
+  },
+  infoIcon: {
+    width: 20,
+    height: 20,
+    marginTop: 2,
+  },
+  infoLabel: {
+    fontFamily: interFonts.medium,
+    fontSize: v2FontSizes.xs,
+    color: v2Colors.inkMuted,
+    textTransform: "uppercase",
+    letterSpacing: v2FontSizes.xs * 0.05,
+  },
+  infoValue: {
+    fontFamily: interFonts.semiBold,
+    fontSize: v2FontSizes.s,
+    color: v2Colors.ink,
+    marginTop: 2,
+  },
+
+  // ---------------------------------------------------------------------------
   // Content Layout (single column, max 900px)
   // ---------------------------------------------------------------------------
   content: {
     maxWidth: 900,
     width: "100%",
     alignSelf: "center",
-    paddingHorizontal: v2SpacingSemantic.m,
-    paddingTop: v2SpacingSemantic.l,
+    // Native: padding-m (24px) top, frame (16px) horizontal - matches prototype
+    // Web: larger padding for desktop layout
+    paddingHorizontal: Platform.OS === "web" ? v2SpacingSemantic.m : 16, // frame = 16px
+    paddingTop: Platform.OS === "web" ? v2SpacingSemantic.l : v2SpacingSemantic.m, // space-m = 24px
     paddingBottom: v2SpacingSemantic.xl + FLOATING_CTA_HEIGHT,
   },
 
@@ -305,14 +392,17 @@ export const v2DetailStyles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: interFonts.black,
-    fontSize: v2FontSizes.xl, // 20px
+    // Native: text-xs (12px), Web: text-xl (20px)
+    fontSize: Platform.OS === "web" ? v2FontSizes.xl : v2FontSizes.xs,
     color: v2Colors.ink,
     textTransform: "uppercase",
-    letterSpacing: v2FontSizes.xl * 0.02,
-    paddingBottom: v2SpacingSemantic.s,
+    letterSpacing: (Platform.OS === "web" ? v2FontSizes.xl : v2FontSizes.xs) * 0.05,
+    // Native: space-xs (8px), Web: space-s (16px)
+    paddingBottom: Platform.OS === "web" ? v2SpacingSemantic.s : v2SpacingSemantic.xs,
     borderBottomWidth: v2Borders.standard,
     borderBottomColor: v2Colors.ink,
-    marginBottom: v2SpacingSemantic.m,
+    // Native: space-s (16px), Web: space-m (24px)
+    marginBottom: Platform.OS === "web" ? v2SpacingSemantic.m : v2SpacingSemantic.s,
   },
 
   // ---------------------------------------------------------------------------
@@ -330,52 +420,109 @@ export const v2DetailStyles = StyleSheet.create({
 
   // ---------------------------------------------------------------------------
   // Ticket Categories Preview
+  //
+  // Web:    each item has its own 2px border (individual card, gap between)
+  // Native: outer wrapper = table border frame; 2px View separators between
+  //         rows = shared border effect.  The CSS margin-bottom:-2px trick
+  //         breaks on native because the next item's white bg covers the
+  //         border underneath it.
   // ---------------------------------------------------------------------------
   categoriesGrid: {
-    gap: v2SpacingSemantic.s,
+    // Native: no gap — separators supply the visual spacing
+    // Web: gap between individually bordered cards
+    gap: Platform.OS === "web" ? v2SpacingSemantic.s : 0,
   },
+  // Native: outer table frame (left / right / top / bottom border)
+  // Web:    no-op (web uses per-item borders)
+  categoriesTableWrapper: Platform.select({
+    web: {},
+    default: {
+      borderWidth: v2Borders.standard,
+      borderColor: v2Colors.ink,
+    },
+  }),
   categoryItem: {
     flexDirection: "row",
-    alignItems: "center",
+    // Web:    align-items:center works because descriptions are always present (both
+    //         columns equal height) → perfectly symmetric.
+    // Native: flex-start is essential — native font metrics differ from web so
+    //         column heights differ even with the same font sizes.  center would
+    //         vertically offset the shorter column, making price appear below the
+    //         name.  flex-start pins BOTH columns to the TOP so name and price
+    //         always start at the same vertical position regardless of font height.
+    alignItems: Platform.OS === "web" ? "center" : "flex-start",
     justifyContent: "space-between",
-    padding: v2SpacingSemantic.m,
-    borderWidth: v2Borders.standard,
+    // Native: space-s (16px) per prototype, Web: space-m (24px)
+    padding: Platform.OS === "web" ? v2SpacingSemantic.m : v2SpacingSemantic.s,
+    // Web: per-item border (individual card look)
+    // Native: NO border — wrapper + categorySeparator create the table borders
+    borderWidth: Platform.OS === "web" ? v2Borders.standard : 0,
     borderColor: v2Colors.ink,
+    backgroundColor: v2Colors.ground,
+  },
+  // Native only: 2px black line between rows → "shared border" table effect
+  categorySeparator: {
+    height: v2Borders.standard, // 2px
+    backgroundColor: v2Colors.ink,
   },
   categoryItemHover: {
     backgroundColor: v2Colors.field,
     transform: [{ translateX: 4 }],
   },
-  categoryInfo: {},
+  categoryInfo: {
+    flex: 1,
+    flexShrink: 1,
+    // Gap before the price column — prevents long names from crowding the price
+    paddingRight: Platform.OS === "web" ? 0 : 12,
+  },
   categoryName: {
     fontFamily: interFonts.bold,
-    fontSize: v2FontSizes.m,
+    // Native: text-s (14px) per prototype, Web: text-m (16px)
+    fontSize: Platform.OS === "web" ? v2FontSizes.m : v2FontSizes.s,
+    // Explicit lineHeight on native keeps the left column height predictable
+    // so it always matches the right column's height (name ↔ price, desc ↔ status)
+    lineHeight: Platform.OS === "web" ? undefined : Math.round(v2FontSizes.s * 1.35),
     color: v2Colors.ink,
     textTransform: "uppercase",
   },
   categoryDesc: {
     fontFamily: interFonts.regular,
-    fontSize: v2FontSizes.s,
+    // Native: text-xs (12px) per prototype, Web: text-s (14px)
+    fontSize: Platform.OS === "web" ? v2FontSizes.s : v2FontSizes.xs,
+    lineHeight: Platform.OS === "web" ? undefined : Math.round(v2FontSizes.xs * 1.35),
     color: v2Colors.inkMuted,
     marginTop: 2,
   },
   categoryPrice: {
+    // flexShrink: 0 ensures the price column is NEVER squeezed by categoryInfo's flex:1
+    flexShrink: 0,
     alignItems: "flex-end",
   },
   categoryPriceValue: {
     fontFamily: interFonts.black,
-    fontSize: v2FontSizes.l,
+    // Native: text-m (16px) per prototype, Web: text-l (18px)
+    fontSize: Platform.OS === "web" ? v2FontSizes.l : v2FontSizes.m,
+    lineHeight: Platform.OS === "web" ? undefined : Math.round(v2FontSizes.m * 1.35),
     color: v2Colors.ink,
   },
   categoryAvail: {
     fontFamily: interFonts.semiBold,
     fontSize: v2FontSizes.xs,
-    color: "#16a34a", // Success green
+    lineHeight: Platform.OS === "web" ? undefined : Math.round(v2FontSizes.xs * 1.35),
+    color: v2Colors.success,
+  },
+  categoryAvailLimited: {
+    fontFamily: interFonts.semiBold,
+    fontSize: v2FontSizes.xs,
+    lineHeight: Platform.OS === "web" ? undefined : Math.round(v2FontSizes.xs * 1.35),
+    color: v2Colors.warning,
   },
   categoryAvailOut: {
     fontFamily: interFonts.semiBold,
     fontSize: v2FontSizes.xs,
-    color: v2Colors.inkMuted,
+    lineHeight: Platform.OS === "web" ? undefined : Math.round(v2FontSizes.xs * 1.35),
+    color: v2Colors.danger, // #ff0000 - "Habis" per Design Palette Guide
+    textDecorationLine: "line-through",
   },
   categorySoldOut: {
     opacity: 0.5,
@@ -394,15 +541,21 @@ export const v2DetailStyles = StyleSheet.create({
   },
 
   // ---------------------------------------------------------------------------
-  // Lineup Grid
+  // Lineup Grid (Web) / Horizontal Scroll (Native)
   // ---------------------------------------------------------------------------
   lineupGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
+    flexWrap: Platform.OS === "web" ? "wrap" : "nowrap",
     gap: v2SpacingSemantic.s,
   },
+  // Native: horizontal scroll container
+  lineupScroll: {
+    marginHorizontal: -v2SpacingSemantic.m, // Bleed to edges
+    paddingHorizontal: v2SpacingSemantic.m,
+    paddingBottom: v2SpacingSemantic.s,
+  },
   lineupItem: {
-    width: 150, // Will be responsive
+    width: Platform.OS === "web" ? 150 : 100, // Smaller on mobile
     alignItems: "center",
     padding: v2SpacingSemantic.m,
     borderWidth: v2Borders.standard,
@@ -554,7 +707,7 @@ export const v2DetailStyles = StyleSheet.create({
   termsCheck: {
     fontFamily: interFonts.black,
     fontSize: v2FontSizes.s,
-    color: "#16a34a", // Success green
+    color: v2Colors.success, // #00aa00 per Design Palette Guide
   },
   termsText: {
     flex: 1,
@@ -565,14 +718,16 @@ export const v2DetailStyles = StyleSheet.create({
 
   // ---------------------------------------------------------------------------
   // Floating CTA (fixed bottom bar)
+  // Mobile: native shadow + pulse + safe area
   // ---------------------------------------------------------------------------
   floatingCta: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    paddingVertical: v2SpacingSemantic.m,
-    paddingHorizontal: v2SpacingSemantic.m,
+    paddingVertical: v2SpacingSemantic.s,
+    paddingHorizontal: Platform.OS === "web" ? v2SpacingSemantic.m : 16, // frame padding on mobile
+    paddingBottom: Platform.OS === "web" ? v2SpacingSemantic.m : v2SpacingSemantic.s + SAFE_AREA_BOTTOM,
     backgroundColor: v2Colors.ground,
     borderTopWidth: v2Borders.standard,
     borderTopColor: v2Colors.ink,
@@ -585,7 +740,7 @@ export const v2DetailStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: v2SpacingSemantic.m,
+    gap: v2SpacingSemantic.s,
   },
   floatingCtaInfo: {
     flex: 1,
@@ -602,13 +757,26 @@ export const v2DetailStyles = StyleSheet.create({
     fontSize: v2FontSizes.xl,
     color: v2Colors.ink,
   },
+  // Native: static container style for shadow (avoids NOBRIDGE error)
+  floatingCtaBtnContainer: Platform.select({
+    web: {},
+    default: {
+      shadowColor: v2Colors.ink,
+      shadowOffset: { width: v2Shadows.md.x, height: v2Shadows.md.y },
+      shadowOpacity: 1,
+      shadowRadius: 0,
+      elevation: 4,
+    },
+  }),
   floatingCtaBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: v2SpacingSemantic.xs,
-    paddingVertical: v2SpacingSemantic.m,
-    paddingHorizontal: v2SpacingSemantic.l,
+    // Native: 1rem 2rem (16px 32px) per prototype
+    // Web: larger padding for desktop layout
+    paddingVertical: Platform.OS === "web" ? v2SpacingSemantic.m : v2SpacingSemantic.s, // 24px web, 16px native
+    paddingHorizontal: Platform.OS === "web" ? v2SpacingSemantic.l : 32, // 48px web, 32px native
     backgroundColor: v2Colors.ink,
     borderWidth: v2Borders.standard,
     borderColor: v2Colors.ink,
@@ -619,24 +787,27 @@ export const v2DetailStyles = StyleSheet.create({
   },
   floatingCtaBtnText: {
     fontFamily: interFonts.bold,
-    fontSize: v2FontSizes.m,
+    // Native: text-s (14px) per prototype, Web: text-m (16px)
+    fontSize: Platform.OS === "web" ? v2FontSizes.m : v2FontSizes.s,
     color: v2Colors.ground,
     textTransform: "uppercase",
-    letterSpacing: v2FontSizes.m * 0.04,
+    letterSpacing: (Platform.OS === "web" ? v2FontSizes.m : v2FontSizes.s) * 0.04,
   },
   floatingCtaArrow: {
     fontFamily: interFonts.bold,
-    fontSize: v2FontSizes.m,
+    // Native: text-s (14px) per prototype, Web: text-m (16px)
+    fontSize: Platform.OS === "web" ? v2FontSizes.m : v2FontSizes.s,
     color: v2Colors.ground,
   },
 
   // ---------------------------------------------------------------------------
-  // Trust Badges
+  // Trust Badges (Web only - hidden on native mobile)
   // ---------------------------------------------------------------------------
   trustBadges: {
     flexDirection: "row",
     gap: v2SpacingSemantic.s,
     marginTop: v2SpacingSemantic.s,
+    display: Platform.OS === "web" ? "flex" : "none",
   },
   trustBadge: {
     flexDirection: "row",
@@ -651,7 +822,7 @@ export const v2DetailStyles = StyleSheet.create({
   trustBadgeCheck: {
     fontFamily: interFonts.bold,
     fontSize: 12,
-    color: "#16a34a",
+    color: v2Colors.success, // #00aa00 per Design Palette Guide
   },
 
   // ---------------------------------------------------------------------------

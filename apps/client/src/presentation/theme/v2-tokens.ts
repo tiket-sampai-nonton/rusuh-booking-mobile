@@ -29,7 +29,7 @@ export const v2Colors = {
   // Legacy aliases (for backwards compatibility in components)
   black: '#000000',
   white: '#ffffff',
-  gray: '#888888',
+  gray: '#666666',        // Legacy alias - uses inkMuted per Design Palette Guide (NO arbitrary grays)
   red: '#ff0000',
   green: '#00aa00',
   accent: '#000000',      // CTAs same as ink for brutalist
@@ -208,6 +208,9 @@ export const v2ZIndex = {
 
 export const v2Layout = {
   headerHeight: 60,
+  headerHeightMobile: 56,      // Mobile: 56px (design-tokens.css --header-height)
+  bottomBarHeight: 72,         // Mobile: 72px (design-tokens.css --bottom-bar-height)
+  tapTarget: 44,               // Mobile: 44px min touch target
   contentNarrow: 600,
   contentDefault: 700,
   contentWide: 1200,

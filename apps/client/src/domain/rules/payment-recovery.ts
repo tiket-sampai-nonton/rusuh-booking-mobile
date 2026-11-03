@@ -16,7 +16,7 @@
 import type { PaymentStatus } from "@domain/repositories/payment.repository";
 
 /** Why the flow landed on the expired/recovery screen. */
-export type ExpiryReason = "payment" | "hold" | "queue";
+export type ExpiryReason = "payment" | "hold" | "queue" | "turn";
 
 /** The recovery the screen should offer. */
 export type RecoveryAction =
@@ -66,7 +66,12 @@ export function isRetryable(
 /**
  * The re-queue destination for a given expiry reason. A payment/hold failure
  * sends the user back to the event's waiting room to re-enter the queue; a
- * queue expiry (or an unknown event) falls back to browse.
+ * queue or turn expiry (or an unknown event) falls back to browse.
+ *
+ * NOTE: Even though the mobile prototype suggests "rejoin queue" for queue/turn,
+ * the business rule is that queue expiry means you were already in the queue and
+ * got kicked out — you should browse for events rather than immediately rejoin
+ * the same queue. For "turn" missed, we follow the same pattern.
  */
 export function requeueRoute(
   reason: ExpiryReason,

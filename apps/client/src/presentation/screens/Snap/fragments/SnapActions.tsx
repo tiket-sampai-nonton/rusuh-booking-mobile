@@ -59,7 +59,7 @@ export function SnapActions({
 
       <Text
         className="mt-4 pt-4 text-center text-2xs leading-5"
-        style={{ color: v2.gray, borderTopWidth: 1, borderTopColor: "#e0e0e0" }}
+        style={{ color: v2.inkMuted, borderTopWidth: 1, borderTopColor: v2.field }}
       >
         SNAP akan mengembalikan pengguna ke halaman hasil Rusuh Tiket. Halaman
         hasil tetap memverifikasi status dari backend.

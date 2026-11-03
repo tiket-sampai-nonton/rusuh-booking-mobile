@@ -177,6 +177,13 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               </Text>
             </Pressable>
           </View>
+
+          {/* Email note (v2-mobile prototype 10-success.html `.email-note`) */}
+          <View className="mt-4 flex-row items-center justify-center gap-2">
+            <Text style={{ fontSize: 14, color: "rgba(255,255,255,0.6)" }}>
+              ✉️ E-tiket juga dikirim ke email kamu
+            </Text>
+          </View>
         </ScrollView>
       )}
     </View>

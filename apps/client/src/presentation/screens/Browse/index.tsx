@@ -14,7 +14,7 @@
  */
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { useMemo, useState, useRef } from 'react';
-import { Pressable, Text, TextInput, View, Platform } from 'react-native';
+import { Pressable, ScrollView, Text, View, Platform } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -22,6 +22,7 @@ import {
   V2ToastProvider,
   V2Loader,
   V2Header,
+  V2BottomNav,
 } from '@presentation/components/v2';
 import { useEvents } from '@presentation/hooks/useEvents';
 import { useResponsive } from '@presentation/hooks/useResponsive';
@@ -39,8 +40,6 @@ import {
 import {
   browseScrollContent,
   browseHero,
-  browseSearchBox,
-  browseSearchBtn,
   browseCategories,
   browseCategoriesInner,
   browseCategoryBtn,
@@ -82,7 +81,7 @@ const SORT_OPTIONS = [
 export function BrowseScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isWeb, isDesktop, width, gridColumns } = useResponsive();
+  const { isWeb, isDesktop, isNative, width, gridColumns } = useResponsive();
   const params = useLocalSearchParams<{
     genre?: string;
     time?: string;
@@ -102,7 +101,6 @@ export function BrowseScreen() {
   });
 
   // State
-  const [searchQuery, setSearchQuery] = useState(params.q ?? '');
   const [activeCategory, setActiveCategory] = useState(params.genre ?? 'all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState(params.sort ?? 'date');
@@ -119,7 +117,7 @@ export function BrowseScreen() {
     [data, genre, time, sort],
   );
 
-  // Apply search + category filter
+  // Apply category filter
   const results = useMemo(() => {
     let filtered = allResults;
 
@@ -131,27 +129,12 @@ export function BrowseScreen() {
       );
     }
 
-    // Search query filter
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (ev) =>
-          ev.name?.toLowerCase().includes(q) ||
-          ev.venue?.toLowerCase().includes(q),
-      );
-    }
-
     return filtered;
-  }, [allResults, activeCategory, searchQuery]);
+  }, [allResults, activeCategory]);
 
   const goToEvent = (eventId: string): void =>
     router.push(`/events/${eventId}` as Href);
   const goHome = (): void => router.push('/' as Href);
-
-  // Handle search
-  const handleSearch = () => {
-    // Just filter client-side for now (O4 blocker)
-  };
 
   // Handle category click
   const handleCategoryClick = (key: string) => {
@@ -211,101 +194,114 @@ export function BrowseScreen() {
                 Next Event
               </Text>
             </View>
-
-            {/* Search box (prototype .search-box) */}
-            <View style={browseSearchBox}>
-              <TextInput
-                style={{
-                  flex: 1,
-                  paddingVertical: 16,
-                  paddingHorizontal: 24,
-                  backgroundColor: 'transparent',
-                  color: v2Colors.ground,
-                  fontFamily: interFonts.regular,
-                  fontSize: 16,
-                }}
-                placeholder="Search events, artists, venues..."
-                placeholderTextColor="rgba(255,255,255,0.5)"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                onSubmitEditing={handleSearch}
-                testID="browse-search-input"
-              />
-              <Pressable
-                style={({ pressed }) => [
-                  browseSearchBtn,
-                  pressed && { backgroundColor: v2Colors.ink },
-                ]}
-                onPress={handleSearch}
-                testID="browse-search-btn"
-              >
-                <Text
-                  style={{
-                    color: v2Colors.ink,
-                    fontFamily: interFonts.bold,
-                    fontSize: 14,
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Search
-                </Text>
-              </Pressable>
-            </View>
           </View>
 
           {/* ═══════════════════════════════════════════════════════════════════
               CATEGORIES SECTION (prototype .categories)
+              Mobile: horizontal scroll with pill buttons (no header)
+              Desktop: grid with section header
               ═══════════════════════════════════════════════════════════════════ */}
-          <View style={browseCategories}>
-            <View style={browseCategoriesInner(isDesktop)}>
-              {/* Header */}
-              <View style={{ marginBottom: 32 }}>
-                <Text
+          {isNative ? (
+            // Mobile: horizontal scroll categories (prototype .categories-scroll)
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                gap: 8,
+              }}
+              style={{
+                backgroundColor: v2Colors.ground,
+                borderBottomWidth: v2Borders.standard,
+                borderBottomColor: v2Colors.ink,
+              }}
+            >
+              {CATEGORIES.map((cat) => {
+                const isActive = activeCategory === cat.key;
+                return (
+                  <Pressable
+                    key={cat.key}
+                    style={{
+                      paddingHorizontal: 16,
+                      paddingVertical: 8,
+                      borderWidth: v2Borders.standard,
+                      borderColor: v2Colors.ink,
+                      backgroundColor: isActive ? v2Colors.ink : v2Colors.ground,
+                      minHeight: 36,
+                      justifyContent: 'center',
+                    }}
+                    onPress={() => handleCategoryClick(cat.key)}
+                    testID={`category-${cat.key}`}
+                  >
+                    <Text
+                      style={{
+                        color: isActive ? v2Colors.ground : v2Colors.ink,
+                        fontFamily: interFonts.semiBold,
+                        fontSize: 12,
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.6,
+                      }}
+                    >
+                      {cat.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          ) : (
+            // Desktop: grid categories with header
+            <View style={browseCategories}>
+              <View style={browseCategoriesInner(isDesktop)}>
+                {/* Header */}
+                <View style={{ marginBottom: 32 }}>
+                  <Text
+                    style={{
+                      color: v2Colors.ink,
+                      fontSize: 24,
+                      fontFamily: interFonts.black,
+                      textTransform: 'uppercase',
+                      letterSpacing: -0.48,
+                    }}
+                  >
+                    Categories
+                  </Text>
+                </View>
+
+                {/* Category buttons grid */}
+                <View
                   style={{
-                    color: v2Colors.ink,
-                    fontSize: 24,
-                    fontFamily: interFonts.black,
-                    textTransform: 'uppercase',
-                    letterSpacing: -0.48,
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    gap: 16,
                   }}
                 >
-                  Categories
-                </Text>
-              </View>
-
-              {/* Category buttons grid */}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  gap: 16,
-                }}
-              >
-                {CATEGORIES.map((cat) => {
-                  const isActive = activeCategory === cat.key;
-                  return (
-                    <Pressable
-                      key={cat.key}
-                      style={isActive ? browseCategoryBtnActive : browseCategoryBtn}
-                      onPress={() => handleCategoryClick(cat.key)}
-                      testID={`category-${cat.key}`}
-                    >
-                      <Text
-                        style={{
-                          color: isActive ? v2Colors.ground : v2Colors.ink,
-                          fontFamily: interFonts.bold,
-                          fontSize: 14,
-                          textTransform: 'uppercase',
-                        }}
+                  {CATEGORIES.map((cat) => {
+                    const isActive = activeCategory === cat.key;
+                    return (
+                      <Pressable
+                        key={cat.key}
+                        style={isActive ? browseCategoryBtnActive : browseCategoryBtn}
+                        onPress={() => handleCategoryClick(cat.key)}
+                        testID={`category-${cat.key}`}
                       >
-                        {cat.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+                        <Text
+                          style={{
+                            color: isActive ? v2Colors.ground : v2Colors.ink,
+                            fontFamily: interFonts.bold,
+                            fontSize: 14,
+                            textTransform: 'uppercase',
+                          }}
+                        >
+                          {cat.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
               </View>
             </View>
-          </View>
+          )}
 
           {/* ═══════════════════════════════════════════════════════════════════
               MAIN CONTENT (prototype main)
@@ -408,7 +404,7 @@ export function BrowseScreen() {
               <BrowseGrid
                 events={results}
                 onPress={goToEvent}
-                columns={viewMode === 'list' ? 1 : gridColumns}
+                columns={viewMode === 'list' ? 1 : (isNative ? 2 : gridColumns)}
               />
             )}
 
@@ -451,6 +447,17 @@ export function BrowseScreen() {
           ]}
           onCtaPress={() => {}}
           onLogoPress={goHome}
+        />
+
+        {/* Bottom Navigation (native only, handled internally by V2BottomNav) */}
+        <V2BottomNav
+          activeRoute="browse"
+          onNavigate={(route) => {
+            if (route === 'home') router.push('/' as Href);
+            else if (route === 'browse') { /* already here */ }
+            else if (route === 'tickets') router.push('/history' as Href);
+            else if (route === 'profile') router.push('/profile' as Href);
+          }}
         />
       </View>
     </V2ToastProvider>

@@ -29,7 +29,6 @@
  */
 import { useEffect, useRef, useState } from "react";
 import {
-  Dimensions,
   Image,
   Platform,
   Pressable,
@@ -50,6 +49,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 
 import type { EventSummary } from "@domain/repositories/event.repository";
 import { eventImage } from "@domain/rules/event-image";
@@ -60,6 +60,7 @@ import {
   v2Easing,
   interFonts,
 } from "@presentation/theme";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 
 // ═══════════════════════════════════════
 // CONSTANTS (from prototype CSS variables)
@@ -269,20 +270,36 @@ function HeroSlide({
         />
       </Animated.View>
 
-      {/* Native: grayscale approximation overlay */}
+      {/* Native: grayscale approximation with stronger desaturation */}
       {!isWeb && (
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "#808080",
-            opacity: 0.6,
-          }}
-        />
+        <>
+          {/* Dark layer for contrast reduction */}
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "#000000",
+              opacity: 0.25,
+            }}
+          />
+          {/* Gray layer for desaturation */}
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: v2Colors.inkMuted, // #666666 - per Design Palette Guide
+              opacity: 0.65,
+            }}
+          />
+        </>
       )}
     </Animated.View>
   );
@@ -290,30 +307,40 @@ function HeroSlide({
 
 // ═══════════════════════════════════════
 // GRADIENT OVERLAY (prototype .hero-slide-overlay)
-// CSS: linear-gradient(to top, var(--ground) 0%, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.3) 100%)
+// Desktop (v2/01-home.html):
+//   linear-gradient(to top, var(--ground) 0%, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.3) 100%)
+// Mobile (v2-mobile/01-home.html):
+//   linear-gradient(to top, var(--ground) 0%, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.7) 60%, rgba(255,255,255,0.3) 100%)
 //
-// Use actual CSS linear-gradient on web, fallback for native.
+// Use actual CSS linear-gradient on web, expo-linear-gradient on native.
 // ═══════════════════════════════════════
-function GradientOverlay() {
+function GradientOverlay({ isMobile = false }: { readonly isMobile?: boolean }) {
   // Web: use real CSS linear-gradient (exact match to prototype)
   const webGradientStyle = isWeb
     ? ({
-        background: `linear-gradient(to top, ${v2Colors.ground} 0%, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.3) 100%)`,
+        background: isMobile
+          // Mobile prototype gradient: stronger fade at bottom for text readability
+          ? `linear-gradient(to top, ${v2Colors.ground} 0%, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.7) 60%, rgba(255,255,255,0.3) 100%)`
+          // Desktop prototype gradient
+          : `linear-gradient(to top, ${v2Colors.ground} 0%, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.3) 100%)`,
       } as any)
     : null;
 
-  // Native: approximate with stacked Views (no CSS gradients in RN)
+  // Native: use expo-linear-gradient for smooth gradient (no more banding)
   if (!isWeb) {
-    const gradientStops = [
-      { flex: 70, opacity: 0.3 },
-      { flex: 12, opacity: 0.5 },
-      { flex: 8, opacity: 0.7 },
-      { flex: 5, opacity: 0.85 },
-      { flex: 5, color: v2Colors.ground },
-    ];
-
+    // Mobile prototype: var(--ground) 0% → 0.95 30% → 0.7 60% → 0.3 100%
+    // "to top" in CSS = start from bottom, so we reverse the colors array (top → bottom)
+    // and use locations from top (0) to bottom (1)
     return (
-      <View
+      <LinearGradient
+        // Gradient from top to bottom (CSS "to top" reversed for RN)
+        colors={[
+          "rgba(255,255,255,0.3)",   // top (100% in CSS)
+          "rgba(255,255,255,0.7)",   // 60% point in CSS → 0.4 from top
+          "rgba(255,255,255,0.95)",  // 30% point in CSS → 0.7 from top
+          v2Colors.ground,            // bottom (0% in CSS)
+        ]}
+        locations={[0, 0.4, 0.7, 1]}
         style={{
           position: "absolute",
           top: 0,
@@ -323,17 +350,7 @@ function GradientOverlay() {
           zIndex: 2,
         }}
         pointerEvents="none"
-      >
-        {gradientStops.map((stop, i) => (
-          <View
-            key={i}
-            style={{
-              flex: stop.flex,
-              backgroundColor: stop.color ?? `rgba(255,255,255,${stop.opacity})`,
-            }}
-          />
-        ))}
-      </View>
+      />
     );
   }
 
@@ -455,7 +472,7 @@ function CountdownTimer({ targetDate }: { readonly targetDate: Date }) {
 }
 
 // ═══════════════════════════════════════
-// HERO INFO (prototype .hero-info with fadeUp animation)
+// HERO INFO (prototype .hero-info with fadeUp animation) — Desktop/Web
 // ═══════════════════════════════════════
 function HeroInfo({
   event,
@@ -610,6 +627,245 @@ function HeroInfo({
           </Text>
         </Pressable>
       </View>
+    </Animated.View>
+  );
+}
+
+// ═══════════════════════════════════════
+// HERO INFO MOBILE (v2-mobile/01-home.html prototype)
+// Simpler layout: Badge + Title + Meta + Single CTA
+// NO countdown, NO price, NO tagline, NO secondary button
+// ═══════════════════════════════════════
+
+/** Pulsing red dot for "ON SALE NOW" badge */
+function PulsingDot() {
+  const reducedMotion = useReducedMotion();
+  const scale = useSharedValue(1);
+  const opacityVal = useSharedValue(1);
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    // liveDot animation: scale 1 → 1.3, opacity 1 → 0.7 (1s infinite)
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(1.3, { duration: 500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 500, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+    opacityVal.value = withRepeat(
+      withSequence(
+        withTiming(0.7, { duration: 500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 500, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+    return () => {
+      cancelAnimation(scale);
+      cancelAnimation(opacityVal);
+    };
+  }, [reducedMotion, scale, opacityVal]);
+
+  const dotStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacityVal.value,
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          backgroundColor: "#ff0000", // --danger
+        },
+        dotStyle,
+      ]}
+    />
+  );
+}
+
+/** Arrow icon for CTA button */
+function ArrowIcon({ color = v2Colors.ground }: { readonly color?: string }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+      <Path d="M5 12h14M12 5l7 7-7 7" stroke={color} strokeWidth={2.5} />
+    </Svg>
+  );
+}
+
+function HeroInfoMobile({
+  event,
+  onBook,
+}: {
+  readonly event: EventSummary;
+  readonly onBook: (eventId: string) => void;
+}) {
+  const reducedMotion = useReducedMotion();
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(30);
+  const { width } = useWindowDimensions();
+  
+  // Text scramble animation for title (like desktop)
+  const displayTitle = useTextScramble(event.name);
+
+  // fadeSlideUp animation from prototype: 0.6s delay after loader exit
+  useEffect(() => {
+    if (reducedMotion) {
+      opacity.value = 1;
+      translateY.value = 0;
+      return;
+    }
+    opacity.value = 0;
+    translateY.value = 30;
+
+    opacity.value = withDelay(INFO_FADE_DELAY_MS, withTiming(1, { duration: 600, easing: EASE }));
+    translateY.value = withDelay(INFO_FADE_DELAY_MS, withTiming(0, { duration: 600, easing: EASE }));
+  }, [event.id, reducedMotion, opacity, translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  // Mobile title size: smaller than desktop - clamp(2rem, 10vw, 3rem) = 32-48px
+  // Reduced from original 40-64px for better mobile fit
+  const titleFontSize = Math.min(Math.max(32, width * 0.10), 48);
+
+  return (
+    <Animated.View key={event.id} style={animatedStyle}>
+      {/* Badge: "ON SALE NOW" with pulsing red dot */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+          backgroundColor: v2Colors.ink,
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          alignSelf: "flex-start",
+          marginBottom: SPACE_S,
+        }}
+      >
+        <PulsingDot />
+        <Text
+          style={{
+            color: v2Colors.ground,
+            fontSize: TEXT_XS,
+            fontFamily: interFonts.bold, // weight 700
+            textTransform: "uppercase",
+            letterSpacing: 0.6, // 0.05em at 12px
+          }}
+        >
+          On Sale Now
+        </Text>
+      </View>
+
+      {/* Title: Large brutalist text */}
+      <Text
+        accessibilityRole="header"
+        style={{
+          color: v2Colors.ink,
+          fontSize: titleFontSize,
+          fontFamily: interFonts.black, // weight 900
+          lineHeight: titleFontSize * 1.1, // line-height: 1.1 to prevent top clipping
+          textTransform: "uppercase",
+          letterSpacing: titleFontSize * -0.02, // letter-spacing: -0.02em
+          marginBottom: SPACE_S,
+        }}
+      >
+        {displayTitle}
+      </Text>
+
+      {/* Meta: Date · Venue (compact, single line with wrap) */}
+      <View
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: SPACE_S,
+          marginBottom: SPACE_M,
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <CalendarIcon color={v2Colors.inkMuted} />
+          <Text
+            style={{
+              color: v2Colors.inkMuted,
+              fontSize: TEXT_S,
+              fontFamily: interFonts.regular, // weight 400
+            }}
+          >
+            {formatDateID(event.startsAt)}
+          </Text>
+        </View>
+        {event.venue && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <MapPinIcon color={v2Colors.inkMuted} />
+            <Text
+              style={{
+                color: v2Colors.inkMuted,
+                fontSize: TEXT_S,
+                fontFamily: interFonts.regular, // weight 400
+              }}
+            >
+              {event.venue}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Single CTA: "GET TICKETS →" (no secondary button on mobile) */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Get tickets for ${event.name}`}
+        testID="hero-book"
+        onPress={() => onBook(event.id)}
+        style={({ pressed }) => ({
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+          backgroundColor: v2Colors.ink,
+          borderWidth: v2Borders.standard,
+          borderColor: v2Colors.ink,
+          paddingVertical: 14, // .btn padding: 0.875rem
+          paddingHorizontal: 24, // 1.5rem
+          minHeight: 44, // --tap-target
+          alignSelf: "flex-start",
+          // Press feedback: translate + shadow removal (brutalist)
+          transform: pressed ? [{ translateX: 4 }, { translateY: 4 }] : [],
+          // Shadow: 4px 4px hard shadow (brutalist)
+          ...(isWeb
+            ? !pressed
+              ? ({ boxShadow: `4px 4px 0 ${v2Colors.ink}` } as any)
+              : {}
+            : !pressed
+              ? {
+                  shadowColor: v2Colors.ink,
+                  shadowOffset: { width: 4, height: 4 },
+                  shadowOpacity: 1,
+                  shadowRadius: 0,
+                  elevation: 4,
+                }
+              : {}),
+        })}
+      >
+        <Text
+          style={{
+            color: v2Colors.ground,
+            fontSize: TEXT_S,
+            fontFamily: interFonts.bold, // weight 700
+            textTransform: "uppercase",
+            letterSpacing: 0.56, // 0.04em at 14px
+          }}
+        >
+          Get Tickets
+        </Text>
+        <ArrowIcon />
+      </Pressable>
     </Animated.View>
   );
 }
@@ -807,14 +1063,16 @@ export function V2HeroCarousel({ events, onBook, onSeeAll }: V2HeroCarouselProps
   const top = events.slice(0, 3);
   const zoom = useSharedValue(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight, heroHeightVh, isNative } = useResponsive();
 
-  // Viewport height (prototype: min-height 100vh/100dvh)
-  const { height: screenHeight } = Dimensions.get("window");
-  const heroHeight = Math.max(760, screenHeight);
+  // Viewport height: 70vh on mobile/native, 100vh on desktop web
+  // v2-mobile prototype: .hero { min-height: 70vh }
+  // v2 desktop prototype: .hero { min-height: 100vh }
+  const heroHeight = Math.max(480, (screenHeight * heroHeightVh) / 100);
 
   // Responsive: single column on narrow screens (<900px per prototype @media query)
-  const isNarrow = screenWidth < 900;
+  // For native: ALWAYS use mobile layout regardless of screen width
+  const isNarrow = screenWidth < 900 || isNative;
 
   // Ken Burns zoom loop (20s): scale 1 → 1.05 → 1
   useEffect(() => {
@@ -885,7 +1143,7 @@ export function V2HeroCarousel({ events, onBook, onSeeAll }: V2HeroCarouselProps
   const currentEvent = top[currentIndex];
   if (!currentEvent) return null;
 
-  // Target date for countdown
+  // Target date for countdown (desktop only)
   const targetDate = new Date(currentEvent.startsAt ?? Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   return (
@@ -913,44 +1171,62 @@ export function V2HeroCarousel({ events, onBook, onSeeAll }: V2HeroCarouselProps
       </View>
 
       {/* Gradient overlay (prototype .hero-slide-overlay) */}
-      <GradientOverlay />
+      <GradientOverlay isMobile={isNative} />
 
       {/*
-        Content container (prototype .hero-content)
-        - position: relative, z-index: 10
-        - display: grid, grid-template-columns: 1fr 400px, gap: --space-l
-        - align-items: end
+        Content container — layout differs between mobile and desktop:
         
-        In RN we use absolute positioning at the bottom of the hero section,
-        inside the solid ground area created by the gradient overlay.
+        Desktop (v2/01-home.html):
+        - grid: 1fr 400px, gap: --space-l
+        - Title left (flex 1), Info right (400px fixed)
+        - Aligned to bottom of hero
+        
+        Mobile (v2-mobile/01-home.html):
+        - Single column, content stacked
+        - Badge → Title → Meta → CTA
+        - Positioned at bottom with frame padding
       */}
       <View
         style={{
           position: "absolute",
-          bottom: SPACE_L + 40, // Room for nav dots
+          bottom: isNative ? SPACE_L : SPACE_L + 40, // Native: no extra room for dots at bottom
           left: FRAME_PADDING,
           right: FRAME_PADDING,
           zIndex: 10,
-          flexDirection: isNarrow ? "column" : "row",
+          // Desktop: row layout with title + info side by side
+          // Native: single column (mobile prototype has Badge→Title→Meta→CTA stacked)
+          flexDirection: isNative ? "column" : isNarrow ? "column" : "row",
           gap: isNarrow ? SPACE_M : SPACE_L,
           alignItems: isNarrow ? "flex-start" : "flex-end",
         }}
       >
-        {/* Left column: Title (flex: 1, aligned to bottom) */}
-        <View style={{ flex: 1, justifyContent: "flex-end" }}>
-          <HeroTitle name={currentEvent.name} />
-        </View>
+        {/* 
+          Native (mobile): Use HeroInfoMobile which includes the title
+          Web/Desktop: Separate title column + HeroInfo column
+        */}
+        {isNative ? (
+          // Mobile: Single stacked component with Badge + Title + Meta + CTA
+          <HeroInfoMobile event={currentEvent} onBook={onBook} />
+        ) : (
+          <>
+            {/* Left column: Title (flex: 1, aligned to bottom) */}
+            <View style={{ flex: 1, justifyContent: "flex-end" }}>
+              <HeroTitle name={currentEvent.name} />
+            </View>
 
-        {/* Right column: Info (fixed 400px width on desktop) */}
-        <View style={isNarrow ? { width: "100%" } : { width: 400 }}>
-          <HeroInfo event={currentEvent} targetDate={targetDate} onBook={onBook} onSeeAll={onSeeAll} />
-        </View>
+            {/* Right column: Info (fixed 400px width on desktop) */}
+            <View style={isNarrow ? { width: "100%" } : { width: 400 }}>
+              <HeroInfo event={currentEvent} targetDate={targetDate} onBook={onBook} onSeeAll={onSeeAll} />
+            </View>
+          </>
+        )}
       </View>
 
       {/* Navigation dots (prototype .hero-nav) - bottom right */}
-      {top.length > 1 && <SlideDots count={top.length} current={currentIndex} onSelect={handleDotPress} />}
+      {/* On native mobile: hide dots for cleaner look per v2-mobile prototype (no carousel nav) */}
+      {!isNative && top.length > 1 && <SlideDots count={top.length} current={currentIndex} onSelect={handleDotPress} />}
 
-      {/* Scroll indicator (prototype .scroll-indicator) - bottom left */}
+      {/* Scroll indicator (prototype .scroll-indicator) - bottom left, desktop only */}
       {!isNarrow && <ScrollIndicator />}
     </View>
   );

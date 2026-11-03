@@ -10,7 +10,7 @@ function SummaryRow({ label, value, last }: SnapSummaryRowProps & { last?: boole
   return (
     <View
       className="flex-row items-center justify-between gap-3.5 py-3"
-      style={last ? undefined : { borderBottomWidth: 1, borderBottomColor: "#e0e0e0" }}
+      style={last ? undefined : { borderBottomWidth: 1, borderBottomColor: v2.field }}
     >
       <Text className="text-xs" style={{ color: v2.gray }}>
         {label}

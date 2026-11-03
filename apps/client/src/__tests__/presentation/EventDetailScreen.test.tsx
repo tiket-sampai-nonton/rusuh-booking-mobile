@@ -90,8 +90,7 @@ describe("EventDetailScreen", () => {
     expect(screen.getByText("Habis")).toBeTruthy();
     // compact min price in the buy box
     expect(screen.getByText("Rp 450rb")).toBeTruthy();
-    // remaining-tickets hero chip
-    expect(screen.getByText("120 tiket tersedia")).toBeTruthy();
+    // hero ticket-count chip is web-only (hidden on native per v2-mobile prototype)
     // active CTA
     expect(screen.getByText("Masuk Antrean")).toBeTruthy();
   });

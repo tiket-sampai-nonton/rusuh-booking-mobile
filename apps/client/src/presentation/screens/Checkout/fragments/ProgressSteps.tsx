@@ -135,7 +135,7 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
               left: "10%",
               right: "10%",
               height: 2,
-              backgroundColor: "#e0e0e0",
+              backgroundColor: v2Colors.field, // #f5f5f5 per Design Palette Guide
               zIndex: 1,
             }}
           />

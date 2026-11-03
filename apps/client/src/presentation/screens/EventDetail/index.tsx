@@ -1,7 +1,8 @@
 /**
  * EventDetail V2 PageScreen — V2 Brutalist Mono Design
  *
- * MATCHES: `.oil-ui/v2/02-event-detail.html`
+ * MATCHES: `.genesis/prototype/v2-mobile/02-event-detail.html` (native)
+ * MATCHES: `.oil-ui/v2/02-event-detail.html` (web)
  *
  * V2 Changes:
  * - WHITE background (not dark theme)
@@ -12,11 +13,20 @@
  * - Floating CTA with pulse glow animation
  * - New sections: Lineup grid, Venue map, Gallery + Lightbox
  *
+ * Mobile-specific (native only):
+ * - Header: transparent → solid on scroll (100px threshold)
+ * - Hero: 50vh height, parallax scroll
+ * - Info card below hero with date/location
+ * - Flow steps hidden
+ * - Lineup: horizontal scroll (not grid)
+ * - Floating CTA: native shadow + pulse + safe area
+ * - No trust badges in CTA
+ *
  * Flow: Event Detail → Waiting Room → Ticket Selection → Payment → Success
  */
 import { useCallback, useState } from "react";
 import { useRouter, type Href } from "expo-router";
-import { ScrollView, Text, View } from "react-native";
+import { Platform, ScrollView, Text, View, type NativeSyntheticEvent, type NativeScrollEvent } from "react-native";
 
 import { ctaFor } from "@domain/rules/event-detail-cta";
 import { parseDescription } from "@domain/rules/event-description";
@@ -34,6 +44,7 @@ import { DetailHero } from "./fragments/DetailHero";
 import { DetailError, DetailLoading } from "./fragments/DetailStates";
 import { FloatingCTA } from "./fragments/FloatingCTA";
 import { Gallery, DEMO_GALLERY } from "./fragments/Gallery";
+import { InfoCard } from "./fragments/InfoCard";
 import { Lightbox } from "./fragments/Lightbox";
 import { Lineup, DEMO_LINEUP } from "./fragments/Lineup";
 import { TrustBox } from "./fragments/TrustBox";
@@ -68,7 +79,7 @@ function heroStatusLabel(status: string): string {
 export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   const router = useRouter();
   const { data: event, isLoading, isError, error } = useEventDetail(eventId);
-  const { isDesktop } = useResponsive();
+  const { isDesktop, isNative } = useResponsive();
   const joinQueue = useJoinQueue();
 
   // Lightbox state
@@ -79,6 +90,9 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
 
   // Wishlist state (local for now)
   const [isWishlisted, setIsWishlisted] = useState(false);
+
+  // Scroll state for header (native only)
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // Navigation handlers
   const goHome = useCallback((): void => {
@@ -99,6 +113,14 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
       });
     }
   }, [event?.name]);
+
+  // Scroll handler for header visibility (native only)
+  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (Platform.OS !== "web") {
+      const scrollY = e.nativeEvent.contentOffset.y;
+      setIsScrolled(scrollY > 100);
+    }
+  }, []);
 
   // Lightbox handlers
   const openLightbox = useCallback((index: number) => {
@@ -137,7 +159,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
     joinQueue.mutate(eventId);
   };
 
-  // Hero chips (ticket availability info)
+  // Hero chips (ticket availability info) - web only
   const chips: string[] = [];
   if (
     typeof event.remainingTickets === "number" &&
@@ -175,9 +197,10 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
         {/* Fixed Header */}
         <V2Header
           onBack={goHome}
-          onWishlist={handleWishlist}
+          onWishlist={isNative ? undefined : handleWishlist} // Wishlist web only
           onShare={handleShare}
           isWishlisted={isWishlisted}
+          isScrolled={isScrolled}
         />
 
         {/* Scrollable Content */}
@@ -185,11 +208,13 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
           contentContainerStyle={v2DetailScrollContent(isDesktop)}
           testID="detail-scroll"
           showsVerticalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
         >
-          {/* Flow Steps Indicator */}
+          {/* Flow Steps Indicator (web only - hidden via styles on native) */}
           <V2Steps activeStep={1} />
 
-          {/* Hero Section (Grayscale + Ken Burns) */}
+          {/* Hero Section (Grayscale + Ken Burns/Settle) */}
           <DetailHero
             banner={banner}
             statusLabel={heroStatusLabel(event.status)}
@@ -201,6 +226,18 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
 
           {/* Content Sections */}
           <View style={styles.content}>
+            {/* Info Card (native only - date/location) */}
+            <InfoCard
+              date={dateTxt}
+              time={timeTxt}
+              venue={event.venue ?? "Lokasi akan diumumkan"}
+            />
+
+            {/* Ticket Categories Preview — FIRST per prototype section order */}
+            <Block label="Kategori Tiket">
+              <Categories categories={desc.categories} />
+            </Block>
+
             {/* About Event */}
             <Block label="Tentang Event">
               <Text style={styles.description}>
@@ -208,12 +245,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
               </Text>
             </Block>
 
-            {/* Ticket Categories Preview */}
-            <Block label="Kategori Tiket">
-              <Categories categories={desc.categories} />
-            </Block>
-
-            {/* Lineup Grid */}
+            {/* Lineup Grid/Scroll */}
             <Block label="Line Up">
               <Lineup items={lineup} />
             </Block>
@@ -249,10 +281,12 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
               )}
             </Block>
 
-            {/* Trust Box (optional - can be removed if using inline badges) */}
-            <Block label="Jaminan Kami">
-              <TrustBox />
-            </Block>
+            {/* Trust Box (web only - can be removed if using inline badges) */}
+            {!isNative && (
+              <Block label="Jaminan Kami">
+                <TrustBox />
+              </Block>
+            )}
           </View>
         </ScrollView>
 

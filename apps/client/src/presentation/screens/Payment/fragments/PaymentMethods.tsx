@@ -53,7 +53,7 @@ export function PaymentMethods({ methods, selected, onSelect }: PaymentMethodsPr
                 <Text className="text-sm font-bold uppercase" style={{ color: isSelected ? v2.ground : v2.ink }}>
                   {m.name}
                 </Text>
-                <Text className="text-2xs" style={{ color: isSelected ? "#cccccc" : v2.gray }}>
+                <Text className="text-2xs" style={{ color: isSelected ? v2.ground : v2.inkMuted }}>
                   {m.sub}
                 </Text>
               </View>

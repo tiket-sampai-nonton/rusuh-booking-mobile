@@ -30,10 +30,12 @@ describe("(public) routes", () => {
 
   it("renders the Home screen (RBT-030: real event catalog, not a placeholder)", async () => {
     // The Home route wires the mock catalog through the provider stack; the
-    // V2 "Event Minggu Ini" / "Event Sebelumnya" sections prove the real screen mounts.
+    // section header proves the real screen mounts.
+    // On native: "Upcoming" (v2-mobile prototype); on web: "Event Minggu Ini"
+    // Jest runs as native, so we expect "Upcoming".
     renderWithProviders(<HomeScreen />);
     await waitFor(() =>
-      expect(screen.getByText("Event Minggu Ini")).toBeTruthy(),
+      expect(screen.getByText("Upcoming")).toBeTruthy(),
     );
     // V2 history section shows "Event Sebelumnya" when history events exist
     expect(screen.getByText("Event Sebelumnya")).toBeTruthy();
@@ -41,11 +43,12 @@ describe("(public) routes", () => {
 
   it("renders the Browse screen (RBT-031: real URL-driven results, not a placeholder)", async () => {
     // The Browse route wires the mock catalog through the provider stack and
-    // reads filters from the URL; V2 shows "Categories" + result count
-    // to prove the real screen mounts.
+    // reads filters from the URL.
+    // On native: category filter chips are a horizontal scroll (no "Categories"
+    // header text — that's desktop-only). Check the filter chip and result count.
     renderWithProviders(<BrowseScreen />);
     await waitFor(() =>
-      expect(screen.getByText("Categories")).toBeTruthy(),
+      expect(screen.getByTestId("category-all")).toBeTruthy(),
     );
     expect(screen.getByTestId("browse-count")).toBeTruthy();
   });

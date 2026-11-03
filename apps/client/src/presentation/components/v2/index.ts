@@ -1,11 +1,14 @@
 /**
  * RBT-096 — V2 Brutalist Mono Components (Re-implementation)
+ * RBT-097 — Mobile-specific components (BottomNav)
  *
  * Shared chrome + animation primitives for the V2 design system.
  * All components honor reduced-motion preferences.
  * Web-only pieces (cursor, scroll-progress) render nothing on native.
+ * Native-only pieces (bottom-nav) render nothing on web.
  *
  * Source of truth: `.genesis/prototype/v2/MASTER-SPEC.md`
+ * Mobile divergences: `.genesis/prototype/v2-mobile/`
  */
 
 // Button with ink-spread fill animation (§2.1)
@@ -43,10 +46,12 @@ export { V2ScrollProgress } from './V2ScrollProgress';
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // Header with slide-in animation (§3.1)
+// Mobile: 56px height, Desktop: 60px height
 export { V2Header } from './V2Header';
 export type { V2HeaderProps } from './V2Header';
 
 // Hero carousel with Ken Burns + grayscale images (§3.1)
+// Mobile: 70vh height, Desktop: 100vh height
 export { V2HeroCarousel } from './V2HeroCarousel';
 export type { V2HeroCarouselProps } from './V2HeroCarousel';
 
@@ -57,3 +62,13 @@ export type { V2EventCardProps } from './V2EventCard';
 // Category card with reveal animation (§3.1)
 export { V2CategoryCard } from './V2CategoryCard';
 export type { V2CategoryCardProps } from './V2CategoryCard';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MOBILE-SPECIFIC COMPONENTS (RBT-097)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Bottom navigation bar — native (iOS/Android) only
+// Height: 72px + safe-area-inset-bottom
+// On web, V2Header handles navigation instead
+export { V2BottomNav } from './V2BottomNav';
+export type { V2BottomNavProps, BottomNavRoute } from './V2BottomNav';

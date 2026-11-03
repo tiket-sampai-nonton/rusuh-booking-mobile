@@ -1,5 +1,6 @@
 /**
  * RBT-096 — V2 Brutalist Mono Home Sections (Re-implementation)
+ * RBT-097 — Mobile: horizontal scroll for events (v2-mobile prototype)
  *
  * PROTOTYPE 01-home.html EXACT COPY:
  * - Events grid: 2px gap (ink background creates border effect)
@@ -10,14 +11,19 @@
  * - Testimonials: quote cards
  * - Newsletter: email form
  * - Footer: ink background, link columns
+ *
+ * MOBILE (v2-mobile/01-home.html):
+ * - Events: horizontal scroll (.events-scroll), 280px fixed width cards
+ * - Section header: "UPCOMING" + "SEE ALL →" (no filter button)
  */
-import { Pressable, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, ScrollView, Text, View, type ViewStyle } from 'react-native';
 
 import {
   V2Reveal,
   V2EventCard,
   V2CategoryCard,
 } from '@presentation/components/v2';
+import { useResponsive } from '@presentation/hooks/useResponsive';
 import { v2Colors, v2Borders, v2SpacingSemantic, interFonts } from '@presentation/theme';
 
 import type { HomeSectionsProps } from '../interface';
@@ -60,20 +66,25 @@ function V2SectionHeader({
   onLinkPress,
   showFilter,
   onFilterPress,
+  isNative = false,
 }: {
   readonly title: string;
   readonly linkText?: string;
   readonly onLinkPress?: () => void;
   readonly showFilter?: boolean;
   readonly onFilterPress?: () => void;
+  readonly isNative?: boolean;
 }) {
+  // Mobile native: smaller title, no filter button (per v2-mobile prototype)
+  const titleSize = isNative ? 20 : 24;
+  
   return (
     <View
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'baseline',
-        marginBottom: v2SpacingSemantic.l,
+        alignItems: 'center',
+        marginBottom: isNative ? v2SpacingSemantic.m : v2SpacingSemantic.l,
         paddingBottom: v2SpacingSemantic.s,
         borderBottomWidth: v2Borders.standard,
         borderBottomColor: v2Colors.ink,
@@ -83,17 +94,18 @@ function V2SectionHeader({
         accessibilityRole="header"
         style={{
           color: v2Colors.ink,
-          fontSize: 24,
+          fontSize: titleSize,
           fontFamily: interFonts.black, // weight 900
           textTransform: 'uppercase',
-          letterSpacing: 0.48,
+          letterSpacing: isNative ? -0.2 : 0.48, // tighter on mobile
         }}
       >
         {title}
       </Text>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-        {showFilter && (
+        {/* Filter button: desktop only (v2-mobile has no filter) */}
+        {showFilter && !isNative && (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Filter Event"
@@ -130,20 +142,28 @@ function V2SectionHeader({
             accessibilityRole="link"
             accessibilityLabel={linkText}
             onPress={onLinkPress}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: isNative ? 4 : 8 }}
           >
             <Text
               style={{
-                color: v2Colors.ink,
-                fontSize: 14,
-                fontFamily: interFonts.bold, // weight 700
+                color: isNative ? v2Colors.inkMuted : v2Colors.ink,
+                fontSize: isNative ? 12 : 14,
+                fontFamily: isNative ? interFonts.semiBold : interFonts.bold,
                 textTransform: 'uppercase',
-                letterSpacing: 0.56,
+                letterSpacing: isNative ? 0.6 : 0.56, // 0.05em at 12px
               }}
             >
               {linkText}
             </Text>
-            <Text style={{ color: v2Colors.ink, fontSize: 14, fontFamily: interFonts.bold }}>→</Text>
+            <Text
+              style={{
+                color: isNative ? v2Colors.inkMuted : v2Colors.ink,
+                fontSize: isNative ? 12 : 14,
+                fontFamily: isNative ? interFonts.semiBold : interFonts.bold,
+              }}
+            >
+              →
+            </Text>
           </Pressable>
         )}
       </View>
@@ -152,9 +172,68 @@ function V2SectionHeader({
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// EVENTS GRID (prototype .events-grid)
-// Grid with 2px gap creates border effect (ink background behind cards)
+// EVENTS GRID (prototype .events-grid) / MOBILE SCROLL (v2-mobile .events-scroll)
+// Desktop: Grid with 2px gap creates border effect (ink background behind cards)
+// Mobile: Horizontal scroll, 280px fixed-width cards
 // ═══════════════════════════════════════════════════════════════════════════════
+
+/** Mobile-only horizontal scroll list (v2-mobile/01-home.html .events-scroll) */
+function V2EventsHorizontalScroll({
+  events,
+  onPress,
+}: {
+  readonly events: readonly { id: string }[];
+  readonly onPress: (eventId: string) => void;
+}) {
+  if (events.length === 0) {
+    return (
+      <View
+        style={{
+          padding: 48,
+          borderWidth: v2Borders.standard,
+          borderStyle: 'dashed',
+          borderColor: v2Colors.ink,
+        }}
+      >
+        <Text
+          style={{
+            color: v2Colors.inkMuted,
+            fontSize: 14,
+            textAlign: 'center',
+            fontFamily: interFonts.regular,
+          }}
+        >
+          Belum ada event yang cocok.
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      snapToInterval={280 + 16} // card width + gap
+      decelerationRate="fast"
+      contentContainerStyle={{
+        paddingRight: v2SpacingSemantic.m, // match section padding
+        gap: 16, // --space-s from prototype
+      }}
+      style={{
+        marginHorizontal: -v2SpacingSemantic.m, // bleed to edges
+        paddingLeft: v2SpacingSemantic.m,
+      }}
+    >
+      {(events as readonly any[]).map((ev, i) => (
+        <View key={ev.id} style={{ width: 280 }}>
+          <V2Reveal delay={i * 80}>
+            <V2EventCard event={ev} onPress={onPress} />
+          </V2Reveal>
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
 
 function V2EventsGrid({
   events,
@@ -294,10 +373,19 @@ export function V2HomeSections({
   onHistoryLayout,
   onSeeAll,
 }: HomeSectionsProps) {
+  const { isNative } = useResponsive();
+  
+  // Mobile native: "Upcoming" + "See All", horizontal scroll
+  // Web/Desktop: "Event Minggu Ini" + "Lihat Semua" + Filter, grid
+  const sectionTitle = isNative ? 'Upcoming' : 'Event Minggu Ini';
+  const seeAllText = isNative ? 'See All' : 'Lihat Semua';
+
   return (
     <View>
       {/* ═══════════════════════════════════════════════════════════════════════
           EVENTS SECTION (prototype #featured / .events)
+          Mobile: horizontal scroll (v2-mobile .events-scroll)
+          Desktop: grid (v2 .events-grid)
           ═══════════════════════════════════════════════════════════════════════ */}
       <View
         style={{
@@ -311,19 +399,28 @@ export function V2HomeSections({
       >
         <V2Reveal>
           <V2SectionHeader
-            title="Event Minggu Ini"
-            linkText="Lihat Semua"
+            title={sectionTitle}
+            linkText={seeAllText}
             onLinkPress={onSeeAll}
-            showFilter
+            showFilter={!isNative} // Filter only on web/desktop
             onFilterPress={onFilter}
+            isNative={isNative}
           />
         </V2Reveal>
 
-        <V2EventsGrid
-          events={data.upcoming}
-          onPress={onPressEvent}
-          columns={columns}
-        />
+        {/* Mobile native: horizontal scroll; Desktop/Web: grid */}
+        {isNative ? (
+          <V2EventsHorizontalScroll
+            events={data.upcoming}
+            onPress={onPressEvent}
+          />
+        ) : (
+          <V2EventsGrid
+            events={data.upcoming}
+            onPress={onPressEvent}
+            columns={columns}
+          />
+        )}
       </View>
 
       {/* ═══════════════════════════════════════════════════════════════════════
