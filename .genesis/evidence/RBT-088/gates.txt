@@ -1,0 +1,54 @@
+RBT-088 — V2 Brutalist Mono: Home screen (01-home)
+Branch: feature/RBT-088-v2-home
+Date: 2026-11-03
+
+SCOPE
+  Re-skin the Home screen to the V2 prototype (.genesis/prototype/v2/01-home.html),
+  presentation-layer only. Data wiring (useEvents/TanStack, LoginModal, FilterModal,
+  nav testIDs, parallax scroll) untouched. Domain/application/infrastructure untouched.
+
+CHANGES
+  presentation/screens/Home/fragments/HomeNav.tsx       restyle: glass pill -> brutalist bordered bar
+  presentation/screens/Home/fragments/HomeSections.tsx  restyle: brutalist section heads + filter btn
+                                                         + wire HomeMarketing below the history grid
+  presentation/screens/Home/fragments/HomeMarketing.tsx NEW: stats (animated counters), how-it-works,
+                                                         testimonials, newsletter — the four prototype
+                                                         marketing sections the V5 build never had
+  presentation/screens/Home/index.tsx                   wrap in V2ToastProvider (newsletter toast)
+
+PROTOTYPE FIDELITY
+  - Nav: fixed white bar, 2px hard bottom border, uppercase wordmark, center links (web>720px),
+    "Masuk / Daftar" ink CTA. (01-home .header)
+  - Sections: uppercase headers with bordered tag pill, brutalist "Filter Event" button. (#featured/#history)
+  - Stats: ink bar, 4 counters ticking 0->target (2.500.000+ / 500+ / 1.000.000+ / 99,9%),
+    Indonesian thousands separators, reduced-motion jumps to target. (.stats data-target/data-suffix/data-decimal)
+  - How It Works: 4 numbered bordered step cards (01-04) with red number accent. (.how-it-works)
+  - Testimonials: 3 bordered quote cards with initial avatar. (.testimonials)
+  - Newsletter: bordered email input (red focus border) + Daftar button, valid/invalid toast. (.newsletter)
+  - Hero (HeroCarousel) + TrustStrip: already full 1:1 from the prior build (scramble/glitch/Ken Burns/
+    parallax, reduced-motion safe) — kept as-is; the prototype hero retains red accents (Live dot/aura/CTA).
+
+GATES
+  tsc --noEmit            : PASS (0 errors)
+  eslint (Home/ + test)   : PASS (0 errors, 0 warnings)
+  jest HomeMarketing      : PASS (11/11)
+  jest HomeScreen (regress): PASS (7/7) — existing suite renders the newly-wired marketing, no regression
+
+COVERAGE (HomeMarketing.tsx — new file, scoped)
+  Statements : 100%  (47/47)
+  Branches   :  90%  (18/20)   [meets >=90% bar]
+  Functions  : 100%  (16/16)
+  Lines      : 100%  (44/44)
+  Residual branches (line 51, 103): the `intPart ?? "0"` defensive fallback (unreachable — String.split
+  always yields index 0) and the rAF cleanup null-guard. Not faked — left honestly uncovered; branch is
+  at the 90% bar. Counter animation refactored from a reanimated worklet reaction to a JS-thread
+  requestAnimationFrame tick specifically so every branch is unit-testable (no mock-undrivable worklet).
+
+REDUCED MOTION (RBT-080 not regressed)
+  V2Counter, V2Reveal, V2RevealStagger, V2Toast all honor useReducedMotion (counter jumps straight to
+  target; reveals render in place). Verified by the reduced-motion test path.
+
+NOTE
+  Native/web rendered screenshots (web+iOS+Android) deferred — host memory is tight (TIGHT posture,
+  ~3.9GB). Gate evidence (tsc/eslint/jest/coverage) captured now; screenshot capture to be appended
+  under screenshots/ when a simulator/Metro run is affordable.

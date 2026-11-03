@@ -17,6 +17,7 @@ import { FilterModal, type FilterValue } from "@presentation/components/FilterMo
 import { HeroCarousel } from "@presentation/components/home/HeroCarousel";
 import { TrustStrip } from "@presentation/components/home/TrustStrip";
 import { ScreenFade } from "@presentation/components/ScreenFade";
+import { V2ToastProvider } from "@presentation/components/v2";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
@@ -61,6 +62,7 @@ export function HomeScreen() {
 
   return (
     <ScreenFade>
+      <V2ToastProvider>
       <View className="flex-1 bg-background">
         <Animated.ScrollView
           ref={scrollRef}
@@ -115,6 +117,7 @@ export function HomeScreen() {
         <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
         <FilterModal visible={filterOpen} onClose={() => setFilterOpen(false)} onApply={applyFilter} />
       </View>
+      </V2ToastProvider>
     </ScreenFade>
   );
 }
