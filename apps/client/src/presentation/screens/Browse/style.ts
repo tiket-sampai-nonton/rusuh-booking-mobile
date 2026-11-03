@@ -149,26 +149,33 @@ export const browseSortSelect: ViewStyle = {
 // EVENTS GRID (prototype .events-grid)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const GAP = 32; // prototype gap: 2rem
+const GAP_DESKTOP = 32; // desktop prototype gap: 2rem
+const GAP_MOBILE = 16;  // mobile prototype gap: --space-s (16px)
 
-/** Multi-column grid row (desktop) */
-export const browseGridRow: ViewStyle = {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  marginHorizontal: -GAP / 2,
+/** Multi-column grid row */
+export const browseGridRow = (isNative = false): ViewStyle => {
+  const gap = isNative ? GAP_MOBILE : GAP_DESKTOP;
+  return {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -gap / 2,
+  };
 };
 
-/** Single-column grid (mobile) */
-export const browseGridList: ViewStyle = {
-  gap: GAP,
-};
+/** Single-column grid (list view) */
+export const browseGridList = (isNative = false): ViewStyle => ({
+  gap: isNative ? GAP_MOBILE : GAP_DESKTOP,
+});
 
 /** One cell in the multi-column grid */
-export const browseGridCell = (columns: number): ViewStyle => ({
-  width: `${100 / columns}%` as DimensionValue,
-  paddingHorizontal: GAP / 2,
-  marginBottom: GAP,
-});
+export const browseGridCell = (columns: number, isNative = false): ViewStyle => {
+  const gap = isNative ? GAP_MOBILE : GAP_DESKTOP;
+  return {
+    width: `${100 / columns}%` as DimensionValue,
+    paddingHorizontal: gap / 2,
+    marginBottom: gap,
+  };
+};
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LOAD MORE (prototype .load-more)
