@@ -11,10 +11,23 @@
 //   - presentation:    may import application + domain, NEVER infrastructure
 //   - infrastructure:  implements domain ports; may import domain
 //   - providers:       composition root — the ONLY place adapters bind
+const path = require("path");
+
 module.exports = {
   root: true,
   extends: ["expo"],
   ignorePatterns: ["dist/", ".expo/", "coverage/", "node_modules/"],
+  settings: {
+    "import/resolver": {
+      typescript: {
+        project: path.join(__dirname, "tsconfig.json"),
+        alwaysTryTypes: true,
+      },
+      node: {
+        extensions: [".js", ".jsx", ".ts", ".tsx", ".d.ts"],
+      },
+    },
+  },
   overrides: [
     {
       files: ["src/**/*.{ts,tsx}"],
