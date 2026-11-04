@@ -136,8 +136,9 @@ describe("BrowseScreen — URL-driven filters", () => {
     // V2: BrowseScreen uses V2Loader directly with accessibilityLabel="Memuat"
     expect(screen.getByLabelText("Memuat")).toBeTruthy();
     release([]);
-    await waitFor(() =>
-      expect(screen.queryByLabelText("Memuat")).toBeNull(),
-    );
+    // The loader remains mounted during its exit animation. Assert that the
+    // resolved empty state appears instead of waiting for the animation node
+    // to unmount (Reanimated's test clock does not advance it automatically).
+    await waitFor(() => screen.getByTestId("browse-empty"));
   });
 });

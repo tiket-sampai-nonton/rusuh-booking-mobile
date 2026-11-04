@@ -28,7 +28,7 @@ export function SnapSummary({ bookingId, method, amountMinor }: SnapSummaryProps
       className="my-7 px-5 py-1"
       style={{ backgroundColor: "#f9f9f9", borderWidth: v2Border.base, borderColor: v2.ink }}
     >
-      <SummaryRow label="Order ID" value={bookingId} />
+      <SummaryRow label="Nomor Pesanan" value={bookingId} />
       <SummaryRow label="Metode" value={method ?? "SNAP"} />
       <SummaryRow label="Total" value={minorToIDR(amountMinor)} last />
     </View>

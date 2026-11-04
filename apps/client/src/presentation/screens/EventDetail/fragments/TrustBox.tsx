@@ -24,8 +24,8 @@ import {
 const TRUST_LINES = [
   "Tiket resmi & terverifikasi",
   "Antrean adil (FCFS)",
-  "E-ticket langsung ke gate",
-  "Refund sesuai ketentuan penyelenggara",
+  "Tiket elektronik langsung ke pintu masuk",
+  "Pengembalian dana sesuai ketentuan penyelenggara",
 ] as const;
 
 export function TrustBox() {

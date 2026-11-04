@@ -103,7 +103,7 @@ const BADGE_LABEL: Record<BadgeTone, string> = {
   ok: 'Tersedia',
   low: 'Stok Menipis',
   soon: 'Segera',
-  soldout: 'Sold Out',
+  soldout: 'Habis Terjual',
   done: 'Selesai',
 };
 
@@ -190,6 +190,7 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
       elevation: interpolate(hovered.value, [0, 1], [0, 8]),
     } : {}),
   }));
+  const nativeShadowStyle = useAnimatedStyle(() => ({ opacity: staggerOpacity.value }));
 
   // Image scale on hover: 1 → 1.05
   const imageScaleStyle = useAnimatedStyle(() => ({
@@ -223,14 +224,6 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
     // Desktop: border comes from grid gap + ink background
     borderWidth: isNative ? v2Borders.standard : 0,
     borderColor: isNative ? v2Colors.ink : undefined,
-    // Mobile: static shadow (4px 4px) to avoid NOBRIDGE errors with animated shadowOffset
-    ...(isNative ? {
-      shadowColor: v2Colors.ink,
-      shadowOffset: { width: 4, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 4,
-    } : {}),
   };
 
   const imageContainerStyle: ViewStyle = {
@@ -279,6 +272,8 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
   };
 
   return (
+    <View style={isNative ? { position: 'relative', width: '100%' } : undefined}>
+    {isNative ? <Animated.View pointerEvents="none" style={[{ position: 'absolute', top: 4, right: -4, bottom: -4, left: 4, backgroundColor: v2Colors.ink }, nativeShadowStyle]} /> : null}
     <Animated.View style={[containerStyle, cardStyle]}>
       <Pressable
         accessibilityRole="button"
@@ -334,7 +329,7 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
                 letterSpacing: 0.48, // 0.04em
               }}
             >
-              {badge.label || BADGE_LABEL[badge.tone]}
+              {BADGE_LABEL[badge.tone]}
             </Text>
           </Animated.View>
 
@@ -474,6 +469,7 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
         </View>
       </Pressable>
     </Animated.View>
+    </View>
   );
 }
 

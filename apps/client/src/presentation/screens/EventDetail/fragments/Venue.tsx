@@ -92,7 +92,7 @@ export function Venue({ name, address, mapImage, mapsUrl }: VenueProps) {
         >
           <View style={venueStyles.mapBtn}>
             <PinIcon color={v2Colors.ground} size={16} />
-            <Text style={venueStyles.mapBtnText}>Buka di Maps</Text>
+            <Text style={venueStyles.mapBtnText}>Buka Peta</Text>
           </View>
         </View>
       </Pressable>

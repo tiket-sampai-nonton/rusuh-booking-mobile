@@ -72,7 +72,7 @@ describe("HomeMarketing", () => {
     expect(screen.getByText("Transaksi Aman")).toBeTruthy();
     expect(screen.getByText("Cara Beli Tiket")).toBeTruthy();
     expect(screen.getByText("Pilih Event")).toBeTruthy();
-    expect(screen.getByText("Masuk Venue")).toBeTruthy();
+    expect(screen.getByText("Masuk ke Lokasi Acara")).toBeTruthy();
     expect(screen.getByText("Kata Mereka")).toBeTruthy();
     expect(screen.getByText("Rina Putri")).toBeTruthy();
   });

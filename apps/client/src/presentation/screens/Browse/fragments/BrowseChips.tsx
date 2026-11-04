@@ -40,30 +40,30 @@ export function BrowseChips({
 }: BrowseChipsProps) {
   return (
     <View className="mt-3 flex-row flex-wrap items-center" style={{ gap: 8 }}>
-      <Chip label="Genre" value={genre === "Semua" ? "Semua" : genre} />
+      <Chip label="Kategori" value={genre === "Semua" ? "Semua" : genre} />
       <Chip label="Waktu" value={TIME_LABEL[time] ?? "Semua waktu"} />
-      <Chip label="Urut" value={SORT_LABEL[sort] ?? "Terdekat"} />
+      <Chip label="Urutan" value={SORT_LABEL[sort] ?? "Terdekat"} />
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Ubah Filter"
+        accessibilityLabel="Ubah Penyaringan"
         onPress={onRefine}
         testID="browse-refine"
         style={{ borderWidth: 2, borderColor: v2.ink, backgroundColor: v2.ink, paddingHorizontal: 14, paddingVertical: 8 }}
       >
         <Text style={{ color: v2.ground }} className="text-2xs font-v2 font-bold uppercase">
-          ⛃ Ubah Filter
+          Saring Event
         </Text>
       </Pressable>
       {isFiltered ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Reset Filter"
+          accessibilityLabel="Hapus Penyaringan"
           onPress={onReset}
           testID="browse-reset"
           style={{ borderWidth: 2, borderColor: v2.ink, backgroundColor: v2.ground, paddingHorizontal: 14, paddingVertical: 8 }}
         >
           <Text style={{ color: v2.ink }} className="text-2xs font-v2 font-bold uppercase">
-            ↺ Reset Filter
+            Hapus Penyaringan
           </Text>
         </Pressable>
       ) : null}

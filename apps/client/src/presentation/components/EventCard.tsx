@@ -131,7 +131,7 @@ export function EventCard({ event, onPress, history = false }: EventCardProps) {
         >
           {disabled ? (
             <Text style={{ fontSize: 12, color: AVAIL_COLOR[badge.tone] }} className="font-semibold">
-              {badge.tone === "done" ? "Event selesai" : "Sold Out"}
+              {badge.tone === "done" ? "Event selesai" : "Tiket Habis"}
             </Text>
           ) : (
             <Text style={{ fontSize: 12 }} className="text-muted-foreground">

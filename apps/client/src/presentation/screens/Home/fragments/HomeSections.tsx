@@ -83,7 +83,7 @@ export function HomeSections({
           <V2SectionHead
             tag="Sedang Berlangsung"
             title="Konser Terdekat"
-            subtitle="Pilih event, masuk waiting room, dan amankan tiketmu. Posisi antrean real-time, tanpa PHP."
+            subtitle="Pilih event, masuk ke ruang tunggu, dan amankan tiketmu. Posisi antrean diperbarui langsung."
           />
         </V2Reveal>
 
@@ -91,7 +91,7 @@ export function HomeSections({
           <View className="mb-7.5 flex-row">
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Filter Event"
+              accessibilityLabel="Saring Event"
               onPress={onFilter}
               testID="filter-open"
               style={{
@@ -109,7 +109,7 @@ export function HomeSections({
                 ⛃
               </Text>
               <Text style={{ color: v2.ink }} className="text-sm font-v2 font-bold uppercase">
-                Filter Event
+                Saring Event
               </Text>
             </Pressable>
           </View>
@@ -132,7 +132,7 @@ export function HomeSections({
           <V2SectionHead
             archive
             tag="⏳ Arsip"
-            title="History Event"
+            title="Riwayat Event"
             subtitle="Event yang sudah berlalu. Kartu diredam & tidak bisa diklik."
           />
         </V2Reveal>

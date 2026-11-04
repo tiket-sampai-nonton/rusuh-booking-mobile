@@ -20,15 +20,15 @@ export function peopleAhead(position: number): number {
 }
 
 /**
- * ETA text, mirroring the V2 prototype: "Ready!" at the front, else ~N min using a
+ * ETA text uses Bahasa labels: "Siap!" at the front, else ~N menit using a
  * fixed admission rate (the server rate isn't on the frozen QueueEntry, so the
  * prototype's default 1400/min is used as the display heuristic).
  */
 const ADMISSION_RATE_PER_MIN = 1400;
 export function etaText(position: number): string {
-  if (position <= 0) return "Ready!";
+  if (position <= 0) return "Siap!";
   const mins = Math.max(1, Math.ceil(position / ADMISSION_RATE_PER_MIN));
-  return mins <= 1 ? "~1 min" : `~${mins} min`;
+  return mins <= 1 ? "~1 menit" : `~${mins} menit`;
 }
 
 /**
@@ -66,20 +66,20 @@ export const ZONE_COPY: Readonly<Record<QueueZone, ZoneCopy>> = {
   GUARANTEED: {
     tone: "ok",
     icon: "lock",
-    label: "Safe Zone",
-    body: "Your ticket is guaranteed when your turn arrives. You will not be cut in line.",
+    label: "Zona Aman",
+    body: "Tiket Anda terjamin saat giliran tiba. Posisi Anda tidak akan didahului.",
   },
   POSSIBLE: {
     tone: "warn",
     icon: "warning",
-    label: "Possible Zone",
-    body: "You are in the reserve zone. Ticket availability depends on remaining stock.",
+    label: "Zona Cadangan",
+    body: "Anda berada di zona cadangan. Ketersediaan tiket bergantung pada sisa stok.",
   },
   NOT_ENOUGH: {
     tone: "error",
     icon: "alert",
-    label: "Low Chance Zone",
-    body: "Your position is beyond estimated stock. Stay in queue - tickets may become available if others cancel.",
+    label: "Peluang Terbatas",
+    body: "Posisi Anda melewati perkiraan stok. Tetap mengantre, tiket mungkin tersedia jika ada pembatalan.",
   },
 };
 
@@ -87,21 +87,21 @@ export function zoneCopy(zone: QueueZone | undefined): ZoneCopy {
   return ZONE_COPY[zone ?? "GUARANTEED"];
 }
 
-/** Terminal-state title per the V2 prototype (English). */
+/** Terminal-state titles shown to the user. */
 export function terminalTitle(status: QueueStatus): string {
-  return status === "SOLD_OUT" ? "Sold Out" : "Sale Ended";
+  return status === "SOLD_OUT" ? "Tiket Habis" : "Penjualan Berakhir";
 }
 
 /** Terminal-state body copy (recovery hint). */
 export function terminalBody(status: QueueStatus): string {
   return status === "SOLD_OUT"
-    ? "Sorry, all tickets for this event have been sold while you were in the queue."
-    : "The ticket sale period for this event has ended.";
+    ? "Maaf, semua tiket event ini habis terjual saat Anda mengantre."
+    : "Masa penjualan tiket event ini telah berakhir.";
 }
 
 /** Claim-error (RBT-044) title mirrors the terminal titles. */
 export function claimErrorTitle(errorState: "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN"): string {
-  return errorState === "EVENT_SOLD_OUT" ? "Sold Out" : "Turn Expired";
+  return errorState === "EVENT_SOLD_OUT" ? "Tiket Habis" : "Giliran Berakhir";
 }
 
 /** Claim-error body copy. */
@@ -109,74 +109,70 @@ export function claimErrorBody(
   errorState: "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN",
 ): string {
   if (errorState === "EVENT_SOLD_OUT") {
-    return "All tickets sold out during your turn. Browse other events.";
+    return "Semua tiket habis saat giliran Anda. Jelajahi event lainnya.";
   }
-  return "You didn't proceed to ticket selection in time. Your turn has been given to the next person in queue.";
+  return "Anda belum memilih tiket tepat waktu. Giliran diberikan kepada orang berikutnya dalam antrean.";
 }
 
 /** Verbatim copy constants reused across fragments. */
 export const COPY = {
-  // V2 prototype uses English labels
-  eyebrow: "Virtual Waiting Room",
-  positionLabel: "Your Position",
-  title: "You're in the queue",
+  eyebrow: "Ruang Tunggu Virtual",
+  positionLabel: "Posisi Anda",
+  title: "Anda sedang mengantre",
   persistenceSub:
-    "Your position is safely stored on the server — refreshing or closing/reopening the tab won't remove you from the queue.",
-  aheadLabel: "Ahead of you",
-  etaLabel: "Estimated wait",
-  admitTitle: "It's your turn!",
-  admitSub: "Preparing ticket selection page...",
-  leave: "Leave Queue",
-  noQueueTitle: "No Active Queue",
-  noQueueSub: "You haven't joined any event queue yet.",
-  errorTitle: "Failed to Load Queue",
-  errorSub: "Something went wrong. Please try again.",
-  loadingSub: "Connecting...",
+    "Posisi Anda tersimpan dengan aman di server. Memuat ulang atau menutup halaman tidak akan menghapus antrean Anda.",
+  aheadLabel: "Orang di depan Anda",
+  etaLabel: "Perkiraan waktu tunggu",
+  admitTitle: "Giliran Anda!",
+  admitSub: "Menyiapkan halaman pemilihan tiket…",
+  leave: "Keluar dari Antrean",
+  noQueueTitle: "Tidak Ada Antrean Aktif",
+  noQueueSub: "Anda belum bergabung ke antrean event mana pun.",
+  errorTitle: "Antrean Gagal Dimuat",
+  errorSub: "Terjadi kendala. Silakan coba lagi.",
+  loadingSub: "Menghubungkan…",
   footnote:
-    "First-Come-First-Served queue. Queue tokens are issued & validated by the server. Adaptive polling follows nextPollAfterMs from server.",
+    "Antrean dilayani sesuai urutan kedatangan. Token antrean diterbitkan dan divalidasi server. Pembaruan mengikuti jadwal dari server.",
 
   // V2 info text
   infoText:
-    "Please keep this page open. Your position is automatically updated. Do not refresh or leave this page, or you will lose your spot.",
+    "Jangan tutup halaman ini. Posisi antrean diperbarui otomatis. Jangan muat ulang atau tinggalkan halaman agar posisi Anda tetap terjaga.",
 
   // V2 warning messages
-  backgroundWarningTitle: "Tab in Background",
+  backgroundWarningTitle: "Halaman di Latar Belakang",
   backgroundWarningText:
-    "Your queue position is being held, but please keep this tab active to ensure smooth transition when it's your turn.",
-  longWaitWarningTitle: "📱 Long Wait Expected",
+    "Posisi antrean Anda tetap tersimpan. Biarkan halaman ini aktif agar perpindahan berjalan lancar saat giliran tiba.",
+  longWaitWarningTitle: "Antrean Diperkirakan Lama",
   longWaitWarningText:
-    "The estimated wait is over 10 minutes. Keep this tab open - we'll notify you when it's almost your turn.",
-  turnExpiryTitle: "Your Turn Expires In",
+    "Perkiraan waktu tunggu lebih dari 10 menit. Biarkan halaman ini terbuka; kami akan memberi tahu saat giliran Anda hampir tiba.",
+  turnExpiryTitle: "Giliran Anda Berakhir Dalam",
 
   // V2 redirect countdown
-  redirectTitle: "It's Your Turn!",
-  redirectText: "Redirecting to ticket selection...",
+  redirectTitle: "Giliran Anda!",
+  redirectText: "Membuka halaman pemilihan tiket…",
 
   // V2 modal
-  leaveModalTitle: "Leave Queue?",
+  leaveModalTitle: "Keluar dari Antrean?",
   leaveModalText:
-    "If you leave now, you will lose your position in the queue and will need to rejoin from the back.",
-  stayInQueue: "Stay in Queue",
-  leaveQueue: "Leave Queue",
+    "Jika Anda keluar sekarang, posisi antrean akan hilang dan Anda harus bergabung kembali dari belakang.",
+  stayInQueue: "Tetap Mengantre",
+  leaveQueue: "Keluar dari Antrean",
 
   // V2 error states
-  soldOutTitle: "Sold Out",
-  soldOutText:
-    "Sorry, all tickets for this event have been sold while you were in the queue.",
-  saleEndedTitle: "Sale Ended",
-  saleEndedText: "The ticket sale period for this event has ended.",
-  sessionExpiredTitle: "⌛ Session Expired",
-  sessionExpiredText:
-    "Your queue session has expired due to inactivity. Please rejoin the queue.",
-  turnExpiredTitle: "Turn Expired",
-  turnExpiredText:
-    "You didn't proceed to ticket selection in time. Your turn has been given to the next person in queue.",
+  soldOutTitle: "Tiket Habis",
+  soldOutText: "Maaf, semua tiket event ini habis terjual saat Anda mengantre.",
+  saleEndedTitle: "Penjualan Berakhir",
+  saleEndedText: "Masa penjualan tiket event ini telah berakhir.",
+  sessionExpiredTitle: "Sesi Kedaluwarsa",
+  sessionExpiredText: "Sesi antrean Anda berakhir karena tidak aktif. Silakan bergabung kembali.",
+  turnExpiredTitle: "Giliran Berakhir",
+  turnExpiredText: "Anda belum memilih tiket tepat waktu. Giliran diberikan kepada orang berikutnya dalam antrean.",
 
   // V2 buttons
-  browseEvents: "Browse Other Events",
-  rejoinQueue: "Rejoin Queue",
+  browseEvents: "Jelajahi Event Lain",
+  rejoinQueue: "Bergabung Kembali",
 
   // V2 network status
-  connectionLost: "Connection lost. Your position is being held...",
-  reconnected: "Reconnected! Resuming queue...",
+  connectionLost: "Koneksi terputus. Posisi antrean Anda tetap tersimpan…",
+  reconnected: "Koneksi tersambung kembali. Memperbarui antrean…",
 } as const;

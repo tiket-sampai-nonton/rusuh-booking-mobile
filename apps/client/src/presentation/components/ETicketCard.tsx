@@ -60,9 +60,9 @@ export function ETicketCard({ bookingId, index, total, eventName, venue, startsA
         {eventName ? (
           <View className="mt-5 w-full gap-2" style={{ borderTopWidth: v2Border.base, borderTopColor: v2.ink, paddingTop: 16 }}>
             <Text className="text-lg font-extrabold uppercase" style={{ color: v2.ink }}>{eventName}</Text>
-            <Text className="text-xs" style={{ color: v2.gray }}>{attendeeName ?? 'Ticket holder'} · {attendeeNikMasked ?? '••••'}</Text>
-            <Text className="text-xs" style={{ color: v2.gray }}>{startsAt ?? 'Date TBA'} · {venue ?? 'Venue TBA'}</Text>
-            <Text className="text-xs font-bold uppercase" style={{ color: v2.ink }}>General Admission · Ticket code {value}</Text>
+            <Text className="text-xs" style={{ color: v2.gray }}>{attendeeName ?? 'Pemegang tiket'} · {attendeeNikMasked ?? '••••'}</Text>
+            <Text className="text-xs" style={{ color: v2.gray }}>{startsAt ?? 'Tanggal menyusul'} · {venue ?? 'Lokasi menyusul'}</Text>
+            <Text className="text-xs font-bold uppercase" style={{ color: v2.ink }}>Tiket Umum · Kode tiket {value}</Text>
           </View>
         ) : null}
         <Text className="mt-1 text-2xs" style={{ color: v2.gray }}>

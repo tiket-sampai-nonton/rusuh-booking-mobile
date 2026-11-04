@@ -14,7 +14,7 @@ const RN = require("react-native") as typeof import("react-native");
 describe("buildTicketManifest (RBT-071)", () => {
   it("lists one safe ref per ticket and carries NO PII", () => {
     const m = buildTicketManifest("bk-1", 2);
-    expect(m).toContain("Order: bk-1");
+    expect(m).toContain("Nomor Pesanan: bk-1");
     expect(m).toContain("RBT|bk-1|1");
     expect(m).toContain("RBT|bk-1|2");
     expect(/\d{16}/.test(m)).toBe(false); // no raw NIK

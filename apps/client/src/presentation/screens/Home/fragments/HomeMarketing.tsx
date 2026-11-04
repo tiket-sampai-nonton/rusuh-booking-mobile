@@ -24,7 +24,7 @@ function easeOutExpo(t: number): number {
 /** Prototype stat tiles (`data-target` / `data-suffix` / `data-decimal`). */
 const STATS = [
   { target: 2_500_000, suffix: "+", decimals: 0, label: "Tiket Terjual" },
-  { target: 500, suffix: "+", decimals: 0, label: "Partner Event" },
+  { target: 500, suffix: "+", decimals: 0, label: "Mitra Event" },
   { target: 1_000_000, suffix: "+", decimals: 0, label: "Pengguna Aktif" },
   { target: 99.9, suffix: "%", decimals: 1, label: "Transaksi Aman" },
 ] as const;
@@ -34,7 +34,7 @@ const STEPS = [
   { n: "01", title: "Pilih Event", desc: "Cari dan pilih event yang ingin kamu hadiri dari berbagai kategori" },
   { n: "02", title: "Pilih Tiket", desc: "Tentukan kategori kursi dan jumlah tiket sesuai kebutuhan" },
   { n: "03", title: "Bayar", desc: "Selesaikan pembayaran dengan metode pilihanmu secara aman" },
-  { n: "04", title: "Masuk Venue", desc: "Tunjukkan e-ticket di pintu masuk dan nikmati acaranya" },
+  { n: "04", title: "Masuk ke Lokasi Acara", desc: "Tunjukkan tiket elektronik di pintu masuk dan nikmati acaranya." },
 ] as const;
 
 /** Prototype testimonials. */
@@ -253,7 +253,7 @@ export function HomeMarketing() {
         </V2Reveal>
         <V2Reveal delay={80}>
           <Text style={{ color: v2.muted, textAlign: "center", marginBottom: 20 }} className="text-base font-v2">
-            Daftar newsletter dan jangan lewatkan event favoritmu
+            Berlangganan info event agar tidak melewatkan event favoritmu
           </Text>
         </V2Reveal>
         <V2Reveal delay={160}>
@@ -268,7 +268,7 @@ export function HomeMarketing() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
-              accessibilityLabel="Alamat email newsletter"
+              accessibilityLabel="Alamat email untuk info event"
               testID="newsletter-input"
               style={{
                 borderWidth: 2,
@@ -281,7 +281,7 @@ export function HomeMarketing() {
                 fontSize: 16,
               }}
             />
-            <V2Button label="Daftar" onPress={submitNewsletter} testID="newsletter-submit" />
+            <V2Button label="Berlangganan" onPress={submitNewsletter} testID="newsletter-submit" />
           </View>
         </V2Reveal>
       </View>

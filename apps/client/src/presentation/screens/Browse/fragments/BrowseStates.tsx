@@ -14,7 +14,7 @@ import { v2Colors, interFonts } from '@presentation/theme';
 import { browseEmpty } from '../style';
 
 export function BrowseLoading() {
-  return <V2Loader visible label="BROWSE" testID="browse-loading" />;
+  return <V2Loader visible label="JELAJAHI" testID="browse-loading" />;
 }
 
 export function BrowseEmpty() {

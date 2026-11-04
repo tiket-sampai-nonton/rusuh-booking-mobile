@@ -2,14 +2,15 @@ import "../../global.css";
 
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Fragment, useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { Fragment, useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, Platform, View } from "react-native";
 
 import { useNotifications } from "@presentation/hooks/useNotifications";
 import { useInterFonts } from "@presentation/theme/fonts";
 import { AppProviders } from "@providers/providers";
 import { useServices } from "@providers/service-context";
 import { useAccountStore } from "@presentation/stores/account-store";
+import { NativeLaunchSplash } from "@presentation/components/NativeLaunchSplash";
 
 // Runs INSIDE the providers so it can read the DI container (useServices).
 // Registers for push + wires the notification tap→deep-link (RBT-072, native).
@@ -41,24 +42,26 @@ function AccountSessionBridge() {
 // RBT-096 adds Inter font loading for V2 "Brutalist Mono" design system.
 export default function RootLayout() {
   const { fontsLoaded, fontError } = useInterFonts();
-
-  // Wait for fonts to load (or error) before rendering the app
-  if (!fontsLoaded && !fontError) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size="large" color="#000000" />
-      </View>
-    );
-  }
+  const [showSplash, setShowSplash] = useState(Platform.OS !== "web");
+  const finishSplash = useCallback(() => setShowSplash(false), []);
 
   return (
-    <AppProviders>
-      <Fragment>
-        <NotificationBridge />
-        <AccountSessionBridge />
-        <Stack screenOptions={{ headerShown: false }} />
-        <StatusBar style="auto" />
-      </Fragment>
-    </AppProviders>
+    <View style={{ flex: 1 }}>
+      {fontsLoaded || fontError ? (
+        <AppProviders>
+          <Fragment>
+            <NotificationBridge />
+            <AccountSessionBridge />
+            <Stack screenOptions={{ headerShown: false }} />
+          </Fragment>
+        </AppProviders>
+      ) : (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator size="large" color="#000000" />
+        </View>
+      )}
+      <StatusBar style={showSplash ? "light" : "auto"} />
+      {showSplash && Platform.OS !== "web" ? <NativeLaunchSplash onFinish={finishSplash} /> : null}
+    </View>
   );
 }

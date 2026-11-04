@@ -51,7 +51,7 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable
-        accessibilityLabel="Tutup filter"
+        accessibilityLabel="Tutup penyaringan"
         onPress={onClose}
         className="flex-1 items-center justify-center bg-ink/70 p-5"
         style={Platform.OS === "web" ? undefined : { justifyContent: "flex-end", padding: 0 }}
@@ -64,15 +64,15 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
           testID="filter-modal"
         >
           <Text className="text-xl font-extrabold text-foreground" accessibilityRole="header">
-            Filter Event
+            Saring Event
           </Text>
           <Text className="mt-1.5 text-sm text-muted-foreground">
-            Pilih genre, waktu, dan urutan. Hasil tampil di halaman baru.
+            Pilih kategori, waktu, dan urutan. Hasil tampil di halaman baru.
           </Text>
 
           <ScrollView style={{ maxHeight: 340 }} className="mt-2">
             <PillGroup
-              label="Genre Musik"
+              label="Kategori Musik"
               options={GENRES.map((g) => ({ v: g, l: g }))}
               value={genre}
               onPick={setGenre}
@@ -106,12 +106,12 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Terapkan Filter"
+              accessibilityLabel="Terapkan Saringan"
               onPress={apply}
               testID="filter-apply"
               className="rounded-pill bg-brand px-5 py-3"
             >
-              <Text className="text-sm font-bold text-white">Terapkan Filter</Text>
+              <Text className="text-sm font-bold text-white">Terapkan Saringan</Text>
             </Pressable>
           </View>
         </Pressable>

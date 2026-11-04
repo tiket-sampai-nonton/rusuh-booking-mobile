@@ -38,7 +38,7 @@ export function HistoryScreen() {
   // Nav links for desktop header
   const navLinks = isDesktop
     ? [
-        { label: "Browse", onPress: goBrowse, testID: "history-nav-browse" },
+        { label: "Jelajahi", onPress: goBrowse, testID: "history-nav-browse" },
         { label: "Tiket Saya", onPress: noop, testID: "history-nav-tickets" },
       ]
     : [];
@@ -73,7 +73,7 @@ export function HistoryScreen() {
 
           {/* Main content */}
           <View style={historyStyles.main}>
-            <Text style={historyStyles.sectionTitle}>⏳ Histori</Text>
+            <Text style={historyStyles.sectionTitle}>Riwayat</Text>
 
             {isLoading ? (
               <HistoryLoading />

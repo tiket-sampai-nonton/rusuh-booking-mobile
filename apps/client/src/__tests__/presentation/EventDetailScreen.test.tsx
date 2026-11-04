@@ -121,7 +121,7 @@ describe("EventDetailScreen", () => {
       container: { eventRepository: repo(soldOut) },
     });
     await waitFor(() => screen.getByTestId("join-cta"));
-    expect(screen.getByText("Tiket Habis")).toBeTruthy();
+    expect(screen.getAllByText("Tiket Habis").length).toBeGreaterThan(0);
     fireEvent.press(screen.getByTestId("join-cta"));
     expect(mockRouter.push).not.toHaveBeenCalled();
   });

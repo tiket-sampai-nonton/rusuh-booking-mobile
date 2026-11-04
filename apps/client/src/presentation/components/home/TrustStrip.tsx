@@ -18,7 +18,7 @@ import Animated, {
 const ITEMS = [
   "Antrean adil FCFS",
   "Timer server-authoritative",
-  "Anti-oversell",
+  "Cegah Penjualan Berlebih",
   "Maks 3 tiket / NIK",
   "Pembayaran aman",
   "E-tiket instan",

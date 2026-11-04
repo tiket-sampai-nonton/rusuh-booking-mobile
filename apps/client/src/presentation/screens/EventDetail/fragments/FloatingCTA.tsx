@@ -239,7 +239,7 @@ function NativeCTAButton({ label, disabled, canJoin, onJoin, pulseAnim }: CTABut
 const TRUST_BADGES = [
   { text: "Tiket resmi" },
   { text: "Antrean adil" },
-  { text: "E-ticket instan" },
+  { text: "Tiket elektronik instan" },
 ] as const;
 
 function TrustBadges() {

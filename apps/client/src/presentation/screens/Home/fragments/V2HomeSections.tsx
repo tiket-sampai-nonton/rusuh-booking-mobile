@@ -54,7 +54,7 @@ const CATEGORIES = [
     imageUri: 'https://images.unsplash.com/photo-1461896836934- voices?w=600&q=80',
   },
   {
-    name: 'Theater',
+    name: 'Teater',
     count: '35+ event',
     imageUri: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=600&q=80',
   },
@@ -111,7 +111,7 @@ function V2SectionHeader({
         {showFilter && (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Filter Event"
+            accessibilityLabel="Saring Event"
             onPress={onFilterPress}
             testID="filter-btn"
             style={{
@@ -137,7 +137,7 @@ function V2SectionHeader({
                 letterSpacing: 0.48,
               }}
             >
-              Filter
+              Saring
             </Text>
           </Pressable>
         )}
@@ -381,10 +381,9 @@ export function V2HomeSections({
 }: HomeSectionsProps) {
   const { isNative } = useResponsive();
   
-  // Mobile native: "Upcoming" + "See All", horizontal scroll
-  // Web/Desktop: "Event Minggu Ini" + "Lihat Semua" + Filter, grid
-  const sectionTitle = isNative ? 'Upcoming' : 'Event Minggu Ini';
-  const seeAllText = isNative ? 'See All' : 'Lihat Semua';
+  // Use the same Indonesian copy for equivalent native and web sections.
+  const sectionTitle = 'Event Minggu Ini';
+  const seeAllText = 'Lihat Semua';
 
   return (
     <View>
@@ -408,7 +407,7 @@ export function V2HomeSections({
             title={sectionTitle}
             linkText={seeAllText}
             onLinkPress={onSeeAll}
-            showFilter
+            showFilter={!isNative}
             onFilterPress={onFilter}
             isNative={isNative}
           />

@@ -93,10 +93,10 @@ export function HomeScreen() {
           {/* Hero Carousel - Full viewport (prototype .hero) */}
           {data && data.upcoming.length > 0 && (
             <V2HeroCarousel
-              events={data.upcoming.slice(0, 1)}
+              events={data.upcoming.slice(0, 3)}
               onBook={goToEvent}
               onSeeAll={goBrowse}
-              autoPlay={false}
+              autoPlay
             />
           )}
 
@@ -121,10 +121,10 @@ export function HomeScreen() {
           showLinks={showNavLinks}
           links={[
             { label: 'Beranda', onPress: () => scrollRef.current?.scrollTo({ y: 0, animated: true }), testID: 'nav-home' },
-            { label: 'Browse', onPress: goBrowse, testID: 'nav-browse' },
+            { label: 'Jelajahi', onPress: goBrowse, testID: 'nav-browse' },
             ...(profile ? [
-              { label: 'My Ticket', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
-              { label: 'Profile', onPress: () => router.push('/profile' as Href), testID: 'nav-profile' },
+              { label: 'Tiket Saya', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
+              { label: 'Profil', onPress: () => router.push('/profile' as Href), testID: 'nav-profile' },
             ] : []),
           ]}
           isLoggedIn={Boolean(profile)}

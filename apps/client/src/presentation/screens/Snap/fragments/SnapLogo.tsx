@@ -12,7 +12,7 @@ export function SnapLogo() {
       >
         SNAP
       </Text>
-      <Text style={{ color: v2.gray, fontSize: 14 }}>Secure Payment Gateway</Text>
+      <Text style={{ color: v2.gray, fontSize: 14 }}>Gerbang Pembayaran Aman</Text>
     </View>
   );
 }

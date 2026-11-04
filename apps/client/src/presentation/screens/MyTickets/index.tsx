@@ -24,6 +24,15 @@ import { v2Colors, v2Borders, interFonts } from '@presentation/theme';
 
 type TicketTab = 'upcoming' | 'past';
 
+const BOOKING_STATUS_LABELS: Record<MyBookingSummary['status'], string> = {
+  PENDING_PAYMENT: 'Menunggu Pembayaran',
+  VERIFYING: 'Sedang Diverifikasi',
+  PAID: 'Lunas',
+  EXPIRED: 'Kedaluwarsa',
+  CANCELLED: 'Dibatalkan',
+  REVIEW: 'Dalam Peninjauan',
+};
+
 interface TicketQrRef {
   toDataURL: (callback: (value: string) => void) => void;
 }
@@ -70,16 +79,16 @@ function TicketCard({
             {event.name}
           </Text>
           <Text style={{ color: past ? v2Colors.inkMuted : v2Colors.success, fontFamily: interFonts.bold, fontSize: 11, textTransform: 'uppercase' }}>
-            {past ? 'Used' : 'Confirmed'}
+            {past ? 'Terpakai' : 'Terkonfirmasi'}
           </Text>
         </View>
         <Text style={{ marginTop: 8, color: v2Colors.inkMuted, fontFamily: interFonts.medium, fontSize: 12 }}>
-          {formatDateID(event.startsAt)} · {event.venue ?? 'Venue TBA'}
+          {formatDateID(event.startsAt)} · {event.venue ?? 'Lokasi menyusul'}
         </Text>
         <View style={{ marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderStyle: 'dashed', borderColor: v2Colors.ink, flexDirection: 'row', justifyContent: 'space-between' }}>
           <View>
-            <Text style={{ color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 11, textTransform: 'uppercase' }}>Ticket</Text>
-            <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 13 }}>{ticketCount} × General Admission</Text>
+            <Text style={{ color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 11, textTransform: 'uppercase' }}>Tiket</Text>
+            <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 13 }}>{ticketCount} × Tiket Umum</Text>
           </View>
           <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 13 }}>{minorToIDR(amountMinor, { compact: true })}</Text>
         </View>
@@ -93,10 +102,10 @@ function TicketCard({
             style={{ width: '100%', minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: past ? v2Colors.inkMuted : v2Colors.ink }}
             testID={`ticket-qr-${bookingId}`}
           >
-            <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>View QR</Text>
+            <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Lihat QR</Text>
           </Pressable>
           <Pressable accessibilityRole="button" accessibilityLabel="Unduh e-tiket" onPress={onDownload} style={{ flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: v2Colors.ink }} testID={`ticket-download-${bookingId}`}>
-            <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Download</Text>
+            <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Unduh</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -105,7 +114,7 @@ function TicketCard({
             style={{ minHeight: 44, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}
             testID={`ticket-share-${bookingId}`}
           >
-            <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Share</Text>
+            <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Bagikan</Text>
           </Pressable>
         </View>
       </View>
@@ -203,10 +212,10 @@ export function MyTicketsScreen() {
           isLoggedIn={Boolean(profile)}
           links={[
             { label: 'Beranda', onPress: () => router.push('/' as Href), testID: 'nav-home' },
-            { label: 'Browse', onPress: () => router.push('/browse' as Href), testID: 'nav-browse' },
+            { label: 'Jelajahi', onPress: () => router.push('/browse' as Href), testID: 'nav-browse' },
             ...(profile ? [
-              { label: 'My Ticket', onPress: () => {}, testID: 'nav-tickets' },
-              { label: 'Profile', onPress: () => router.push('/profile' as Href), testID: 'nav-profile' },
+              { label: 'Tiket Saya', onPress: () => {}, testID: 'nav-tickets' },
+              { label: 'Profil', onPress: () => router.push('/profile' as Href), testID: 'nav-profile' },
             ] : []),
           ]}
           onLogoPress={() => router.push('/' as Href)}
@@ -214,30 +223,30 @@ export function MyTicketsScreen() {
           actions={[]}
         />
         <ScrollView contentContainerStyle={{ paddingTop: insets.top + 88, paddingHorizontal: 16, paddingBottom: insets.bottom + 88 }}>
-          <Text accessibilityRole="header" style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 32, textTransform: 'uppercase' }}>My Tickets</Text>
-          <Text style={{ marginTop: 8, color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 14 }}>Your upcoming and past event tickets.</Text>
+          <Text accessibilityRole="header" style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 32, textTransform: 'uppercase' }}>Tiket Saya</Text>
+          <Text style={{ marginTop: 8, color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 14 }}>Daftar tiket event mendatang dan yang sudah lewat.</Text>
 
           <View style={{ flexDirection: 'row', marginTop: 24, borderBottomWidth: v2Borders.standard, borderColor: v2Colors.ink }}>
             {(['upcoming', 'past'] as const).map((value) => (
               <Pressable key={value} onPress={() => setTab(value)} style={{ flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: tab === value ? v2Colors.ink : v2Colors.ground }} testID={`tickets-tab-${value}`}>
                 <Text style={{ color: tab === value ? v2Colors.ground : v2Colors.ink, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>
-                  {value === 'upcoming' ? `Upcoming (${upcomingCount})` : `Past (${pastCount})`}
+                  {value === 'upcoming' ? `Mendatang (${upcomingCount})` : `Sebelumnya (${pastCount})`}
                 </Text>
               </Pressable>
             ))}
           </View>
 
           <View style={{ marginTop: 24 }}>
-            {historyError ? <Text accessibilityLiveRegion="polite" style={{ color: '#b91c1c', fontFamily: interFonts.medium, fontSize: 13 }}>Could not load your tickets. Please try again.</Text> : null}
+            {historyError ? <Text accessibilityLiveRegion="polite" style={{ color: '#b91c1c', fontFamily: interFonts.medium, fontSize: 13 }}>Tiket gagal dimuat. Silakan coba lagi.</Text> : null}
             {accountBookings.map((booking) => (
               <View key={booking.bookingId} style={{ marginBottom: 16, padding: 16, borderWidth: v2Borders.standard, borderColor: v2Colors.ink, backgroundColor: v2Colors.ground }} testID={`account-ticket-${booking.bookingId}`}>
                 <Text style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 17, textTransform: 'uppercase' }}>{booking.eventName}</Text>
-                <Text style={{ marginTop: 8, color: v2Colors.inkMuted, fontFamily: interFonts.medium, fontSize: 12 }}>{booking.publicRef} · {booking.status.replaceAll('_', ' ')}</Text>
+                <Text style={{ marginTop: 8, color: v2Colors.inkMuted, fontFamily: interFonts.medium, fontSize: 12 }}>{booking.publicRef} · {BOOKING_STATUS_LABELS[booking.status]}</Text>
                 <Text style={{ marginTop: 8, color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 14 }}>{minorToIDR(booking.amountMinor)}</Text>
-                {booking.status === 'PAID' ? <Pressable accessibilityRole="button" accessibilityLabel={`Lihat QR ${booking.eventName}`} onPress={() => { setSelectedBooking(booking); setQrOpen(true); }} style={{ marginTop: 14, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: v2Colors.ink }} testID={`account-ticket-qr-${booking.bookingId}`}><Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>View QR</Text></Pressable> : null}
+                {booking.status === 'PAID' ? <Pressable accessibilityRole="button" accessibilityLabel={`Lihat QR ${booking.eventName}`} onPress={() => { setSelectedBooking(booking); setQrOpen(true); }} style={{ marginTop: 14, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: v2Colors.ink }} testID={`account-ticket-qr-${booking.bookingId}`}><Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Lihat QR</Text></Pressable> : null}
               </View>
             ))}
-            {hasNextPage ? <Pressable accessibilityRole="button" onPress={() => void fetchNextPage()} disabled={isFetchingNextPage} style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>{isFetchingNextPage ? 'Loading…' : 'Load More Tickets'}</Text></Pressable> : null}
+            {hasNextPage ? <Pressable accessibilityRole="button" onPress={() => void fetchNextPage()} disabled={isFetchingNextPage} style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>{isFetchingNextPage ? 'Memuat…' : 'Muat Tiket Lainnya'}</Text></Pressable> : null}
             {showTicket && activeEvent && accountBookings.length === 0 ? (
               <TicketCard
                 event={activeEvent}
@@ -250,13 +259,13 @@ export function MyTicketsScreen() {
               />
             ) : !historyLoading && accountBookings.length === 0 && !showTicket ? (
               <View style={{ paddingVertical: 56, paddingHorizontal: 20, alignItems: 'center', borderWidth: v2Borders.standard, borderStyle: 'dashed', borderColor: v2Colors.ink }} testID="my-tickets-empty">
-                <Text style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 20, textTransform: 'uppercase', textAlign: 'center' }}>{tab === 'upcoming' ? 'No Upcoming Tickets' : 'No Past Tickets'}</Text>
-                <Text style={{ marginTop: 10, color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 13, textAlign: 'center' }}>Confirmed tickets will appear here after payment.</Text>
+                <Text style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 20, textTransform: 'uppercase', textAlign: 'center' }}>{tab === 'upcoming' ? 'Belum Ada Tiket Mendatang' : 'Belum Ada Tiket Sebelumnya'}</Text>
+                <Text style={{ marginTop: 10, color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 13, textAlign: 'center' }}>Tiket yang sudah dikonfirmasi akan tampil di sini setelah pembayaran.</Text>
                 <Pressable onPress={() => router.push('/browse' as Href)} style={{ marginTop: 20, minHeight: 44, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: v2Colors.ink }}>
-                  <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Browse Events</Text>
+                  <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Jelajahi Event</Text>
                 </Pressable>
               </View>
-            ) : historyLoading && !showTicket ? <Text style={{ paddingVertical: 32, textAlign: 'center', color: v2Colors.inkMuted, fontFamily: interFonts.medium }}>Loading tickets…</Text> : null}
+            ) : historyLoading && !showTicket ? <Text style={{ paddingVertical: 32, textAlign: 'center', color: v2Colors.inkMuted, fontFamily: interFonts.medium }}>Memuat tiket…</Text> : null}
             {downloadError ? <Text accessibilityLiveRegion="polite" style={{ marginTop: 12, color: '#b91c1c', fontFamily: interFonts.medium, fontSize: 12 }}>{downloadError}</Text> : null}
           </View>
         </ScrollView>
@@ -264,13 +273,13 @@ export function MyTicketsScreen() {
         <Modal visible={qrOpen} transparent animationType={Platform.OS === 'web' ? 'fade' : 'slide'} onRequestClose={() => { setQrOpen(false); setSelectedBooking(null); }}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.72)', alignItems: 'center', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', padding: Platform.OS === 'web' ? 24 : 0 }}>
             <View style={{ width: '100%', maxWidth: 360, padding: 24, alignItems: 'center', backgroundColor: v2Colors.ground, borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}>
-              <Text style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 20, textTransform: 'uppercase' }}>{selectedBooking?.eventName ?? 'Your QR Ticket'}</Text>
-              {selectedBooking ? ticketsLoading ? <Text style={{ marginTop: 24 }}>Loading QR…</Text> : ticketsError ? <Text style={{ marginTop: 24, color: '#b91c1c' }}>Could not load ticket QR. Please try again.</Text> : selectedTickets?.tickets.map((ticket, index) => <View key={ticket.ticketCode} style={{ marginTop: 20, padding: 16, alignItems: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><QRCode value={ticket.qrPayload} size={190} color={v2Colors.ink} backgroundColor={v2Colors.ground} getRef={(ref) => { qrRefs.current[index] = ref; }} /><Text style={{ marginTop: 8, color: v2Colors.ink, fontFamily: interFonts.bold }}>{ticket.ticketCode}</Text></View>) : <View style={{ marginTop: 24, padding: 16, backgroundColor: v2Colors.ground, borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><QRCode value={`RBT|${bookingId ?? 'booking'}|1`} size={190} color={v2Colors.ink} backgroundColor={v2Colors.ground} /></View>}
-              <Text style={{ marginTop: 16, color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 12, textAlign: 'center' }}>Show this code at the entrance.</Text>
-              {selectedBooking && selectedTickets ? <Pressable onPress={() => void downloadSelectedBooking()} style={{ marginTop: 12, minHeight: 44, paddingHorizontal: 22, alignItems: 'center', justifyContent: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Download E-Ticket</Text></Pressable> : null}
+              <Text style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 20, textTransform: 'uppercase' }}>{selectedBooking?.eventName ?? 'QR Tiket Anda'}</Text>
+              {selectedBooking ? ticketsLoading ? <Text style={{ marginTop: 24 }}>Memuat QR…</Text> : ticketsError ? <Text style={{ marginTop: 24, color: '#b91c1c' }}>QR tiket gagal dimuat. Silakan coba lagi.</Text> : selectedTickets?.tickets.map((ticket, index) => <View key={ticket.ticketCode} style={{ marginTop: 20, padding: 16, alignItems: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><QRCode value={ticket.qrPayload} size={190} color={v2Colors.ink} backgroundColor={v2Colors.ground} getRef={(ref) => { qrRefs.current[index] = ref; }} /><Text style={{ marginTop: 8, color: v2Colors.ink, fontFamily: interFonts.bold }}>{ticket.ticketCode}</Text></View>) : <View style={{ marginTop: 24, padding: 16, backgroundColor: v2Colors.ground, borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><QRCode value={`RBT|${bookingId ?? 'booking'}|1`} size={190} color={v2Colors.ink} backgroundColor={v2Colors.ground} /></View>}
+              <Text style={{ marginTop: 16, color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 12, textAlign: 'center' }}>Tunjukkan kode ini di pintu masuk.</Text>
+              {selectedBooking && selectedTickets ? <Pressable onPress={() => void downloadSelectedBooking()} style={{ marginTop: 12, minHeight: 44, paddingHorizontal: 22, alignItems: 'center', justifyContent: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Unduh E-Tiket</Text></Pressable> : null}
               {downloadError ? <Text style={{ marginTop: 8, color: '#b91c1c', fontSize: 12 }}>{downloadError}</Text> : null}
               <Pressable onPress={() => { setQrOpen(false); setSelectedBooking(null); }} style={{ marginTop: 20, minHeight: 44, paddingHorizontal: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: v2Colors.ink }}>
-                <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Close</Text>
+                <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Tutup</Text>
               </Pressable>
             </View>
           </View>

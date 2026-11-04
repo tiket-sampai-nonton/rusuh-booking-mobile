@@ -59,7 +59,7 @@ export function PaymentResultScreen({
     >
       <Seo
         title="Memproses Pembayaran"
-        description="Verifying your payment."
+        description="Memverifikasi pembayaran Anda."
         path={`/payment-result/${bookingId}`}
         noindex
       />

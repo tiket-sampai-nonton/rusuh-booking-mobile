@@ -143,8 +143,8 @@ describe("HistoryScreen", () => {
       container: { eventRepository: repo(CATALOG) },
     });
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
-    // V2 History screen shows "⏳ Histori" section title
-    expect(screen.getByText(/Histori/)).toBeTruthy();
+    // V2 History screen shows the Indonesian "Riwayat" section title.
+    expect(screen.getByText("Riwayat")).toBeTruthy();
   });
 
   it("past event cards are disabled (not navigable)", async () => {

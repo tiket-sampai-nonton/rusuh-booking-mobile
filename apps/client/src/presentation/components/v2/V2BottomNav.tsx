@@ -96,8 +96,8 @@ const NAV_ITEMS: readonly {
   label: string;
   Icon: React.FC<{ active: boolean }>;
 }[] = [
-  { route: 'home', label: 'Home', Icon: HomeIcon },
-  { route: 'browse', label: 'Browse', Icon: BrowseIcon },
+  { route: 'home', label: 'Beranda', Icon: HomeIcon },
+  { route: 'browse', label: 'Jelajahi', Icon: BrowseIcon },
   { route: 'tickets', label: 'Tiket', Icon: TicketsIcon },
   { route: 'profile', label: 'Akun', Icon: ProfileIcon },
 ];

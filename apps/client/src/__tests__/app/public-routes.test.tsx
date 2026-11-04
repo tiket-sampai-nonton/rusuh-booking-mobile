@@ -37,11 +37,10 @@ describe("(public) routes", () => {
   it("renders the Home screen (RBT-030: real event catalog, not a placeholder)", async () => {
     // The Home route wires the mock catalog through the provider stack; the
     // section header proves the real screen mounts.
-    // On native: "Upcoming" (v2-mobile prototype); on web: "Event Minggu Ini"
-    // Jest runs as native, so we expect "Upcoming".
+    // Native and web share the same Indonesian Home section title.
     renderWithProviders(<HomeScreen />);
     await waitFor(() =>
-      expect(screen.getByText("Upcoming")).toBeTruthy(),
+      expect(screen.getByText("Event Minggu Ini")).toBeTruthy(),
     );
     expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
   });

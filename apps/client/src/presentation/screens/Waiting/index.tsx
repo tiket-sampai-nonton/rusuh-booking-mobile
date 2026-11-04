@@ -218,7 +218,7 @@ function RingProgress({ progress, position, isWarning = false }: RingProgressPro
         >
           {formatCount(position)}
         </Text>
-        <Text style={styles.positionLabel}>Your Position</Text>
+        <Text style={styles.positionLabel}>Posisi Anda</Text>
       </View>
     </View>
   );
@@ -272,11 +272,11 @@ function EstimatedTime({ position }: { readonly position: number }) {
     <View style={styles.estimatedTime} testID="waiting-eta">
       <View style={styles.timeBlock}>
         <Text style={styles.timeValue}>{String(minutes).padStart(2, "0")}</Text>
-        <Text style={styles.timeLabel}>Minutes</Text>
+        <Text style={styles.timeLabel}>Menit</Text>
       </View>
       <View style={styles.timeBlock}>
         <Text style={styles.timeValue}>{String(seconds).padStart(2, "0")}</Text>
-        <Text style={styles.timeLabel}>Seconds</Text>
+        <Text style={styles.timeLabel}>Detik</Text>
       </View>
     </View>
   );
@@ -305,17 +305,17 @@ function LeaveModal({
     <View style={[styles.modalOverlay, Platform.OS !== "web" && { justifyContent: "flex-end", paddingHorizontal: 0 }]} testID="waiting-leave-modal">
       <View style={[styles.modal, Platform.OS !== "web" && { maxWidth: "100%", borderBottomWidth: 0 }]}>
         <View style={{ alignItems: "center", marginBottom: 12 }}><QueueIcon kind="warning" /></View>
-        <Text style={styles.modalTitle}>Leave Queue?</Text>
+        <Text style={styles.modalTitle}>Keluar dari Antrean?</Text>
         <Text style={styles.modalText}>
-          If you leave now, you will lose your position in the queue and will
-          need to rejoin from the back.
+          Jika Anda keluar sekarang, posisi antrean akan hilang dan Anda harus
+          bergabung kembali dari belakang.
         </Text>
         <View style={styles.modalActions}>
           <Pressable style={styles.modalBtnStay} onPress={onStay}>
-            <Text style={styles.modalBtnStayText}>Stay in Queue</Text>
+            <Text style={styles.modalBtnStayText}>Tetap Mengantre</Text>
           </Pressable>
           <Pressable style={styles.modalBtnLeave} onPress={onLeave}>
-            <Text style={styles.modalBtnLeaveText}>Leave Queue</Text>
+            <Text style={styles.modalBtnLeaveText}>Keluar dari Antrean</Text>
           </Pressable>
         </View>
       </View>
@@ -346,8 +346,8 @@ function NetworkStatusBar({
     >
       <Text style={styles.networkStatusText}>
         {isReconnected
-          ? "Reconnected! Resuming queue..."
-          : "Connection lost. Your position is being held..."}
+          ? "Koneksi tersambung kembali. Memperbarui antrean…"
+          : "Koneksi terputus. Posisi antrean Anda tetap tersimpan…"}
       </Text>
     </View>
   );
@@ -375,10 +375,10 @@ function LeaveButton({ onPress }: { readonly onPress: () => void }) {
       style={styles.leaveBtn}
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel="Leave Queue"
+      accessibilityLabel="Keluar dari Antrean"
       testID="waiting-leave"
     >
-      <Text style={styles.leaveBtnText}>Leave Queue</Text>
+      <Text style={styles.leaveBtnText}>Keluar dari Antrean</Text>
     </Pressable>
   );
 }
@@ -429,7 +429,7 @@ function WaitingActive({ position, zone, onLeavePress }: WaitingActiveProps) {
 
   return (
     <>
-      <StatusBadge variant="queue" label="In Queue" />
+      <StatusBadge variant="queue" label="Dalam Antrean" />
 
       <RingProgress
         progress={progress}
@@ -442,8 +442,8 @@ function WaitingActive({ position, zone, onLeavePress }: WaitingActiveProps) {
       <EstimatedTime position={position} />
 
       <Text style={styles.infoText}>
-        Please keep this page open. Your position is automatically updated. Do
-        not refresh or leave this page, or you will lose your spot.
+        Jangan tutup halaman ini. Posisi antrean diperbarui otomatis. Jangan
+        muat ulang atau tinggalkan halaman agar posisi Anda tetap terjaga.
       </Text>
 
       <LeaveButton onPress={onLeavePress} />
@@ -463,7 +463,7 @@ interface YourTurnStateProps {
 function YourTurnState({ onLeavePress, claiming }: YourTurnStateProps) {
   return (
     <>
-      <StatusBadge variant="yourTurn" label="It's Your Turn!" />
+      <StatusBadge variant="yourTurn" label="Giliran Anda!" />
 
       <RingProgress progress={1} position={0} />
 
@@ -566,7 +566,7 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
               icon="warning"
               title={COPY.noQueueTitle}
               message={COPY.noQueueSub}
-              buttonText="Browse Events"
+              buttonText="Jelajahi Event"
               onPress={handleBrowseEvents}
               testID="waiting-noqueue-error"
             />
@@ -589,7 +589,7 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
               icon="warning"
               title={COPY.errorTitle}
               message={error?.message ?? COPY.errorSub}
-              buttonText="Try Again"
+              buttonText="Coba Lagi"
               onPress={handleRejoinQueue}
               testID="waiting-error-state"
             />
@@ -611,13 +611,13 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
           <View style={styles.waitingContainer}>
             <StatusBadge
               variant={isSoldOut ? "soldOut" : "expired"}
-              label={isSoldOut ? "Sold Out" : "Sale Ended"}
+              label={isSoldOut ? "Tiket Habis" : "Penjualan Berakhir"}
             />
             <ErrorState
               icon={isSoldOut ? "ticket" : "clock"}
               title={terminalTitle(entry.status)}
               message={terminalBody(entry.status)}
-              buttonText="Browse Other Events"
+              buttonText="Jelajahi Event Lain"
               onPress={handleBrowseEvents}
               testID={`waiting-${isSoldOut ? "soldout" : "ended"}-state`}
             />
@@ -641,13 +641,13 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
             <View style={styles.waitingContainer}>
               <StatusBadge
                 variant={isSoldOut ? "soldOut" : "expired"}
-                label={isSoldOut ? "Sold Out" : "Turn Expired"}
+                label={isSoldOut ? "Tiket Habis" : "Giliran Berakhir"}
               />
               <ErrorState
                 icon={isSoldOut ? "ticket" : "clock"}
                 title={claimErrorTitle(errorState)}
                 message={claimErrorBody(errorState)}
-                buttonText={isSoldOut ? "Browse Other Events" : "Rejoin Queue"}
+                buttonText={isSoldOut ? "Jelajahi Event Lain" : "Bergabung Kembali"}
                 onPress={isSoldOut ? handleBrowseEvents : handleRejoinQueue}
                 testID="waiting-claim-error-state"
               />

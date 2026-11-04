@@ -64,7 +64,7 @@ function heroStatusLabel(status: string): string {
     case "AVAILABLE":
       return "Penjualan Dibuka";
     case "SOLD_OUT":
-      return "Sold Out";
+      return "Tiket Habis";
     case "NOT_STARTED":
       return "Segera Dibuka";
     case "CLOSED":
@@ -239,7 +239,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
             </Block>
 
             {/* Lineup Grid/Scroll */}
-            <Block label="Line Up">
+            <Block label="Pengisi Acara">
               <Lineup items={lineup} />
             </Block>
 

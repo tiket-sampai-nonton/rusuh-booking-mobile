@@ -13,7 +13,7 @@ const FOOTER_HAIRLINE = withAlpha(neutral.card, 0.08);
 
 const COLUMNS: readonly { title: string; links: readonly string[] }[] = [
   { title: "Kategori", links: ["Musik", "Festival", "Jazz", "Rock"] },
-  { title: "Bantuan", links: ["Cara Booking", "Aturan NIK", "Refund", "Kontak"] },
+  { title: "Bantuan", links: ["Cara Pemesanan", "Aturan NIK", "Pengembalian Dana", "Kontak"] },
   { title: "Perusahaan", links: ["Tentang", "Karier", "Kebijakan Privasi"] },
 ];
 
@@ -26,8 +26,8 @@ export function HomeFooter() {
         <View style={{ maxWidth: 300 }}>
           <BrandMark color={neutral.card} />
           <Text style={{ fontSize: 13, marginTop: 12, lineHeight: 21 }} className="text-white/60">
-            Platform booking tiket konser online yang tetap adil dan stabil saat
-            ribuan orang menyerbu sekaligus.
+            Platform pemesanan tiket konser daring yang tetap adil dan stabil saat
+            ribuan orang mengakses bersamaan.
           </Text>
         </View>
 
@@ -52,7 +52,7 @@ export function HomeFooter() {
           © 2026 Rusuh Tiket · PT. Tiga Sekawan Angin Ribut
         </Text>
         <Text style={{ fontSize: 12 }} className="text-white/60">
-          Prototype V5 — selaras API contract
+          Informasi event diperbarui secara berkala
         </Text>
       </View>
     </View>
