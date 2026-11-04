@@ -421,55 +421,32 @@ export const v2DetailStyles = StyleSheet.create({
   // ---------------------------------------------------------------------------
   // Ticket Categories Preview
   //
-  // Web:    each item has its own 2px border (individual card, gap between)
-  // Native: outer wrapper = table border frame; 2px View separators between
-  //         rows = shared border effect.  The CSS margin-bottom:-2px trick
-  //         breaks on native because the next item's white bg covers the
-  //         border underneath it.
+  // Prototype mobile: individually bordered rows with a shared 2px divider.
   // ---------------------------------------------------------------------------
   categoriesGrid: {
-    // Native: no gap — separators supply the visual spacing
-    // Web: gap between individually bordered cards
     gap: Platform.OS === "web" ? v2SpacingSemantic.s : 0,
+    marginBottom: v2SpacingSemantic.m,
   },
-  // Native: outer table frame (left / right / top / bottom border)
-  // Web:    no-op (web uses per-item borders)
-  categoriesTableWrapper: Platform.select({
-    web: {},
-    default: {
-      borderWidth: v2Borders.standard,
-      borderColor: v2Colors.ink,
-    },
-  }),
-  categoryItem: {
-    flexDirection: "row",
-    // Web:    align-items:center works because descriptions are always present (both
-    //         columns equal height) → perfectly symmetric.
-    // Native: flex-start is essential — native font metrics differ from web so
-    //         column heights differ even with the same font sizes.  center would
-    //         vertically offset the shorter column, making price appear below the
-    //         name.  flex-start pins BOTH columns to the TOP so name and price
-    //         always start at the same vertical position regardless of font height.
-    alignItems: Platform.OS === "web" ? "center" : "flex-start",
-    justifyContent: "space-between",
-    // Native: space-s (16px) per prototype, Web: space-m (24px)
-    padding: Platform.OS === "web" ? v2SpacingSemantic.m : v2SpacingSemantic.s,
-    // Web: per-item border (individual card look)
-    // Native: NO border — wrapper + categorySeparator create the table borders
-    borderWidth: Platform.OS === "web" ? v2Borders.standard : 0,
+  categoryFrame: {
+    borderWidth: v2Borders.standard,
     borderColor: v2Colors.ink,
     backgroundColor: v2Colors.ground,
+    padding: 0,
+    marginBottom: Platform.OS === "web" ? 0 : -v2Borders.standard,
   },
-  // Native only: 2px black line between rows → "shared border" table effect
-  categorySeparator: {
-    height: v2Borders.standard, // 2px
-    backgroundColor: v2Colors.ink,
+  categoryItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    // Inner content sits 16px from the outer 2px border on mobile.
+    padding: Platform.OS === "web" ? v2SpacingSemantic.m : v2SpacingSemantic.s - v2Borders.standard,
   },
   categoryItemHover: {
     backgroundColor: v2Colors.field,
     transform: [{ translateX: 4 }],
   },
   categoryInfo: {
+    alignSelf: "flex-start",
     flex: 1,
     flexShrink: 1,
     // Gap before the price column — prevents long names from crowding the price
@@ -494,6 +471,7 @@ export const v2DetailStyles = StyleSheet.create({
     marginTop: 2,
   },
   categoryPrice: {
+    alignSelf: "flex-start",
     // flexShrink: 0 ensures the price column is NEVER squeezed by categoryInfo's flex:1
     flexShrink: 0,
     alignItems: "flex-end",
@@ -526,18 +504,6 @@ export const v2DetailStyles = StyleSheet.create({
   },
   categorySoldOut: {
     opacity: 0.5,
-  },
-  categoriesNote: {
-    marginTop: v2SpacingSemantic.s,
-    padding: v2SpacingSemantic.s,
-    backgroundColor: v2Colors.field,
-    borderLeftWidth: 4,
-    borderLeftColor: v2Colors.ink,
-  },
-  categoriesNoteText: {
-    fontFamily: interFonts.regular,
-    fontSize: v2FontSizes.s,
-    color: v2Colors.inkMuted,
   },
 
   // ---------------------------------------------------------------------------

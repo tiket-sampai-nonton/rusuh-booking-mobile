@@ -1,0 +1,12 @@
+appId: host.exp.Exponent
+---
+- takeScreenshot: 00-snap
+- tapOn:
+    id: snap-channel-wallet
+- takeScreenshot: 01-wallet-channel
+- tapOn:
+    text: GoPay
+- takeScreenshot: 02-gopay-selected
+- tapOn:
+    id: snap-success
+- takeScreenshot: 03-success-outcome

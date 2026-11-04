@@ -13,6 +13,7 @@
 import { useRouter, type Href } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { SnapOutcome } from "@domain/repositories/payment.repository";
 import { ScreenFade } from "@presentation/components/ScreenFade";
@@ -27,6 +28,7 @@ import type { SnapSimulatorScreenProps } from "./interface";
 import { snapStyles } from "./style";
 
 export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { settle } = useSnapSimulator();
   const attemptId = useSessionStore((s) => s.attemptId);
@@ -34,6 +36,7 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
   const method = useSessionStore((s) => s.paymentMethod);
   const [channel, setChannel] = useState<"bank" | "wallet">("bank");
   const [bank, setBank] = useState("BCA");
+  const [wallet, setWallet] = useState<string | null>(null);
 
   const run = (outcome: SnapOutcome): void => {
     const afterwards = (): void => {
@@ -56,30 +59,39 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
   return (
     <ScreenFade>
       <View className="flex-1" style={{ backgroundColor: v2.field }} testID="snap-screen">
-        <ScrollView contentContainerStyle={snapStyles.scrollContent}>
-          <View
-            className="w-full max-w-md self-center p-7"
-            style={{ backgroundColor: v2.ground, borderWidth: v2Border.base, borderColor: v2.ink }}
+        <View
+          style={{
+            height: insets.top + 56,
+            paddingTop: insets.top,
+            paddingHorizontal: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            backgroundColor: v2.ground,
+            borderBottomWidth: v2Border.base,
+            borderBottomColor: v2.ink,
+          }}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Kembali ke pembayaran"
+            onPress={() => router.back()}
+            style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center", borderWidth: v2Border.base, borderColor: v2.ink }}
           >
+            <Text style={{ color: v2.ink, fontSize: 22 }}>‹</Text>
+          </Pressable>
+          <Text style={{ color: v2.ink, fontSize: 14, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" }}>SNAP Payment</Text>
+          {/* The simulator has no server-authoritative expiry value to show here. */}
+          <View style={{ width: 44 }} />
+        </View>
+        <ScrollView
+          contentContainerStyle={[
+            snapStyles.scrollContent,
+            { paddingHorizontal: 16, paddingTop: 24, paddingBottom: insets.bottom + 24 },
+          ]}
+        >
+          <View className="w-full max-w-md self-center" style={{ backgroundColor: v2.ground }}>
             <SnapLogo />
-
-            <Text
-              className="mt-8 text-center text-2xs font-extrabold uppercase"
-              style={[snapStyles.eyebrow, { color: v2.gray }]}
-            >
-              Third-party payment gateway
-            </Text>
-            <Text
-              className="mt-2 text-center text-2xl font-extrabold uppercase"
-              style={[snapStyles.heading, { color: v2.ink }]}
-              accessibilityRole="header"
-            >
-              Selesaikan pembayaranmu
-            </Text>
-            <Text className="mt-2.5 text-center text-xs leading-5" style={{ color: v2.gray }}>
-              Ini adalah simulasi halaman SNAP untuk prototype. Pada produksi,
-              halaman ini akan disediakan oleh payment provider.
-            </Text>
 
             <SnapSummary
               bookingId={bookingId}
@@ -114,7 +126,14 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
               ) : (
                 <View className="mt-3 gap-3" style={{ borderWidth: v2Border.base, borderColor: v2.ink, padding: 16 }}>
                   {["GoPay", "QRIS"].map((value) => (
-                    <Pressable key={value} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: 14, borderWidth: v2Border.base, borderColor: v2.ink }}>
+                    <Pressable
+                      key={value}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: wallet === value }}
+                      onPress={() => setWallet(value)}
+                      style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: 14, borderWidth: v2Border.base, borderColor: v2.ink, backgroundColor: wallet === value ? v2.field : v2.ground }}
+                      testID={`snap-wallet-${value.toLowerCase()}`}
+                    >
                       <Text style={{ color: v2.ink, fontSize: 13, fontWeight: "700" }}>{value}</Text>
                     </Pressable>
                   ))}

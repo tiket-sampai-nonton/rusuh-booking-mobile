@@ -1,24 +1,18 @@
-/** V2 brutalist SNAP gateway logo mark + wordmark (prototype 08a-snap.html `.snap-header`). */
+/** Centered SNAP identity from prototype 08a-snap.html `.snap-header`. */
 import { Text, View } from "react-native";
 
-import { v2 } from "@presentation/theme";
-
-import { snapStyles } from "../style";
+import { v2, v2Border } from "@presentation/theme";
 
 export function SnapLogo() {
   return (
-    <View className="flex-row items-center justify-center gap-3">
-      <View style={snapStyles.logoMark} className="items-center justify-center">
-        <Text style={snapStyles.logoArrow} accessibilityElementsHidden>
-          ↗
-        </Text>
-      </View>
+    <View style={{ alignItems: "center", paddingBottom: 24, borderBottomWidth: v2Border.base, borderBottomColor: v2.ink }}>
       <Text
-        className="text-base font-bold uppercase"
-        style={{ color: v2.ink, letterSpacing: 1.5 }}
+        accessibilityRole="header"
+        style={{ color: v2.ink, fontSize: 32, fontWeight: "900", letterSpacing: -0.64, marginBottom: 4 }}
       >
-        SNAP Payment
+        SNAP
       </Text>
+      <Text style={{ color: v2.gray, fontSize: 14 }}>Secure Payment Gateway</Text>
     </View>
   );
 }

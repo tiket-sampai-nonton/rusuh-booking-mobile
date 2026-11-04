@@ -607,7 +607,7 @@ function HeroInfo({
           accessibilityRole="button"
           accessibilityLabel="Lihat detail event"
           testID="hero-detail"
-          onPress={onSeeAll}
+          onPress={() => onBook(event.id)}
           style={{
             backgroundColor: v2Colors.ground,
             borderWidth: v2Borders.standard,
@@ -820,40 +820,34 @@ function HeroInfoMobile({
       </View>
 
       {/* Single CTA: "GET TICKETS →" (no secondary button on mobile) */}
-      <Pressable
+      <View
+        style={{
+          alignSelf: "flex-start",
+          backgroundColor: v2Colors.ink,
+          borderWidth: v2Borders.standard,
+          borderColor: v2Colors.ink,
+          shadowColor: v2Colors.ink,
+          shadowOffset: { width: 4, height: 4 },
+          shadowOpacity: 1,
+          shadowRadius: 0,
+          elevation: 4,
+        }}
+      >
+       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Get tickets for ${event.name}`}
         testID="hero-book"
         onPress={() => onBook(event.id)}
-        style={({ pressed }) => ({
+        style={{
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
           gap: 8,
           backgroundColor: v2Colors.ink,
-          borderWidth: v2Borders.standard,
-          borderColor: v2Colors.ink,
-          paddingVertical: 14, // .btn padding: 0.875rem
-          paddingHorizontal: 24, // 1.5rem
-          minHeight: 44, // --tap-target
-          alignSelf: "flex-start",
-          // Press feedback: translate + shadow removal (brutalist)
-          transform: pressed ? [{ translateX: 4 }, { translateY: 4 }] : [],
-          // Shadow: 4px 4px hard shadow (brutalist)
-          ...(isWeb
-            ? !pressed
-              ? ({ boxShadow: `4px 4px 0 ${v2Colors.ink}` } as any)
-              : {}
-            : !pressed
-              ? {
-                  shadowColor: v2Colors.ink,
-                  shadowOffset: { width: 4, height: 4 },
-                  shadowOpacity: 1,
-                  shadowRadius: 0,
-                  elevation: 4,
-                }
-              : {}),
-        })}
+          paddingVertical: 14,
+          paddingHorizontal: 24,
+          minHeight: 44,
+        }}
       >
         <Text
           style={{
@@ -867,7 +861,8 @@ function HeroInfoMobile({
           Get Tickets
         </Text>
         <ArrowIcon />
-      </Pressable>
+       </Pressable>
+      </View>
     </Animated.View>
   );
 }

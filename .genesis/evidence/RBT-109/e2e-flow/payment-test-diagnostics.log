@@ -1,0 +1,22 @@
+
+> rusuh-booking-client@0.1.0 test
+> jest --runInBand --detectOpenHandles --forceExit src/__tests__/presentation/screens/PaymentScreen.test.tsx
+
+PASS src/__tests__/presentation/screens/PaymentScreen.test.tsx (11.964 s)
+  PaymentScreen — summary + method + timer (RBT-060)
+    ✓ shows a loading state until the page arrives (1774 ms)
+    ✓ renders the total == amountMinor with NO service-fee line (D10.1) (11 ms)
+    ✓ renders ONLY the server-provided methods (AC2) (8 ms)
+    ✓ defaults to the first method and enables Bayar on selection (11 ms)
+    ✓ pressing Bayar creates an attempt (RBT-061) (19 ms)
+    ✓ refresh-safe: an AWAITING attempt shows 'Kembali ke SNAP' (AC2) (8 ms)
+    ✓ shows an error message when creating the attempt fails (RBT-061) (15 ms)
+    ✓ back navigates home (7 ms)
+    ✓ pressing Bayar is a no-op stub until RBT-061 (does not navigate yet) (8 ms)
+    ✓ redirects to /expired when the payment countdown elapses (7 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       10 passed, 10 total
+Snapshots:   0 total
+Time:        12.33 s
+Ran all test suites matching /src\/__tests__\/presentation\/screens\/PaymentScreen.test.tsx/i.

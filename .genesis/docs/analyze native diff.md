@@ -458,3 +458,23 @@ Verification after implementation:
 - `npm run lint` — passed.
 - `npm test -- --runInBand --forceExit --silent` — 103 suites passed, 804 tests passed.
 - `npx expo export --platform web` — passed; 29 static routes exported, including `/my-tickets`, `/profile`, and `/payment-webview/[bookingId]`.
+
+## RBT-109 native recapture update — 2026-11-04
+
+This section supersedes any earlier statement that the screens below are fully parity-verified. The native simulator was recaptured after the latest changes; the rendered local prototype could not be opened because the browser policy denied local HTML access. Prototype source was reviewed, but rendered side-by-side approval is still outstanding. Full details and captures are in `.genesis/evidence/RBT-109/parity-report.md`.
+
+- **Home:** the native CTA contrast defect is fixed; latest capture shows a solid black button with white text. Full hero height, motion, and below-fold sections remain unverified against a rendered reference.
+- **Browse:** the native-only black hero is removed. Fixed search and category bars now follow the prototype layout; results have a 16px frame and 36px grid/list controls. The latest capture still shows a card-level wishlist placement defect. Search/filter/press states need follow-up.
+- **Event Detail:** native category border frame, dividers, padding, and price/status alignment are fixed and recaptured. Live category fixtures differ from the HTML sample; gallery, modal, and full scroll states remain unverified.
+- **Waiting Room:** the test route produced “No Active Queue”; it did not provide evidence for normal queue or turn states.
+- **Checkout / Payment:** ticket-selection form and payment screen are recaptured. Payment sticky-bar composition remains visibly different from the prototype. The legacy card-entry prototype remains excluded by the SNAP ownership rule.
+- **SNAP:** top safe-area overlap is fixed; header and centered SNAP identity now follow the mobile reference. The simulator still differs in payment-method/confirmation composition. Its countdown is omitted because it has no server-authoritative expiry value.
+- **My Tickets / Success:** only the empty ticket state and unverified-payment loading state were available. Populated ticket/QR and paid-success states are not signed off.
+- **Expired:** recovery state was recaptured; detailed icon/action parity and interaction states remain open.
+- **Profile:** app-only route; no matching screen exists in `v2-mobile`.
+
+Verification for RBT-109: `npm run typecheck` and `npm run lint` pass; 5 targeted suites / 29 tests pass. The pass remains in progress and is not ready for G3 evidence approval or PR. Android was not captured. No backend state or payment instrument behavior was fabricated.
+
+### Payment Result cold-start recovery
+
+A cold launch of `/payment-result/demo-booking` without an `attemptId` reproduced an indefinite spinner: `useVerifyPayment` disables its query when the id is missing, but the screen previously rendered the normal verifying state. The screen now reports the missing attempt and offers `Kembali ke pembayaran`; that page provides the existing route back Home. Evidence: `.genesis/evidence/RBT-109/after/payment-result-missing-attempt.png`. Typecheck/lint pass and the Payment Result screen suite passes 6 tests, including the new recovery action. This is a native route defect, separate from the prototype parity gaps above.

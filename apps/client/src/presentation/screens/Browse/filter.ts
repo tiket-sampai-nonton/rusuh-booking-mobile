@@ -38,6 +38,23 @@ export const SORT_LABEL: Record<string, string> = {
 
 const DAY = 86_400_000;
 
+const CATEGORY_TERMS: Readonly<Record<string, readonly string[]>> = {
+  concert: ["concert", "konser"],
+  festival: ["festival", "fest"],
+  sports: ["sports", "sport", "olahraga"],
+  theater: ["theater", "theatre", "teater"],
+};
+
+/** Best-effort category match until EventSummary receives a typed genre field. */
+export function matchesCategory(
+  event: Pick<EventSummary, "name" | "venue">,
+  category: string,
+): boolean {
+  const terms = CATEGORY_TERMS[category.toLowerCase()] ?? [category.toLowerCase()];
+  const searchable = `${event.name} ${event.venue ?? ""}`.toLowerCase();
+  return terms.some((term) => searchable.includes(term));
+}
+
 /**
  * URL params are user-controlled — normalize unknown/tampered values to the
  * safe default instead of turning a typo into a false empty state.

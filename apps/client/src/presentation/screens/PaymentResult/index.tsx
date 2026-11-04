@@ -12,7 +12,7 @@
  */
 import { useRouter, type Href } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import { Seo } from "@presentation/components/Seo";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
@@ -45,7 +45,12 @@ export function PaymentResultScreen({
     if (route) router.replace(route as Href);
   }, [route, router]);
 
-  const failedToVerify = isError;
+  // A deep link can cold-start the app without the in-memory attempt id. In
+  // that case the query is disabled; showing the normal spinner would leave
+  // the user here forever. Return them to Payment so its server page can
+  // restore the current attempt and provide the normal route back Home.
+  const missingAttemptId = !resolvedAttemptId;
+  const failedToVerify = isError || missingAttemptId;
 
   return (
     <View
@@ -59,13 +64,27 @@ export function PaymentResultScreen({
         noindex
       />
       {failedToVerify ? (
-        <Text
-          className="text-center text-base text-destructive"
-          testID="payment-result-error"
-          accessibilityRole="alert"
-        >
-          Gagal memeriksa status pembayaran. Mohon tunggu, kami mencoba lagi.
-        </Text>
+        <View className="items-center gap-5">
+          <Text
+            className="text-center text-base text-destructive"
+            testID="payment-result-error"
+            accessibilityRole="alert"
+          >
+            {missingAttemptId
+              ? "ID percobaan pembayaran tidak tersedia. Kembali ke pembayaran untuk memeriksa status terbaru."
+              : "Gagal memeriksa status pembayaran. Kembali ke halaman pembayaran untuk mencoba lagi."}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.replace(`/payment/${bookingId}` as Href)}
+            style={{ minHeight: 48, paddingHorizontal: 20, alignItems: "center", justifyContent: "center", backgroundColor: "#000000" }}
+            testID="payment-result-return"
+          >
+            <Text style={{ color: "#ffffff", fontWeight: "700", textTransform: "uppercase" }}>
+              Kembali ke pembayaran
+            </Text>
+          </Pressable>
+        </View>
       ) : (
         // RBT-080: live region so a screen reader announces the status change
         // (verifying → success) without the user re-focusing.

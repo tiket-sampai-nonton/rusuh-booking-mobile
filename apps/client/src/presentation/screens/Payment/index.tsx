@@ -22,6 +22,7 @@ import { usePayment } from "@presentation/hooks/usePayment";
 import { usePaymentPage } from "@presentation/hooks/usePaymentPage";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
+import { useSessionStore } from "@presentation/stores/session-store";
 import { useServices } from "@providers/service-context";
 
 import { PaymentBar } from "./fragments/PaymentBar";
@@ -38,6 +39,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   const { serverClock } = useServices();
   const { page, isLoading } = usePaymentPage(bookingId);
   const { createAttempt, resumeHandoff } = usePayment();
+  const setBooking = useSessionStore((s) => s.setBooking);
 
   const [method, setMethod] = useState<PaymentMethod | null>(null);
 
@@ -54,6 +56,10 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
       setMethod(page.methods[0]);
     }
   }, [page, method]);
+
+  useEffect(() => {
+    if (page) setBooking(bookingId, page.amountMinor);
+  }, [bookingId, page, setBooking]);
 
   const { remainingMs, expired } = useServerCountdown({
     clock: serverClock,

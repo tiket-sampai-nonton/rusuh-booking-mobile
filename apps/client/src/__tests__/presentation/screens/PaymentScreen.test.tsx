@@ -7,6 +7,7 @@ import type {
   PaymentRepository,
 } from "@domain/repositories/payment.repository";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
+import { useSessionStore } from "@presentation/stores/session-store";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
 jest.mock("expo-router", () => ({
@@ -61,9 +62,10 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
   beforeEach(() => {
     jest.useFakeTimers({ advanceTimers: true });
     mockRouter.replace.mockReset();
+    useSessionStore.getState().reset();
   });
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    jest.clearAllTimers();
     jest.useRealTimers();
   });
 
@@ -87,6 +89,7 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     await waitFor(() =>
       expect(screen.getByTestId("payment-total").props.children).toBe("Rp 450.000"),
     );
+    expect(useSessionStore.getState().amountMinor).toBe(45000000);
     expect(screen.queryByText(/biaya layanan/i)).toBeNull();
   });
 

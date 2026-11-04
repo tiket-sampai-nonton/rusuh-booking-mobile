@@ -4,7 +4,7 @@
  * confirmed route (PAID → /success), and surfaces a verify error.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, waitFor } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
 
 import type {
@@ -128,5 +128,16 @@ describe("PaymentResultScreen (RBT-063)", () => {
       expect(screen.getByTestId("payment-result-error")).toBeTruthy(),
     );
     expect(mockRouter.replace).not.toHaveBeenCalled();
+  });
+
+  it("offers a payment recovery route when a cold deep link has no attempt id", () => {
+    const screen = renderScreen(new StatusRepo(attempt("AWAITING_PAYMENT")), {
+      bookingId: "bk-1",
+    });
+
+    expect(screen.getByTestId("payment-result-error")).toBeTruthy();
+    expect(screen.queryByTestId("payment-result-spinner")).toBeNull();
+    fireEvent.press(screen.getByTestId("payment-result-return"));
+    expect(mockRouter.replace).toHaveBeenCalledWith("/payment/bk-1");
   });
 });

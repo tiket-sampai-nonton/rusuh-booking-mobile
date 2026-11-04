@@ -7,7 +7,7 @@ import { StyleSheet } from "react-native";
 import { v2 } from "@presentation/theme";
 
 export const snapStyles = StyleSheet.create({
-  scrollContent: { flexGrow: 1, justifyContent: "center", padding: 32 },
+  scrollContent: { flexGrow: 1, justifyContent: "flex-start", padding: 0 },
   logoMark: {
     width: 40,
     height: 40,
