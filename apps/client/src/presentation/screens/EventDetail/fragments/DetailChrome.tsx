@@ -12,6 +12,7 @@
 import type { ReactNode } from "react";
 import { Animated, Platform, Pressable, Text, View } from "react-native";
 import Svg, { Line, Path, Polyline } from "react-native-svg";
+import { ArrowIcon } from "@presentation/components/ArrowIcon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { interFonts } from "@presentation/theme/fonts";
@@ -45,18 +46,14 @@ export function DetailBackground({
 
 interface HeaderProps {
   readonly onBack: () => void;
-  readonly onWishlist?: () => void;
   readonly onShare?: () => void;
-  readonly isWishlisted?: boolean;
   /** Native only: header becomes solid when scrolled past 100px */
   readonly isScrolled?: boolean;
 }
 
 export function V2Header({
   onBack,
-  onWishlist,
   onShare,
-  isWishlisted = false,
   isScrolled = false,
 }: HeaderProps) {
   const isNative = Platform.OS !== "web";
@@ -87,6 +84,7 @@ export function V2Header({
             onPress={onBack}
             style={({ pressed }) => [
               styles.backBtn,
+              { minWidth: 44, minHeight: 44, justifyContent: "center", alignItems: "center" },
               pressed && { backgroundColor: v2Colors.ink },
             ]}
           >
@@ -113,6 +111,7 @@ export function V2Header({
                 onPress={onShare}
                 style={({ pressed }) => [
                   styles.iconBtn,
+                  { minWidth: 44, minHeight: 44, justifyContent: "center", alignItems: "center" },
                   pressed && { backgroundColor: v2Colors.ink },
                 ]}
               >
@@ -135,7 +134,7 @@ export function V2Header({
           </View>
         </>
       ) : (
-        // Web: full header with back text + logo + wishlist + share
+        // Web: full header with back text + logo + share
         <>
           <View style={styles.headerLeft}>
             {/* Back Button - uses styles.backBtn for web which includes flexDirection + gap */}
@@ -145,9 +144,10 @@ export function V2Header({
               onPress={onBack}
               style={styles.backBtn}
             >
-              <Text style={{ fontFamily: interFonts.semiBold, fontSize: 14, color: v2Colors.ink }}>
-                ← Kembali
-              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <ArrowIcon direction="left" color={v2Colors.ink} />
+                <Text style={{ fontFamily: interFonts.semiBold, fontSize: 14, color: v2Colors.ink }}>Kembali</Text>
+              </View>
             </Pressable>
 
             {/* Logo */}
@@ -155,20 +155,6 @@ export function V2Header({
           </View>
 
           <View style={styles.headerActions}>
-            {/* Wishlist Button */}
-            {onWishlist && (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={isWishlisted ? "Hapus dari wishlist" : "Tambah ke wishlist"}
-                onPress={onWishlist}
-                style={styles.iconBtn}
-              >
-                <Text style={{ fontFamily: interFonts.bold, fontSize: 18, color: v2Colors.ink }}>
-                  {isWishlisted ? "♥" : "♡"}
-                </Text>
-              </Pressable>
-            )}
-
             {/* Share Button */}
             {onShare && (
               <Pressable
@@ -177,9 +163,9 @@ export function V2Header({
                 onPress={onShare}
                 style={styles.iconBtn}
               >
-                <Text style={{ fontFamily: interFonts.bold, fontSize: 16, color: v2Colors.ink }}>
-                  ⤴
-                </Text>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={v2Colors.ink} strokeWidth={2}>
+                  <Path d="M12 16V3m0 0L7 8m5-5 5 5M5 13v7h14v-7" />
+                </Svg>
               </Pressable>
             )}
           </View>

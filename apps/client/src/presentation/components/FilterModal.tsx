@@ -12,7 +12,7 @@
  * faithful RN equivalent of the prototype's dropdowns).
  */
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, Platform, Pressable, ScrollView, Text, View } from "react-native";
 
 export interface FilterValue {
   readonly genre: string;
@@ -54,11 +54,13 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
         accessibilityLabel="Tutup filter"
         onPress={onClose}
         className="flex-1 items-center justify-center bg-ink/70 p-5"
+        style={Platform.OS === "web" ? undefined : { justifyContent: "flex-end", padding: 0 }}
         testID="filter-backdrop"
       >
         <Pressable
           onPress={(e) => e.stopPropagation()}
           className="w-full max-w-md rounded-3xl border border-line bg-card p-6"
+          style={Platform.OS === "web" ? undefined : { maxWidth: "100%", maxHeight: "88%", borderRadius: 0, borderBottomWidth: 0, padding: 24 }}
           testID="filter-modal"
         >
           <Text className="text-xl font-extrabold text-foreground" accessibilityRole="header">
@@ -109,7 +111,7 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
               testID="filter-apply"
               className="rounded-pill bg-brand px-5 py-3"
             >
-              <Text className="text-sm font-bold text-white">Terapkan Filter ↗</Text>
+              <Text className="text-sm font-bold text-white">Terapkan Filter</Text>
             </Pressable>
           </View>
         </Pressable>

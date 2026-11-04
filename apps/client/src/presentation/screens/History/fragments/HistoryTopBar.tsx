@@ -7,6 +7,7 @@ import { Pressable, Text, View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BrandMark } from "@presentation/components/BrandMark";
+import { ArrowIcon } from "@presentation/components/ArrowIcon";
 import { v2Colors, v2Borders, interFonts } from "@presentation/theme";
 
 import type { HistoryTopBarProps } from "../interface";
@@ -29,7 +30,7 @@ export function HistoryTopBar({ onHome }: HistoryTopBarProps) {
         onPress={onHome}
         testID="history-home"
       >
-        <Text style={styles.backText}>← Beranda</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><ArrowIcon direction="left" /><Text style={styles.backText}>Beranda</Text></View>
       </Pressable>
     </View>
   );

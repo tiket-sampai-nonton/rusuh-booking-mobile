@@ -18,10 +18,12 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { Animated, Platform, Pressable, Text, View } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
 import type { EventDetail } from "@domain/repositories/event.repository";
 import { minorToIDR } from "@domain/services/money";
 import { v2Colors, v2Duration } from "@presentation/theme/v2-tokens";
+import { ArrowIcon } from "@presentation/components/ArrowIcon";
 
 import { v2DetailStyles as styles } from "../style";
 
@@ -167,7 +169,7 @@ function WebCTAButton({ label, disabled, canJoin, onJoin, pulseAnim }: CTAButton
         ]}
       >
         <Text style={styles.floatingCtaBtnText}>{label}</Text>
-        {canJoin && <Text style={styles.floatingCtaArrow}>→</Text>}
+        {canJoin && <ArrowIcon color={styles.floatingCtaArrow.color as string} />}
       </Pressable>
     </Animated.View>
   );
@@ -223,14 +225,7 @@ function NativeCTAButton({ label, disabled, canJoin, onJoin, pulseAnim }: CTABut
           {label}
         </Text>
         {canJoin && (
-          <Text
-            style={[
-              styles.floatingCtaArrow,
-              isPressed && !disabled && { color: v2Colors.ink },
-            ]}
-          >
-            →
-          </Text>
+          <ArrowIcon color={isPressed && !disabled ? v2Colors.ink : v2Colors.ground} />
         )}
       </Pressable>
     </Animated.View>
@@ -242,9 +237,9 @@ function NativeCTAButton({ label, disabled, canJoin, onJoin, pulseAnim }: CTABut
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const TRUST_BADGES = [
-  { icon: "✓", text: "Tiket resmi" },
-  { icon: "✓", text: "Antrean adil" },
-  { icon: "✓", text: "E-ticket instan" },
+  { text: "Tiket resmi" },
+  { text: "Antrean adil" },
+  { text: "E-ticket instan" },
 ] as const;
 
 function TrustBadges() {
@@ -252,7 +247,7 @@ function TrustBadges() {
     <View style={styles.trustBadges}>
       {TRUST_BADGES.map((badge) => (
         <View key={badge.text} style={styles.trustBadge}>
-          <Text style={styles.trustBadgeCheck}>{badge.icon}</Text>
+          <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={v2Colors.ink} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><Path d="m5 12 4 4L19 6" /></Svg>
           <Text style={styles.trustBadgeText}>{badge.text}</Text>
         </View>
       ))}

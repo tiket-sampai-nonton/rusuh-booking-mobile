@@ -10,6 +10,7 @@ import { Pressable, Text, View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { formatCountdown } from "@domain/services/date-format";
+import { ArrowIcon } from "@presentation/components/ArrowIcon";
 import { v2Colors, v2Borders, interFonts } from "@presentation/theme";
 
 import type { CheckoutTopBarProps } from "../interface";
@@ -29,7 +30,7 @@ export function CheckoutTopBar({ remainingMs, warn, expired, onBack }: CheckoutT
           testID="checkout-back"
           style={styles.backButton}
         >
-          <Text style={styles.backText}>← Kembali</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><ArrowIcon direction="left" /><Text style={styles.backText}>Kembali</Text></View>
         </Pressable>
 
         {/* Timer badge (prototype .timer-bar style) */}

@@ -5,7 +5,7 @@
  * - White background (var(--white)), black ink (var(--black))
  * - 2px solid borders everywhere
  * - Inter font family (900 black, 700 bold)
- * - Hero: black bg with noise texture, search box
+ * - Hero: black bg with noise texture
  * - Categories: button grid with fill-up hover
  * - Cards: grayscale→color on hover, 8px shadow offset
  * - No rounded corners anywhere
@@ -20,7 +20,7 @@ import { v2Colors, v2Borders, v2SpacingSemantic } from '@presentation/theme';
 
 /** Scroll content: max-width container on desktop (prototype max-width: 1400px) */
 export const browseScrollContent = (bottom: number, isDesktop: boolean): ViewStyle => ({
-  paddingBottom: bottom + 48,
+  paddingBottom: bottom + 88,
   ...(isDesktop
     ? {
         maxWidth: 1400,
@@ -44,27 +44,6 @@ export const browseHero: ViewStyle = {
 
 export const browseHeroTitle: ViewStyle = {
   marginBottom: 24,
-};
-
-export const browseSearchBox: ViewStyle = {
-  flexDirection: 'row',
-  maxWidth: 600,
-  width: '100%',
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ground,
-};
-
-export const browseSearchInput = {
-  flex: 1,
-  paddingVertical: 16,
-  paddingHorizontal: 24,
-  backgroundColor: 'transparent',
-};
-
-export const browseSearchBtn: ViewStyle = {
-  paddingVertical: 16,
-  paddingHorizontal: 32,
-  backgroundColor: v2Colors.ground,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -164,7 +143,7 @@ export const browseGridRow = (isNative = false): ViewStyle => {
 
 /** Single-column grid (list view) */
 export const browseGridList = (isNative = false): ViewStyle => ({
-  gap: isNative ? GAP_MOBILE : GAP_DESKTOP,
+  gap: isNative ? GAP_MOBILE : 16,
 });
 
 /** One cell in the multi-column grid */

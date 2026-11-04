@@ -17,6 +17,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { v2Colors, v2Borders, interFonts } from "@presentation/theme";
+import { CheckIcon } from "@presentation/components/ArrowIcon";
 
 interface ProgressStepsProps {
   /**
@@ -60,15 +61,7 @@ function StepCircle({
       }}
     >
       {isCompleted ? (
-        <Text
-          style={{
-            color: v2Colors.ground,
-            fontSize: 16,
-            fontFamily: interFonts.bold,
-          }}
-        >
-          ✓
-        </Text>
+        <CheckIcon color={v2Colors.ground} size={16} />
       ) : (
         <Text
           style={{

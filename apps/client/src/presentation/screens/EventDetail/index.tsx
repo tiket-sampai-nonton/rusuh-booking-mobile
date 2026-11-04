@@ -51,6 +51,8 @@ import { TrustBox } from "./fragments/TrustBox";
 import { Venue, DEMO_VENUE } from "./fragments/Venue";
 import type { EventDetailScreenProps, LightboxState, LineupItem } from "./interface";
 import { v2DetailScrollContent, v2DetailStyles as styles } from "./style";
+import { CheckIcon } from "@presentation/components/ArrowIcon";
+import { v2Colors } from "@presentation/theme";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HERO STATUS LABEL
@@ -88,8 +90,6 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
     currentIndex: 0,
   });
 
-  // Wishlist state (local for now)
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   // Scroll state for header (native only)
   const [isScrolled, setIsScrolled] = useState(false);
@@ -98,11 +98,6 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   const goHome = useCallback((): void => {
     router.push("/" as Href);
   }, [router]);
-
-  const handleWishlist = useCallback(() => {
-    setIsWishlisted((prev) => !prev);
-    // TODO: Persist to backend/storage
-  }, []);
 
   const handleShare = useCallback(() => {
     // TODO: Implement native share sheet
@@ -197,9 +192,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
         {/* Fixed Header */}
         <V2Header
           onBack={goHome}
-          onWishlist={isNative ? undefined : handleWishlist} // Wishlist web only
           onShare={handleShare}
-          isWishlisted={isWishlisted}
           isScrolled={isScrolled}
         />
 
@@ -250,10 +243,8 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
               <Lineup items={lineup} />
             </Block>
 
-            {/* These sections belong to the desktop/detail prototype. The
-                mobile reference ends after Line Up before the fixed CTA. */}
-            {!isNative && (
-              <>
+            {/* Both native and web share these event information sections. */}
+            <>
                 <Block label="Lokasi">
                   <Venue
                     name={venueInfo.name}
@@ -272,7 +263,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
                     <View style={styles.termsList}>
                       {desc.terms.map((t) => (
                         <View key={t} style={styles.termsItem}>
-                          <Text style={styles.termsCheck}>✓</Text>
+                          <CheckIcon color={v2Colors.ink} size={14} />
                           <Text style={styles.termsText}>{t}</Text>
                         </View>
                       ))}
@@ -281,8 +272,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
                     <Text style={styles.description}>Ketentuan menyusul.</Text>
                   )}
                 </Block>
-              </>
-            )}
+            </>
 
             {/* Trust Box (web only - can be removed if using inline badges) */}
             {!isNative && (

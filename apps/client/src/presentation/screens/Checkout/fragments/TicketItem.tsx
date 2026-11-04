@@ -17,7 +17,7 @@ import type { TicketItemProps } from "../interface";
 
 const STATUS_TEXT: Record<string, { label: string; color: string }> = {
   checking: { label: "Mengecek ketersediaan NIK…", color: v2Colors.gray },
-  available: { label: "NIK tersedia ✓", color: v2Colors.success },
+  available: { label: "NIK tersedia", color: v2Colors.success },
   blocked: { label: "NIK sudah terdaftar untuk event ini.", color: "#ff0000" },
   warning: { label: "Batas pengecekan tercapai — lanjut, server memvalidasi.", color: v2Colors.warning },
 };

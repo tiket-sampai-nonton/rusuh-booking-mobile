@@ -17,6 +17,7 @@ import type { EventRepository } from "@domain/repositories/event.repository";
 import type { PaymentRepository } from "@domain/repositories/payment.repository";
 import type { QueueRepository } from "@domain/repositories/queue.repository";
 import type { UserRepository } from "@domain/repositories/user.repository";
+import type { TicketHistoryRepository } from "@domain/repositories/ticket-history.repository";
 import { IdempotencyKeys } from "@domain/idempotency/idempotency-key";
 import { InMemoryIdempotencyStore } from "@infrastructure/__fixtures__/in-memory-idempotency-store";
 import type { ClockPort } from "@domain/services/clock.port";
@@ -28,9 +29,9 @@ import { HttpEventRepository } from "@infrastructure/api/http-event.repository";
 import { HttpPaymentRepository } from "@infrastructure/api/http-payment.repository";
 import { HttpQueueRepository } from "@infrastructure/api/http-queue.repository";
 import { HttpUserRepository } from "@infrastructure/api/http-user.repository";
+import { HttpTicketHistoryRepository } from "@infrastructure/api/http-ticket-history.repository";
 import { MockBookingRepository } from "@infrastructure/__fixtures__/mock-booking.repository";
 import { MockEventRepository } from "@infrastructure/__fixtures__/mock-event.repository";
-import { MockFileShareAdapter } from "@infrastructure/__fixtures__/mock-file-share.adapter";
 import { MockHttpClient } from "@infrastructure/__fixtures__/mock-http-client";
 import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notification.adapter";
 import { ExpoNotificationAdapter } from "@infrastructure/notifications/expo-notification.adapter";
@@ -38,10 +39,13 @@ import { WebPushNotificationAdapter } from "@infrastructure/notifications/web-pu
 import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.repository";
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
+import { MockTicketHistoryRepository } from "@infrastructure/__fixtures__/mock-ticket-history.repository";
 import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-token-storage";
 import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
 import { SecureStoreQueueMembership } from "@infrastructure/queue/secure-store-queue-membership";
+import { ExpoFileShareAdapter } from "@infrastructure/files/expo-file-share.adapter";
+import { WebFileShareAdapter } from "@infrastructure/files/web-file-share.adapter";
 import { FetchHttpClient } from "@infrastructure/http/fetch-http-client";
 import type { HttpClient } from "@infrastructure/http/http-client";
 import { SystemClock } from "@infrastructure/time/system-clock";
@@ -64,6 +68,7 @@ export interface Container {
   readonly bookingRepository: BookingRepository;
   readonly paymentRepository: PaymentRepository;
   readonly userRepository: UserRepository;
+  readonly ticketHistoryRepository: TicketHistoryRepository;
   readonly notification: NotificationPort;
   readonly fileShare: FileSharePort;
   readonly tokenStorage: TokenStorage;
@@ -164,6 +169,8 @@ export function createContainer(options: ContainerOptions = {}): Container {
     Platform.OS === "web"
       ? new WebPushNotificationAdapter()
       : new ExpoNotificationAdapter();
+  const fileShareAdapter: FileSharePort =
+    Platform.OS === "web" ? new WebFileShareAdapter() : new ExpoFileShareAdapter();
   // Server-authoritative clock layered over the device clock. Unsynced until a
   // server timestamp arrives (offset 0 → serverNow === device now); the catalog
   // split + timers read through it so a later sync corrects everything at once.
@@ -193,8 +200,9 @@ export function createContainer(options: ContainerOptions = {}): Container {
       bookingRepository: new MockBookingRepository(),
       paymentRepository: new MockPaymentRepository(),
       userRepository: new MockUserRepository(),
+      ticketHistoryRepository: new MockTicketHistoryRepository(),
       notification: new MockNotificationAdapter(),
-      fileShare: new MockFileShareAdapter(),
+      fileShare: fileShareAdapter,
     };
   }
 
@@ -223,10 +231,11 @@ export function createContainer(options: ContainerOptions = {}): Container {
     queueRepository: new HttpQueueRepository(httpClient),
     bookingRepository: new HttpBookingRepository(httpClient),
     paymentRepository: new HttpPaymentRepository(httpClient),
-    userRepository: new HttpUserRepository(httpClient),
+    userRepository: new HttpUserRepository(httpClient, tokenStorage),
+    ticketHistoryRepository: new HttpTicketHistoryRepository(httpClient, tokenStorage),
     // RBT-072: native uses expo-notifications; web falls back to the mock until
     // web-push (RBT-073). fileShare is bound in E6.
     notification: notificationAdapter,
-    fileShare: new MockFileShareAdapter(),
+    fileShare: fileShareAdapter,
   };
 }

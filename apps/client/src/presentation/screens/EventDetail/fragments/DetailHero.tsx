@@ -30,6 +30,7 @@ import {
 
 import { interFonts } from "@presentation/theme/fonts";
 import { v2Colors, v2Duration } from "@presentation/theme/v2-tokens";
+import { CalendarIcon, ClockIcon, PinIcon } from "@presentation/components/ArrowIcon";
 
 import type { DetailHeroProps } from "../interface";
 import { v2DetailStyles as styles } from "../style";
@@ -209,7 +210,7 @@ export function DetailHero({
           >
             {meta.split(" · ").map((item, i) => (
               <View key={i} style={styles.heroMetaItem}>
-                <Text style={heroStyles.metaIcon}>{getMetaIcon(i)}</Text>
+                {getMetaIcon(i)}
                 <Text style={styles.heroMetaText}>{item}</Text>
               </View>
             ))}
@@ -240,12 +241,12 @@ export function DetailHero({
 }
 
 // Helper to get icon for meta item
-function getMetaIcon(index: number): string {
+function getMetaIcon(index: number) {
   switch (index) {
-    case 0: return "📅"; // Date
-    case 1: return "🕐"; // Time
-    case 2: return "📍"; // Location
-    default: return "•";
+    case 0: return <CalendarIcon />;
+    case 1: return <ClockIcon />;
+    case 2: return <PinIcon />;
+    default: return null;
   }
 }
 

@@ -4,7 +4,7 @@
  * Reproduces: full-bleed photo SLIDES that crossfade (opacity 1.2s) with a Ken
  * Burns zoom (scale 1.08→1.18 over 6s), auto-advance every 4200ms, the dark
  * scrim gradient, the drifting red/ember aura, the stroked marquee text, the
- * "Live · Flash Sale" eyebrow with a pulsing dot, the slide title + 📍/🗓 meta,
+ * "Live · Flash Sale" eyebrow with a pulsing dot, the slide title and event metadata,
  * the "Booking Sekarang" (red pin) + "Lihat Semua" actions, and the dots
  * (active = 26px red). All animation is Reanimated and honors reduced-motion
  * (static first slide, no loops) exactly like the prototype's media query.
@@ -28,6 +28,7 @@ import type { EventSummary } from "@domain/repositories/event.repository";
 import { eventImage } from "@domain/rules/event-image";
 import { formatDateID } from "@domain/services/date-format";
 import { brand, neutral, withAlpha } from "@presentation/theme";
+import { CalendarIcon, PinIcon, ArrowIcon } from "@presentation/components/ArrowIcon";
 
 const EASE = Easing.bezier(0.32, 0.72, 0, 1);
 const SLIDE_MS = 4200;
@@ -343,8 +344,8 @@ function SlideBody({
         {ev.name}
       </Text>
       <View className="mt-3.5 flex-row flex-wrap gap-3.5">
-        {ev.venue ? <Text className="text-md text-white/80">📍 {ev.venue}</Text> : null}
-        {dateTxt ? <Text className="text-md text-white/80">🗓 {dateTxt}</Text> : null}
+        {ev.venue ? <View className="flex-row items-center gap-1.5"><PinIcon color="#ffffff" /><Text className="text-md text-white/80">{ev.venue}</Text></View> : null}
+        {dateTxt ? <View className="flex-row items-center gap-1.5"><CalendarIcon color="#ffffff" /><Text className="text-md text-white/80">{dateTxt}</Text></View> : null}
       </View>
       <View className="mt-6 flex-row flex-wrap items-center gap-3">
         <Pressable
@@ -360,7 +361,7 @@ function SlideBody({
             style={{ width: 34, height: 34 }}
             className="items-center justify-center rounded-full bg-brand"
           >
-            <Text className="text-md text-white" accessibilityElementsHidden>↗</Text>
+            <ArrowIcon color="#ffffff" size={16} />
           </View>
         </Pressable>
         <Pressable

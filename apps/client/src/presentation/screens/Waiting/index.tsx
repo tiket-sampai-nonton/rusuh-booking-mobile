@@ -18,18 +18,20 @@
  * never color-only: every zone/state carries an icon + text label (RBT-080 a11y).
  */
 import { useRouter, type Href } from "expo-router";
+import type { ComponentType } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Platform, Pressable, Text, View } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
 import Animated, {
   cancelAnimation,
+  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Circle } from "react-native-svg";
+import Svg, { Circle, Path, type CircleProps } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { isAdmitted, isTerminal } from "@domain/state-machines/queue-state-machine";
@@ -63,8 +65,11 @@ import {
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const REDIRECT_COUNTDOWN_SECONDS = 5;
 const ADMISSION_RATE_PER_MIN = 1400; // ~23/sec
+type AnimatedCircleProps = CircleProps & {
+  animatedProps?: Partial<Pick<CircleProps, "strokeDashoffset">>;
+};
+const AnimatedCircle = Animated.createAnimatedComponent(Circle) as unknown as ComponentType<AnimatedCircleProps>;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HEADER
@@ -163,8 +168,16 @@ interface RingProgressProps {
 
 function RingProgress({ progress, position, isWarning = false }: RingProgressProps) {
   const clamped = Math.max(0, Math.min(1, progress));
-  // strokeDashoffset: full circumference = 0% progress, 0 = 100% progress
-  const offset = RING_CIRCUMFERENCE * (1 - clamped);
+  const reducedMotion = useReducedMotion() ?? false;
+  const animatedProgress = useSharedValue(clamped);
+  useEffect(() => {
+    animatedProgress.value = reducedMotion
+      ? clamped
+      : withTiming(clamped, { duration: 700 });
+  }, [animatedProgress, clamped, reducedMotion]);
+  const arcProps = useAnimatedProps(() => ({
+    strokeDashoffset: RING_CIRCUMFERENCE * (1 - animatedProgress.value),
+  }));
   const strokeColor = isWarning || position <= 10 ? palette.red : palette.ink;
 
   return (
@@ -176,7 +189,7 @@ function RingProgress({ progress, position, isWarning = false }: RingProgressPro
         style={{ transform: [{ rotate: "-90deg" }] }}
       >
         {/* Background track */}
-        <Circle
+        <AnimatedCircle
           cx={RING_SIZE / 2}
           cy={RING_SIZE / 2}
           r={RING_RADIUS}
@@ -185,7 +198,7 @@ function RingProgress({ progress, position, isWarning = false }: RingProgressPro
           strokeWidth={RING_STROKE}
         />
         {/* Progress arc */}
-        <Circle
+        <AnimatedCircle
           cx={RING_SIZE / 2}
           cy={RING_SIZE / 2}
           r={RING_RADIUS}
@@ -193,7 +206,7 @@ function RingProgress({ progress, position, isWarning = false }: RingProgressPro
           stroke={strokeColor}
           strokeWidth={RING_STROKE}
           strokeDasharray={RING_CIRCUMFERENCE}
-          strokeDashoffset={offset}
+          animatedProps={arcProps}
           strokeLinecap="square"
         />
       </Svg>
@@ -225,12 +238,24 @@ function ZoneBanner({ zone }: { readonly zone: string }) {
       accessibilityLiveRegion="polite"
       style={[styles.zone, { backgroundColor: tone.bg, borderColor: tone.border }]}
     >
-      <Text style={styles.zoneIcon}>{copy.icon}</Text>
+      <QueueIcon kind={copy.icon} size={20} />
       <View style={styles.zoneTextWrap}>
         <Text style={[styles.zoneLabel, { color: tone.text }]}>{copy.label}</Text>
         <Text style={[styles.zoneBody, { color: tone.text }]}>{copy.body}</Text>
       </View>
     </View>
+  );
+}
+
+function QueueIcon({ kind, size = 28 }: { readonly kind: "lock" | "warning" | "alert" | "clock" | "ticket"; readonly size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={palette.ink} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" testID={`waiting-icon-${kind}`} accessibilityLabel={`${kind} icon`}>
+      {kind === "lock" ? <Path d="M5 10h14v11H5zM8 10V7a4 4 0 0 1 8 0v3" /> : null}
+      {kind === "warning" ? <Path d="M12 3 2.5 20h19L12 3ZM12 9v5m0 3h.01" /> : null}
+      {kind === "alert" ? <Path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 7v6m0 4h.01" /> : null}
+      {kind === "clock" ? <Path d="M12 7v5l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /> : null}
+      {kind === "ticket" ? <Path d="M3 7h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V7Zm6 0v12" /> : null}
+    </Svg>
   );
 }
 
@@ -258,58 +283,8 @@ function EstimatedTime({ position }: { readonly position: number }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// REDIRECT COUNTDOWN (with pulsing background animation)
+// ADMITTED state proceeds as soon as the claim use case returns a session.
 // ═══════════════════════════════════════════════════════════════════════════════
-
-function RedirectCountdown({
-  seconds,
-  onComplete,
-}: {
-  readonly seconds: number;
-  readonly onComplete: () => void;
-}) {
-  const [countdown, setCountdown] = useState(seconds);
-  const reducedMotion = useReducedMotion() ?? false;
-  const bgOpacity = useSharedValue(1);
-
-  // Pulse background animation (prototype: @keyframes pulseBackground)
-  useEffect(() => {
-    if (!reducedMotion) {
-      bgOpacity.value = withRepeat(
-        withSequence(
-          withTiming(0.8, { duration: 500 }),
-          withTiming(1, { duration: 500 })
-        ),
-        -1,
-        false
-      );
-    }
-    return () => {
-      cancelAnimation(bgOpacity);
-    };
-  }, [reducedMotion, bgOpacity]);
-
-  useEffect(() => {
-    if (countdown <= 0) {
-      onComplete();
-      return;
-    }
-    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [countdown, onComplete]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: bgOpacity.value,
-  }));
-
-  return (
-    <Animated.View style={[styles.redirectCountdown, animatedStyle]} testID="waiting-redirect">
-      <Text style={styles.redirectTitle}>🎉 It's Your Turn!</Text>
-      <Text style={styles.redirectNumber}>{countdown}</Text>
-      <Text style={styles.redirectText}>Redirecting to ticket selection...</Text>
-    </Animated.View>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LEAVE CONFIRMATION MODAL
@@ -327,9 +302,10 @@ function LeaveModal({
   if (!visible) return null;
 
   return (
-    <View style={styles.modalOverlay} testID="waiting-leave-modal">
-      <View style={styles.modal}>
-        <Text style={styles.modalTitle}>⚠️ Leave Queue?</Text>
+    <View style={[styles.modalOverlay, Platform.OS !== "web" && { justifyContent: "flex-end", paddingHorizontal: 0 }]} testID="waiting-leave-modal">
+      <View style={[styles.modal, Platform.OS !== "web" && { maxWidth: "100%", borderBottomWidth: 0 }]}>
+        <View style={{ alignItems: "center", marginBottom: 12 }}><QueueIcon kind="warning" /></View>
+        <Text style={styles.modalTitle}>Leave Queue?</Text>
         <Text style={styles.modalText}>
           If you leave now, you will lose your position in the queue and will
           need to rejoin from the back.
@@ -419,7 +395,7 @@ function ErrorState({
   onPress,
   testID,
 }: {
-  readonly icon: string;
+  readonly icon: "warning" | "clock" | "ticket";
   readonly title: string;
   readonly message: string;
   readonly buttonText: string;
@@ -428,9 +404,8 @@ function ErrorState({
 }) {
   return (
     <View style={styles.errorState} testID={testID}>
-      <Text style={styles.errorTitle}>
-        {icon} {title}
-      </Text>
+      <View style={{ alignItems: "center", marginBottom: 12 }}><QueueIcon kind={icon} /></View>
+      <Text style={styles.errorTitle}>{title}</Text>
       <Text style={styles.errorText}>{message}</Text>
       <Pressable style={styles.errorBtn} onPress={onPress}>
         <Text style={styles.errorBtnText}>{buttonText}</Text>
@@ -481,22 +456,16 @@ function WaitingActive({ position, zone, onLeavePress }: WaitingActiveProps) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 interface YourTurnStateProps {
-  readonly onRedirect: () => void;
   readonly onLeavePress: () => void;
   readonly claiming: boolean;
 }
 
-function YourTurnState({ onRedirect, onLeavePress, claiming }: YourTurnStateProps) {
+function YourTurnState({ onLeavePress, claiming }: YourTurnStateProps) {
   return (
     <>
       <StatusBadge variant="yourTurn" label="It's Your Turn!" />
 
       <RingProgress progress={1} position={0} />
-
-      <RedirectCountdown
-        seconds={REDIRECT_COUNTDOWN_SECONDS}
-        onComplete={onRedirect}
-      />
 
       {claiming && (
         <View style={styles.prep}>
@@ -541,18 +510,10 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
     status: admitted ? entry.status : undefined,
   });
 
-  // Redirect to checkout on successful claim
-  const handleRedirect = useCallback(() => {
-    if (claimedSessionId) {
-      router.replace(`/checkout/${claimedSessionId}` as Href);
-    }
-  }, [claimedSessionId, router]);
-
+  // A successful, server-authorized claim proceeds immediately to checkout.
   useEffect(() => {
-    if (claimedSessionId) {
-      // Auto-redirect handled by RedirectCountdown component
-    }
-  }, [claimedSessionId]);
+    if (claimedSessionId) router.replace(`/checkout/${claimedSessionId}` as Href);
+  }, [claimedSessionId, router]);
 
   const handleLeavePress = useCallback(() => {
     setShowLeaveModal(true);
@@ -602,7 +563,7 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
         <View style={styles.shell}>
           <View style={styles.waitingContainer}>
             <ErrorState
-              icon="❓"
+              icon="warning"
               title={COPY.noQueueTitle}
               message={COPY.noQueueSub}
               buttonText="Browse Events"
@@ -625,7 +586,7 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
         <View style={styles.shell}>
           <View style={styles.waitingContainer}>
             <ErrorState
-              icon="⚠️"
+              icon="warning"
               title={COPY.errorTitle}
               message={error?.message ?? COPY.errorSub}
               buttonText="Try Again"
@@ -653,7 +614,7 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
               label={isSoldOut ? "Sold Out" : "Sale Ended"}
             />
             <ErrorState
-              icon={isSoldOut ? "😔" : "⏰"}
+              icon={isSoldOut ? "ticket" : "clock"}
               title={terminalTitle(entry.status)}
               message={terminalBody(entry.status)}
               buttonText="Browse Other Events"
@@ -683,7 +644,7 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
                 label={isSoldOut ? "Sold Out" : "Turn Expired"}
               />
               <ErrorState
-                icon={isSoldOut ? "😔" : "⏱️"}
+                icon={isSoldOut ? "ticket" : "clock"}
                 title={claimErrorTitle(errorState)}
                 message={claimErrorBody(errorState)}
                 buttonText={isSoldOut ? "Browse Other Events" : "Rejoin Queue"}
@@ -702,7 +663,6 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
         <View style={styles.shell}>
           <View style={styles.waitingContainer}>
             <YourTurnState
-              onRedirect={handleRedirect}
               onLeavePress={handleLeavePress}
               claiming={claiming}
             />

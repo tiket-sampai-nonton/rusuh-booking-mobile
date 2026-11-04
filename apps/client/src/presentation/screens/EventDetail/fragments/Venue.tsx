@@ -27,6 +27,7 @@ import {
   v2FontSizes,
   v2SpacingSemantic,
 } from "@presentation/theme/v2-tokens";
+import { PinIcon } from "@presentation/components/ArrowIcon";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // VENUE COMPONENT
@@ -90,7 +91,7 @@ export function Venue({ name, address, mapImage, mapsUrl }: VenueProps) {
           ]}
         >
           <View style={venueStyles.mapBtn}>
-            <Text style={venueStyles.mapBtnIcon}>📍</Text>
+            <PinIcon color={v2Colors.ground} size={16} />
             <Text style={venueStyles.mapBtnText}>Buka di Maps</Text>
           </View>
         </View>

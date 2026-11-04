@@ -15,7 +15,7 @@
  *  - no-queueId guard;
  *  - reduced-motion path renders without animation.
  */
-import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
 
 import type { QueuePollingView } from "@presentation/hooks/useQueuePolling";
@@ -120,7 +120,7 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ zone: "GUARANTEED" }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     const zone = screen.getByTestId("waiting-zone");
-    expect(zone).toHaveTextContent("🔒", { exact: false });
+    expect(screen.getByTestId("waiting-icon-lock")).toBeTruthy();
     // V2 uses "Safe Zone" instead of "Zona Aman"
     expect(zone).toHaveTextContent("Safe Zone", { exact: false });
     expect(zone).toHaveTextContent(
@@ -133,7 +133,7 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ zone: "POSSIBLE" }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     const zone = screen.getByTestId("waiting-zone");
-    expect(zone).toHaveTextContent("⚠️", { exact: false });
+    expect(screen.getByTestId("waiting-icon-warning")).toBeTruthy();
     // V2 uses "Possible Zone" instead of "Masih mungkin"
     expect(zone).toHaveTextContent("Possible Zone", { exact: false });
     expect(zone).toHaveTextContent(
@@ -146,7 +146,7 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ zone: "NOT_ENOUGH" }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     const zone = screen.getByTestId("waiting-zone");
-    expect(zone).toHaveTextContent("🔴", { exact: false });
+    expect(screen.getByTestId("waiting-icon-alert")).toBeTruthy();
     // V2 uses "Low Chance Zone" instead of "Belum cukup tiket"
     expect(zone).toHaveTextContent("Low Chance Zone", { exact: false });
     expect(zone).toHaveTextContent(
@@ -164,7 +164,7 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
 });
 
 describe("WaitingRoomScreen — admit live region", () => {
-  it("renders the admitted state with redirect countdown", () => {
+  it("renders the admitted state while the ticket session is being claimed", () => {
     mockUseQueuePolling.mockReturnValue(
       polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
     );
@@ -172,28 +172,18 @@ describe("WaitingRoomScreen — admit live region", () => {
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     // V2 uses "waiting-admitted" as the wrapper testID
     expect(screen.getByTestId("waiting-admitted")).toBeTruthy();
-    // V2 shows "It's Your Turn!" in the redirect countdown
-    expect(screen.getByTestId("waiting-redirect")).toBeTruthy();
-    // Multiple "It's Your Turn" texts exist (badge + countdown), so just check they're there
-    expect(screen.getAllByText(/It's Your Turn/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/It's Your Turn/i)).toBeTruthy();
+    expect(screen.queryByTestId("waiting-redirect")).toBeNull();
   });
 
-  it("auto-redirects to checkout via countdown when claim yields a sessionId", async () => {
-    jest.useFakeTimers();
+  it("redirects to checkout immediately when claim yields a sessionId", () => {
     mockUseQueuePolling.mockReturnValue(
       polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
     );
     mockUseAutoClaim.mockReturnValue(claim({ claimedSessionId: "sess-7" }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
 
-    // V2 has a 5-second countdown before redirect - advance each second in act()
-    for (let i = 0; i < 6; i++) {
-      await act(async () => {
-        jest.advanceTimersByTime(1000);
-      });
-    }
     expect(mockReplace).toHaveBeenCalledWith("/checkout/sess-7");
-    jest.useRealTimers();
   });
 });
 

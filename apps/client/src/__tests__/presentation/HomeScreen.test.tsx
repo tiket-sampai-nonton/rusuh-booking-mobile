@@ -54,7 +54,7 @@ describe("HomeScreen", () => {
     );
   });
 
-  it("renders the mobile upcoming section and prototype stats banner", async () => {
+  it("renders the mobile upcoming section without the removed stats banner", async () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
@@ -65,11 +65,11 @@ describe("HomeScreen", () => {
     // V2: Header text is "Upcoming" on native (matches v2-mobile prototype),
     // "Event Minggu Ini" on web — Jest runs as native
     expect(screen.getByText("Upcoming")).toBeTruthy();
-    expect(screen.getByTestId("home-mobile-stats")).toBeTruthy();
+    expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
     // "Rusuh Fest 2026" shows in the static hero and catalog card.
     expect(screen.getAllByText("Rusuh Fest 2026").length).toBeGreaterThanOrEqual(1);
-    // History/archive is a separate route in the mobile prototype.
-    expect(screen.queryByTestId("section-history")).toBeNull();
+    // History is rendered on Home when the repository provides past events.
+    expect(screen.getByTestId("section-history")).toBeTruthy();
     fireEvent(screen.getByTestId("section-events"), "layout", {
       nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
     });

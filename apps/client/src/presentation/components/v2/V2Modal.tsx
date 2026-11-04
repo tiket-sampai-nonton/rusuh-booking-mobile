@@ -92,7 +92,7 @@ export function V2Modal({
         testID={testID ? `${testID}-backdrop` : 'v2-modal-backdrop'}
         accessibilityLabel="Tutup dialog"
         onPress={onClose}
-        style={styles.backdrop}
+        style={[styles.backdrop, Platform.OS !== 'web' && { justifyContent: 'flex-end', padding: 0 }]}
       >
         {/* Modal card - stop propagation to prevent close on card tap */}
         <Pressable
@@ -100,9 +100,9 @@ export function V2Modal({
           accessibilityViewIsModal
           accessibilityRole={Platform.OS === 'web' ? ('dialog' as 'none') : undefined}
           onPress={(e) => e.stopPropagation()}
-          style={styles.cardWrapper}
+          style={[styles.cardWrapper, Platform.OS !== 'web' && { maxWidth: '100%' }]}
         >
-          <Animated.View style={[styles.card, cardStyle]}>
+          <Animated.View style={[styles.card, Platform.OS !== 'web' && { padding: 24, borderBottomWidth: 0 }, cardStyle]}>
             {/* Title */}
             {title && (
               <Text

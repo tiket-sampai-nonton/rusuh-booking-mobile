@@ -20,6 +20,7 @@ import {
   StyleSheet,
   Text,
 } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
 import { interFonts } from "@presentation/theme/fonts";
 import {
@@ -118,7 +119,7 @@ export function Lightbox({
       <Animated.View style={[lightboxStyles.container, { opacity: fadeAnim }]}>
         {/* Close Button */}
         <NavButton
-          label="×"
+          kind="close"
           onPress={onClose}
           style={lightboxStyles.closeBtn}
           accessibilityLabel="Tutup lightbox"
@@ -127,7 +128,7 @@ export function Lightbox({
         {/* Prev Button */}
         {images.length > 1 && (
           <NavButton
-            label="←"
+            kind="previous"
             onPress={handlePrev}
             style={[lightboxStyles.navBtn, lightboxStyles.navBtnPrev]}
             accessibilityLabel="Gambar sebelumnya"
@@ -137,7 +138,7 @@ export function Lightbox({
         {/* Next Button */}
         {images.length > 1 && (
           <NavButton
-            label="→"
+            kind="next"
             onPress={handleNext}
             style={[lightboxStyles.navBtn, lightboxStyles.navBtnNext]}
             accessibilityLabel="Gambar selanjutnya"
@@ -173,34 +174,29 @@ export function Lightbox({
 // ═══════════════════════════════════════════════════════════════════════════════
 
 interface NavButtonProps {
-  readonly label: string;
+  readonly kind: "close" | "previous" | "next";
   readonly onPress: () => void;
   readonly style?: any;
   readonly accessibilityLabel: string;
 }
 
-function NavButton({ label, onPress, style, accessibilityLabel }: NavButtonProps) {
+function NavButton({ kind, onPress, style, accessibilityLabel }: NavButtonProps) {
   return (
     <Pressable
       style={({ hovered }) => [
         lightboxStyles.btn,
         style,
         hovered && lightboxStyles.btnHover,
-        hovered && label === "×" && lightboxStyles.closeBtnHover,
+        hovered && kind === "close" && lightboxStyles.closeBtnHover,
       ]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
     >
       {({ hovered }) => (
-        <Text
-          style={[
-            lightboxStyles.btnText,
-            hovered && lightboxStyles.btnTextHover,
-          ]}
-        >
-          {label}
-        </Text>
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={hovered ? "#000000" : "#ffffff"} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          {kind === "close" ? <Path d="m18 6-12 12M6 6l12 12" /> : kind === "previous" ? <Path d="m15 18-6-6 6-6" /> : <Path d="m9 18 6-6-6-6" />}
+        </Svg>
       )}
     </Pressable>
   );

@@ -32,6 +32,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { Image, Pressable, Text, TextInput, View } from 'react-native';
+import { ArrowIcon } from '@presentation/components/ArrowIcon';
 import Animated, {
   Easing,
   interpolate,
@@ -430,16 +431,7 @@ function V2StepCard({
             zIndex: 1,
           }}
         >
-          <Text
-            style={{
-              color: v2Colors.ground,
-              fontSize: 24,
-              fontWeight: '900',
-              fontFamily: interFonts.bold,
-            }}
-          >
-            →
-          </Text>
+          <ArrowIcon color={v2Colors.ground} size={24} />
         </View>
       )}
     </Pressable>

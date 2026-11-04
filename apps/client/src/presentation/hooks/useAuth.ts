@@ -17,6 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 
 import { CompleteRegistration } from "@application/auth/complete-registration.use-case";
+import { PersistSession } from "@application/auth/persist-session.use-case";
 import { RequestOtp } from "@application/auth/request-otp.use-case";
 import { VerifyOtp } from "@application/auth/verify-otp.use-case";
 import type {
@@ -24,6 +25,7 @@ import type {
   UserProfile,
 } from "@domain/repositories/user.repository";
 import { useServices } from "@providers/service-context";
+import { useAccountStore } from "@presentation/stores/account-store";
 
 export interface UseAuthResult {
   /** Trigger an OTP send. Resolves when the request is accepted. */
@@ -73,15 +75,17 @@ export interface UseAuthResult {
  * `userRepository`. The use cases are memoized per repository instance.
  */
 export function useAuth(): UseAuthResult {
-  const { userRepository } = useServices();
+  const { userRepository, tokenStorage } = useServices();
+  const setAccountProfile = useAccountStore((s) => s.setProfile);
 
-  const { requestOtp, verifyOtp, completeRegistration } = useMemo(
+  const { requestOtp, verifyOtp, completeRegistration, persistSession } = useMemo(
     () => ({
       requestOtp: new RequestOtp(userRepository),
       verifyOtp: new VerifyOtp(userRepository),
       completeRegistration: new CompleteRegistration(userRepository),
+      persistSession: new PersistSession(tokenStorage),
     }),
-    [userRepository],
+    [userRepository, tokenStorage],
   );
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -97,6 +101,7 @@ export function useAuth(): UseAuthResult {
   >({
     mutationFn: ({ email, code }) => verifyOtp.execute(email, code),
     onSuccess: async (result) => {
+      await persistSession.execute(result.token);
       // Returning user → fetch the masked profile for the signed-in panel.
       // New user → RBT-021 completes registration before a profile exists.
       if (result.isNew) {
@@ -104,7 +109,9 @@ export function useAuth(): UseAuthResult {
         return;
       }
       try {
-        setProfile(await userRepository.getMe());
+        const currentProfile = await userRepository.getMe();
+        setProfile(currentProfile);
+        setAccountProfile(currentProfile);
       } catch {
         // Profile fetch is best-effort for the visual panel; a failure here
         // does not break the (optional) sign-in. The raw token is never logged.
@@ -123,6 +130,7 @@ export function useAuth(): UseAuthResult {
       // Registration complete → the masked profile powers the signed-in panel
       // and checkout auto-fill. The raw NIK is never stored/logged here.
       setProfile(result);
+      setAccountProfile(result);
     },
   });
 

@@ -38,6 +38,7 @@ export interface V2BottomNavProps {
   readonly activeRoute: BottomNavRoute;
   /** Navigation handler */
   readonly onNavigate: (route: BottomNavRoute) => void;
+  readonly isLoggedIn?: boolean;
   /** Test ID prefix */
   readonly testIDPrefix?: string;
 }
@@ -61,8 +62,7 @@ function BrowseIcon({ active }: { readonly active: boolean }) {
   const color = active ? v2Colors.ink : v2Colors.inkMuted;
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-      <Circle cx={11} cy={11} r={8} stroke={color} strokeWidth={2} />
-      <Path d="M21 21l-4.35-4.35" stroke={color} strokeWidth={2} />
+      <Path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" stroke={color} strokeWidth={2} strokeLinejoin="round" />
     </Svg>
   );
 }
@@ -213,6 +213,7 @@ function NavItem({
 export function V2BottomNav({
   activeRoute,
   onNavigate,
+  isLoggedIn = false,
   testIDPrefix = 'bottom-nav',
 }: V2BottomNavProps) {
   // Call all hooks BEFORE any conditional returns (React rules of hooks)
@@ -261,7 +262,7 @@ export function V2BottomNav({
 
   return (
     <Animated.View style={[navBarStyle, containerStyle]} testID={testIDPrefix}>
-      {NAV_ITEMS.map((item) => (
+      {NAV_ITEMS.filter((item) => item.route !== 'tickets' || isLoggedIn).map((item) => (
         <NavItem
           key={item.route}
           label={item.label}

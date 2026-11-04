@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { minorToIDR } from "@domain/services/money";
 import { v2, v2Border } from "@presentation/theme";
+import { ExternalLinkIcon } from "@presentation/components/ArrowIcon";
 
 import type { PaymentBarProps } from "../interface";
 import { paymentBar } from "../style";
@@ -57,9 +58,7 @@ export function PaymentBar({
                 : (resumeLabel ?? "Bayar Sekarang")}
           </Text>
           {canPay ? (
-            <Text className="text-sm" style={{ color: v2.ink }} accessibilityElementsHidden>
-              ↗
-            </Text>
+            <ExternalLinkIcon color={v2.ink} size={16} />
           ) : null}
         </Pressable>
       </View>

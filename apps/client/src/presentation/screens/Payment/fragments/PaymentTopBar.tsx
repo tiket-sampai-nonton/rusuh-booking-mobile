@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { formatCountdown } from "@domain/services/date-format";
+import { ArrowIcon } from "@presentation/components/ArrowIcon";
 import { v2, v2Border } from "@presentation/theme";
 
 import type { PaymentTopBarProps } from "../interface";
@@ -25,9 +26,7 @@ export function PaymentTopBar({ remainingMs, warn, expired, onBack }: PaymentTop
         onPress={onBack}
         testID="payment-back"
       >
-        <Text className="text-sm font-bold uppercase tracking-tag" style={{ color: v2.ink }}>
-          ← Kembali
-        </Text>
+        <View className="flex-row items-center gap-1.5"><ArrowIcon direction="left" color={v2.ink} /><Text className="text-sm font-bold uppercase tracking-tag" style={{ color: v2.ink }}>Kembali</Text></View>
       </Pressable>
       <View
         className="flex-row items-center gap-2.25 px-3.5 py-2"

@@ -156,7 +156,10 @@ export const v2DetailStyles = StyleSheet.create({
   stepsContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: v2SpacingSemantic.xs,
+    justifyContent: "space-between",
+    alignSelf: "center",
+    width: "100%",
+    maxWidth: 960,
     paddingVertical: v2SpacingSemantic.m,
     paddingHorizontal: v2SpacingSemantic.m,
     paddingTop: HEADER_HEIGHT + v2SpacingSemantic.m,
@@ -165,9 +168,12 @@ export const v2DetailStyles = StyleSheet.create({
     display: Platform.OS === "web" ? "flex" : "none",
   },
   step: {
-    flexDirection: "row",
+    flex: 1,
+    flexDirection: "column",
     alignItems: "center",
-    gap: v2SpacingSemantic.xs,
+    justifyContent: "center",
+    gap: 8,
+    position: "relative",
   },
   stepNum: {
     width: 24,
@@ -208,11 +214,14 @@ export const v2DetailStyles = StyleSheet.create({
     color: v2Colors.inkMuted,
   },
   stepConnector: {
-    width: 30,
+    position: "absolute",
+    left: "50%",
+    top: 11,
+    width: "100%",
     height: 2,
     backgroundColor: v2Colors.inkMuted,
     opacity: 0.3,
-    marginLeft: v2SpacingSemantic.xs,
+    zIndex: -1,
   },
 
   // ---------------------------------------------------------------------------
