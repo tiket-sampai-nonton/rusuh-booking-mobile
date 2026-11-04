@@ -62,6 +62,8 @@ describe("BrowseChips", () => {
     expect(screen.getByText("Semua")).toBeTruthy();
     expect(screen.getByText("Semua waktu")).toBeTruthy();
     expect(screen.getByText("Terdekat")).toBeTruthy();
+    expect(screen.getByLabelText("Ubah Penyaringan")).toBeTruthy();
+    expect(screen.queryByText("Saring Event")).toBeNull();
     expect(screen.queryByTestId("browse-reset")).toBeNull();
   });
 

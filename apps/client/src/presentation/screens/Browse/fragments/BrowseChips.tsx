@@ -6,6 +6,7 @@
  * Same props/testID wiring as the V5 version — restyle only.
  */
 import { Pressable, Text, View } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
 import { v2 } from "@presentation/theme";
 
@@ -48,11 +49,11 @@ export function BrowseChips({
         accessibilityLabel="Ubah Penyaringan"
         onPress={onRefine}
         testID="browse-refine"
-        style={{ borderWidth: 2, borderColor: v2.ink, backgroundColor: v2.ink, paddingHorizontal: 14, paddingVertical: 8 }}
+        style={{ width: 36, height: 36, borderWidth: 2, borderColor: v2.ink, backgroundColor: v2.ground, alignItems: "center", justifyContent: "center" }}
       >
-        <Text style={{ color: v2.ground }} className="text-2xs font-v2 font-bold uppercase">
-          Saring Event
-        </Text>
+        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={v2.ink} strokeWidth={2}>
+          <Path d="M4 6h16M7 12h10m-7 6h4" />
+        </Svg>
       </Pressable>
       {isFiltered ? (
         <Pressable
