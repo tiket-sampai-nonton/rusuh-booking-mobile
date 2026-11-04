@@ -12,7 +12,7 @@
  */
 import { useRouter, type Href } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PlusIcon } from "@presentation/components/ArrowIcon";
 
@@ -93,6 +93,14 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const [rows, setRows] = useState<TicketRow[]>([emptyRow()]);
   const [consent, setConsent] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (!confirmLeave) setConfirmLeave(true);
+      return true;
+    });
+    return () => subscription.remove();
+  }, [confirmLeave]);
 
   const cap = effectiveCap(session?.maxSelectable);
 

@@ -48,6 +48,7 @@ export function CheckoutBar({
           accessibilityLabel="Lanjut Bayar"
           accessibilityState={{ disabled: !canSubmit }}
           disabled={!canSubmit}
+          pointerEvents={canSubmit ? "auto" : "none"}
           onPress={onSubmit}
           testID="checkout-submit"
           style={({ pressed }) => [

@@ -23,9 +23,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
+  BackHandler,
   Modal,
   Platform,
   Pressable,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   View,
@@ -71,7 +74,7 @@ const RESEND_COOLDOWN = 60;
 export function LoginModal({
   visible,
   onClose,
-}: LoginModalProps): React.ReactElement {
+}: LoginModalProps): React.ReactElement | null {
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
@@ -150,8 +153,13 @@ export function LoginModal({
       setRegNikError("");
       setRegDoneName("");
       auth.reset();
-      // Focus email input after animation
-      setTimeout(() => emailInputRef.current?.focus(), 500);
+      // Android's soft keyboard resizes transparent Modal windows. Focusing on
+      // open can move the sheet under the keyboard before the user sees it;
+      // let native users open the keyboard by choosing the field. Web retains
+      // the prototype's focus-on-open behavior.
+      if (Platform.OS === "web") {
+        setTimeout(() => emailInputRef.current?.focus(), 500);
+      }
     }
     return () => {
       if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
@@ -162,6 +170,15 @@ export function LoginModal({
   const close = useCallback(() => {
     onClose();
   }, [onClose]);
+
+  useEffect(() => {
+    if (!visible || Platform.OS !== "android") return;
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      close();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [close, visible]);
 
   // ---------------------------------------------------------------------------
   // Step 1: Phone/Email → send OTP
@@ -189,8 +206,10 @@ export function LoginModal({
           return t - 1;
         });
       }, 1000);
-      // Focus first OTP box
-      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+      // Avoid bringing up Android's keyboard while the sheet is transitioning.
+      if (Platform.OS === "web") {
+        setTimeout(() => otpRefs.current[0]?.focus(), 100);
+      }
     } catch {
       // Error surfaced via auth.requestError
     }
@@ -233,7 +252,9 @@ export function LoginModal({
         setRegConsent(false);
         setRegNikError("");
         setStep("register");
-        setTimeout(() => regNameInputRef.current?.focus(), 50);
+        if (Platform.OS === "web") {
+          setTimeout(() => regNameInputRef.current?.focus(), 50);
+        }
       } else {
         // Returning user → signed-in panel
         setStep("signed");
@@ -305,25 +326,22 @@ export function LoginModal({
     }
   }, [auth, canRegister, regName, regNik]);
 
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none" // We handle animation ourselves
-      onRequestClose={close}
-    >
-      {/* Overlay backdrop */}
-      <Pressable
-        testID="login-backdrop"
-        accessibilityLabel="Tutup dialog"
-        onPress={close}
+  const modalBody = (
+      <View
         style={[styles.overlay, Platform.OS !== "web" && { justifyContent: "flex-end", padding: 0 }]}
       >
+        <Pressable
+          testID="login-backdrop"
+          accessibilityLabel="Tutup dialog"
+          onPress={close}
+          style={StyleSheet.absoluteFillObject}
+        />
         {/* Animated card */}
         <Animated.View
           style={{
             width: "100%",
             maxWidth: 400,
+            maxHeight: Platform.OS === "web" ? undefined : "92%",
             opacity: fadeAnim,
             transform: [{ scale: scaleAnim }, { translateY: translateYAnim }],
           }}
@@ -333,7 +351,7 @@ export function LoginModal({
             accessibilityViewIsModal
             accessibilityRole={Platform.OS === "web" ? "none" : undefined}
             onPress={(e) => e.stopPropagation()}
-            style={[styles.card, Platform.OS !== "web" && { maxWidth: "100%", padding: 24, borderBottomWidth: 0 }]}
+            style={[styles.card, Platform.OS !== "web" && { maxWidth: "100%", maxHeight: "100%", padding: 0, borderBottomWidth: 0, flexShrink: 1 }]}
           >
             {/* Close button */}
             <Pressable
@@ -345,6 +363,12 @@ export function LoginModal({
               <CloseIcon color={v2Colors.ink} />
             </Pressable>
 
+            <ScrollView
+              style={{ flexShrink: 1 }}
+              contentContainerStyle={Platform.OS === "web" ? undefined : { padding: 24, paddingTop: 72 }}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
             {/* Step 1: Phone/Email */}
             {step === "phone" && (
               <View>
@@ -667,15 +691,36 @@ export function LoginModal({
                 <View style={[styles.actions, styles.doneActions]}>
                   <PrimaryButton
                     testID="login-done-close"
-                    label="Mulai Belanja"
+                    label="Cari Tiket"
                     onPress={close}
                   />
                 </View>
               </View>
             )}
+            </ScrollView>
           </Pressable>
         </Animated.View>
-      </Pressable>
+      </View>
+  );
+
+  if (Platform.OS !== "web") {
+    if (!visible) return null;
+    // Keep the native sheet in the screen's own view tree. Android's transparent
+    // Modal window can otherwise measure to the form contents and leave the
+    // controls clipped above the screen while still intercepting all touches.
+    return (
+      <View
+        pointerEvents="auto"
+        style={[StyleSheet.absoluteFillObject, { zIndex: 10000, elevation: 10000 }]}
+      >
+        {modalBody}
+      </View>
+    );
+  }
+
+  return (
+    <Modal visible={visible} transparent animationType="none" onRequestClose={close}>
+      {modalBody}
     </Modal>
   );
 }

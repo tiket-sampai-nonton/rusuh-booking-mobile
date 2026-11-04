@@ -41,6 +41,7 @@ describe("CheckoutBar (RBT-051)", () => {
     expect(
       screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
     ).toBe(true);
+    expect(screen.getByTestId("checkout-submit").props.pointerEvents).toBe("none");
   });
 
   it("shows 'Memproses…' while pending and does not fire submit", () => {

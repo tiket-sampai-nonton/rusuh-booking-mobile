@@ -40,7 +40,7 @@ describe("(public) routes", () => {
     // Native and web share the same Indonesian Home section title.
     renderWithProviders(<HomeScreen />);
     await waitFor(() =>
-      expect(screen.getByText("Event Minggu Ini")).toBeTruthy(),
+      expect(screen.getByText("Daftar Event")).toBeTruthy(),
     );
     expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
   });

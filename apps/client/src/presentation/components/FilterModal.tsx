@@ -11,8 +11,12 @@
  * RN has no native <select>; each field is a row of selectable pills (the
  * faithful RN equivalent of the prototype's dropdowns).
  */
-import { useState } from "react";
-import { Modal, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { BackHandler, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { CloseIcon } from "@presentation/components/ArrowIcon";
+import { interFonts, v2Borders, v2Colors } from "@presentation/theme";
 
 export interface FilterValue {
   readonly genre: string;
@@ -40,6 +44,7 @@ const SORTS = [
 ];
 
 export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
+  const insets = useSafeAreaInsets();
   const [genre, setGenre] = useState("Semua");
   const [time, setTime] = useState("all");
   const [sort, setSort] = useState("closest");
@@ -48,29 +53,72 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
     onApply({ genre, time, sort });
   };
 
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+  useEffect(() => {
+    if (!visible || Platform.OS !== "android") return;
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      onClose();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [onClose, visible]);
+
+  const sheetContent = (
+    <View
+      style={{
+        flex: 1,
+        alignItems: "center",
+        justifyContent: Platform.OS === "web" ? "center" : "flex-end",
+        padding: Platform.OS === "web" ? 24 : 0,
+        backgroundColor: "rgba(0,0,0,0.72)",
+      }}
+    >
       <Pressable
         accessibilityLabel="Tutup penyaringan"
         onPress={onClose}
-        className="flex-1 items-center justify-center bg-ink/70 p-5"
-        style={Platform.OS === "web" ? undefined : { justifyContent: "flex-end", padding: 0 }}
+        style={StyleSheet.absoluteFillObject}
         testID="filter-backdrop"
-      >
+      />
         <Pressable
           onPress={(e) => e.stopPropagation()}
-          className="w-full max-w-md rounded-3xl border border-line bg-card p-6"
-          style={Platform.OS === "web" ? undefined : { maxWidth: "100%", maxHeight: "88%", borderRadius: 0, borderBottomWidth: 0, padding: 24 }}
+          accessibilityViewIsModal
+          style={{
+            width: "100%",
+            maxWidth: 480,
+            maxHeight: "90%",
+            padding: 24,
+            paddingBottom: Platform.OS === "web" ? 24 : Math.max(24, insets.bottom + 16),
+            borderWidth: v2Borders.standard,
+            borderColor: v2Colors.ink,
+            backgroundColor: v2Colors.ground,
+            shadowColor: v2Colors.ink,
+            shadowOffset: { width: 4, height: 4 },
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            elevation: 5,
+          }}
           testID="filter-modal"
         >
-          <Text className="text-xl font-extrabold text-foreground" accessibilityRole="header">
-            Saring Event
-          </Text>
-          <Text className="mt-1.5 text-sm text-muted-foreground">
-            Pilih kategori, waktu, dan urutan. Hasil tampil di halaman baru.
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+            <View style={{ flex: 1 }}>
+              <Text accessibilityRole="header" style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 20, textTransform: "uppercase" }}>
+                Saring Event
+              </Text>
+              <Text style={{ marginTop: 6, color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 13 }}>
+                Pilih kategori, waktu, dan urutan event.
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Tutup penyaringan"
+              onPress={onClose}
+              style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center", borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}
+              testID="filter-close"
+            >
+              <CloseIcon color={v2Colors.ink} />
+            </Pressable>
+          </View>
 
-          <ScrollView style={{ maxHeight: 340 }} className="mt-2">
+          <ScrollView style={{ maxHeight: 340, marginTop: 12 }} keyboardShouldPersistTaps="handled">
             <PillGroup
               label="Kategori Musik"
               options={GENRES.map((g) => ({ v: g, l: g }))}
@@ -94,28 +142,45 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
             />
           </ScrollView>
 
-          <View className="mt-5 flex-row justify-end gap-2.5">
+          <View style={{ marginTop: 20, flexDirection: "row", justifyContent: "flex-end", gap: 10 }}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Batal"
               onPress={onClose}
               testID="filter-cancel"
-              className="rounded-pill border border-line px-5 py-3"
+              style={{ minHeight: 44, paddingHorizontal: 20, alignItems: "center", justifyContent: "center", borderWidth: v2Borders.standard, borderColor: v2Colors.ink, backgroundColor: v2Colors.ground }}
             >
-              <Text className="text-sm font-semibold text-foreground">Batal</Text>
+              <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 13, textTransform: "uppercase" }}>Batal</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Terapkan Saringan"
               onPress={apply}
               testID="filter-apply"
-              className="rounded-pill bg-brand px-5 py-3"
+              style={{ minHeight: 44, paddingHorizontal: 20, alignItems: "center", justifyContent: "center", borderWidth: v2Borders.standard, borderColor: v2Colors.ink, backgroundColor: v2Colors.ink }}
             >
-              <Text className="text-sm font-bold text-white">Terapkan Saringan</Text>
+              <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 13, textTransform: "uppercase" }}>Terapkan Saringan</Text>
             </Pressable>
           </View>
         </Pressable>
-      </Pressable>
+    </View>
+  );
+
+  if (Platform.OS !== "web") {
+    if (!visible) return null;
+    return (
+      <View
+        pointerEvents="auto"
+        style={[StyleSheet.absoluteFillObject, { zIndex: 10000, elevation: 10000 }]}
+      >
+        {sheetContent}
+      </View>
+    );
+  }
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      {sheetContent}
     </Modal>
   );
 }
@@ -147,9 +212,9 @@ function PillGroup({
               accessibilityLabel={`${label}: ${o.l}`}
               onPress={() => onPick(o.v)}
               testID={`${testPrefix}-${o.v}`}
-              className={`rounded-pill border px-3.5 py-2 ${on ? "border-brand bg-brand" : "border-line bg-background"}`}
+              style={{ minHeight: 40, justifyContent: "center", paddingHorizontal: 14, paddingVertical: 8, borderWidth: v2Borders.standard, borderColor: v2Colors.ink, backgroundColor: on ? v2Colors.ink : v2Colors.ground }}
             >
-              <Text className={`text-xs font-semibold ${on ? "text-white" : "text-foreground"}`}>
+              <Text style={{ color: on ? v2Colors.ground : v2Colors.ink, fontFamily: interFonts.semiBold, fontSize: 12 }}>
                 {o.l}
               </Text>
             </Pressable>

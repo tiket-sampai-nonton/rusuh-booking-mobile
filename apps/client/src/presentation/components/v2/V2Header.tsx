@@ -256,10 +256,6 @@ export function V2Header({
   const slideIn = useSharedValue(reducedMotion ? 1 : 0);
   const ctaHover = useSharedValue(0);
 
-  // Mobile native: show login icon when not logged in, nothing when logged in
-  // Web: always show text CTA button regardless of viewport size
-  const showMobileLoginIcon = isNative && !isLoggedIn && actions.length === 0;
-
   // Slide in from top on mount (prototype: animation 0.8s, delay 0.5s)
   useEffect(() => {
     if (reducedMotion) {
@@ -416,8 +412,6 @@ export function V2Header({
                 </View>
               ))}
             </View>
-          ) : showMobileLoginIcon ? (
-            <IconButton icon="login" label="Masuk" onPress={onCtaPress} testID="header-login" />
           ) : !isNative && !isLoggedIn ? (
             /* Desktop/Web: CTA button with ink spread hover (prototype .btn-ghost) */
             <AnimatedPressable

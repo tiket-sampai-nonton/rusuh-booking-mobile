@@ -1,7 +1,7 @@
 import { useRouter, type Href } from 'expo-router';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { useMemo, useRef, useState } from 'react';
-import { Image, Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BackHandler, Image, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { ticketRef } from '@presentation/components/ETicketCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -156,6 +156,7 @@ export function MyTicketsScreen() {
     queryKey: ['my-booking-tickets', selectedBooking?.bookingId],
     queryFn: () => ticketHistoryRepository.getBookingTickets(selectedBooking!.bookingId),
     enabled: Boolean(selectedBooking),
+    retry: 1,
   });
 
   const allAccountBookings = profile ? history?.pages.flatMap((page) => page.bookings) ?? [] : [];
@@ -200,6 +201,46 @@ export function MyTicketsScreen() {
     }
   };
 
+  const closeQr = useCallback(() => {
+    setQrOpen(false);
+    setSelectedBooking(null);
+  }, []);
+
+  useEffect(() => {
+    if (!qrOpen || Platform.OS !== 'android') return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      closeQr();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [closeQr, qrOpen]);
+
+  const qrSheet = (
+    <Pressable
+      onPress={closeQr}
+      style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.72)', alignItems: 'center', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', padding: Platform.OS === 'web' ? 24 : 0 }}
+      testID="ticket-qr-backdrop"
+    >
+      <Pressable
+        onPress={(event) => event.stopPropagation()}
+        accessibilityViewIsModal
+        style={{ width: '100%', maxWidth: 480, maxHeight: '90%', backgroundColor: v2Colors.ground, borderWidth: v2Borders.standard, borderColor: v2Colors.ink, shadowColor: v2Colors.ink, shadowOffset: { width: 4, height: 4 }, shadowOpacity: 1, shadowRadius: 0, elevation: 5 }}
+        testID="ticket-qr-sheet"
+      >
+        <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: insets.bottom + 24, alignItems: 'center' }} showsVerticalScrollIndicator={false}>
+          <Text style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 20, textTransform: 'uppercase', textAlign: 'center' }}>{selectedBooking?.eventName ?? 'QR Tiket Anda'}</Text>
+          {selectedBooking ? ticketsLoading ? <Text style={{ marginTop: 24 }}>Memuat QR…</Text> : ticketsError ? <Text style={{ marginTop: 24, color: '#b91c1c' }}>QR tiket gagal dimuat. Silakan coba lagi.</Text> : selectedTickets?.tickets.map((ticket, index) => <View key={ticket.ticketCode} style={{ marginTop: 20, padding: 16, alignItems: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><QRCode value={ticket.qrPayload} size={190} color={v2Colors.ink} backgroundColor={v2Colors.ground} getRef={(ref) => { qrRefs.current[index] = ref; }} /><Text style={{ marginTop: 8, color: v2Colors.ink, fontFamily: interFonts.bold }}>{ticket.ticketCode}</Text></View>) : <View style={{ marginTop: 24, padding: 16, backgroundColor: v2Colors.ground, borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><QRCode value={`RBT|${bookingId ?? 'booking'}|1`} size={190} color={v2Colors.ink} backgroundColor={v2Colors.ground} /></View>}
+          <Text style={{ marginTop: 16, color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 12, textAlign: 'center' }}>Tunjukkan kode ini di pintu masuk.</Text>
+          {selectedBooking && selectedTickets ? <Pressable onPress={() => void downloadSelectedBooking()} style={{ marginTop: 12, minHeight: 44, paddingHorizontal: 22, alignItems: 'center', justifyContent: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Unduh E-Tiket</Text></Pressable> : null}
+          {downloadError ? <Text style={{ marginTop: 8, color: '#b91c1c', fontSize: 12 }}>{downloadError}</Text> : null}
+          <Pressable accessibilityRole="button" accessibilityLabel="Tutup QR tiket" onPress={closeQr} style={{ marginTop: 20, minHeight: 44, minWidth: 128, paddingHorizontal: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: v2Colors.ink }} testID="ticket-qr-close">
+            <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Tutup</Text>
+          </Pressable>
+        </ScrollView>
+      </Pressable>
+    </Pressable>
+  );
+
   return (
     <ScreenFade>
       <View style={{ flex: 1, backgroundColor: v2Colors.ground }} testID="my-tickets-screen">
@@ -236,10 +277,18 @@ export function MyTicketsScreen() {
             ))}
           </View>
 
-          <View style={{ marginTop: 24 }}>
+          <View
+            style={{
+              marginTop: 16,
+              flexDirection: isWeb ? 'row' : 'column',
+              flexWrap: isWeb ? 'wrap' : 'nowrap',
+              justifyContent: 'flex-start',
+              gap: isWeb ? 16 : 0,
+            }}
+          >
             {historyError ? <Text accessibilityLiveRegion="polite" style={{ color: '#b91c1c', fontFamily: interFonts.medium, fontSize: 13 }}>Tiket gagal dimuat. Silakan coba lagi.</Text> : null}
             {accountBookings.map((booking) => (
-              <View key={booking.bookingId} style={{ marginBottom: 16, padding: 16, borderWidth: v2Borders.standard, borderColor: v2Colors.ink, backgroundColor: v2Colors.ground }} testID={`account-ticket-${booking.bookingId}`}>
+              <View key={booking.bookingId} style={{ flexBasis: isWeb ? (width >= 1100 ? '31%' : width >= 640 ? '48%' : '100%') : '100%', flexGrow: 0, flexShrink: 0, marginBottom: isWeb ? 0 : 16, padding: 16, borderWidth: v2Borders.standard, borderColor: v2Colors.ink, backgroundColor: v2Colors.ground }} testID={`account-ticket-${booking.bookingId}`}>
                 <Text style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 17, textTransform: 'uppercase' }}>{booking.eventName}</Text>
                 <Text style={{ marginTop: 8, color: v2Colors.inkMuted, fontFamily: interFonts.medium, fontSize: 12 }}>{booking.publicRef} · {BOOKING_STATUS_LABELS[booking.status]}</Text>
                 <Text style={{ marginTop: 8, color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 14 }}>{minorToIDR(booking.amountMinor)}</Text>
@@ -270,20 +319,15 @@ export function MyTicketsScreen() {
           </View>
         </ScrollView>
 
-        <Modal visible={qrOpen} transparent animationType={Platform.OS === 'web' ? 'fade' : 'slide'} onRequestClose={() => { setQrOpen(false); setSelectedBooking(null); }}>
-          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.72)', alignItems: 'center', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', padding: Platform.OS === 'web' ? 24 : 0 }}>
-            <View style={{ width: '100%', maxWidth: 360, padding: 24, alignItems: 'center', backgroundColor: v2Colors.ground, borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}>
-              <Text style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 20, textTransform: 'uppercase' }}>{selectedBooking?.eventName ?? 'QR Tiket Anda'}</Text>
-              {selectedBooking ? ticketsLoading ? <Text style={{ marginTop: 24 }}>Memuat QR…</Text> : ticketsError ? <Text style={{ marginTop: 24, color: '#b91c1c' }}>QR tiket gagal dimuat. Silakan coba lagi.</Text> : selectedTickets?.tickets.map((ticket, index) => <View key={ticket.ticketCode} style={{ marginTop: 20, padding: 16, alignItems: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><QRCode value={ticket.qrPayload} size={190} color={v2Colors.ink} backgroundColor={v2Colors.ground} getRef={(ref) => { qrRefs.current[index] = ref; }} /><Text style={{ marginTop: 8, color: v2Colors.ink, fontFamily: interFonts.bold }}>{ticket.ticketCode}</Text></View>) : <View style={{ marginTop: 24, padding: 16, backgroundColor: v2Colors.ground, borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><QRCode value={`RBT|${bookingId ?? 'booking'}|1`} size={190} color={v2Colors.ink} backgroundColor={v2Colors.ground} /></View>}
-              <Text style={{ marginTop: 16, color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 12, textAlign: 'center' }}>Tunjukkan kode ini di pintu masuk.</Text>
-              {selectedBooking && selectedTickets ? <Pressable onPress={() => void downloadSelectedBooking()} style={{ marginTop: 12, minHeight: 44, paddingHorizontal: 22, alignItems: 'center', justifyContent: 'center', borderWidth: v2Borders.standard, borderColor: v2Colors.ink }}><Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Unduh E-Tiket</Text></Pressable> : null}
-              {downloadError ? <Text style={{ marginTop: 8, color: '#b91c1c', fontSize: 12 }}>{downloadError}</Text> : null}
-              <Pressable onPress={() => { setQrOpen(false); setSelectedBooking(null); }} style={{ marginTop: 20, minHeight: 44, paddingHorizontal: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: v2Colors.ink }}>
-                <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Tutup</Text>
-              </Pressable>
-            </View>
+        {Platform.OS === 'web' ? (
+          <Modal visible={qrOpen} transparent animationType="fade" onRequestClose={closeQr}>
+            {qrSheet}
+          </Modal>
+        ) : qrOpen ? (
+          <View style={[StyleSheet.absoluteFillObject, { zIndex: 10000, elevation: 10000 }]}>
+            {qrSheet}
           </View>
-        </Modal>
+        ) : null}
         <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
 
         <V2BottomNav activeRoute="tickets" isLoggedIn={Boolean(profile)} onNavigate={(route) => {
