@@ -13,7 +13,8 @@
  * noindex: a crawler must never see a transactional failure state (SECURITY §6.5).
  */
 import { useRouter, type Href } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
+import Svg, { Path, Circle } from "react-native-svg";
 
 import type { PaymentStatus } from "@domain/repositories/payment.repository";
 import {
@@ -40,11 +41,11 @@ export interface ExpiredRecoveryScreenProps {
 }
 
 // Icon per reason (prototype 09-expired.html variants)
-const REASON_ICON: Record<ExpiryReason, string> = {
-  payment: "💳",
-  hold: "⏱️",
-  queue: "👋",
-  turn: "⚡",
+const REASON_ICON_PATH: Record<ExpiryReason, string> = {
+  payment: "M3 7h18v12H3z M3 11h18 M7 15h4",
+  hold: "M12 7v5l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
+  queue: "M8 7h13M8 12h13M8 17h13M3 7h.01M3 12h.01M3 17h.01",
+  turn: "M12 3v18M3 12h18M7 7l10 10M17 7 7 17",
 };
 
 const REASON_COPY: Record<ExpiryReason, { title: string; body: string; infoText: string; infoList: string[] }> = {
@@ -102,7 +103,6 @@ export function ExpiredRecoveryScreen({
   const router = useRouter();
   const recovery = decideRecovery(status, remainingMs, errorCode);
   const copy = REASON_COPY[reason];
-  const icon = REASON_ICON[reason];
 
   // Retry is only reachable when canRetry (below) is true, which already
   // requires a bookingId — so no redundant guard here.
@@ -140,9 +140,10 @@ export function ExpiredRecoveryScreen({
           className="h-[100px] w-[100px] items-center justify-center rounded-full"
           style={{ borderWidth: v2Border.base, borderColor: v2.danger }}
         >
-          <Text className="text-4xl" accessibilityElementsHidden>
-            {icon}
-          </Text>
+          <Svg width={42} height={42} viewBox="0 0 24 24" fill="none" stroke={v2.danger} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+            {reason === "payment" ? <Path d={REASON_ICON_PATH[reason]} /> : <Path d={REASON_ICON_PATH[reason]} />}
+            {reason === "hold" ? <Circle cx={12} cy={12} r={9} /> : null}
+          </Svg>
         </View>
         <Text
           className="text-center text-2xl font-extrabold uppercase"
@@ -180,7 +181,7 @@ export function ExpiredRecoveryScreen({
           <View className="mt-2 gap-1">
             {copy.infoList.map((item, i) => (
               <View key={i} className="flex-row gap-2">
-                <Text style={{ color: v2.ink }}>→</Text>
+                <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={v2.ink} strokeWidth={2} style={{ marginTop: 2 }}><Path d="M4 12h15m-6-6 6 6-6 6" /></Svg>
                 <Text className="flex-1 text-xs" style={{ color: v2.inkMuted }}>
                   {item}
                 </Text>
@@ -208,6 +209,17 @@ export function ExpiredRecoveryScreen({
         >
           <Text style={{ color: v2.ground, letterSpacing: 0.5, fontSize: 14, fontWeight: "700", textTransform: "uppercase" }}>{primaryText}</Text>
         </Pressable>
+        {Platform.OS !== "web" ? (
+          <Pressable
+            onPress={() => router.replace("/" as Href)}
+            accessibilityRole="button"
+            accessibilityLabel="Kembali ke Beranda"
+            testID="expired-home"
+            style={({ pressed }) => ({ minHeight: 48, alignItems: "center", justifyContent: "center", borderWidth: v2Border.base, borderColor: v2.ink, backgroundColor: pressed ? v2.field : v2.ground })}
+          >
+            <Text style={{ color: v2.ink, fontWeight: "800", fontSize: 12, textTransform: "uppercase" }}>Kembali ke Beranda</Text>
+          </Pressable>
+        ) : null}
         {canRetry && (
           <Pressable
             onPress={onRequeue}

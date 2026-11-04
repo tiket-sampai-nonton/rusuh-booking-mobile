@@ -12,7 +12,7 @@
  * Mobile differences (v2-mobile/01-home.html):
  * - Height: 56px (vs 60px desktop)
  * - Logo: 18px (1.125rem) same as desktop
- * - Icon buttons: 44px × 44px tap target with shadow (Search + Notifications)
+ * - Icon actions use explicit SVG assets and 44px × 44px tap targets
  * - Active state: translate + shadow collapse, invert colors
  * - NO "Masuk / Daftar" text button on mobile — use icon buttons instead
  *
@@ -64,32 +64,7 @@ function LoginIcon({ color = v2Colors.ink }: { readonly color?: string }) {
   );
 }
 
-function SearchIcon({ color = v2Colors.ink }: { readonly color?: string }) {
-  return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <Path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke={color} strokeWidth={2} />
-      <Path d="m21 21-4.35-4.35" stroke={color} strokeWidth={2} strokeLinecap="round" />
-    </Svg>
-  );
-}
-
-function BellIcon({ color = v2Colors.ink }: { readonly color?: string }) {
-  return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <Path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
-}
-
-function HeartIcon({ color = v2Colors.ink }: { readonly color?: string }) {
-  return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <Path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z" stroke={color} strokeWidth={2} strokeLinejoin="round" />
-    </Svg>
-  );
-}
-
-type HeaderIcon = 'login' | 'search' | 'bell' | 'heart';
+type HeaderIcon = 'login';
 
 /** Mobile header icon button (v2-mobile .icon-btn) */
 function IconButton({
@@ -166,9 +141,6 @@ function IconButton({
       ]}
     >
       {icon === 'login' ? <LoginIcon color={iconColor} /> : null}
-      {icon === 'search' ? <SearchIcon color={iconColor} /> : null}
-      {icon === 'bell' ? <BellIcon color={iconColor} /> : null}
-      {icon === 'heart' ? <HeartIcon color={iconColor} /> : null}
     </AnimatedPressable>
   );
 }
@@ -446,7 +418,7 @@ export function V2Header({
             </View>
           ) : showMobileLoginIcon ? (
             <IconButton icon="login" label="Masuk" onPress={onCtaPress} testID="header-login" />
-          ) : !isNative ? (
+          ) : !isNative && !isLoggedIn ? (
             /* Desktop/Web: CTA button with ink spread hover (prototype .btn-ghost) */
             <AnimatedPressable
               accessibilityRole="button"

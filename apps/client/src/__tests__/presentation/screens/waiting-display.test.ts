@@ -58,7 +58,7 @@ describe("zoneCopy", () => {
     expect(zoneCopy("GUARANTEED")).toBe(ZONE_COPY.GUARANTEED);
     // V2: "Possible Zone" instead of Bahasa "Masih mungkin."
     expect(zoneCopy("POSSIBLE").label).toBe("Possible Zone");
-    expect(zoneCopy("NOT_ENOUGH").icon).toBe("🔴");
+    expect(zoneCopy("NOT_ENOUGH").icon).toBe("alert");
     expect(zoneCopy(undefined)).toBe(ZONE_COPY.GUARANTEED);
   });
   it("carries an icon + label + body for every zone (never color-only)", () => {

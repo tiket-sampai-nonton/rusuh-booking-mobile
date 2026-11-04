@@ -87,7 +87,7 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
         <ScrollView
           contentContainerStyle={[
             snapStyles.scrollContent,
-            { paddingHorizontal: 16, paddingTop: 24, paddingBottom: insets.bottom + 24 },
+            { paddingHorizontal: 24, paddingTop: 28, paddingBottom: insets.bottom + 40, width: "100%" },
           ]}
         >
           <View className="w-full max-w-md self-center" style={{ backgroundColor: v2.ground }}>

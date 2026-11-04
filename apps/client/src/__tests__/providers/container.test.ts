@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import {
   createContainer,
   createQueueMembershipStorage,
@@ -14,7 +15,10 @@ import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.rep
 import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
 import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notification.adapter";
-import { MockFileShareAdapter } from "@infrastructure/__fixtures__/mock-file-share.adapter";
+import { MockTicketHistoryRepository } from "@infrastructure/__fixtures__/mock-ticket-history.repository";
+import { ExpoFileShareAdapter } from "@infrastructure/files/expo-file-share.adapter";
+import { WebFileShareAdapter } from "@infrastructure/files/web-file-share.adapter";
+import { HttpTicketHistoryRepository } from "@infrastructure/api/http-ticket-history.repository";
 import { MockHttpClient } from "@infrastructure/__fixtures__/mock-http-client";
 import { HttpEventRepository } from "@infrastructure/api/http-event.repository";
 import { HttpQueueRepository } from "@infrastructure/api/http-queue.repository";
@@ -67,7 +71,8 @@ describe("providers/container — createContainer (mock mode)", () => {
     expect(c.paymentRepository).toBeInstanceOf(MockPaymentRepository);
     expect(c.userRepository).toBeInstanceOf(MockUserRepository);
     expect(c.notification).toBeInstanceOf(MockNotificationAdapter);
-    expect(c.fileShare).toBeInstanceOf(MockFileShareAdapter);
+    expect(c.fileShare).toBeInstanceOf(Platform.OS === "web" ? WebFileShareAdapter : ExpoFileShareAdapter);
+    expect(c.ticketHistoryRepository).toBeInstanceOf(MockTicketHistoryRepository);
     expect(c.httpClient).toBeInstanceOf(MockHttpClient);
   });
 
@@ -165,6 +170,7 @@ describe("providers/container — createContainer (real mode, RBT-010 wired)", (
     expect(c.bookingRepository).toBeInstanceOf(HttpBookingRepository);
     expect(c.paymentRepository).toBeInstanceOf(HttpPaymentRepository);
     expect(c.userRepository).toBeInstanceOf(HttpUserRepository);
+    expect(c.ticketHistoryRepository).toBeInstanceOf(HttpTicketHistoryRepository);
     expect(c.httpClient).toBeInstanceOf(FetchHttpClient);
   });
 

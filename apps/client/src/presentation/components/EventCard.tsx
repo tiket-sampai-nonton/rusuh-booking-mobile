@@ -21,6 +21,7 @@ import { eventImage } from "@domain/rules/event-image";
 import { formatDateID } from "@domain/services/date-format";
 import { minorToIDR } from "@domain/services/money";
 import { neutral, status, withAlpha } from "@presentation/theme";
+import { ArrowIcon, CloseIcon, CalendarIcon, PinIcon } from "@presentation/components/ArrowIcon";
 
 export interface EventCardProps {
   readonly event: EventSummary;
@@ -112,14 +113,16 @@ export function EventCard({ event, onPress, history = false }: EventCardProps) {
           {event.name}
         </Text>
         {event.venue ? (
-          <Text style={{ fontSize: 13, marginTop: 6 }} className="text-muted-foreground" numberOfLines={1}>
-            📍 {event.venue}
-          </Text>
+          <View className="mt-1.5 flex-row items-center gap-1.5">
+            <PinIcon color={neutral.muted} size={13} />
+            <Text style={{ fontSize: 13 }} className="text-muted-foreground" numberOfLines={1}>{event.venue}</Text>
+          </View>
         ) : null}
         {dateTxt ? (
-          <Text style={{ fontSize: 12.5, marginTop: 8 }} className="font-semibold text-muted-foreground">
-            🗓 {dateTxt}
-          </Text>
+          <View className="mt-2 flex-row items-center gap-1.5">
+            <CalendarIcon color={neutral.muted} size={13} />
+            <Text style={{ fontSize: 12.5 }} className="font-semibold text-muted-foreground">{dateTxt}</Text>
+          </View>
         ) : null}
 
         <View
@@ -139,9 +142,7 @@ export function EventCard({ event, onPress, history = false }: EventCardProps) {
             style={{ width: 36, height: 36, backgroundColor: disabled ? INK_30 : neutral.ink }}
             className="items-center justify-center rounded-full"
           >
-            <Text style={{ fontSize: 15 }} className="text-white" accessibilityElementsHidden>
-              {disabled ? "✕" : "↗"}
-            </Text>
+            {disabled ? <CloseIcon color="#ffffff" size={15} /> : <ArrowIcon color="#ffffff" size={15} />}
           </View>
         </View>
       </View>

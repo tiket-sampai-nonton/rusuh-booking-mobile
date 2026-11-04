@@ -8,6 +8,7 @@
 import { Pressable, Text, View } from "react-native";
 
 import { v2Colors, interFonts } from "@presentation/theme";
+import { CheckIcon } from "@presentation/components/ArrowIcon";
 
 import type { ConsentGateProps } from "../interface";
 
@@ -44,16 +45,7 @@ export function ConsentGate({ checked, onToggle }: ConsentGateProps) {
         }}
       >
         {checked ? (
-          <Text
-            style={{
-              fontSize: 14,
-              color: v2Colors.ground,
-              fontFamily: interFonts.bold,
-            }}
-            accessibilityElementsHidden
-          >
-            ✓
-          </Text>
+          <CheckIcon color={v2Colors.ground} size={15} />
         ) : null}
       </View>
       {/* Label */}

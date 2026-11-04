@@ -44,16 +44,13 @@ function repoReturning(events: readonly EventSummary[]): EventRepository {
 describe("HomeScreen (web desktop)", () => {
   beforeEach(() => mockRouter.push.mockReset());
 
-  it("renders desktop nav links + multi-column grid and still navigates", async () => {
+  it("renders the guest desktop nav + multi-column grid and still navigates", async () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    // V2: wait for header with nav links (Konser etc.) to be visible
-    await waitFor(() => screen.getByTestId("nav-konser"));
-    // Nav center link only shown on web > 768px (showNavLinks branch).
-    // V2 uses genre labels: verify nav link exists by testID (label may appear elsewhere too)
-    expect(screen.getByTestId("nav-konser")).toBeTruthy();
-    expect(screen.getByTestId("nav-festival")).toBeTruthy();
+    // Desktop navigation follows the guest menu: Beranda and Browse.
+    await waitFor(() => screen.getByTestId("nav-home"));
+    expect(screen.getByTestId("nav-browse")).toBeTruthy();
     // V2: Multi-column CardGrid uses v2-event-card-<id> testIDs
     fireEvent.press(screen.getByTestId("v2-event-card-evt-1"));
     expect(mockRouter.push).toHaveBeenCalledWith("/events/evt-1");
@@ -97,31 +94,14 @@ describe("HomeScreen (web desktop)", () => {
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 
-  it("nav Konser / Festival / Olahraga / Theater scroll in-page (no navigation)", async () => {
+  it("guest desktop navigation routes to Browse and keeps Beranda on Home", async () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    // V2: wait for header nav links
-    await waitFor(() => screen.getByTestId("nav-konser"));
-    // V2: section testID is section-events (not section-upcoming)
-    const feat = screen.queryByTestId("section-events");
-    if (feat) {
-      fireEvent(feat, "layout", {
-        nativeEvent: { layout: { x: 0, y: 800, width: 1200, height: 600 } },
-      });
-    }
-    const hist = screen.queryByTestId("section-history");
-    if (hist) {
-      fireEvent(hist, "layout", {
-        nativeEvent: { layout: { x: 0, y: 1400, width: 1200, height: 600 } },
-      });
-    }
-    // V2: nav links are genre-based (Konser, Festival, etc.)
-    fireEvent.press(screen.getByTestId("nav-konser"));
-    fireEvent.press(screen.getByTestId("nav-festival"));
-    fireEvent.press(screen.getByTestId("nav-olahraga"));
-    fireEvent.press(screen.getByTestId("nav-theater"));
-    // All scroll in-page; none navigate.
+    await waitFor(() => screen.getByTestId("nav-home"));
+    fireEvent.press(screen.getByTestId("nav-home"));
     expect(mockRouter.push).not.toHaveBeenCalled();
+    fireEvent.press(screen.getByTestId("nav-browse"));
+    expect(mockRouter.push).toHaveBeenCalledWith("/browse");
   });
 });

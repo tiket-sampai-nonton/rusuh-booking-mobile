@@ -29,6 +29,7 @@ import {
 } from '@presentation/components/v2';
 import { useEvents } from '@presentation/hooks/useEvents';
 import { useResponsive } from '@presentation/hooks/useResponsive';
+import { useAccountStore } from '@presentation/stores/account-store';
 import { v2Colors } from '@presentation/theme';
 
 import { V2HomeSections } from './fragments/V2HomeSections';
@@ -38,10 +39,9 @@ export function HomeScreen() {
   const router = useRouter();
   const { data, isLoading, isError, error } = useEvents();
   const scrollRef = useRef<Animated.ScrollView>(null);
-  const featuredY = useRef(0);
-  const historyY = useRef(0);
   const { isWeb, isDesktop, isNative, width, gridColumns, bottomBarHeight } = useResponsive();
   const insets = useSafeAreaInsets();
+  const profile = useAccountStore((s) => s.profile);
 
   // Prototype breakpoint: nav center links show > 768px (desktop web only).
   const showNavLinks = isWeb && width > 768;
@@ -61,10 +61,6 @@ export function HomeScreen() {
 
   const goToEvent = (eventId: string): void => router.push(`/events/${eventId}` as Href);
   const goBrowse = (): void => router.push('/browse' as Href);
-  const scrollToFeatured = (): void =>
-    scrollRef.current?.scrollTo({ y: featuredY.current, animated: true });
-  const scrollToHistory = (): void =>
-    scrollRef.current?.scrollTo({ y: historyY.current, animated: true });
 
   // Filter "Terapkan" → /browse with the chosen params.
   const applyFilter = (f: FilterValue): void => {
@@ -113,12 +109,8 @@ export function HomeScreen() {
               onPressEvent={goToEvent}
               onFilter={() => setFilterOpen(true)}
               onSeeAll={goBrowse}
-              onFeaturedLayout={(y) => {
-                featuredY.current = y;
-              }}
-              onHistoryLayout={(y) => {
-                historyY.current = y;
-              }}
+              onFeaturedLayout={() => undefined}
+              onHistoryLayout={() => undefined}
             />
           )}
         </Animated.ScrollView>
@@ -128,17 +120,17 @@ export function HomeScreen() {
           topInset={insets.top}
           showLinks={showNavLinks}
           links={[
-            { label: 'Konser', onPress: scrollToFeatured, testID: 'nav-konser' },
-            { label: 'Festival', onPress: scrollToFeatured, testID: 'nav-festival' },
-            { label: 'Olahraga', onPress: scrollToFeatured, testID: 'nav-olahraga' },
-            { label: 'Theater', onPress: scrollToHistory, testID: 'nav-theater' },
+            { label: 'Beranda', onPress: () => scrollRef.current?.scrollTo({ y: 0, animated: true }), testID: 'nav-home' },
+            { label: 'Browse', onPress: goBrowse, testID: 'nav-browse' },
+            ...(profile ? [
+              { label: 'My Ticket', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
+              { label: 'Profile', onPress: () => router.push('/profile' as Href), testID: 'nav-profile' },
+            ] : []),
           ]}
+          isLoggedIn={Boolean(profile)}
           onCtaPress={() => setLoginOpen(true)}
           onLogoPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
-          actions={[
-            { icon: 'search', label: 'Cari event', onPress: goBrowse, testID: 'header-search' },
-            { icon: 'bell', label: 'Notifikasi', onPress: () => setLoginOpen(true), testID: 'header-notifications' },
-          ]}
+          actions={[]}
         />
 
         {/* Login/OTP + Filter modals */}
@@ -148,6 +140,7 @@ export function HomeScreen() {
         {/* Bottom Navigation (native only, handled internally by V2BottomNav) */}
         <V2BottomNav
           activeRoute="home"
+          isLoggedIn={Boolean(profile)}
           onNavigate={(route) => {
             if (route === 'browse') router.push('/browse' as Href);
             else if (route === 'tickets') router.push('/my-tickets' as Href);

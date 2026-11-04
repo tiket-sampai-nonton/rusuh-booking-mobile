@@ -2,17 +2,37 @@ import "../../global.css";
 
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 import { useNotifications } from "@presentation/hooks/useNotifications";
 import { useInterFonts } from "@presentation/theme/fonts";
 import { AppProviders } from "@providers/providers";
+import { useServices } from "@providers/service-context";
+import { useAccountStore } from "@presentation/stores/account-store";
 
 // Runs INSIDE the providers so it can read the DI container (useServices).
 // Registers for push + wires the notification tap→deep-link (RBT-072, native).
 function NotificationBridge() {
   useNotifications();
+  return null;
+}
+
+function AccountSessionBridge() {
+  const { tokenStorage, userRepository } = useServices();
+  useEffect(() => {
+    let active = true;
+    void tokenStorage.load().then(async (token) => {
+      if (!active || !token || useAccountStore.getState().profile) return;
+      try {
+        const profile = await userRepository.getMe();
+        if (active) useAccountStore.getState().setProfile(profile);
+      } catch {
+        // Expired or unavailable sessions remain guests; the booking flow stays public.
+      }
+    });
+    return () => { active = false; };
+  }, [tokenStorage, userRepository]);
   return null;
 }
 
@@ -35,6 +55,7 @@ export default function RootLayout() {
     <AppProviders>
       <Fragment>
         <NotificationBridge />
+        <AccountSessionBridge />
         <Stack screenOptions={{ headerShown: false }} />
         <StatusBar style="auto" />
       </Fragment>

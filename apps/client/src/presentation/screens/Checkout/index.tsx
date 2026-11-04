@@ -14,6 +14,7 @@ import { useRouter, type Href } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { PlusIcon } from "@presentation/components/ArrowIcon";
 
 import {
   appendRow,
@@ -31,6 +32,7 @@ import {
 } from "@domain/rules/checkout";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { v2 } from "@presentation/theme";
+import { WarningIcon } from "@presentation/components/ArrowIcon";
 import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
@@ -249,7 +251,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               }}
             >
               <Text style={{ color: v2.ink, fontSize: 14, fontWeight: "700", textTransform: "uppercase" }}>
-                ＋ Tambah tiket
+                <View className="flex-row items-center gap-2"><PlusIcon color={v2.ink} size={16} /><Text style={{ color: v2.ink, fontSize: 14, fontWeight: "700", textTransform: "uppercase" }}>Tambah tiket</Text></View>
               </Text>
             </Pressable>
             <View
@@ -265,9 +267,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
                 paddingVertical: 14,
               }}
             >
-              <Text style={{ color: v2.warn, fontSize: 16 }} accessibilityElementsHidden>
-                ⚠
-              </Text>
+              <WarningIcon color={v2.warn} />
               <Text style={{ color: v2.ink, flex: 1, fontSize: 13 }}>
                 Batas{" "}
                 <Text style={{ color: v2.warn, fontWeight: "700" }}>

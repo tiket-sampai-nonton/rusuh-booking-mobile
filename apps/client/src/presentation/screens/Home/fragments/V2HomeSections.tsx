@@ -16,7 +16,9 @@
  * - Events: horizontal scroll (.events-scroll), 280px fixed width cards
  * - Section header: "UPCOMING" + "SEE ALL →" (no filter button)
  */
-import { Pressable, ScrollView, Text, View, type ViewStyle } from 'react-native';
+import { FlatList, Pressable, Text, View, type ViewStyle, type ListRenderItemInfo } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import Svg, { Path } from 'react-native-svg';
 
 import {
   V2Reveal,
@@ -25,10 +27,11 @@ import {
 } from '@presentation/components/v2';
 import { useResponsive } from '@presentation/hooks/useResponsive';
 import { v2Colors, v2Borders, v2SpacingSemantic, interFonts } from '@presentation/theme';
+import { ArrowIcon } from '@presentation/components/ArrowIcon';
+import type { EventSummary } from '@domain/repositories/event.repository';
 
 import type { HomeSectionsProps } from '../interface';
 import { V2HomeFooter } from './V2HomeFooter';
-import { MobileStats } from './MobileStats';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CATEGORY DATA (prototype .categories-grid)
@@ -105,8 +108,7 @@ function V2SectionHeader({
       </Text>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-        {/* Filter button: desktop only (v2-mobile has no filter) */}
-        {showFilter && !isNative && (
+        {showFilter && (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Filter Event"
@@ -119,11 +121,13 @@ function V2SectionHeader({
               borderWidth: v2Borders.standard,
               borderColor: v2Colors.ink,
               backgroundColor: v2Colors.ground,
-              paddingVertical: 12,
-              paddingHorizontal: 20,
+              paddingVertical: isNative ? 8 : 12,
+              paddingHorizontal: isNative ? 12 : 20,
             }}
           >
-            <Text style={{ color: v2Colors.ink, fontSize: 12 }}>⚙</Text>
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={v2Colors.ink} strokeWidth={2}>
+              <Path d="M4 6h16M7 12h10m-7 6h4" />
+            </Svg>
             <Text
               style={{
                 color: v2Colors.ink,
@@ -156,15 +160,7 @@ function V2SectionHeader({
             >
               {linkText}
             </Text>
-            <Text
-              style={{
-                color: isNative ? v2Colors.inkMuted : v2Colors.ink,
-                fontSize: isNative ? 12 : 14,
-                fontFamily: isNative ? interFonts.semiBold : interFonts.bold,
-              }}
-            >
-              →
-            </Text>
+            <ArrowIcon color={isNative ? v2Colors.inkMuted : v2Colors.ink} size={isNative ? 14 : 16} />
           </Pressable>
         )}
       </View>
@@ -183,9 +179,20 @@ function V2EventsHorizontalScroll({
   events,
   onPress,
 }: {
-  readonly events: readonly { id: string }[];
+  readonly events: readonly EventSummary[];
   readonly onPress: (eventId: string) => void;
 }) {
+  const [visibleIds, setVisibleIds] = useState<ReadonlySet<string>>(() => new Set());
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: readonly { item: EventSummary }[] }) => {
+    setVisibleIds(new Set(viewableItems.map(({ item }) => item.id)));
+  }).current;
+  const renderItem = useCallback(({ item, index }: ListRenderItemInfo<EventSummary>) => (
+    <View style={{ width: 280 }}>
+      <V2Reveal delay={index * 80}>
+        <V2EventCard event={item} onPress={onPress} isImageVisible={visibleIds.has(item.id)} />
+      </V2Reveal>
+    </View>
+  ), [onPress, visibleIds]);
   if (events.length === 0) {
     return (
       <View
@@ -211,8 +218,14 @@ function V2EventsHorizontalScroll({
   }
 
   return (
-    <ScrollView
+    <FlatList
       horizontal
+      data={events}
+      keyExtractor={(item) => item.id}
+      renderItem={renderItem}
+      onViewableItemsChanged={onViewableItemsChanged}
+      viewabilityConfig={{ itemVisiblePercentThreshold: 30 }}
+      initialNumToRender={3}
       showsHorizontalScrollIndicator={false}
       snapToInterval={280 + 16} // card width + gap
       decelerationRate="fast"
@@ -224,15 +237,7 @@ function V2EventsHorizontalScroll({
         marginHorizontal: -v2SpacingSemantic.m, // bleed to edges
         paddingLeft: v2SpacingSemantic.m,
       }}
-    >
-      {(events as readonly any[]).map((ev, i) => (
-        <View key={ev.id} style={{ width: 280 }}>
-          <V2Reveal delay={i * 80}>
-            <V2EventCard event={ev} onPress={onPress} />
-          </V2Reveal>
-        </View>
-      ))}
-    </ScrollView>
+    />
   );
 }
 
@@ -403,7 +408,7 @@ export function V2HomeSections({
             title={sectionTitle}
             linkText={seeAllText}
             onLinkPress={onSeeAll}
-            showFilter={!isNative} // Filter only on web/desktop
+            showFilter
             onFilterPress={onFilter}
             isNative={isNative}
           />
@@ -454,7 +459,7 @@ export function V2HomeSections({
       {/* ═══════════════════════════════════════════════════════════════════════
           HISTORY SECTION (prototype .events with archive styling)
           ═══════════════════════════════════════════════════════════════════════ */}
-      {!isNative && data.history.length > 0 && (
+      {data.history.length > 0 && (
         <View
           style={{
             paddingTop: v2SpacingSemantic.xl,
@@ -468,19 +473,18 @@ export function V2HomeSections({
             <V2SectionHeader title="Event Sebelumnya" />
           </V2Reveal>
 
-          <V2EventsGrid
-            events={data.history}
-            onPress={onPressEvent}
-            columns={columns}
-            history
-          />
+          {isNative ? (
+            <V2EventsHorizontalScroll events={data.history} onPress={onPressEvent} />
+          ) : (
+            <V2EventsGrid events={data.history} onPress={onPressEvent} columns={columns} history />
+          )}
         </View>
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════════
           FOOTER (prototype .footer)
           ═══════════════════════════════════════════════════════════════════════ */}
-      {isNative ? <MobileStats /> : <V2HomeFooter />}
+      {!isNative && <V2HomeFooter />}
     </View>
   );
 }

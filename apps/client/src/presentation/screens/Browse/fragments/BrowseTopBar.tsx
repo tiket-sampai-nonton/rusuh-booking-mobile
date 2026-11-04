@@ -7,6 +7,7 @@
  */
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ArrowIcon } from "@presentation/components/ArrowIcon";
 
 import { v2 } from "@presentation/theme";
 
@@ -41,9 +42,7 @@ export function BrowseTopBar({ onHome }: BrowseTopBarProps) {
           onPress={onHome}
           testID="browse-home"
         >
-          <Text style={{ color: v2.ink }} className="text-sm font-v2 font-bold uppercase">
-            ← Beranda
-          </Text>
+          <View className="flex-row items-center gap-1.5"><ArrowIcon direction="left" color={v2.ink} /><Text style={{ color: v2.ink }} className="text-sm font-v2 font-bold uppercase">Beranda</Text></View>
         </Pressable>
       </View>
     </View>

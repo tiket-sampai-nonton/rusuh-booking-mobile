@@ -63,7 +63,7 @@ export function CheckoutBar({
                 (pressed || !canSubmit) && styles.payButtonTextPressed,
               ]}
             >
-              {pending ? "Memproses…" : expired ? "Waktu habis" : "Lanjut Bayar →"}
+              {pending ? "Memproses…" : expired ? "Waktu habis" : "Lanjut Bayar"}
             </Text>
           )}
         </Pressable>

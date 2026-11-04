@@ -14,20 +14,27 @@
  * success card with a dark summary, white-primary / outline-secondary actions.
  */
 import { useRouter, type Href } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 
 import { minorToIDR } from "@domain/services/money";
-import { ETicketCard } from "@presentation/components/ETicketCard";
+import { ETicketCard, ticketRef } from "@presentation/components/ETicketCard";
 import { Seo } from "@presentation/components/Seo";
-import { useETicketShare } from "@presentation/hooks/useETicketShare";
+import { useETicketDownload } from "@presentation/hooks/useETicketDownload";
+import { CheckIcon, MailIcon } from "@presentation/components/ArrowIcon";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
+import { ArrowIcon } from "@presentation/components/ArrowIcon";
 import { useSessionStore } from "@presentation/stores/session-store";
 import { v2, v2Border } from "@presentation/theme";
 
 export interface SuccessScreenProps {
   readonly bookingId: string;
+}
+
+interface TicketQrRef {
+  toDataURL: (callback: (value: string) => void) => void;
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
@@ -52,8 +59,24 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   // pending verdict stays on the processing state (the gate routes here on
   // PAID, so this is a safety re-check, not the primary poll).
   const { verdict, isLoading } = useVerifyPayment(attemptId, bookingId);
-  const { shareTickets } = useETicketShare();
+  const { downloadTickets } = useETicketDownload();
   const count = ticketCount ?? 1;
+  const qrRefs = useRef<(TicketQrRef | null)[]>([]);
+  const [downloadError, setDownloadError] = useState("");
+
+  const handleDownload = async () => {
+    setDownloadError("");
+    try {
+      const qrImages = await Promise.all(Array.from({ length: count }, (_, index) => new Promise<string>((resolve, reject) => {
+        const qr = qrRefs.current[index];
+        if (!qr) return reject(new Error("QR tiket belum siap. Coba lagi."));
+        qr.toDataURL((value) => value ? resolve(value.replace(/^data:image\/png;base64,/, "")) : reject(new Error("QR tiket tidak dapat dibuat.")));
+      })));
+      await downloadTickets(bookingId, count, qrImages, event?.name);
+    } catch (error) {
+      setDownloadError(error instanceof Error ? error.message : "E-tiket gagal disimpan. Coba lagi.");
+    }
+  };
 
   useEffect(() => {
     if (verdict === "failed") {
@@ -93,6 +116,10 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
           </Text>
         </View>
       ) : (
+        <>
+        <View style={{ position: "absolute", left: -10000, top: 0, opacity: 0 }} pointerEvents="none" accessibilityElementsHidden>
+          {Array.from({ length: count }, (_, index) => <QRCode key={index} value={ticketRef(bookingId, index)} size={240} getRef={(ref) => { qrRefs.current[index] = ref; }} />)}
+        </View>
         <ScrollView className="w-full" contentContainerClassName="w-full max-w-md self-center">
           {/* Green success ring (prototype `.success-icon`). */}
           <View className="mb-6 items-center">
@@ -100,9 +127,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               className="h-20 w-20 items-center justify-center rounded-full"
                 style={{ borderWidth: 2, borderColor: v2.ground }}
             >
-              <Text className="text-3xl font-extrabold" style={{ color: v2.ground }} accessibilityElementsHidden>
-                ✓
-              </Text>
+              <CheckIcon color={v2.ground} size={32} />
             </View>
           </View>
 
@@ -161,15 +186,13 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
           <View className="mt-7 flex-row gap-3">
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Unduh atau bagikan e-tiket"
+              accessibilityLabel="Unduh e-tiket"
               testID="success-download"
-              onPress={() => void shareTickets(bookingId, count)}
+              onPress={() => void handleDownload()}
               className="flex-1 items-center py-4"
               style={{ backgroundColor: v2.ground, borderWidth: v2Border.base, borderColor: v2.ground }}
             >
-              <Text className="text-sm font-bold uppercase" style={{ color: v2.ink, letterSpacing: 0.5 }}>
-                ⬇ Unduh E-Tiket
-              </Text>
+              <View className="flex-row items-center gap-2"><ArrowIcon direction="download" color={v2.ink} /><Text className="text-sm font-bold uppercase" style={{ color: v2.ink, letterSpacing: 0.5 }}>Unduh E-Tiket</Text></View>
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -184,14 +207,15 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               </Text>
             </Pressable>
           </View>
+          {downloadError ? <Text className="mt-3 text-center text-xs" style={{ color: v2.accent }}>{downloadError}</Text> : null}
 
           {/* Email note (v2-mobile prototype 10-success.html `.email-note`) */}
           <View className="mt-4 flex-row items-center justify-center gap-2">
-            <Text style={{ fontSize: 14, color: "rgba(255,255,255,0.6)" }}>
-              ✉️ E-tiket juga dikirim ke email kamu
-            </Text>
+            <MailIcon color="rgba(255,255,255,0.6)" size={16} />
+            <Text style={{ fontSize: 14, color: "rgba(255,255,255,0.6)" }}>E-tiket juga dikirim ke email kamu</Text>
           </View>
         </ScrollView>
+        </>
       )}
     </View>
   );

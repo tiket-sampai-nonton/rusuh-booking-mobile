@@ -7,7 +7,7 @@
  * - Uppercase button labels
  * - Black/white color scheme
  */
-import { Modal, Pressable, Text, View, StyleSheet } from "react-native";
+import { Modal, Platform, Pressable, Text, View, StyleSheet } from "react-native";
 
 import { v2Colors, v2Borders, interFonts } from "@presentation/theme";
 
@@ -19,16 +19,16 @@ export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
       <Pressable
         accessibilityLabel="Tutup"
         onPress={onStay}
-        style={styles.overlay}
+        style={[styles.overlay, Platform.OS !== "web" && { justifyContent: "flex-end", padding: 0 }]}
         testID="checkout-leave-backdrop"
       >
         <Pressable
           onPress={(e) => e.stopPropagation()}
-          style={styles.modal}
+          style={[styles.modal, Platform.OS !== "web" && { maxWidth: "100%", borderBottomWidth: 0 }]}
           testID="checkout-leave-modal"
         >
           <Text style={styles.title} accessibilityRole="header">
-            ⚠️ Tinggalkan halaman?
+            Tinggalkan halaman?
           </Text>
           <Text style={styles.body}>
             Kalau kamu keluar sekarang, sesi pemilihan tiket dilepas dan kamu harus

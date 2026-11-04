@@ -56,7 +56,7 @@ export type ZoneTone = "ok" | "warn" | "error";
 
 export interface ZoneCopy {
   readonly tone: ZoneTone;
-  readonly icon: string;
+  readonly icon: "lock" | "warning" | "alert";
   readonly label: string;
   readonly body: string;
 }
@@ -65,19 +65,19 @@ export interface ZoneCopy {
 export const ZONE_COPY: Readonly<Record<QueueZone, ZoneCopy>> = {
   GUARANTEED: {
     tone: "ok",
-    icon: "🔒",
+    icon: "lock",
     label: "Safe Zone",
     body: "Your ticket is guaranteed when your turn arrives. You will not be cut in line.",
   },
   POSSIBLE: {
     tone: "warn",
-    icon: "⚠️",
+    icon: "warning",
     label: "Possible Zone",
     body: "You are in the reserve zone. Ticket availability depends on remaining stock.",
   },
   NOT_ENOUGH: {
     tone: "error",
-    icon: "🔴",
+    icon: "alert",
     label: "Low Chance Zone",
     body: "Your position is beyond estimated stock. Stay in queue - tickets may become available if others cancel.",
   },
@@ -140,35 +140,35 @@ export const COPY = {
     "Please keep this page open. Your position is automatically updated. Do not refresh or leave this page, or you will lose your spot.",
 
   // V2 warning messages
-  backgroundWarningTitle: "⚠️ Tab in Background",
+  backgroundWarningTitle: "Tab in Background",
   backgroundWarningText:
     "Your queue position is being held, but please keep this tab active to ensure smooth transition when it's your turn.",
   longWaitWarningTitle: "📱 Long Wait Expected",
   longWaitWarningText:
     "The estimated wait is over 10 minutes. Keep this tab open - we'll notify you when it's almost your turn.",
-  turnExpiryTitle: "⏰ Your Turn Expires In",
+  turnExpiryTitle: "Your Turn Expires In",
 
   // V2 redirect countdown
-  redirectTitle: "🎉 It's Your Turn!",
+  redirectTitle: "It's Your Turn!",
   redirectText: "Redirecting to ticket selection...",
 
   // V2 modal
-  leaveModalTitle: "⚠️ Leave Queue?",
+  leaveModalTitle: "Leave Queue?",
   leaveModalText:
     "If you leave now, you will lose your position in the queue and will need to rejoin from the back.",
   stayInQueue: "Stay in Queue",
   leaveQueue: "Leave Queue",
 
   // V2 error states
-  soldOutTitle: "😔 Sold Out",
+  soldOutTitle: "Sold Out",
   soldOutText:
     "Sorry, all tickets for this event have been sold while you were in the queue.",
-  saleEndedTitle: "⏰ Sale Ended",
+  saleEndedTitle: "Sale Ended",
   saleEndedText: "The ticket sale period for this event has ended.",
   sessionExpiredTitle: "⌛ Session Expired",
   sessionExpiredText:
     "Your queue session has expired due to inactivity. Please rejoin the queue.",
-  turnExpiredTitle: "⏱️ Turn Expired",
+  turnExpiredTitle: "Turn Expired",
   turnExpiredText:
     "You didn't proceed to ticket selection in time. Your turn has been given to the next person in queue.",
 

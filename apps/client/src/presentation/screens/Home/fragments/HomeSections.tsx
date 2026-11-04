@@ -81,7 +81,7 @@ export function HomeSections({
       >
         <V2Reveal>
           <V2SectionHead
-            tag="● Sedang Berlangsung"
+            tag="Sedang Berlangsung"
             title="Konser Terdekat"
             subtitle="Pilih event, masuk waiting room, dan amankan tiketmu. Posisi antrean real-time, tanpa PHP."
           />

@@ -3,7 +3,7 @@
  *
  * PROTOTYPE 05-browse.html EXACT COPY:
  * - Header: fixed, white bg, 2px border, slides on scroll
- * - Hero: black bg with noise, search box
+ * - Hero: black bg with noise
  * - Categories: button grid with fill-up hover
  * - Cards: grayscale→color on hover, 8px shadow offset
  * - Load more: fill-up button
@@ -14,8 +14,9 @@
  */
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { useMemo, useState, useRef } from 'react';
-import { Pressable, ScrollView, Text, View, Platform, TextInput } from 'react-native';
+import { Pressable, ScrollView, Text, View, Platform } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -26,6 +27,8 @@ import {
 } from '@presentation/components/v2';
 import { useEvents } from '@presentation/hooks/useEvents';
 import { useResponsive } from '@presentation/hooks/useResponsive';
+import { FilterModal, type FilterValue } from '@presentation/components/FilterModal';
+import { useAccountStore } from '@presentation/stores/account-store';
 import { v2Colors, v2Borders, interFonts } from '@presentation/theme';
 
 import { BrowseGrid } from './fragments/BrowseGrid';
@@ -53,9 +56,6 @@ import {
   browseSortSelect,
   browseLoadMore,
   browseLoadMoreBtn,
-  browseSearchBox,
-  browseSearchInput,
-  browseSearchBtn,
 } from './style';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -89,8 +89,8 @@ export function BrowseScreen() {
     genre?: string;
     time?: string;
     sort?: string;
-    q?: string;
   }>();
+  const profile = useAccountStore((s) => s.profile);
   const { data, isLoading } = useEvents();
   const scrollRef = useRef<Animated.ScrollView>(null);
 
@@ -108,8 +108,7 @@ export function BrowseScreen() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState(params.sort ?? 'date');
   const [loadMoreDisabled, setLoadMoreDisabled] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(String(params.q ?? ''));
-  const [wishlist, setWishlist] = useState<ReadonlySet<string>>(new Set());
+  const [filterOpen, setFilterOpen] = useState(false);
 
   // Hydrate filter from URL
   const genre = readGenre(params.genre);
@@ -131,19 +130,16 @@ export function BrowseScreen() {
       filtered = filtered.filter((ev) => matchesCategory(ev, activeCategory));
     }
 
-    const query = searchQuery.trim().toLowerCase();
-    if (query) {
-      filtered = filtered.filter((ev) =>
-        `${ev.name} ${ev.venue ?? ''}`.toLowerCase().includes(query),
-      );
-    }
-
     return filtered;
-  }, [allResults, activeCategory, searchQuery]);
+  }, [allResults, activeCategory]);
 
   const goToEvent = (eventId: string): void =>
     router.push(`/events/${eventId}` as Href);
   const goHome = (): void => router.push('/' as Href);
+  const applyFilter = (value: FilterValue): void => {
+    setFilterOpen(false);
+    router.push(`/browse?${new URLSearchParams({ genre: value.genre, time: value.time, sort: value.sort }).toString()}` as Href);
+  };
 
   // Handle category click
   const handleCategoryClick = (key: string) => {
@@ -206,28 +202,6 @@ export function BrowseScreen() {
               >
                 Next Event
               </Text>
-            </View>
-            <View style={browseSearchBox}>
-              <TextInput
-                accessibilityLabel="Cari event"
-                placeholder="Search events..."
-                placeholderTextColor={v2Colors.inkMuted}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                onSubmitEditing={() => undefined}
-                returnKeyType="search"
-                style={[browseSearchInput, { color: v2Colors.ground, fontFamily: interFonts.regular, fontSize: 14 }]}
-                testID="browse-search-input"
-              />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Cari"
-                onPress={() => undefined}
-                style={browseSearchBtn}
-                testID="browse-search-button"
-              >
-                <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, textTransform: 'uppercase' }}>Search</Text>
-              </Pressable>
             </View>
           </View>}
 
@@ -324,6 +298,9 @@ export function BrowseScreen() {
               </Text>
 
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+                <Pressable accessibilityRole="button" accessibilityLabel="Filter event" onPress={() => setFilterOpen(true)} style={{ minHeight: 36, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: v2Colors.ink }} testID="browse-filter">
+                  <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 11, textTransform: 'uppercase' }}>Filter</Text>
+                </Pressable>
                 {/* The mobile prototype has no sort control; retain it only on web. */}
                 {Platform.OS === 'web' ? (
                   <View style={browseSortSelect}>
@@ -359,14 +336,9 @@ export function BrowseScreen() {
                     onPress={() => setViewMode('grid')}
                     testID="view-grid"
                   >
-                    <Text
-                      style={{
-                        color: viewMode === 'grid' ? v2Colors.ground : v2Colors.ink,
-                        fontSize: 16,
-                      }}
-                    >
-                      ⊞
-                    </Text>
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={viewMode === 'grid' ? v2Colors.ground : v2Colors.ink} strokeWidth={2}>
+                      <Path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z" />
+                    </Svg>
                   </Pressable>
                   <View style={{ width: v2Borders.standard, backgroundColor: v2Colors.ink }} />
                   <Pressable
@@ -377,14 +349,9 @@ export function BrowseScreen() {
                     onPress={() => setViewMode('list')}
                     testID="view-list"
                   >
-                    <Text
-                      style={{
-                        color: viewMode === 'list' ? v2Colors.ground : v2Colors.ink,
-                        fontSize: 16,
-                      }}
-                    >
-                      ☰
-                    </Text>
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={viewMode === 'list' ? v2Colors.ground : v2Colors.ink} strokeWidth={2}>
+                      <Path d="M4 5h16M4 12h16M4 19h16" />
+                    </Svg>
                   </Pressable>
                 </View>
               </View>
@@ -398,14 +365,6 @@ export function BrowseScreen() {
                 events={results}
                 onPress={goToEvent}
                 columns={viewMode === 'list' ? 1 : (isNative ? 2 : gridColumns)}
-                wishlistedIds={wishlist}
-                onToggleWishlist={(id) => {
-                  setWishlist((current) => {
-                    const next = new Set(current);
-                    if (next.has(id)) next.delete(id); else next.add(id);
-                    return next;
-                  });
-                }}
               />
             )}
 
@@ -442,57 +401,25 @@ export function BrowseScreen() {
         <V2Header
           topInset={insets.top}
           showLinks={showNavLinks}
+          isLoggedIn={Boolean(profile)}
           links={[
+            { label: 'Beranda', onPress: goHome, testID: 'nav-home' },
             { label: 'Browse', onPress: () => {}, testID: 'nav-browse' },
-            { label: 'My Tickets', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
+            ...(profile ? [
+              { label: 'My Ticket', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
+              { label: 'Profile', onPress: () => router.push('/profile' as Href), testID: 'nav-profile' },
+            ] : []),
           ]}
           onCtaPress={() => {}}
           onLogoPress={goHome}
-          actions={[{ icon: 'heart', label: 'Wishlist', count: wishlist.size, testID: 'header-wishlist' }]}
+          actions={[]}
         />
 
         {isNative && (
-          <>
             <View
               style={{
                 position: 'absolute',
                 top: insets.top + 56,
-                left: 0,
-                right: 0,
-                zIndex: 99,
-                height: 68,
-                paddingTop: 8,
-                paddingHorizontal: 16,
-                paddingBottom: 16,
-                backgroundColor: v2Colors.ground,
-              }}
-            >
-              <View style={{ flex: 1, flexDirection: 'row', borderWidth: 2, borderColor: v2Colors.ink, backgroundColor: '#f5f5f5' }}>
-                <TextInput
-                  accessibilityLabel="Search events, artists"
-                  placeholder="Search events, artists..."
-                  placeholderTextColor={v2Colors.inkMuted}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  returnKeyType="search"
-                  style={{ flex: 1, paddingHorizontal: 16, color: v2Colors.ink, fontFamily: interFonts.regular, fontSize: 16 }}
-                  testID="browse-search-input"
-                />
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Search"
-                  onPress={() => setSearchQuery((value) => value.trim())}
-                  style={{ width: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: v2Colors.ink }}
-                  testID="browse-search-button"
-                >
-                  <Text style={{ color: v2Colors.ground, fontSize: 22 }}>⌕</Text>
-                </Pressable>
-              </View>
-            </View>
-            <View
-              style={{
-                position: 'absolute',
-                top: insets.top + 56 + 68,
                 left: 0,
                 right: 0,
                 zIndex: 98,
@@ -518,12 +445,12 @@ export function BrowseScreen() {
                 })}
               </ScrollView>
             </View>
-          </>
         )}
 
         {/* Bottom Navigation (native only, handled internally by V2BottomNav) */}
         <V2BottomNav
           activeRoute="browse"
+          isLoggedIn={Boolean(profile)}
           onNavigate={(route) => {
             if (route === 'home') router.push('/' as Href);
             else if (route === 'browse') { /* already here */ }
@@ -531,6 +458,7 @@ export function BrowseScreen() {
             else if (route === 'profile') router.push('/profile' as Href);
           }}
         />
+        <FilterModal visible={filterOpen} onClose={() => setFilterOpen(false)} onApply={applyFilter} />
       </View>
     </V2ToastProvider>
   );

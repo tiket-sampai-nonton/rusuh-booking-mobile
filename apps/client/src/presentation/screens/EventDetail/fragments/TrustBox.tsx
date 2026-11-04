@@ -13,6 +13,7 @@
 import { Text, View, StyleSheet } from "react-native";
 
 import { interFonts } from "@presentation/theme/fonts";
+import { CheckIcon } from "@presentation/components/ArrowIcon";
 import {
   v2Borders,
   v2Colors,
@@ -32,9 +33,7 @@ export function TrustBox() {
     <View style={trustStyles.container}>
       {TRUST_LINES.map((text) => (
         <View key={text} style={trustStyles.row}>
-          <Text style={trustStyles.check} accessibilityElementsHidden>
-            ✓
-          </Text>
+          <CheckIcon color={v2Colors.success} size={16} />
           <Text style={trustStyles.text}>{text}</Text>
         </View>
       ))}

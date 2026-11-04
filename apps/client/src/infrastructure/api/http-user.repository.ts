@@ -12,12 +12,18 @@ import type {
   UserProfile,
   UserRepository,
 } from "@domain/repositories/user.repository";
+import type { TokenStorage } from "@domain/auth/token-storage.port";
 import { assertOk, unwrap } from "@infrastructure/api/envelope";
 import { toAuthSession, toUserProfile } from "@infrastructure/api/dto-mappers";
 import type { HttpClient } from "@infrastructure/http/http-client";
 
 export class HttpUserRepository implements UserRepository {
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient, private readonly tokenStorage?: TokenStorage) {}
+
+  private async authHeaders(): Promise<Readonly<Record<string, string>> | undefined> {
+    const token = await this.tokenStorage?.load();
+    return token ? { Authorization: `Bearer ${token}` } : undefined;
+  }
 
   async requestOtp(email: string): Promise<void> {
     const res = await this.http.request({
@@ -44,13 +50,14 @@ export class HttpUserRepository implements UserRepository {
     const res = await this.http.request({
       method: "PATCH",
       url: "me",
+      headers: await this.authHeaders(),
       body: input,
     });
     return toUserProfile(unwrap<Parameters<typeof toUserProfile>[0]>(res));
   }
 
   async getMe(): Promise<UserProfile> {
-    const res = await this.http.request({ method: "GET", url: "me" });
+    const res = await this.http.request({ method: "GET", url: "me", headers: await this.authHeaders() });
     return toUserProfile(unwrap<Parameters<typeof toUserProfile>[0]>(res));
   }
 }

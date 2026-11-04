@@ -5,7 +5,6 @@
  * - Cards: 2px border, grayscale→color on hover
  * - Hover: 8px shadow offset, -4px translate
  * - Badge: HOT (red), NEW (green)
- * - Wishlist button: heart icon
  * - Multi-column grid on desktop
  * - Mobile: 2 columns with 16px gap (--space-s)
  * - Desktop: responsive columns with 32px gap (2rem)
@@ -19,7 +18,7 @@ import { browseGridCell, browseGridRow, browseGridList } from '../style';
 
 const isNative = Platform.OS !== 'web';
 
-export function BrowseGrid({ events, onPress, columns = 1, wishlistedIds = new Set(), onToggleWishlist }: BrowseGridProps) {
+export function BrowseGrid({ events, onPress, columns = 1 }: BrowseGridProps) {
   const isListMode = columns <= 1;
   
   if (isListMode) {
@@ -27,7 +26,7 @@ export function BrowseGrid({ events, onPress, columns = 1, wishlistedIds = new S
       <View style={browseGridList(isNative)} testID="browse-grid">
         {events.map((ev, i) => (
           <V2Reveal key={ev.id} delay={i * 80}>
-            <V2EventCard event={ev} onPress={onPress} listMode showWishlist={!isNative} wishlisted={wishlistedIds.has(ev.id)} onToggleWishlist={onToggleWishlist} />
+            <V2EventCard event={ev} onPress={onPress} listMode />
           </V2Reveal>
         ))}
       </View>
@@ -39,7 +38,7 @@ export function BrowseGrid({ events, onPress, columns = 1, wishlistedIds = new S
       {events.map((ev, i) => (
         <View key={ev.id} style={browseGridCell(columns, isNative)}>
           <V2Reveal delay={i * 80}>
-            <V2EventCard event={ev} onPress={onPress} showWishlist wishlisted={wishlistedIds.has(ev.id)} onToggleWishlist={onToggleWishlist} />
+            <V2EventCard event={ev} onPress={onPress} />
           </V2Reveal>
         </View>
       ))}

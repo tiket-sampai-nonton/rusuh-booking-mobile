@@ -43,7 +43,7 @@ describe("(public) routes", () => {
     await waitFor(() =>
       expect(screen.getByText("Upcoming")).toBeTruthy(),
     );
-    expect(screen.getByTestId("home-mobile-stats")).toBeTruthy();
+    expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
   });
 
   it("renders the Browse screen (RBT-031: real URL-driven results, not a placeholder)", async () => {

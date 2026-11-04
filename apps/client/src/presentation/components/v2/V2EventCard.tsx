@@ -85,19 +85,6 @@ function ArrowRightIcon({ color = v2Colors.ink }: { readonly color?: string }) {
   );
 }
 
-function HeartIcon({ color = v2Colors.ink, filled = false }: { readonly color?: string; readonly filled?: boolean }) {
-  return (
-    <Svg width={16} height={16} viewBox="0 0 24 24" fill={filled ? color : 'none'}>
-      <Path
-        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
 export interface V2EventCardProps {
   readonly event: EventSummary;
   readonly onPress: (eventId: string) => void;
@@ -107,10 +94,8 @@ export interface V2EventCardProps {
   readonly staggerIndex?: number;
   /** List view mode: use 16:9 aspect ratio instead of 1:1 */
   readonly listMode?: boolean;
-  /** Browse-only wishlist affordance. */
-  readonly showWishlist?: boolean;
-  readonly wishlisted?: boolean;
-  readonly onToggleWishlist?: (eventId: string) => void;
+  /** Native Home carousel: reveal the color layer when the card enters view. */
+  readonly isImageVisible?: boolean;
 }
 
 /** Badge label per tone */
@@ -122,10 +107,11 @@ const BADGE_LABEL: Record<BadgeTone, string> = {
   done: 'Selesai',
 };
 
-export function V2EventCard({ event, onPress, history = false, staggerIndex = 0, listMode = false, showWishlist = false, wishlisted = false, onToggleWishlist }: V2EventCardProps) {
+export function V2EventCard({ event, onPress, history = false, staggerIndex = 0, listMode = false, isImageVisible = true }: V2EventCardProps) {
   const reducedMotion = useReducedMotion();
   const { isNative } = useResponsive();
   const hovered = useSharedValue(0);
+  const colorReveal = useSharedValue(isNative ? 0 : 1);
   const staggerOpacity = useSharedValue(reducedMotion ? 1 : 0);
   const staggerTranslateY = useSharedValue(reducedMotion ? 0 : 20);
   const [isHovered, setIsHovered] = useState(false); // For web CSS filter
@@ -133,6 +119,13 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
   const disabled = badge.disabled || history;
   const dateTxt = formatDateID(event.startsAt);
   const image = eventImage(event.id);
+  const grayscaleImage = image.includes('images.unsplash.com') ? `${image}${image.includes('?') ? '&' : '?'}sat=-100` : image;
+
+  useEffect(() => {
+    if (!isNative) return;
+    colorReveal.value = isImageVisible && !reducedMotion ? withTiming(1, { duration: 900, easing: EASE }) : (isImageVisible ? 1 : 0);
+  }, [colorReveal, isImageVisible, isNative, reducedMotion]);
+  const colorLayerStyle = useAnimatedStyle(() => ({ opacity: colorReveal.value }));
 
   // Mobile vs Desktop sizing
   const contentPadding = isNative ? MOBILE_CONTENT_PADDING : DESKTOP_CONTENT_PADDING;
@@ -203,17 +196,6 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
     transform: [{ scale: interpolate(hovered.value, [0, 1], [1, 1.05]) }],
   }));
 
-  // For native: grayscale effect via overlays
-  // Gray overlay fades out on press to reveal color
-  const nativeGrayscaleStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(hovered.value, [0, 1], [0.6, 0]),
-  }));
-
-  // Dark overlay for contrast (also fades out on press)
-  const nativeDarkOverlayStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(hovered.value, [0, 1], [0.25, 0]),
-  }));
-
   // Badge slides in from left on hover (or always visible for certain states)
   const badgeAlwaysShow = badge.tone === 'soldout' || badge.tone === 'done' || badge.tone === 'low';
   const badgeStyle = useAnimatedStyle(() => ({
@@ -255,8 +237,10 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
     // Mobile grid: square aspect ratio (1:1) for taller image
     // Mobile list: 16:9 aspect ratio for shorter image
     // Desktop: 4:3 aspect ratio
-    aspectRatio: isNative ? (listMode ? 16 / 9 : 1) : 4 / 3,
-    width: '100%',
+    aspectRatio: isNative ? (listMode ? 16 / 9 : 1) : (listMode ? undefined : 4 / 3),
+    width: isWeb && listMode ? 240 : '100%',
+    height: isWeb && listMode ? 160 : undefined,
+    flexShrink: 0,
     overflow: 'hidden',
     position: 'relative',
   };
@@ -280,33 +264,8 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
     // Date (16) + gap (4) + Title (2 lines * 16 * 1.3 = 42) + gap (8) + Venue (12) + gap (16) + Footer (~50) ≈ 148
     minHeight: isNative ? 160 : undefined,
     justifyContent: isNative ? 'space-between' : undefined,
+    ...(isWeb && listMode ? { flex: 1, minHeight: 160, justifyContent: 'center' } : {}),
   };
-
-  const wishlistButton = showWishlist && !disabled ? (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${wishlisted ? 'Hapus dari' : 'Simpan ke'} wishlist: ${event.name}`}
-      accessibilityState={{ selected: wishlisted }}
-      onPress={(pressEvent) => {
-        pressEvent.stopPropagation();
-        onToggleWishlist?.(event.id);
-      }}
-      style={({ pressed }) => ({
-        ...(isWeb ? { position: 'absolute', top: 8, right: 8 } : {}),
-        zIndex: 10,
-        width: 36,
-        height: 36,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: pressed || wishlisted ? v2Colors.ink : v2Colors.ground,
-        borderWidth: v2Borders.standard,
-        borderColor: v2Colors.ink,
-      })}
-      testID={`wishlist-${event.id}`}
-    >
-      <HeartIcon color={wishlisted ? v2Colors.ground : v2Colors.ink} filled={wishlisted} />
-    </Pressable>
-  ) : null;
 
   const footerStyle: ViewStyle = {
     flexDirection: 'row',
@@ -332,55 +291,24 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
         onPressIn={() => setHovered(true)}
         onPressOut={() => setHovered(false)}
         testID={`v2-event-card-${event.id}`}
+        style={isWeb && listMode ? { flexDirection: 'row', minHeight: 160, borderWidth: v2Borders.standard, borderColor: v2Colors.ink, backgroundColor: v2Colors.ground } : undefined}
       >
         {/* Image with grayscale → color effect */}
         <View style={imageContainerStyle}>
           <Animated.View style={[{ flex: 1 }, imageScaleStyle]}>
             <Image
-              source={{ uri: image }}
+              source={{ uri: isNative ? grayscaleImage : image }}
               resizeMode="cover"
               accessibilityIgnoresInvertColors
               style={webImageStyle}
             />
+            {isNative ? (
+              <Animated.View pointerEvents="none" style={[{ position: 'absolute', width: '100%', height: '100%' }, colorLayerStyle]}>
+                <Image source={{ uri: image }} resizeMode="cover" accessibilityIgnoresInvertColors style={{ width: '100%', height: '100%' }} />
+              </Animated.View>
+            ) : null}
           </Animated.View>
 
-          {/* Native only: grayscale approximation via high-contrast gray overlay */}
-          {/* This desaturates colors by blending with gray - not perfect but works on RN */}
-          {!isWeb && (
-            <>
-              {/* Dark overlay to reduce color vibrancy */}
-              <Animated.View
-                pointerEvents="none"
-                style={[
-                  {
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: '#000000',
-                  },
-                  nativeDarkOverlayStyle,
-                ]}
-              />
-              {/* Gray overlay for desaturation effect */}
-              {/* NOTE: Using inkMuted (#666666) per Design Palette Guide - NO arbitrary grays */}
-              <Animated.View
-                pointerEvents="none"
-                style={[
-                  {
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: v2Colors.inkMuted, // #666666 - the only allowed gray
-                  },
-                  nativeGrayscaleStyle,
-                ]}
-              />
-            </>
-          )}
 
           {/* Badge */}
           <Animated.View
@@ -410,26 +338,6 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
             </Text>
           </Animated.View>
 
-          {/* Keep the native wishlist hit target in a full-size positioned layer. */}
-          {!isWeb && wishlistButton && (
-            <View
-              pointerEvents="box-none"
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                alignItems: 'flex-start',
-                padding: 8,
-                zIndex: 10,
-              }}
-            >
-              {wishlistButton}
-            </View>
-          )}
         </View>
 
         {/* Content */}
@@ -565,7 +473,6 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
           </View>
         </View>
       </Pressable>
-      {isWeb && wishlistButton}
     </Animated.View>
   );
 }

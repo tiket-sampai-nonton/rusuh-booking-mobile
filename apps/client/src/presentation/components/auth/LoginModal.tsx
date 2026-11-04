@@ -39,6 +39,7 @@ import {
   isValidEmail,
 } from "@presentation/components/auth/auth.schema";
 import { useAuth } from "@presentation/hooks/useAuth";
+import { ArrowIcon, CheckIcon, CloseIcon } from "@presentation/components/ArrowIcon";
 import { v2Colors, v2Duration } from "@presentation/theme/v2-tokens";
 
 import { loginStyles as styles } from "./login-modal.style";
@@ -316,7 +317,7 @@ export function LoginModal({
         testID="login-backdrop"
         accessibilityLabel="Tutup dialog"
         onPress={close}
-        style={styles.overlay}
+        style={[styles.overlay, Platform.OS !== "web" && { justifyContent: "flex-end", padding: 0 }]}
       >
         {/* Animated card */}
         <Animated.View
@@ -332,7 +333,7 @@ export function LoginModal({
             accessibilityViewIsModal
             accessibilityRole={Platform.OS === "web" ? "none" : undefined}
             onPress={(e) => e.stopPropagation()}
-            style={styles.card}
+            style={[styles.card, Platform.OS !== "web" && { maxWidth: "100%", padding: 24, borderBottomWidth: 0 }]}
           >
             {/* Close button */}
             <Pressable
@@ -341,7 +342,7 @@ export function LoginModal({
               onPress={close}
               style={styles.closeBtn}
             >
-              <Text style={styles.closeBtnText}>×</Text>
+              <CloseIcon color={v2Colors.ink} />
             </Pressable>
 
             {/* Step 1: Phone/Email */}
@@ -478,7 +479,7 @@ export function LoginModal({
                 <View style={styles.actions}>
                   <GhostButton
                     testID="login-change-email"
-                    label="← Ubah Email"
+                    label="Ubah Email"
                     onPress={backToPhone}
                   />
                   <PrimaryButton
@@ -571,7 +572,7 @@ export function LoginModal({
                       regConsent && styles.checkboxChecked,
                     ]}
                   >
-                    {regConsent && <Text style={styles.checkboxMark}>✓</Text>}
+                    {regConsent && <CheckIcon color={v2Colors.ground} size={14} />}
                   </View>
                   <Text style={styles.consentText}>
                     Saya menyetujui pemrosesan data sesuai{" "}
@@ -651,7 +652,7 @@ export function LoginModal({
             {step === "success" && (
               <View style={styles.doneContainer}>
                 <View style={styles.doneCheck}>
-                  <Text style={styles.doneCheckMark}>✓</Text>
+                  <CheckIcon color={v2Colors.ground} size={28} />
                 </View>
                 <Text
                   accessibilityRole="header"
@@ -731,7 +732,7 @@ function PrimaryButton({
       ]}
     >
       <Text style={styles.goText}>{label}</Text>
-      {variant !== "danger" && <Text style={styles.arrow}>→</Text>}
+      {variant !== "danger" && <ArrowIcon color={v2Colors.ground} />}
     </Pressable>
   );
 }
