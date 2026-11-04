@@ -90,6 +90,18 @@ describe("BrowseScreen — URL-driven filters", () => {
     expect(screen.getByTestId("browse-count")).toBeTruthy();
   });
 
+  it("opens filters from an icon-only accessible control", async () => {
+    renderWithProviders(<BrowseScreen />, {
+      container: { eventRepository: repo(CATALOG) },
+    });
+    await waitFor(() => screen.getByTestId("browse-filter"));
+
+    expect(screen.getByLabelText("Saring event")).toBeTruthy();
+    expect(screen.queryByText("Saring")).toBeNull();
+    fireEvent.press(screen.getByTestId("browse-filter"));
+    expect(screen.getByTestId("filter-modal")).toBeTruthy();
+  });
+
   it("renders the empty state when the filter matches nothing", async () => {
     mockParams.current = { genre: "Orkestra" };
     renderWithProviders(<BrowseScreen />, {

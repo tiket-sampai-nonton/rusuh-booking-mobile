@@ -298,8 +298,16 @@ export function BrowseScreen() {
               </Text>
 
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
-                <Pressable accessibilityRole="button" accessibilityLabel="Saring event" onPress={() => setFilterOpen(true)} style={{ minHeight: 36, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: v2Colors.ink }} testID="browse-filter">
-                  <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 11, textTransform: 'uppercase' }}>Saring</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Saring event"
+                  onPress={() => setFilterOpen(true)}
+                  style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: v2Colors.ink }}
+                  testID="browse-filter"
+                >
+                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={v2Colors.ink} strokeWidth={2}>
+                    <Path d="M4 6h16M7 12h10m-7 6h4" />
+                  </Svg>
                 </Pressable>
                 {/* The mobile prototype has no sort control; retain it only on web. */}
                 {Platform.OS === 'web' ? (
