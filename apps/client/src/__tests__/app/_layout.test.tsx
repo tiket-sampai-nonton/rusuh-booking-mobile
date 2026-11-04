@@ -22,4 +22,9 @@ describe("RootLayout (skeleton)", () => {
   it("renders the router root without crashing", () => {
     expect(() => render(<RootLayout />)).not.toThrow();
   });
+
+  it("shows the native launch splash on the native test platform", () => {
+    const { getByTestId } = render(<RootLayout />);
+    expect(getByTestId("native-launch-splash")).toBeTruthy();
+  });
 });

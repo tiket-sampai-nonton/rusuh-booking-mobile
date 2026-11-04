@@ -54,7 +54,7 @@ export function Lineup({ items }: LineupProps) {
 
   if (items.length === 0) {
     return (
-      <Text style={lineupStyles.empty}>Line-up akan diumumkan menyusul.</Text>
+      <Text style={lineupStyles.empty}>Daftar pengisi acara akan diumumkan menyusul.</Text>
     );
   }
 

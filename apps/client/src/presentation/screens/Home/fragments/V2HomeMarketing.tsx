@@ -61,7 +61,7 @@ interface StatItem {
 
 const STATS: StatItem[] = [
   { target: 2_500_000, suffix: '+', label: 'Tiket Terjual' },
-  { target: 500, suffix: '+', label: 'Partner Event' },
+  { target: 500, suffix: '+', label: 'Mitra Event' },
   { target: 1_000_000, suffix: '+', label: 'Pengguna Aktif' },
   { target: 99.9, suffix: '%', label: 'Transaksi Aman', decimal: 1 },
 ];
@@ -70,7 +70,7 @@ const STEPS = [
   { number: '01', title: 'Pilih Event', desc: 'Cari dan pilih event yang ingin kamu hadiri dari berbagai kategori' },
   { number: '02', title: 'Pilih Tiket', desc: 'Tentukan kategori kursi dan jumlah tiket sesuai kebutuhan' },
   { number: '03', title: 'Bayar', desc: 'Selesaikan pembayaran dengan metode pilihanmu secara aman' },
-  { number: '04', title: 'Masuk Venue', desc: 'Tunjukkan e-ticket di pintu masuk dan nikmati acaranya' },
+  { number: '04', title: 'Masuk ke Lokasi Acara', desc: 'Tunjukkan tiket elektronik di pintu masuk dan nikmati acaranya.' },
 ] as const;
 
 const TESTIMONIALS = [
@@ -675,7 +675,7 @@ function V2NewsletterSection() {
 
     // Simulate success
     setStatus('success');
-    toast.show('Berhasil mendaftar newsletter!', 'success');
+    toast.show('Berhasil berlangganan info event!', 'success');
     setEmail('');
     setTimeout(() => setStatus('idle'), 3000);
   }, [email, toast]);
@@ -722,7 +722,7 @@ function V2NewsletterSection() {
             marginBottom: v2SpacingSemantic.l,
           }}
         >
-          Daftar newsletter dan jangan lewatkan event favoritmu
+          Berlangganan info event agar tidak melewatkan event favoritmu
         </Text>
       </V2Reveal>
 
@@ -745,7 +745,7 @@ function V2NewsletterSection() {
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
-            accessibilityLabel="Email untuk newsletter"
+            accessibilityLabel="Email untuk info event"
             style={{
               flex: 1,
               paddingHorizontal: 20,
@@ -770,7 +770,7 @@ function V2NewsletterSection() {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Daftar newsletter"
+            accessibilityLabel="Berlangganan info event"
             onPress={handleSubmit}
             style={{
               backgroundColor: v2Colors.ink,
@@ -792,7 +792,7 @@ function V2NewsletterSection() {
                 fontFamily: interFonts.bold,
               }}
             >
-              Daftar
+              Berlangganan
             </Text>
           </Pressable>
         </View>

@@ -60,7 +60,7 @@ describe("HeroCarousel", () => {
       />,
     );
     expect(screen.getByTestId("home-hero")).toBeTruthy();
-    expect(screen.getByText("Live · Flash Sale")).toBeTruthy();
+    expect(screen.getByText("Sedang Berlangsung · Promo Kilat")).toBeTruthy();
     expect(screen.getAllByText("Rusuh Fest 2026").length).toBeGreaterThanOrEqual(1);
     fireEvent.press(screen.getAllByTestId("hero-book")[0]);
     expect(onBook).toHaveBeenCalledWith("evt-1");
@@ -91,7 +91,7 @@ describe("HeroCarousel", () => {
       />,
     );
     expect(screen.getByTestId("home-hero")).toBeTruthy();
-    expect(screen.getByText("Live · Flash Sale")).toBeTruthy();
+    expect(screen.getByText("Sedang Berlangsung · Promo Kilat")).toBeTruthy();
   });
 
   it("auto-advances to the next slide on the interval tick", () => {
@@ -121,14 +121,14 @@ describe("TrustStrip", () => {
     render(<TrustStrip />);
     expect(screen.getByTestId("trust-strip")).toBeTruthy();
     // Each item is duplicated (two copies for the seamless loop).
-    expect(screen.getAllByText("Anti-oversell").length).toBe(2);
+    expect(screen.getAllByText("Cegah Penjualan Berlebih").length).toBe(2);
   });
 
   it("renders static under reduced-motion (no scroll loop)", () => {
     motionState.reduced = true;
     render(<TrustStrip />);
     expect(screen.getByTestId("trust-strip")).toBeTruthy();
-    expect(screen.getAllByText("Anti-oversell").length).toBe(2);
+    expect(screen.getAllByText("Cegah Penjualan Berlebih").length).toBe(2);
   });
 });
 

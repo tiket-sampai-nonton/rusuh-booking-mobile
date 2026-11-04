@@ -63,11 +63,11 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const CATEGORIES = [
-  { key: 'all', label: 'All' },
-  { key: 'concert', label: 'Concerts' },
-  { key: 'festival', label: 'Festivals' },
-  { key: 'sports', label: 'Sports' },
-  { key: 'theater', label: 'Theater' },
+  { key: 'all', label: 'Semua' },
+  { key: 'concert', label: 'Konser' },
+  { key: 'festival', label: 'Festival' },
+  { key: 'sports', label: 'Olahraga' },
+  { key: 'theater', label: 'Teater' },
 ] as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -75,10 +75,10 @@ const CATEGORIES = [
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const SORT_OPTIONS = [
-  { key: 'date', label: 'Sort by Date' },
-  { key: 'price-low', label: 'Price: Low to High' },
-  { key: 'price-high', label: 'Price: High to Low' },
-  { key: 'popular', label: 'Most Popular' },
+  { key: 'date', label: 'Urutkan Berdasarkan Tanggal' },
+  { key: 'price-low', label: 'Harga Terendah' },
+  { key: 'price-high', label: 'Harga Tertinggi' },
+  { key: 'popular', label: 'Paling Populer' },
 ] as const;
 
 export function BrowseScreen() {
@@ -153,7 +153,7 @@ export function BrowseScreen() {
 
   // Show loading screen
   if (isLoading) {
-    return <V2Loader visible label="BROWSE" />;
+    return <V2Loader visible label="JELAJAHI" />;
   }
 
   return (
@@ -188,7 +188,7 @@ export function BrowseScreen() {
                   textAlign: 'center',
                 }}
               >
-                Find Your
+                Temukan
               </Text>
               <Text
                 style={{
@@ -200,7 +200,7 @@ export function BrowseScreen() {
                   textAlign: 'center',
                 }}
               >
-                Next Event
+                Event Berikutnya
               </Text>
             </View>
           </View>}
@@ -225,7 +225,7 @@ export function BrowseScreen() {
                       letterSpacing: -0.48,
                     }}
                   >
-                    Categories
+                    Kategori
                   </Text>
                 </View>
 
@@ -290,16 +290,16 @@ export function BrowseScreen() {
                 }}
                 testID="browse-count"
               >
-                Showing{' '}
+                Menampilkan{' '}
                 <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold }}>
                   {results.length}
                 </Text>{' '}
-                events
+                event
               </Text>
 
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
-                <Pressable accessibilityRole="button" accessibilityLabel="Filter event" onPress={() => setFilterOpen(true)} style={{ minHeight: 36, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: v2Colors.ink }} testID="browse-filter">
-                  <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 11, textTransform: 'uppercase' }}>Filter</Text>
+                <Pressable accessibilityRole="button" accessibilityLabel="Saring event" onPress={() => setFilterOpen(true)} style={{ minHeight: 36, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: v2Colors.ink }} testID="browse-filter">
+                  <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, fontSize: 11, textTransform: 'uppercase' }}>Saring</Text>
                 </Pressable>
                 {/* The mobile prototype has no sort control; retain it only on web. */}
                 {Platform.OS === 'web' ? (
@@ -389,7 +389,7 @@ export function BrowseScreen() {
                       textTransform: 'uppercase',
                     }}
                   >
-                    {loadMoreDisabled ? 'No More Events' : 'Load More Events'}
+                    {loadMoreDisabled ? 'Semua Event Ditampilkan' : 'Muat Lebih Banyak Event'}
                   </Text>
                 </Pressable>
               </View>
@@ -404,10 +404,10 @@ export function BrowseScreen() {
           isLoggedIn={Boolean(profile)}
           links={[
             { label: 'Beranda', onPress: goHome, testID: 'nav-home' },
-            { label: 'Browse', onPress: () => {}, testID: 'nav-browse' },
+            { label: 'Jelajahi', onPress: () => {}, testID: 'nav-browse' },
             ...(profile ? [
-              { label: 'My Ticket', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
-              { label: 'Profile', onPress: () => router.push('/profile' as Href), testID: 'nav-profile' },
+              { label: 'Tiket Saya', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
+              { label: 'Profil', onPress: () => router.push('/profile' as Href), testID: 'nav-profile' },
             ] : []),
           ]}
           onCtaPress={() => {}}

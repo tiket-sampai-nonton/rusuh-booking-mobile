@@ -49,7 +49,7 @@ export function HomeNav({
           <View className="flex-row" style={{ gap: 24 }}>
             {[
               { label: "Jelajah", onPress: onJelajah, testID: "nav-jelajah" },
-              { label: "History", onPress: onHistory, testID: "nav-history" },
+              { label: "Riwayat", onPress: onHistory, testID: "nav-history" },
               { label: "Kategori", onPress: onKategori, testID: "nav-kategori" },
             ].map((l) => (
               <Pressable

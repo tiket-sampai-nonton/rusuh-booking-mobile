@@ -122,7 +122,7 @@ export function Lightbox({
           kind="close"
           onPress={onClose}
           style={lightboxStyles.closeBtn}
-          accessibilityLabel="Tutup lightbox"
+          accessibilityLabel="Tutup galeri foto"
         />
 
         {/* Prev Button */}

@@ -18,7 +18,7 @@ export function buildTicketManifest(
   bookingId: string,
   ticketCount: number,
 ): string {
-  const lines = [`Rusuh Booking Tiket — E-Tiket`, `Order: ${bookingId}`, ""];
+  const lines = [`Rusuh Tiket — E-Tiket`, `Nomor Pesanan: ${bookingId}`, ""];
   for (let i = 0; i < ticketCount; i += 1) {
     lines.push(`Tiket ${i + 1}/${ticketCount}: ${ticketRef(bookingId, i)}`);
   }

@@ -43,7 +43,7 @@ const LINK_COLUMNS = [
       { label: 'Konser', href: '/browse?cat=konser' },
       { label: 'Festival', href: '/browse?cat=festival' },
       { label: 'Olahraga', href: '/browse?cat=olahraga' },
-      { label: 'Theater', href: '/browse?cat=theater' },
+      { label: 'Teater', href: '/browse?cat=theater' },
     ],
   },
   {
@@ -52,7 +52,7 @@ const LINK_COLUMNS = [
       { label: 'Pusat Bantuan', href: '#' },
       { label: 'Cara Beli', href: '#' },
       { label: 'Pembayaran', href: '#' },
-      { label: 'Refund', href: '#' },
+      { label: 'Pengembalian Dana', href: '#' },
     ],
   },
   {
@@ -60,7 +60,7 @@ const LINK_COLUMNS = [
     links: [
       { label: 'Tentang Kami', href: '#' },
       { label: 'Karir', href: '#' },
-      { label: 'Press', href: '#' },
+      { label: 'Media', href: '#' },
       { label: 'Kontak', href: '#' },
     ],
   },
@@ -306,7 +306,7 @@ export function V2HomeFooter() {
                 maxWidth: 300,
               }}
             >
-              Platform tiket event terpercaya di Indonesia. Beli tiket konser, festival, olahraga, dan theater dengan mudah dan aman.
+              Platform tiket event terpercaya di Indonesia. Beli tiket konser, festival, olahraga, dan teater dengan mudah dan aman.
             </Text>
           </View>
         </V2Reveal>
@@ -360,7 +360,7 @@ export function V2HomeFooter() {
             fontFamily: interFonts.bold,
           }}
         >
-          © 2025 Rusuh Tiket. All rights reserved.
+          © 2025 Rusuh Tiket. Hak cipta dilindungi.
         </Text>
 
         {/* Social Links */}

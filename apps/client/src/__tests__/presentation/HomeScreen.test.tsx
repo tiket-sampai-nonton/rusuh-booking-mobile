@@ -62,9 +62,8 @@ describe("HomeScreen", () => {
     await waitFor(() =>
       expect(screen.getByTestId("section-events")).toBeTruthy(),
     );
-    // V2: Header text is "Upcoming" on native (matches v2-mobile prototype),
-    // "Event Minggu Ini" on web — Jest runs as native
-    expect(screen.getByText("Upcoming")).toBeTruthy();
+    // Native and web use the same Indonesian Home section title.
+    expect(screen.getByText("Event Minggu Ini")).toBeTruthy();
     expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
     // "Rusuh Fest 2026" shows in the static hero and catalog card.
     expect(screen.getAllByText("Rusuh Fest 2026").length).toBeGreaterThanOrEqual(1);

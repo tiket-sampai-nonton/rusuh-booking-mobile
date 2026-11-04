@@ -1,4 +1,4 @@
-/** RBT-043 — pure waiting-room display helpers (V2 English copy). */
+/** RBT-043 — pure waiting-room display helpers (Bahasa Indonesia copy). */
 import {
   claimErrorBody,
   claimErrorTitle,
@@ -31,14 +31,13 @@ describe("peopleAhead", () => {
 });
 
 describe("etaText", () => {
-  it("is 'Ready!' at the front", () => {
-    expect(etaText(0)).toBe("Ready!");
-    expect(etaText(-3)).toBe("Ready!");
+  it("is 'Siap!' at the front", () => {
+    expect(etaText(0)).toBe("Siap!");
+    expect(etaText(-3)).toBe("Siap!");
   });
-  it("is '~1 min' for a small queue and '~N min' beyond the rate", () => {
-    // V2 uses 'min' not 'mnt'
-    expect(etaText(5)).toBe("~1 min");
-    expect(etaText(3000)).toBe("~3 min");
+  it("uses Indonesian minute wording for the estimate", () => {
+    expect(etaText(5)).toBe("~1 menit");
+    expect(etaText(3000)).toBe("~3 menit");
   });
 });
 
@@ -54,10 +53,9 @@ describe("ringProgress", () => {
 });
 
 describe("zoneCopy", () => {
-  it("returns V2 English copy per zone and defaults to GUARANTEED", () => {
+  it("returns Indonesian copy per zone and defaults to GUARANTEED", () => {
     expect(zoneCopy("GUARANTEED")).toBe(ZONE_COPY.GUARANTEED);
-    // V2: "Possible Zone" instead of Bahasa "Masih mungkin."
-    expect(zoneCopy("POSSIBLE").label).toBe("Possible Zone");
+    expect(zoneCopy("POSSIBLE").label).toBe("Zona Cadangan");
     expect(zoneCopy("NOT_ENOUGH").icon).toBe("alert");
     expect(zoneCopy(undefined)).toBe(ZONE_COPY.GUARANTEED);
   });
@@ -72,38 +70,33 @@ describe("zoneCopy", () => {
 });
 
 describe("terminal + claim-error copy", () => {
-  it("titles sold-out vs ended (V2 English)", () => {
-    // V2: "Sold Out" and "Sale Ended" instead of Bahasa
-    expect(terminalTitle("SOLD_OUT")).toBe("Sold Out");
-    expect(terminalTitle("ENDED")).toBe("Sale Ended");
-    expect(terminalTitle("MISSED")).toBe("Sale Ended");
+  it("titles sold-out and ended states in Indonesian", () => {
+    expect(terminalTitle("SOLD_OUT")).toBe("Tiket Habis");
+    expect(terminalTitle("ENDED")).toBe("Penjualan Berakhir");
+    expect(terminalTitle("MISSED")).toBe("Penjualan Berakhir");
   });
-  it("bodies sold-out vs ended (V2 English)", () => {
-    // V2 English phrases
-    expect(terminalBody("SOLD_OUT")).toMatch(/all tickets/i);
-    expect(terminalBody("ENDED")).toMatch(/sale period/i);
+  it("describes sold-out and ended states in Indonesian", () => {
+    expect(terminalBody("SOLD_OUT")).toMatch(/semua tiket/i);
+    expect(terminalBody("ENDED")).toMatch(/masa penjualan/i);
   });
-  it("maps claim-error state to title + body (V2 English)", () => {
-    // V2: "Sold Out" and "Turn Expired" instead of Bahasa
-    expect(claimErrorTitle("EVENT_SOLD_OUT")).toBe("Sold Out");
-    expect(claimErrorTitle("TURN_MISSED")).toBe("Turn Expired");
-    expect(claimErrorTitle("UNKNOWN")).toBe("Turn Expired");
-    // V2 English body copy
-    expect(claimErrorBody("EVENT_SOLD_OUT")).toMatch(/tickets sold out/i);
-    expect(claimErrorBody("TURN_MISSED")).toMatch(/didn't proceed/i);
-    expect(claimErrorBody("UNKNOWN")).toMatch(/didn't proceed/i);
+  it("maps claim-error state to Indonesian title and body", () => {
+    expect(claimErrorTitle("EVENT_SOLD_OUT")).toBe("Tiket Habis");
+    expect(claimErrorTitle("TURN_MISSED")).toBe("Giliran Berakhir");
+    expect(claimErrorTitle("UNKNOWN")).toBe("Giliran Berakhir");
+    expect(claimErrorBody("EVENT_SOLD_OUT")).toMatch(/tiket habis/i);
+    expect(claimErrorBody("TURN_MISSED")).toMatch(/belum memilih tiket/i);
+    expect(claimErrorBody("UNKNOWN")).toMatch(/belum memilih tiket/i);
   });
 });
 
-describe("COPY constants match the V2 prototype verbatim", () => {
-  it("has the exact V2 English strings", () => {
-    // V2 uses English labels
-    expect(COPY.positionLabel).toBe("Your Position");
+describe("COPY constants use Indonesian wording", () => {
+  it("uses Indonesian queue labels and explains persisted positions", () => {
+    expect(COPY.positionLabel).toBe("Posisi Anda");
     expect(COPY.persistenceSub).toBe(
-      "Your position is safely stored on the server — refreshing or closing/reopening the tab won't remove you from the queue.",
+      "Posisi Anda tersimpan dengan aman di server. Memuat ulang atau menutup halaman tidak akan menghapus antrean Anda.",
     );
     expect(COPY.footnote).toBe(
-      "First-Come-First-Served queue. Queue tokens are issued & validated by the server. Adaptive polling follows nextPollAfterMs from server.",
+      "Antrean dilayani sesuai urutan kedatangan. Token antrean diterbitkan dan divalidasi server. Pembaruan mengikuti jadwal dari server.",
     );
   });
 });

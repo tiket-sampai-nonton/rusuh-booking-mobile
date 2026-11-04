@@ -60,10 +60,10 @@ export function ProfileScreen() {
           showLinks={isWeb && width > 768}
           links={[
             { label: 'Beranda', onPress: () => router.push('/' as Href), testID: 'nav-home' },
-            { label: 'Browse', onPress: () => router.push('/browse' as Href), testID: 'nav-browse' },
+            { label: 'Jelajahi', onPress: () => router.push('/browse' as Href), testID: 'nav-browse' },
             ...(profile ? [
-              { label: 'My Ticket', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
-              { label: 'Profile', onPress: () => {}, testID: 'nav-profile' },
+              { label: 'Tiket Saya', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
+              { label: 'Profil', onPress: () => {}, testID: 'nav-profile' },
             ] : []),
           ]}
           onLogoPress={() => router.push('/' as Href)}
@@ -71,10 +71,10 @@ export function ProfileScreen() {
           isLoggedIn={Boolean(profile)}
         />
         <ScrollView contentContainerStyle={{ paddingTop: insets.top + 96, paddingHorizontal: 16, paddingBottom: insets.bottom + 120 }}>
-          <Text accessibilityRole="header" style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 32, textTransform: 'uppercase' }}>Profile</Text>
+          <Text accessibilityRole="header" style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 32, textTransform: 'uppercase' }}>Profil</Text>
           {!profile ? (
             <View style={{ marginTop: 24, padding: 20, borderWidth: v2Borders.standard, borderColor: v2Colors.ink, backgroundColor: v2Colors.field }}>
-              <Text style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 20, textTransform: 'uppercase' }}>Guest account</Text>
+              <Text style={{ color: v2Colors.ink, fontFamily: interFonts.black, fontSize: 20, textTransform: 'uppercase' }}>Akun Tamu</Text>
               <Text style={{ marginTop: 8, color: v2Colors.inkMuted, fontFamily: interFonts.regular, fontSize: 13, lineHeight: 20 }}>Masuk untuk mengelola profil dan melihat tiket di berbagai perangkat.</Text>
               <Pressable onPress={() => setLoginOpen(true)} style={{ marginTop: 18, minHeight: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: v2Colors.ink }} testID="profile-login">
                 <Text style={{ color: v2Colors.ground, fontFamily: interFonts.bold, fontSize: 12, textTransform: 'uppercase' }}>Masuk / Daftar</Text>

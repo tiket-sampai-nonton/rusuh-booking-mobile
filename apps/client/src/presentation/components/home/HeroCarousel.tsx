@@ -150,7 +150,7 @@ export function HeroCarousel({ events, onBook, onSeeAll, scrollY }: HeroCarousel
             <View className="flex-row items-center gap-2 rounded-pill border border-white/[0.18] bg-white/10 px-3.5 py-1.75">
               <PulseDot pulse={pulse} />
               <Text className="text-2xs font-semibold uppercase tracking-tag text-white">
-                Live · Flash Sale
+                Sedang Berlangsung · Promo Kilat
               </Text>
             </View>
           </View>
@@ -350,13 +350,13 @@ function SlideBody({
       <View className="mt-6 flex-row flex-wrap items-center gap-3">
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Booking ${ev.name} sekarang`}
+          accessibilityLabel={`Pesan tiket ${ev.name} sekarang`}
           onPress={() => onBook(ev.id)}
           testID="hero-book"
           style={{ paddingTop: 15, paddingBottom: 15, paddingLeft: 26, paddingRight: 11 }}
           className="flex-row items-center gap-[13px] rounded-pill bg-white shadow-button"
         >
-          <Text className="text-md font-bold text-ink">Booking Sekarang</Text>
+          <Text className="text-md font-bold text-ink">Pesan Tiket</Text>
           <View
             style={{ width: 34, height: 34 }}
             className="items-center justify-center rounded-full bg-brand"

@@ -130,7 +130,7 @@ export function ExpiredRecoveryScreen({
     >
       <Seo
         title="Kedaluwarsa"
-        description="Expired."
+        description="Waktu sesi telah berakhir."
         path={`/expired/${resourceId}`}
         noindex
       />

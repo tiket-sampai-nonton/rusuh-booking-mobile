@@ -96,7 +96,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
     >
       <Seo
         title="E-Tiket"
-        description="Your confirmed tickets."
+          description="Tiket Anda telah dikonfirmasi."
         path={`/success/${bookingId}`}
         noindex
       />
@@ -158,7 +158,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               borderColor: "rgba(255,255,255,0.1)",
             }}
           >
-            <SummaryRow label="Order ID" value={bookingId} />
+            <SummaryRow label="Nomor Pesanan" value={bookingId} />
             <SummaryRow label="Jumlah tiket" value={`${ticketCount ?? 1} tiket`} />
             <SummaryRow label="Total dibayar" value={minorToIDR(amountMinor)} />
             <SummaryRow label="NIK pembeli" value={buyerNikMasked ?? "••••"} />

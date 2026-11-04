@@ -80,7 +80,7 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
           >
             <Text style={{ color: v2.ink, fontSize: 22 }}>‹</Text>
           </Pressable>
-          <Text style={{ color: v2.ink, fontSize: 14, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" }}>SNAP Payment</Text>
+          <Text style={{ color: v2.ink, fontSize: 14, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" }}>Pembayaran SNAP</Text>
           {/* The simulator has no server-authoritative expiry value to show here. */}
           <View style={{ width: 44 }} />
         </View>
@@ -100,11 +100,11 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
             />
 
             <View style={{ marginBottom: 24 }}>
-              <Text className="mb-3 text-xs font-extrabold uppercase" style={{ color: v2.ink, letterSpacing: 1.5 }}>Payment method</Text>
+              <Text className="mb-3 text-xs font-extrabold uppercase" style={{ color: v2.ink, letterSpacing: 1.5 }}>Metode Pembayaran</Text>
               <View className="flex-row" style={{ borderWidth: v2Border.base, borderColor: v2.ink }}>
                 {(["bank", "wallet"] as const).map((value) => (
                   <Pressable key={value} onPress={() => setChannel(value)} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center", backgroundColor: channel === value ? v2.ink : v2.ground }} testID={`snap-channel-${value}`}>
-                    <Text style={{ color: channel === value ? v2.ground : v2.ink, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>{value === "bank" ? "Bank Transfer" : "E-Wallet"}</Text>
+                    <Text style={{ color: channel === value ? v2.ground : v2.ink, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>{value === "bank" ? "Transfer Bank" : "Dompet Digital"}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -118,9 +118,9 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
                     ))}
                   </View>
                   <View className="mt-3 p-4" style={{ borderWidth: v2Border.base, borderColor: v2.ink, backgroundColor: v2.field }}>
-                    <Text className="text-xs font-bold uppercase" style={{ color: v2.ink }}>Virtual account {bank}</Text>
+                    <Text className="text-xs font-bold uppercase" style={{ color: v2.ink }}>Akun virtual {bank}</Text>
                     <Text className="mt-2 text-xl font-extrabold" style={{ color: v2.ink }}>8800 1234 5678</Text>
-                    <Text className="mt-2 text-xs" style={{ color: v2.gray }}>Transfer the exact total, then wait for payment verification.</Text>
+                    <Text className="mt-2 text-xs" style={{ color: v2.gray }}>Transfer sesuai jumlah tagihan, lalu tunggu verifikasi pembayaran.</Text>
                   </View>
                 </>
               ) : (
@@ -137,7 +137,7 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
                       <Text style={{ color: v2.ink, fontSize: 13, fontWeight: "700" }}>{value}</Text>
                     </Pressable>
                   ))}
-                  <Text className="text-xs" style={{ color: v2.gray }}>Choose a wallet above to continue in the payment provider.</Text>
+                  <Text className="text-xs" style={{ color: v2.gray }}>Pilih dompet digital di atas untuk melanjutkan pembayaran.</Text>
                 </View>
               )}
             </View>

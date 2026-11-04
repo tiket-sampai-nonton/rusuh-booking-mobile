@@ -348,7 +348,7 @@ export function V2Header({
           {/* Logo */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Rusuh Tiket home"
+            accessibilityLabel="Beranda Rusuh Tiket"
             onPress={onLogoPress}
             testID="header-logo"
           >

@@ -16,7 +16,7 @@ export function PaymentHoldBanner() {
         🔒
       </Text>
       <Text className="flex-1 text-xs font-semibold text-white">
-        Stok kamu sudah di-hold. Selesaikan pembayaran sebelum waktu habis.
+        Tiket sudah disimpan sementara. Selesaikan pembayaran sebelum waktu habis.
       </Text>
     </View>
   );

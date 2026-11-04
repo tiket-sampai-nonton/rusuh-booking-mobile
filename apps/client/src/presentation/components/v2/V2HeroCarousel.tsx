@@ -762,7 +762,7 @@ function HeroInfoMobile({
             letterSpacing: 0.6, // 0.05em at 12px
           }}
         >
-          On Sale Now
+          Sedang Dijual
         </Text>
       </View>
 
@@ -835,7 +835,7 @@ function HeroInfoMobile({
       >
        <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Get tickets for ${event.name}`}
+        accessibilityLabel={`Beli tiket untuk ${event.name}`}
         testID="hero-book"
         onPress={() => onBook(event.id)}
         style={{
@@ -858,7 +858,7 @@ function HeroInfoMobile({
             letterSpacing: 0.56, // 0.04em at 14px
           }}
         >
-          Get Tickets
+          Beli Tiket
         </Text>
         <ArrowIcon />
        </Pressable>
@@ -1043,7 +1043,7 @@ function ScrollIndicator() {
           letterSpacing: 1.6, // 0.1em at 16px = 1.6px
         }}
       >
-        Scroll
+        Gulir
       </Text>
     </Animated.View>
   );
@@ -1097,16 +1097,18 @@ export function V2HeroCarousel({ events, onBook, onSeeAll, autoPlay = true }: V2
 
   // Auto-advance slides (6s interval)
   useEffect(() => {
-    if (reducedMotion || !autoPlay || top.length <= 1) return;
+    if (!autoPlay || top.length <= 1) return;
     intervalRef.current = setInterval(() => {
       setCurrentIndex((prev) => {
         const next = (prev + 1) % top.length;
-        setPrevIndex(prev);
-        setGlitchIndex(next);
-        setTimeout(() => {
-          setPrevIndex(null);
-          setGlitchIndex(null);
-        }, FADE_DURATION_MS);
+        if (!reducedMotion) {
+          setPrevIndex(prev);
+          setGlitchIndex(next);
+          setTimeout(() => {
+            setPrevIndex(null);
+            setGlitchIndex(null);
+          }, FADE_DURATION_MS);
+        }
         return next;
       });
     }, SLIDE_DURATION_MS);
@@ -1120,16 +1122,18 @@ export function V2HeroCarousel({ events, onBook, onSeeAll, autoPlay = true }: V2
     // Reset timer
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
-      if (!reducedMotion && top.length > 1) {
+      if (top.length > 1) {
         intervalRef.current = setInterval(() => {
           setCurrentIndex((prev) => {
             const next = (prev + 1) % top.length;
-            setPrevIndex(prev);
-            setGlitchIndex(next);
-            setTimeout(() => {
-              setPrevIndex(null);
-              setGlitchIndex(null);
-            }, FADE_DURATION_MS);
+            if (!reducedMotion) {
+              setPrevIndex(prev);
+              setGlitchIndex(next);
+              setTimeout(() => {
+                setPrevIndex(null);
+                setGlitchIndex(null);
+              }, FADE_DURATION_MS);
+            }
             return next;
           });
         }, SLIDE_DURATION_MS);
