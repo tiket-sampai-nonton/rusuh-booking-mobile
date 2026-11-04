@@ -166,7 +166,8 @@ export function BrowseScreen() {
           scrollEventThrottle={16}
           contentContainerStyle={[
             browseScrollContent(insets.bottom, isDesktop),
-            isNative && { paddingTop: insets.top + 56 + 68 + 52 },
+            // Reserve the fixed header (56), category strip (52), and a compact 12px gap.
+            isNative && { paddingTop: insets.top + 56 + 52 + 12 },
           ]}
           stickyHeaderIndices={undefined}
           testID="browse-scroll"
@@ -313,6 +314,7 @@ export function BrowseScreen() {
                 {Platform.OS === 'web' ? (
                   <View style={browseSortSelect}>
                     <select
+                      aria-label="Urutkan event"
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
                       style={{

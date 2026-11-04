@@ -7,7 +7,8 @@
  * updated query so the URL stays the single source of truth (deep-linkable +
  * back/forward safe). The pure filter math is covered in browse-filter.test.ts.
  */
-import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { Dimensions, Platform } from "react-native";
 
 import type {
   EventDetail,
@@ -15,12 +16,16 @@ import type {
   EventSummary,
 } from "@domain/repositories/event.repository";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
+import { useAccountStore } from "@presentation/stores/account-store";
 
 // Mutable param box the mocked useLocalSearchParams reads from, plus router
 // spies — held in mock-prefixed names so the hoisted jest.mock factory may
 // legally reference them.
 const mockParams: { current: Record<string, string> } = { current: {} };
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const originalPlatform = Platform.OS;
+const originalWindow = Dimensions.get("window");
+const originalScreen = Dimensions.get("screen");
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => mockParams.current,
   useRouter: () => mockRouter,
@@ -66,6 +71,13 @@ describe("BrowseScreen — URL-driven filters", () => {
     mockParams.current = {};
     mockRouter.push.mockReset();
     mockRouter.replace.mockReset();
+    useAccountStore.getState().clearProfile();
+  });
+
+  afterEach(() => {
+    cleanup();
+    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    act(() => Dimensions.set({ window: originalWindow, screen: originalScreen }));
   });
 
   it("hydrates the UI from the URL query (genre=rock → filtered by category)", async () => {
@@ -88,6 +100,36 @@ describe("BrowseScreen — URL-driven filters", () => {
     expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
     expect(screen.getByTestId("v2-event-card-folk")).toBeTruthy();
     expect(screen.getByTestId("browse-count")).toBeTruthy();
+  });
+
+  it("supports desktop sorting, category, view, navigation, and filter actions", async () => {
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    const desktopDimensions = { ...originalWindow, width: 1024, height: 900 };
+    Dimensions.set({ window: desktopDimensions, screen: { ...originalScreen, width: 1024, height: 900 } });
+    useAccountStore.getState().setProfile({ emailMasked: "u***@example.com", hasNik: true });
+
+    renderWithProviders(<BrowseScreen />, {
+      container: { eventRepository: repo(CATALOG) },
+    });
+    await waitFor(() => screen.getByTestId("v2-event-card-rock"));
+
+    fireEvent.scroll(screen.getByTestId("browse-scroll"), { nativeEvent: { contentOffset: { y: 120 } } });
+    fireEvent.press(screen.getByTestId("category-concert"));
+    fireEvent.press(screen.getByTestId("category-festival"));
+    fireEvent.press(screen.getByTestId("view-list"));
+    fireEvent.press(screen.getByTestId("view-grid"));
+    fireEvent.press(screen.getByTestId("nav-home"));
+    fireEvent.press(screen.getByTestId("nav-tickets"));
+    fireEvent.press(screen.getByTestId("nav-profile"));
+
+    fireEvent.press(screen.getByTestId("browse-filter"));
+    fireEvent.press(screen.getByTestId("filter-apply"));
+    expect(mockRouter.push).toHaveBeenCalledWith(expect.stringMatching(/^\/browse\?/));
+
+    const sortSelect = screen.getByLabelText("Urutkan event");
+    fireEvent(sortSelect, "change", { target: { value: "price-low" } });
+    fireEvent.press(screen.getByTestId("load-more-btn"));
+    expect(screen.getByText("Semua Event Ditampilkan")).toBeTruthy();
   });
 
   it("opens filters from an icon-only accessible control", async () => {
