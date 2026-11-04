@@ -38,6 +38,7 @@ describe("CheckoutBar (RBT-051)", () => {
       />,
     );
     expect(screen.getByText("NIK pembeli belum valid")).toBeTruthy();
+    expect(screen.getByText("Lanjut Bayar")).toBeTruthy();
     expect(
       screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
     ).toBe(true);
