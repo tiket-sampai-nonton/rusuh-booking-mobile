@@ -278,8 +278,10 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${event.name}, ${event.venue ?? ''}, ${dateTxt}`}
-        accessibilityState={{ disabled }}
-        disabled={disabled}
+        // Availability controls purchase styling, not access to event details.
+        // Historical cards remain informational and intentionally non-interactive.
+        accessibilityState={{ disabled: history }}
+        disabled={history}
         onPress={() => onPress(event.id)}
         onHoverIn={() => setHovered(true)}
         onHoverOut={() => setHovered(false)}

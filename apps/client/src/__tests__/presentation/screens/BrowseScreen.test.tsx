@@ -164,6 +164,18 @@ describe("BrowseScreen — URL-driven filters", () => {
     expect(mockRouter.push).toHaveBeenCalledWith("/events/rock");
   });
 
+  it("opens event details from an unavailable card instead of disabling the whole card", async () => {
+    const soldOut = { ...ev("sold-out", "Sold Out Show", 5), status: "SOLD_OUT" as const, remainingTickets: 0 };
+    renderWithProviders(<BrowseScreen />, {
+      container: { eventRepository: repo([soldOut]) },
+    });
+
+    const card = await waitFor(() => screen.getByTestId("v2-event-card-sold-out"));
+    expect(card.props.accessibilityState).toEqual({ disabled: false });
+    fireEvent.press(card);
+    expect(mockRouter.push).toHaveBeenCalledWith("/events/sold-out");
+  });
+
   it("goes home from the header logo", async () => {
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
