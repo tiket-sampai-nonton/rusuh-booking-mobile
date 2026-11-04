@@ -258,6 +258,7 @@ describe("LoginModal (RBT-020)", () => {
     fireEvent.press(getByTestId("login-reg-submit"));
     // V2: "Berhasil!" success title
     await waitFor(() => expect(getByText("Berhasil!")).toBeTruthy());
+    expect(getByText("Cari Tiket")).toBeTruthy();
     expect(spy).toHaveBeenCalledWith({
       fullName: "Rizky Rachmawan",
       nik: "3201234567890123",

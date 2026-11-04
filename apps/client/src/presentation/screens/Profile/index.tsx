@@ -100,12 +100,12 @@ export function ProfileScreen() {
             </View>
           )}
         </ScrollView>
-        <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
         <V2BottomNav activeRoute="profile" isLoggedIn={Boolean(profile)} onNavigate={(route) => {
           if (route === 'home') router.push('/' as Href);
           if (route === 'browse') router.push('/browse' as Href);
           if (route === 'tickets') router.push('/my-tickets' as Href);
         }} />
+        <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
       </View>
     </ScreenFade>
   );

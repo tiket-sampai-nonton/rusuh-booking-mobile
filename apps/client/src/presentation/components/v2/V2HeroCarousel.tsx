@@ -1034,17 +1034,6 @@ function ScrollIndicator() {
           ]}
         />
       </View>
-      <Text
-        style={{
-          color: v2Colors.ink,
-          fontSize: TEXT_S,
-          fontFamily: interFonts.semiBold, // weight 600
-          textTransform: "uppercase",
-          letterSpacing: 1.6, // 0.1em at 16px = 1.6px
-        }}
-      >
-        Gulir
-      </Text>
     </Animated.View>
   );
 }

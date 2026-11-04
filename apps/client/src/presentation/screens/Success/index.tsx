@@ -17,6 +17,7 @@ import { useRouter, type Href } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { minorToIDR } from "@domain/services/money";
 import { ETicketCard, ticketRef } from "@presentation/components/ETicketCard";
@@ -48,6 +49,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 
 export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const attemptId = useSessionStore((s) => s.attemptId);
   const amountMinor = useSessionStore((s) => s.amountMinor);
   const buyerNikMasked = useSessionStore((s) => s.buyerNikMasked);
@@ -90,8 +92,8 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
 
   return (
     <View
-      className="flex-1 items-center justify-center p-6"
-      style={{ backgroundColor: v2.ink }}
+      className="flex-1 items-center justify-center px-6"
+      style={{ backgroundColor: v2.ink, paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16 }}
       testID="success-screen"
     >
       <Seo
@@ -120,7 +122,12 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
         <View style={{ position: "absolute", left: -10000, top: 0, opacity: 0 }} pointerEvents="none" accessibilityElementsHidden>
           {Array.from({ length: count }, (_, index) => <QRCode key={index} value={ticketRef(bookingId, index)} size={240} getRef={(ref) => { qrRefs.current[index] = ref; }} />)}
         </View>
-        <ScrollView className="w-full" contentContainerClassName="w-full max-w-md self-center">
+        <ScrollView
+          className="w-full"
+          contentContainerClassName="w-full max-w-md self-center"
+          contentContainerStyle={{ paddingBottom: 12 }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Green success ring (prototype `.success-icon`). */}
           <View className="mb-6 items-center">
             <View

@@ -273,8 +273,8 @@ export function BrowseScreen() {
               style={[
                 browseHeader,
                 isNative && {
-                  marginBottom: 16,
-                  paddingVertical: 16,
+                  marginBottom: 8,
+                  paddingVertical: 8,
                   paddingHorizontal: 0,
                   borderBottomWidth: 1,
                   borderBottomColor: v2Colors.ink,

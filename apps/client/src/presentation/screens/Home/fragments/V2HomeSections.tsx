@@ -117,28 +117,18 @@ function V2SectionHeader({
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 8,
               borderWidth: v2Borders.standard,
               borderColor: v2Colors.ink,
               backgroundColor: v2Colors.ground,
-              paddingVertical: isNative ? 8 : 12,
-              paddingHorizontal: isNative ? 12 : 20,
+              width: 44,
+              height: 44,
+              padding: 0,
+              justifyContent: 'center',
             }}
           >
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={v2Colors.ink} strokeWidth={2}>
               <Path d="M4 6h16M7 12h10m-7 6h4" />
             </Svg>
-            <Text
-              style={{
-                color: v2Colors.ink,
-                fontSize: 12,
-                fontFamily: interFonts.bold, // weight 700
-                textTransform: 'uppercase',
-                letterSpacing: 0.48,
-              }}
-            >
-              Saring
-            </Text>
           </Pressable>
         )}
 
@@ -224,7 +214,9 @@ function V2EventsHorizontalScroll({
       keyExtractor={(item) => item.id}
       renderItem={renderItem}
       onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={{ itemVisiblePercentThreshold: 30 }}
+      // Keep a partially peeking next card grayscale until most of its artwork
+      // is actually on screen, matching the annotated native reference.
+      viewabilityConfig={{ itemVisiblePercentThreshold: 65 }}
       initialNumToRender={3}
       showsHorizontalScrollIndicator={false}
       snapToInterval={280 + 16} // card width + gap
@@ -382,7 +374,7 @@ export function V2HomeSections({
   const { isNative } = useResponsive();
   
   // Use the same Indonesian copy for equivalent native and web sections.
-  const sectionTitle = 'Event Minggu Ini';
+  const sectionTitle = 'Daftar Event';
   const seeAllText = 'Lihat Semua';
 
   return (
