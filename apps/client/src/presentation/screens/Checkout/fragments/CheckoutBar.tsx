@@ -6,7 +6,7 @@
  * - 2px borders, no rounded corners
  * - "Lanjut Bayar" button with white fill effect
  */
-import { Pressable, Text, View, StyleSheet } from "react-native";
+import { Pressable, Text, View, StyleSheet, Platform } from "react-native";
 
 import { minorToIDR } from "@domain/services/money";
 import { v2Colors, v2Borders, interFonts } from "@presentation/theme";
@@ -53,12 +53,14 @@ export function CheckoutBar({
           testID="checkout-submit"
           style={({ pressed }) => [
             styles.payButton,
+            Platform.OS !== "web" && styles.payButtonNative,
             pressed && styles.payButtonPressed,
             !canSubmit && styles.payButtonDisabled,
           ]}
         >
           {({ pressed }) => (
             <Text
+              numberOfLines={1}
               style={[
                 styles.payButtonText,
                 (pressed || !canSubmit) && styles.payButtonTextPressed,
@@ -112,6 +114,13 @@ const styles = StyleSheet.create({
     backgroundColor: v2Colors.ground,
     paddingVertical: 16,
     paddingHorizontal: 32,
+  },
+  payButtonNative: {
+    minWidth: 160,
+    flexShrink: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
   },
   payButtonPressed: {
     backgroundColor: v2Colors.ink,

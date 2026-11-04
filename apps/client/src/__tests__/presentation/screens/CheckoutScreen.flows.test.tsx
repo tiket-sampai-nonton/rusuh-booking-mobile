@@ -116,6 +116,7 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
         screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
       ).toBe(false),
     );
+    expect(screen.getByText("Lanjut Bayar")).toBeTruthy();
   });
 
   it("a logged-in user skips the inline consent gate", async () => {
