@@ -14,8 +14,7 @@
  * - Price with availability-colored status text
  * - Note callout with left accent border
  */
-import { Fragment } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 
 import { minorToIDR } from "@domain/services/money";
 
@@ -27,26 +26,13 @@ type AvailabilityStatus = "available" | "limited" | "sold-out";
 
 export function Categories({ categories }: CategoriesProps) {
   if (categories.length === 0) {
-    return (
-      <View style={styles.categoriesNote}>
-        <Text style={styles.categoriesNoteText}>
-          Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.
-        </Text>
-      </View>
-    );
+    return null;
   }
 
   return (
     <View>
-      {/*
-       * Native: categoriesTableWrapper provides the outer 2px border frame.
-       *         A categorySeparator View between each row gives the shared-
-       *         border "table" look — the CSS margin-bottom:-2px trick breaks
-       *         on native because the next item's bg covers the border below it.
-       * Web:    categoriesTableWrapper is a no-op; item-level borders handle it.
-       */}
-      <View style={[styles.categoriesGrid, styles.categoriesTableWrapper]}>
-        {categories.map((c, index) => {
+      <View style={styles.categoriesGrid}>
+        {categories.map((c) => {
           const status: AvailabilityStatus =
             c.available <= 0 ? "sold-out" : c.available < 50 ? "limited" : "available";
 
@@ -58,28 +44,18 @@ export function Categories({ categories }: CategoriesProps) {
                 : "Tersedia";
 
           return (
-            <Fragment key={`${c.code}-${c.name}`}>
-              <CategoryRow
-                name={c.name}
-                description={c.code ? `Kode ${c.code}` : undefined}
-                price={minorToIDR(c.priceMinor)}
-                availability={availTxt}
-                status={status}
-              />
-              {/* 2px separator between rows (native only) — NOT after the last row */}
-              {Platform.OS !== "web" && index < categories.length - 1 && (
-                <View style={styles.categorySeparator} />
-              )}
-            </Fragment>
+            <CategoryRow
+              key={`${c.code}-${c.name}`}
+              name={c.name}
+              description={c.code ? `Kode ${c.code}` : undefined}
+              price={minorToIDR(c.priceMinor)}
+              availability={availTxt}
+              status={status}
+            />
           );
         })}
       </View>
 
-      <View style={styles.categoriesNote}>
-        <Text style={styles.categoriesNoteText}>
-          Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.
-        </Text>
-      </View>
     </View>
   );
 }
@@ -123,26 +99,18 @@ function CategoryRow({
   };
 
   return (
-    <Pressable
-      style={({ hovered }) => [
-        styles.categoryItem,
-        isSoldOut && styles.categorySoldOut,
-        hovered && !isSoldOut && styles.categoryItemHover,
-      ]}
-      disabled={isSoldOut}
-    >
-      {/* Left: Name + Description */}
-      <View style={styles.categoryInfo}>
-        <Text style={styles.categoryName}>{name}</Text>
-        {description && <Text style={styles.categoryDesc}>{description}</Text>}
+    <View style={[styles.categoryFrame, isSoldOut && styles.categorySoldOut]}>
+      <View style={styles.categoryItem}>
+        <View style={styles.categoryInfo}>
+          <Text style={styles.categoryName}>{name}</Text>
+          {description && <Text style={styles.categoryDesc}>{description}</Text>}
+        </View>
+        <View style={styles.categoryPrice}>
+          <Text style={styles.categoryPriceValue}>{price}</Text>
+          <Text style={getAvailabilityStyle()}>{availability}</Text>
+        </View>
       </View>
-
-      {/* Right: Price + Availability */}
-      <View style={styles.categoryPrice}>
-        <Text style={styles.categoryPriceValue}>{price}</Text>
-        <Text style={getAvailabilityStyle()}>{availability}</Text>
-      </View>
-    </Pressable>
+    </View>
   );
 }
 

@@ -196,7 +196,6 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
       shadowRadius: 0,
       elevation: interpolate(hovered.value, [0, 1], [0, 8]),
     } : {}),
-    zIndex: hovered.value > 0.5 ? 10 : 0,
   }));
 
   // Image scale on hover: 1 → 1.05
@@ -235,6 +234,8 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
 
   const containerStyle: ViewStyle = {
     backgroundColor: v2Colors.ground,
+    position: 'relative',
+    zIndex: isHovered ? 10 : 0,
     opacity: disabled ? 0.62 : 1,
     // Mobile: explicit 2px solid border (prototype has border: var(--border))
     // Desktop: border comes from grid gap + ink background
@@ -255,6 +256,7 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
     // Mobile list: 16:9 aspect ratio for shorter image
     // Desktop: 4:3 aspect ratio
     aspectRatio: isNative ? (listMode ? 16 / 9 : 1) : 4 / 3,
+    width: '100%',
     overflow: 'hidden',
     position: 'relative',
   };
@@ -279,6 +281,32 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
     minHeight: isNative ? 160 : undefined,
     justifyContent: isNative ? 'space-between' : undefined,
   };
+
+  const wishlistButton = showWishlist && !disabled ? (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${wishlisted ? 'Hapus dari' : 'Simpan ke'} wishlist: ${event.name}`}
+      accessibilityState={{ selected: wishlisted }}
+      onPress={(pressEvent) => {
+        pressEvent.stopPropagation();
+        onToggleWishlist?.(event.id);
+      }}
+      style={({ pressed }) => ({
+        ...(isWeb ? { position: 'absolute', top: 8, right: 8 } : {}),
+        zIndex: 10,
+        width: 36,
+        height: 36,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: pressed || wishlisted ? v2Colors.ink : v2Colors.ground,
+        borderWidth: v2Borders.standard,
+        borderColor: v2Colors.ink,
+      })}
+      testID={`wishlist-${event.id}`}
+    >
+      <HeartIcon color={wishlisted ? v2Colors.ground : v2Colors.ink} filled={wishlisted} />
+    </Pressable>
+  ) : null;
 
   const footerStyle: ViewStyle = {
     flexDirection: 'row',
@@ -354,33 +382,6 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
             </>
           )}
 
-          {showWishlist && !disabled ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`${wishlisted ? 'Hapus dari' : 'Simpan ke'} wishlist: ${event.name}`}
-              accessibilityState={{ selected: wishlisted }}
-              onPress={(pressEvent) => {
-                pressEvent.stopPropagation();
-                onToggleWishlist?.(event.id);
-              }}
-              style={({ pressed }) => ({
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                width: 36,
-                height: 36,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: pressed || wishlisted ? v2Colors.ink : v2Colors.ground,
-                borderWidth: v2Borders.standard,
-                borderColor: v2Colors.ink,
-              })}
-              testID={`wishlist-${event.id}`}
-            >
-              <HeartIcon color={wishlisted ? v2Colors.ground : v2Colors.ink} filled={wishlisted} />
-            </Pressable>
-          ) : null}
-
           {/* Badge */}
           <Animated.View
             style={[
@@ -408,6 +409,27 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
               {badge.label || BADGE_LABEL[badge.tone]}
             </Text>
           </Animated.View>
+
+          {/* Keep the native wishlist hit target in a full-size positioned layer. */}
+          {!isWeb && wishlistButton && (
+            <View
+              pointerEvents="box-none"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                alignItems: 'flex-start',
+                padding: 8,
+                zIndex: 10,
+              }}
+            >
+              {wishlistButton}
+            </View>
+          )}
         </View>
 
         {/* Content */}
@@ -543,6 +565,7 @@ export function V2EventCard({ event, onPress, history = false, staggerIndex = 0,
           </View>
         </View>
       </Pressable>
+      {isWeb && wishlistButton}
     </Animated.View>
   );
 }

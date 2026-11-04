@@ -14,6 +14,7 @@ import {
   filterEvents,
   inTimeBucket,
   isFiltered,
+  matchesCategory,
   readGenre,
   readParam,
 } from "@presentation/screens/Browse/filter";
@@ -130,6 +131,17 @@ describe("filterEvents — genre", () => {
   it("returns everything for 'Semua'", () => {
     const out = filterEvents(CATALOG, "Semua", "all", "closest", NOW);
     expect(out).toHaveLength(CATALOG.length);
+  });
+});
+
+describe("matchesCategory", () => {
+  it("matches common category aliases in event names", () => {
+    expect(matchesCategory(CATALOG[0], "festival")).toBe(true);
+    expect(matchesCategory(ev("concert", "Jakarta Konser", 1), "concert")).toBe(true);
+  });
+
+  it("does not match unrelated categories", () => {
+    expect(matchesCategory(CATALOG[0], "theater")).toBe(false);
   });
 });
 

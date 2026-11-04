@@ -34,6 +34,7 @@ import {
   SORTS,
   TIMES,
   filterEvents,
+  matchesCategory,
   readGenre,
   readParam,
 } from './filter';
@@ -127,10 +128,7 @@ export function BrowseScreen() {
 
     // Category filter
     if (activeCategory !== 'all') {
-      filtered = filtered.filter((ev) =>
-        ev.name?.toLowerCase().includes(activeCategory) ||
-        ev.venue?.toLowerCase().includes(activeCategory),
-      );
+      filtered = filtered.filter((ev) => matchesCategory(ev, activeCategory));
     }
 
     const query = searchQuery.trim().toLowerCase();
@@ -168,16 +166,19 @@ export function BrowseScreen() {
         <Animated.ScrollView
           ref={scrollRef}
           style={{ flex: 1 }}
-          contentContainerStyle={browseScrollContent(insets.bottom, isDesktop)}
           onScroll={onScroll}
           scrollEventThrottle={16}
-          stickyHeaderIndices={isNative ? [1] : undefined}
+          contentContainerStyle={[
+            browseScrollContent(insets.bottom, isDesktop),
+            isNative && { paddingTop: insets.top + 56 + 68 + 52 },
+          ]}
+          stickyHeaderIndices={undefined}
           testID="browse-scroll"
         >
           {/* ═══════════════════════════════════════════════════════════════════
               HERO SECTION (prototype .hero)
               ═══════════════════════════════════════════════════════════════════ */}
-          <View style={[browseHero, { paddingTop: insets.top + 80 }]}>
+          {!isNative && <View style={[browseHero, { paddingTop: insets.top + 80 }]}>
             {/* Hero title with slide-up animation */}
             <View style={{ marginBottom: 24 }}>
               <Text
@@ -228,62 +229,14 @@ export function BrowseScreen() {
                 <Text style={{ color: v2Colors.ink, fontFamily: interFonts.bold, textTransform: 'uppercase' }}>Search</Text>
               </Pressable>
             </View>
-          </View>
+          </View>}
 
           {/* ═══════════════════════════════════════════════════════════════════
               CATEGORIES SECTION (prototype .categories)
               Mobile: horizontal scroll with pill buttons (no header)
               Desktop: grid with section header
               ═══════════════════════════════════════════════════════════════════ */}
-          {isNative ? (
-            // Mobile: horizontal scroll categories (prototype .categories-scroll)
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                gap: 8,
-              }}
-              style={{
-                backgroundColor: v2Colors.ground,
-                borderBottomWidth: v2Borders.standard,
-                borderBottomColor: v2Colors.ink,
-              }}
-            >
-              {CATEGORIES.map((cat) => {
-                const isActive = activeCategory === cat.key;
-                return (
-                  <Pressable
-                    key={cat.key}
-                    style={{
-                      paddingHorizontal: 16,
-                      paddingVertical: 8,
-                      borderWidth: v2Borders.standard,
-                      borderColor: v2Colors.ink,
-                      backgroundColor: isActive ? v2Colors.ink : v2Colors.ground,
-                      minHeight: 36,
-                      justifyContent: 'center',
-                    }}
-                    onPress={() => handleCategoryClick(cat.key)}
-                    testID={`category-${cat.key}`}
-                  >
-                    <Text
-                      style={{
-                        color: isActive ? v2Colors.ground : v2Colors.ink,
-                        fontFamily: interFonts.semiBold,
-                        fontSize: 12,
-                        textTransform: 'uppercase',
-                        letterSpacing: 0.6,
-                      }}
-                    >
-                      {cat.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          ) : (
+          {isNative ? null : (
             // Desktop: grid categories with header
             <View style={browseCategories}>
               <View style={browseCategoriesInner(isDesktop)}>
@@ -340,9 +293,21 @@ export function BrowseScreen() {
           {/* ═══════════════════════════════════════════════════════════════════
               MAIN CONTENT (prototype main)
               ═══════════════════════════════════════════════════════════════════ */}
-          <View style={browseMain(isDesktop)}>
+          <View style={isNative ? { paddingHorizontal: 16 } : browseMain(isDesktop)}>
             {/* Browse header: results count, sort, view toggle */}
-            <View style={browseHeader}>
+            <View
+              style={[
+                browseHeader,
+                isNative && {
+                  marginBottom: 16,
+                  paddingVertical: 16,
+                  paddingHorizontal: 0,
+                  borderBottomWidth: 1,
+                  borderBottomColor: v2Colors.ink,
+                  borderStyle: 'dashed',
+                },
+              ]}
+            >
               <Text
                 style={{
                   color: v2Colors.inkMuted,
@@ -387,7 +352,10 @@ export function BrowseScreen() {
                 {/* View toggle (prototype .view-toggle) */}
                 <View style={browseViewToggle}>
                   <Pressable
-                    style={viewMode === 'grid' ? browseViewBtnActive : browseViewBtn}
+                    style={[
+                      viewMode === 'grid' ? browseViewBtnActive : browseViewBtn,
+                      isNative && { width: 36, height: 36, paddingVertical: 0, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' },
+                    ]}
                     onPress={() => setViewMode('grid')}
                     testID="view-grid"
                   >
@@ -402,7 +370,10 @@ export function BrowseScreen() {
                   </Pressable>
                   <View style={{ width: v2Borders.standard, backgroundColor: v2Colors.ink }} />
                   <Pressable
-                    style={viewMode === 'list' ? browseViewBtnActive : browseViewBtn}
+                    style={[
+                      viewMode === 'list' ? browseViewBtnActive : browseViewBtn,
+                      isNative && { width: 36, height: 36, paddingVertical: 0, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' },
+                    ]}
                     onPress={() => setViewMode('list')}
                     testID="view-list"
                   >
@@ -479,6 +450,76 @@ export function BrowseScreen() {
           onLogoPress={goHome}
           actions={[{ icon: 'heart', label: 'Wishlist', count: wishlist.size, testID: 'header-wishlist' }]}
         />
+
+        {isNative && (
+          <>
+            <View
+              style={{
+                position: 'absolute',
+                top: insets.top + 56,
+                left: 0,
+                right: 0,
+                zIndex: 99,
+                height: 68,
+                paddingTop: 8,
+                paddingHorizontal: 16,
+                paddingBottom: 16,
+                backgroundColor: v2Colors.ground,
+              }}
+            >
+              <View style={{ flex: 1, flexDirection: 'row', borderWidth: 2, borderColor: v2Colors.ink, backgroundColor: '#f5f5f5' }}>
+                <TextInput
+                  accessibilityLabel="Search events, artists"
+                  placeholder="Search events, artists..."
+                  placeholderTextColor={v2Colors.inkMuted}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  returnKeyType="search"
+                  style={{ flex: 1, paddingHorizontal: 16, color: v2Colors.ink, fontFamily: interFonts.regular, fontSize: 16 }}
+                  testID="browse-search-input"
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Search"
+                  onPress={() => setSearchQuery((value) => value.trim())}
+                  style={{ width: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: v2Colors.ink }}
+                  testID="browse-search-button"
+                >
+                  <Text style={{ color: v2Colors.ground, fontSize: 22 }}>⌕</Text>
+                </Pressable>
+              </View>
+            </View>
+            <View
+              style={{
+                position: 'absolute',
+                top: insets.top + 56 + 68,
+                left: 0,
+                right: 0,
+                zIndex: 98,
+                height: 52,
+                backgroundColor: v2Colors.ground,
+                borderBottomWidth: 2,
+                borderBottomColor: v2Colors.ink,
+              }}
+            >
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8, gap: 8 }}>
+                {CATEGORIES.map((cat) => {
+                  const active = activeCategory === cat.key;
+                  return (
+                    <Pressable
+                      key={cat.key}
+                      onPress={() => handleCategoryClick(cat.key)}
+                      style={{ paddingHorizontal: 16, minHeight: 34, justifyContent: 'center', borderWidth: 2, borderColor: v2Colors.ink, backgroundColor: active ? v2Colors.ink : v2Colors.ground }}
+                      testID={`category-${cat.key}`}
+                    >
+                      <Text style={{ color: active ? v2Colors.ground : v2Colors.ink, fontFamily: interFonts.semiBold, fontSize: 12, textTransform: 'uppercase' }}>{cat.label}</Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </>
+        )}
 
         {/* Bottom Navigation (native only, handled internally by V2BottomNav) */}
         <V2BottomNav

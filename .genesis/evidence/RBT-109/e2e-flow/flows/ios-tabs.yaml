@@ -1,0 +1,15 @@
+appId: host.exp.Exponent
+---
+- takeScreenshot: 00-home
+- tapOn:
+    id: bottom-nav-browse
+- takeScreenshot: 01-browse
+- tapOn:
+    id: category-festival
+- takeScreenshot: 02-festival-filter
+- tapOn:
+    id: bottom-nav-tickets
+- takeScreenshot: 03-my-tickets
+- tapOn:
+    id: bottom-nav-profile
+- takeScreenshot: 04-profile

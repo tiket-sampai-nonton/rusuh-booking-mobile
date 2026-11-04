@@ -35,17 +35,13 @@ describe("Block (V2 brutalist section)", () => {
   });
 });
 
-describe("Categories (read-only preview)", () => {
-  it("shows the server read-only note when empty", () => {
+describe("Categories (prototype preview)", () => {
+	it("renders no category table when the server has no categories", () => {
     render(<Categories categories={[]} />);
-    expect(
-      screen.getByText(
-        "Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.",
-      ),
-    ).toBeTruthy();
+		expect(screen.queryByText("Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.")).toBeNull();
   });
 
-  it("renders available / low-stock / sold-out arms + the final note", () => {
+	it("renders available / low-stock / sold-out arms without prototype-external copy", () => {
     render(
       <Categories
         categories={[
@@ -59,11 +55,6 @@ describe("Categories (read-only preview)", () => {
     expect(screen.getByText("Sisa 12")).toBeTruthy();
     expect(screen.getByText("Habis")).toBeTruthy();
     expect(screen.getByText("Kode VIP")).toBeTruthy();
-    // The populated-state note is present too.
-    expect(
-      screen.getByText(
-        "Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.",
-      ),
-    ).toBeTruthy();
+		expect(screen.queryByText("Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.")).toBeNull();
   });
 });

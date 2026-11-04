@@ -150,12 +150,12 @@ describe("EventDetailScreen", () => {
     // V2 shows "Menyusul" for price in FloatingCTA when minPriceMinor is present
     // but categories have no price data - since this test has available which has
     // minPriceMinor, we should see the price formatted
-    // No categories → read-only server note (prototype 02 .categories-note).
+    // The mobile prototype does not add a placeholder callout to the ticket list.
     expect(
-      screen.getByText(
+      screen.queryByText(
         "Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.",
       ),
-    ).toBeTruthy();
+    ).toBeNull();
   });
 
   it("shows 'Sisa N' for a low-stock category and 'Menyusul' without a price", async () => {

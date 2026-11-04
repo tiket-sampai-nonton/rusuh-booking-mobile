@@ -52,6 +52,13 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
     expect(screen.getByText("bk-1")).toBeTruthy();
   });
 
+  it("selects a wallet option and exposes the selected state", () => {
+    const screen = renderScreen("bk-1");
+    fireEvent.press(screen.getByTestId("snap-channel-wallet"));
+    fireEvent.press(screen.getByTestId("snap-wallet-qris"));
+    expect(screen.getByTestId("snap-wallet-qris").props.accessibilityState.selected).toBe(true);
+  });
+
   it("success drives snapCallback(PAID) then routes to the verify gate", async () => {
     // seed an attempt in the store + repo
     const base = createContainer({ useMocks: true });
