@@ -45,6 +45,12 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
   it("renders the simulator shell + summary", () => {
     const screen = renderScreen("bk-1");
     expect(screen.getByTestId("snap-screen")).toBeTruthy();
+    expect(screen.getByTestId("snap-screen").props.style.backgroundColor).toBe("#ffffff");
+    expect(screen.getByTestId("snap-content").props.style[1]).toMatchObject({
+      borderWidth: 2,
+      borderColor: "#000000",
+      padding: 16,
+    });
     expect(screen.getByTestId("snap-success")).toBeTruthy();
     expect(screen.getByTestId("snap-fail")).toBeTruthy();
     expect(screen.getByTestId("snap-unknown")).toBeTruthy();

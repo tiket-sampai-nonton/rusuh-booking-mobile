@@ -11,7 +11,7 @@
  * Markup lives in ./fragments/*, inline styles in ./style, types in ./interface.
  */
 import { useRouter, type Href } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -58,7 +58,11 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
 
   return (
     <ScreenFade>
-      <View className="flex-1" style={{ backgroundColor: v2.field }} testID="snap-screen">
+      <View
+        className="flex-1"
+        style={{ backgroundColor: Platform.OS === "web" ? v2.field : v2.ground }}
+        testID="snap-screen"
+      >
         <View
           style={{
             height: insets.top + 56,
@@ -90,7 +94,18 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
             { paddingHorizontal: 28, paddingTop: 28, paddingBottom: insets.bottom + 40, width: "100%" },
           ]}
         >
-          <View className="w-full max-w-md self-center" style={{ backgroundColor: v2.ground, paddingHorizontal: 4 }}>
+          <View
+            className="w-full max-w-md self-center"
+            style={[
+              { backgroundColor: v2.ground, paddingHorizontal: 4 },
+              Platform.OS !== "web" && {
+                borderWidth: v2Border.base,
+                borderColor: v2.ink,
+                padding: 16,
+              },
+            ]}
+            testID="snap-content"
+          >
             <SnapLogo />
 
             <SnapSummary
