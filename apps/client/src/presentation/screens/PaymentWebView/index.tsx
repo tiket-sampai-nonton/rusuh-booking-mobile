@@ -13,10 +13,11 @@
  */
 import { useRouter, type Href } from "expo-router";
 import { useEffect, useState } from "react";
-import { Platform, Text, View } from "react-native";
+import { Platform, View } from "react-native";
 import { WebView } from "react-native-webview";
 
 import { usePaymentWebView } from "@presentation/hooks/usePaymentWebView";
+import { PaymentWebViewNotice } from "./fragments/PaymentWebViewNotice";
 
 export interface PaymentWebViewScreenProps {
   readonly bookingId: string;
@@ -75,31 +76,15 @@ export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
 
   // On web there is no WebView handoff — reuse the page directly.
   if (Platform.OS === "web") {
-    return (
-      <View className="flex-1 items-center justify-center bg-background p-6" testID="paywv-web">
-        <Text className="text-center text-sm text-muted-foreground">
-          Pembayaran dibuka langsung di halaman ini (tanpa WebView di web).
-        </Text>
-      </View>
-    );
+    return <PaymentWebViewNotice variant="web" />;
   }
 
   if (error) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background p-6" testID="paywv-error">
-        <Text className="text-center text-sm text-error">
-          Gagal membuka halaman pembayaran. Coba lagi.
-        </Text>
-      </View>
-    );
+    return <PaymentWebViewNotice variant="error" />;
   }
 
   if (!pageUrl) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background" testID="paywv-loading">
-        <Text className="text-sm text-muted-foreground">Membuka pembayaran…</Text>
-      </View>
-    );
+    return <PaymentWebViewNotice variant="loading" />;
   }
 
   return (

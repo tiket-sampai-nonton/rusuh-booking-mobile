@@ -52,7 +52,10 @@ function renderScreen(
   const base = createContainer({ useMocks: true });
   const container: Container = { ...base, paymentRepository: repo };
   const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+    defaultOptions: {
+      queries: { retry: false, gcTime: Infinity },
+      mutations: { gcTime: Infinity },
+    },
   });
   return render(
     <QueryClientProvider client={qc}>

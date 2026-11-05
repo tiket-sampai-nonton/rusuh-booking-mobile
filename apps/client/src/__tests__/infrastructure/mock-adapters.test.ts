@@ -48,6 +48,9 @@ describe("MockQueueRepository", () => {
     });
     expect(ticket.nextPollAfterMs).toBe(2000);
     expect(typeof ticket.serverTime).toBe("string");
+    await expect(repo.getQueueStatus("evt-1")).resolves.toEqual({
+      admissionRatePerMin: 1400,
+    });
 
     const s1 = await repo.getStatus("q-evt-1");
     expect(s1.position).toBe(4);

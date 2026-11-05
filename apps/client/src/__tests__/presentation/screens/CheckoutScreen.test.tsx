@@ -1,4 +1,6 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { QueryClient } from "@tanstack/react-query";
+import { BackHandler, Platform } from "react-native";
 
 import type {
   AttendeeCheck,
@@ -8,11 +10,32 @@ import type {
   BookingSession,
 } from "@domain/repositories/booking.repository";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
+import { BOOKING_CATEGORY_FIXTURE } from "@shared/test-fixtures/booking-categories.fixture";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
+jest.mock("@presentation/hooks/useServerCountdown", () => {
+  const { useEffect, useRef } = jest.requireActual("react");
+  return {
+    useServerCountdown: ({ expiresAtIso, serverTimeIso, onExpire }: { expiresAtIso?: string; serverTimeIso?: string; onExpire?: () => void }) => {
+      const deadline = expiresAtIso ? Date.parse(expiresAtIso) : 0;
+      const serverNow = serverTimeIso ? Date.parse(serverTimeIso) : deadline;
+      const expired = Boolean(expiresAtIso && deadline <= serverNow);
+      const fired = useRef(false);
+      useEffect(() => {
+        if (!expired) {
+          fired.current = false;
+        } else if (!fired.current) {
+          fired.current = true;
+          onExpire?.();
+        }
+      }, [expired, onExpire]);
+      return { remainingMs: Math.max(0, deadline - serverNow), expired };
+    },
+  };
+});
 
 // eslint-disable-next-line import/first
 import { CheckoutScreen } from "@presentation/screens/Checkout";
@@ -25,6 +48,7 @@ const SESSION: BookingSession = {
   expiresAt: "2999-01-01T00:00:00.000Z", // far future → no expiry during test
   serverTime: "2026-12-01T00:00:00.000Z",
   maxSelectable: 3,
+  categories: BOOKING_CATEGORY_FIXTURE,
 };
 
 function bookingRepo(session: BookingSession | null): BookingRepository {
@@ -51,17 +75,17 @@ function bookingRepo(session: BookingSession | null): BookingRepository {
 
 describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
   beforeEach(() => {
-    // Fake timers (auto-advancing) stop the 1s server-countdown setInterval from
-    // spinning a real wall-clock loop per mount — that accumulation OOMs the
-    // suite on the memory-tight CI host. waitFor still flushes via microtasks.
-    jest.useFakeTimers({ advanceTimers: true });
+    // Countdown math is covered by useServerCountdown tests; this screen test
+    // supplies server-authoritative remaining time and leaves debounce timers
+    // under Testing Library's act-aware waitFor loop.
+    jest.useFakeTimers();
     mockRouter.push.mockReset();
     mockRouter.replace.mockReset();
     useAccountStore.getState().clearProfile(); // default: guest
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    jest.clearAllTimers();
     jest.useRealTimers();
   });
 
@@ -70,6 +94,8 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
     await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    expect(screen.getByTestId("cat-0-REG").props.accessibilityState.selected).toBe(true);
+    expect(screen.getByTestId("checkout-total").props.children).toBe("Rp 450.000");
     expect(screen.queryByTestId("ticket-row-1")).toBeNull();
   });
 
@@ -108,6 +134,48 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     expect(screen.queryByTestId("ticket-row-2")).toBeNull();
   });
 
+  it("keeps rows stable when refreshed categories arrive and supports an empty catalog", async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
+    queryClient.setQueryData(["booking-session", "current"], SESSION);
+    const refreshedView = renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
+      container: { bookingRepository: bookingRepo(SESSION) },
+      queryClient,
+    });
+    await waitFor(() => expect(screen.getByTestId("cat-0-REG").props.accessibilityState.selected).toBe(true));
+    act(() => queryClient.setQueryData(["booking-session", "current"], { ...SESSION, categories: [...SESSION.categories] }));
+    expect(screen.getByTestId("cat-0-REG").props.accessibilityState.selected).toBe(true);
+    refreshedView.unmount();
+
+    const emptySession = { ...SESSION, categories: [] };
+    renderWithProviders(<CheckoutScreen sessionId="sess-empty" />, {
+      container: { bookingRepository: bookingRepo(emptySession) },
+    });
+    await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
+    fireEvent.press(screen.getByTestId("add-ticket"));
+    expect(await screen.findByTestId("ticket-row-1")).toBeTruthy();
+  });
+
+  it("handles hardware back repeatedly while the leave-confirm dialog is open", async () => {
+    const originalPlatform = Platform.OS;
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "android" });
+    const remove = jest.fn();
+    let handler: (() => boolean) | undefined;
+    const addListener = jest.spyOn(BackHandler, "addEventListener").mockImplementation((_event, callback) => {
+      handler = callback as () => boolean;
+      return { remove } as never;
+    });
+    const view = renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
+      container: { bookingRepository: bookingRepo(SESSION) },
+    });
+    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    await act(async () => { expect(handler?.()).toBe(true); });
+    await waitFor(() => expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy());
+    await act(async () => { expect(handler?.()).toBe(true); });
+    view.unmount();
+    expect(addListener).toHaveBeenCalled();
+    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+  });
+
   it("selecting a category + filling valid buyer/attendee enables Lanjut Bayar", async () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
@@ -119,6 +187,9 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
     fireEvent.press(screen.getByTestId("cat-0-VIP")); // pick VIP category
+    await waitFor(() =>
+      expect(screen.getByTestId("checkout-total").props.children).toBe("Rp 950.000"),
+    );
     fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
     fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010001");
     fireEvent.press(screen.getByTestId("checkout-consent")); // guest consent (RBT-052)
@@ -219,7 +290,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
-    // V2: CheckoutHero shows "Pilih Tiketmu" (uppercase T)
+    // : CheckoutHero shows "Pilih Tiketmu" (uppercase T)
     await waitFor(() => expect(screen.getByText("Pilih Tiketmu")).toBeTruthy());
   });
 
@@ -230,7 +301,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     // Loading clears → the add-ticket control appears (post-restore render),
     // and the session-dependent hero stays absent (false arm of the ternary).
     await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
-    // V2: CheckoutHero shows "Pilih Tiketmu" (uppercase T)
+    // : CheckoutHero shows "Pilih Tiketmu" (uppercase T)
     expect(screen.queryByText("Pilih Tiketmu")).toBeNull();
     expect(screen.getByTestId("ticket-row-0")).toBeTruthy();
   });
@@ -256,7 +327,9 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
       container: { bookingRepository: bookingRepo(past) },
     });
     await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/expired/sess-1"),
+      expect(mockRouter.replace).toHaveBeenCalledWith(
+        "/expired/sess-1?reason=hold&eventId=evt-1",
+      ),
     );
   });
 });

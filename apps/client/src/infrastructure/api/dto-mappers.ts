@@ -82,6 +82,7 @@ interface WireBookingSession {
   expiresAt: string;
   serverTime?: string;
   maxSelectable?: number;
+  categories: BookingSession["categories"];
 }
 interface WireAttendeeCheck {
   nikMasked: string;
@@ -176,6 +177,7 @@ export function toBookingSession(dto: WireBookingSession): BookingSession {
     expiresAt: dto.expiresAt,
     serverTime: dto.serverTime,
     maxSelectable: dto.maxSelectable,
+    categories: dto.categories,
   };
 }
 

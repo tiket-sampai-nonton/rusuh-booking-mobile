@@ -12,11 +12,13 @@
  */
 import { useRouter, type Href } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { View } from "react-native";
 
 import { Seo } from "@presentation/components/Seo";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 import { useSessionStore } from "@presentation/stores/session-store";
+import { VerificationFailure } from "./fragments/VerificationFailure";
+import { VerificationProgress } from "./fragments/VerificationProgress";
 
 export interface PaymentResultScreenProps {
   readonly bookingId: string;
@@ -64,52 +66,12 @@ export function PaymentResultScreen({
         noindex
       />
       {failedToVerify ? (
-        <View className="items-center gap-5">
-          <Text
-            className="text-center text-base text-destructive"
-            testID="payment-result-error"
-            accessibilityRole="alert"
-          >
-            {missingAttemptId
-              ? "ID percobaan pembayaran tidak tersedia. Kembali ke pembayaran untuk memeriksa status terbaru."
-              : "Gagal memeriksa status pembayaran. Kembali ke halaman pembayaran untuk mencoba lagi."}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.replace(`/payment/${bookingId}` as Href)}
-            style={{ minHeight: 48, paddingHorizontal: 20, alignItems: "center", justifyContent: "center", backgroundColor: "#000000" }}
-            testID="payment-result-return"
-          >
-            <Text style={{ color: "#ffffff", fontWeight: "700", textTransform: "uppercase" }}>
-              Kembali ke pembayaran
-            </Text>
-          </Pressable>
-        </View>
+        <VerificationFailure
+          missingAttemptId={missingAttemptId}
+          onReturn={() => router.replace(`/payment/${bookingId}` as Href)}
+        />
       ) : (
-        // RBT-080: live region so a screen reader announces the status change
-        // (verifying → success) without the user re-focusing.
-        <View
-          className="items-center gap-4"
-          accessibilityLiveRegion="polite"
-          testID="payment-result-status"
-        >
-          <ActivityIndicator
-            size="large"
-            testID="payment-result-spinner"
-            accessibilityLabel="Memproses pembayaran"
-          />
-          <Text
-            className="text-center text-base text-foreground"
-            accessibilityRole="header"
-          >
-            {verdict === "paid"
-              ? "Pembayaran berhasil — mengalihkan…"
-              : "Memverifikasi pembayaran kamu…"}
-          </Text>
-          <Text className="text-center text-sm text-muted-foreground">
-            Jangan tutup halaman ini. Status dikonfirmasi langsung dari server.
-          </Text>
-        </View>
+        <VerificationProgress isPaid={verdict === "paid"} />
       )}
     </View>
   );

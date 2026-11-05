@@ -1,7 +1,7 @@
 /**
- * EventDetail V2 screen prop + fragment types.
+ * EventDetail  screen prop + fragment types.
  *
- * V2 adds: LineupItem, VenueInfo, GalleryState for new V2 sections.
+ *  adds: LineupItem, VenueInfo, GalleryState for new  sections.
  */
 import type { ReactNode } from "react";
 
@@ -73,7 +73,7 @@ export interface FloatingCTAProps {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// V2: LINEUP PROPS
+// : LINEUP PROPS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export interface LineupItem {
@@ -87,7 +87,7 @@ export interface LineupProps {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// V2: VENUE PROPS
+// : VENUE PROPS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export interface VenueInfo {
@@ -105,7 +105,7 @@ export interface VenueProps {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// V2: GALLERY + LIGHTBOX PROPS
+// : GALLERY + LIGHTBOX PROPS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export interface GalleryProps {

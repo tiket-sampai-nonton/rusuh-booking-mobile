@@ -7,7 +7,7 @@
  * navigate callback the parent passes (history cards are disabled in the live
  * screen, so this is the only place the passthrough is exercised).
  *
- * V2: Cards now use testID `v2-event-card-<id>` (Brutalist Mono redesign).
+ * : Cards now use testID `v2-event-card-<id>` (Brutalist Mono redesign).
  */
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
@@ -39,7 +39,7 @@ describe("HistoryGrid (RBT-095)", () => {
   it("renders a single column when `columns` is omitted (default-param branch)", () => {
     render(<HistoryGrid events={EVENTS} onPress={jest.fn()} />);
     expect(screen.getByTestId("history-grid")).toBeTruthy();
-    // V2: testID is now `v2-event-card-<id>`
+    // : testID is now `v2-event-card-<id>`
     expect(screen.getByTestId("v2-event-card-rock")).toBeTruthy();
     expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
   });

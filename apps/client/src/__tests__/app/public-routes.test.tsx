@@ -1,4 +1,5 @@
 import { screen, waitFor } from "@testing-library/react-native";
+import { Animated } from "react-native";
 
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
@@ -10,6 +11,11 @@ jest.mock("expo-router", () => ({
   useLocalSearchParams: () => ({ eventId: "evt-1" }),
   useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
 }));
+
+jest.mock("react-native-reanimated", () => {
+  const actual = jest.requireActual("react-native-reanimated/mock");
+  return { ...actual, useReducedMotion: () => true };
+});
 
 // eslint-disable-next-line import/first
 import HomeScreen from "../../app/(public)/index";
@@ -24,7 +30,34 @@ import ProfileScreen from "../../app/(public)/profile";
 // eslint-disable-next-line import/first
 import EventDetailScreen from "../../app/(public)/events/[eventId]";
 
+const completedAnimation = {
+  start: (callback?: (result: { finished: boolean }) => void) =>
+    callback?.({ finished: true }),
+  stop: () => undefined,
+  reset: () => undefined,
+};
+
 describe("(public) routes", () => {
+  beforeEach(() => {
+    jest
+      .spyOn(Animated, "timing")
+      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.timing>);
+    jest
+      .spyOn(Animated, "parallel")
+      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.parallel>);
+    jest
+      .spyOn(Animated, "spring")
+      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.spring>);
+    jest
+      .spyOn(Animated, "sequence")
+      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.sequence>);
+    jest
+      .spyOn(Animated, "loop")
+      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.loop>);
+  });
+
+  afterEach(() => jest.restoreAllMocks());
+
   it("export component functions", () => {
     expect(typeof HomeScreen).toBe("function");
     expect(typeof BrowseScreen).toBe("function");
@@ -59,7 +92,7 @@ describe("(public) routes", () => {
 
   it("renders the History screen (RBT-034: real past-event list, not a placeholder)", async () => {
     // The History route wires the mock catalog through the provider stack and
-    // derives past/CLOSED events; V2 shows "Arsip Event" header.
+    // derives past/CLOSED events;  shows "Arsip Event" header.
     renderWithProviders(<HistoryScreen />);
     await waitFor(() => expect(screen.getByText("Arsip Event")).toBeTruthy());
   });

@@ -1,5 +1,5 @@
 /**
- * RBT-096 — Inter font loader for V2 "Brutalist Mono" design system.
+ * RBT-096 — Inter font loader for  "Brutalist Mono" design system.
  *
  * The prototype uses Google Fonts Inter with weights 400/500/600/700/900.
  * This module provides:

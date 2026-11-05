@@ -3,12 +3,15 @@ import { HttpEventRepository } from "@infrastructure/api/http-event.repository";
 import { HttpPaymentRepository } from "@infrastructure/api/http-payment.repository";
 import { HttpQueueRepository } from "@infrastructure/api/http-queue.repository";
 import { HttpUserRepository } from "@infrastructure/api/http-user.repository";
+import { ServerClock } from "@domain/services/server-clock";
+import { BOOKING_CATEGORY_FIXTURE } from "@shared/test-fixtures/booking-categories.fixture";
 import { TransportError } from "@infrastructure/api/envelope";
 import type {
   HttpClient,
   HttpRequest,
   HttpResponse,
 } from "@infrastructure/http/http-client";
+import type { TokenStorage } from "@domain/auth/token-storage.port";
 
 /** Programmable fake transport: records requests, returns queued responses. */
 class FakeHttpClient implements HttpClient {
@@ -35,6 +38,7 @@ const ok = <T>(data: T): HttpResponse<unknown> => ({
 describe("HttpEventRepository", () => {
   it("lists events (unwrap + map DTO→domain)", async () => {
     const http = new FakeHttpClient();
+    const serverClock = new ServerClock({ now: () => Date.parse("2030-01-01T00:00:00Z") });
     http.queueResponse(
       ok({
         events: [
@@ -51,11 +55,12 @@ describe("HttpEventRepository", () => {
         serverTime: "2026-01-01T00:00:00Z",
       }),
     );
-    const repo = new HttpEventRepository(http);
+    const repo = new HttpEventRepository(http, serverClock);
     const out = await repo.listEvents();
     expect(http.calls[0]).toEqual({ method: "GET", url: "events" });
     expect(out).toHaveLength(1);
     expect(out[0]).toMatchObject({ id: "e1", slug: "s1", status: "AVAILABLE" });
+    expect(serverClock.serverNow()).toBe(Date.parse("2026-01-01T00:00:00Z"));
   });
 
   it("gets event detail by id (url-encoded)", async () => {
@@ -71,7 +76,10 @@ describe("HttpEventRepository", () => {
         description: { longDesc: "d" },
       }),
     );
-    const repo = new HttpEventRepository(http);
+    const repo = new HttpEventRepository(
+      http,
+      new ServerClock({ now: () => Date.parse("2030-01-01T00:00:00Z") }),
+    );
     const out = await repo.getEventDetail("e 2");
     expect(http.calls[0].url).toBe("events/e%202");
     expect(out.description).toEqual({ longDesc: "d" });
@@ -89,6 +97,11 @@ describe("HttpQueueRepository", () => {
     };
     http.queueResponse(ok(entry));
     http.queueResponse(ok({ ...entry, position: 2 }));
+    http.queueResponse({
+      status: 200,
+      headers: {},
+      data: { admissionRatePerMin: 875 },
+    });
     http.queueResponse({ status: 204, headers: {}, data: null });
     const repo = new HttpQueueRepository(http);
 
@@ -99,8 +112,15 @@ describe("HttpQueueRepository", () => {
     const status = await repo.getStatus("q1");
     expect(status.position).toBe(2);
 
+    const queueStatus = await repo.getQueueStatus("event 1");
+    expect(http.calls[2]).toMatchObject({
+      method: "GET",
+      url: "queue-status/event%201",
+    });
+    expect(queueStatus.admissionRatePerMin).toBe(875);
+
     await expect(repo.leave("q1")).resolves.toBeUndefined();
-    expect(http.calls[2]).toMatchObject({ method: "DELETE", url: "queue/q1" });
+    expect(http.calls[3]).toMatchObject({ method: "DELETE", url: "queue/q1" });
   });
 });
 
@@ -179,6 +199,7 @@ describe("HttpBookingRepository", () => {
       sessionId: "s1",
       eventId: "e1",
       expiresAt: "2026-01-01T00:05:00Z",
+      categories: BOOKING_CATEGORY_FIXTURE,
     };
     http.queueResponse(ok(session));
     http.queueResponse(ok(session));
@@ -188,8 +209,14 @@ describe("HttpBookingRepository", () => {
     );
     const repo = new HttpBookingRepository(http);
 
-    expect((await repo.createSession("e1")).sessionId).toBe("s1");
-    expect((await repo.getCurrentSession())?.sessionId).toBe("s1");
+    expect(await repo.createSession("e1")).toMatchObject({
+      sessionId: "s1",
+      categories: BOOKING_CATEGORY_FIXTURE,
+    });
+    expect(await repo.getCurrentSession()).toMatchObject({
+      sessionId: "s1",
+      categories: BOOKING_CATEGORY_FIXTURE,
+    });
     expect((await repo.checkAttendee("s1", "x")).result).toBe("AVAILABLE");
     const booking = await repo.hold(
       "s1",
@@ -229,6 +256,13 @@ describe("HttpBookingRepository", () => {
     });
     const repo = new HttpBookingRepository(http);
     expect(await repo.getCurrentSession()).toBeNull();
+  });
+
+  it("returns null when the transport rejects with a 404", async () => {
+    const http = new FakeHttpClient();
+    jest.spyOn(http, "request").mockRejectedValue(new TransportError({ code: 1404, httpStatus: 404 }));
+    const repo = new HttpBookingRepository(http);
+    await expect(repo.getCurrentSession()).resolves.toBeNull();
   });
 
   it("re-throws a non-404 transport error from current session", async () => {
@@ -274,5 +308,24 @@ describe("HttpUserRepository", () => {
     expect(http.calls[2]).toMatchObject({ method: "PATCH", url: "me" });
 
     expect((await repo.getMe()).emailMasked).toBe("a***@x.io");
+  });
+
+  it("adds the stored bearer token to authenticated profile requests", async () => {
+    const http = new FakeHttpClient();
+    http.queueResponse(ok({ emailMasked: "a***@x.io", hasNik: false }));
+    const tokenStorage: TokenStorage = {
+      load: jest.fn().mockResolvedValue("profile-token"),
+      save: jest.fn().mockResolvedValue(undefined),
+      clear: jest.fn().mockResolvedValue(undefined),
+    };
+    const repo = new HttpUserRepository(http, tokenStorage);
+
+    await repo.getMe();
+
+    expect(http.calls[0]).toMatchObject({
+      method: "GET",
+      url: "me",
+      headers: { Authorization: "Bearer profile-token" },
+    });
   });
 });

@@ -1,12 +1,12 @@
 /** Payment screen styles — extracted from inline `style={{…}}` (refactor rule). */
 import { StyleSheet, type DimensionValue } from "react-native";
 
-import { v2 } from "@presentation/theme";
+import { designColors } from "@presentation/theme";
 
 export const paymentStyles = StyleSheet.create({
-  // V2 brutalist: square timer dot + square method icon chip (black fill).
+  //  brutalist: square timer dot + square method icon chip (black fill).
   timerDot: { width: 8, height: 8 },
-  methodIcon: { width: 44, height: 30, backgroundColor: v2.accent },
+  methodIcon: { width: 44, height: 30, backgroundColor: designColors.accent },
   tabularNum: { fontVariant: ["tabular-nums"] },
 });
 
@@ -20,9 +20,9 @@ export const paymentScrollContent = (isDesktop: boolean) => ({
   ...(isDesktop ? { maxWidth: 620, width: "100%" as DimensionValue, alignSelf: "center" as const } : {}),
 });
 
-/** V2 mobile prototype sticky checkout bar — white ground + bottom safe-area inset. */
+/**  mobile prototype sticky checkout bar — white ground + bottom safe-area inset. */
 export const paymentBar = (bottom: number) => ({
-  backgroundColor: v2.ground,
-  borderTopColor: v2.ink,
+  backgroundColor: designColors.ground,
+  borderTopColor: designColors.ink,
   paddingBottom: bottom + 16,
 });

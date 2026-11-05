@@ -28,7 +28,7 @@ class FakeRepo implements BookingRepository {
   throwOnHold: Error | null = null;
   holds = 0;
   async createSession(eventId: string): Promise<BookingSession> {
-    return { sessionId: "s", eventId, expiresAt: "", maxSelectable: 3 };
+    return { sessionId: "s", eventId, expiresAt: "", maxSelectable: 3, categories: [] };
   }
   async getCurrentSession(): Promise<BookingSession | null> {
     return null;
@@ -52,7 +52,10 @@ function wrapper(repo: BookingRepository) {
   const base = createContainer({ useMocks: true });
   const container: Container = { ...base, bookingRepository: repo };
   const qc = new QueryClient({
-    defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+    defaultOptions: {
+      mutations: { retry: false, gcTime: Infinity },
+      queries: { retry: false, gcTime: Infinity },
+    },
   });
   return function Wrapper({
     children,

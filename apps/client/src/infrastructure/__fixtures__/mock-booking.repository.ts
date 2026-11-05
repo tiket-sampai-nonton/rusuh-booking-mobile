@@ -13,6 +13,7 @@ import type {
   BookingRepository,
   BookingSession,
 } from "@domain/repositories/booking.repository";
+import { BOOKING_CATEGORY_FIXTURE } from "@shared/test-fixtures/booking-categories.fixture";
 
 export class MockBookingRepository implements BookingRepository {
   private current: BookingSession | null = null;
@@ -27,6 +28,7 @@ export class MockBookingRepository implements BookingRepository {
       expiresAt: new Date(Date.now() + 300_000).toISOString(),
       serverTime: new Date().toISOString(),
       maxSelectable: 3,
+      categories: BOOKING_CATEGORY_FIXTURE,
     };
     return this.current;
   }
@@ -41,11 +43,7 @@ export class MockBookingRepository implements BookingRepository {
    * `...99` → CHECK_LIMIT_REACHED (warns), anything else → AVAILABLE.
    */
   async checkAttendee(_sessionId: string, nik: string): Promise<AttendeeCheck> {
-    const result: AttendeeCheck["result"] = nik.endsWith("00")
-      ? "ALREADY_REGISTERED"
-      : nik.endsWith("99")
-        ? "CHECK_LIMIT_REACHED"
-        : "AVAILABLE";
+    const result = attendeeResultForNik(nik);
     return {
       nikMasked: `${nik.slice(0, 2)}****${nik.slice(-2)}`,
       result,
@@ -84,12 +82,12 @@ export class MockBookingRepository implements BookingRepository {
 
     // Deterministic conflict triggers so the FE can exercise every hold error
     // path without the BE (RBT-054, FR-16). A real BE enforces these.
-    const categories = new Set(items.map((i) => i.categoryId));
+    const selectedCategories = new Set(items.map((i) => i.categoryId));
     const niks = items.map((i) => i.attendeeNik);
     if (items.some((i) => i.categoryId === "SOLD")) {
       throw mapError({ code: "CATEGORY_UNAVAILABLE" });
     }
-    if (categories.size > 1) {
+    if (selectedCategories.size > 1) {
       throw mapError({ code: "MIXED_CATEGORIES_NOT_ALLOWED" });
     }
     if (new Set(niks).size !== niks.length) {
@@ -99,14 +97,28 @@ export class MockBookingRepository implements BookingRepository {
       throw mapError({ code: "QUANTITY_EXCEEDS_LIMIT" });
     }
     this.seq += 1;
+    const bookingCategories = this.current?.categories ?? [];
+    const amountMinor = items.reduce((sum, item) => {
+      const category = bookingCategories.find(
+        (candidate) =>
+          candidate.categoryId === item.categoryId || candidate.code === item.categoryId,
+      );
+      return sum + (category?.priceMinor ?? 0);
+    }, 0);
     const booking: Booking = {
       bookingId: `bk-${sessionId}-${this.seq}`,
       sessionId,
       status: "HELD",
-      amountMinor: items.length * 45000000,
+      amountMinor,
       serverTime: new Date().toISOString(),
     };
     this.bookingsByKey.set(idempotencyKey, booking);
     return booking;
   }
+}
+
+function attendeeResultForNik(nik: string): AttendeeCheck["result"] {
+  if (nik.endsWith("00")) return "ALREADY_REGISTERED";
+  if (nik.endsWith("99")) return "CHECK_LIMIT_REACHED";
+  return "AVAILABLE";
 }

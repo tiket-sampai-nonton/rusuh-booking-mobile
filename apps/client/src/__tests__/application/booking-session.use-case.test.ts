@@ -16,6 +16,7 @@ const SESSION: BookingSession = {
   expiresAt: "2026-12-01T00:05:00.000Z",
   serverTime: "2026-12-01T00:00:00.000Z",
   maxSelectable: 3,
+  categories: [],
 };
 
 class FakeBookingRepo implements BookingRepository {

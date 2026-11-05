@@ -47,6 +47,9 @@ class FakeQueueRepository implements QueueRepository {
     if (this.getStatusError) throw this.getStatusError;
     return entry({ queueId, status: this.statusToReturn });
   }
+  async getQueueStatus(): Promise<{ admissionRatePerMin?: number }> {
+    return {};
+  }
   async leave(_queueId: string): Promise<void> {
     void _queueId;
   }

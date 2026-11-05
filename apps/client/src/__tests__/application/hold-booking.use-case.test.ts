@@ -27,7 +27,7 @@ class FakeRepo implements BookingRepository {
   /** When set, hold throws this instead of succeeding. */
   throwOnHold: Error | null = null;
   async createSession(eventId: string): Promise<BookingSession> {
-    return { sessionId: "s", eventId, expiresAt: "", maxSelectable: 3 };
+    return { sessionId: "s", eventId, expiresAt: "", maxSelectable: 3, categories: [] };
   }
   async getCurrentSession(): Promise<BookingSession | null> {
     return null;

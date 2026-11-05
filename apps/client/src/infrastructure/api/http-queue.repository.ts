@@ -8,6 +8,7 @@
 import type {
   QueueEntry,
   QueueRepository,
+  QueueStatusSnapshot,
 } from "@domain/repositories/queue.repository";
 import { assertOk, unwrap } from "@infrastructure/api/envelope";
 import { toQueueEntry } from "@infrastructure/api/dto-mappers";
@@ -31,6 +32,15 @@ export class HttpQueueRepository implements QueueRepository {
       url: `queue/${encodeURIComponent(queueId)}`,
     });
     return toQueueEntry(unwrap<Parameters<typeof toQueueEntry>[0]>(res));
+  }
+
+  async getQueueStatus(eventId: string): Promise<QueueStatusSnapshot> {
+    const res = await this.http.request<{ admissionRatePerMin?: number }>({
+      method: "GET",
+      url: `queue-status/${encodeURIComponent(eventId)}`,
+    });
+    assertOk(res);
+    return { admissionRatePerMin: res.data.admissionRatePerMin };
   }
 
   async leave(queueId: string): Promise<void> {

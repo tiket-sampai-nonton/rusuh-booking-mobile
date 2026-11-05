@@ -71,7 +71,13 @@ describe("useNotifications (RBT-072)", () => {
     const RN = require("react-native") as typeof import("react-native");
     const orig = RN.Platform.OS;
     Object.defineProperty(RN.Platform, "OS", { value: "web", configurable: true });
-    renderHook(() => useNotifications(), { wrapper });
+    const container = createContainer({ useMocks: true });
+    const register = jest.spyOn(container.notification, "registerForRemotePush");
+    const webWrapper = ({ children }: { children: React.ReactNode }) => (
+      <ServiceProvider container={container}>{children}</ServiceProvider>
+    );
+    renderHook(() => useNotifications(), { wrapper: webWrapper });
+    await waitFor(() => expect(register).toHaveBeenCalled());
     expect(Notifications.addNotificationResponseReceivedListener).not.toHaveBeenCalled();
     Object.defineProperty(RN.Platform, "OS", { value: orig, configurable: true });
   });

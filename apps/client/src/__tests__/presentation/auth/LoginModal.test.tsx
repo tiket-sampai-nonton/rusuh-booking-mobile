@@ -2,7 +2,7 @@
  * RBT-020 — LoginModal component tests (RNTL).
  *
  * Renders the modal inside a ServiceProvider (fake UserRepository) + a real
- * QueryClientProvider, then drives the V2 prototype flow:
+ * QueryClientProvider, then drives the  prototype flow:
  *  - open modal
  *  - invalid email blocked ("Format email belum benar")
  *  - email submit → OTP step with 6 separate digit boxes
@@ -13,11 +13,12 @@
  *  - "Ubah Email" returns to email step
  *  - backdrop + hardware-back (Escape) close
  *
- * V2 OTP input: 6 individual boxes (login-otp-0 to login-otp-5), NOT a single input.
+ *  OTP input: 6 individual boxes (login-otp-0 to login-otp-5), NOT a single input.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
+import { Animated, BackHandler, Platform } from "react-native";
 
 import type { Container } from "@providers/container";
 import { createContainer } from "@providers/container";
@@ -29,6 +30,14 @@ import type {
   UserProfile,
   UserRepository,
 } from "@domain/repositories/user.repository";
+import { DomainError } from "@domain/errors/domain-error";
+
+const completedAnimation = {
+  start: (callback?: (result: { finished: boolean }) => void) =>
+    callback?.({ finished: true }),
+  stop: () => undefined,
+  reset: () => undefined,
+};
 
 class FakeUserRepository implements UserRepository {
   public session: AuthSession = { token: "tok-1", isNew: false };
@@ -52,17 +61,20 @@ class FakeUserRepository implements UserRepository {
   }
 }
 
-function renderModal(repo: UserRepository) {
+function renderModal(repo: UserRepository, visible = true) {
   const base = createContainer({ useMocks: true });
   const container: Container = { ...base, userRepository: repo };
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    defaultOptions: {
+      queries: { retry: false, gcTime: Infinity },
+      mutations: { retry: false, gcTime: Infinity },
+    },
   });
   const onClose = jest.fn();
   const utils = render(
     <QueryClientProvider client={queryClient}>
       <ServiceProvider container={container}>
-        <LoginModal visible onClose={onClose} />
+        <LoginModal visible={visible} onClose={onClose} />
       </ServiceProvider>
     </QueryClientProvider>,
   );
@@ -70,6 +82,23 @@ function renderModal(repo: UserRepository) {
 }
 
 describe("LoginModal (RBT-020)", () => {
+  const originalPlatform = Platform.OS;
+
+  beforeEach(() => {
+    jest
+      .spyOn(Animated, "timing")
+      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.timing>);
+    jest
+      .spyOn(Animated, "parallel")
+      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.parallel>);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+  });
+
   it("renders the email step with prototype title + copy", () => {
     const { getByText, getByTestId } = renderModal(new FakeUserRepository());
     expect(getByText("Masuk / Daftar")).toBeTruthy();
@@ -88,11 +117,46 @@ describe("LoginModal (RBT-020)", () => {
     });
   });
 
+  it("focuses the web email field and clears a validation message when edited", () => {
+    jest.useFakeTimers();
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    const { getByTestId } = renderModal(new FakeUserRepository());
+    const email = getByTestId("login-email-input");
+    fireEvent(email, "focus");
+    fireEvent.changeText(email, "bad-email");
+    fireEvent.press(getByTestId("login-send"));
+    expect(getByTestId("login-email-error").props.children).toBe("Format email belum benar");
+    fireEvent.changeText(email, "valid@example.com");
+    fireEvent(email, "blur");
+    act(() => jest.advanceTimersByTime(500));
+    expect(getByTestId("login-email-error").props.children).toBe("");
+  });
+
+  it("shows a typed Bahasa request error from the domain", async () => {
+    const repo = new FakeUserRepository();
+    jest.spyOn(repo, "requestOtp").mockRejectedValueOnce(
+      new DomainError({ kind: "auth", code: "OTP_FAILED", userMessage: "Email belum terdaftar." }),
+    );
+    const { getByTestId } = renderModal(repo);
+    fireEvent.changeText(getByTestId("login-email-input"), "valid@example.com");
+    fireEvent.press(getByTestId("login-send"));
+    await waitFor(() => expect(getByTestId("login-email-error").props.children).toBe("Email belum terdaftar."));
+  });
+
+  it("uses the generic request fallback for an untyped error", async () => {
+    const repo = new FakeUserRepository();
+    jest.spyOn(repo, "requestOtp").mockRejectedValueOnce(new Error("offline"));
+    const { getByTestId } = renderModal(repo);
+    fireEvent.changeText(getByTestId("login-email-input"), "valid@example.com");
+    fireEvent.press(getByTestId("login-send"));
+    await waitFor(() => expect(getByTestId("login-email-error").props.children).toBe("Terjadi kesalahan. Silakan coba lagi."));
+  });
+
   it("advances to the OTP step and echoes the entered email", async () => {
     const { getByTestId, getByText } = renderModal(new FakeUserRepository());
     fireEvent.changeText(getByTestId("login-email-input"), "kamu@email.com");
     fireEvent.press(getByTestId("login-send"));
-    // V2: "Verifikasi OTP" title, 6 separate digit boxes
+    // : "Verifikasi OTP" title, 6 separate digit boxes
     await waitFor(() => expect(getByText("Verifikasi OTP")).toBeTruthy());
     expect(getByTestId("login-otp-0")).toBeTruthy();
     expect(getByTestId("login-otp-5")).toBeTruthy();
@@ -122,6 +186,42 @@ describe("LoginModal (RBT-020)", () => {
     );
   });
 
+  it("keeps verify and resend controls disabled until their prerequisites are met", async () => {
+    jest.useFakeTimers();
+    const repo = new FakeUserRepository();
+    const requestOtp = jest.spyOn(repo, "requestOtp");
+    const { getByTestId, getByText } = renderModal(repo);
+    fireEvent.changeText(getByTestId("login-email-input"), "kamu@email.com");
+    fireEvent.press(getByTestId("login-send"));
+    await waitFor(() => getByText("Verifikasi OTP"));
+
+    expect(requestOtp).toHaveBeenCalledTimes(1);
+    expect(getByTestId("login-verify").props.accessibilityState.disabled).toBe(true);
+    expect(getByText("Kirim ulang (60s)")).toBeTruthy();
+  });
+
+  it("resends OTP after cooldown and handles digit focus movement", async () => {
+    jest.useFakeTimers();
+    const repo = new FakeUserRepository();
+    const requestOtp = jest.spyOn(repo, "requestOtp");
+    const { getByTestId, getByText } = renderModal(repo);
+    fireEvent.changeText(getByTestId("login-email-input"), "kamu@email.com");
+    fireEvent.press(getByTestId("login-send"));
+    await waitFor(() => getByText("Verifikasi OTP"));
+
+    fireEvent.changeText(getByTestId("login-otp-0"), "1");
+    fireEvent.changeText(getByTestId("login-otp-1"), "2");
+    fireEvent.changeText(getByTestId("login-otp-1"), "");
+    fireEvent(getByTestId("login-otp-1"), "keyPress", { nativeEvent: { key: "Backspace" } });
+    fireEvent(getByTestId("login-otp-0"), "keyPress", { nativeEvent: { key: "Backspace" } });
+    act(() => jest.advanceTimersByTime(60_000));
+    expect(getByTestId("login-resend").props.disabled).toBeFalsy();
+    fireEvent.press(getByTestId("login-resend"));
+    await waitFor(() => expect(getByText("Kirim ulang (60s)")).toBeTruthy());
+    expect(requestOtp).toHaveBeenCalledTimes(2);
+    act(() => jest.advanceTimersByTime(1_000));
+  });
+
   it("shows a Bahasa OTP error on a wrong code", async () => {
     const repo = new FakeUserRepository();
     repo.throwOnVerify = true;
@@ -138,7 +238,7 @@ describe("LoginModal (RBT-020)", () => {
     fireEvent.changeText(getByTestId("login-otp-5"), "0");
     fireEvent.press(getByTestId("login-verify"));
     await waitFor(() => {
-      // V2 testID: login-otp-error — DomainError message from OTP_INVALID
+      //  testID: login-otp-error — DomainError message from OTP_INVALID
       expect(getByTestId("login-otp-error").props.children).toBe(
         "Kode OTP salah atau kedaluwarsa. Coba lagi.",
       );
@@ -160,7 +260,7 @@ describe("LoginModal (RBT-020)", () => {
     fireEvent.changeText(getByTestId("login-otp-4"), "5");
     fireEvent.changeText(getByTestId("login-otp-5"), "6");
     fireEvent.press(getByTestId("login-verify"));
-    // V2: "Akun Kamu" (capitalized)
+    // : "Akun Kamu" (capitalized)
     await waitFor(() => expect(getByText("Akun Kamu")).toBeTruthy());
     expect(getByTestId("login-signed-name").props.children).toBe("Budi");
     expect(getByTestId("login-signed-email").props.children).toBe(
@@ -169,7 +269,7 @@ describe("LoginModal (RBT-020)", () => {
     expect(getByTestId("login-logout")).toBeTruthy();
   });
 
-  // Helper: drive the modal to the register step for a NEW email (V2 uses 6 boxes).
+  // Helper: drive the modal to the register step for a NEW email ( uses 6 boxes).
   async function reachRegisterStep(
     getByTestId: ReturnType<typeof renderModal>["getByTestId"],
     getByText: ReturnType<typeof renderModal>["getByText"],
@@ -189,6 +289,16 @@ describe("LoginModal (RBT-020)", () => {
     await waitFor(() => expect(getByText("Lengkapi Pendaftaran")).toBeTruthy());
   }
 
+  async function reachOtpStep(
+    getByTestId: ReturnType<typeof renderModal>["getByTestId"],
+    getByText: ReturnType<typeof renderModal>["getByText"],
+    email = "rizky@telkomsel.co.id",
+  ) {
+    fireEvent.changeText(getByTestId("login-email-input"), email);
+    fireEvent.press(getByTestId("login-send"));
+    await waitFor(() => expect(getByText("Verifikasi OTP")).toBeTruthy());
+  }
+
   it("renders the name/NIK/consent registration form for a new email (isNew=true)", async () => {
     const repo = new FakeUserRepository();
     repo.session = { token: "tok-new", isNew: true };
@@ -200,6 +310,17 @@ describe("LoginModal (RBT-020)", () => {
     expect(getByTestId("login-reg-consent")).toBeTruthy();
     expect(getByText("Kebijakan Privasi")).toBeTruthy();
     expect(getByTestId("login-reg-submit")).toBeTruthy();
+  });
+
+  it("supports web focus transitions through OTP verification and registration", async () => {
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    const repo = new FakeUserRepository();
+    repo.session = { token: "tok-new", isNew: true };
+    const { getByTestId, getByText } = renderModal(repo);
+    await reachRegisterStep(getByTestId, getByText);
+
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 550)));
+    expect(getByTestId("login-reg-name-input")).toBeTruthy();
   });
 
   it("keeps 'Daftar & Masuk' disabled until name + 16-digit NIK + consent are all valid", async () => {
@@ -223,6 +344,31 @@ describe("LoginModal (RBT-020)", () => {
     );
   });
 
+  it("guards a direct registration call until the form is valid", async () => {
+    const repo = new FakeUserRepository();
+    repo.session = { token: "tok-new", isNew: true };
+    const completeRegistration = jest.spyOn(repo, "completeRegistration");
+    const { getByTestId, getByText } = renderModal(repo);
+    await reachRegisterStep(getByTestId, getByText);
+    expect(getByTestId("login-reg-submit").props.accessibilityState.disabled).toBe(true);
+    expect(completeRegistration).not.toHaveBeenCalled();
+    fireEvent(getByTestId("login-card"), "press", { stopPropagation: jest.fn() });
+  });
+
+  it("uses a safe avatar and name for a returning profile with missing fields", async () => {
+    const repo = new FakeUserRepository();
+    repo.profile = { emailMasked: "", fullName: undefined, hasNik: false };
+    const { getByTestId, getByText } = renderModal(repo);
+    await reachOtpStep(getByTestId, getByText);
+    for (let index = 0; index < 6; index += 1) {
+      fireEvent.changeText(getByTestId(`login-otp-${index}`), "123456"[index] ?? "");
+    }
+    fireEvent.press(getByTestId("login-verify"));
+    await waitFor(() => expect(getByTestId("login-signed-name").props.children).toBe("—"));
+    expect(getByTestId("login-signed-email").props.children).toBe("");
+    expect(getByText("B")).toBeTruthy();
+  });
+
   it("shows a NIK error for a short NIK and blocks submit", async () => {
     const repo = new FakeUserRepository();
     repo.session = { token: "tok-new", isNew: true };
@@ -242,7 +388,7 @@ describe("LoginModal (RBT-020)", () => {
     repo.session = { token: "tok-new", isNew: true };
     repo.profile = {
       emailMasked: "r***@telkomsel.co.id",
-      fullName: "Rizky Rachmawan",
+      fullName: undefined,
       nikMasked: "32****23",
       hasNik: true,
     };
@@ -256,9 +402,10 @@ describe("LoginModal (RBT-020)", () => {
     fireEvent.changeText(getByTestId("login-reg-nik-input"), "3201234567890123");
     fireEvent.press(getByTestId("login-reg-consent"));
     fireEvent.press(getByTestId("login-reg-submit"));
-    // V2: "Berhasil!" success title
+    // : "Berhasil!" success title
     await waitFor(() => expect(getByText("Berhasil!")).toBeTruthy());
     expect(getByText("Cari Tiket")).toBeTruthy();
+    expect(getByText(/Akun Rizky Rachmawan aktif/)).toBeTruthy();
     expect(spy).toHaveBeenCalledWith({
       fullName: "Rizky Rachmawan",
       nik: "3201234567890123",
@@ -288,7 +435,7 @@ describe("LoginModal (RBT-020)", () => {
     const { getByTestId, getByText } = renderModal(new FakeUserRepository());
     fireEvent.changeText(getByTestId("login-email-input"), "kamu@email.com");
     fireEvent.press(getByTestId("login-send"));
-    // V2: testID is login-change-email with label "← Ubah Email"
+    // : testID is login-change-email with label "← Ubah Email"
     await waitFor(() => getByTestId("login-change-email"));
     fireEvent.press(getByTestId("login-change-email"));
     await waitFor(() => expect(getByText("Masuk / Daftar")).toBeTruthy());
@@ -307,5 +454,26 @@ describe("LoginModal (RBT-020)", () => {
     // Fallback: directly invoke the Modal's close via the Batal button.
     fireEvent.press(getByTestId("login-cancel"));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("registers and handles Android hardware back", () => {
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "android" });
+    let handler: (() => boolean | null | undefined) | undefined;
+    jest.spyOn(BackHandler, "addEventListener").mockImplementation((_event, callback) => {
+      handler = callback;
+      return { remove: jest.fn() };
+    });
+    const { onClose } = renderModal(new FakeUserRepository());
+
+    expect(handler).toBeDefined();
+    act(() => {
+      if (handler) handler();
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not mount the native sheet when hidden", () => {
+    const { queryByTestId } = renderModal(new FakeUserRepository(), false);
+    expect(queryByTestId("login-email-input")).toBeNull();
   });
 });

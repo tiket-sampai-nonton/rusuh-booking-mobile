@@ -1,0 +1,13 @@
+import { Circle, Path } from "react-native-svg";
+
+import { IconFrame } from "../IconFrame";
+import type { IconProps } from "../types";
+
+export function PinIcon({ color, size = 16 }: IconProps) {
+  return (
+    <IconFrame color={color} size={size}>
+      <Path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" />
+      <Circle cx={12} cy={10} r={2.5} />
+    </IconFrame>
+  );
+}

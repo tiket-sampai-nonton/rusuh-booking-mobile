@@ -24,7 +24,10 @@ function renderScreen(bookingId: string) {
   const payment = base.paymentRepository as MockPaymentRepository;
   const container: Container = { ...base, paymentRepository: payment };
   const qc = new QueryClient({
-    defaultOptions: { mutations: { retry: false } },
+    defaultOptions: {
+      queries: { gcTime: Infinity },
+      mutations: { retry: false, gcTime: Infinity },
+    },
   });
   const utils = render(
     <QueryClientProvider client={qc}>
@@ -39,6 +42,7 @@ function renderScreen(bookingId: string) {
 describe("SnapSimulatorScreen (RBT-065)", () => {
   beforeEach(() => {
     mockRouter.replace.mockReset();
+    mockRouter.back.mockReset();
     useSessionStore.getState().reset();
   });
 
@@ -65,6 +69,14 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
     expect(screen.getByTestId("snap-wallet-qris").props.accessibilityState.selected).toBe(true);
   });
 
+  it("selects a bank and returns to the payment page", () => {
+    const screen = renderScreen("bk-1");
+    fireEvent.press(screen.getByText("BNI"));
+    expect(screen.getByText("Akun virtual BNI")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("Kembali ke pembayaran"));
+    expect(mockRouter.back).toHaveBeenCalledTimes(1);
+  });
+
   it("success drives snapCallback(PAID) then routes to the verify gate", async () => {
     // seed an attempt in the store + repo
     const base = createContainer({ useMocks: true });
@@ -72,7 +84,12 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
     const attempt = await payment.createAttempt("bk-1", "QRIS", "k1");
     useSessionStore.getState().setPaymentMethod("QRIS", attempt.attemptId);
 
-    const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    const qc = new QueryClient({
+      defaultOptions: {
+        queries: { gcTime: Infinity },
+        mutations: { retry: false, gcTime: Infinity },
+      },
+    });
     const screen = render(
       <QueryClientProvider client={qc}>
         <ServiceProvider container={{ ...base, paymentRepository: payment }}>
@@ -96,7 +113,12 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
     const attempt = await payment.createAttempt("bk-1", "QRIS", "k2");
     useSessionStore.getState().setPaymentMethod("QRIS", attempt.attemptId);
 
-    const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    const qc = new QueryClient({
+      defaultOptions: {
+        queries: { gcTime: Infinity },
+        mutations: { retry: false, gcTime: Infinity },
+      },
+    });
     const screen = render(
       <QueryClientProvider client={qc}>
         <ServiceProvider container={{ ...base, paymentRepository: payment }}>
@@ -119,7 +141,12 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
     const attempt = await payment.createAttempt("bk-1", "QRIS", "k3");
     useSessionStore.getState().setPaymentMethod("QRIS", attempt.attemptId);
 
-    const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    const qc = new QueryClient({
+      defaultOptions: {
+        queries: { gcTime: Infinity },
+        mutations: { retry: false, gcTime: Infinity },
+      },
+    });
     const screen = render(
       <QueryClientProvider client={qc}>
         <ServiceProvider container={{ ...base, paymentRepository: payment }}>

@@ -118,6 +118,7 @@ describe("inTimeBucket", () => {
 
 describe("filterEvents — genre", () => {
   it.each([
+    ["Festival", ["a"]],
     ["Rock", ["a"]],
     ["Jazz", ["b"]],
     ["Elektronik", ["c"]],

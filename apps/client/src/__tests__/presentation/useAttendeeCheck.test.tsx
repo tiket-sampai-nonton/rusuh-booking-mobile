@@ -13,6 +13,12 @@ import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
 import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
 
+function attendeeVerdict(nik: string): AttendeeCheck["result"] {
+  if (nik.endsWith("00")) return "ALREADY_REGISTERED";
+  if (nik.endsWith("99")) return "CHECK_LIMIT_REACHED";
+  return "AVAILABLE";
+}
+
 const NIK_OK = "3171010101010001";
 const NIK_BLOCK = "3171010101010100"; // ...00 → ALREADY_REGISTERED
 const NIK_LIMIT = "3171010101010199"; // ...99 → CHECK_LIMIT_REACHED
@@ -20,18 +26,14 @@ const NIK_LIMIT = "3171010101010199"; // ...99 → CHECK_LIMIT_REACHED
 class FakeRepo implements BookingRepository {
   calls: string[] = [];
   async createSession(eventId: string): Promise<BookingSession> {
-    return { sessionId: "s", eventId, expiresAt: "", maxSelectable: 3 };
+    return { sessionId: "s", eventId, expiresAt: "", maxSelectable: 3, categories: [] };
   }
   async getCurrentSession(): Promise<BookingSession | null> {
     return null;
   }
   async checkAttendee(_s: string, nik: string): Promise<AttendeeCheck> {
     this.calls.push(nik);
-    const result: AttendeeCheck["result"] = nik.endsWith("00")
-      ? "ALREADY_REGISTERED"
-      : nik.endsWith("99")
-        ? "CHECK_LIMIT_REACHED"
-        : "AVAILABLE";
+    const result = attendeeVerdict(nik);
     return { nikMasked: "3***", result };
   }
   async setBuyer(): Promise<void> {}

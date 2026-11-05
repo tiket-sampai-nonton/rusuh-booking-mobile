@@ -1,10 +1,6 @@
 /** Browse screen prop + fragment types (RBT-031). */
 import type { EventSummary } from "@domain/repositories/event.repository";
 
-export interface BrowseTopBarProps {
-  readonly onHome: () => void;
-}
-
 export interface BrowseChipsProps {
   readonly genre: string;
   readonly time: string;

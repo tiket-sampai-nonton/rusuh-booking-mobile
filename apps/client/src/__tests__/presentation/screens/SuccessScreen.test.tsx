@@ -20,9 +20,21 @@ import { SuccessScreen } from "@presentation/screens/Success";
 import { useSessionStore } from "@presentation/stores/session-store";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
+const mockDownloadTickets = jest.fn(async () => undefined);
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
+jest.mock("@presentation/hooks/useETicketDownload", () => ({
+  useETicketDownload: () => ({ downloadTickets: mockDownloadTickets }),
+}));
+jest.mock("react-native-qrcode-svg", () => {
+  const ReactMock = require("react");
+  const Native = require("react-native");
+  function QrCodeMock(props: { value: string }) {
+    return ReactMock.createElement(Native.View, { testID: "success-qr", accessibilityLabel: props.value });
+  }
+  return { __esModule: true, default: QrCodeMock };
+});
 
 class StatusRepo implements PaymentRepository {
   constructor(private readonly attempt: PaymentAttempt) {}
@@ -50,7 +62,12 @@ function renderScreen(status: PaymentStatus, bookingId = "bk-1") {
     ...base,
     paymentRepository: new StatusRepo({ attemptId: "a1", bookingId, status }),
   };
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
+  const qc = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, gcTime: Infinity },
+      mutations: { gcTime: Infinity },
+    },
+  });
   return render(
     <QueryClientProvider client={qc}>
       <ServiceProvider container={container}>
@@ -65,11 +82,13 @@ describe("SuccessScreen (RBT-070)", () => {
     mockRouter.replace.mockReset();
     useSessionStore.getState().reset();
     useSessionStore.getState().setPaymentMethod("QRIS", "a1");
+    mockDownloadTickets.mockReset();
   });
 
-  it("shows the verifying state before the authoritative status resolves", () => {
+  it("shows the verifying state before the authoritative status resolves", async () => {
     const screen = renderScreen("AWAITING_PAYMENT");
     expect(screen.getByTestId("success-verifying")).toBeTruthy();
+    await waitFor(() => expect(screen.getByText("Menyiapkan tiket…")).toBeTruthy());
   });
 
   it("renders the order summary ONLY when verified PAID (orderId/qty/amount/masked NIK)", async () => {
@@ -114,13 +133,32 @@ describe("SuccessScreen (RBT-070)", () => {
     expect(screen.getByText("1 tiket")).toBeTruthy();
   });
 
-  it("the download action fires the share without throwing (RBT-071)", async () => {
+  it("downloads ticket references without reading the rendered native QR (RBT-071)", async () => {
     useSessionStore.getState().setOrderDetail("31****89", 1);
     const screen = renderScreen("PAID");
     await waitFor(() => expect(screen.getByTestId("success-download")).toBeTruthy());
-    // On web (jest default here RN is 'ios'); the handler is fire-and-forget —
-    // pressing must not throw. Platform default share is covered in its own test.
     expect(() => fireEvent.press(screen.getByTestId("success-download"))).not.toThrow();
+    await waitFor(() => expect(mockDownloadTickets).toHaveBeenCalledWith(
+      "bk-1", 1, ["RBT|bk-1|1"], undefined,
+    ));
+  });
+
+  it("generates one safe ticket reference per ticket", async () => {
+    useSessionStore.getState().setOrderDetail("31****89", 2);
+    const screen = renderScreen("PAID");
+    await waitFor(() => expect(screen.getByTestId("success-download")).toBeTruthy());
+    fireEvent.press(screen.getByTestId("success-download"));
+    await waitFor(() => expect(mockDownloadTickets).toHaveBeenCalledWith(
+      "bk-1", 2, ["RBT|bk-1|1", "RBT|bk-1|2"], undefined,
+    ));
+  });
+
+  it("uses the generic message for non-Error download failures", async () => {
+    mockDownloadTickets.mockRejectedValueOnce("disk unavailable");
+    const screen = renderScreen("PAID");
+    await waitFor(() => expect(screen.getByTestId("success-download")).toBeTruthy());
+    fireEvent.press(screen.getByTestId("success-download"));
+    await waitFor(() => expect(screen.getByText("E-tiket gagal disimpan. Coba lagi.")).toBeTruthy());
   });
 
   it("a non-PAID (FAILED) status redirects to the recovery screen", async () => {

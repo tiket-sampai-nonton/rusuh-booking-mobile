@@ -122,10 +122,13 @@ export function setBuyerUseAt(
   index: number,
   on: boolean,
 ): TicketRow[] {
-  return rows.map((row, i) => ({
-    ...row,
-    useBuyerNik: i === index ? on : on ? false : row.useBuyerNik,
-  }));
+  return rows.map((row, i) => {
+    let useBuyerNik = row.useBuyerNik;
+    if (i === index) useBuyerNik = on;
+    else if (on) useBuyerNik = false;
+
+    return { ...row, useBuyerNik };
+  });
 }
 
 /* ------------------------------------------------------------------ *

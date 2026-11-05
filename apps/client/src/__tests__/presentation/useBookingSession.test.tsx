@@ -22,6 +22,7 @@ const SESSION: BookingSession = {
   sessionId: "sess-1",
   eventId: "evt-1",
   expiresAt: "2026-12-01T00:05:00.000Z",
+  categories: [],
 };
 
 class FakeBookingRepo implements BookingRepository {
@@ -49,7 +50,10 @@ function wrapper(repo: BookingRepository) {
   const base = createContainer({ useMocks: true });
   const container: Container = { ...base, bookingRepository: repo };
   const qc = new QueryClient({
-    defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+    defaultOptions: {
+      mutations: { retry: false, gcTime: Infinity },
+      queries: { retry: false, gcTime: Infinity },
+    },
   });
   return function Wrapper({
     children,

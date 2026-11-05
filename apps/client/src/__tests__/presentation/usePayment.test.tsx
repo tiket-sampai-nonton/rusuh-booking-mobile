@@ -45,7 +45,12 @@ class FakeRepo implements PaymentRepository {
 function wrapper(repo: PaymentRepository) {
   const base = createContainer({ useMocks: true });
   const container: Container = { ...base, paymentRepository: repo };
-  const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+  const qc = new QueryClient({
+    defaultOptions: {
+      queries: { gcTime: Infinity },
+      mutations: { retry: false, gcTime: Infinity },
+    },
+  });
   return function Wrapper({
     children,
   }: {
@@ -142,8 +147,21 @@ describe("openSnapHandoff (platform branches)", () => {
     expect(openURL).toHaveBeenCalledWith("https://snap.mock/native");
   });
 
+  it("routes a native booking handoff to the encoded in-app payment WebView", async () => {
+    Object.defineProperty(RN.Platform, "OS", { value: "android", configurable: true });
+    jest.resetModules();
+    const push = jest.fn();
+    jest.doMock("expo-router", () => ({ router: { push } }));
+
+    await openSnapHandoff("https://snap.mock/native", "bk / 123");
+
+    expect(push).toHaveBeenCalledWith("/payment-webview/bk%20%2F%20123");
+    jest.dontMock("expo-router");
+  });
+
   it("routes an in-app relative path via the router (RBT-065 /snap)", async () => {
     // lazily require()'d inside openSnapHandoff; mock the module's router.push
+    jest.resetModules();
     const push = jest.fn();
     jest.doMock("expo-router", () => ({ router: { push } }));
     await openSnapHandoff("/snap/bk-1");

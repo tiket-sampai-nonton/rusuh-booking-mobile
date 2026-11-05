@@ -1,5 +1,5 @@
 /**
- * RBT-089 — V2 Brutalist Mono Browse Screen Styles
+ * RBT-089 —  Brutalist Mono Browse Screen Styles
  *
  * PROTOTYPE 05-browse.html EXACT COPY:
  * - White background (var(--white)), black ink (var(--black))
@@ -10,9 +10,10 @@
  * - Cards: grayscale→color on hover, 8px shadow offset
  * - No rounded corners anywhere
  */
-import { type DimensionValue, type ViewStyle } from 'react-native';
+import { type DimensionValue, type TextStyle, type ViewStyle } from 'react-native';
 
-import { v2Colors, v2Borders, v2SpacingSemantic } from '@presentation/theme';
+import { designColors, designBorders, designSpacingSemantic } from '@presentation/theme';
+import { interFonts } from '@presentation/theme/fonts';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LAYOUT
@@ -30,14 +31,124 @@ export const browseScrollContent = (bottom: number, isDesktop: boolean): ViewSty
     : {}),
 });
 
+export const browseRoot: ViewStyle = { flex: 1, backgroundColor: designColors.ground };
+export const browseScroll: ViewStyle = { flex: 1 };
+export const browseNativeScrollContent = (top: number): ViewStyle => ({ paddingTop: top });
+export const browseNativeMain: ViewStyle = { paddingHorizontal: 16 };
+export const browseHeroText = (isDesktop: boolean): TextStyle => {
+  const size = isDesktop ? 80 : 40;
+  return {
+    color: designColors.ground,
+    fontSize: size,
+    fontFamily: interFonts.black,
+    letterSpacing: -0.04 * size,
+    lineHeight: isDesktop ? 72 : 36,
+    textAlign: 'center',
+  };
+};
+export const browseCategoryHeading: TextStyle = {
+  color: designColors.ink,
+  fontSize: 24,
+  fontFamily: interFonts.black,
+  textTransform: 'uppercase',
+  letterSpacing: -0.48,
+};
+export const browseCategoryHeadingWrap: ViewStyle = { marginBottom: 32 };
+export const browseCategoryGrid: ViewStyle = { flexDirection: 'row', flexWrap: 'wrap', gap: 16 };
+export const browseCategoryLabel = (isActive: boolean): TextStyle => ({
+  color: isActive ? designColors.ground : designColors.ink,
+  fontFamily: interFonts.bold,
+  fontSize: 14,
+  textTransform: 'uppercase',
+});
+export const browseNativeHeader: ViewStyle = {
+  marginBottom: 8,
+  paddingVertical: 8,
+  paddingHorizontal: 0,
+  borderBottomWidth: 1,
+  borderBottomColor: designColors.ink,
+  borderStyle: 'dashed',
+};
+export const browseCountText: TextStyle = {
+  color: designColors.inkMuted,
+  fontFamily: interFonts.regular,
+  fontSize: 14,
+};
+export const browseCountValue: TextStyle = { color: designColors.ink, fontFamily: 'Inter_700Bold' };
+export const browseToolbarActions: ViewStyle = { flexDirection: 'row', gap: 16, alignItems: 'center' };
+export const browseFilterButton: ViewStyle = {
+  width: 36,
+  height: 36,
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderWidth: 2,
+  borderColor: designColors.ink,
+};
+export const browseNativeViewButton: ViewStyle = {
+  width: 36,
+  height: 36,
+  paddingVertical: 0,
+  paddingHorizontal: 0,
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+export const browseViewDivider: ViewStyle = { width: designBorders.standard, backgroundColor: designColors.ink };
+export const browseSortControl = {
+  borderWidth: 0,
+  backgroundColor: 'transparent',
+  fontFamily: 'Inter, sans-serif',
+  fontWeight: '500',
+  fontSize: 14,
+  cursor: 'pointer',
+  outlineWidth: 0,
+};
+export const browseLoadMorePressed: ViewStyle = { backgroundColor: designColors.ink };
+export const browseLoadMoreDisabled: ViewStyle = { opacity: 0.5 };
+export const browseLoadMoreLabel = (disabled: boolean): TextStyle => ({
+  color: disabled ? designColors.inkMuted : designColors.ink,
+  fontFamily: interFonts.bold,
+  fontSize: 14,
+  textTransform: 'uppercase',
+});
+export const browseNativeCategoryBar: ViewStyle = {
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  zIndex: 98,
+  height: 52,
+  backgroundColor: designColors.ground,
+  borderBottomWidth: 2,
+  borderBottomColor: designColors.ink,
+};
+export const browseNativeCategoryBarPosition = (top: number): ViewStyle => ({ top });
+export const browseNativeCategoryScrollContent: ViewStyle = {
+  paddingHorizontal: 16,
+  paddingVertical: 8,
+  gap: 8,
+};
+export const browseNativeCategoryButton = (active: boolean): ViewStyle => ({
+  paddingHorizontal: 16,
+  minHeight: 34,
+  justifyContent: 'center',
+  borderWidth: 2,
+  borderColor: designColors.ink,
+  backgroundColor: active ? designColors.ink : designColors.ground,
+});
+export const browseNativeCategoryLabel = (active: boolean): TextStyle => ({
+  color: active ? designColors.ground : designColors.ink,
+  fontFamily: interFonts.semiBold,
+  fontSize: 12,
+  textTransform: 'uppercase',
+});
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // HERO SECTION (prototype .hero — black bg with noise)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const browseHero: ViewStyle = {
-  backgroundColor: v2Colors.ink,
+  backgroundColor: designColors.ink,
   paddingTop: 96, // prototype: padding: 8rem 2rem 4rem
-  paddingHorizontal: v2SpacingSemantic.m,
+  paddingHorizontal: designSpacingSemantic.m,
   paddingBottom: 48,
   alignItems: 'center',
 };
@@ -52,10 +163,10 @@ export const browseHeroTitle: ViewStyle = {
 
 export const browseCategories: ViewStyle = {
   paddingVertical: 48,
-  paddingHorizontal: v2SpacingSemantic.m,
-  backgroundColor: v2Colors.ground,
-  borderBottomWidth: v2Borders.standard,
-  borderBottomColor: v2Colors.ink,
+  paddingHorizontal: designSpacingSemantic.m,
+  backgroundColor: designColors.ground,
+  borderBottomWidth: designBorders.standard,
+  borderBottomColor: designColors.ink,
 };
 
 export const browseCategoriesInner = (isDesktop: boolean): ViewStyle => ({
@@ -67,15 +178,15 @@ export const browseCategoriesInner = (isDesktop: boolean): ViewStyle => ({
 export const browseCategoryBtn: ViewStyle = {
   paddingVertical: 16,
   paddingHorizontal: 24,
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ink,
-  backgroundColor: v2Colors.ground,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
+  backgroundColor: designColors.ground,
   overflow: 'hidden',
 };
 
 export const browseCategoryBtnActive: ViewStyle = {
   ...browseCategoryBtn,
-  backgroundColor: v2Colors.ink,
+  backgroundColor: designColors.ink,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -84,7 +195,7 @@ export const browseCategoryBtnActive: ViewStyle = {
 
 export const browseMain = (isDesktop: boolean): ViewStyle => ({
   paddingVertical: 48,
-  paddingHorizontal: v2SpacingSemantic.m,
+  paddingHorizontal: designSpacingSemantic.m,
   maxWidth: isDesktop ? 1400 : undefined,
   width: '100%' as DimensionValue,
   alignSelf: 'center' as const,
@@ -101,27 +212,27 @@ export const browseHeader: ViewStyle = {
 
 export const browseViewToggle: ViewStyle = {
   flexDirection: 'row',
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ink,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
 };
 
 export const browseViewBtn: ViewStyle = {
   paddingVertical: 12,
   paddingHorizontal: 16,
-  backgroundColor: v2Colors.ground,
+  backgroundColor: designColors.ground,
 };
 
 export const browseViewBtnActive: ViewStyle = {
   ...browseViewBtn,
-  backgroundColor: v2Colors.ink,
+  backgroundColor: designColors.ink,
 };
 
 export const browseSortSelect: ViewStyle = {
   paddingVertical: 12,
   paddingHorizontal: 16,
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ink,
-  backgroundColor: v2Colors.ground,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
+  backgroundColor: designColors.ground,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -168,10 +279,16 @@ export const browseLoadMore: ViewStyle = {
 export const browseLoadMoreBtn: ViewStyle = {
   paddingVertical: 16,
   paddingHorizontal: 48,
-  backgroundColor: v2Colors.ground,
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ink,
+  backgroundColor: designColors.ground,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
 };
+
+export const browseLoadMoreButtonStyle = (pressed: boolean, disabled: boolean): ViewStyle[] => [
+  browseLoadMoreBtn,
+  ...(pressed ? [browseLoadMorePressed] : []),
+  ...(disabled ? [browseLoadMoreDisabled] : []),
+];
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // EMPTY / LOADING STATES
@@ -180,9 +297,9 @@ export const browseLoadMoreBtn: ViewStyle = {
 export const browseEmpty: ViewStyle = {
   marginTop: 32,
   padding: 48,
-  borderWidth: v2Borders.standard,
+  borderWidth: designBorders.standard,
   borderStyle: 'dashed',
-  borderColor: v2Colors.ink,
+  borderColor: designColors.ink,
   alignItems: 'center',
 };
 

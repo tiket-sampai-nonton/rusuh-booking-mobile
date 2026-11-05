@@ -5,6 +5,7 @@
  */
 import { fireEvent, render } from "@testing-library/react-native";
 import React from "react";
+import { Platform } from "react-native";
 
 import { ExpiredRecoveryScreen } from "@presentation/screens/ExpiredRecovery";
 
@@ -119,5 +120,14 @@ describe("ExpiredRecoveryScreen (RBT-064)", () => {
       <ExpiredRecoveryScreen resourceId="bk-1" reason="payment" status="FAILED" remainingMs={60_000} />,
     );
     expect(screen.queryByTestId("expired-retry")).toBeNull();
+  });
+
+  it("returns to Home from the native recovery screen", () => {
+    const originalPlatform = Platform.OS;
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "android" });
+    const screen = render(<ExpiredRecoveryScreen resourceId="hold-1" reason="hold" />);
+    fireEvent.press(screen.getByTestId("expired-home"));
+    expect(mockRouter.replace).toHaveBeenCalledWith("/");
+    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
   });
 });

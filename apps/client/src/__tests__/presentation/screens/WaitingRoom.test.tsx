@@ -1,11 +1,11 @@
 /**
  * RBT-043 / RBT-096 — Waiting room screen tests (RNTL).
  *
- * Updated for V2 Brutalist Mono design system (English copy).
+ * Updated for  Brutalist Mono design system (English copy).
  *
  * The two seams — useQueuePolling (RBT-042) and useAutoClaim (RBT-044) — are
  * mocked (jest.mock) so NO real polling / claim fires; the screen is driven by
- * the fake return values. Asserts the V2 prototype contract (06-waiting.html):
+ * the fake return values. Asserts the  prototype contract (06-waiting.html):
  *  - position ring + stats (position, ahead count, ETA);
  *  - zone banner renders the EXACT copy per GUARANTEED/POSSIBLE/NOT_ENOUGH;
  *  - the admit region is an aria-live (accessibilityLiveRegion) node that
@@ -23,7 +23,7 @@ import type { UseAutoClaimResult } from "@presentation/hooks/useAutoClaim";
 import type { QueueEntry } from "@domain/repositories/queue.repository";
 
 // --- Mock the two merged hooks: the screen must CONSUME, not rebuild them. ---
-const mockUseQueuePolling = jest.fn<QueuePollingView, [string, boolean?]>();
+const mockUseQueuePolling = jest.fn<QueuePollingView, [string, boolean?, string?]>();
 const mockUseAutoClaim = jest.fn<UseAutoClaimResult, [unknown]>();
 
 jest.mock("@presentation/hooks/useQueuePolling", () => ({
@@ -35,7 +35,7 @@ jest.mock("@presentation/hooks/useAutoClaim", () => ({
 }));
 
 // Mock reduced-motion so tests can flip the branch deterministically.
-const mockReducedMotion = jest.fn<boolean, []>();
+const mockReducedMotion = jest.fn<boolean | undefined, []>();
 jest.mock("react-native-reanimated", () => {
   const actual = jest.requireActual("react-native-reanimated/mock");
   return { ...actual, useReducedMotion: () => mockReducedMotion() };
@@ -64,11 +64,15 @@ function entry(over: Partial<QueueEntry> = {}): QueueEntry {
 function polling(over: Partial<QueuePollingView> = {}): QueuePollingView {
   return {
     entry: entry(),
+    admissionRatePerMin: 1400,
     isLoading: false,
     isError: false,
+    isConnectionLost: false,
+    isReconnected: false,
     error: null,
     isSettled: false,
     leave: jest.fn(async () => undefined),
+    refetch: jest.fn(async () => ({ data: undefined })),
     ...over,
   };
 }
@@ -95,14 +99,14 @@ describe("WaitingRoomScreen — position + stats", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ position: 42 }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     expect(screen.getByTestId("waiting-position")).toHaveTextContent("42");
-    // V2 uses "Your Position" label
+    //  uses "Your Position" label
     expect(screen.getByTestId("waiting-position")).toBeTruthy();
   });
 
   it("shows ETA in minutes/seconds format", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ position: 42 }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    // V2 shows ETA as minutes/seconds blocks instead of "ahead" count
+    //  shows ETA as minutes/seconds blocks instead of "ahead" count
     expect(screen.getByTestId("waiting-eta")).toBeTruthy();
     expect(screen.getByText("Menit")).toBeTruthy();
     expect(screen.getByText("Detik")).toBeTruthy();
@@ -157,7 +161,7 @@ describe("WaitingRoomScreen — admit live region", () => {
     );
     mockUseAutoClaim.mockReturnValue(claim({ claiming: true }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    // V2 uses "waiting-admitted" as the wrapper testID
+    //  uses "waiting-admitted" as the wrapper testID
     expect(screen.getByTestId("waiting-admitted")).toBeTruthy();
     expect(screen.getByText(/Giliran Anda/i)).toBeTruthy();
     expect(screen.queryByTestId("waiting-redirect")).toBeNull();
@@ -221,6 +225,65 @@ describe("WaitingRoomScreen — terminal + error states", () => {
     expect(screen.getByTestId("waiting-error")).toBeTruthy();
   });
 
+  it("uses the safe error copy when the failed query has no Error object", () => {
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: undefined, isError: true, error: null }),
+    );
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+    expect(screen.getByTestId("waiting-error")).toHaveTextContent(/Terjadi kendala\. Silakan coba lagi\./);
+  });
+
+  it("keeps the last queue position visible while a poll is timing out", () => {
+    mockUseQueuePolling.mockReturnValue(
+      polling({ isError: true, isConnectionLost: true, error: new Error("timeout") }),
+    );
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+    expect(screen.getByTestId("waiting-active")).toBeTruthy();
+    expect(screen.getByTestId("waiting-position")).toHaveTextContent("42");
+    expect(screen.getByTestId("waiting-network-status")).toHaveTextContent(
+      "Koneksi terputus",
+      { exact: false },
+    );
+  });
+
+  it("keeps the waiting room open and retries the same queue after the first timeout", () => {
+    const refetch = jest.fn(async () => ({ data: undefined }));
+    mockUseQueuePolling.mockReturnValue(
+      polling({
+        entry: undefined,
+        isError: true,
+        isConnectionLost: true,
+        error: new Error("timeout"),
+        refetch,
+      }),
+    );
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+    expect(screen.getByTestId("waiting-reconnecting")).toBeTruthy();
+    expect(screen.getByTestId("waiting-network-status")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("waiting-reconnecting-state"));
+    expect(refetch).toHaveBeenCalledTimes(1);
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("rejoins the existing event from a polling error", () => {
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: undefined, isError: true, error: new Error("boom") }),
+    );
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+    fireEvent.press(screen.getByTestId("waiting-error-state"));
+    expect(mockReplace).toHaveBeenCalledWith("/events/evt-1");
+  });
+
+  it("returns to Home when a claim error cannot identify the prior event", () => {
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
+    );
+    mockUseAutoClaim.mockReturnValue(claim({ errorState: "UNKNOWN", error: new Error("unknown") }));
+    render(<WaitingRoomScreen queueId="q-1" eventId="" />);
+    fireEvent.press(screen.getByTestId("waiting-claim-error-state"));
+    expect(mockReplace).toHaveBeenCalledWith("/");
+  });
+
   it("renders a loading state while the first poll is in flight", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: undefined, isLoading: true }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
@@ -252,6 +315,15 @@ describe("WaitingRoomScreen — leave action", () => {
     expect(leave).toHaveBeenCalledTimes(1);
     expect(mockReplace).toHaveBeenCalledWith("/");
   });
+
+  it("closes the leave dialog when the user chooses to stay in the queue", () => {
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+    fireEvent.press(screen.getByTestId("waiting-leave"));
+    expect(screen.getByTestId("waiting-leave-modal")).toBeTruthy();
+    fireEvent.press(screen.getByText("Tetap Mengantre"));
+    expect(screen.queryByTestId("waiting-leave-modal")).toBeNull();
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
 });
 
 describe("WaitingRoomScreen — guards + reduced motion", () => {
@@ -263,6 +335,8 @@ describe("WaitingRoomScreen — guards + reduced motion", () => {
     );
     // The poller must not be driven with an empty id.
     expect(mockUseQueuePolling).toHaveBeenCalledWith("", expect.any(Boolean));
+    fireEvent.press(screen.getByText("Jelajahi Event"));
+    expect(mockReplace).toHaveBeenCalledWith("/browse");
   });
 
   it("passes the reduced-motion flag to the poller and renders without crashing", () => {
@@ -270,5 +344,11 @@ describe("WaitingRoomScreen — guards + reduced motion", () => {
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     expect(mockUseQueuePolling).toHaveBeenCalledWith("q-1", true);
     expect(screen.getByTestId("waiting-position")).toBeTruthy();
+  });
+
+  it("defaults to standard motion when the platform has no reduced-motion preference", () => {
+    mockReducedMotion.mockReturnValue(undefined);
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+    expect(mockUseQueuePolling).toHaveBeenCalledWith("q-1", false);
   });
 });

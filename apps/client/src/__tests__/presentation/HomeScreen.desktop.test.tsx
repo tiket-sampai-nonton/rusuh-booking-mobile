@@ -20,6 +20,34 @@ import { renderWithProviders } from "@shared/test-fixtures/render-with-providers
 const mockRouter = { push: jest.fn() };
 jest.mock("expo-router", () => ({ useRouter: () => mockRouter }));
 
+// This suite exercises Home navigation/layout; animation details are covered
+// by the carousel and modal component suites.
+jest.mock("react-native-reanimated", () => {
+  const actual = jest.requireActual("react-native-reanimated/mock");
+  return { ...actual, useReducedMotion: () => true };
+});
+jest.mock("@presentation/components/design-system/HeroCarousel", () => {
+  const ReactMock = require("react");
+  const { View } = require("react-native");
+  return {
+    HeroCarousel: () => ReactMock.createElement(View, { testID: "hero-carousel" }),
+  };
+});
+jest.mock("@presentation/components/auth/LoginModal", () => {
+  const ReactMock = require("react");
+  const { Pressable, Text, TextInput, View } = require("react-native");
+  return {
+    LoginModal: ({ visible, onClose }: { visible: boolean; onClose: () => void }) => visible
+      ? ReactMock.createElement(
+        View,
+        { testID: "login-card" },
+        ReactMock.createElement(TextInput, { testID: "login-email-input" }),
+        ReactMock.createElement(Pressable, { onPress: onClose, testID: "login-close" }, ReactMock.createElement(Text, null, "Tutup")),
+      )
+      : null,
+  };
+});
+
 // Force the desktop-web layout for HomeScreen (all isDesktop branches).
 jest.mock("@presentation/hooks/useResponsive", () => ({
   useResponsive: () => ({
@@ -51,7 +79,7 @@ describe("HomeScreen (web desktop)", () => {
     // Desktop navigation follows the guest menu: Beranda and Browse.
     await waitFor(() => screen.getByTestId("nav-home"));
     expect(screen.getByTestId("nav-browse")).toBeTruthy();
-    // V2: Multi-column CardGrid uses v2-event-card-<id> testIDs
+    // : Multi-column CardGrid uses v2-event-card-<id> testIDs
     fireEvent.press(screen.getByTestId("v2-event-card-evt-1"));
     expect(mockRouter.push).toHaveBeenCalledWith("/events/evt-1");
     // Drive the scroll handler (hero parallax) — covers the onScroll path.
@@ -68,7 +96,7 @@ describe("HomeScreen (web desktop)", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    // V2: wait for filter button (testID="filter-btn")
+    // : wait for filter button (testID="filter-btn")
     await waitFor(() => screen.getByTestId("filter-btn"));
     fireEvent.press(screen.getByTestId("filter-btn"));
     // The popup appears; no navigation yet (prototype opens a dialog).
@@ -85,10 +113,10 @@ describe("HomeScreen (web desktop)", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    // V2: header CTA is testID="header-cta"
+    // : header CTA is testID="header-cta"
     await waitFor(() => screen.getByTestId("header-cta"));
     fireEvent.press(screen.getByTestId("header-cta"));
-    // V2 LoginModal renders the email step: card + input.
+    //  LoginModal renders the email step: card + input.
     expect(screen.getByTestId("login-card")).toBeTruthy();
     expect(screen.getByTestId("login-email-input")).toBeTruthy();
     expect(mockRouter.push).not.toHaveBeenCalled();

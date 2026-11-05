@@ -24,7 +24,10 @@ function wrapper(eventRepository: EventRepository) {
   const base = createContainer({ useMocks: true });
   const container = { ...base, eventRepository };
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: {
+      queries: { retry: false, gcTime: Infinity },
+      mutations: { gcTime: Infinity },
+    },
   });
   return function Wrapper({ children }: { children: ReactNode }) {
     return (

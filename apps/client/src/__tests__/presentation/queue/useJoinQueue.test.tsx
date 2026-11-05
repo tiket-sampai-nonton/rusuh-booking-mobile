@@ -39,6 +39,9 @@ class FakeQueueRepository implements QueueRepository {
   async getStatus(queueId: string): Promise<QueueEntry> {
     return { queueId, eventId: "evt-1", position: 1, status: "WAITING" };
   }
+  async getQueueStatus(): Promise<{ admissionRatePerMin?: number }> {
+    return {};
+  }
   async leave(_queueId: string): Promise<void> {
     void _queueId;
   }
@@ -52,7 +55,10 @@ function makeWrapper(repo: QueueRepository, storage: QueueMembershipStorage) {
     queueMembership: storage,
   };
   const queryClient = new QueryClient({
-    defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+    defaultOptions: {
+      mutations: { retry: false, gcTime: Infinity },
+      queries: { retry: false, gcTime: Infinity },
+    },
   });
   return function Wrapper({
     children,

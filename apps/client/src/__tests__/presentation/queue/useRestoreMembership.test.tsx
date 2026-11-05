@@ -26,7 +26,7 @@ import { ServiceProvider } from "@providers/service-context";
 import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 import { useRestoreMembership } from "@presentation/hooks/useRestoreMembership";
 
-const mockRouter = { push: jest.fn() };
+let mockRouter = { push: jest.fn() };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
@@ -38,6 +38,9 @@ class FakeQueueRepository implements QueueRepository {
   }
   async getStatus(queueId: string): Promise<QueueEntry> {
     return { queueId, eventId: "evt-1", position: 3, status: this.statusToReturn };
+  }
+  async getQueueStatus(): Promise<{ admissionRatePerMin?: number }> {
+    return {};
   }
   async leave(_queueId: string): Promise<void> {
     void _queueId;
@@ -52,7 +55,10 @@ function makeWrapper(repo: QueueRepository, storage: QueueMembershipStorage) {
     queueMembership: storage,
   };
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    defaultOptions: {
+      queries: { retry: false, gcTime: Infinity },
+      mutations: { retry: false, gcTime: Infinity },
+    },
   });
   return function Wrapper({
     children,
@@ -68,9 +74,10 @@ function makeWrapper(repo: QueueRepository, storage: QueueMembershipStorage) {
 }
 
 describe("useRestoreMembership", () => {
-  beforeEach(() => mockRouter.push.mockReset());
+  beforeEach(() => { mockRouter = { push: jest.fn() }; });
 
   it("resumes an ACTIVE membership and navigates once to the waiting room", async () => {
+    const initialRouter = mockRouter;
     const repo = new FakeQueueRepository();
     repo.statusToReturn = "WAITING";
     const storage = new InMemoryQueueMembership();
@@ -88,9 +95,12 @@ describe("useRestoreMembership", () => {
     // Membership still present (active slot is not cleared).
     expect(await storage.load()).not.toBeNull();
 
-    // A re-render must not re-navigate (navigate-once guard).
+    // A new router reference re-runs the effect; the queue-id guard still prevents duplicate navigation.
+    const nextRouter = { push: jest.fn() };
+    mockRouter = nextRouter;
     rerender({});
-    expect(mockRouter.push).toHaveBeenCalledTimes(1);
+    expect(initialRouter.push).toHaveBeenCalledTimes(1);
+    expect(nextRouter.push).not.toHaveBeenCalled();
   });
 
   it("clears a TERMINAL membership and does NOT navigate", async () => {
