@@ -18,7 +18,7 @@
 | Check | Result |
 |---|---|
 | Jest coverage | **185 suites passed; 1,096 tests passed** |
-| Per-file coverage | **418 files measured**; every file is at least 90% for statements, functions, and branches. Minimums: statements 94.44%, functions 90%, branches 90%. Aggregate: statements 99.52%, functions 99.78%, branches 97.38%. |
+| Per-file coverage | **418 files measured**; every file is at least 90% for statements, lines, functions, and branches. Minimums: statements 94.44%, lines 94.44%, functions 90%, branches 90%. Aggregate: statements 99.52%, lines 99.78%, functions 99.78%, branches 97.38%. See [per-file coverage summary](coverage-summary.md) and [CSV](coverage-per-file.csv). |
 | TypeScript | `npm run typecheck` passed |
 | ESLint | `npm run lint` passed |
 | Web export | `npx expo export --platform web` passed; 29 static routes generated |
@@ -32,9 +32,10 @@ The `android/`, `ios/`, and `web/` folders contain the final captures and downlo
 ### Android emulator
 
 - Profile authentication and signed-out state: [authenticated profile](android/profile-authenticated-registration.png), [signed-out profile](android/profile-signed-out.png).
-- Browse, event detail, queue admission, and Checkout: [Browse](android/browse-current.png), [event detail](android/event-detail-checkout-flow.png), [queue admission](android/post-queue-admission.png), [checked consent](android/checkout-consent-checked.png).
+- Browse, event detail, queue admission, and Checkout: [fresh Browse replay](android/browse-replay-current.png), [event detail](android/event-detail-checkout-flow.png), [queue admission](android/post-queue-admission.png), [checked consent](android/checkout-consent-checked.png).
+- A fresh replay confirmed Event Detail → queue admission → Checkout: [Event Detail live audit](android/event-detail-live-audit.png), [Checkout with empty form](android/checkout-after-admission-live-replay.png).
 - Checkout expiry and recovery: [expired Checkout](android/checkout-expired-after-submit-flow.png), [requeue destination](android/expired-requeue-destination.png), [Browse after recovery](android/expired-requeue-browse-destination.png).
-- The live Checkout hold expired before this replay reached Payment/SNAP. The automated flow tests and Web captures cover those later states; a complete fresh Android purchase run remains unverified in this session.
+- The fresh Checkout hold expired before buyer/attendee entry could be completed and the flow submitted to Payment/SNAP. No screenshot containing entered identity data was retained. Automated flow tests and Web captures cover the later states; a complete fresh Android purchase run remains unverified in this session.
 
 ### iOS simulator
 
