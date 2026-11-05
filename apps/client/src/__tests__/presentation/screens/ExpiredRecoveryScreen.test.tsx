@@ -1,7 +1,7 @@
 /**
  * RBT-064 — ExpiredRecoveryScreen: failure/expiry recovery UI + routing.
  * FAILED+payable → Retry (→ /payment); not-payable/expired → Re-queue
- * (→ /waiting or /browse). Reason-specific copy.
+ * (→ /events or /browse). Reason-specific copy.
  */
 import { fireEvent, render } from "@testing-library/react-native";
 import React from "react";
@@ -34,7 +34,7 @@ describe("ExpiredRecoveryScreen (RBT-064)", () => {
     expect(mockRouter.replace).toHaveBeenCalledWith("/payment/bk-1");
   });
 
-  it("FAILED + payable: the secondary action re-queues to the waiting room", () => {
+  it("FAILED + payable: the secondary action returns to the event to rejoin", () => {
     const screen = render(
       <ExpiredRecoveryScreen
         resourceId="bk-1"
@@ -46,7 +46,7 @@ describe("ExpiredRecoveryScreen (RBT-064)", () => {
       />,
     );
     fireEvent.press(screen.getByTestId("expired-requeue"));
-    expect(mockRouter.replace).toHaveBeenCalledWith("/waiting/evt-7");
+    expect(mockRouter.replace).toHaveBeenCalledWith("/events/evt-7");
   });
 
   it("BOOKING_NOT_PAYABLE: hides Retry, offers re-queue only", () => {
@@ -63,7 +63,7 @@ describe("ExpiredRecoveryScreen (RBT-064)", () => {
     );
     expect(screen.queryByTestId("expired-retry")).toBeNull();
     fireEvent.press(screen.getByTestId("expired-requeue"));
-    expect(mockRouter.replace).toHaveBeenCalledWith("/waiting/evt-7");
+    expect(mockRouter.replace).toHaveBeenCalledWith("/events/evt-7");
   });
 
   it("deadline passed: hides Retry even for FAILED", () => {

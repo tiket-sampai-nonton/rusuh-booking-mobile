@@ -59,9 +59,9 @@ describe("isRetryable", () => {
 });
 
 describe("requeueRoute", () => {
-  it("payment/hold with an eventId → the event's waiting room", () => {
-    expect(requeueRoute("payment", "evt-7")).toBe("/waiting/evt-7");
-    expect(requeueRoute("hold", "evt-7")).toBe("/waiting/evt-7");
+  it("payment/hold with an eventId → the event page to create a new queue entry", () => {
+    expect(requeueRoute("payment", "evt-7")).toBe("/events/evt-7");
+    expect(requeueRoute("hold", "evt-7")).toBe("/events/evt-7");
   });
   it("queue reason → browse", () => {
     expect(requeueRoute("queue", "evt-7")).toBe("/browse");
