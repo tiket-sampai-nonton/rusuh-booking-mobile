@@ -8,7 +8,10 @@
 import type {
   QueueEntry,
   QueueRepository,
+  QueueStatusSnapshot,
 } from "@domain/repositories/queue.repository";
+
+const MOCK_ADMISSION_RATE_PER_MIN = 1400;
 
 export class MockQueueRepository implements QueueRepository {
   private readonly positions = new Map<string, number>();
@@ -38,6 +41,10 @@ export class MockQueueRepository implements QueueRepository {
     const next = current > 0 ? current - 1 : 0;
     this.positions.set(queueId, next);
     return this.entry(queueId, next);
+  }
+
+  async getQueueStatus(_eventId: string): Promise<QueueStatusSnapshot> {
+    return { admissionRatePerMin: MOCK_ADMISSION_RATE_PER_MIN };
   }
 
   async leave(queueId: string): Promise<void> {

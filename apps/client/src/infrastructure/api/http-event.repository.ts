@@ -2,8 +2,8 @@
  * HttpEventRepository — infrastructure/api (ARCHITECTURE §3; RBT-010).
  *
  * Implements the `EventRepository` domain port over the `HttpClient` transport
- * port. Unwraps the `{meta,data}` envelope and maps wire DTOs → domain entities.
- * Depends on NO concrete client (axios/fetch) — bound at the composition root.
+ * port. Unwraps the `{meta,data}` envelope, syncs the contract server clock, and
+ * maps wire DTOs → domain entities. Depends on NO concrete HTTP client.
  */
 
 import type {
@@ -11,16 +11,24 @@ import type {
   EventRepository,
   EventSummary,
 } from "@domain/repositories/event.repository";
+import type { ServerClock } from "@domain/services/server-clock";
 import { unwrap } from "@infrastructure/api/envelope";
 import { toEventDetail, toEventSummary } from "@infrastructure/api/dto-mappers";
 import type { HttpClient } from "@infrastructure/http/http-client";
 
 export class HttpEventRepository implements EventRepository {
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly serverClock: ServerClock,
+  ) {}
 
   async listEvents(): Promise<readonly EventSummary[]> {
     const res = await this.http.request({ method: "GET", url: "events" });
-    const data = unwrap<{ events: Parameters<typeof toEventSummary>[0][] }>(res);
+    const data = unwrap<{
+      events: Parameters<typeof toEventSummary>[0][];
+      serverTime: string;
+    }>(res);
+    this.serverClock.sync(data.serverTime);
     return data.events.map(toEventSummary);
   }
 

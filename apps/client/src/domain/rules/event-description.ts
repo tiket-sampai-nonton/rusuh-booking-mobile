@@ -8,7 +8,8 @@
  * (`lineup: string[]`, `terms: string`) and the prototype shape
  * (`lineup: {stage,acts}[]`, `terms: string[]`). This module normalises the bag
  * into a typed, UI-ready view; everything missing or mistyped degrades to a safe
- * empty default so the screen never throws on malformed data.
+ * empty default so the screen never throws on malformed data. The local mock
+ * fixture may also supply performer `{name,role,avatar}` records.
  */
 
 /** A pricing category + its availability (prototype `.cat`). */
@@ -24,14 +25,21 @@ export interface EventCategory {
 /** Normalised, UI-ready view of the opaque description record. */
 export interface ParsedDescription {
   readonly longDesc: string;
-  readonly lineup: readonly string[];
+  readonly lineup: readonly ParsedLineupItem[];
   readonly terms: readonly string[];
   readonly bannerImage?: string;
   readonly categories: readonly EventCategory[];
-  /** V2: Optional subtitle shown below hero title. */
+  /** : Optional subtitle shown below hero title. */
   readonly subtitle?: string;
-  /** V2: Gallery image URLs for the event detail page. */
+  /** : Gallery image URLs for the event detail page. */
   readonly gallery?: readonly string[];
+}
+
+/** Performer details parsed from the event's opaque description payload. */
+export interface ParsedLineupItem {
+  readonly name: string;
+  readonly role: string;
+  readonly avatar?: string;
 }
 
 const EMPTY: ParsedDescription = {
@@ -56,24 +64,33 @@ function asFiniteNumber(v: unknown): number {
   return typeof v === "number" && isFinite(v) ? v : 0;
 }
 
-/** Normalise a lineup entry: a non-empty string, or `{stage,acts}` → "stage — acts". */
-function lineupEntry(v: unknown): string | null {
+/** Normalise supported lineup records without inventing performer data. */
+function lineupEntry(v: unknown): ParsedLineupItem | null {
   if (typeof v === "string") {
     const s = v.trim();
-    return s.length > 0 ? s : null;
+    return s.length > 0 ? { name: s, role: "Performer" } : null;
   }
   if (isRecord(v)) {
+    const name = asString(v.name).trim();
+    if (name.length > 0) {
+      const avatar = asString(v.avatar).trim();
+      return {
+        name,
+        role: asString(v.role).trim() || "Performer",
+        ...(avatar.length > 0 ? { avatar } : {}),
+      };
+    }
     const stage = asString(v.stage).trim();
     const acts = asString(v.acts).trim();
     const joined = [stage, acts].filter((p) => p.length > 0).join(" — ");
-    return joined.length > 0 ? joined : null;
+    return joined.length > 0 ? { name: joined, role: "Performer" } : null;
   }
   return null;
 }
 
-function parseLineup(v: unknown): string[] {
+function parseLineup(v: unknown): ParsedLineupItem[] {
   if (!Array.isArray(v)) return [];
-  const out: string[] = [];
+  const out: ParsedLineupItem[] = [];
   for (const item of v) {
     const entry = lineupEntry(item);
     if (entry !== null) out.push(entry);

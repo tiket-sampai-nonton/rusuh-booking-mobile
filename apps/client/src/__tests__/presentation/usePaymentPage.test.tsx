@@ -47,7 +47,10 @@ function wrapper(repo: PaymentRepository) {
   const base = createContainer({ useMocks: true });
   const container: Container = { ...base, paymentRepository: repo };
   const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: {
+      queries: { retry: false, gcTime: Infinity },
+      mutations: { gcTime: Infinity },
+    },
   });
   return function Wrapper({
     children,

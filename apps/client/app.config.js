@@ -13,6 +13,7 @@ const config = {
     android: { package: "com.tiketsampainonton.rusuhbooking" },
     web: {
         bundler: "metro",
+        favicon: "./assets/favicon.png",
         // RBT-033: static rendering so public routes (/, /browse, /events/[id],
         // /history) emit indexable HTML per route (D6.2 — never ship a public
         // route as "single"). Transactional routes are marked noindex via Head.

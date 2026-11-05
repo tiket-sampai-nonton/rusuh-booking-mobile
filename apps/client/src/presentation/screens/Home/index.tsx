@@ -1,5 +1,5 @@
 /**
- * RBT-096 — V2 Brutalist Mono Home Screen (Re-implementation)
+ * RBT-096 —  Brutalist Mono Home Screen (Re-implementation)
  *
  * 1:1 of prototype 01-home.html. MASTER-SPEC §3.1.
  *
@@ -19,21 +19,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LoginModal } from '@presentation/components/auth/LoginModal';
 import { FilterModal, type FilterValue } from '@presentation/components/FilterModal';
-import {
-  V2ToastProvider,
-  V2Loader,
-  V2ScrollProgress,
-  V2Header,
-  V2HeroCarousel,
-  V2BottomNav,
-} from '@presentation/components/v2';
+import { ToastProvider, Loader, ScrollProgress, Header, HeroCarousel, BottomNav } from '@presentation/components/design-system';
 import { useEvents } from '@presentation/hooks/useEvents';
 import { useResponsive } from '@presentation/hooks/useResponsive';
 import { useAccountStore } from '@presentation/stores/account-store';
-import { v2Colors } from '@presentation/theme';
 
-import { V2HomeSections } from './fragments/V2HomeSections';
+
+import { HomeSections } from './fragments/HomeSections';
 import { HomeError } from './fragments/HomeStates';
+import { homeScrollContent, componentStyles } from './style';
 
 export function HomeScreen() {
   const router = useRouter();
@@ -71,19 +65,19 @@ export function HomeScreen() {
 
   // Show loading screen (prototype loader with bouncing letters)
   if (isLoading) {
-    return <V2Loader visible label="RUSUH" />;
+    return <Loader visible label="RUSUH" />;
   }
 
   return (
-    <V2ToastProvider>
-      <View style={{ flex: 1, backgroundColor: v2Colors.ground }}>
+    <ToastProvider>
+      <View style={componentStyles.elementFlex0}>
         {/* Scroll progress bar - fixed top (prototype .scroll-progress) */}
-        {isWeb && <V2ScrollProgress />}
+        {isWeb && <ScrollProgress />}
 
         <Animated.ScrollView
           ref={scrollRef}
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: bottomPadding }}
+          style={componentStyles.elementFlex1}
+          contentContainerStyle={homeScrollContent(bottomPadding)}
           onScroll={onScroll}
           scrollEventThrottle={16}
           testID="home-scroll"
@@ -92,7 +86,7 @@ export function HomeScreen() {
 
           {/* Hero Carousel - Full viewport (prototype .hero) */}
           {data && data.upcoming.length > 0 && (
-            <V2HeroCarousel
+            <HeroCarousel
               events={data.upcoming.slice(0, 3)}
               onBook={goToEvent}
               onSeeAll={goBrowse}
@@ -102,7 +96,7 @@ export function HomeScreen() {
 
           {/* Main sections: Events grid, Categories, Stats, How-to, Testimonials, Newsletter, Footer */}
           {data && (
-            <V2HomeSections
+            <HomeSections
               data={data}
               isDesktop={isDesktop}
               columns={gridColumns}
@@ -111,12 +105,13 @@ export function HomeScreen() {
               onSeeAll={goBrowse}
               onFeaturedLayout={() => undefined}
               onHistoryLayout={() => undefined}
+              onNavigate={(href) => router.push(href as Href)}
             />
           )}
         </Animated.ScrollView>
 
         {/* Fixed Header - slides in from top (prototype .header) */}
-        <V2Header
+        <Header
           topInset={insets.top}
           showLinks={showNavLinks}
           links={[
@@ -137,8 +132,8 @@ export function HomeScreen() {
         <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
         <FilterModal visible={filterOpen} onClose={() => setFilterOpen(false)} onApply={applyFilter} />
 
-        {/* Bottom Navigation (native only, handled internally by V2BottomNav) */}
-        <V2BottomNav
+        {/* Bottom Navigation (native only, handled internally by BottomNav) */}
+        <BottomNav
           activeRoute="home"
           isLoggedIn={Boolean(profile)}
           onNavigate={(route) => {
@@ -149,6 +144,6 @@ export function HomeScreen() {
           }}
         />
       </View>
-    </V2ToastProvider>
+    </ToastProvider>
   );
 }

@@ -28,24 +28,70 @@ describe("parseDescription — defensive rich-description parsing", () => {
 
   it("reads a string[] lineup (fixture shape)", () => {
     const d = parseDescription({ lineup: ["Band A", "Band B"] });
-    expect(d.lineup).toEqual(["Band A", "Band B"]);
+    expect(d.lineup).toEqual([
+      { name: "Band A", role: "Performer" },
+      { name: "Band B", role: "Performer" },
+    ]);
   });
 
-  it("maps an object[] lineup ({stage,acts}) to strings (prototype shape)", () => {
+  it("maps the prototype {stage,acts} lineup shape to performer names", () => {
     const d = parseDescription({
       lineup: [{ stage: "Main", acts: "Band A" }, { acts: "DJ C" }],
     });
-    expect(d.lineup).toEqual(["Main — Band A", "DJ C"]);
+    expect(d.lineup).toEqual([
+      { name: "Main — Band A", role: "Performer" },
+      { name: "DJ C", role: "Performer" },
+    ]);
+  });
+
+  it("preserves mock/API lineup details when provided", () => {
+    const d = parseDescription({
+      lineup: [{ name: "Ahmad Dhani", role: "Keyboards", avatar: "https://example.test/a.png" }],
+    });
+    expect(d.lineup).toEqual([
+      { name: "Ahmad Dhani", role: "Keyboards", avatar: "https://example.test/a.png" },
+    ]);
+  });
+
+  it("uses safe performer defaults and drops empty lineup records", () => {
+    const d = parseDescription({
+      lineup: [
+        { name: "  Band C  ", role: "  ", avatar: "  " },
+        { name: "   ", stage: "  ", acts: " " },
+      ],
+    });
+    expect(d.lineup).toEqual([{ name: "Band C", role: "Performer" }]);
   });
 
   it("drops empty / non-string lineup entries", () => {
     const d = parseDescription({ lineup: ["Band A", "", 7, null] });
-    expect(d.lineup).toEqual(["Band A"]);
+    expect(d.lineup).toEqual([{ name: "Band A", role: "Performer" }]);
   });
 
   it("wraps a single string terms value into an array", () => {
     const d = parseDescription({ terms: "Wajib KTP." });
     expect(d.terms).toEqual(["Wajib KTP."]);
+  });
+
+  it("drops blank terms and empty gallery entries", () => {
+    const d = parseDescription({ terms: "  ", gallery: ["", "  ", 1] });
+    expect(d.terms).toEqual([]);
+    expect(d.gallery).toBeUndefined();
+  });
+
+  it("parses gallery images and a non-empty subtitle", () => {
+    const d = parseDescription({
+      gallery: ["https://example.test/a.jpg", "  ", 2],
+      subtitle: "  Tur dua hari  ",
+    });
+    expect(d.gallery).toEqual(["https://example.test/a.jpg"]);
+    expect(d.subtitle).toBe("Tur dua hari");
+  });
+
+  it("keeps optional subtitle and gallery absent when their values are malformed", () => {
+    const d = parseDescription({ subtitle: 10, gallery: "not-an-array" });
+    expect(d.subtitle).toBeUndefined();
+    expect(d.gallery).toBeUndefined();
   });
 
   it("reads a string[] terms value", () => {

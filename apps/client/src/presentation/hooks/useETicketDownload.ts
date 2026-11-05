@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { toString as renderQrSvg } from "qrcode";
 
 import { useServices } from "@providers/service-context";
 
@@ -6,8 +7,10 @@ function utf8Base64(value: string): string {
   return btoa(unescape(encodeURIComponent(value)));
 }
 
+const htmlEscapes: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+
 function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char] ?? char);
+  return value.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
 }
 
 function safeFileId(value: string): string {
@@ -18,11 +21,17 @@ function safeFileId(value: string): string {
 export function useETicketDownload() {
   const { fileShare } = useServices();
   return {
-    downloadTickets: useCallback(async (bookingId: string, ticketCount: number, qrImages: readonly string[], eventName?: string, ticketCodes?: readonly string[]) => {
+    downloadTickets: useCallback(async (bookingId: string, ticketCount: number, qrPayloads: readonly string[], eventName?: string, ticketCodes?: readonly string[]) => {
+      const qrImages = await Promise.all(Array.from({ length: ticketCount }, async (_, index) => {
+        const qrPayload = qrPayloads[index];
+        if (!qrPayload) return "";
+        const svg = await renderQrSvg(qrPayload, { type: "svg", margin: 1 });
+        return utf8Base64(svg);
+      }));
       const tickets = Array.from({ length: ticketCount }, (_, index) => `
         <article class="ticket">
           <h2>E-Tiket ${index + 1} / ${ticketCount}</h2>
-          <img alt="Kode QR tiket ${index + 1}" src="data:image/png;base64,${qrImages[index] ?? ""}" />
+          <img alt="Kode QR tiket ${index + 1}" src="data:image/svg+xml;base64,${qrImages[index] ?? ""}" />
           <p class="code">${escapeHtml(ticketCodes?.[index] ?? `RBT|${bookingId}|${index + 1}`)}</p>
           ${eventName ? `<h3>${escapeHtml(eventName)}</h3>` : ""}
           <p>Tunjukkan QR ini di gerbang masuk.</p>

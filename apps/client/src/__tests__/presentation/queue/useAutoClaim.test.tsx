@@ -40,6 +40,7 @@ class FakeBookingRepository implements BookingRepository {
       sessionId: `sess-${this.seq}`,
       eventId,
       expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      categories: [],
     };
   }
   async getCurrentSession(): Promise<BookingSession | null> {
@@ -62,7 +63,10 @@ function makeWrapper(repo: BookingRepository) {
   const base = createContainer({ useMocks: true });
   const container: Container = { ...base, bookingRepository: repo };
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    defaultOptions: {
+      queries: { retry: false, gcTime: Infinity },
+      mutations: { retry: false, gcTime: Infinity },
+    },
   });
   return function Wrapper({
     children,
@@ -78,6 +82,17 @@ function makeWrapper(repo: BookingRepository) {
 }
 
 describe("useAutoClaim", () => {
+  it("waits for an authoritative queue status before claiming", async () => {
+    const repo = new FakeBookingRepository();
+    const { result } = renderHook(
+      () => useAutoClaim({ eventId: "evt-1" }),
+      { wrapper: makeWrapper(repo) },
+    );
+
+    await waitFor(() => expect(result.current.claiming).toBe(false));
+    expect(repo.createSessionCalls).toEqual([]);
+  });
+
   it("auto-claims ONCE on ADMITTED and exposes the sessionId", async () => {
     const repo = new FakeBookingRepository();
     const onClaimed = jest.fn();

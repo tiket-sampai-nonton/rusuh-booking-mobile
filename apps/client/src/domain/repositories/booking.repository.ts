@@ -11,6 +11,15 @@
  */
 
 /** A booking session (the time-boxed hold within which the user selects). */
+export interface BookingCategory {
+  readonly categoryId: string;
+  readonly code: string;
+  readonly name: string;
+  /** Minor-unit IDR integer from the Booking contract. */
+  readonly priceMinor: number;
+  readonly available: number;
+}
+
 export interface BookingSession {
   readonly sessionId: string;
   readonly eventId: string;
@@ -19,6 +28,8 @@ export interface BookingSession {
   readonly serverTime?: string;
   /** Max tickets this session may select (quota rule). */
   readonly maxSelectable?: number;
+  /** Ticket categories and current prices supplied by the Booking contract. */
+  readonly categories: readonly BookingCategory[];
 }
 
 /** Result of an attendee-NIK availability check (quota enforcement). */

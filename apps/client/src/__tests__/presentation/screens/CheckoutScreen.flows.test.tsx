@@ -9,11 +9,32 @@ import type {
   BookingSession,
 } from "@domain/repositories/booking.repository";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
+import { BOOKING_CATEGORY_FIXTURE } from "@shared/test-fixtures/booking-categories.fixture";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
+jest.mock("@presentation/hooks/useServerCountdown", () => {
+  const { useEffect, useRef } = jest.requireActual("react");
+  return {
+    useServerCountdown: ({ expiresAtIso, serverTimeIso, onExpire }: { expiresAtIso?: string; serverTimeIso?: string; onExpire?: () => void }) => {
+      const deadline = expiresAtIso ? Date.parse(expiresAtIso) : 0;
+      const serverNow = serverTimeIso ? Date.parse(serverTimeIso) : deadline;
+      const expired = Boolean(expiresAtIso && deadline <= serverNow);
+      const fired = useRef(false);
+      useEffect(() => {
+        if (!expired) {
+          fired.current = false;
+        } else if (!fired.current) {
+          fired.current = true;
+          onExpire?.();
+        }
+      }, [expired, onExpire]);
+      return { remainingMs: Math.max(0, deadline - serverNow), expired };
+    },
+  };
+});
 
 // eslint-disable-next-line import/first
 import { CheckoutScreen } from "@presentation/screens/Checkout";
@@ -26,6 +47,7 @@ const SESSION: BookingSession = {
   expiresAt: "2999-01-01T00:00:00.000Z",
   serverTime: "2026-12-01T00:00:00.000Z",
   maxSelectable: 3,
+  categories: BOOKING_CATEGORY_FIXTURE,
 };
 
 function bookingRepo(session: BookingSession | null): BookingRepository {
@@ -51,16 +73,18 @@ function bookingRepo(session: BookingSession | null): BookingRepository {
 }
 
 /** A repo whose checkAttendee mirrors the mock's suffix rule (...00 blocks). */
+function attendeeVerdict(nik: string): AttendeeCheck["result"] {
+  if (nik.endsWith("00")) return "ALREADY_REGISTERED";
+  if (nik.endsWith("99")) return "CHECK_LIMIT_REACHED";
+  return "AVAILABLE";
+}
+
 function verdictRepo(session: BookingSession | null): BookingRepository {
   return {
     ...bookingRepo(session),
     checkAttendee: async (_s, nik): Promise<AttendeeCheck> => ({
       nikMasked: "31****01",
-      result: nik.endsWith("00")
-        ? "ALREADY_REGISTERED"
-        : nik.endsWith("99")
-          ? "CHECK_LIMIT_REACHED"
-          : "AVAILABLE",
+      result: attendeeVerdict(nik),
     }),
   };
 }
@@ -74,16 +98,16 @@ const LOGGED_IN = {
 
 describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", () => {
   beforeEach(() => {
-    // Auto-advancing fake timers: tame the countdown interval + the attendee
-    // debounce so neither spins real loops accumulating heap across mounts.
-    jest.useFakeTimers({ advanceTimers: true });
+    // The countdown hook is mocked here; use waitFor to flush attendee debounce
+    // and async repository responses through Testing Library's act boundaries.
+    jest.useFakeTimers();
     mockRouter.push.mockReset();
     mockRouter.replace.mockReset();
     useAccountStore.getState().clearProfile(); // default: guest
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    jest.clearAllTimers();
     jest.useRealTimers();
   });
 

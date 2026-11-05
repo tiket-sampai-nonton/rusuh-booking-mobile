@@ -2,6 +2,7 @@
 import type { ReactNode } from "react";
 
 import type { TicketRow } from "@domain/rules/checkout";
+import type { BookingCategory } from "@domain/repositories/booking.repository";
 
 export interface CheckoutScreenProps {
   readonly sessionId: string;
@@ -52,6 +53,7 @@ export interface TicketItemProps {
   readonly onUseBuyer: (on: boolean) => void;
   /** Attendee-NIK availability status for this row (RBT-052 AC2). */
   readonly status?: RowCheckStatus;
+  readonly categories: readonly BookingCategory[];
 }
 
 export interface ConsentGateProps {

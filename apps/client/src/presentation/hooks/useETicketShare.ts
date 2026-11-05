@@ -69,7 +69,6 @@ function escapeHtml(s: string): string {
 
 /** Web default: open a print window with the manifest. */
 function defaultOpenPrint(html: string): void {
-  if (typeof globalThis === "undefined") return;
   const w = (globalThis as { open?: (u?: string) => unknown }).open?.("");
   const win = w as
     | { document?: { write: (s: string) => void; close: () => void }; print?: () => void }

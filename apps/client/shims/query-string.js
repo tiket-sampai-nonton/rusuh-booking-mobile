@@ -19,7 +19,7 @@
  * bridged.
  */
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- deliberate CJS->ESM interop bridge
-const qs = require("query-string/base.js");
+const qs = require("../node_modules/query-string/base.js");
 
 // `query-string/base.js` is the ESM module; under Metro/Babel esModule interop
 // its named exports appear either flat or under `.default`. Normalize both.

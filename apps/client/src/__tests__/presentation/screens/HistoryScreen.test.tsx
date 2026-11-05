@@ -112,7 +112,7 @@ describe("HistoryScreen", () => {
       },
     });
     await waitFor(() => screen.getByTestId("history-error"));
-    // V2: error title is "Gagal Memuat Event"
+    // : error title is "Gagal Memuat Event"
     expect(screen.getByText("Gagal Memuat Event")).toBeTruthy();
     expect(screen.getByText("Jaringan bermasalah")).toBeTruthy();
   });
@@ -122,7 +122,7 @@ describe("HistoryScreen", () => {
       container: { eventRepository: repo([ev("future", "Future Fest", 30)]) },
     });
     await waitFor(() => screen.getByTestId("history-empty"));
-    // V2: empty state title is "Belum Ada Arsip"
+    // : empty state title is "Belum Ada Arsip"
     expect(screen.getByText("Belum Ada Arsip")).toBeTruthy();
   });
 
@@ -130,7 +130,7 @@ describe("HistoryScreen", () => {
     renderWithProviders(<HistoryScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    // V2 uses v2-event-card-<id> testIDs
+    //  uses v2-event-card-<id> testIDs
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
     // both past events show
     expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
@@ -143,7 +143,7 @@ describe("HistoryScreen", () => {
       container: { eventRepository: repo(CATALOG) },
     });
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
-    // V2 History screen shows the Indonesian "Riwayat" section title.
+    //  History screen shows the Indonesian "Riwayat" section title.
     expect(screen.getByText("Riwayat")).toBeTruthy();
   });
 
@@ -160,7 +160,7 @@ describe("HistoryScreen", () => {
     renderWithProviders(<HistoryScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    // V2 uses header-logo testID for home navigation
+    //  uses header-logo testID for home navigation
     await waitFor(() => screen.getByTestId("header-logo"));
     fireEvent.press(screen.getByTestId("header-logo"));
     expect(mockRouter.push).toHaveBeenCalledWith("/");
@@ -177,9 +177,13 @@ describe("HistoryScreen", () => {
     renderWithProviders(<HistoryScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    // V2 uses v2-event-card-<id> testIDs
+    //  uses v2-event-card-<id> testIDs
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
     expect(screen.getByTestId("history-grid")).toBeTruthy();
     expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("history-nav-browse"));
+    expect(mockRouter.push).toHaveBeenCalledWith("/browse");
+    fireEvent.press(screen.getByTestId("history-nav-tickets"));
+    expect(mockRouter.push).toHaveBeenCalledTimes(1);
   });
 });

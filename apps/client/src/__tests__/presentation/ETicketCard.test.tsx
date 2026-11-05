@@ -32,4 +32,30 @@ describe("ETicketCard (RBT-071)", () => {
     );
     expect(screen.queryByText(/\d{16}/)).toBeNull();
   });
+
+  it("shows event details with safe fallbacks when optional details are missing", () => {
+    const screen = render(
+      <ETicketCard bookingId="bk-2" index={0} total={1} eventName="Rusuh Fest" />,
+    );
+    expect(screen.getByText("Rusuh Fest")).toBeTruthy();
+    expect(screen.getByText("Pemegang tiket · ••••")).toBeTruthy();
+    expect(screen.getByText("Tanggal menyusul · Lokasi menyusul")).toBeTruthy();
+  });
+
+  it("renders provided event and attendee details", () => {
+    const screen = render(
+      <ETicketCard
+        bookingId="bk-3"
+        index={1}
+        total={2}
+        eventName="Rusuh Fest"
+        venue="Gelora Bung Karno"
+        startsAt="15 November 2026"
+        attendeeName="Penonton QA"
+        attendeeNikMasked="31****99"
+      />,
+    );
+    expect(screen.getByText("Penonton QA · 31****99")).toBeTruthy();
+    expect(screen.getByText("15 November 2026 · Gelora Bung Karno")).toBeTruthy();
+  });
 });

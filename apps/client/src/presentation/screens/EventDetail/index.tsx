@@ -1,10 +1,10 @@
 /**
- * EventDetail V2 PageScreen — V2 Brutalist Mono Design
+ * EventDetail  PageScreen —  Brutalist Mono Design
  *
  * MATCHES: `.genesis/prototype/v2-mobile/02-event-detail.html` (native)
  * MATCHES: `.oil-ui/v2/02-event-detail.html` (web)
  *
- * V2 Changes:
+ *  Changes:
  * - WHITE background (not dark theme)
  * - Grayscale images with color on hover
  * - 2px black borders (NO border-radius)
@@ -34,31 +34,32 @@ import { eventImage } from "@domain/rules/event-image";
 import { formatDateID, formatTimeID } from "@domain/services/date-format";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
+import { MAX_TICKETS } from "@domain/rules/checkout";
 import { useJoinQueue } from "@presentation/hooks/useJoinQueue";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import { Block } from "./fragments/Block";
 import { Categories } from "./fragments/Categories";
-import { DetailBackground, V2Header, V2Steps } from "./fragments/DetailChrome";
+import { DetailBackground, Header, Steps } from "./fragments/DetailChrome";
 import { DetailHero } from "./fragments/DetailHero";
 import { DetailError, DetailLoading } from "./fragments/DetailStates";
 import { FloatingCTA } from "./fragments/FloatingCTA";
-import { Gallery, DEMO_GALLERY } from "./fragments/Gallery";
+import { Gallery } from "./fragments/Gallery";
 import { InfoCard } from "./fragments/InfoCard";
 import { Lightbox } from "./fragments/Lightbox";
-import { Lineup, DEMO_LINEUP } from "./fragments/Lineup";
+import { Lineup } from "./fragments/Lineup";
 import { TrustBox } from "./fragments/TrustBox";
-import { Venue, DEMO_VENUE } from "./fragments/Venue";
-import type { EventDetailScreenProps, LightboxState, LineupItem } from "./interface";
-import { v2DetailScrollContent, v2DetailStyles as styles } from "./style";
+import { Venue } from "./fragments/Venue";
+import type { EventDetailScreenProps, LightboxState } from "./interface";
+import { designDetailScrollContent, designDetailStyles as styles } from "./style";
 import { CheckIcon } from "@presentation/components/ArrowIcon";
-import { v2Colors } from "@presentation/theme";
+import { designColors } from "@presentation/theme";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HERO STATUS LABEL
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/** Hero status pill copy (V2 prototype: `statusLabel`). */
+/** Hero status pill copy ( prototype: `statusLabel`). */
 function heroStatusLabel(status: string): string {
   switch (status) {
     case "AVAILABLE":
@@ -132,7 +133,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
 
   // Loading state
   if (isLoading) {
-    return <DetailLoading onBack={goHome} />;
+    return <DetailLoading />;
   }
 
   // Error state
@@ -163,34 +164,18 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   ) {
     chips.push(`${event.remainingTickets.toLocaleString("id-ID")} tiket tersedia`);
   }
-  chips.push("Maks 3 tiket / NIK");
+  chips.push(`Maks ${MAX_TICKETS} tiket / NIK`);
 
-  // Parse lineup from description or use demo data
-  const lineup: LineupItem[] =
-    desc.lineup.length > 0
-      ? desc.lineup.map((name) => ({ name, role: "Performer" }))
-      : DEMO_LINEUP;
+  const galleryImages = desc.gallery ?? [];
 
-  // Parse gallery from description or use demo data
-  const galleryImages = desc.gallery?.length ? desc.gallery : DEMO_GALLERY;
-
-  // Parse venue info from event or use demo
-  const venueInfo = event.venue
-    ? {
-        name: event.venue.split("·")[0]?.trim() ?? event.venue,
-        address: event.venue.includes("·")
-          ? event.venue.split("·").slice(1).join("·").trim()
-          : "",
-        mapImage: undefined as string | undefined,
-        mapsUrl: undefined as string | undefined,
-      }
-    : DEMO_VENUE;
+  // Use venue details from the event. Missing venue data stays visibly missing.
+  const venueInfo = createVenueInfo(event.venue);
 
   return (
     <ScreenFade>
       <DetailBackground testID="event-detail-screen">
         {/* Fixed Header */}
-        <V2Header
+        <Header
           onBack={goHome}
           onShare={handleShare}
           isScrolled={isScrolled}
@@ -198,14 +183,14 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
 
         {/* Scrollable Content */}
         <ScrollView
-          contentContainerStyle={v2DetailScrollContent(isDesktop)}
+          contentContainerStyle={designDetailScrollContent(isDesktop)}
           testID="detail-scroll"
           showsVerticalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}
         >
           {/* Flow Steps Indicator (web only - hidden via styles on native) */}
-          <V2Steps activeStep={1} />
+          <Steps activeStep={1} />
 
           {/* Hero Section (Grayscale + Ken Burns/Settle) */}
           <DetailHero
@@ -240,18 +225,22 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
 
             {/* Lineup Grid/Scroll */}
             <Block label="Pengisi Acara">
-              <Lineup items={lineup} />
+              <Lineup items={desc.lineup} />
             </Block>
 
             {/* Both native and web share these event information sections. */}
             <>
                 <Block label="Lokasi">
-                  <Venue
-                    name={venueInfo.name}
-                    address={venueInfo.address}
-                    mapImage={venueInfo.mapImage}
-                    mapsUrl={venueInfo.mapsUrl}
-                  />
+                  {venueInfo ? (
+                    <Venue
+                      name={venueInfo.name}
+                      address={venueInfo.address}
+                      mapImage={venueInfo.mapImage}
+                      mapsUrl={venueInfo.mapsUrl}
+                    />
+                  ) : (
+                    <Text style={styles.description}>Lokasi akan diumumkan.</Text>
+                  )}
                 </Block>
 
                 <Block label="Galeri">
@@ -263,7 +252,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
                     <View style={styles.termsList}>
                       {desc.terms.map((t) => (
                         <View key={t} style={styles.termsItem}>
-                          <CheckIcon color={v2Colors.ink} size={14} />
+                          <CheckIcon color={designColors.ink} size={14} />
                           <Text style={styles.termsText}>{t}</Text>
                         </View>
                       ))}
@@ -302,4 +291,15 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
       </DetailBackground>
     </ScreenFade>
   );
+}
+
+function createVenueInfo(venue?: string) {
+  if (!venue) return undefined;
+  const [venueName, ...addressParts] = venue.split("·");
+  return {
+    name: venueName.trim(),
+    address: addressParts.join("·").trim(),
+    mapImage: undefined as string | undefined,
+    mapsUrl: undefined as string | undefined,
+  };
 }

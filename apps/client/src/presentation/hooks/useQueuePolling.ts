@@ -18,9 +18,10 @@
  * is RBT-043 — neither is built here.
  */
 import { useQuery, type Query } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ObserveQueue } from "@application/queue/observe-queue.use-case";
+import { ObserveQueueStatus } from "@application/queue/observe-queue-status.use-case";
 import { LeaveQueue } from "@application/queue/leave-queue.use-case";
 import type { QueueEntry } from "@domain/repositories/queue.repository";
 import { pollIntervalMs } from "@domain/rules/queue-polling";
@@ -34,8 +35,14 @@ import { useServices } from "@providers/service-context";
 export interface QueuePollingView {
   /** Latest queue entry (undefined until the first poll resolves). */
   readonly entry?: QueueEntry;
+  /** Event-level throughput from the public server status document. */
+  readonly admissionRatePerMin?: number;
   readonly isLoading: boolean;
   readonly isError: boolean;
+  /** A poll failed after retries; cached position remains renderable. */
+  readonly isConnectionLost: boolean;
+  /** Brief confirmation after a previously failed poll succeeds again. */
+  readonly isReconnected: boolean;
   readonly error: Error | null;
   /**
    * True once the entry has settled (terminal OR admitted) — the poller has
@@ -44,6 +51,32 @@ export interface QueuePollingView {
   readonly isSettled: boolean;
   /** Leave the waiting room (abandons the slot). */
   readonly leave: () => Promise<void>;
+  /** Retry the same queue ID without leaving the waiting room. */
+  readonly refetch: () => Promise<unknown>;
+}
+
+interface QueuePollData {
+  readonly entry: QueueEntry;
+  readonly admissionRatePerMin?: number;
+}
+
+const RECONNECTED_FEEDBACK_DURATION_MS = 2500;
+
+export function isRecoverableConnectionError(error: Error | null): boolean {
+  if (!error) return false;
+  const message = error.message.toLowerCase();
+  const name = error.name.toLowerCase();
+  const code = (error as Error & { code?: unknown }).code;
+  if (/timeout|timed out|network|fetch failed|failed to fetch|abort/.test(`${name} ${message}`)) {
+    return true;
+  }
+  if (typeof code === 'string' && /timeout|network|abort|econnreset/.test(code.toLowerCase())) {
+    return true;
+  }
+
+  const httpStatus = (error as Error & { httpStatus?: unknown }).httpStatus;
+  return typeof httpStatus === 'number' &&
+    (httpStatus === 408 || httpStatus === 429 || httpStatus >= 500);
 }
 
 /**
@@ -76,38 +109,80 @@ export function computeRefetchInterval(
 export function useQueuePolling(
   queueId: string,
   reducedMotion = false,
+  eventId?: string,
 ): QueuePollingView {
   const { queueRepository } = useServices();
+  const hadConnectionError = useRef(false);
+  const [isReconnected, setIsReconnected] = useState(false);
 
   // One use-case instance per repository binding (stable across re-renders).
-  const { observe, leaveQueue } = useMemo(
+  const { observe, observeStatus, leaveQueue } = useMemo(
     () => ({
       observe: new ObserveQueue(queueRepository),
+      observeStatus: new ObserveQueueStatus(queueRepository),
       leaveQueue: new LeaveQueue(queueRepository),
     }),
     [queueRepository],
   );
 
-  const query = useQuery<QueueEntry, Error>({
-    queryKey: ["queue", queueId],
-    queryFn: () => observe.execute(queueId),
+  const query = useQuery<QueuePollData, Error>({
+    queryKey: ["queue", queueId, eventId],
+    queryFn: async () => {
+      const entry = await observe.execute(queueId);
+      if (!eventId) return { entry };
+
+      try {
+        const status = await observeStatus.execute(eventId);
+        return { entry, admissionRatePerMin: status.admissionRatePerMin };
+      } catch {
+        // The estimate is optional; preserve the live queue state if its public
+        // status document is temporarily unavailable.
+        return { entry };
+      }
+    },
     enabled: queueId.length > 0,
     // The SINGLE adaptive poller. Stop on terminal/admitted; else the jittered
     // server-honoured wait. TanStack cancels this interval on unmount.
-    refetchInterval: (query: Query<QueueEntry, Error>) =>
-      computeRefetchInterval(query.state.data, reducedMotion),
+    refetchInterval: (query: Query<QueuePollData, Error>) =>
+      computeRefetchInterval(query.state.data?.entry, reducedMotion),
+    // Web can immediately resume after an `online` event. Native keeps the
+    // server-paced interval active and catches up on the next successful poll.
+    refetchOnReconnect: true,
   });
 
-  const entry = query.data;
+  const isConnectionLost = query.isError && isRecoverableConnectionError(query.error);
+
+  useEffect(() => {
+    if (isConnectionLost) {
+      hadConnectionError.current = true;
+      setIsReconnected(false);
+      return;
+    }
+    if (hadConnectionError.current && query.isSuccess) {
+      hadConnectionError.current = false;
+      setIsReconnected(true);
+      const timer = setTimeout(
+        () => setIsReconnected(false),
+        RECONNECTED_FEEDBACK_DURATION_MS,
+      );
+      return () => clearTimeout(timer);
+    }
+  }, [isConnectionLost, query.isSuccess]);
+
+  const entry = query.data?.entry;
   const isSettled =
     entry !== undefined && (isTerminal(entry.status) || isAdmitted(entry.status));
 
   return {
     entry,
+    admissionRatePerMin: query.data?.admissionRatePerMin,
     isLoading: query.isLoading,
     isError: query.isError,
+    isConnectionLost,
+    isReconnected,
     error: query.error,
     isSettled,
     leave: () => leaveQueue.execute(queueId),
+    refetch: query.refetch,
   };
 }

@@ -20,7 +20,7 @@
  */
 import { Platform, useWindowDimensions } from "react-native";
 
-import { v2Layout } from "@presentation/theme";
+import { designLayout } from "@presentation/theme";
 
 export interface Responsive {
   readonly isWeb: boolean;
@@ -59,15 +59,17 @@ export function useResponsive(): Responsive {
       height,
       gridColumns: 1,
       detailTwoCol: false,
-      headerHeight: v2Layout.headerHeightMobile,
+      headerHeight: designLayout.headerHeightMobile,
       heroHeightVh: 70,
-      bottomBarHeight: v2Layout.bottomBarHeight,
-      tapTarget: v2Layout.tapTarget,
+      bottomBarHeight: designLayout.bottomBarHeight,
+      tapTarget: designLayout.tapTarget,
     };
   }
 
   // Web: responsive based on viewport width
-  const gridColumns: 1 | 2 | 3 = width > 900 ? 3 : width > 620 ? 2 : 1;
+  let gridColumns: 1 | 2 | 3 = 1;
+  if (width > 620) gridColumns = 2;
+  if (width > 900) gridColumns = 3;
   const isDesktop = width >= 960;
 
   return {
@@ -78,9 +80,9 @@ export function useResponsive(): Responsive {
     height,
     gridColumns,
     detailTwoCol: width > 820,
-    headerHeight: isDesktop ? v2Layout.headerHeight : v2Layout.headerHeightMobile,
+    headerHeight: isDesktop ? designLayout.headerHeight : designLayout.headerHeightMobile,
     heroHeightVh: isDesktop ? 100 : 70,
     bottomBarHeight: 0, // Web uses top nav, no bottom bar
-    tapTarget: v2Layout.tapTarget,
+    tapTarget: designLayout.tapTarget,
   };
 }

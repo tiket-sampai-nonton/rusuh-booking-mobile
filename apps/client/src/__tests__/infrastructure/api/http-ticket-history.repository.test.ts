@@ -44,4 +44,51 @@ describe("HttpTicketHistoryRepository", () => {
       headers: { Authorization: "Bearer access-token" },
     });
   });
+
+  it("uses contract defaults for incomplete booking rows and omits absent auth/cursor", async () => {
+    const http = {
+      request: jest.fn().mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: { meta: { code: 0 }, data: { bookings: [{}, { bookingId: "booking-2" }] } },
+      }),
+    } as unknown as HttpClient;
+    const tokenStorage = { load: jest.fn().mockResolvedValue(null) } as unknown as TokenStorage;
+    const repository = new HttpTicketHistoryRepository(http, tokenStorage);
+
+    await expect(repository.listMyBookings()).resolves.toEqual({
+      bookings: [{
+        bookingId: "booking-2",
+        publicRef: "booking-2",
+        eventName: "Event",
+        status: "REVIEW",
+        amountMinor: 0,
+        createdAt: undefined,
+      }],
+      nextCursor: undefined,
+    });
+    expect(http.request).toHaveBeenCalledWith({
+      method: "GET",
+      url: "me/bookings?limit=20",
+      headers: undefined,
+    });
+  });
+
+  it("returns an empty list when the response omits bookings and reads tickets without a token", async () => {
+    const http = {
+      request: jest.fn()
+        .mockResolvedValueOnce({ status: 200, headers: {}, data: { meta: { code: 0 }, data: {} } })
+        .mockResolvedValueOnce({ status: 200, headers: {}, data: { meta: { code: 0 }, data: { bookingId: "booking-3", tickets: [] } } }),
+    } as unknown as HttpClient;
+    const tokenStorage = { load: jest.fn().mockResolvedValue(null) } as unknown as TokenStorage;
+    const repository = new HttpTicketHistoryRepository(http, tokenStorage);
+
+    await expect(repository.listMyBookings()).resolves.toEqual({ bookings: [], nextCursor: undefined });
+    await expect(repository.getBookingTickets("booking-3")).resolves.toMatchObject({ bookingId: "booking-3", tickets: [] });
+    expect(http.request).toHaveBeenLastCalledWith({
+      method: "GET",
+      url: "bookings/booking-3/tickets",
+      headers: undefined,
+    });
+  });
 });

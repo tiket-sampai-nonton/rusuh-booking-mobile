@@ -1,7 +1,7 @@
 /**
  * Checkout PageScreen (folder index) — RBT-051 item-list slice.
  *
- * V2 Brutalist Mono implementation matching 03-checkout.html:
+ *  Brutalist Mono implementation matching 03-checkout.html:
  * - Progress steps bar at top (4 steps: Pilih, Detail, Bayar, Selesai)
  * - Numbered sections with black boxes (1, 2, 3)
  * - 2px solid borders, no rounded corners
@@ -16,22 +16,9 @@ import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PlusIcon } from "@presentation/components/ArrowIcon";
 
-import {
-  appendRow,
-  effectiveCap,
-  isAttendeeBlocked,
-  isAttendeeWarning,
-  isCheckoutReady,
-  isValidNik,
-  maskNik,
-  patchRowAt,
-  removeRowAt,
-  setBuyerUseAt,
-  type AttendeeCheckResult,
-  type TicketRow,
-} from "@domain/rules/checkout";
+import { appendRow, effectiveCap, isAttendeeBlocked, isAttendeeWarning, isCheckoutReady, isValidNik, maskNik, patchRowAt, removeRowAt, setBuyerUseAt, type AttendeeCheckResult, type TicketRow } from "@domain/rules/checkout";
 import { ScreenFade } from "@presentation/components/ScreenFade";
-import { v2 } from "@presentation/theme";
+import { designColors } from "@presentation/theme";
 import { WarningIcon } from "@presentation/components/ArrowIcon";
 import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
 import { useResponsive } from "@presentation/hooks/useResponsive";
@@ -39,10 +26,7 @@ import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession"
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
 import { useHoldBooking } from "@presentation/hooks/useHoldBooking";
 import { useSetBuyer } from "@presentation/hooks/useSetBuyer";
-import {
-  prefillFromProfile,
-  useAccountStore,
-} from "@presentation/stores/account-store";
+import { prefillFromProfile, useAccountStore } from "@presentation/stores/account-store";
 import { useSessionStore } from "@presentation/stores/session-store";
 import { useServices } from "@providers/service-context";
 
@@ -56,7 +40,8 @@ import { LeaveConfirm } from "./fragments/LeaveConfirm";
 import { ProgressSteps } from "./fragments/ProgressSteps";
 import { TicketItem } from "./fragments/TicketItem";
 import type { CheckoutScreenProps, RowCheckStatus } from "./interface";
-import { checkoutScrollContent } from "./style";
+import { checkoutScrollContent, componentStyles } from "./style";
+import { addTicketButtonStyle } from './style';
 
 /** Map a resolved NIK verdict (+ pending flag) to the row's display status. */
 function rowStatus(
@@ -90,7 +75,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const [buyerNik, setBuyerNik] = useState("");
   // Prefill the email from the account on first render when logged in (AC1).
   const [buyerEmail, setBuyerEmail] = useState(prefill.emailMasked ?? "");
-  const [rows, setRows] = useState<TicketRow[]>([emptyRow()]);
+  const [rows, setRows] = useState<TicketRow[]>([emptyRow("")]);
   const [consent, setConsent] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
 
@@ -108,11 +93,28 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     clock: serverClock,
     expiresAtIso: session?.expiresAt,
     serverTimeIso: session?.serverTime,
-    onExpire: () => router.replace(`/expired/${sessionId}` as Href),
+    onExpire: () =>
+      router.replace(
+        `/expired/${sessionId}?reason=hold&eventId=${encodeURIComponent(session?.eventId ?? "")}` as Href,
+      ),
   });
 
   // Guests must tick the inline consent; logged-in users already consented.
   const consentGiven = isGuest ? consent : true;
+
+  useEffect(() => {
+    const defaultCategoryId = session?.categories[0]?.categoryId;
+    if (!defaultCategoryId) return;
+    setRows((current) => {
+      let changed = false;
+      const next = current.map((row) => {
+        if (row.categoryId) return row;
+        changed = true;
+        return { ...row, categoryId: defaultCategoryId };
+      });
+      return changed ? next : current;
+    });
+  }, [session?.categories]);
 
   const ready = useMemo(
     () =>
@@ -128,8 +130,8 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   );
 
   const totalMinor = useMemo(
-    () => rows.reduce((sum, r) => sum + categoryPrice(r.categoryId), 0),
-    [rows],
+    () => rows.reduce((sum, row) => sum + categoryPrice(row.categoryId, session?.categories ?? []), 0),
+    [rows, session?.categories],
   );
 
   // Debounced attendee-NIK availability checks (AC2): request for each valid
@@ -142,7 +144,10 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   }, [rows, buyerNik, request]);
 
   // Row mutations delegate to the pure domain rules (cap / min-1 / single-use).
-  const addRow = (): void => setRows((r) => appendRow(r, emptyRow(), cap));
+  const addRow = (): void =>
+    setRows((current) =>
+      appendRow(current, emptyRow(session?.categories[0]?.categoryId ?? ""), cap),
+    );
   const removeRow = (i: number): void => setRows((r) => removeRowAt(r, i));
   const patchRow = (i: number, patch: Partial<TicketRow>): void =>
     setRows((r) => patchRowAt(r, i, patch));
@@ -186,18 +191,10 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           <Section title="Data Pembeli" number={1}>
             {prefill.fromAccount ? (
               <View
-                style={{
-                  marginTop: 4,
-                  alignSelf: "flex-start",
-                  borderWidth: 2,
-                  borderColor: v2.success,
-                  backgroundColor: v2.ground,
-                  paddingHorizontal: 12,
-                  paddingVertical: 5,
-                }}
+                style={componentStyles.buyerPrefillBadge}
                 testID="prefill-badge"
               >
-                <Text style={{ color: v2.success }} className="text-2xs font-v2 font-bold uppercase">
+                <Text style={componentStyles.buyerPrefillBadgeText} className="text-2xs font-v2 font-bold uppercase">
                   Terisi dari akun
                 </Text>
               </View>
@@ -237,6 +234,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
                   onPatch={(p) => patchRow(i, p)}
                   onUseBuyer={(on) => setUseBuyer(i, on)}
                   status={rowStatus(checks[nik], !!pending[nik])}
+                  categories={session?.categories ?? []}
                 />
               );
             })}
@@ -247,38 +245,19 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               disabled={rows.length >= cap}
               onPress={addRow}
               testID="add-ticket"
-              style={{
-                marginTop: 16,
-                alignItems: "center",
-                borderWidth: 2,
-                borderStyle: "dashed",
-                borderColor: v2.ink,
-                backgroundColor: v2.ground,
-                paddingVertical: 16,
-                opacity: rows.length >= cap ? 0.4 : 1,
-              }}
+              style={addTicketButtonStyle(rows, cap)}
             >
-              <Text style={{ color: v2.ink, fontSize: 14, fontWeight: "700", textTransform: "uppercase" }}>
-                <View className="flex-row items-center gap-2"><PlusIcon color={v2.ink} size={16} /><Text style={{ color: v2.ink, fontSize: 14, fontWeight: "700", textTransform: "uppercase" }}>Tambah tiket</Text></View>
+              <Text style={componentStyles.addTicketText}>
+                <View className="flex-row items-center gap-2"><PlusIcon color={designColors.ink} size={16} /><Text style={componentStyles.addTicketLabel}>Tambah tiket</Text></View>
               </Text>
             </Pressable>
             <View
-              style={{
-                marginTop: 16,
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 12,
-                borderWidth: 2,
-                borderColor: v2.warn,
-                backgroundColor: v2.ground,
-                paddingHorizontal: 16,
-                paddingVertical: 14,
-              }}
+              style={componentStyles.quotaWarning}
             >
-              <WarningIcon color={v2.warn} />
-              <Text style={{ color: v2.ink, flex: 1, fontSize: 13 }}>
+              <WarningIcon color={designColors.warn} />
+              <Text style={componentStyles.quotaWarningText}>
                 Batas{" "}
-                <Text style={{ color: v2.warn, fontWeight: "700" }}>
+                <Text style={componentStyles.quotaWarningEmphasis}>
                   {cap} tiket per NIK
                 </Text>{" "}
                 divalidasi server saat Lanjut Bayar. Tiap tiket butuh 1 NIK penonton.

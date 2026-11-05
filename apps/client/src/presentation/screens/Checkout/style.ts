@@ -1,5 +1,5 @@
 /**
- * RBT-092 — V2 Brutalist Mono Checkout Screen Styles
+ * RBT-092 —  Brutalist Mono Checkout Screen Styles
  *
  * PROTOTYPE 03-checkout.html EXACT COPY:
  * - White background (var(--white)), black ink (var(--black))
@@ -8,25 +8,28 @@
  * - Progress steps bar at top
  * - No rounded corners
  */
-import { type DimensionValue, type ViewStyle } from 'react-native';
+import { type DimensionValue, type ViewStyle, StyleSheet } from "react-native";
 
-import { v2Colors, v2Borders, v2SpacingSemantic } from '@presentation/theme';
+import { designColors, designBorders, designSpacingSemantic } from "@presentation/theme";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PROGRESS BAR (prototype .progress-container)
 // ═══════════════════════════════════════════════════════════════════════════════
 
+import type { TicketRow } from "@domain/rules/checkout";
+import type { DynamicStyle } from "@presentation/utils/style";
+
 export const checkoutProgressContainer: ViewStyle = {
-  backgroundColor: v2Colors.ground,
-  borderBottomWidth: v2Borders.standard,
-  borderBottomColor: v2Colors.ink,
+  backgroundColor: designColors.ground,
+  borderBottomWidth: designBorders.standard,
+  borderBottomColor: designColors.ink,
   paddingVertical: 16,
 };
 
 export const checkoutProgressInner: ViewStyle = {
   maxWidth: 800,
   marginHorizontal: 'auto',
-  paddingHorizontal: v2SpacingSemantic.m,
+  paddingHorizontal: designSpacingSemantic.m,
 };
 
 export const checkoutProgressSteps: ViewStyle = {
@@ -41,7 +44,7 @@ export const checkoutProgressLine: ViewStyle = {
   left: '10%',
   right: '10%',
   height: 2,
-  backgroundColor: v2Colors.field, // #f5f5f5 - Use field per Design Palette Guide (no arbitrary grays)
+  backgroundColor: designColors.field, // #f5f5f5 - Use field per Design Palette Guide (no arbitrary grays)
 };
 
 export const checkoutStep: ViewStyle = {
@@ -52,16 +55,16 @@ export const checkoutStep: ViewStyle = {
 export const checkoutStepNumber: ViewStyle = {
   width: 40,
   height: 40,
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ink,
-  backgroundColor: v2Colors.ground,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
+  backgroundColor: designColors.ground,
   alignItems: 'center',
   justifyContent: 'center',
 };
 
 export const checkoutStepNumberActive: ViewStyle = {
   ...checkoutStepNumber,
-  backgroundColor: v2Colors.ink,
+  backgroundColor: designColors.ink,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -70,7 +73,7 @@ export const checkoutStepNumberActive: ViewStyle = {
 
 /** Scroll content: max-width container on desktop (prototype max-width: 1200px) */
 export const checkoutScrollContent = (isDesktop: boolean): ViewStyle => ({
-  padding: v2SpacingSemantic.m,
+  padding: designSpacingSemantic.m,
   paddingBottom: 140, // Room for sticky bar
   ...(isDesktop
     ? {
@@ -98,7 +101,9 @@ export const checkoutSidebar = (isDesktop: boolean): ViewStyle => ({
   width: isDesktop ? 400 : '100%' as DimensionValue,
   ...(isDesktop
     ? {
-        position: 'sticky' as any,
+        // React Native Web supports CSS `sticky`, which is outside RN's
+        // platform-neutral ViewStyle position union.
+        position: 'sticky' as unknown as ViewStyle['position'],
         top: 128,
       }
     : {
@@ -120,14 +125,14 @@ export const checkoutSectionHeader: ViewStyle = {
   gap: 16,
   marginBottom: 24,
   paddingBottom: 16,
-  borderBottomWidth: v2Borders.standard,
-  borderBottomColor: v2Colors.ink,
+  borderBottomWidth: designBorders.standard,
+  borderBottomColor: designColors.ink,
 };
 
 export const checkoutSectionNumber: ViewStyle = {
   width: 32,
   height: 32,
-  backgroundColor: v2Colors.ink,
+  backgroundColor: designColors.ink,
   alignItems: 'center',
   justifyContent: 'center',
 };
@@ -147,9 +152,9 @@ export const checkoutFormGroup: ViewStyle = {
 };
 
 export const checkoutInput: ViewStyle = {
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ink,
-  backgroundColor: v2Colors.ground,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
+  backgroundColor: designColors.ground,
   paddingVertical: 16,
   paddingHorizontal: 16,
 };
@@ -161,7 +166,7 @@ export const checkoutInputFocus: ViewStyle = {
 
 export const checkoutInputError: ViewStyle = {
   ...checkoutInput,
-  borderColor: v2Colors.danger, // #ff0000 per Design Palette Guide
+  borderColor: designColors.danger, // #ff0000 per Design Palette Guide
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -169,8 +174,8 @@ export const checkoutInputError: ViewStyle = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const checkoutPaymentMethod: ViewStyle = {
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ink,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
   padding: 20,
   flexDirection: 'row',
   alignItems: 'center',
@@ -180,14 +185,14 @@ export const checkoutPaymentMethod: ViewStyle = {
 
 export const checkoutPaymentMethodSelected: ViewStyle = {
   ...checkoutPaymentMethod,
-  backgroundColor: v2Colors.ink,
+  backgroundColor: designColors.ink,
 };
 
 export const checkoutPaymentRadio: ViewStyle = {
   width: 20,
   height: 20,
   borderWidth: 2,
-  borderColor: v2Colors.ink,
+  borderColor: designColors.ink,
   borderRadius: 10,
   alignItems: 'center',
   justifyContent: 'center',
@@ -197,7 +202,7 @@ export const checkoutPaymentIcon: ViewStyle = {
   width: 48,
   height: 32,
   borderWidth: 1,
-  borderColor: v2Colors.ink,
+  borderColor: designColors.ink,
   alignItems: 'center',
   justifyContent: 'center',
 };
@@ -207,13 +212,13 @@ export const checkoutPaymentIcon: ViewStyle = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const checkoutOrderSummary: ViewStyle = {
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ink,
-  backgroundColor: v2Colors.ground,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
+  backgroundColor: designColors.ground,
 };
 
 export const checkoutSummaryHeader: ViewStyle = {
-  backgroundColor: v2Colors.ink,
+  backgroundColor: designColors.ink,
   padding: 24,
 };
 
@@ -225,16 +230,16 @@ export const checkoutSummaryEvent: ViewStyle = {
   flexDirection: 'row',
   gap: 16,
   paddingBottom: 24,
-  borderBottomWidth: v2Borders.standard,
-  borderBottomColor: v2Colors.ink,
+  borderBottomWidth: designBorders.standard,
+  borderBottomColor: designColors.ink,
   marginBottom: 24,
 };
 
 export const checkoutSummaryImage: ViewStyle = {
   width: 80,
   height: 80,
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ink,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
   overflow: 'hidden',
 };
 
@@ -247,8 +252,8 @@ export const checkoutSummaryRow: ViewStyle = {
 
 export const checkoutSummaryTotal: ViewStyle = {
   ...checkoutSummaryRow,
-  borderTopWidth: v2Borders.standard,
-  borderTopColor: v2Colors.ink,
+  borderTopWidth: designBorders.standard,
+  borderTopColor: designColors.ink,
   marginTop: 16,
   paddingTop: 16,
 };
@@ -258,7 +263,7 @@ export const checkoutSummaryTotal: ViewStyle = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const checkoutTimerBar: ViewStyle = {
-  backgroundColor: v2Colors.danger, // #ff0000 per Design Palette Guide
+  backgroundColor: designColors.danger, // #ff0000 per Design Palette Guide
   paddingVertical: 12,
   paddingHorizontal: 24,
   flexDirection: 'row',
@@ -273,16 +278,16 @@ export const checkoutTimerBar: ViewStyle = {
 
 export const checkoutPaySection: ViewStyle = {
   padding: 24,
-  borderTopWidth: v2Borders.standard,
-  borderTopColor: v2Colors.ink,
+  borderTopWidth: designBorders.standard,
+  borderTopColor: designColors.ink,
 };
 
 export const checkoutPayBtn: ViewStyle = {
   width: '100%' as DimensionValue,
   paddingVertical: 20,
-  backgroundColor: v2Colors.ink,
-  borderWidth: v2Borders.standard,
-  borderColor: v2Colors.ink,
+  backgroundColor: designColors.ink,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
   alignItems: 'center',
   justifyContent: 'center',
 };
@@ -291,8 +296,8 @@ export const checkoutPayBtn: ViewStyle = {
 export const checkoutStyles = {
   timerDot: { width: 8, height: 8, borderRadius: 999 },
   hero: {
-    borderWidth: v2Borders.standard,
-    borderColor: v2Colors.ink,
+    borderWidth: designBorders.standard,
+    borderColor: designColors.ink,
     overflow: 'hidden' as const,
   },
   heroScrim: {
@@ -309,6 +314,47 @@ export const checkoutStyles = {
 export const checkoutTopBar = (top: number) => ({ paddingTop: top + 10 });
 
 export const checkoutBar = (bottom: number) => ({
-  backgroundColor: v2Colors.ink,
+  backgroundColor: designColors.ink,
   paddingBottom: bottom + 16,
 });
+
+export const componentStyles = StyleSheet.create({
+  buyerPrefillBadge: {
+                  marginTop: 4,
+                  alignSelf: "flex-start",
+                  borderWidth: 2,
+                  borderColor: designColors.success,
+                  backgroundColor: designColors.ground,
+                  paddingHorizontal: 12,
+                  paddingVertical: 5,
+                },
+  buyerPrefillBadgeText: { color: designColors.success },
+  addTicketText: { color: designColors.ink, fontSize: 14, fontWeight: "700", textTransform: "uppercase" },
+  addTicketLabel: { color: designColors.ink, fontSize: 14, fontWeight: "700", textTransform: "uppercase" },
+  quotaWarning: {
+                marginTop: 16,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                borderWidth: 2,
+                borderColor: designColors.warn,
+                backgroundColor: designColors.ground,
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+              },
+  quotaWarningText: { color: designColors.ink, flex: 1, fontSize: 13 },
+  quotaWarningEmphasis: { color: designColors.warn, fontWeight: "700" },
+});
+
+export function addTicketButtonStyle(rows: readonly TicketRow[], cap: number): DynamicStyle {
+  return {
+                marginTop: 16,
+                alignItems: "center",
+                borderWidth: 2,
+                borderStyle: "dashed",
+                borderColor: designColors.ink,
+                backgroundColor: designColors.ground,
+                paddingVertical: 16,
+                opacity: rows.length >= cap ? 0.4 : 1,
+              } as DynamicStyle;
+}

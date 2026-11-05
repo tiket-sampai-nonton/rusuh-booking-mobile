@@ -85,9 +85,9 @@ describe("BrowseScreen — URL-driven filters", () => {
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    // V2 uses v2-event-card-<id> testIDs and client-side category filter
+    //  uses v2-event-card-<id> testIDs and client-side category filter
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
-    // V2: browse-count shows "Showing X events"
+    // : browse-count shows "Showing X events"
     expect(screen.getByTestId("browse-count")).toBeTruthy();
   });
 
@@ -95,11 +95,21 @@ describe("BrowseScreen — URL-driven filters", () => {
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    // V2 uses v2-event-card-<id> testIDs
+    //  uses v2-event-card-<id> testIDs
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
     expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
     expect(screen.getByTestId("v2-event-card-folk")).toBeTruthy();
     expect(screen.getByTestId("browse-count")).toBeTruthy();
+  });
+
+  it("treats the all-genres URL value as the unfiltered category", async () => {
+    mockParams.current = { genre: "Semua", time: "month", sort: "closest" };
+    renderWithProviders(<BrowseScreen />, {
+      container: { eventRepository: repo(CATALOG) },
+    });
+
+    await waitFor(() => screen.getByTestId("v2-event-card-rock"));
+    expect(screen.queryByTestId("v2-event-card-jazz")).toBeNull();
   });
 
   it("supports desktop sorting, category, view, navigation, and filter actions", async () => {
@@ -119,9 +129,11 @@ describe("BrowseScreen — URL-driven filters", () => {
     fireEvent.press(screen.getByTestId("view-list"));
     fireEvent.press(screen.getByTestId("view-grid"));
     fireEvent.press(screen.getByTestId("nav-home"));
+    fireEvent.press(screen.getByTestId("nav-browse"));
     fireEvent.press(screen.getByTestId("nav-tickets"));
     fireEvent.press(screen.getByTestId("nav-profile"));
-
+    fireEvent.press(screen.getByTestId("browse-filter"));
+    fireEvent.press(screen.getByTestId("filter-close"));
     fireEvent.press(screen.getByTestId("browse-filter"));
     fireEvent.press(screen.getByTestId("filter-apply"));
     expect(mockRouter.push).toHaveBeenCalledWith(expect.stringMatching(/^\/browse\?/));
@@ -150,7 +162,7 @@ describe("BrowseScreen — URL-driven filters", () => {
       container: { eventRepository: repo(CATALOG) },
     });
     await waitFor(() => screen.getByTestId("browse-empty"));
-    // V2: empty state shows "Tidak Ada Event"
+    // : empty state shows "Tidak Ada Event"
     expect(screen.getByText("Tidak Ada Event")).toBeTruthy();
   });
 
@@ -158,7 +170,7 @@ describe("BrowseScreen — URL-driven filters", () => {
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    // V2 uses v2-event-card-<id> testIDs
+    //  uses v2-event-card-<id> testIDs
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
     fireEvent.press(screen.getByTestId("v2-event-card-rock"));
     expect(mockRouter.push).toHaveBeenCalledWith("/events/rock");
@@ -180,13 +192,44 @@ describe("BrowseScreen — URL-driven filters", () => {
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
-    // V2 uses V2Header with header-logo testID
+    //  uses Header with header-logo testID
     await waitFor(() => screen.getByTestId("header-logo"));
     fireEvent.press(screen.getByTestId("header-logo"));
     expect(mockRouter.push).toHaveBeenCalledWith("/");
   });
 
-  it("shows the V2Loader before data resolves", async () => {
+  it("keeps the guest desktop header CTA inert on Browse", async () => {
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    Dimensions.set({ window: { ...originalWindow, width: 1024 }, screen: { ...originalScreen, width: 1024 } });
+    renderWithProviders(<BrowseScreen />, {
+      container: { eventRepository: repo(CATALOG) },
+    });
+    await waitFor(() => screen.getByTestId("header-cta"));
+    fireEvent.press(screen.getByTestId("header-cta"));
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it("routes logged-in native bottom navigation to Home, tickets, and profile", async () => {
+    useAccountStore.getState().setProfile({
+      emailMasked: "p***@mail.com",
+      fullName: "Penonton",
+      hasNik: true,
+    });
+    renderWithProviders(<BrowseScreen />, {
+      container: { eventRepository: repo(CATALOG) },
+    });
+    await waitFor(() => screen.getByRole("tab", { name: "Beranda" }));
+
+    fireEvent.press(screen.getByRole("tab", { name: "Beranda" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Tiket" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Akun" }));
+
+    expect(mockRouter.push).toHaveBeenCalledWith("/");
+    expect(mockRouter.push).toHaveBeenCalledWith("/my-tickets");
+    expect(mockRouter.push).toHaveBeenCalledWith("/profile");
+  });
+
+  it("shows the Loader before data resolves", async () => {
     let release!: (e: EventSummary[]) => void;
     const gate = new Promise<EventSummary[]>((r) => {
       release = r;
@@ -199,7 +242,7 @@ describe("BrowseScreen — URL-driven filters", () => {
         },
       },
     });
-    // V2: BrowseScreen uses V2Loader directly with accessibilityLabel="Memuat"
+    // : BrowseScreen uses Loader directly with accessibilityLabel="Memuat"
     expect(screen.getByLabelText("Memuat")).toBeTruthy();
     release([]);
     // The loader remains mounted during its exit animation. Assert that the

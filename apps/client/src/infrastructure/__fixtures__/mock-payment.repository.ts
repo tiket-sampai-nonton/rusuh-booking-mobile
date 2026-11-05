@@ -117,10 +117,11 @@ export class MockPaymentRepository implements PaymentRepository {
     if (!found) {
       throw new Error(`MockPaymentRepository: unknown attempt ${attemptId}`);
     }
-    const next: PaymentAttempt =
-      outcome === "UNKNOWN"
-        ? found
-        : { ...found, status: outcome === "PAID" ? "PAID" : "FAILED" };
+    let next = found;
+    if (outcome !== "UNKNOWN") {
+      const status = outcome === "PAID" ? "PAID" : "FAILED";
+      next = { ...found, status };
+    }
     this.attemptsById.set(attemptId, next);
     this.attemptByBooking.set(next.bookingId, next);
     // Also settle the deterministic poll so getStatus agrees immediately.

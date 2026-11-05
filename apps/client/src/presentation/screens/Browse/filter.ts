@@ -7,8 +7,8 @@
  * GET /events has no server filter param yet). No React / RN / Expo imports.
  *
  * genre is an O1 FE-NEED gap — `EventSummary` carries no genre field — so it is
- * a best-effort name-substring match until the field lands; time + sort work
- * fully off `startsAt`.
+ * a best-effort name/venue match with known category aliases until the field
+ * lands; time + sort work fully off `startsAt`.
  */
 import type { EventSummary } from "@domain/repositories/event.repository";
 
@@ -109,8 +109,7 @@ export function filterEvents(
 ): EventSummary[] {
   let list = all.filter((ev) => inTimeBucket(ev, time, now));
   if (genre !== "Semua") {
-    const needle = genre.toLowerCase();
-    list = list.filter((ev) => ev.name.toLowerCase().includes(needle));
+    list = list.filter((ev) => matchesCategory(ev, genre));
   }
   const dir = sort === "furthest" ? -1 : 1;
   return [...list].sort((a, b) => {

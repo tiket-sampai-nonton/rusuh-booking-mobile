@@ -460,6 +460,23 @@ Type: Story · P0/P1 · M · Deps: RBT-005, RBT-081, RBT-082, RBT-083
 - AC2: release summary/checklist wired; SEO output + bundle gates green on web release; go/no-go evidence collected for H5.
 - Skills: EAS, GitHub Actions, release management.
 
+#### RBT-119: Research and refactor the Expo client for clean code and separation of concerns
+Type: Chore · P1 · XL · Scope: `apps/client` (web, iOS, Android)
+
+> Post-H3 cross-cutting task. Execution authorized on 2026-11-04; G1/G2/G3 explicitly bypassed by the user. Do not invent or change BE contract assumptions.
+
+- **AC1 — Research and analysis:** Research screen orchestration, screen-specific fragments, reusable components, styling, testing, SOLID, and Clean Architecture. Here, `fragments` means screen-local components, not React's `<Fragment>`. Record sources, structural/coverage/log baseline, risks, and verification plan.
+- **AC2 — Preservation and branch:** Preserve unrelated work and use an isolated feature branch based on `develop`.
+- **AC3 — Naming and folders:** Inventory filenames under `apps/client`, remove V2 filename prefixes and update imports/references. Give each component its own file/folder; screen-only UI belongs under its screen's `fragments`; reusable UI belongs under shared `components`.
+- **AC4 — Screen responsibility:** Screens orchestrate data, state, actions, and composition. Fragments render screen-specific UI and may consume shared components. Put reusable UI logic in appropriate utilities without violating layer boundaries.
+- **AC5 — Styling:** Remove inline styling. Prefer NativeWind; use named styles, factories, or animation styles for dynamic/platform-specific cases. Preserve output across platforms.
+- **AC6 — Architecture and data:** Improve clean code/SOLID while maintaining inward-only Clean Architecture dependencies. Replace hardcoded dynamic values with authoritative data/config; preserve server-authoritative timers, guest access, payment boundaries, and current API behavior.
+- **AC7 — Errors and warnings:** Resolve actionable errors/warnings; document remaining environment/external limitations with evidence, without suppressing logs.
+- **AC8 — Coverage:** Target at least 90% coverage for each applicable file; report per-file metrics and scope. Identify generated/unmeasurable files and state their treatment explicitly.
+- **AC9 — Behavior and visual verification:** Preserve behavior/output; retest screens, actions, and available happy/edge flows on web, iOS, and Android. Run typecheck, lint, relevant tests, and capture before/after evidence under `.genesis/evidence/RBT-119/`.
+- **Organization interpretation:** “More than 1 component per file” means each screen composes multiple fragment components; each component declaration remains in its own file/folder.
+- Skills: React, React Native, frontend design, testing/evidence, architecture, performance.
+
 ---
 
 ## Milestones

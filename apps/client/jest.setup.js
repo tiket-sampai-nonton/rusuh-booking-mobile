@@ -1,5 +1,11 @@
 // React Native Testing Library ships its own Jest matchers (v12.4+).
 import "@testing-library/react-native/extend-expect";
+import { act } from "@testing-library/react-native";
+import { notifyManager } from "@tanstack/react-query";
+
+// TanStack Query flushes observer updates in a scheduled callback. Treat that
+// callback as a React update so async query and mutation tests stay inside act.
+notifyManager.setNotifyFunction((notify) => act(notify));
 
 // Safe-area insets: screens call useSafeAreaInsets(); provide a zero-inset stub
 // so components render under plain `render()` (no SafeAreaProvider) exactly as

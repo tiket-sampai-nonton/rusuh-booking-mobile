@@ -1,19 +1,19 @@
 /**
- * History PageScreen — V2 Brutalist Mono "Arsip Event" (RBT-034).
+ * History PageScreen —  Brutalist Mono "Arsip Event" (RBT-034).
  *
  * Dedicated `/history` route for PAST / CLOSED events.
  *
- * V2 Design (prototype 04-my-tickets):
+ *  Design (prototype 04-my-tickets):
  * - Black hero with large "ARSIP EVENT" title
- * - V2Header fixed at top
- * - V2EventCard grid in `history` (disabled) mode
+ * - Header fixed at top
+ * - EventCard grid in `history` (disabled) mode
  * - Grayscale images, 2px borders
  */
 import { useRouter, type Href } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { V2Header } from "@presentation/components/v2/V2Header";
+import { Header } from "@presentation/components/design-system/Header";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
@@ -30,8 +30,16 @@ export function HistoryScreen() {
 
   const history = data?.history ?? [];
 
-  // Past cards are disabled in V2EventCard (history mode) — this is a no-op
+  // Past cards are disabled in EventCard (history mode) — this is a no-op
   const noop = (): void => undefined;
+  let historyContent = <HistoryGrid events={history} onPress={noop} columns={gridColumns} />;
+  if (isLoading) {
+    historyContent = <HistoryLoading />;
+  } else if (isError) {
+    historyContent = <HistoryError message={error?.message} />;
+  } else if (history.length === 0) {
+    historyContent = <HistoryEmpty />;
+  }
   const goHome = (): void => router.push("/" as Href);
   const goBrowse = (): void => router.push("/browse" as Href);
 
@@ -46,8 +54,8 @@ export function HistoryScreen() {
   return (
     <ScreenFade>
       <View style={historyStyles.container}>
-        {/* V2 Header — fixed at top */}
-        <V2Header
+        {/*  Header — fixed at top */}
+        <Header
           topInset={insets.top}
           showLinks={isDesktop}
           links={navLinks}
@@ -59,7 +67,7 @@ export function HistoryScreen() {
           contentContainerStyle={historyScrollContent(insets.bottom, isDesktop)}
           testID="history-scroll"
         >
-          {/* V2 Hero section — black bg with title */}
+          {/*  Hero section — black bg with title */}
           <View style={historyStyles.hero}>
             <View style={historyStyles.heroContent}>
               <Text style={historyStyles.heroTitle} accessibilityRole="header">
@@ -75,15 +83,7 @@ export function HistoryScreen() {
           <View style={historyStyles.main}>
             <Text style={historyStyles.sectionTitle}>Riwayat</Text>
 
-            {isLoading ? (
-              <HistoryLoading />
-            ) : isError ? (
-              <HistoryError message={error?.message} />
-            ) : history.length === 0 ? (
-              <HistoryEmpty />
-            ) : (
-              <HistoryGrid events={history} onPress={noop} columns={gridColumns} />
-            )}
+            {historyContent}
           </View>
         </ScrollView>
       </View>

@@ -1,8 +1,8 @@
 /**
- * RBT-090 — EventDetail V2 fragments: Block (with/without heading) + Categories
+ * RBT-090 — EventDetail  fragments: Block (with/without heading) + Categories
  * (empty read-only note / sold-out / low-stock / available arms).
  *
- * V2: Block no longer renders the 'heading' prop - only 'label' as section title.
+ * : Block no longer renders the 'heading' prop - only 'label' as section title.
  */
 import { render, screen } from "@testing-library/react-native";
 import { Text } from "react-native";
@@ -10,17 +10,17 @@ import { Text } from "react-native";
 import { Block } from "@presentation/screens/EventDetail/fragments/Block";
 import { Categories } from "@presentation/screens/EventDetail/fragments/Categories";
 
-describe("Block (V2 brutalist section)", () => {
-  it("renders the label + children (V2: heading is not rendered)", () => {
+describe("Block ( brutalist section)", () => {
+  it("renders the label + children (: heading is not rendered)", () => {
     render(
       <Block label="Line-up" heading="Yang akan tampil.">
         <Text>child</Text>
       </Block>,
     );
-    // V2: only label is rendered as title, heading is not shown
+    // : only label is rendered as title, heading is not shown
     expect(screen.getByText("Line-up")).toBeTruthy();
     expect(screen.getByText("child")).toBeTruthy();
-    // V2: heading prop is ignored
+    // : heading prop is ignored
     expect(screen.queryByText("Yang akan tampil.")).toBeNull();
   });
 
@@ -46,13 +46,16 @@ describe("Categories (prototype preview)", () => {
       <Categories
         categories={[
           { code: "VIP", name: "VIP", priceMinor: 75000000, available: 200 }, // Tersedia
+          { code: "CAT-50", name: "Ambang Tersedia", priceMinor: 30000000, available: 50 },
+          { code: "CAT-49", name: "Ambang Menipis", priceMinor: 30000000, available: 49 },
           { code: "REG", name: "Reguler", priceMinor: 45000000, available: 12 }, // Sisa 12
           { code: "", name: "Festival", priceMinor: 30000000, available: 0 }, // Habis (no code)
         ]}
       />,
     );
-    expect(screen.getByText("Tersedia")).toBeTruthy();
+    expect(screen.getAllByText("Tersedia")).toHaveLength(2);
     expect(screen.getByText("Sisa 12")).toBeTruthy();
+    expect(screen.getByText("Sisa 49")).toBeTruthy();
     expect(screen.getByText("Habis")).toBeTruthy();
     expect(screen.getByText("Kode VIP")).toBeTruthy();
 		expect(screen.queryByText("Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.")).toBeNull();

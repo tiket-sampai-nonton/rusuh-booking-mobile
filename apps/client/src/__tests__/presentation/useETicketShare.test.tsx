@@ -71,7 +71,7 @@ describe("useETicketShare (RBT-071)", () => {
 
   // Native default writeAndShare — isolateModules so each case's fresh
   // expo-* mock is the one the hook's lazy require() picks up.
-  async function runNativeDefault(available: boolean): Promise<{
+  async function runNativeDefault(available: boolean, cacheDirectory: string | null = "file:///cache/"): Promise<{
     writeAsStringAsync: jest.Mock;
     shareAsync: jest.Mock;
   }> {
@@ -79,7 +79,7 @@ describe("useETicketShare (RBT-071)", () => {
     const shareAsync = jest.fn().mockResolvedValue(undefined);
     await jest.isolateModulesAsync(async () => {
       jest.doMock("expo-file-system", () => ({
-        cacheDirectory: "file:///cache/",
+        cacheDirectory: cacheDirectory ?? undefined,
         writeAsStringAsync,
       }));
       jest.doMock("expo-sharing", () => ({
@@ -108,6 +108,13 @@ describe("useETicketShare (RBT-071)", () => {
     const { writeAsStringAsync, shareAsync } = await runNativeDefault(false);
     expect(writeAsStringAsync).toHaveBeenCalled();
     expect(shareAsync).not.toHaveBeenCalled();
+  });
+
+  it("native DEFAULT tolerates a missing cache directory", async () => {
+    Object.defineProperty(RN.Platform, "OS", { value: "ios", configurable: true });
+    const { writeAsStringAsync, shareAsync } = await runNativeDefault(true, null);
+    expect(writeAsStringAsync).toHaveBeenCalledWith("eticket-bk-2.txt", expect.stringContaining("RBT|bk-2|1"));
+    expect(shareAsync).toHaveBeenCalledWith("eticket-bk-2.txt");
   });
 
   it("web DEFAULT: a window with no document is handled without throwing", async () => {

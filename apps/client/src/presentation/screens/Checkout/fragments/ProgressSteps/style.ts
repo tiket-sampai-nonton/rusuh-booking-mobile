@@ -1,0 +1,62 @@
+
+import { StyleSheet } from "react-native";
+import { designColors, designBorders } from "@presentation/theme";
+
+import type { DynamicStyle } from "@presentation/utils/style";
+import { interFonts } from "@presentation/theme";
+
+export const componentStyles = StyleSheet.create({
+  elementBackgroundColor0: {
+        backgroundColor: designColors.ground,
+        borderBottomWidth: designBorders.standard,
+        borderBottomColor: designColors.ink,
+        paddingVertical: 16,
+      },
+  elementMaxWidth1: {
+          maxWidth: 800,
+          marginHorizontal: "auto",
+          paddingHorizontal: 32,
+          width: "100%",
+        },
+  elementFlexDirection2: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            position: "relative",
+          },
+  elementPosition3: {
+              position: "absolute",
+              top: 20, // Half of step circle height (40/2)
+              left: "10%",
+              right: "10%",
+              height: 2,
+              backgroundColor: designColors.field, // #f5f5f5 per Design Palette Guide
+              zIndex: 1,
+            },
+  elementAlignItems4: {
+                  alignItems: "center",
+                  gap: 8,
+                  zIndex: 3,
+                },
+});
+
+export function styleForProgressStepsAnimatedView2(): DynamicStyle {
+  return {
+                position: "absolute",
+                top: 20,
+                left: "10%",
+                height: 2,
+                backgroundColor: designColors.ink,
+                zIndex: 2,
+              } as DynamicStyle;
+}
+
+export function styleForProgressStepsText3(arg0: boolean, arg1: boolean): DynamicStyle {
+  return {
+                    fontSize: 12,
+                    fontFamily: interFonts.medium,
+                    textTransform: "uppercase",
+                    letterSpacing: 0.6,
+                    color: arg0 || arg1 ? designColors.ink : designColors.gray,
+                  } as DynamicStyle;
+}

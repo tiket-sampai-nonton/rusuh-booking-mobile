@@ -9,6 +9,13 @@
  */
 import type { EventDetail } from "@domain/repositories/event.repository";
 
+const MOCK_EVENT_GALLERY = [
+  "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&q=80",
+  "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80",
+  "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&q=80",
+  "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&q=80",
+] as const;
+
 export const EVENT_FIXTURES: readonly EventDetail[] = [
   {
     id: "evt-1",
@@ -24,6 +31,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     description: {
       longDesc: "Festival musik tahunan terbesar dengan line-up lintas genre.",
       lineup: ["Band A", "Band B", "DJ C"],
+      gallery: MOCK_EVENT_GALLERY,
       terms: "Tiket tidak dapat dikembalikan. Wajib membawa KTP sesuai NIK.",
       bannerImage: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80&auto=format&fit=crop",
       // FE-NEED (O2): pricing categories + availability, mocked until the BE
@@ -49,7 +57,13 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     remainingTickets: 8,
     description: {
       longDesc: "Nobar final dengan layar raksasa dan zona komunitas.",
-      lineup: [],
+      lineup: [
+        { name: "Ahmad Dhani", role: "Keyboards", avatar: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=200&q=80" },
+        { name: "Once Mekel", role: "Vocal", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80" },
+        { name: "Andra Ramadhan", role: "Guitar", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80" },
+        { name: "Yuke Sampurna", role: "Bass", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80" },
+      ],
+      gallery: MOCK_EVENT_GALLERY,
       terms: "Masuk sesuai sesi pada tiket.",
       bannerImage: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=1200&q=80&auto=format&fit=crop",
       categories: [
@@ -72,6 +86,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     description: {
       longDesc: "Malam musik indie dengan 12 penampil.",
       lineup: ["Indie X", "Indie Y"],
+      gallery: MOCK_EVENT_GALLERY,
       terms: "Penjualan dibuka 20 Desember.",
       bannerImage: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=1200&q=80&auto=format&fit=crop",
     },
@@ -90,6 +105,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     description: {
       longDesc: "Konser stadion dengan kapasitas penuh.",
       lineup: ["Headliner Z"],
+      gallery: MOCK_EVENT_GALLERY,
       terms: "Sold out. Tidak ada penjualan di lokasi.",
       bannerImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80&auto=format&fit=crop",
       categories: [
@@ -112,6 +128,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     description: {
       longDesc: "Acara jazz tahunan (telah berlalu).",
       lineup: ["Jazz Trio"],
+      gallery: MOCK_EVENT_GALLERY,
       terms: "Acara telah selesai.",
       bannerImage: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1200&q=80&auto=format&fit=crop",
     },
@@ -130,6 +147,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     description: {
       longDesc: "Pesta musik elektronik dengan panggung 360°.",
       lineup: ["DJ One", "DJ Two", "DJ Three"],
+      gallery: MOCK_EVENT_GALLERY,
       terms: "Usia 18+. Wajib NIK.",
       bannerImage: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&q=80&auto=format&fit=crop",
       categories: [

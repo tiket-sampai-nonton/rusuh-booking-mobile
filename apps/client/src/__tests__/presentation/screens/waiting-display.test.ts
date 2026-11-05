@@ -3,6 +3,7 @@ import {
   claimErrorBody,
   claimErrorTitle,
   COPY,
+  etaMinutesSeconds,
   etaText,
   formatCount,
   peopleAhead,
@@ -36,8 +37,18 @@ describe("etaText", () => {
     expect(etaText(-3)).toBe("Siap!");
   });
   it("uses Indonesian minute wording for the estimate", () => {
-    expect(etaText(5)).toBe("~1 menit");
-    expect(etaText(3000)).toBe("~3 menit");
+    expect(etaText(5, 1400)).toBe("~1 menit");
+    expect(etaText(3000, 1400)).toBe("~3 menit");
+  });
+  it("does not invent an estimate when the server rate is missing or invalid", () => {
+    expect(etaText(3000)).toBe("Belum tersedia");
+    expect(etaText(3000, 0)).toBe("Belum tersedia");
+    expect(etaText(3000, Number.NaN)).toBe("Belum tersedia");
+    expect(etaMinutesSeconds(3000)).toBeUndefined();
+  });
+  it("uses server-provided admission rate for minute/second estimates", () => {
+    expect(etaMinutesSeconds(3000, 1000)).toEqual({ minutes: 3, seconds: 0 });
+    expect(etaMinutesSeconds(500, 1000)).toEqual({ minutes: 0, seconds: 30 });
   });
 });
 
@@ -98,5 +109,6 @@ describe("COPY constants use Indonesian wording", () => {
     expect(COPY.footnote).toBe(
       "Antrean dilayani sesuai urutan kedatangan. Token antrean diterbitkan dan divalidasi server. Pembaruan mengikuti jadwal dari server.",
     );
+    expect(COPY.longWaitWarningText).not.toMatch(/10 menit/i);
   });
 });

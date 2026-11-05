@@ -5,6 +5,7 @@
  */
 import { LeaveQueue } from "@application/queue/leave-queue.use-case";
 import { ObserveQueue } from "@application/queue/observe-queue.use-case";
+import { ObserveQueueStatus } from "@application/queue/observe-queue-status.use-case";
 import type {
   QueueEntry,
   QueueRepository,
@@ -23,6 +24,7 @@ function makeEntry(over: Partial<QueueEntry> = {}): QueueEntry {
 
 class FakeQueueRepository implements QueueRepository {
   getStatusCalls: string[] = [];
+  getQueueStatusCalls: string[] = [];
   leaveCalls: string[] = [];
   constructor(private readonly entry: QueueEntry) {}
 
@@ -32,6 +34,10 @@ class FakeQueueRepository implements QueueRepository {
   async getStatus(queueId: string): Promise<QueueEntry> {
     this.getStatusCalls.push(queueId);
     return this.entry;
+  }
+  async getQueueStatus(eventId: string): Promise<{ admissionRatePerMin?: number }> {
+    this.getQueueStatusCalls.push(eventId);
+    return { admissionRatePerMin: 900 };
   }
   async leave(queueId: string): Promise<void> {
     this.leaveCalls.push(queueId);
@@ -55,6 +61,15 @@ describe("RBT-042 ObserveQueue", () => {
     await observe.execute("q-1");
     await observe.execute("q-1");
     expect(repo.getStatusCalls).toHaveLength(2);
+  });
+});
+
+describe("RBT-119 ObserveQueueStatus", () => {
+  it("returns the server-provided public admission rate", async () => {
+    const repo = new FakeQueueRepository(makeEntry());
+    const result = await new ObserveQueueStatus(repo).execute("evt-9");
+    expect(repo.getQueueStatusCalls).toEqual(["evt-9"]);
+    expect(result).toEqual({ admissionRatePerMin: 900 });
   });
 });
 

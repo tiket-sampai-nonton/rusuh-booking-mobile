@@ -4,8 +4,10 @@
 import { render, screen } from "@testing-library/react-native";
 import React from "react";
 
+const mockUseLocalSearchParams = jest.fn((): { bookingId?: string } => ({ bookingId: "bk-1" }));
+
 jest.mock("expo-router", () => ({
-  useLocalSearchParams: () => ({ bookingId: "bk-1" }),
+  useLocalSearchParams: () => mockUseLocalSearchParams(),
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
 }));
 
@@ -24,7 +26,12 @@ describe("/snap/[bookingId] route", () => {
   });
 
   it("renders the SNAP simulator for the booking", () => {
-    const qc = new QueryClient();
+    const qc = new QueryClient({
+      defaultOptions: {
+        queries: { gcTime: Infinity },
+        mutations: { gcTime: Infinity },
+      },
+    });
     render(
       <QueryClientProvider client={qc}>
         <ServiceProvider container={createContainer({ useMocks: true })}>
@@ -33,5 +40,11 @@ describe("/snap/[bookingId] route", () => {
       </QueryClientProvider>,
     );
     expect(screen.getByTestId("snap-screen")).toBeTruthy();
+  });
+
+  it("passes an empty booking id when the route parameter is missing", () => {
+    mockUseLocalSearchParams.mockReturnValue({});
+    const routeElement = SnapRoute();
+    expect(routeElement.props.bookingId).toBe("");
   });
 });

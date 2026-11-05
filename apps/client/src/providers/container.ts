@@ -227,7 +227,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
     queueMembership,
     idempotencyKeys,
     httpClient,
-    eventRepository: new HttpEventRepository(httpClient),
+    eventRepository: new HttpEventRepository(httpClient, serverClock),
     queueRepository: new HttpQueueRepository(httpClient),
     bookingRepository: new HttpBookingRepository(httpClient),
     paymentRepository: new HttpPaymentRepository(httpClient),

@@ -34,12 +34,12 @@ export class HttpBookingRepository implements BookingRepository {
   }
 
   async getCurrentSession(): Promise<BookingSession | null> {
-    const res = await this.http.request({
-      method: "GET",
-      url: "booking-sessions/current",
-    });
-    if (res.status === 404) return null;
     try {
+      const res = await this.http.request({
+        method: "GET",
+        url: "booking-sessions/current",
+      });
+      if (res.status === 404) return null;
       return toBookingSession(
         unwrap<Parameters<typeof toBookingSession>[0]>(res),
       );

@@ -1,7 +1,7 @@
 /** Home screen styles — extracted from inline `style={{…}}` (refactor rule). */
 import { StyleSheet, type DimensionValue } from "react-native";
 
-import { neutral } from "@presentation/theme";
+import { neutral, designColors } from "@presentation/theme";
 
 const GAP = 22;
 const DESKTOP_MAX = 1180; // prototype index.html .wrap max-width
@@ -58,4 +58,9 @@ export const homeGridCell = (columns: number) => ({
   width: `${100 / columns}%` as DimensionValue,
   paddingHorizontal: GAP / 2,
   marginBottom: GAP,
+});
+
+export const componentStyles = StyleSheet.create({
+  elementFlex0: { flex: 1, backgroundColor: designColors.ground },
+  elementFlex1: { flex: 1 },
 });

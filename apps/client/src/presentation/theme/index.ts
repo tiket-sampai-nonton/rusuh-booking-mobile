@@ -9,5 +9,5 @@
 export * from "./tokens";
 export * from "./theme";
 export * from "./color";
-export * from "./v2-tokens";
+export * from "./event-design-tokens";
 export * from "./fonts";

@@ -1,7 +1,7 @@
 /**
- * RBT-091 — Waiting-room styles, V2 "Brutalist Mono" (Light variant).
+ * RBT-091 — Waiting-room styles,  "Brutalist Mono" (Light variant).
  *
- * Matches the V2 prototype `06-waiting.html`:
+ * Matches the  prototype `06-waiting.html`:
  * - WHITE background, BLACK text/borders
  * - JetBrains Mono font throughout
  * - 3px solid black borders
@@ -19,44 +19,44 @@
  * RBT-044 auto-claim, and the icon+label (never color-only) zone banners all stay
  * exactly as before. Every testID is preserved.
  */
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, type TextStyle, type ViewStyle } from "react-native";
 
-import { v2Colors, v2Fonts, v2Borders, v2ZoneBanners } from "@presentation/theme";
+import { designColors, designFonts, designBorders, designZoneBanners } from "@presentation/theme";
 
 import type { ZoneTone } from "./display";
 
 /**
- * V2 Brutalist Mono palette (06-waiting.html). WHITE background, BLACK text.
+ *  Brutalist Mono palette (06-waiting.html). WHITE background, BLACK text.
  * DESIGN PALETTE GUIDE: NO GRAYS in main UI — only use inkMuted (#666666).
  */
 export const palette = {
   // Core
-  ground: v2Colors.ground, // #fff - background
-  ink: v2Colors.ink, // #000 - text/borders
-  gray: v2Colors.inkMuted, // #666666 - the only allowed gray per Design Palette Guide
-  muted: v2Colors.inkMuted, // #666666 - same
-  field: v2Colors.field, // #f5f5f5 - subtle background (estimated time block)
-  ringBg: v2Colors.field, // #f5f5f5 - ring track background (use field, not arbitrary gray)
+  ground: designColors.ground, // #fff - background
+  ink: designColors.ink, // #000 - text/borders
+  gray: designColors.inkMuted, // #666666 - the only allowed gray per Design Palette Guide
+  muted: designColors.inkMuted, // #666666 - same
+  field: designColors.field, // #f5f5f5 - subtle background (estimated time block)
+  ringBg: designColors.field, // #f5f5f5 - ring track background (use field, not arbitrary gray)
 
   // Functional
-  red: v2Colors.danger, // #ff0000 - accent/danger
-  green: v2Colors.success, // #00aa00 - success
-  orange: v2Colors.warning, // #ff6600 - warning/offline
+  red: designColors.danger, // #ff0000 - accent/danger
+  green: designColors.success, // #00aa00 - success
+  orange: designColors.warning, // #ff6600 - warning/offline
 
   // Legacy aliases for compatibility
-  white: v2Colors.ground,
-  ember: v2Colors.danger,
-  pillDot: v2Colors.danger,
-  okText: v2Colors.success,
-  errText: v2Colors.danger,
-  ok: v2ZoneBanners.guaranteed.border,
-  amber: v2ZoneBanners.possible.border,
-  amberText: v2ZoneBanners.possible.text,
-  faint: v2Colors.inkMuted, // #666666 - the only allowed gray
+  white: designColors.ground,
+  ember: designColors.danger,
+  pillDot: designColors.danger,
+  okText: designColors.success,
+  errText: designColors.danger,
+  ok: designZoneBanners.guaranteed.border,
+  amber: designZoneBanners.possible.border,
+  amberText: designZoneBanners.possible.text,
+  faint: designColors.inkMuted, // #666666 - the only allowed gray
 } as const;
 
 /**
- * Zone banner tone → {bg, border, text}. V2 brutalist: colored background,
+ * Zone banner tone → {bg, border, text}.  brutalist: colored background,
  * hard colored border, colored bold text — the icon+label still carries the
  * meaning so it is never color-only (RBT-080).
  */
@@ -64,21 +64,34 @@ export const ZONE_STYLE: Readonly<
   Record<ZoneTone, { bg: string; border: string; text: string }>
 > = {
   ok: {
-    bg: v2ZoneBanners.guaranteed.bg,
-    border: v2ZoneBanners.guaranteed.border,
-    text: v2ZoneBanners.guaranteed.text,
+    bg: designZoneBanners.guaranteed.bg,
+    border: designZoneBanners.guaranteed.border,
+    text: designZoneBanners.guaranteed.text,
   },
   warn: {
-    bg: v2ZoneBanners.possible.bg,
-    border: v2ZoneBanners.possible.border,
-    text: v2ZoneBanners.possible.text,
+    bg: designZoneBanners.possible.bg,
+    border: designZoneBanners.possible.border,
+    text: designZoneBanners.possible.text,
   },
   error: {
-    bg: v2ZoneBanners.notEnough.bg,
-    border: v2ZoneBanners.notEnough.border,
-    text: v2ZoneBanners.notEnough.text,
+    bg: designZoneBanners.notEnough.bg,
+    border: designZoneBanners.notEnough.border,
+    text: designZoneBanners.notEnough.text,
   },
 };
+
+export function headerInsetStyle(top: number): ViewStyle {
+  return { paddingTop: top + 12 };
+}
+
+export function zoneBannerStyle(tone: ZoneTone): ViewStyle {
+  const { bg, border } = ZONE_STYLE[tone];
+  return { backgroundColor: bg, borderColor: border };
+}
+
+export function zoneTextStyle(tone: ZoneTone): TextStyle {
+  return { color: ZONE_STYLE[tone].text };
+}
 
 // Ring dimensions (SVG-based, 220px as per prototype)
 export const RING_SIZE = 200;
@@ -86,8 +99,8 @@ export const RING_RADIUS = 90;
 export const RING_STROKE = 6;
 export const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ~628
 
-const B = v2Borders.thick; // 3px for waiting room
-const MONO = v2Fonts.mono; // JetBrains Mono
+const B = designBorders.thick; // 3px for waiting room
+const MONO = designFonts.mono; // JetBrains Mono
 
 export const styles = StyleSheet.create({
   // ═══════════════════════════════════════════════════════════════════════════
@@ -209,6 +222,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  ringSvg: {
+    transform: [{ rotate: "-90deg" }],
+  },
   ringCenter: {
     position: "absolute",
     alignItems: "center",
@@ -308,6 +324,12 @@ export const styles = StyleSheet.create({
     color: palette.gray,
     marginTop: 4,
     fontFamily: MONO,
+  },
+  etaUnavailable: {
+    color: palette.gray,
+    fontSize: 14,
+    textAlign: "center",
+    paddingVertical: 12,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -438,6 +460,10 @@ export const styles = StyleSheet.create({
   errorState: {
     alignItems: "center",
   },
+  iconCentered: {
+    alignItems: "center",
+    marginBottom: 12,
+  },
   errorTitle: {
     fontSize: 32,
     fontWeight: "800",
@@ -486,6 +512,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 32,
     zIndex: 1000,
   },
+  modalOverlayNative: {
+    justifyContent: "flex-end",
+    paddingHorizontal: 0,
+  },
   modal: {
     backgroundColor: palette.ground,
     borderWidth: B,
@@ -495,6 +525,10 @@ export const styles = StyleSheet.create({
     maxWidth: 400,
     width: "100%",
     alignItems: "center",
+  },
+  modalPanelNative: {
+    maxWidth: "100%",
+    borderBottomWidth: 0,
   },
   modalTitle: {
     fontSize: 20,
@@ -628,7 +662,7 @@ export const styles = StyleSheet.create({
     width: "100%",
   },
   eyebrow: {
-    display: "none", // Hidden in V2 prototype
+    display: "none", // Hidden in  prototype
   },
 
   // Legacy ring styles (View-based fallback)
@@ -725,7 +759,7 @@ export const styles = StyleSheet.create({
   prepText: {
     fontSize: 14,
     fontWeight: "700",
-    color: v2ZoneBanners.guaranteed.text,
+    color: designZoneBanners.guaranteed.text,
     fontFamily: MONO,
   },
   admitTitle: {

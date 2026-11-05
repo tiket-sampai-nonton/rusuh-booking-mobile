@@ -31,7 +31,7 @@ export function expiryReminder(
 export function paymentSuccess(bookingId: string): LocalNotification {
   return {
     kind: "payment_success",
-    title: "Pembayaran berhasil 🎉",
+    title: "Pembayaran berhasil",
     body: "Tiketmu sudah aktif. Buka e-tiket dan QR-nya di sini.",
     deepLink: `/success/${bookingId}`,
   };

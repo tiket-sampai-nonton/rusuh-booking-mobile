@@ -19,13 +19,13 @@ import type { SnapOutcome } from "@domain/repositories/payment.repository";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useSnapSimulator } from "@presentation/hooks/useSnapSimulator";
 import { useSessionStore } from "@presentation/stores/session-store";
-import { v2, v2Border } from "@presentation/theme";
 
 import { SnapActions } from "./fragments/SnapActions";
 import { SnapLogo } from "./fragments/SnapLogo";
 import { SnapSummary } from "./fragments/SnapSummary";
 import type { SnapSimulatorScreenProps } from "./interface";
-import { snapStyles } from "./style";
+import { snapStyles, componentStyles } from "./style";
+import { styleForSnapSimulatorScreenView0, styleForSnapSimulatorScreenView1, styleForSnapSimulatorScreenView2, styleForSnapSimulatorScreenPressable3, styleForSnapSimulatorScreenText4, styleForSnapSimulatorScreenPressable5, styleForSnapSimulatorScreenPressable6 } from './style';
 
 export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
   const insets = useSafeAreaInsets();
@@ -42,10 +42,7 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
     const afterwards = (): void => {
       // FAILED → recovery screen; PAID/UNKNOWN → the verify gate (keeps polling
       // on UNKNOWN). The gate re-reads getStatus; we never render PAID here.
-      const route =
-        outcome === "FAILED"
-          ? `/expired/${bookingId}?reason=payment&bookingId=${bookingId}`
-          : `/payment-result/${bookingId}${attemptId ? `?attemptId=${attemptId}` : ""}`;
+      const route = paymentResultRoute(outcome, bookingId, attemptId);
       router.replace(route as Href);
     };
     if (attemptId) {
@@ -60,33 +57,23 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
     <ScreenFade>
       <View
         className="flex-1"
-        style={{ backgroundColor: Platform.OS === "web" ? v2.field : v2.ground }}
+        style={componentStyles.elementBackgroundColor0}
         testID="snap-screen"
       >
         <View
-          style={{
-            height: insets.top + 56,
-            paddingTop: insets.top,
-            paddingHorizontal: 16,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            backgroundColor: v2.ground,
-            borderBottomWidth: v2Border.base,
-            borderBottomColor: v2.ink,
-          }}
+          style={styleForSnapSimulatorScreenView0(insets)}
         >
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Kembali ke pembayaran"
             onPress={() => router.back()}
-            style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center", borderWidth: v2Border.base, borderColor: v2.ink }}
+            style={componentStyles.elementWidth1}
           >
-            <Text style={{ color: v2.ink, fontSize: 22 }}>‹</Text>
+            <Text style={componentStyles.elementColor2}>‹</Text>
           </Pressable>
-          <Text style={{ color: v2.ink, fontSize: 14, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" }}>Pembayaran SNAP</Text>
+          <Text style={componentStyles.elementColor3}>Pembayaran SNAP</Text>
           {/* The simulator has no server-authoritative expiry value to show here. */}
-          <View style={{ width: 44 }} />
+          <View style={componentStyles.elementWidth4} />
         </View>
         <ScrollView
           contentContainerStyle={[
@@ -97,12 +84,8 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
           <View
             className="w-full max-w-md self-center"
             style={[
-              { backgroundColor: v2.ground, paddingHorizontal: 4 },
-              Platform.OS !== "web" && {
-                borderWidth: v2Border.base,
-                borderColor: v2.ink,
-                padding: 16,
-              },
+              styleForSnapSimulatorScreenView1(),
+              Platform.OS !== "web" && styleForSnapSimulatorScreenView2(),
             ]}
             testID="snap-content"
           >
@@ -114,12 +97,12 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
               amountMinor={amountMinor}
             />
 
-            <View style={{ marginBottom: 24 }}>
-              <Text className="mb-3 text-xs font-extrabold uppercase" style={{ color: v2.ink, letterSpacing: 1.5 }}>Metode Pembayaran</Text>
-              <View className="flex-row" style={{ borderWidth: v2Border.base, borderColor: v2.ink }}>
+            <View style={componentStyles.elementMarginBottom5}>
+              <Text className="mb-3 text-xs font-extrabold uppercase" style={componentStyles.elementColor6}>Metode Pembayaran</Text>
+              <View className="flex-row" style={componentStyles.elementBorderWidth7}>
                 {(["bank", "wallet"] as const).map((value) => (
-                  <Pressable key={value} onPress={() => setChannel(value)} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center", backgroundColor: channel === value ? v2.ink : v2.ground }} testID={`snap-channel-${value}`}>
-                    <Text style={{ color: channel === value ? v2.ground : v2.ink, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>{value === "bank" ? "Transfer Bank" : "Dompet Digital"}</Text>
+                  <Pressable key={value} onPress={() => setChannel(value)} style={styleForSnapSimulatorScreenPressable3(channel, value)} testID={`snap-channel-${value}`}>
+                    <Text style={styleForSnapSimulatorScreenText4(channel, value)}>{value === "bank" ? "Transfer Bank" : "Dompet Digital"}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -127,32 +110,32 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
                 <>
                   <View className="mt-3 flex-row gap-2">
                     {["BCA", "BNI", "Mandiri"].map((value) => (
-                      <Pressable key={value} onPress={() => setBank(value)} style={{ flex: 1, minHeight: 44, alignItems: "center", justifyContent: "center", borderWidth: v2Border.base, borderColor: v2.ink, backgroundColor: bank === value ? v2.field : v2.ground }}>
-                        <Text style={{ color: v2.ink, fontSize: 12, fontWeight: "700" }}>{value}</Text>
+                      <Pressable key={value} onPress={() => setBank(value)} style={styleForSnapSimulatorScreenPressable5(bank, value)}>
+                        <Text style={componentStyles.elementColor8}>{value}</Text>
                       </Pressable>
                     ))}
                   </View>
-                  <View className="mt-3 p-4" style={{ borderWidth: v2Border.base, borderColor: v2.ink, backgroundColor: v2.field }}>
-                    <Text className="text-xs font-bold uppercase" style={{ color: v2.ink }}>Akun virtual {bank}</Text>
-                    <Text className="mt-2 text-xl font-extrabold" style={{ color: v2.ink }}>8800 1234 5678</Text>
-                    <Text className="mt-2 text-xs" style={{ color: v2.gray }}>Transfer sesuai jumlah tagihan, lalu tunggu verifikasi pembayaran.</Text>
+                  <View className="mt-3 p-4" style={componentStyles.elementBorderWidth9}>
+                    <Text className="text-xs font-bold uppercase" style={componentStyles.elementColor10}>Akun virtual {bank}</Text>
+                    <Text className="mt-2 text-xl font-extrabold" style={componentStyles.elementColor11}>8800 1234 5678</Text>
+                    <Text className="mt-2 text-xs" style={componentStyles.elementColor12}>Transfer sesuai jumlah tagihan, lalu tunggu verifikasi pembayaran.</Text>
                   </View>
                 </>
               ) : (
-                <View className="mt-3 gap-3" style={{ borderWidth: v2Border.base, borderColor: v2.ink, padding: 16 }}>
+                <View className="mt-3 gap-3" style={componentStyles.elementBorderWidth13}>
                   {["GoPay", "QRIS"].map((value) => (
                     <Pressable
                       key={value}
                       accessibilityRole="button"
                       accessibilityState={{ selected: wallet === value }}
                       onPress={() => setWallet(value)}
-                      style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: 14, borderWidth: v2Border.base, borderColor: v2.ink, backgroundColor: wallet === value ? v2.field : v2.ground }}
+                      style={styleForSnapSimulatorScreenPressable6(wallet, value)}
                       testID={`snap-wallet-${value.toLowerCase()}`}
                     >
-                      <Text style={{ color: v2.ink, fontSize: 13, fontWeight: "700" }}>{value}</Text>
+                      <Text style={componentStyles.elementColor14}>{value}</Text>
                     </Pressable>
                   ))}
-                  <Text className="text-xs" style={{ color: v2.gray }}>Pilih dompet digital di atas untuk melanjutkan pembayaran.</Text>
+                  <Text className="text-xs" style={componentStyles.elementColor15}>Pilih dompet digital di atas untuk melanjutkan pembayaran.</Text>
                 </View>
               )}
             </View>
@@ -168,4 +151,16 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
       </View>
     </ScreenFade>
   );
+}
+
+function paymentResultRoute(
+  outcome: SnapOutcome,
+  bookingId: string,
+  attemptId?: string,
+): string {
+  if (outcome === "FAILED") {
+    return `/expired/${bookingId}?reason=payment&bookingId=${bookingId}`;
+  }
+  if (attemptId) return `/payment-result/${bookingId}?attemptId=${attemptId}`;
+  return `/payment-result/${bookingId}`;
 }

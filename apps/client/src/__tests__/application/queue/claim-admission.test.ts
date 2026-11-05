@@ -26,6 +26,7 @@ class FakeBookingRepository implements BookingRepository {
     sessionId: "sess-1",
     eventId: "evt-1",
     expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    categories: [],
   };
   public createSessionError: Error | null = null;
 
