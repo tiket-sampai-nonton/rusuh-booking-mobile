@@ -65,8 +65,10 @@ export function isRetryable(
 
 /**
  * The re-queue destination for a given expiry reason. A payment/hold failure
- * sends the user back to the event's waiting room to re-enter the queue; a
- * queue or turn expiry (or an unknown event) falls back to browse.
+ * sends the user to the event page, where they can create a new queue entry.
+ * The waiting route requires an existing queueId, so it cannot be the re-entry
+ * destination after the previous hold has expired. Queue/turn expiry (or an
+ * unknown event) falls back to browse.
  *
  * NOTE: Even though the mobile prototype suggests "rejoin queue" for queue/turn,
  * the business rule is that queue expiry means you were already in the queue and
@@ -78,7 +80,7 @@ export function requeueRoute(
   eventId?: string,
 ): string {
   if ((reason === "payment" || reason === "hold") && eventId) {
-    return `/waiting/${eventId}`;
+    return `/events/${eventId}`;
   }
   return "/browse";
 }
