@@ -119,6 +119,7 @@
 | RBT-082 load test | Ray | Hardening | RBT-042/050/054 | flash-crowd on queue+booking | ❌ serialize | Backlog | ☐ |
 | RBT-083 QA suites | Ray | Hardening | features | Playwright + Maestro across flows | ❌ serialize | Backlog | ☐ |
 | RBT-084 release readiness | Ray | Hardening | RBT-005/081/082/083 | OTA/rollback/summary | ❌ serialize | Backlog | ☐ |
+| RBT-119 client refactor | Riz | Hardening | E2 + existing feature flows | `apps/client/**` | ❌ serialize | Done | ☑ |
 
 ---
 
