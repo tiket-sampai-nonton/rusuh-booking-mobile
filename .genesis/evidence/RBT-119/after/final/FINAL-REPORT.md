@@ -35,7 +35,8 @@ The `android/`, `ios/`, and `web/` folders contain the final captures and downlo
 - Browse, event detail, queue admission, and Checkout: [fresh Browse replay](android/browse-replay-current.png), [event detail](android/event-detail-checkout-flow.png), [queue admission](android/post-queue-admission.png), [checked consent](android/checkout-consent-checked.png).
 - A fresh replay confirmed Event Detail → queue admission → Checkout: [Event Detail live audit](android/event-detail-live-audit.png), [Checkout with empty form](android/checkout-after-admission-live-replay.png).
 - Checkout expiry and recovery: [expired Checkout](android/checkout-expired-after-submit-flow.png), [requeue destination](android/expired-requeue-destination.png), [Browse after recovery](android/expired-requeue-browse-destination.png).
-- The fresh Checkout hold expired before buyer/attendee entry could be completed and the flow submitted to Payment/SNAP. No screenshot containing entered identity data was retained. Automated flow tests and Web captures cover the later states; a complete fresh Android purchase run remains unverified in this session.
+- Separately exercised the synthetic mock payment tail on Android: [Payment methods](android/payment-isolated-synthetic.png) → [SNAP](android/snap-isolated-synthetic.png) → [Success with QR](android/success-qr-isolated-synthetic.png) → [downloaded e-ticket HTML](android/eticket-downloaded-isolated-synthetic.html). This route uses synthetic booking data and is not a continuation of the Checkout replay.
+- The fresh Checkout hold expired before buyer/attendee entry could be completed and the flow submitted to Payment/SNAP. No screenshot containing entered identity data was retained. Automated flow tests, the isolated Android payment tail, and Web captures cover later states; a complete fresh Android purchase run remains unverified in this session.
 
 ### iOS simulator
 
