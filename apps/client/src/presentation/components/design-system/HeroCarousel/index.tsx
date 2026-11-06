@@ -60,12 +60,14 @@ export function HeroCarousel({
     height: screenHeight,
     heroHeightVh,
     isNative,
+    isMobileWeb,
   } = useResponsive();
 
-  // Viewport height: 70vh on mobile/native, 100vh on desktop web
-  // v2-mobile prototype: .hero { min-height: 70vh }
-  // v2 desktop prototype: .hero { min-height: 100vh }
-  const heroHeight = Math.max(480, (screenHeight * heroHeightVh) / 100);
+  // The approved mobile web hero is a compact image-led banner below the site
+  // header. Native and desktop keep their existing viewport-based layouts.
+  const heroHeight = isMobileWeb
+    ? 246
+    : Math.max(480, (screenHeight * heroHeightVh) / 100);
 
   // Responsive: single column on narrow screens (<900px per prototype @media query)
   // For native: ALWAYS use mobile layout regardless of screen width
@@ -164,7 +166,7 @@ export function HeroCarousel({
       </View>
 
       {/* Gradient overlay (prototype .hero-slide-overlay) */}
-      <GradientOverlay isMobile={isNative} />
+      <GradientOverlay isMobile={isNative} isMobileWeb={isMobileWeb} />
 
       {/*
         Content container — layout differs between mobile and desktop:
@@ -179,14 +181,19 @@ export function HeroCarousel({
         - Badge → Title → Meta → CTA
         - Positioned at bottom with frame padding
       */}
-      <View style={styleForHeroCarouselView13(isNative, isNarrow)}>
+      <View style={styleForHeroCarouselView13(isNative, isNarrow, isMobileWeb)}>
         {/*
           Native (mobile): Use HeroInfoMobile which includes the title
           Web/Desktop: Separate title column + HeroInfo column
         */}
-        {isNative ? (
+        {isNative || isMobileWeb ? (
           // Mobile: Single stacked component with Badge + Title + Meta + CTA
-          <HeroInfoMobile event={currentEvent} onBook={onBook} />
+          <HeroInfoMobile
+            event={currentEvent}
+            onBook={onBook}
+            onSeeAll={onSeeAll}
+            isMobileWeb={isMobileWeb}
+          />
         ) : (
           <>
             {/* Left column: Title (flex: 1, aligned to bottom) */}
@@ -210,7 +217,7 @@ export function HeroCarousel({
 
       {/* Navigation dots (prototype .hero-nav) - bottom right */}
       {/* On native mobile: hide dots for cleaner look per v2-mobile prototype (no carousel nav) */}
-      {!isNative && top.length > 1 && (
+      {!isNative && !isMobileWeb && top.length > 1 && (
         <SlideDots
           count={top.length}
           current={currentIndex}

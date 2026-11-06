@@ -39,7 +39,7 @@ import { TICKET_HISTORY_PAGE_SIZE } from "./constants";
 export function MyTicketsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isWeb, width } = useResponsive();
+  const { isWeb, isMobileWeb, width } = useResponsive();
   const { data } = useEvents();
   const bookingId = useSessionStore((s) => s.bookingId);
   const eventId = useSessionStore((s) => s.eventId);
@@ -263,6 +263,29 @@ export function MyTicketsScreen() {
                 ]
               : []),
           ]}
+          mobileMenuLinks={[
+            {
+              label: "Beranda",
+              onPress: () => router.push("/" as Href),
+              testID: "nav-home",
+            },
+            {
+              label: "Cari Event",
+              onPress: () => router.push("/browse" as Href),
+              testID: "nav-browse",
+            },
+            { label: "Tiket Saya", onPress: () => {}, testID: "nav-tickets" },
+            {
+              label: "Arsip Event",
+              onPress: () => router.push("/history" as Href),
+              testID: "nav-history",
+            },
+            {
+              label: "Profil",
+              onPress: () => router.push("/profile" as Href),
+              testID: "nav-profile",
+            },
+          ]}
           onLogoPress={() => router.push("/" as Href)}
           onCtaPress={() => setLoginOpen(true)}
           actions={[]}
@@ -271,9 +294,16 @@ export function MyTicketsScreen() {
           contentContainerStyle={ticketsScrollContent(
             insets.top,
             insets.bottom,
+            isMobileWeb,
           )}
         >
-          <Text accessibilityRole="header" style={screenStyles.title}>
+          <Text
+            accessibilityRole="header"
+            style={[
+              screenStyles.title,
+              isMobileWeb && screenStyles.mobileWebTitle,
+            ]}
+          >
             Tiket Saya
           </Text>
           <Text style={screenStyles.description}>

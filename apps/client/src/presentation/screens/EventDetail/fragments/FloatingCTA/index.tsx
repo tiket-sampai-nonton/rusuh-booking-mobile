@@ -39,6 +39,7 @@ interface FloatingCTAProps {
   readonly canJoin: boolean;
   readonly ctaLabel: string;
   readonly onJoin: () => void;
+  readonly isMobileWeb?: boolean;
 }
 
 export function FloatingCTA({
@@ -46,6 +47,7 @@ export function FloatingCTA({
   canJoin,
   ctaLabel,
   onJoin,
+  isMobileWeb = false,
 }: FloatingCTAProps) {
   const isNative = Platform.OS !== "web";
 
@@ -91,16 +93,39 @@ export function FloatingCTA({
 
   return (
     <Animated.View
-      style={[styles.floatingCta, floatingCtaEntranceStyle(slideAnim)]}
+      style={[
+        styles.floatingCta,
+        isMobileWeb && styles.mobileWebFloatingCta,
+        floatingCtaEntranceStyle(slideAnim),
+      ]}
     >
       <View style={styles.floatingCtaInner}>
         {/* Left: Price Info */}
-        <View style={styles.floatingCtaInfo}>
-          <Text style={styles.floatingCtaPriceLabel}>Mulai dari</Text>
-          <Text style={styles.floatingCtaPrice}>{priceText}</Text>
+        <View
+          style={[
+            styles.floatingCtaInfo,
+            isMobileWeb && styles.mobileWebFloatingCtaInfo,
+          ]}
+        >
+          <Text
+            style={[
+              styles.floatingCtaPriceLabel,
+              isMobileWeb && styles.mobileWebFloatingCtaLabel,
+            ]}
+          >
+            Mulai dari
+          </Text>
+          <Text
+            style={[
+              styles.floatingCtaPrice,
+              isMobileWeb && styles.mobileWebFloatingCtaPrice,
+            ]}
+          >
+            {priceText}
+          </Text>
 
           {/* Trust Badges - Web only */}
-          {!isNative && <TrustBadges />}
+          {!isNative && !isMobileWeb && <TrustBadges />}
         </View>
 
         {/* Right: CTA Button */}
@@ -119,6 +144,7 @@ export function FloatingCTA({
             canJoin={canJoin}
             onJoin={onJoin}
             pulseAnim={pulseAnim}
+            isMobileWeb={isMobileWeb}
           />
         )}
       </View>

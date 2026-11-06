@@ -13,10 +13,12 @@
 import { useRouter, type Href } from "expo-router";
 import { useEffect } from "react";
 import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Seo } from "@presentation/components/Seo";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 import { useSessionStore } from "@presentation/stores/session-store";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 import { VerificationFailure } from "./fragments/VerificationFailure";
 import { VerificationProgress } from "./fragments/VerificationProgress";
 
@@ -31,6 +33,8 @@ export function PaymentResultScreen({
   attemptId,
 }: PaymentResultScreenProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { isMobileWeb } = useResponsive();
   // Fall back to the attempt recorded at createAttempt (refresh-safe) when the
   // callback return did not carry it (e.g. the WebView path). Scalar selector
   // (never a fresh object) so this does not re-render in a loop.
@@ -56,7 +60,16 @@ export function PaymentResultScreen({
 
   return (
     <View
-      className="flex-1 items-center justify-center bg-background p-6"
+      className={
+        isMobileWeb
+          ? "flex-1 items-center bg-background px-4"
+          : "flex-1 items-center justify-center bg-background p-6"
+      }
+      style={
+        isMobileWeb
+          ? { justifyContent: "flex-start", paddingTop: insets.top + 72 }
+          : undefined
+      }
       testID="payment-result"
     >
       <Seo

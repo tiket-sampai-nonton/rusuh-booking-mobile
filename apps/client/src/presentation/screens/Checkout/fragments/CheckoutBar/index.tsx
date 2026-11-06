@@ -7,6 +7,7 @@
  * - "Lanjut Bayar" button with white fill effect
  */
 import { Pressable, Text, View, Platform } from "react-native";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import { minorToIDR } from "@domain/services/money";
 
@@ -23,10 +24,17 @@ export function CheckoutBar({
   onSubmit,
   bottomInset,
 }: CheckoutBarProps) {
+  const { isMobileWeb } = useResponsive();
   const canSubmit = ready && !pending && !expired;
 
   return (
-    <View style={[styles.container, styleForCheckoutBarView0(bottomInset)]}>
+    <View
+      style={[
+        styles.container,
+        isMobileWeb && styles.mobileWebContainer,
+        styleForCheckoutBarView0(bottomInset, isMobileWeb),
+      ]}
+    >
       {/* Error message */}
       {errorMessage ? (
         <Text style={styles.errorText} accessibilityLiveRegion="polite">
@@ -34,11 +42,24 @@ export function CheckoutBar({
         </Text>
       ) : null}
 
-      <View style={styles.content}>
+      <View style={[styles.content, isMobileWeb && styles.mobileWebContent]}>
         {/* Total */}
         <View>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue} testID="checkout-total">
+          <Text
+            style={[
+              styles.totalLabel,
+              isMobileWeb && styles.mobileWebTotalLabel,
+            ]}
+          >
+            Total
+          </Text>
+          <Text
+            style={[
+              styles.totalValue,
+              isMobileWeb && styles.mobileWebTotalValue,
+            ]}
+            testID="checkout-total"
+          >
             {minorToIDR(totalMinor)}
           </Text>
         </View>
@@ -53,6 +74,7 @@ export function CheckoutBar({
           testID="checkout-submit"
           style={({ pressed }) => [
             styles.payButton,
+            isMobileWeb && styles.mobileWebPayButton,
             Platform.OS !== "web" && styles.payButtonNative,
             pressed && styles.payButtonPressed,
             !canSubmit && styles.payButtonDisabled,
@@ -64,6 +86,7 @@ export function CheckoutBar({
               numberOfLines={1}
               style={[
                 styles.payButtonText,
+                isMobileWeb && styles.mobileWebPayButtonText,
                 (pressed || !canSubmit) && styles.payButtonTextPressed,
               ]}
             >

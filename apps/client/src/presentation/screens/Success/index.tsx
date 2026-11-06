@@ -34,6 +34,7 @@ import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
 import { ArrowIcon } from "@presentation/components/ArrowIcon";
 import { useSessionStore } from "@presentation/stores/session-store";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 import { designColors } from "@presentation/theme";
 import { successStyles, componentStyles } from "./style";
 import { styleForSuccessScreenView0 } from "./style";
@@ -45,6 +46,7 @@ export interface SuccessScreenProps {
 export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isMobileWeb } = useResponsive();
   const attemptId = useSessionStore((s) => s.attemptId);
   const amountMinor = useSessionStore((s) => s.amountMinor);
   const buyerNikMasked = useSessionStore((s) => s.buyerNikMasked);
@@ -91,8 +93,12 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
 
   return (
     <View
-      className="flex-1 items-center justify-center px-6"
-      style={styleForSuccessScreenView0(insets)}
+      className={
+        isMobileWeb
+          ? "flex-1 items-center px-4"
+          : "flex-1 items-center justify-center px-6"
+      }
+      style={styleForSuccessScreenView0(insets, isMobileWeb)}
       testID="success-screen"
     >
       <Seo
@@ -109,10 +115,16 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
         >
           <ActivityIndicator
             size="large"
-            color={designColors.ground}
+            color={isMobileWeb ? designColors.ink : designColors.ground}
             accessibilityLabel="Memverifikasi pembayaran"
           />
-          <Text className="text-center text-base text-white">
+          <Text
+            className={
+              isMobileWeb
+                ? "text-center text-base text-foreground"
+                : "text-center text-base text-white"
+            }
+          >
             {verificationMessage}
           </Text>
         </View>
@@ -126,12 +138,20 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
             showsVerticalScrollIndicator={false}
           >
             {/* Green success ring (prototype `.success-icon`). */}
-            <View className="mb-6 items-center">
+            <View className="mb-4 items-center">
               <View
                 className="h-20 w-20 items-center justify-center rounded-full"
-                style={componentStyles.elementBorderWidth1}
+                style={[
+                  componentStyles.elementBorderWidth1,
+                  isMobileWeb && componentStyles.mobileWebSuccessRing,
+                ]}
               >
-                <CheckIcon color={designColors.ground} size={32} />
+                <CheckIcon
+                  color={
+                    isMobileWeb ? designColors.success : designColors.ground
+                  }
+                  size={32}
+                />
               </View>
             </View>
 
@@ -143,33 +163,56 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               Pembayaran berhasil
             </Text>
             <Text
-              className="mt-2 text-center text-2xl font-extrabold uppercase text-white"
-              style={componentStyles.elementLetterSpacing3}
+              className={
+                isMobileWeb
+                  ? "mt-2 text-center text-2xl font-extrabold uppercase text-foreground"
+                  : "mt-2 text-center text-2xl font-extrabold uppercase text-white"
+              }
+              style={[
+                componentStyles.elementLetterSpacing3,
+                isMobileWeb && componentStyles.mobileWebText,
+              ]}
               accessibilityRole="header"
             >
               Tiket kamu sudah aktif
             </Text>
-            <Text className="mt-2.5 text-center text-xs leading-5 text-white/70">
+            <Text
+              className={
+                isMobileWeb
+                  ? "mt-1.5 text-center text-xs leading-5 text-muted-foreground"
+                  : "mt-2.5 text-center text-xs leading-5 text-white/70"
+              }
+            >
               Simpan e-tiket ini. Tunjukkan QR di pintu masuk.
             </Text>
 
             {/* Summary card — translucent on the dark ground (prototype `.summary-card`). */}
             <View
-              className="my-6 gap-1 p-5"
-              style={componentStyles.elementBackgroundColor4}
+              className={isMobileWeb ? "my-4 gap-1 p-3" : "my-6 gap-1 p-5"}
+              style={[
+                componentStyles.elementBackgroundColor4,
+                isMobileWeb && componentStyles.mobileWebSummary,
+              ]}
             >
-              <SummaryRow label="Nomor Pesanan" value={bookingId} />
+              <SummaryRow
+                label="Nomor Pesanan"
+                value={bookingId}
+                isMobileWeb={isMobileWeb}
+              />
               <SummaryRow
                 label="Jumlah tiket"
                 value={`${ticketCount ?? 1} tiket`}
+                isMobileWeb={isMobileWeb}
               />
               <SummaryRow
                 label="Total dibayar"
                 value={minorToIDR(amountMinor)}
+                isMobileWeb={isMobileWeb}
               />
               <SummaryRow
                 label="NIK pembeli"
                 value={buyerNikMasked ?? "••••"}
+                isMobileWeb={isMobileWeb}
               />
             </View>
 
@@ -192,7 +235,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               ))}
             </View>
 
-            <View className="mt-7 flex-row gap-3">
+            <View className="mt-5 flex-row gap-3">
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Unduh e-tiket"
@@ -217,11 +260,21 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
                 testID="success-home"
                 onPress={() => router.replace("/" as Href)}
                 className="flex-1 items-center py-4"
-                style={componentStyles.elementBorderWidth7}
+                style={[
+                  componentStyles.elementBorderWidth7,
+                  isMobileWeb && componentStyles.mobileWebSecondaryButton,
+                ]}
               >
                 <Text
-                  className="text-sm font-bold uppercase text-white"
-                  style={componentStyles.elementLetterSpacing8}
+                  className={
+                    isMobileWeb
+                      ? "text-sm font-bold uppercase text-foreground"
+                      : "text-sm font-bold uppercase text-white"
+                  }
+                  style={[
+                    componentStyles.elementLetterSpacing8,
+                    isMobileWeb && componentStyles.mobileWebText,
+                  ]}
                 >
                   Ke Beranda
                 </Text>
@@ -238,8 +291,18 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
 
             {/* Email note (v2-mobile prototype 10-success.html `.email-note`) */}
             <View className="mt-4 flex-row items-center justify-center gap-2">
-              <MailIcon color="rgba(255,255,255,0.6)" size={16} />
-              <Text style={componentStyles.elementFontSize10}>
+              <MailIcon
+                color={
+                  isMobileWeb ? designColors.gray : "rgba(255,255,255,0.6)"
+                }
+                size={16}
+              />
+              <Text
+                style={[
+                  componentStyles.elementFontSize10,
+                  isMobileWeb && componentStyles.mobileWebMutedText,
+                ]}
+              >
                 E-tiket juga dikirim ke email kamu
               </Text>
             </View>

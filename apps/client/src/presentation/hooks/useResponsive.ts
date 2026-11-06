@@ -28,6 +28,8 @@ export interface Responsive {
   readonly isNative: boolean;
   /** Web AND wide enough for the desktop container layout (≥ 960px). */
   readonly isDesktop: boolean;
+  /** Narrow browser layout that follows the approved mobile-web prototype. */
+  readonly isMobileWeb: boolean;
   readonly width: number;
   readonly height: number;
   /** Event-grid column count (prototype index.html breakpoints). */
@@ -55,6 +57,7 @@ export function useResponsive(): Responsive {
       isWeb: false,
       isNative: true,
       isDesktop: false,
+      isMobileWeb: false,
       width,
       height,
       gridColumns: 1,
@@ -76,6 +79,7 @@ export function useResponsive(): Responsive {
     isWeb: true,
     isNative: false,
     isDesktop,
+    isMobileWeb: width <= 640,
     width,
     height,
     gridColumns,

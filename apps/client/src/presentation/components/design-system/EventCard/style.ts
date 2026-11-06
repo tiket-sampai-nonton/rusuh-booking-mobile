@@ -47,18 +47,27 @@ export function eventCardImageContainerStyle(
   isNative: boolean,
   listMode: boolean,
   isWeb: boolean,
+  isMobileWeb = false,
 ): ViewStyle {
   let aspectRatio: number | undefined;
+  let width: ViewStyle["width"] = "100%";
+  let height: ViewStyle["height"];
   if (isNative) {
     aspectRatio = listMode ? 16 / 9 : 1;
+  } else if (isMobileWeb && listMode) {
+    width = 100;
+    height = 116;
   } else if (!listMode) {
     aspectRatio = 4 / 3;
+  } else if (isWeb && listMode) {
+    width = 240;
+    height = 160;
   }
 
   return {
     aspectRatio,
-    width: isWeb && listMode ? 240 : "100%",
-    height: isWeb && listMode ? 160 : undefined,
+    width,
+    height,
     flexShrink: 0,
     overflow: "hidden",
     position: "relative",
@@ -83,6 +92,7 @@ export function eventCardContentStyle(
   isNative: boolean,
   isWeb: boolean,
   listMode: boolean,
+  isMobileWeb = false,
 ): ViewStyle {
   let justifyContent: ViewStyle["justifyContent"];
   if (isNative) {
@@ -93,22 +103,34 @@ export function eventCardContentStyle(
 
   return {
     padding: contentPadding,
-    minHeight: isNative || (isWeb && listMode) ? 160 : undefined,
+    minHeight:
+      isMobileWeb && listMode
+        ? 116
+        : isNative || (isWeb && listMode)
+          ? 160
+          : undefined,
     justifyContent,
     flex: isWeb && listMode ? 1 : undefined,
   };
 }
 
-export function eventCardFooterStyle(isNative: boolean): ViewStyle {
+export function eventCardFooterStyle(
+  isNative: boolean,
+  isMobileWeb = false,
+): ViewStyle {
   return {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: designSpacingSemantic.s,
-    borderTopWidth: isNative ? 1 : designBorders.standard,
+    paddingTop: isMobileWeb ? 0 : designSpacingSemantic.s,
+    borderTopWidth: isMobileWeb ? 0 : isNative ? 1 : designBorders.standard,
     borderStyle: isNative ? "dashed" : "solid",
     borderTopColor: designColors.ink,
-    marginTop: isNative ? designSpacingSemantic.s : designSpacingSemantic.m,
+    marginTop: isMobileWeb
+      ? 4
+      : isNative
+        ? designSpacingSemantic.s
+        : designSpacingSemantic.m,
   };
 }
 
@@ -127,10 +149,10 @@ export function styleForEventCardAnimatedView1(): DynamicStyle {
   } as DynamicStyle;
 }
 
-export function styleForEventCardPressable2(): DynamicStyle {
+export function styleForEventCardPressable2(isMobileWeb = false): DynamicStyle {
   return {
     flexDirection: "row",
-    minHeight: 160,
+    minHeight: isMobileWeb ? 116 : 160,
     borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     backgroundColor: designColors.ground,

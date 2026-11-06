@@ -29,7 +29,7 @@ import { historyStyles, historyScrollContent } from "./style";
 export function HistoryScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isDesktop, gridColumns } = useResponsive();
+  const { isDesktop, isMobileWeb, gridColumns } = useResponsive();
   const { data, isLoading, isError, error } = useEvents();
 
   const history = data?.history ?? [];
@@ -50,12 +50,12 @@ export function HistoryScreen() {
   const goBrowse = (): void => router.push("/browse" as Href);
 
   // Nav links for desktop header
-  const navLinks = isDesktop
-    ? [
-        { label: "Jelajahi", onPress: goBrowse, testID: "history-nav-browse" },
-        { label: "Tiket Saya", onPress: noop, testID: "history-nav-tickets" },
-      ]
-    : [];
+  const navLinks = [
+    { label: "Beranda", onPress: goHome, testID: "history-nav-home" },
+    { label: "Jelajahi", onPress: goBrowse, testID: "history-nav-browse" },
+    { label: "Tiket Saya", onPress: noop, testID: "history-nav-tickets" },
+    { label: "Arsip Event", onPress: noop, testID: "history-nav-archive" },
+  ];
 
   return (
     <ScreenFade>
@@ -65,6 +65,21 @@ export function HistoryScreen() {
           topInset={insets.top}
           showLinks={isDesktop}
           links={navLinks}
+          mobileMenuLinks={[
+            { label: "Beranda", onPress: goHome, testID: "nav-home" },
+            { label: "Cari Event", onPress: goBrowse, testID: "nav-browse" },
+            {
+              label: "Tiket Saya",
+              onPress: () => router.push("/my-tickets" as Href),
+              testID: "nav-tickets",
+            },
+            { label: "Arsip Event", onPress: () => {}, testID: "nav-history" },
+            {
+              label: "Profil",
+              onPress: () => router.push("/profile" as Href),
+              testID: "nav-profile",
+            },
+          ]}
           onLogoPress={goHome}
           ctaLabel="Masuk / Daftar"
         />
@@ -74,19 +89,40 @@ export function HistoryScreen() {
           testID="history-scroll"
         >
           {/*  Hero section — black bg with title */}
-          <View style={historyStyles.hero}>
+          <View
+            style={[
+              historyStyles.hero,
+              isMobileWeb && historyStyles.mobileWebHero,
+            ]}
+          >
             <View style={historyStyles.heroContent}>
-              <Text style={historyStyles.heroTitle} accessibilityRole="header">
+              <Text
+                style={[
+                  historyStyles.heroTitle,
+                  isMobileWeb && historyStyles.mobileWebHeroTitle,
+                ]}
+                accessibilityRole="header"
+              >
                 Arsip Event
               </Text>
-              <Text style={historyStyles.heroSubtitle}>
+              <Text
+                style={[
+                  historyStyles.heroSubtitle,
+                  isMobileWeb && historyStyles.mobileWebHeroSubtitle,
+                ]}
+              >
                 Event yang sudah berlalu. Kartu diredam & tidak bisa diklik.
               </Text>
             </View>
           </View>
 
           {/* Main content */}
-          <View style={historyStyles.main}>
+          <View
+            style={[
+              historyStyles.main,
+              isMobileWeb && historyStyles.mobileWebMain,
+            ]}
+          >
             <Text style={historyStyles.sectionTitle}>Riwayat</Text>
 
             {historyContent}

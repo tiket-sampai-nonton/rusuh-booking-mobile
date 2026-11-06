@@ -33,3 +33,15 @@ export const checkoutSectionStyles = StyleSheet.create({
     letterSpacing: -0.4,
   },
 });
+
+export const compactSectionStyles = StyleSheet.create({
+  container: { marginTop: 20 },
+  header: {
+    gap: 10,
+    marginBottom: 14,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+  },
+  numberBadge: { width: 26, height: 26 },
+  title: { fontSize: 16, letterSpacing: -0.2 },
+});

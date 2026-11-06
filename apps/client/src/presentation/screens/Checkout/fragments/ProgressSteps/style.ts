@@ -37,6 +37,9 @@ export const componentStyles = StyleSheet.create({
     gap: 8,
     zIndex: 3,
   },
+  mobileWebContainer: { paddingVertical: 8 },
+  mobileWebMaxWidth: { paddingHorizontal: 16 },
+  mobileWebLabel: { fontSize: 9, letterSpacing: 0.3 },
 });
 
 export function styleForProgressStepsAnimatedView2(): DynamicStyle {

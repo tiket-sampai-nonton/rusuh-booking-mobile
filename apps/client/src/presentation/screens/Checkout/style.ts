@@ -76,9 +76,12 @@ export const checkoutStepNumberActive: ViewStyle = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /** Scroll content: max-width container on desktop (prototype max-width: 1200px) */
-export const checkoutScrollContent = (isDesktop: boolean): ViewStyle => ({
-  padding: designSpacingSemantic.m,
-  paddingBottom: 140, // Room for sticky bar
+export const checkoutScrollContent = (
+  isDesktop: boolean,
+  isMobileWeb = false,
+): ViewStyle => ({
+  padding: isMobileWeb ? 16 : designSpacingSemantic.m,
+  paddingBottom: isMobileWeb ? 92 : 140,
   ...(isDesktop
     ? {
         maxWidth: 800,

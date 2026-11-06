@@ -19,9 +19,15 @@ export interface HeaderProps {
   readonly onBack: () => void;
   readonly onShare?: () => void;
   readonly isScrolled?: boolean;
+  readonly isMobileWeb?: boolean;
 }
 
-export function Header({ onBack, onShare, isScrolled = false }: HeaderProps) {
+export function Header({
+  onBack,
+  onShare,
+  isScrolled = false,
+  isMobileWeb = false,
+}: HeaderProps) {
   const isNative = Platform.OS !== "web";
   const insets = useSafeAreaInsets();
   const headerStyle = isNative
@@ -34,7 +40,7 @@ export function Header({ onBack, onShare, isScrolled = false }: HeaderProps) {
           borderBottomColor: designColors.ink,
         },
       ]
-    : styles.header;
+    : [styles.header, isMobileWeb && styles.mobileWebDetailHeader];
 
   return (
     <Animated.View style={headerStyle}>

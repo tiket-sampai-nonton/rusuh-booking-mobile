@@ -19,6 +19,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
+  mobileWebContainer: { paddingHorizontal: 16, paddingVertical: 8 },
   backButton: {
     paddingVertical: 4,
   },
@@ -29,6 +30,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
+  mobileWebBackText: { fontSize: 12 },
   timerBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -38,6 +40,12 @@ export const styles = StyleSheet.create({
     backgroundColor: designColors.ground,
     paddingHorizontal: 16,
     paddingVertical: 10,
+  },
+  mobileWebTimerBadge: {
+    gap: 7,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
   },
   timerBadgeWarning: {
     borderColor: "#ff0000",
@@ -59,6 +67,7 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     fontVariant: ["tabular-nums"],
   },
+  mobileWebTimerText: { fontSize: 13 },
   timerTextWarning: {
     color: designColors.ground,
   },

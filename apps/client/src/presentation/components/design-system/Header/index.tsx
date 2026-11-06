@@ -19,7 +19,7 @@
  * Links (desktop > 720px): center nav links with hover underline slide
  * CTA: "Masuk / Daftar" black button with ink-spread hover (desktop only)
  */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, {
   Easing,
@@ -41,12 +41,15 @@ import {
 } from "@presentation/utils/style";
 import { IconButton } from "./IconButton";
 import { NavLink } from "./NavLink";
+import { LoginModal } from "@presentation/components/auth/LoginModal";
 import type { HeaderAction } from "./types";
 import {
   componentStyles,
   headerContainerStyle,
   headerInnerStyle,
   headerRowStyle,
+  headerMobileMenuBackdrop,
+  headerMobileMenuPanel,
 } from "./style";
 import {
   styleForHeaderAnimatedView2,
@@ -62,11 +65,9 @@ export interface HeaderProps {
   /** Show center nav links (desktop only) */
   readonly showLinks?: boolean;
   /** Nav link data */
-  readonly links?: readonly {
-    label: string;
-    testID?: string;
-    onPress: () => void;
-  }[];
+  readonly links?: readonly HeaderNavLink[];
+  /** Complete navigation for the mobile web menu, independent of desktop links. */
+  readonly mobileMenuLinks?: readonly HeaderNavLink[];
   /** CTA button press handler (desktop: "Masuk / Daftar", mobile: login icon) */
   readonly onCtaPress?: () => void;
   /** Logo press handler */
@@ -79,10 +80,17 @@ export interface HeaderProps {
   readonly actions?: readonly HeaderAction[];
 }
 
+export interface HeaderNavLink {
+  readonly label: string;
+  readonly testID?: string;
+  readonly onPress: () => void;
+}
+
 export function Header({
   topInset = 0,
   showLinks = false,
   links = [],
+  mobileMenuLinks,
   onCtaPress,
   onLogoPress,
   ctaLabel = "Masuk / Daftar",
@@ -90,7 +98,9 @@ export function Header({
   actions = [],
 }: HeaderProps) {
   const reducedMotion = useReducedMotion();
-  const { headerHeight, isNative } = useResponsive();
+  const { headerHeight, isNative, isMobileWeb } = useResponsive();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [fallbackLoginOpen, setFallbackLoginOpen] = useState(false);
   const slideIn = useSharedValue(reducedMotion ? 1 : 0);
   const ctaHover = useSharedValue(0);
 
@@ -147,6 +157,13 @@ export function Header({
   const containerStyle = headerContainerStyle;
   const innerStyle = headerInnerStyle(topInset);
   const rowStyle = headerRowStyle(headerHeight);
+
+  const visibleCtaLabel = isMobileWeb ? "Masuk" : ctaLabel;
+  const menuLinks = mobileMenuLinks?.length ? mobileMenuLinks : links;
+  const handleCtaPress = () => {
+    if (onCtaPress) onCtaPress();
+    else setFallbackLoginOpen(true);
+  };
 
   return (
     <Animated.View style={[containerStyle, headerStyle, pointerEventsBoxNone]}>
@@ -208,13 +225,13 @@ export function Header({
               ))}
             </View>
           )}
-          {!isNative && !isLoggedIn && (
+          {!isNative && !isMobileWeb && !isLoggedIn && (
             /* Desktop/Web: CTA button with ink spread hover (prototype .btn-ghost) */
             <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel={ctaLabel}
               testID="header-cta"
-              onPress={onCtaPress}
+              onPress={handleCtaPress}
               onHoverIn={() => setCtaHover(true)}
               onHoverOut={() => setCtaHover(false)}
               onPressIn={() => setCtaHover(true)}
@@ -232,12 +249,80 @@ export function Header({
               <Animated.Text
                 style={[styleForHeaderAnimatedText3(), ctaTextStyle]}
               >
-                {ctaLabel}
+                {visibleCtaLabel}
               </Animated.Text>
             </AnimatedPressable>
           )}
+
+          {!isNative && isMobileWeb && (
+            <View style={componentStyles.mobileActions}>
+              {!isLoggedIn && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Masuk atau daftar"
+                  onPress={handleCtaPress}
+                  testID="header-cta"
+                  style={componentStyles.mobileCta}
+                >
+                  <Text style={componentStyles.mobileCtaText}>Masuk</Text>
+                </Pressable>
+              )}
+              {menuLinks.length > 0 && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={menuOpen ? "Tutup menu" : "Buka menu"}
+                  accessibilityState={{ expanded: menuOpen }}
+                  onPress={() => setMenuOpen((open) => !open)}
+                  testID="header-menu-toggle"
+                  style={componentStyles.mobileMenuToggle}
+                >
+                  <View style={componentStyles.menuLine} />
+                  <View style={componentStyles.menuLine} />
+                  <View style={componentStyles.menuLine} />
+                </Pressable>
+              )}
+            </View>
+          )}
         </View>
       </View>
+
+      {isMobileWeb && menuOpen && menuLinks.length > 0 ? (
+        <>
+          <Pressable
+            accessibilityLabel="Tutup menu navigasi"
+            onPress={() => setMenuOpen(false)}
+            testID="header-menu-backdrop"
+            style={headerMobileMenuBackdrop(topInset + headerHeight)}
+          />
+          <View
+            accessibilityRole="menu"
+            style={headerMobileMenuPanel(topInset + headerHeight)}
+            testID="header-mobile-menu"
+          >
+            {menuLinks.map((link) => (
+              <Pressable
+                key={link.label}
+                accessibilityRole="menuitem"
+                onPress={() => {
+                  setMenuOpen(false);
+                  link.onPress();
+                }}
+                testID={link.testID ? `mobile-${link.testID}` : undefined}
+                style={componentStyles.mobileMenuItem}
+              >
+                <Text style={componentStyles.mobileMenuLabel}>
+                  {link.label}
+                </Text>
+                <Text style={componentStyles.mobileMenuArrow}>›</Text>
+              </Pressable>
+            ))}
+          </View>
+        </>
+      ) : null}
+
+      {!onCtaPress && fallbackLoginOpen ? (
+        <LoginModal visible onClose={() => setFallbackLoginOpen(false)} />
+      ) : null}
     </Animated.View>
   );
 }

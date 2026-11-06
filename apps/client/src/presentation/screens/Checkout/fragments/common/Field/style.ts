@@ -5,6 +5,7 @@ import type { DynamicStyle } from "@presentation/utils/style";
 
 export const checkoutFieldStyles = StyleSheet.create({
   container: { marginTop: 16 },
+  mobileWebContainer: { marginTop: 12 },
   label: {
     color: designColors.ink,
     fontSize: 12,
@@ -13,6 +14,8 @@ export const checkoutFieldStyles = StyleSheet.create({
     letterSpacing: 0.6,
     marginBottom: 8,
   },
+  mobileWebLabel: { fontSize: 11, marginBottom: 5, letterSpacing: 0.4 },
+  mobileWebInput: { minHeight: 46, paddingVertical: 11, paddingHorizontal: 12 },
   error: {
     color: designColors.danger,
     fontSize: 12,

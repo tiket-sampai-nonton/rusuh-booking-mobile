@@ -173,6 +173,7 @@ export const designDetailStyles = StyleSheet.create({
     // Hidden on native
     display: Platform.OS === "web" ? "flex" : "none",
   },
+  mobileWebStepsContainer: { display: "none" },
   step: {
     flex: 1,
     flexDirection: "column",
@@ -241,6 +242,7 @@ export const designDetailStyles = StyleSheet.create({
     justifyContent: "flex-end",
     overflow: "hidden",
   },
+  mobileWebHero: { height: 210, minHeight: 210 },
   heroBg: {
     position: "absolute",
     top: 0,
@@ -292,6 +294,83 @@ export const designDetailStyles = StyleSheet.create({
     maxWidth: 1200,
     width: "100%",
   },
+  mobileWebHeroContent: { padding: 16, paddingHorizontal: 16 },
+  mobileWebHeroBadge: { marginBottom: 6, backgroundColor: designColors.ground },
+  mobileWebHeroBadgeText: { color: designColors.ink },
+  mobileWebHeroTitle: {
+    color: designColors.ground,
+    fontSize: 30,
+    lineHeight: 32,
+    letterSpacing: -1.2,
+    marginBottom: 6,
+  },
+  mobileWebHeroSubtitle: {
+    color: "rgba(255,255,255,0.9)",
+    fontSize: 13,
+    marginBottom: 8,
+  },
+  mobileWebHeroMeta: { gap: 4 },
+  mobileWebHeroMetaText: { color: designColors.ground, fontSize: 11 },
+  mobileWebTicketStats: {
+    flexDirection: "row",
+    borderBottomWidth: designBorders.standard,
+    borderBottomColor: designColors.ink,
+  },
+  mobileWebTicketStat: { flex: 1, paddingVertical: 10, paddingHorizontal: 16 },
+  mobileWebTicketStatSecond: {
+    borderLeftWidth: 1,
+    borderLeftColor: designColors.ink,
+  },
+  mobileWebTicketStatLabel: {
+    color: designColors.gray,
+    fontFamily: plusJakartaSansFonts.bold,
+    fontSize: 9,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  mobileWebTicketStatValue: {
+    marginTop: 2,
+    color: designColors.ink,
+    fontFamily: plusJakartaSansFonts.extraBold,
+    fontSize: 14,
+  },
+  mobileWebDetailHeader: {
+    position: "relative",
+    height: 56,
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+    backgroundColor: designColors.ground,
+    borderBottomWidth: designBorders.standard,
+    borderBottomColor: designColors.ink,
+  },
+  mobileWebContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: FLOATING_CTA_HEIGHT + 24,
+  },
+  mobileWebSection: { marginBottom: 18 },
+  mobileWebSectionTitle: {
+    fontSize: 17,
+    paddingBottom: 8,
+    marginBottom: 12,
+  },
+  mobileWebCategoryFrame: {
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: designColors.field,
+    marginBottom: 0,
+  },
+  mobileWebCategoryItem: { paddingVertical: 10, paddingHorizontal: 0 },
+  mobileWebFloatingCta: { paddingHorizontal: 16, paddingVertical: 10 },
+  mobileWebFloatingCtaInfo: { flex: 0, minWidth: 90 },
+  mobileWebFloatingCtaLabel: { fontSize: 9 },
+  mobileWebFloatingCtaPrice: { fontSize: 16 },
+  mobileWebFloatingCtaButton: {
+    minHeight: 48,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  mobileWebFloatingCtaButtonText: { fontSize: 12 },
   heroBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -926,8 +1005,13 @@ export const designDetailStyles = StyleSheet.create({
 // SCROLL CONTENT HELPER
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const designDetailScrollContent = (isDesktop: boolean): object => ({
-  paddingBottom: FLOATING_CTA_HEIGHT + designSpacingSemantic.l,
+export const designDetailScrollContent = (
+  isDesktop: boolean,
+  isMobileWeb = false,
+): object => ({
+  paddingBottom: isMobileWeb
+    ? FLOATING_CTA_HEIGHT + 16
+    : FLOATING_CTA_HEIGHT + designSpacingSemantic.l,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════

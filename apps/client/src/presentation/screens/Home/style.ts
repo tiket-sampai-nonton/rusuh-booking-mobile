@@ -32,7 +32,8 @@ export const homeStyles = StyleSheet.create({
 });
 
 /** Scroll content bottom inset (runtime). */
-export const homeScrollContent = (bottom: number) => ({
+export const homeScrollContent = (bottom: number, top = 0) => ({
+  ...(top > 0 ? { paddingTop: top } : {}),
   paddingBottom: bottom,
 });
 

@@ -12,6 +12,7 @@ export function WebCTAButton({
   canJoin,
   onJoin,
   pulseAnim,
+  isMobileWeb = false,
 }: CTAButtonProps) {
   return (
     <Animated.View
@@ -30,10 +31,18 @@ export function WebCTAButton({
         testID="join-cta"
         style={[
           styles.floatingCtaBtn,
+          isMobileWeb && styles.mobileWebFloatingCtaButton,
           disabled && styles.floatingCtaBtnDisabled,
         ]}
       >
-        <Text style={styles.floatingCtaBtnText}>{label}</Text>
+        <Text
+          style={[
+            styles.floatingCtaBtnText,
+            isMobileWeb && styles.mobileWebFloatingCtaButtonText,
+          ]}
+        >
+          {label}
+        </Text>
         {canJoin && (
           <ArrowIcon color={styles.floatingCtaArrow.color as string} />
         )}

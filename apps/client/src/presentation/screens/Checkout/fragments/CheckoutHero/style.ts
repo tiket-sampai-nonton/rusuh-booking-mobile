@@ -12,10 +12,12 @@ export const styles = StyleSheet.create({
     backgroundColor: designColors.ground,
     overflow: "hidden",
   },
+  compactContainer: { flexDirection: "row", alignItems: "stretch" },
   imageContainer: {
     height: 180,
     overflow: "hidden",
   },
+  compactImageContainer: { width: 82, height: 80, flexShrink: 0 },
   image: {
     width: "100%",
     height: "100%",
@@ -26,6 +28,12 @@ export const styles = StyleSheet.create({
     borderTopWidth: designBorders.standard,
     borderTopColor: designColors.ink,
   },
+  compactInfo: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 12,
+    borderTopWidth: 0,
+  },
   title: {
     color: designColors.ink,
     fontSize: 20,
@@ -33,6 +41,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: -0.4,
   },
+  compactTitle: { fontSize: 15, letterSpacing: -0.3 },
   subtitle: {
     color: designColors.gray,
     fontSize: 14,
@@ -40,4 +49,5 @@ export const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 22,
   },
+  compactSubtitle: { fontSize: 12, lineHeight: 17, marginTop: 4 },
 });

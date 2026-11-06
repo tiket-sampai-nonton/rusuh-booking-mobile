@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import { minorToIDR } from "@domain/services/money";
 import { designColors } from "@presentation/theme";
 import { ExternalLinkIcon } from "@presentation/components/ArrowIcon";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import type { PaymentBarProps } from "../../interface";
 import { paymentBar } from "../../style";
@@ -24,10 +25,14 @@ export function PaymentBar({
   onPay,
   bottomInset,
 }: PaymentBarProps) {
+  const { isMobileWeb } = useResponsive();
   return (
     <View
-      style={[paymentBar(bottomInset), styleForPaymentBarView0()]}
-      className="px-5 pt-4"
+      style={[
+        paymentBar(bottomInset, isMobileWeb),
+        styleForPaymentBarView0(isMobileWeb),
+      ]}
+      className={isMobileWeb ? "px-4 pt-2" : "px-5 pt-4"}
     >
       {errorMessage ? (
         <Text
@@ -38,7 +43,7 @@ export function PaymentBar({
           {errorMessage}
         </Text>
       ) : null}
-      <View className="flex-row items-center justify-between">
+      <View className="flex-row items-center justify-between gap-3">
         <View>
           <Text
             className="text-2xs uppercase tracking-tag"
@@ -60,17 +65,24 @@ export function PaymentBar({
           disabled={!canPay}
           onPress={onPay}
           testID="pay-now"
-          className="flex-row items-center gap-3 py-3.5 pl-6 pr-6"
-          style={styleForPaymentBarPressable1(canPay)}
+          className={
+            isMobileWeb
+              ? "flex-row items-center gap-2 px-4 py-3"
+              : "flex-row items-center gap-3 py-3.5 pl-6 pr-6"
+          }
+          style={styleForPaymentBarPressable1(canPay, isMobileWeb)}
         >
           <Text
             className="text-md font-extrabold uppercase"
-            style={styleForPaymentBarText2(canPay)}
+            style={styleForPaymentBarText2(canPay, isMobileWeb)}
           >
             {paymentButtonLabel(pending, expired, resumeLabel)}
           </Text>
           {canPay ? (
-            <ExternalLinkIcon color={designColors.ink} size={16} />
+            <ExternalLinkIcon
+              color={isMobileWeb ? designColors.ground : designColors.ink}
+              size={16}
+            />
           ) : null}
         </Pressable>
       </View>

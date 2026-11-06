@@ -16,6 +16,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { StepCircle } from "./StepCircle";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 import { componentStyles } from "./style";
 import {
   styleForProgressStepsAnimatedView2,
@@ -41,6 +42,7 @@ const STEPS = [
 ] as const;
 
 export function ProgressSteps({ currentStep }: ProgressStepsProps) {
+  const { isMobileWeb } = useResponsive();
   // Calculate progress line fill percentage (0%, 33%, 66%, 100%)
   const progressPercent = ((currentStep - 1) / (STEPS.length - 1)) * 100;
 
@@ -59,15 +61,27 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
   }));
 
   return (
-    <View style={componentStyles.elementBackgroundColor0}>
-      <View style={componentStyles.elementMaxWidth1}>
+    <View
+      style={[
+        componentStyles.elementBackgroundColor0,
+        isMobileWeb && componentStyles.mobileWebContainer,
+      ]}
+    >
+      <View
+        style={[
+          componentStyles.elementMaxWidth1,
+          isMobileWeb && componentStyles.mobileWebMaxWidth,
+        ]}
+      >
         <View style={componentStyles.elementFlexDirection2}>
           {/* Background line */}
-          <View style={componentStyles.elementPosition3} />
+          {!isMobileWeb && <View style={componentStyles.elementPosition3} />}
           {/* Progress line fill (animated) */}
-          <Animated.View
-            style={[styleForProgressStepsAnimatedView2(), animatedLineStyle]}
-          />
+          {!isMobileWeb && (
+            <Animated.View
+              style={[styleForProgressStepsAnimatedView2(), animatedLineStyle]}
+            />
+          )}
 
           {/* Steps */}
           {STEPS.map((step) => {
@@ -80,8 +94,14 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
                   number={step.id}
                   isActive={isActive}
                   isCompleted={isCompleted}
+                  compact={isMobileWeb}
                 />
-                <Text style={styleForProgressStepsText3(isActive, isCompleted)}>
+                <Text
+                  style={[
+                    styleForProgressStepsText3(isActive, isCompleted),
+                    isMobileWeb && componentStyles.mobileWebLabel,
+                  ]}
+                >
                   {step.label}
                 </Text>
               </View>

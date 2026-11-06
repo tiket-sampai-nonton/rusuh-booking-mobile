@@ -60,6 +60,7 @@ export const loginStyles = StyleSheet.create({
       WebkitBackdropFilter: "blur(4px)",
     }),
   },
+  mobileWebOverlay: { justifyContent: "flex-end", padding: 0 },
 
   // ---------------------------------------------------------------------------
   // Modal card — prototype .modal
@@ -73,6 +74,15 @@ export const loginStyles = StyleSheet.create({
     borderRadius: 0, // Brutalist: NO border-radius
     padding: designModal.padding, // 48px
     position: "relative",
+  },
+  mobileWebCard: {
+    maxWidth: "100%",
+    maxHeight: "92%",
+    padding: 16,
+    paddingTop: 56,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
   },
 
   // ---------------------------------------------------------------------------
@@ -91,6 +101,7 @@ export const loginStyles = StyleSheet.create({
     justifyContent: "center",
     zIndex: 10,
   },
+  mobileWebCloseBtn: { top: 8, right: 16 },
   closeBtnText: {
     fontFamily: plusJakartaSansFonts.bold,
     fontSize: 20,
@@ -151,6 +162,8 @@ export const loginStyles = StyleSheet.create({
     borderColor: designColors.ink,
     backgroundColor: designColors.field, // #f5f5f5
     borderRadius: 0, // Brutalist: NO border-radius
+    // RN Web inherits the browser's blue focus ring unless explicitly reset.
+    outlineWidth: 0,
   },
   // Focus state (applied via separate focused style)
   inputFocused: {
@@ -264,6 +277,7 @@ export const loginStyles = StyleSheet.create({
     justifyContent: "center",
     gap: designSpacingSemantic.xs, // 8px
   },
+  mobileWebOtpRow: { gap: 4 },
   otpBox: {
     width: OTP_BOX.width,
     height: OTP_BOX.height,
@@ -278,6 +292,7 @@ export const loginStyles = StyleSheet.create({
     padding: 0,
     letterSpacing: 0,
   },
+  mobileWebOtpBox: { width: 40, height: 48, fontSize: 16 },
   otpBoxFocused: {
     backgroundColor: designColors.ground,
     ...(hardShadowStyle(4, 4, designColors.ink) as TextStyle),
@@ -432,11 +447,12 @@ export function styleForLoginModalAnimatedView1(
   arg0: Animated.Value,
   arg1: Animated.Value,
   arg2: Animated.Value,
+  isMobileWeb = false,
 ): DynamicStyle {
   return {
     width: "100%",
-    maxWidth: 400,
-    maxHeight: Platform.OS === "web" ? undefined : "92%",
+    maxWidth: isMobileWeb ? "100%" : 400,
+    maxHeight: isMobileWeb ? "92%" : Platform.OS === "web" ? undefined : "92%",
     opacity: arg0,
     transform: [{ scale: arg1 }, { translateY: arg2 }],
   } as DynamicStyle;

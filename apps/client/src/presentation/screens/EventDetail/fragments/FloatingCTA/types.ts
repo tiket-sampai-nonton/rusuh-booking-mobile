@@ -6,4 +6,5 @@ export interface CTAButtonProps {
   readonly canJoin: boolean;
   readonly onJoin: () => void;
   readonly pulseAnim: Animated.Value;
+  readonly isMobileWeb?: boolean;
 }

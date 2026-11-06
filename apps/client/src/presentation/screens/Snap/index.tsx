@@ -19,6 +19,7 @@ import type { SnapOutcome } from "@domain/repositories/payment.repository";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useSnapSimulator } from "@presentation/hooks/useSnapSimulator";
 import { useSessionStore } from "@presentation/stores/session-store";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import { SnapActions } from "./fragments/SnapActions";
 import { SnapLogo } from "./fragments/SnapLogo";
@@ -37,6 +38,7 @@ import {
 
 export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
   const insets = useSafeAreaInsets();
+  const { isMobileWeb } = useResponsive();
   const router = useRouter();
   const { settle } = useSnapSimulator();
   const attemptId = useSessionStore((s) => s.attemptId);
@@ -85,9 +87,9 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
           contentContainerStyle={[
             snapStyles.scrollContent,
             {
-              paddingHorizontal: 28,
-              paddingTop: 28,
-              paddingBottom: insets.bottom + 40,
+              paddingHorizontal: isMobileWeb ? 16 : 28,
+              paddingTop: isMobileWeb ? 16 : 28,
+              paddingBottom: insets.bottom + (isMobileWeb ? 24 : 40),
               width: "100%",
             },
           ]}

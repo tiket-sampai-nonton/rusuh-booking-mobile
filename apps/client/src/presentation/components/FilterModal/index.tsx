@@ -26,6 +26,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CloseIcon } from "@presentation/components/ArrowIcon";
 import { designColors } from "@presentation/theme";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 import { PillGroup } from "./PillGroup";
 import { componentStyles } from "./style";
 import {
@@ -68,6 +69,7 @@ const SORTS = [
 
 export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
   const insets = useSafeAreaInsets();
+  const { isMobileWeb } = useResponsive();
   const [genre, setGenre] = useState("Semua");
   const [time, setTime] = useState("all");
   const [sort, setSort] = useState("closest");
@@ -89,7 +91,12 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
   }, [onClose, visible]);
 
   const sheetContent = (
-    <View style={componentStyles.elementFlex0}>
+    <View
+      style={[
+        componentStyles.elementFlex0,
+        isMobileWeb && componentStyles.mobileWebOverlay,
+      ]}
+    >
       <Pressable
         accessibilityLabel="Tutup penyaringan"
         onPress={onClose}
@@ -99,7 +106,7 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
       <Pressable
         onPress={(e) => e.stopPropagation()}
         accessibilityViewIsModal
-        style={styleForFilterModalPressable0(insets)}
+        style={styleForFilterModalPressable0(insets, isMobileWeb)}
         testID="filter-modal"
       >
         <View style={componentStyles.elementFlexDirection1}>

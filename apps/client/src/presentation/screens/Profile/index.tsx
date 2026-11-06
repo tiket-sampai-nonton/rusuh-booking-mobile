@@ -21,7 +21,7 @@ import { profileContentContainerStyle, styles } from "./style";
 export function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isWeb, width } = useResponsive();
+  const { isWeb, isMobileWeb, width } = useResponsive();
   const profile = useAccountStore((state) => state.profile);
   const clearProfile = useAccountStore((state) => state.clearProfile);
   const { userRepository, tokenStorage } = useServices();
@@ -89,6 +89,29 @@ export function ProfileScreen() {
                 ]
               : []),
           ]}
+          mobileMenuLinks={[
+            {
+              label: "Beranda",
+              onPress: () => router.push("/" as Href),
+              testID: "nav-home",
+            },
+            {
+              label: "Cari Event",
+              onPress: () => router.push("/browse" as Href),
+              testID: "nav-browse",
+            },
+            {
+              label: "Tiket Saya",
+              onPress: () => router.push("/my-tickets" as Href),
+              testID: "nav-tickets",
+            },
+            {
+              label: "Arsip Event",
+              onPress: () => router.push("/history" as Href),
+              testID: "nav-history",
+            },
+            { label: "Profil", onPress: () => {}, testID: "nav-profile" },
+          ]}
           onLogoPress={() => router.push("/" as Href)}
           onCtaPress={() => setLoginOpen(true)}
           isLoggedIn={Boolean(profile)}
@@ -98,9 +121,13 @@ export function ProfileScreen() {
           contentContainerStyle={profileContentContainerStyle(
             insets.top,
             insets.bottom,
+            isMobileWeb,
           )}
         >
-          <Text accessibilityRole="header" style={styles.heading}>
+          <Text
+            accessibilityRole="header"
+            style={[styles.heading, isMobileWeb && styles.mobileWebHeading]}
+          >
             Profil
           </Text>
           {profile ? (

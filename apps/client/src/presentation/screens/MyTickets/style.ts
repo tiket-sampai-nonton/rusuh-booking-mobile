@@ -9,11 +9,12 @@ import {
 export function ticketsScrollContent(
   topInset: number,
   bottomInset: number,
+  isMobileWeb = false,
 ): ViewStyle {
   return {
-    paddingTop: topInset + 88,
+    paddingTop: topInset + (isMobileWeb ? 72 : 88),
     paddingHorizontal: 16,
-    paddingBottom: bottomInset + 88,
+    paddingBottom: bottomInset + (isMobileWeb ? 24 : 88),
   };
 }
 
@@ -25,6 +26,7 @@ export const screenStyles = StyleSheet.create({
     fontSize: 32,
     textTransform: "uppercase",
   },
+  mobileWebTitle: { fontSize: 28, lineHeight: 34 },
   description: {
     marginTop: 8,
     color: designColors.inkMuted,

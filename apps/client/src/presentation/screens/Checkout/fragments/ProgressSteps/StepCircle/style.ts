@@ -15,6 +15,7 @@ export const stepCircleStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  compactCircle: { width: 26, height: 26, borderWidth: 1 },
   filledCircle: {
     backgroundColor: designColors.ink,
   },
@@ -25,6 +26,7 @@ export const stepCircleStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: plusJakartaSansFonts.bold,
   },
+  compactNumber: { fontSize: 11 },
   filledNumber: {
     color: designColors.ground,
   },

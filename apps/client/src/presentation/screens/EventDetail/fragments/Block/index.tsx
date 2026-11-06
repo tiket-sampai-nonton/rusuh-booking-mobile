@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { Animated, Text, View } from "react-native";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import type { BlockProps } from "../../interface";
 import { designDetailStyles as styles } from "../../style";
@@ -17,6 +18,7 @@ import { nativeDriverSupported } from "@presentation/utils/style";
 import { styleForBlockAnimatedView0 } from "./style";
 
 export function Block({ label, heading, children }: BlockProps) {
+  const { isMobileWeb } = useResponsive();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateAnim = useRef(new Animated.Value(30)).current;
   const [isVisible, setIsVisible] = useState(false);
@@ -51,11 +53,18 @@ export function Block({ label, heading, children }: BlockProps) {
     <Animated.View
       style={[
         styles.section,
+        isMobileWeb && styles.mobileWebSection,
         styleForBlockAnimatedView0(fadeAnim, translateAnim),
       ]}
     >
       {/* Section Title (label as title for ) */}
-      <Text style={styles.sectionTitle} accessibilityRole="header">
+      <Text
+        style={[
+          styles.sectionTitle,
+          isMobileWeb && styles.mobileWebSectionTitle,
+        ]}
+        accessibilityRole="header"
+      >
         {label}
       </Text>
 

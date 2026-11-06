@@ -14,9 +14,12 @@ export const paymentStyles = StyleSheet.create({
 export const paymentTopBar = (top: number) => ({ paddingTop: top + 10 });
 
 /** Scroll content: fixed bottom pad + optional desktop max-width container. */
-export const paymentScrollContent = (isDesktop: boolean) => ({
-  padding: 20,
-  paddingBottom: 120,
+export const paymentScrollContent = (
+  isDesktop: boolean,
+  isMobileWeb = false,
+) => ({
+  padding: isMobileWeb ? 16 : 20,
+  paddingBottom: isMobileWeb ? 88 : 120,
   ...(isDesktop
     ? {
         maxWidth: 620,
@@ -27,8 +30,9 @@ export const paymentScrollContent = (isDesktop: boolean) => ({
 });
 
 /**  mobile prototype sticky checkout bar — white ground + bottom safe-area inset. */
-export const paymentBar = (bottom: number) => ({
+export const paymentBar = (bottom: number, isMobileWeb = false) => ({
   backgroundColor: designColors.ground,
   borderTopColor: designColors.ink,
-  paddingBottom: bottom + 16,
+  paddingBottom: bottom + (isMobileWeb ? 8 : 16),
+  paddingHorizontal: isMobileWeb ? 16 : 20,
 });

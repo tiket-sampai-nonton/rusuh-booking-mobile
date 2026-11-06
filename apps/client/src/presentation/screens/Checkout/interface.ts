@@ -34,6 +34,7 @@ export interface CheckoutTopBarProps {
 
 export interface CheckoutHeroProps {
   readonly eventId: string;
+  readonly isMobileWeb?: boolean;
 }
 
 /** Per-row attendee-check status for the ticket row (RBT-052). */
