@@ -49,7 +49,7 @@ export function Loader({
 
   // Fixed array of letter bounce values (hooks must be called unconditionally)
   // Use useRef with makeMutable to avoid calling useSharedValue in a loop
-  const letterBouncesRef = useRef<Animated.SharedValue<number>[]>();
+  const letterBouncesRef = useRef<Animated.SharedValue<number>[] | null>(null);
   if (!letterBouncesRef.current) {
     letterBouncesRef.current = Array.from({ length: LOADER_MAX_LETTERS }, () => makeMutable(0));
   }

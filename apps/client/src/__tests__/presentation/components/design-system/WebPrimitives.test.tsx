@@ -13,8 +13,11 @@ let mockMotionReduced = false;
 jest.mock("react-native-reanimated", () => ({ useReducedMotion: () => mockMotionReduced }));
 
 jest.mock("react-native/Libraries/Utilities/Platform", () => ({
-  OS: "web",
-  select: (o: Record<string, unknown>) => o.web ?? o.default,
+  __esModule: true,
+  default: {
+    OS: "web",
+    select: (o: Record<string, unknown>) => o.web ?? o.default,
+  },
 }));
 
 // Import the two web-only primitives DIRECTLY (not via the index barrel, which
