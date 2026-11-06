@@ -37,7 +37,12 @@ class FakeQueueRepository implements QueueRepository {
     return { queueId: `q-${eventId}`, eventId, position: 5, status: "WAITING" };
   }
   async getStatus(queueId: string): Promise<QueueEntry> {
-    return { queueId, eventId: "evt-1", position: 3, status: this.statusToReturn };
+    return {
+      queueId,
+      eventId: "evt-1",
+      position: 3,
+      status: this.statusToReturn,
+    };
   }
   async getQueueStatus(): Promise<{ admissionRatePerMin?: number }> {
     return {};
@@ -74,7 +79,9 @@ function makeWrapper(repo: QueueRepository, storage: QueueMembershipStorage) {
 }
 
 describe("useRestoreMembership", () => {
-  beforeEach(() => { mockRouter = { push: jest.fn() }; });
+  beforeEach(() => {
+    mockRouter = { push: jest.fn() };
+  });
 
   it("resumes an ACTIVE membership and navigates once to the waiting room", async () => {
     const initialRouter = mockRouter;

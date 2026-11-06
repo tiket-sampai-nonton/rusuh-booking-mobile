@@ -5,7 +5,10 @@ export function categoryPrice(
   categoryId: string,
   categories: readonly BookingCategory[],
 ): number {
-  return categories.find((category) => category.categoryId === categoryId)?.priceMinor ?? 0;
+  return (
+    categories.find((category) => category.categoryId === categoryId)
+      ?.priceMinor ?? 0
+  );
 }
 
 /**

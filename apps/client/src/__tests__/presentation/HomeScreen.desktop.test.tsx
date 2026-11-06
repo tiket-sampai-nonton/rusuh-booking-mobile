@@ -30,21 +30,33 @@ jest.mock("@presentation/components/design-system/HeroCarousel", () => {
   const ReactMock = require("react");
   const { View } = require("react-native");
   return {
-    HeroCarousel: () => ReactMock.createElement(View, { testID: "hero-carousel" }),
+    HeroCarousel: () =>
+      ReactMock.createElement(View, { testID: "hero-carousel" }),
   };
 });
 jest.mock("@presentation/components/auth/LoginModal", () => {
   const ReactMock = require("react");
   const { Pressable, Text, TextInput, View } = require("react-native");
   return {
-    LoginModal: ({ visible, onClose }: { visible: boolean; onClose: () => void }) => visible
-      ? ReactMock.createElement(
-        View,
-        { testID: "login-card" },
-        ReactMock.createElement(TextInput, { testID: "login-email-input" }),
-        ReactMock.createElement(Pressable, { onPress: onClose, testID: "login-close" }, ReactMock.createElement(Text, null, "Tutup")),
-      )
-      : null,
+    LoginModal: ({
+      visible,
+      onClose,
+    }: {
+      visible: boolean;
+      onClose: () => void;
+    }) =>
+      visible
+        ? ReactMock.createElement(
+            View,
+            { testID: "login-card" },
+            ReactMock.createElement(TextInput, { testID: "login-email-input" }),
+            ReactMock.createElement(
+              Pressable,
+              { onPress: onClose, testID: "login-close" },
+              ReactMock.createElement(Text, null, "Tutup"),
+            ),
+          )
+        : null,
   };
 });
 
@@ -65,7 +77,8 @@ import { HomeScreen } from "@presentation/screens/Home";
 function repoReturning(events: readonly EventSummary[]): EventRepository {
   return {
     listEvents: async () => events,
-    getEventDetail: async (id) => events.find((e) => e.id === id) as EventDetail,
+    getEventDetail: async (id) =>
+      events.find((e) => e.id === id) as EventDetail,
   };
 }
 

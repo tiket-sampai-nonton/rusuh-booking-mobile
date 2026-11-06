@@ -1,4 +1,7 @@
-import { fieldFocusStyle, fieldInputStyle } from "@presentation/screens/Checkout/fragments/common/Field/style";
+import {
+  fieldFocusStyle,
+  fieldInputStyle,
+} from "@presentation/screens/Checkout/fragments/common/Field/style";
 
 describe("checkout field style states", () => {
   it("covers invalid, read-only, focused, and unfocused fields", () => {

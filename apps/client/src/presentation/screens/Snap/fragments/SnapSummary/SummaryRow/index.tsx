@@ -17,7 +17,10 @@ export function SummaryRow({ label, value, last = false }: SummaryRowProps) {
       <Text className="text-xs" style={snapSummaryStyles.label}>
         {label}
       </Text>
-      <Text className="flex-1 text-right text-xs font-bold" style={snapSummaryStyles.value}>
+      <Text
+        className="flex-1 text-right text-xs font-bold"
+        style={snapSummaryStyles.value}
+      >
         {value}
       </Text>
     </View>

@@ -428,18 +428,28 @@ export function styleForLoginModalView0(): DynamicStyle {
   return { justifyContent: "flex-end", padding: 0 } as DynamicStyle;
 }
 
-export function styleForLoginModalAnimatedView1(arg0: Animated.Value, arg1: Animated.Value, arg2: Animated.Value): DynamicStyle {
+export function styleForLoginModalAnimatedView1(
+  arg0: Animated.Value,
+  arg1: Animated.Value,
+  arg2: Animated.Value,
+): DynamicStyle {
   return {
-            width: "100%",
-            maxWidth: 400,
-            maxHeight: Platform.OS === "web" ? undefined : "92%",
-            opacity: arg0,
-            transform: [{ scale: arg1 }, { translateY: arg2 }],
-          } as DynamicStyle;
+    width: "100%",
+    maxWidth: 400,
+    maxHeight: Platform.OS === "web" ? undefined : "92%",
+    opacity: arg0,
+    transform: [{ scale: arg1 }, { translateY: arg2 }],
+  } as DynamicStyle;
 }
 
 export function styleForLoginModalPressable2(): DynamicStyle {
-  return { maxWidth: "100%", maxHeight: "100%", padding: 0, borderBottomWidth: 0, flexShrink: 1 } as DynamicStyle;
+  return {
+    maxWidth: "100%",
+    maxHeight: "100%",
+    padding: 0,
+    borderBottomWidth: 0,
+    flexShrink: 1,
+  } as DynamicStyle;
 }
 
 export function styleForLoginModalText3(): DynamicStyle {

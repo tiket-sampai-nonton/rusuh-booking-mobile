@@ -23,7 +23,13 @@ import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 class StatusRepo implements PaymentRepository {
   constructor(private readonly attempt: PaymentAttempt) {}
   async getPaymentPage(bookingId: string): Promise<PaymentPage> {
-    return { bookingId, methods: ["QRIS"], amountMinor: 1, paymentExpiresAt: "", serverTime: "" };
+    return {
+      bookingId,
+      methods: ["QRIS"],
+      amountMinor: 1,
+      paymentExpiresAt: "",
+      serverTime: "",
+    };
   }
   async createAttempt(
     bookingId: string,

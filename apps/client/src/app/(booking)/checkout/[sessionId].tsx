@@ -11,7 +11,12 @@ export default function CheckoutRoute() {
   const id = sessionId ?? "";
   return (
     <Fragment>
-      <Seo title="Checkout" description="Pilih tiket." path={`/checkout/${id}`} noindex />
+      <Seo
+        title="Checkout"
+        description="Pilih tiket."
+        path={`/checkout/${id}`}
+        noindex
+      />
       <CheckoutScreen sessionId={id} />
     </Fragment>
   );

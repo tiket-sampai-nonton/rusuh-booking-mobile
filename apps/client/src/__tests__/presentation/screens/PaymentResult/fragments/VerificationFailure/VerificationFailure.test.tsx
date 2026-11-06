@@ -7,14 +7,20 @@ describe("VerificationFailure", () => {
     const onReturn = jest.fn();
     render(<VerificationFailure missingAttemptId onReturn={onReturn} />);
 
-    expect(screen.getByTestId("payment-result-error").props.children).toMatch(/ID percobaan pembayaran tidak tersedia/);
+    expect(screen.getByTestId("payment-result-error").props.children).toMatch(
+      /ID percobaan pembayaran tidak tersedia/,
+    );
     fireEvent.press(screen.getByTestId("payment-result-return"));
     expect(onReturn).toHaveBeenCalledTimes(1);
   });
 
   it("explains a verification error", () => {
-    render(<VerificationFailure missingAttemptId={false} onReturn={jest.fn()} />);
+    render(
+      <VerificationFailure missingAttemptId={false} onReturn={jest.fn()} />,
+    );
 
-    expect(screen.getByTestId("payment-result-error").props.children).toMatch(/Gagal memeriksa status pembayaran/);
+    expect(screen.getByTestId("payment-result-error").props.children).toMatch(
+      /Gagal memeriksa status pembayaran/,
+    );
   });
 });

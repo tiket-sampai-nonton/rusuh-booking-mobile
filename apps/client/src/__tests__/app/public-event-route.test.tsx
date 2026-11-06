@@ -4,9 +4,13 @@ const mockParams: { eventId?: string } = {};
 const mockEventDetailScreen = jest.fn((_props: { eventId: string }) => null);
 
 jest.mock("expo-router", () => ({ useLocalSearchParams: () => mockParams }));
-jest.mock("@presentation/components/Seo", () => ({ Seo: () => null, eventJsonLd: jest.fn(() => ({})) }));
+jest.mock("@presentation/components/Seo", () => ({
+  Seo: () => null,
+  eventJsonLd: jest.fn(() => ({})),
+}));
 jest.mock("@presentation/screens/EventDetail", () => ({
-  EventDetailScreen: (props: { eventId: string }) => mockEventDetailScreen(props),
+  EventDetailScreen: (props: { eventId: string }) =>
+    mockEventDetailScreen(props),
 }));
 
 // eslint-disable-next-line import/first

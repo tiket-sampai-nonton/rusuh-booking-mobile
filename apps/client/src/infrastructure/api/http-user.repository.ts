@@ -18,9 +18,14 @@ import { toAuthSession, toUserProfile } from "@infrastructure/api/dto-mappers";
 import type { HttpClient } from "@infrastructure/http/http-client";
 
 export class HttpUserRepository implements UserRepository {
-  constructor(private readonly http: HttpClient, private readonly tokenStorage?: TokenStorage) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly tokenStorage?: TokenStorage,
+  ) {}
 
-  private async authHeaders(): Promise<Readonly<Record<string, string>> | undefined> {
+  private async authHeaders(): Promise<
+    Readonly<Record<string, string>> | undefined
+  > {
     const token = await this.tokenStorage?.load();
     return token ? { Authorization: `Bearer ${token}` } : undefined;
   }
@@ -57,7 +62,11 @@ export class HttpUserRepository implements UserRepository {
   }
 
   async getMe(): Promise<UserProfile> {
-    const res = await this.http.request({ method: "GET", url: "me", headers: await this.authHeaders() });
+    const res = await this.http.request({
+      method: "GET",
+      url: "me",
+      headers: await this.authHeaders(),
+    });
     return toUserProfile(unwrap<Parameters<typeof toUserProfile>[0]>(res));
   }
 }

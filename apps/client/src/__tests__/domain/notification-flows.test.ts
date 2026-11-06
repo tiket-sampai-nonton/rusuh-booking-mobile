@@ -51,7 +51,9 @@ describe("required notification flows (RBT-072 AC1)", () => {
 
 describe("notificationRoute", () => {
   it("returns the deep link when it is an in-app path", () => {
-    expect(notificationRoute({ deepLink: "/success/bk-1" })).toBe("/success/bk-1");
+    expect(notificationRoute({ deepLink: "/success/bk-1" })).toBe(
+      "/success/bk-1",
+    );
   });
   it("returns null for an absent or non-path link", () => {
     expect(notificationRoute({ deepLink: undefined })).toBeNull();

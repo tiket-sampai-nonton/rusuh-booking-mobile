@@ -5,8 +5,11 @@ import { designBorder } from "@presentation/theme";
 
 import type { SnapActionsProps } from "../../interface";
 import { componentStyles } from "./style";
-import { styleForSnapActionsPressable0, styleForSnapActionsPressable1, styleForSnapActionsPressable2 } from './style';
-
+import {
+  styleForSnapActionsPressable0,
+  styleForSnapActionsPressable1,
+  styleForSnapActionsPressable2,
+} from "./style";
 
 export function SnapActions({
   onSuccess,
@@ -14,7 +17,10 @@ export function SnapActions({
   onUnknown,
   pending = false,
 }: SnapActionsProps) {
-  const btnBase = { borderWidth: designBorder.base, opacity: pending ? 0.5 : 1 };
+  const btnBase = {
+    borderWidth: designBorder.base,
+    opacity: pending ? 0.5 : 1,
+  };
   return (
     <View className="gap-3">
       <Pressable
@@ -27,7 +33,10 @@ export function SnapActions({
         className="items-center py-3.5"
         style={styleForSnapActionsPressable0(btnBase)}
       >
-        <Text className="text-sm font-bold uppercase text-white" style={componentStyles.elementLetterSpacing0}>
+        <Text
+          className="text-sm font-bold uppercase text-white"
+          style={componentStyles.elementLetterSpacing0}
+        >
           Simulasikan pembayaran berhasil
         </Text>
       </Pressable>
@@ -41,7 +50,10 @@ export function SnapActions({
         className="items-center py-3.5"
         style={styleForSnapActionsPressable1(btnBase)}
       >
-        <Text className="text-sm font-bold uppercase" style={componentStyles.elementColor1}>
+        <Text
+          className="text-sm font-bold uppercase"
+          style={componentStyles.elementColor1}
+        >
           Simulasikan pembayaran gagal
         </Text>
       </Pressable>
@@ -55,7 +67,10 @@ export function SnapActions({
         className="items-center py-3.5"
         style={styleForSnapActionsPressable2(btnBase)}
       >
-        <Text className="text-sm font-bold uppercase" style={componentStyles.elementColor2}>
+        <Text
+          className="text-sm font-bold uppercase"
+          style={componentStyles.elementColor2}
+        >
           Simulasikan status belum pasti (verifying)
         </Text>
       </Pressable>

@@ -33,16 +33,32 @@ describe("PaymentBar (RBT-060)", () => {
       />,
     );
     expect(screen.getByText("Pembayaran gagal dibuat")).toBeTruthy();
-    expect(screen.getByTestId("pay-now").props.accessibilityState.disabled).toBe(true);
+    expect(
+      screen.getByTestId("pay-now").props.accessibilityState.disabled,
+    ).toBe(true);
   });
 
   it("shows 'Memproses…' while pending and 'Waktu habis' when expired (line 42)", () => {
     const { rerender } = render(
-      <PaymentBar amountMinor={0} canPay pending expired={false} onPay={jest.fn()} bottomInset={0} />,
+      <PaymentBar
+        amountMinor={0}
+        canPay
+        pending
+        expired={false}
+        onPay={jest.fn()}
+        bottomInset={0}
+      />,
     );
     expect(screen.getByText("Memproses…")).toBeTruthy();
     rerender(
-      <PaymentBar amountMinor={0} canPay={false} pending={false} expired onPay={jest.fn()} bottomInset={0} />,
+      <PaymentBar
+        amountMinor={0}
+        canPay={false}
+        pending={false}
+        expired
+        onPay={jest.fn()}
+        bottomInset={0}
+      />,
     );
     expect(screen.getByText("Waktu habis")).toBeTruthy();
   });
@@ -51,7 +67,9 @@ describe("PaymentBar (RBT-060)", () => {
 describe("PaymentSummary (RBT-060)", () => {
   it("renders the total with no fee line", () => {
     render(<PaymentSummary bookingId="bk-1" amountMinor={45000000} />);
-    expect(screen.getByTestId("payment-total").props.children).toBe("Rp 450.000");
+    expect(screen.getByTestId("payment-total").props.children).toBe(
+      "Rp 450.000",
+    );
     expect(screen.queryByText(/biaya layanan/i)).toBeNull();
   });
 });

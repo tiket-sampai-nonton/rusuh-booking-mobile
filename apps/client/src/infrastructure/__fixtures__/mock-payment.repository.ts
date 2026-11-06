@@ -138,7 +138,10 @@ export class MockPaymentRepository implements PaymentRepository {
     this.seq += 1;
     const pageToken = `pgt_${bookingId}_${this.seq}`;
     this.liveTokens.add(pageToken);
-    return { pageToken, pageUrl: `/payment/${bookingId}?rb_pay_token=${pageToken}` };
+    return {
+      pageToken,
+      pageUrl: `/payment/${bookingId}?rb_pay_token=${pageToken}`,
+    };
   }
 
   /** Exchange a one-time token (consumed); an unknown/used token is invalid. */

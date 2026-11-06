@@ -1,13 +1,12 @@
-import type { ReactNode } from 'react';
-import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { designColors } from '@presentation/theme';
+import type { ReactNode } from "react";
+import { Platform, Pressable, ScrollView, Text, View } from "react-native";
+import QRCode from "react-native-qrcode-svg";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { designColors } from "@presentation/theme";
 import { styles } from "./style";
-import { ticketQrContentStyle, ticketQrBackdropStyle } from './style';
+import { ticketQrContentStyle, ticketQrBackdropStyle } from "./style";
 
 export { ticketQrBackdropStyle } from "./style";
-
 
 interface BookingTicketQr {
   readonly ticketCode: string;
@@ -41,7 +40,7 @@ export function TicketQrSheet({
     ticketContent = (
       <View style={styles.fallbackQr}>
         <QRCode
-          value={`RBT|${bookingId || 'booking'}|1`}
+          value={`RBT|${bookingId || "booking"}|1`}
           size={190}
           color={designColors.ink}
           backgroundColor={designColors.ground}
@@ -51,7 +50,11 @@ export function TicketQrSheet({
   } else if (isLoading) {
     ticketContent = <Text style={styles.message}>Memuat QR…</Text>;
   } else if (isError) {
-    ticketContent = <Text style={styles.error}>QR tiket gagal dimuat. Silakan coba lagi.</Text>;
+    ticketContent = (
+      <Text style={styles.error}>
+        QR tiket gagal dimuat. Silakan coba lagi.
+      </Text>
+    );
   } else {
     ticketContent = bookingTickets.map((ticket, index) => (
       <View key={ticket.ticketCode} style={styles.ticketQr}>
@@ -86,13 +89,17 @@ export function TicketQrSheet({
         >
           <Text style={styles.title}>{eventName}</Text>
           {ticketContent}
-          <Text style={styles.instruction}>Tunjukkan kode ini di pintu masuk.</Text>
+          <Text style={styles.instruction}>
+            Tunjukkan kode ini di pintu masuk.
+          </Text>
           {bookingTickets && !isLoading && !isError && (
             <Pressable onPress={onDownload} style={styles.download}>
               <Text style={styles.downloadText}>Unduh E-Tiket</Text>
             </Pressable>
           )}
-          {downloadError ? <Text style={styles.errorText}>{downloadError}</Text> : null}
+          {downloadError ? (
+            <Text style={styles.errorText}>{downloadError}</Text>
+          ) : null}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Tutup QR tiket"

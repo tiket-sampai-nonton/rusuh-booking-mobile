@@ -19,18 +19,39 @@
  */
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef } from "react";
-import { Animated, Image, Platform, StyleSheet, Text, View, type ImageStyle } from "react-native";
+import {
+  Animated,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  type ImageStyle,
+} from "react-native";
 
-
-import { designColors, designDuration } from "@presentation/theme/event-design-tokens";
-import { CalendarIcon, ClockIcon, PinIcon } from "@presentation/components/ArrowIcon";
+import {
+  designColors,
+  designDuration,
+} from "@presentation/theme/event-design-tokens";
+import {
+  CalendarIcon,
+  ClockIcon,
+  PinIcon,
+} from "@presentation/components/ArrowIcon";
 
 import type { DetailHeroProps } from "../../interface";
 import { designDetailStyles as styles } from "../../style";
 import { nativeDriverSupported } from "@presentation/utils/style";
 import { heroStyles } from "./style";
-import { styleForDetailHeroAnimatedView0, styleForDetailHeroImage1, styleForDetailHeroAnimatedView2, styleForDetailHeroAnimatedText3, styleForDetailHeroAnimatedText4, styleForDetailHeroAnimatedView5, styleForDetailHeroAnimatedView6 } from './style';
-
+import {
+  styleForDetailHeroAnimatedView0,
+  styleForDetailHeroImage1,
+  styleForDetailHeroAnimatedView2,
+  styleForDetailHeroAnimatedText3,
+  styleForDetailHeroAnimatedText4,
+  styleForDetailHeroAnimatedView5,
+  styleForDetailHeroAnimatedView6,
+} from "./style";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HERO COMPONENT
@@ -82,7 +103,7 @@ export function DetailHero({
             duration: 20000,
             useNativeDriver: nativeDriverSupported(),
           }),
-        ])
+        ]),
       ).start();
     } else {
       // Native: settle animation (scale 1.1 → 1.05)
@@ -94,9 +115,10 @@ export function DetailHero({
     }
   }, [fadeAnim, scaleAnim, slideAnim]);
 
-  const isLive = statusLabel.toLowerCase().includes("live") ||
-                 statusLabel.toLowerCase().includes("tersedia") ||
-                 statusLabel.toLowerCase().includes("dibuka");
+  const isLive =
+    statusLabel.toLowerCase().includes("live") ||
+    statusLabel.toLowerCase().includes("tersedia") ||
+    statusLabel.toLowerCase().includes("dibuka");
 
   return (
     <View style={styles.hero}>
@@ -112,7 +134,8 @@ export function DetailHero({
           style={[
             StyleSheet.absoluteFill,
             // Web-only grayscale filter applied via inline style
-            Platform.OS === "web" && (styleForDetailHeroImage1() as unknown as ImageStyle),
+            Platform.OS === "web" &&
+              (styleForDetailHeroImage1() as unknown as ImageStyle),
           ]}
           resizeMode="cover"
           accessibilityIgnoresInvertColors
@@ -120,8 +143,12 @@ export function DetailHero({
         {/* Native: grayscale overlay (two-layer like home hero) */}
         {isNative && (
           <>
-            <View style={[StyleSheet.absoluteFill, heroStyles.nativeGrayscaleDark]} />
-            <View style={[StyleSheet.absoluteFill, heroStyles.nativeGrayscaleGray]} />
+            <View
+              style={[StyleSheet.absoluteFill, heroStyles.nativeGrayscaleDark]}
+            />
+            <View
+              style={[StyleSheet.absoluteFill, heroStyles.nativeGrayscaleGray]}
+            />
           </>
         )}
       </Animated.View>
@@ -225,9 +252,13 @@ export function DetailHero({
 // Helper to get icon for meta item
 function getMetaIcon(index: number) {
   switch (index) {
-    case 0: return <CalendarIcon />;
-    case 1: return <ClockIcon />;
-    case 2: return <PinIcon />;
-    default: return null;
+    case 0:
+      return <CalendarIcon />;
+    case 1:
+      return <ClockIcon />;
+    case 2:
+      return <PinIcon />;
+    default:
+      return null;
   }
 }

@@ -10,11 +10,9 @@ import { Pressable, Text, View, Platform } from "react-native";
 
 import { minorToIDR } from "@domain/services/money";
 
-
 import type { CheckoutBarProps } from "../../interface";
 import { styles } from "./style";
-import { styleForCheckoutBarView0, styleForCheckoutBarButton0 } from './style';
-
+import { styleForCheckoutBarView0, styleForCheckoutBarButton0 } from "./style";
 
 export function CheckoutBar({
   totalMinor,

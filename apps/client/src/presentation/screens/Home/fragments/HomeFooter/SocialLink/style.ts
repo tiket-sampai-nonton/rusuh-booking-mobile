@@ -31,12 +31,19 @@ export function socialLinkBorderStyle(): DynamicStyle {
   return { borderColor: designColors.ground } as DynamicStyle;
 }
 
-export function socialLinkContainerColor(hovered: number, groundColor: string): string {
+export function socialLinkContainerColor(
+  hovered: number,
+  groundColor: string,
+): string {
   "worklet";
   return hovered > 0.5 ? "transparent" : groundColor;
 }
 
-export function socialLinkTextColor(hovered: number, inkColor: string, groundColor: string): string {
+export function socialLinkTextColor(
+  hovered: number,
+  inkColor: string,
+  groundColor: string,
+): string {
   "worklet";
   return hovered > 0.5 ? inkColor : groundColor;
 }

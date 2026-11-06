@@ -58,7 +58,9 @@ describe("SecureStoreTokenStorage", () => {
     const storage = new SecureStoreTokenStorage();
     await storage.save("tok-3");
     await storage.clear();
-    expect(mockSecureStore.deleteItemAsync).toHaveBeenCalledWith(AUTH_TOKEN_KEY);
+    expect(mockSecureStore.deleteItemAsync).toHaveBeenCalledWith(
+      AUTH_TOKEN_KEY,
+    );
     expect(await storage.load()).toBeNull();
   });
 });

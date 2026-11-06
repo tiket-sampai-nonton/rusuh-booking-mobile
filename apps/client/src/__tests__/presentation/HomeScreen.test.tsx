@@ -49,23 +49,38 @@ jest.mock("react-native-reanimated", () => {
   return {
     ...actual,
     useReducedMotion: () => true,
-    useAnimatedScrollHandler: (callback: (event: { contentOffset: { y: number } }) => void) => callback,
+    useAnimatedScrollHandler: (
+      callback: (event: { contentOffset: { y: number } }) => void,
+    ) => callback,
   };
 });
 jest.mock("@presentation/components/design-system/HeroCarousel", () => {
   const ReactMock = require("react");
   const { Pressable, Text, View } = require("react-native");
   return {
-    HeroCarousel: ({ events, onBook, onSeeAll }: {
+    HeroCarousel: ({
+      events,
+      onBook,
+      onSeeAll,
+    }: {
       events: readonly { id: string; name: string }[];
       onBook: (eventId: string) => void;
       onSeeAll: () => void;
-    }) => ReactMock.createElement(
-      View,
-      { testID: "v2-hero" },
-      ReactMock.createElement(Pressable, { testID: "hero-book", onPress: () => onBook(events[0]?.id ?? "") }, ReactMock.createElement(Text, null, "Beli Tiket")),
-      ReactMock.createElement(Pressable, { testID: "hero-see-all", onPress: onSeeAll }, ReactMock.createElement(Text, null, "Lihat Semua")),
-    ),
+    }) =>
+      ReactMock.createElement(
+        View,
+        { testID: "v2-hero" },
+        ReactMock.createElement(
+          Pressable,
+          { testID: "hero-book", onPress: () => onBook(events[0]?.id ?? "") },
+          ReactMock.createElement(Text, null, "Beli Tiket"),
+        ),
+        ReactMock.createElement(
+          Pressable,
+          { testID: "hero-see-all", onPress: onSeeAll },
+          ReactMock.createElement(Text, null, "Lihat Semua"),
+        ),
+      ),
   };
 });
 
@@ -88,11 +103,17 @@ describe("HomeScreen", () => {
     mockResponsive.width = 393;
     mockResponsive.height = 852;
     act(() => useAccountStore.getState().clearProfile());
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
   });
 
   afterEach(() => {
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
     act(() => useAccountStore.getState().clearProfile());
   });
 
@@ -133,7 +154,9 @@ describe("HomeScreen", () => {
     expect(screen.getByText("Daftar Event")).toBeTruthy();
     expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
     // "Rusuh Fest 2026" shows in the static hero and catalog card.
-    expect(screen.getAllByText("Rusuh Fest 2026").length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText("Rusuh Fest 2026").length,
+    ).toBeGreaterThanOrEqual(1);
     // History is rendered on Home when the repository provides past events.
     expect(screen.getByTestId("section-history")).toBeTruthy();
     fireEvent(screen.getByTestId("section-events"), "layout", {
@@ -220,7 +243,9 @@ describe("HomeScreen", () => {
     fireEvent.press(screen.getByTestId("filter-genre-Festival"));
     fireEvent.press(screen.getByTestId("filter-time-month"));
     fireEvent.press(screen.getByTestId("filter-apply"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/browse?genre=Festival&time=month&sort=closest");
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      "/browse?genre=Festival&time=month&sort=closest",
+    );
   });
 
   it("routes logged-in native bottom navigation to browse, tickets, and profile", async () => {

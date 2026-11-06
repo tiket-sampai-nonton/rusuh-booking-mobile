@@ -1,6 +1,6 @@
-import { Easing } from 'react-native-reanimated';
+import { Easing } from "react-native-reanimated";
 
-import { designEasing } from '@presentation/theme';
+import { designEasing } from "@presentation/theme";
 
 export const LOADER_EASE = Easing.bezier(...designEasing.primary);
 export const LOADER_LETTER_DURATION_MS = 600;

@@ -31,7 +31,10 @@ export function navItemLabelStyle(active: boolean): TextStyle {
   return { color: active ? designColors.ink : designColors.inkMuted };
 }
 
-export function navItemBackgroundStyle(pressed: number, fieldColor: string): ViewStyle {
+export function navItemBackgroundStyle(
+  pressed: number,
+  fieldColor: string,
+): ViewStyle {
   "worklet";
   return { backgroundColor: pressed > 0.5 ? fieldColor : "transparent" };
 }

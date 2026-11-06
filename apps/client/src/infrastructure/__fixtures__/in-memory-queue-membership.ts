@@ -20,12 +20,18 @@ export class InMemoryQueueMembership implements QueueMembershipStorage {
   private membership: QueueMembership | null = null;
 
   async save(membership: QueueMembership): Promise<void> {
-    this.membership = { eventId: membership.eventId, queueId: membership.queueId };
+    this.membership = {
+      eventId: membership.eventId,
+      queueId: membership.queueId,
+    };
   }
 
   async load(): Promise<QueueMembership | null> {
     if (this.membership === null) return null;
-    return { eventId: this.membership.eventId, queueId: this.membership.queueId };
+    return {
+      eventId: this.membership.eventId,
+      queueId: this.membership.queueId,
+    };
   }
 
   async clear(): Promise<void> {

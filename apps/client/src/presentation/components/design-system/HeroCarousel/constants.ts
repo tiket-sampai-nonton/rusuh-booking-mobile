@@ -1,6 +1,6 @@
-import { Easing } from 'react-native-reanimated';
+import { Easing } from "react-native-reanimated";
 
-import { designEasing } from '@presentation/theme';
+import { designEasing } from "@presentation/theme";
 
 export const EASE = Easing.bezier(...designEasing.primary);
 export const SLIDE_DURATION_MS = 6000;
@@ -9,7 +9,7 @@ export const ZOOM_DURATION_MS = 20000;
 export const SCRAMBLE_INTERVAL_MS = 30;
 export const SCROLL_INDICATOR_DELAY_MS = 1500;
 export const INFO_FADE_DELAY_MS = 600;
-export const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+export const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 export const FRAME_PADDING = 24;
 export const SPACE_L = 48;
 export const SPACE_M = 24;

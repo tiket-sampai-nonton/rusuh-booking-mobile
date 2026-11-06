@@ -10,7 +10,9 @@ import { render } from "@testing-library/react-native";
 let mockMotionReduced = false;
 // Minimal reanimated mock — these two primitives only use useReducedMotion, so
 // avoid requireActual (the real module cannot init under jsdom).
-jest.mock("react-native-reanimated", () => ({ useReducedMotion: () => mockMotionReduced }));
+jest.mock("react-native-reanimated", () => ({
+  useReducedMotion: () => mockMotionReduced,
+}));
 
 jest.mock("react-native/Libraries/Utilities/Platform", () => ({
   __esModule: true,
@@ -35,17 +37,21 @@ afterEach(() => {
 describe("Cursor (web, fine pointer)", () => {
   beforeEach(() => {
     // Report a fine (mouse) pointer so the cursor mounts.
-    window.matchMedia = jest.fn().mockReturnValue({ matches: true }) as unknown as typeof window.matchMedia;
+    window.matchMedia = jest.fn().mockReturnValue({
+      matches: true,
+    }) as unknown as typeof window.matchMedia;
     // rAF: run the loop body exactly once (next tick schedules no further run),
     // so the ring-follow interpolation lines execute without an infinite loop.
     let ran = false;
-    jest.spyOn(globalThis, "requestAnimationFrame").mockImplementation((cb: FrameRequestCallback) => {
-      if (!ran) {
-        ran = true;
-        cb(0);
-      }
-      return 1 as unknown as number;
-    });
+    jest
+      .spyOn(globalThis, "requestAnimationFrame")
+      .mockImplementation((cb: FrameRequestCallback) => {
+        if (!ran) {
+          ran = true;
+          cb(0);
+        }
+        return 1 as unknown as number;
+      });
     jest.spyOn(globalThis, "cancelAnimationFrame").mockImplementation(() => {});
   });
   afterEach(() => jest.restoreAllMocks());
@@ -68,7 +74,9 @@ describe("Cursor (web, fine pointer)", () => {
     document.dispatchEvent(ev2);
     unmount();
     // Cursor nodes removed on cleanup.
-    expect(document.body.querySelectorAll("div").length).toBeLessThan(nodesBefore);
+    expect(document.body.querySelectorAll("div").length).toBeLessThan(
+      nodesBefore,
+    );
   });
 
   it("renders nothing under reduced motion", () => {
@@ -78,7 +86,9 @@ describe("Cursor (web, fine pointer)", () => {
   });
 
   it("renders nothing on a coarse pointer", () => {
-    window.matchMedia = jest.fn().mockReturnValue({ matches: false }) as unknown as typeof window.matchMedia;
+    window.matchMedia = jest.fn().mockReturnValue({
+      matches: false,
+    }) as unknown as typeof window.matchMedia;
     render(<Cursor />);
     expect(document.body.querySelectorAll("div").length).toBe(0);
   });
@@ -94,31 +104,54 @@ describe("Cursor (web, fine pointer)", () => {
 describe("ScrollProgress (web)", () => {
   it("creates the bar, updates on scroll, and cleans up", () => {
     const { unmount } = render(<ScrollProgress />);
-    const bar = document.querySelector("[data-testid='v2-scroll-progress']") as HTMLElement;
+    const bar = document.querySelector(
+      "[data-testid='v2-scroll-progress']",
+    ) as HTMLElement;
     expect(bar).toBeTruthy();
     // Simulate a scrollable document and a scroll event.
-    Object.defineProperty(document.documentElement, "scrollHeight", { value: 2000, configurable: true });
-    Object.defineProperty(window, "innerHeight", { value: 1000, configurable: true });
-    Object.defineProperty(window, "scrollY", { value: 500, configurable: true });
+    Object.defineProperty(document.documentElement, "scrollHeight", {
+      value: 2000,
+      configurable: true,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      value: 1000,
+      configurable: true,
+    });
+    Object.defineProperty(window, "scrollY", {
+      value: 500,
+      configurable: true,
+    });
     window.dispatchEvent(new Event("scroll"));
     expect(bar.style.transform).toContain("scaleX(");
     unmount();
-    expect(document.querySelector("[data-testid='v2-scroll-progress']")).toBeNull();
+    expect(
+      document.querySelector("[data-testid='v2-scroll-progress']"),
+    ).toBeNull();
   });
 
   it("clamps the ratio when the document is not scrollable", () => {
-    Object.defineProperty(document.documentElement, "scrollHeight", { value: 500, configurable: true });
-    Object.defineProperty(window, "innerHeight", { value: 1000, configurable: true });
+    Object.defineProperty(document.documentElement, "scrollHeight", {
+      value: 500,
+      configurable: true,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      value: 1000,
+      configurable: true,
+    });
     render(<ScrollProgress />);
     window.dispatchEvent(new Event("scroll"));
-    const bar = document.querySelector("[data-testid='v2-scroll-progress']") as HTMLElement;
+    const bar = document.querySelector(
+      "[data-testid='v2-scroll-progress']",
+    ) as HTMLElement;
     expect(bar.style.transform).toBe("scaleX(0)");
   });
 
   it("omits the smooth transition under reduced motion", () => {
     mockMotionReduced = true;
     render(<ScrollProgress />);
-    const bar = document.querySelector("[data-testid='v2-scroll-progress']") as HTMLElement;
+    const bar = document.querySelector(
+      "[data-testid='v2-scroll-progress']",
+    ) as HTMLElement;
     expect(bar.style.transition).toBe("");
   });
 });

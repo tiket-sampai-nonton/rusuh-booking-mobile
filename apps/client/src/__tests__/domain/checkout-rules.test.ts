@@ -30,7 +30,9 @@ const row = (over: Partial<TicketRow> = {}): TicketRow => {
     ...over,
   };
   return {
-    rowId: over.rowId ?? `row-${base.categoryId}-${base.attendeeName}-${base.attendeeNik}`,
+    rowId:
+      over.rowId ??
+      `row-${base.categoryId}-${base.attendeeName}-${base.attendeeNik}`,
     ...base,
   };
 };
@@ -54,7 +56,12 @@ describe("checkout quantity + category rules (RBT-051)", () => {
 
 describe("single-use buyer NIK + uniqueness (RBT-051 item rules)", () => {
   it("buyerNikUsedOnce is false when two rows claim the buyer NIK", () => {
-    expect(buyerNikUsedOnce([row({ useBuyerNik: true }), row({ useBuyerNik: true })])).toBe(false);
+    expect(
+      buyerNikUsedOnce([
+        row({ useBuyerNik: true }),
+        row({ useBuyerNik: true }),
+      ]),
+    ).toBe(false);
     expect(buyerNikUsedOnce([row({ useBuyerNik: true }), row()])).toBe(true);
     expect(buyerNikUsedOnce([row(), row()])).toBe(true);
   });
@@ -68,9 +75,15 @@ describe("single-use buyer NIK + uniqueness (RBT-051 item rules)", () => {
   });
 
   it("attendeeNiksUnique rejects duplicate (resolved) NIKs", () => {
-    const dup = [row({ attendeeNik: "3171010101010001" }), row({ attendeeNik: "3171010101010001" })];
+    const dup = [
+      row({ attendeeNik: "3171010101010001" }),
+      row({ attendeeNik: "3171010101010001" }),
+    ];
     expect(attendeeNiksUnique(dup, "3171999999999999")).toBe(false);
-    const uniq = [row({ attendeeNik: "3171010101010001" }), row({ attendeeNik: "3171010101010002" })];
+    const uniq = [
+      row({ attendeeNik: "3171010101010001" }),
+      row({ attendeeNik: "3171010101010002" }),
+    ];
     expect(attendeeNiksUnique(uniq, "3171999999999999")).toBe(true);
   });
 });
@@ -191,11 +204,17 @@ describe("isCheckoutReady end-to-end", () => {
     expect(isCheckoutReady({ ...base, rows: [row()] })).toBe(true);
   });
   it("is false with an invalid buyer NIK or email", () => {
-    expect(isCheckoutReady({ ...base, buyerNik: "123", rows: [row()] })).toBe(false);
-    expect(isCheckoutReady({ ...base, buyerEmail: "x", rows: [row()] })).toBe(false);
+    expect(isCheckoutReady({ ...base, buyerNik: "123", rows: [row()] })).toBe(
+      false,
+    );
+    expect(isCheckoutReady({ ...base, buyerEmail: "x", rows: [row()] })).toBe(
+      false,
+    );
   });
   it("is false when over the cap, duplicate NIK, or incomplete row", () => {
-    expect(isCheckoutReady({ ...base, rows: [row(), row(), row(), row()] })).toBe(false); // >3
+    expect(
+      isCheckoutReady({ ...base, rows: [row(), row(), row(), row()] }),
+    ).toBe(false); // >3
     expect(
       isCheckoutReady({ ...base, rows: [row({ attendeeName: "" })] }),
     ).toBe(false); // empty name
@@ -205,7 +224,10 @@ describe("isCheckoutReady end-to-end", () => {
   });
   it("accepts a useBuyerNik row (buyer attends) with a valid buyer NIK", () => {
     expect(
-      isCheckoutReady({ ...base, rows: [row({ useBuyerNik: true, attendeeName: "", attendeeNik: "" })] }),
+      isCheckoutReady({
+        ...base,
+        rows: [row({ useBuyerNik: true, attendeeName: "", attendeeNik: "" })],
+      }),
     ).toBe(true);
   });
   it("rejects two rows both claiming the buyer NIK", () => {

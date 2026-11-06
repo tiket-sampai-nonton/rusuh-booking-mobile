@@ -41,9 +41,13 @@ export const pillGroupStyles = StyleSheet.create({
 });
 
 export function pillOptionStyle(selected: boolean): ViewStyle {
-  return selected ? pillGroupStyles.selectedOption : pillGroupStyles.unselectedOption;
+  return selected
+    ? pillGroupStyles.selectedOption
+    : pillGroupStyles.unselectedOption;
 }
 
 export function pillTextStyle(selected: boolean): TextStyle {
-  return selected ? pillGroupStyles.selectedText : pillGroupStyles.unselectedText;
+  return selected
+    ? pillGroupStyles.selectedText
+    : pillGroupStyles.unselectedText;
 }

@@ -43,10 +43,14 @@ describe("LoginButton (RBT-020)", () => {
   beforeEach(() => {
     jest
       .spyOn(Animated, "timing")
-      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.timing>);
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.timing>,
+      );
     jest
       .spyOn(Animated, "parallel")
-      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.parallel>);
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.parallel>,
+      );
   });
 
   afterEach(() => jest.restoreAllMocks());
@@ -68,8 +72,6 @@ describe("LoginButton (RBT-020)", () => {
     fireEvent.press(getByTestId("login-launcher"));
     await waitFor(() => getByTestId("login-backdrop"));
     fireEvent.press(getByTestId("login-backdrop"));
-    await waitFor(() =>
-      expect(queryByTestId("login-email-input")).toBeNull(),
-    );
+    await waitFor(() => expect(queryByTestId("login-email-input")).toBeNull());
   });
 });

@@ -1,4 +1,7 @@
-import type { BookingTickets, TicketHistoryRepository } from "@domain/repositories/ticket-history.repository";
+import type {
+  BookingTickets,
+  TicketHistoryRepository,
+} from "@domain/repositories/ticket-history.repository";
 
 /** Empty account history in mock mode; guests and test accounts have no saved orders. */
 export class MockTicketHistoryRepository implements TicketHistoryRepository {

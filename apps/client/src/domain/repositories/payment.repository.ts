@@ -113,5 +113,8 @@ export interface PaymentRepository {
    * the callback endpoint; the mock flips the attempt (PAID/FAILED) or leaves it
    * non-terminal (UNKNOWN) so the result gate keeps polling.
    */
-  snapCallback(attemptId: string, outcome: SnapOutcome): Promise<PaymentAttempt>;
+  snapCallback(
+    attemptId: string,
+    outcome: SnapOutcome,
+  ): Promise<PaymentAttempt>;
 }

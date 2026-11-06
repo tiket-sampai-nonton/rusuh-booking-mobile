@@ -71,8 +71,12 @@ describe("providers/container — createContainer (mock mode)", () => {
     expect(c.paymentRepository).toBeInstanceOf(MockPaymentRepository);
     expect(c.userRepository).toBeInstanceOf(MockUserRepository);
     expect(c.notification).toBeInstanceOf(MockNotificationAdapter);
-    expect(c.fileShare).toBeInstanceOf(Platform.OS === "web" ? WebFileShareAdapter : ExpoFileShareAdapter);
-    expect(c.ticketHistoryRepository).toBeInstanceOf(MockTicketHistoryRepository);
+    expect(c.fileShare).toBeInstanceOf(
+      Platform.OS === "web" ? WebFileShareAdapter : ExpoFileShareAdapter,
+    );
+    expect(c.ticketHistoryRepository).toBeInstanceOf(
+      MockTicketHistoryRepository,
+    );
     expect(c.httpClient).toBeInstanceOf(MockHttpClient);
   });
 
@@ -170,7 +174,9 @@ describe("providers/container — createContainer (real mode, RBT-010 wired)", (
     expect(c.bookingRepository).toBeInstanceOf(HttpBookingRepository);
     expect(c.paymentRepository).toBeInstanceOf(HttpPaymentRepository);
     expect(c.userRepository).toBeInstanceOf(HttpUserRepository);
-    expect(c.ticketHistoryRepository).toBeInstanceOf(HttpTicketHistoryRepository);
+    expect(c.ticketHistoryRepository).toBeInstanceOf(
+      HttpTicketHistoryRepository,
+    );
     expect(c.httpClient).toBeInstanceOf(FetchHttpClient);
   });
 

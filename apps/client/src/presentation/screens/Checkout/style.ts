@@ -10,7 +10,11 @@
  */
 import { type DimensionValue, type ViewStyle, StyleSheet } from "react-native";
 
-import { designColors, designBorders, designSpacingSemantic } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  designSpacingSemantic,
+} from "@presentation/theme";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PROGRESS BAR (prototype .progress-container)
@@ -28,27 +32,27 @@ export const checkoutProgressContainer: ViewStyle = {
 
 export const checkoutProgressInner: ViewStyle = {
   maxWidth: 800,
-  marginHorizontal: 'auto',
+  marginHorizontal: "auto",
   paddingHorizontal: designSpacingSemantic.m,
 };
 
 export const checkoutProgressSteps: ViewStyle = {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  position: 'relative',
+  flexDirection: "row",
+  justifyContent: "space-between",
+  position: "relative",
 };
 
 export const checkoutProgressLine: ViewStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '10%',
-  right: '10%',
+  position: "absolute",
+  top: "50%",
+  left: "10%",
+  right: "10%",
   height: 2,
   backgroundColor: designColors.field, // #f5f5f5 - Use field per Design Palette Guide (no arbitrary grays)
 };
 
 export const checkoutStep: ViewStyle = {
-  alignItems: 'center',
+  alignItems: "center",
   gap: 8,
 };
 
@@ -58,8 +62,8 @@ export const checkoutStepNumber: ViewStyle = {
   borderWidth: designBorders.standard,
   borderColor: designColors.ink,
   backgroundColor: designColors.ground,
-  alignItems: 'center',
-  justifyContent: 'center',
+  alignItems: "center",
+  justifyContent: "center",
 };
 
 export const checkoutStepNumberActive: ViewStyle = {
@@ -78,8 +82,8 @@ export const checkoutScrollContent = (isDesktop: boolean): ViewStyle => ({
   ...(isDesktop
     ? {
         maxWidth: 800,
-        width: '100%' as DimensionValue,
-        alignSelf: 'center' as const,
+        width: "100%" as DimensionValue,
+        alignSelf: "center" as const,
       }
     : {}),
 });
@@ -87,7 +91,7 @@ export const checkoutScrollContent = (isDesktop: boolean): ViewStyle => ({
 export const checkoutGrid = (isDesktop: boolean): ViewStyle => ({
   ...(isDesktop
     ? {
-        flexDirection: 'row',
+        flexDirection: "row",
         gap: 48,
       }
     : {}),
@@ -98,12 +102,12 @@ export const checkoutMain: ViewStyle = {
 };
 
 export const checkoutSidebar = (isDesktop: boolean): ViewStyle => ({
-  width: isDesktop ? 400 : '100%' as DimensionValue,
+  width: isDesktop ? 400 : ("100%" as DimensionValue),
   ...(isDesktop
     ? {
         // React Native Web supports CSS `sticky`, which is outside RN's
         // platform-neutral ViewStyle position union.
-        position: 'sticky' as unknown as ViewStyle['position'],
+        position: "sticky" as unknown as ViewStyle["position"],
         top: 128,
       }
     : {
@@ -120,8 +124,8 @@ export const checkoutSection: ViewStyle = {
 };
 
 export const checkoutSectionHeader: ViewStyle = {
-  flexDirection: 'row',
-  alignItems: 'center',
+  flexDirection: "row",
+  alignItems: "center",
   gap: 16,
   marginBottom: 24,
   paddingBottom: 16,
@@ -133,8 +137,8 @@ export const checkoutSectionNumber: ViewStyle = {
   width: 32,
   height: 32,
   backgroundColor: designColors.ink,
-  alignItems: 'center',
-  justifyContent: 'center',
+  alignItems: "center",
+  justifyContent: "center",
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -142,7 +146,7 @@ export const checkoutSectionNumber: ViewStyle = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const checkoutFormRow: ViewStyle = {
-  flexDirection: 'row',
+  flexDirection: "row",
   gap: 16,
   marginBottom: 16,
 };
@@ -177,8 +181,8 @@ export const checkoutPaymentMethod: ViewStyle = {
   borderWidth: designBorders.standard,
   borderColor: designColors.ink,
   padding: 20,
-  flexDirection: 'row',
-  alignItems: 'center',
+  flexDirection: "row",
+  alignItems: "center",
   gap: 16,
   marginBottom: 16,
 };
@@ -194,8 +198,8 @@ export const checkoutPaymentRadio: ViewStyle = {
   borderWidth: 2,
   borderColor: designColors.ink,
   borderRadius: 10,
-  alignItems: 'center',
-  justifyContent: 'center',
+  alignItems: "center",
+  justifyContent: "center",
 };
 
 export const checkoutPaymentIcon: ViewStyle = {
@@ -203,8 +207,8 @@ export const checkoutPaymentIcon: ViewStyle = {
   height: 32,
   borderWidth: 1,
   borderColor: designColors.ink,
-  alignItems: 'center',
-  justifyContent: 'center',
+  alignItems: "center",
+  justifyContent: "center",
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -227,7 +231,7 @@ export const checkoutSummaryContent: ViewStyle = {
 };
 
 export const checkoutSummaryEvent: ViewStyle = {
-  flexDirection: 'row',
+  flexDirection: "row",
   gap: 16,
   paddingBottom: 24,
   borderBottomWidth: designBorders.standard,
@@ -240,13 +244,13 @@ export const checkoutSummaryImage: ViewStyle = {
   height: 80,
   borderWidth: designBorders.standard,
   borderColor: designColors.ink,
-  overflow: 'hidden',
+  overflow: "hidden",
 };
 
 export const checkoutSummaryRow: ViewStyle = {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
   paddingVertical: 8,
 };
 
@@ -266,9 +270,9 @@ export const checkoutTimerBar: ViewStyle = {
   backgroundColor: designColors.danger, // #ff0000 per Design Palette Guide
   paddingVertical: 12,
   paddingHorizontal: 24,
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
   gap: 8,
 };
 
@@ -283,13 +287,13 @@ export const checkoutPaySection: ViewStyle = {
 };
 
 export const checkoutPayBtn: ViewStyle = {
-  width: '100%' as DimensionValue,
+  width: "100%" as DimensionValue,
   paddingVertical: 20,
   backgroundColor: designColors.ink,
   borderWidth: designBorders.standard,
   borderColor: designColors.ink,
-  alignItems: 'center',
-  justifyContent: 'center',
+  alignItems: "center",
+  justifyContent: "center",
 };
 
 // Legacy exports for backwards compatibility
@@ -298,15 +302,15 @@ export const checkoutStyles = {
   hero: {
     borderWidth: designBorders.standard,
     borderColor: designColors.ink,
-    overflow: 'hidden' as const,
+    overflow: "hidden" as const,
   },
   heroScrim: {
-    position: 'absolute' as const,
+    position: "absolute" as const,
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
   heroPad: { padding: 22 },
 };
@@ -320,41 +324,54 @@ export const checkoutBar = (bottom: number) => ({
 
 export const componentStyles = StyleSheet.create({
   buyerPrefillBadge: {
-                  marginTop: 4,
-                  alignSelf: "flex-start",
-                  borderWidth: 2,
-                  borderColor: designColors.success,
-                  backgroundColor: designColors.ground,
-                  paddingHorizontal: 12,
-                  paddingVertical: 5,
-                },
+    marginTop: 4,
+    alignSelf: "flex-start",
+    borderWidth: 2,
+    borderColor: designColors.success,
+    backgroundColor: designColors.ground,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
   buyerPrefillBadgeText: { color: designColors.success },
-  addTicketText: { color: designColors.ink, fontSize: 14, fontWeight: "700", textTransform: "uppercase" },
-  addTicketLabel: { color: designColors.ink, fontSize: 14, fontWeight: "700", textTransform: "uppercase" },
+  addTicketText: {
+    color: designColors.ink,
+    fontSize: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  addTicketLabel: {
+    color: designColors.ink,
+    fontSize: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
   quotaWarning: {
-                marginTop: 16,
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 12,
-                borderWidth: 2,
-                borderColor: designColors.warn,
-                backgroundColor: designColors.ground,
-                paddingHorizontal: 16,
-                paddingVertical: 14,
-              },
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 2,
+    borderColor: designColors.warn,
+    backgroundColor: designColors.ground,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
   quotaWarningText: { color: designColors.ink, flex: 1, fontSize: 13 },
   quotaWarningEmphasis: { color: designColors.warn, fontWeight: "700" },
 });
 
-export function addTicketButtonStyle(rows: readonly TicketRow[], cap: number): DynamicStyle {
+export function addTicketButtonStyle(
+  rows: readonly TicketRow[],
+  cap: number,
+): DynamicStyle {
   return {
-                marginTop: 16,
-                alignItems: "center",
-                borderWidth: 2,
-                borderStyle: "dashed",
-                borderColor: designColors.ink,
-                backgroundColor: designColors.ground,
-                paddingVertical: 16,
-                opacity: rows.length >= cap ? 0.4 : 1,
-              } as DynamicStyle;
+    marginTop: 16,
+    alignItems: "center",
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: designColors.ink,
+    backgroundColor: designColors.ground,
+    paddingVertical: 16,
+    opacity: rows.length >= cap ? 0.4 : 1,
+  } as DynamicStyle;
 }

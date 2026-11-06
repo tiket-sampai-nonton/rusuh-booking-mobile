@@ -85,7 +85,9 @@ export function useAutoClaim({
     [bookingRepository],
   );
 
-  const [claimedSessionId, setClaimedSessionId] = useState<string | undefined>();
+  const [claimedSessionId, setClaimedSessionId] = useState<
+    string | undefined
+  >();
   const claimedOnce = useRef(false);
 
   // Keep the latest onClaimed without making it a mutation/effect dependency

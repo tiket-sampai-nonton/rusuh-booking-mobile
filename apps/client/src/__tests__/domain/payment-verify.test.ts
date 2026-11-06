@@ -53,9 +53,13 @@ describe("computeVerifyRefetchInterval", () => {
     expect(computeVerifyRefetchInterval("READY", -5)).toBe(1_500);
   });
   it("reduced-motion raises the floor", () => {
-    expect(computeVerifyRefetchInterval("AWAITING_PAYMENT", 0, true)).toBe(2_500);
+    expect(computeVerifyRefetchInterval("AWAITING_PAYMENT", 0, true)).toBe(
+      2_500,
+    );
     // a larger step is unaffected
-    expect(computeVerifyRefetchInterval("AWAITING_PAYMENT", 3, true)).toBe(6_000);
+    expect(computeVerifyRefetchInterval("AWAITING_PAYMENT", 3, true)).toBe(
+      6_000,
+    );
   });
 });
 

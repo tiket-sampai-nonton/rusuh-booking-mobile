@@ -7,11 +7,7 @@ import { historyStateStyles } from "../../../style";
 export function HistoryLoading() {
   return (
     <View style={historyStateStyles.loadingContainer} testID="history-loading">
-      <Loader
-        visible={true}
-        label="ARSIP"
-        testID="history-v2-loader"
-      />
+      <Loader visible={true} label="ARSIP" testID="history-v2-loader" />
     </View>
   );
 }

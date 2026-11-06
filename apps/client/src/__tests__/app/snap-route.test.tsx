@@ -4,7 +4,9 @@
 import { render, screen } from "@testing-library/react-native";
 import React from "react";
 
-const mockUseLocalSearchParams = jest.fn((): { bookingId?: string } => ({ bookingId: "bk-1" }));
+const mockUseLocalSearchParams = jest.fn((): { bookingId?: string } => ({
+  bookingId: "bk-1",
+}));
 
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => mockUseLocalSearchParams(),
@@ -45,6 +47,15 @@ describe("/snap/[bookingId] route", () => {
   it("passes an empty booking id when the route parameter is missing", () => {
     mockUseLocalSearchParams.mockReturnValue({});
     const routeElement = SnapRoute();
-    expect(routeElement.props.bookingId).toBe("");
+    const [seoElement, screenElement] = React.Children.toArray(
+      routeElement.props.children,
+    ) as React.ReactElement[];
+    expect(
+      (seoElement as React.ReactElement<{ noindex: boolean }>).props.noindex,
+    ).toBe(true);
+    expect(
+      (screenElement as React.ReactElement<{ bookingId: string }>).props
+        .bookingId,
+    ).toBe("");
   });
 });

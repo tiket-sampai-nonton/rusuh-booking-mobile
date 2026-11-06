@@ -4,7 +4,9 @@ import { designDetailStyles as styles } from "../../../style";
 
 export function getAvailabilityStyle(status: AvailabilityStatus) {
   if (Platform.OS === "web") {
-    return status === "sold-out" ? styles.categoryAvailOut : styles.categoryAvail;
+    return status === "sold-out"
+      ? styles.categoryAvailOut
+      : styles.categoryAvail;
   }
 
   switch (status) {

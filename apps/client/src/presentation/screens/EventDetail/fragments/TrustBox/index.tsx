@@ -12,11 +12,9 @@
  */
 import { Text, View } from "react-native";
 
-
 import { CheckIcon } from "@presentation/components/ArrowIcon";
 import { designColors } from "@presentation/theme/event-design-tokens";
 import { trustStyles } from "./style";
-
 
 const TRUST_LINES = [
   "Tiket resmi & terverifikasi",

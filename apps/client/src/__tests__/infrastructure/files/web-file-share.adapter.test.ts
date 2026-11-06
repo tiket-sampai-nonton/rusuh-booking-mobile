@@ -2,12 +2,28 @@ import { WebFileShareAdapter } from "../../../infrastructure/files/web-file-shar
 
 describe("WebFileShareAdapter", () => {
   const adapter = new WebFileShareAdapter();
-  const file = { fileName: "ticket.pdf", mimeType: "application/pdf", base64: "cGRm" };
-  const originalDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
+  const file = {
+    fileName: "ticket.pdf",
+    mimeType: "application/pdf",
+    base64: "cGRm",
+  };
+  const originalDocument = Object.getOwnPropertyDescriptor(
+    globalThis,
+    "document",
+  );
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
-  const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator");
-  const originalCreateObjectURL = Object.getOwnPropertyDescriptor(URL, "createObjectURL");
-  const originalRevokeObjectURL = Object.getOwnPropertyDescriptor(URL, "revokeObjectURL");
+  const originalNavigator = Object.getOwnPropertyDescriptor(
+    globalThis,
+    "navigator",
+  );
+  const originalCreateObjectURL = Object.getOwnPropertyDescriptor(
+    URL,
+    "createObjectURL",
+  );
+  const originalRevokeObjectURL = Object.getOwnPropertyDescriptor(
+    URL,
+    "revokeObjectURL",
+  );
 
   afterEach(() => {
     jest.restoreAllMocks();
@@ -24,7 +40,13 @@ describe("WebFileShareAdapter", () => {
   });
 
   function installBrowserStubs() {
-    const anchor = { href: "", download: "", style: {}, click: jest.fn(), remove: jest.fn() };
+    const anchor = {
+      href: "",
+      download: "",
+      style: {},
+      click: jest.fn(),
+      remove: jest.fn(),
+    };
     const createElement = jest.fn(() => anchor);
     const appendChild = jest.fn();
     const setTimeout = jest.fn();
@@ -32,9 +54,18 @@ describe("WebFileShareAdapter", () => {
       configurable: true,
       value: { createElement, body: { appendChild } },
     });
-    Object.defineProperty(globalThis, "window", { configurable: true, value: { setTimeout } });
-    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: jest.fn(() => "blob:ticket") });
-    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: jest.fn() });
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { setTimeout },
+    });
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: jest.fn(() => "blob:ticket"),
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: jest.fn(),
+    });
     return { anchor, createElement, appendChild, setTimeout };
   }
 
@@ -56,15 +87,28 @@ describe("WebFileShareAdapter", () => {
   it("uses the native web-share API for supported browsers", async () => {
     installBrowserStubs();
     const share = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(globalThis, "navigator", { configurable: true, value: { share } });
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: { share },
+    });
 
     await adapter.share(file);
-    expect(share).toHaveBeenCalledWith({ files: [expect.objectContaining({ name: "ticket.pdf", type: "application/pdf" })] });
+    expect(share).toHaveBeenCalledWith({
+      files: [
+        expect.objectContaining({
+          name: "ticket.pdf",
+          type: "application/pdf",
+        }),
+      ],
+    });
   });
 
   it("falls back to a download when web sharing is unavailable", async () => {
     const browser = installBrowserStubs();
-    Object.defineProperty(globalThis, "navigator", { configurable: true, value: {} });
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: {},
+    });
     await adapter.share(file);
     expect(browser.anchor.click).toHaveBeenCalledTimes(1);
   });

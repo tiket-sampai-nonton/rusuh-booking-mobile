@@ -19,7 +19,8 @@ import { designColors } from "@presentation/theme";
 /** True only on web with a fine (mouse) pointer. */
 function isFinePointerWeb(): boolean {
   if (Platform.OS !== "web") return false;
-  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function")
+    return false;
   return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 }
 
@@ -38,7 +39,8 @@ export function Cursor(): null {
     ring.style.cssText =
       base +
       `width:20px;height:20px;border:2px solid ${designColors.ground};transition:transform .15s ease,opacity .3s;`;
-    dot.style.cssText = base + `width:4px;height:4px;background:${designColors.ground};`;
+    dot.style.cssText =
+      base + `width:4px;height:4px;background:${designColors.ground};`;
     doc.body.appendChild(ring);
     doc.body.appendChild(dot);
 

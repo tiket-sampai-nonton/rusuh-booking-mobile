@@ -41,9 +41,7 @@ export function useJoinQueue(): UseMutationResult<QueueEntry, Error, string> {
   return useMutation<QueueEntry, Error, string>({
     mutationFn: (eventId: string) => join.execute(eventId),
     onSuccess: (entry) => {
-      router.push(
-        `/waiting/${entry.eventId}?queueId=${entry.queueId}` as Href,
-      );
+      router.push(`/waiting/${entry.eventId}?queueId=${entry.queueId}` as Href);
     },
   });
 }

@@ -10,7 +10,9 @@ describe("Waiting header", () => {
   it("returns users to the home route from its wordmark", () => {
     mockPush.mockReset();
     render(<Header />);
-    fireEvent.press(screen.getByRole("button", { name: "Beranda Rusuh Tiket" }));
+    fireEvent.press(
+      screen.getByRole("button", { name: "Beranda Rusuh Tiket" }),
+    );
     expect(mockPush).toHaveBeenCalledWith("/");
   });
 });

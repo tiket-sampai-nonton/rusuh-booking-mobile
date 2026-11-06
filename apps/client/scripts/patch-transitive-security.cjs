@@ -14,7 +14,11 @@ if (!/^0\.82\./.test(metroPackage.version)) {
   );
 }
 
-const assetsPath = path.join(path.dirname(metroPackagePath), "src", "Assets.js");
+const assetsPath = path.join(
+  path.dirname(metroPackagePath),
+  "src",
+  "Assets.js",
+);
 const marker = "// RBT security compatibility: image-size 2.x";
 const previousImport = 'const getImageSize = require("image-size");';
 const replacementImport =
@@ -25,7 +29,7 @@ const previousCall =
   "  const dimensions = isImage ? getImageSize(isImageInput) : null;";
 const replacementCall =
   "  const dimensions = isImage\n" +
-  "    ? typeof isImageInput === \"string\"\n" +
+  '    ? typeof isImageInput === "string"\n' +
   "      ? await getImageSizeFromFile(isImageInput)\n" +
   "      : getImageSize(isImageInput)\n" +
   "    : null;";

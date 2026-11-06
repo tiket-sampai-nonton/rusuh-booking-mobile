@@ -14,12 +14,13 @@ import { useEffect, useRef } from "react";
 import { Animated, Platform, Text, View } from "react-native";
 import Svg, { Circle, Line, Path, Rect } from "react-native-svg";
 
-
-import { designColors, designDuration } from "@presentation/theme/event-design-tokens";
+import {
+  designColors,
+  designDuration,
+} from "@presentation/theme/event-design-tokens";
 import { nativeDriverSupported } from "@presentation/utils/style";
 import { infoStyles } from "./style";
-import { styleForInfoCardAnimatedView0 } from './style';
-
+import { styleForInfoCardAnimatedView0 } from "./style";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // INFO CARD COMPONENT

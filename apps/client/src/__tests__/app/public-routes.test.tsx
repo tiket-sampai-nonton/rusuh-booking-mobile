@@ -41,16 +41,24 @@ describe("(public) routes", () => {
   beforeEach(() => {
     jest
       .spyOn(Animated, "timing")
-      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.timing>);
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.timing>,
+      );
     jest
       .spyOn(Animated, "parallel")
-      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.parallel>);
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.parallel>,
+      );
     jest
       .spyOn(Animated, "spring")
-      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.spring>);
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.spring>,
+      );
     jest
       .spyOn(Animated, "sequence")
-      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.sequence>);
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.sequence>,
+      );
     jest
       .spyOn(Animated, "loop")
       .mockReturnValue(completedAnimation as ReturnType<typeof Animated.loop>);
@@ -72,9 +80,7 @@ describe("(public) routes", () => {
     // section header proves the real screen mounts.
     // Native and web share the same Indonesian Home section title.
     renderWithProviders(<HomeScreen />);
-    await waitFor(() =>
-      expect(screen.getByText("Daftar Event")).toBeTruthy(),
-    );
+    await waitFor(() => expect(screen.getByText("Daftar Event")).toBeTruthy());
     expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
   });
 

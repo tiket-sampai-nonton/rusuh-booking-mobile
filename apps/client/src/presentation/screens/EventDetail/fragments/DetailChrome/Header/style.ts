@@ -25,7 +25,9 @@ export const detailHeaderStyles = StyleSheet.create({
   },
 });
 
-export function detailHeaderPressedStyle(pressed: boolean): ViewStyle | undefined {
+export function detailHeaderPressedStyle(
+  pressed: boolean,
+): ViewStyle | undefined {
   return pressed ? detailHeaderStyles.iconButtonPressed : undefined;
 }
 

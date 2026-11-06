@@ -46,7 +46,8 @@ export function decideRecovery(
   remainingMs: number,
   errorCode?: string,
 ): RecoveryAction {
-  const notPayable = errorCode !== undefined && NOT_PAYABLE_CODES.has(errorCode);
+  const notPayable =
+    errorCode !== undefined && NOT_PAYABLE_CODES.has(errorCode);
   const deadlinePassed = remainingMs <= 0;
   if (status === "FAILED" && !deadlinePassed && !notPayable) {
     return { kind: "retry" };
@@ -75,10 +76,7 @@ export function isRetryable(
  * got kicked out — you should browse for events rather than immediately rejoin
  * the same queue. For "turn" missed, we follow the same pattern.
  */
-export function requeueRoute(
-  reason: ExpiryReason,
-  eventId?: string,
-): string {
+export function requeueRoute(reason: ExpiryReason, eventId?: string): string {
   if ((reason === "payment" || reason === "hold") && eventId) {
     return `/events/${eventId}`;
   }

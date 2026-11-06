@@ -1,17 +1,29 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import { Platform, Text } from "react-native";
 
-import { DetailBackground, MiniNav, Header, Steps } from "../../../../../../presentation/screens/EventDetail/fragments/DetailChrome/index";
+import {
+  DetailBackground,
+  MiniNav,
+  Header,
+  Steps,
+} from "../../../../../../presentation/screens/EventDetail/fragments/DetailChrome/index";
 
 describe("Event detail chrome fragments", () => {
   const originalPlatform = Platform.OS;
 
   afterEach(() => {
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
   });
 
   it("wraps screen content and forwards the test identifier", () => {
-    render(<DetailBackground testID="detail-root"><Text>Event detail</Text></DetailBackground>);
+    render(
+      <DetailBackground testID="detail-root">
+        <Text>Event detail</Text>
+      </DetailBackground>,
+    );
     expect(screen.getByTestId("detail-root")).toBeTruthy();
     expect(screen.getByText("Event detail")).toBeTruthy();
   });
@@ -37,7 +49,12 @@ describe("Event detail chrome fragments", () => {
   it("renders the web wordmark and the back-only MiniNav variant", () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     const onBack = jest.fn();
-    render(<><Header onBack={onBack} /><MiniNav onBack={onBack} /></>);
+    render(
+      <>
+        <Header onBack={onBack} />
+        <MiniNav onBack={onBack} />
+      </>,
+    );
 
     expect(screen.getAllByText("Rusuh Tiket")).toHaveLength(2);
     fireEvent.press(screen.getAllByRole("button", { name: "Kembali" })[0]);
@@ -45,10 +62,17 @@ describe("Event detail chrome fragments", () => {
   });
 
   it("shows all checkout steps and supports the default active step", () => {
-    render(<><Steps activeStep={3} /><Steps /></>);
+    render(
+      <>
+        <Steps activeStep={3} />
+        <Steps />
+      </>,
+    );
 
     for (const label of ["Detail", "Antre", "Pilih", "Bayar", "Selesai"]) {
-      expect(screen.getAllByText(label, { includeHiddenElements: true }).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByText(label, { includeHiddenElements: true }).length,
+      ).toBeGreaterThan(0);
     }
   });
 });

@@ -1,18 +1,24 @@
-import { useEffect } from 'react';
-import { Pressable, Text, View, useWindowDimensions } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming, useReducedMotion } from 'react-native-reanimated';
+import { useEffect } from "react";
+import { Pressable, Text, View, useWindowDimensions } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+  useReducedMotion,
+} from "react-native-reanimated";
 
-import type { EventSummary } from '@domain/repositories/event.repository';
-import { formatDateID } from '@domain/services/date-format';
-import { designColors } from '@presentation/theme';
+import type { EventSummary } from "@domain/repositories/event.repository";
+import { formatDateID } from "@domain/services/date-format";
+import { designColors } from "@presentation/theme";
 
-import { EASE, INFO_FADE_DELAY_MS } from '../../constants';
-import { componentStyles, styleForHeroInfoMobileText6 } from '../../style';
-import { useTextScramble } from '../../hooks/useTextScramble';
-import { CalendarIcon } from '../CalendarIcon';
-import { MapPinIcon } from '../MapPinIcon';
-import { PulsingDot } from '../PulsingDot';
-import { ArrowIcon } from '../ArrowIcon';
+import { EASE, INFO_FADE_DELAY_MS } from "../../constants";
+import { componentStyles, styleForHeroInfoMobileText6 } from "../../style";
+import { useTextScramble } from "../../hooks/useTextScramble";
+import { CalendarIcon } from "../CalendarIcon";
+import { MapPinIcon } from "../MapPinIcon";
+import { PulsingDot } from "../PulsingDot";
+import { ArrowIcon } from "../ArrowIcon";
 
 export function HeroInfoMobile({
   event,
@@ -39,8 +45,14 @@ export function HeroInfoMobile({
     opacity.value = 0;
     translateY.value = 30;
 
-    opacity.value = withDelay(INFO_FADE_DELAY_MS, withTiming(1, { duration: 600, easing: EASE }));
-    translateY.value = withDelay(INFO_FADE_DELAY_MS, withTiming(0, { duration: 600, easing: EASE }));
+    opacity.value = withDelay(
+      INFO_FADE_DELAY_MS,
+      withTiming(1, { duration: 600, easing: EASE }),
+    );
+    translateY.value = withDelay(
+      INFO_FADE_DELAY_MS,
+      withTiming(0, { duration: 600, easing: EASE }),
+    );
   }, [event.id, reducedMotion, opacity, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -50,20 +62,14 @@ export function HeroInfoMobile({
 
   // Mobile title size: smaller than desktop - clamp(2rem, 10vw, 3rem) = 32-48px
   // Reduced from original 40-64px for better mobile fit
-  const titleFontSize = Math.min(Math.max(32, width * 0.10), 48);
+  const titleFontSize = Math.min(Math.max(32, width * 0.1), 48);
 
   return (
     <Animated.View key={event.id} style={animatedStyle}>
       {/* Badge: "ON SALE NOW" with pulsing red dot */}
-      <View
-        style={componentStyles.elementFlexDirection20}
-      >
+      <View style={componentStyles.elementFlexDirection20}>
         <PulsingDot />
-        <Text
-          style={componentStyles.elementColor21}
-        >
-          Sedang Dijual
-        </Text>
+        <Text style={componentStyles.elementColor21}>Sedang Dijual</Text>
       </View>
 
       {/* Title: Large brutalist text */}
@@ -75,47 +81,33 @@ export function HeroInfoMobile({
       </Text>
 
       {/* Meta: Date · Venue (compact, single line with wrap) */}
-      <View
-        style={componentStyles.elementFlexDirection22}
-      >
+      <View style={componentStyles.elementFlexDirection22}>
         <View style={componentStyles.elementFlexDirection23}>
           <CalendarIcon color={designColors.inkMuted} />
-          <Text
-            style={componentStyles.elementColor24}
-          >
+          <Text style={componentStyles.elementColor24}>
             {formatDateID(event.startsAt)}
           </Text>
         </View>
         {event.venue && (
           <View style={componentStyles.elementFlexDirection25}>
             <MapPinIcon color={designColors.inkMuted} />
-            <Text
-              style={componentStyles.elementColor26}
-            >
-              {event.venue}
-            </Text>
+            <Text style={componentStyles.elementColor26}>{event.venue}</Text>
           </View>
         )}
       </View>
 
       {/* Single CTA: "GET TICKETS →" (no secondary button on mobile) */}
-      <View
-        style={componentStyles.elementAlignSelf27}
-      >
-       <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Beli tiket untuk ${event.name}`}
-        testID="hero-book"
-        onPress={() => onBook(event.id)}
-        style={componentStyles.elementFlexDirection28}
-      >
-        <Text
-          style={componentStyles.elementColor29}
+      <View style={componentStyles.elementAlignSelf27}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Beli tiket untuk ${event.name}`}
+          testID="hero-book"
+          onPress={() => onBook(event.id)}
+          style={componentStyles.elementFlexDirection28}
         >
-          Beli Tiket
-        </Text>
-        <ArrowIcon />
-       </Pressable>
+          <Text style={componentStyles.elementColor29}>Beli Tiket</Text>
+          <ArrowIcon />
+        </Pressable>
       </View>
     </Animated.View>
   );

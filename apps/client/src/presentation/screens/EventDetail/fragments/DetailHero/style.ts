@@ -1,4 +1,3 @@
-
 import { Platform, StyleSheet } from "react-native";
 import { interFonts } from "@presentation/theme/fonts";
 import { designColors } from "@presentation/theme/event-design-tokens";
@@ -51,7 +50,9 @@ export const heroStyles = StyleSheet.create({
   },
 });
 
-export function styleForDetailHeroAnimatedView0(arg0: Animated.Value): DynamicStyle {
+export function styleForDetailHeroAnimatedView0(
+  arg0: Animated.Value,
+): DynamicStyle {
   return { transform: [{ scale: arg0 }] } as DynamicStyle;
 }
 
@@ -59,37 +60,52 @@ export function styleForDetailHeroImage1(): DynamicStyle {
   return { filter: "grayscale(100%) contrast(1.2)" } as DynamicStyle;
 }
 
-export function styleForDetailHeroAnimatedView2(arg0: Animated.Value, arg1: Animated.Value): DynamicStyle {
+export function styleForDetailHeroAnimatedView2(
+  arg0: Animated.Value,
+  arg1: Animated.Value,
+): DynamicStyle {
   return {
-              opacity: arg0,
-              transform: [{ translateY: arg1 }],
-            } as DynamicStyle;
+    opacity: arg0,
+    transform: [{ translateY: arg1 }],
+  } as DynamicStyle;
 }
 
-export function styleForDetailHeroAnimatedText3(arg0: Animated.Value, arg1: Animated.Value): DynamicStyle {
+export function styleForDetailHeroAnimatedText3(
+  arg0: Animated.Value,
+  arg1: Animated.Value,
+): DynamicStyle {
   return {
-              opacity: arg0,
-              transform: [{ translateY: arg1 }],
-            } as DynamicStyle;
+    opacity: arg0,
+    transform: [{ translateY: arg1 }],
+  } as DynamicStyle;
 }
 
-export function styleForDetailHeroAnimatedText4(arg0: Animated.Value, arg1: Animated.Value): DynamicStyle {
+export function styleForDetailHeroAnimatedText4(
+  arg0: Animated.Value,
+  arg1: Animated.Value,
+): DynamicStyle {
   return {
-                opacity: arg0,
-                transform: [{ translateY: arg1 }],
-              } as DynamicStyle;
+    opacity: arg0,
+    transform: [{ translateY: arg1 }],
+  } as DynamicStyle;
 }
 
-export function styleForDetailHeroAnimatedView5(arg0: Animated.Value, arg1: Animated.Value): DynamicStyle {
+export function styleForDetailHeroAnimatedView5(
+  arg0: Animated.Value,
+  arg1: Animated.Value,
+): DynamicStyle {
   return {
-                opacity: arg0,
-                transform: [{ translateY: arg1 }],
-              } as DynamicStyle;
+    opacity: arg0,
+    transform: [{ translateY: arg1 }],
+  } as DynamicStyle;
 }
 
-export function styleForDetailHeroAnimatedView6(arg0: Animated.Value, arg1: Animated.Value): DynamicStyle {
+export function styleForDetailHeroAnimatedView6(
+  arg0: Animated.Value,
+  arg1: Animated.Value,
+): DynamicStyle {
   return {
-                opacity: arg0,
-                transform: [{ translateY: arg1 }],
-              } as DynamicStyle;
+    opacity: arg0,
+    transform: [{ translateY: arg1 }],
+  } as DynamicStyle;
 }

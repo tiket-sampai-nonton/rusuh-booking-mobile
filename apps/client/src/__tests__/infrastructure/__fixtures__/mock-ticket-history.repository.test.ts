@@ -4,7 +4,10 @@ describe("MockTicketHistoryRepository", () => {
   const repository = new MockTicketHistoryRepository();
 
   it("returns an empty history for mock accounts", async () => {
-    await expect(repository.listMyBookings()).resolves.toEqual({ bookings: [], nextCursor: null });
+    await expect(repository.listMyBookings()).resolves.toEqual({
+      bookings: [],
+      nextCursor: null,
+    });
   });
 
   it("explains that a mock booking has no saved tickets", async () => {

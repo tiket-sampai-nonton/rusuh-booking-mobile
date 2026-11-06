@@ -1,17 +1,31 @@
-import type { ComponentType } from 'react';
-import { useEffect } from 'react';
-import { Text, View } from 'react-native';
-import Animated, { useAnimatedProps, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
-import Svg, { Circle, type CircleProps } from 'react-native-svg';
+import type { ComponentType } from "react";
+import { useEffect } from "react";
+import { Text, View } from "react-native";
+import Animated, {
+  useAnimatedProps,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import Svg, { Circle, type CircleProps } from "react-native-svg";
 
-import { formatCount } from '../../display';
-import { palette, RING_CIRCUMFERENCE, RING_RADIUS, RING_SIZE, RING_STROKE, styles } from '../../style';
+import { formatCount } from "../../display";
+import {
+  palette,
+  RING_CIRCUMFERENCE,
+  RING_RADIUS,
+  RING_SIZE,
+  RING_STROKE,
+  styles,
+} from "../../style";
 
 type AnimatedCircleProps = CircleProps & {
   animatedProps?: Partial<Pick<CircleProps, "strokeDashoffset">>;
 };
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle) as unknown as ComponentType<AnimatedCircleProps>;
+const AnimatedCircle = Animated.createAnimatedComponent(
+  Circle,
+) as unknown as ComponentType<AnimatedCircleProps>;
 
 interface RingProgressProps {
   readonly progress: number; // 0..1
@@ -19,7 +33,11 @@ interface RingProgressProps {
   readonly isWarning?: boolean;
 }
 
-export function RingProgress({ progress, position, isWarning = false }: RingProgressProps) {
+export function RingProgress({
+  progress,
+  position,
+  isWarning = false,
+}: RingProgressProps) {
   const clamped = Math.max(0, Math.min(1, progress));
   const reducedMotion = useReducedMotion() ?? false;
   const animatedProgress = useSharedValue(clamped);

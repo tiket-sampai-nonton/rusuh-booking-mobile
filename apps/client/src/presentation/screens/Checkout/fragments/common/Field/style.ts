@@ -21,7 +21,10 @@ export const checkoutFieldStyles = StyleSheet.create({
   },
 });
 
-export function fieldInputStyle(invalid: boolean, editable: boolean): DynamicStyle {
+export function fieldInputStyle(
+  invalid: boolean,
+  editable: boolean,
+): DynamicStyle {
   return {
     borderWidth: 2,
     borderColor: invalid ? designColors.danger : designColors.ink,
@@ -37,14 +40,14 @@ export function fieldInputStyle(invalid: boolean, editable: boolean): DynamicSty
 export function fieldFocusStyle(isFocused: boolean): DynamicStyle {
   if (!isFocused) return {};
   return Platform.select({
-      web: {
-        boxShadow: "4px 4px 0 #000",
-        transform: [{ translateX: -2 }, { translateY: -2 }],
-      } as object,
-      default: {
-        marginLeft: -2,
-        marginTop: -2,
-        borderWidth: 3,
-      },
-    }) as DynamicStyle;
+    web: {
+      boxShadow: "4px 4px 0 #000",
+      transform: [{ translateX: -2 }, { translateY: -2 }],
+    } as object,
+    default: {
+      marginLeft: -2,
+      marginTop: -2,
+      borderWidth: 3,
+    },
+  }) as DynamicStyle;
 }

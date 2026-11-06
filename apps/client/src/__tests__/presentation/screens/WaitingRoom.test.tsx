@@ -23,7 +23,10 @@ import type { UseAutoClaimResult } from "@presentation/hooks/useAutoClaim";
 import type { QueueEntry } from "@domain/repositories/queue.repository";
 
 // --- Mock the two merged hooks: the screen must CONSUME, not rebuild them. ---
-const mockUseQueuePolling = jest.fn<QueuePollingView, [string, boolean?, string?]>();
+const mockUseQueuePolling = jest.fn<
+  QueuePollingView,
+  [string, boolean?, string?]
+>();
 const mockUseAutoClaim = jest.fn<UseAutoClaimResult, [unknown]>();
 const mockUseEventDetail = jest.fn();
 
@@ -112,7 +115,9 @@ beforeEach(() => {
 
 describe("WaitingRoomScreen — Buku Antrean layout", () => {
   it("renders the position number in the position panel", () => {
-    mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ position: 42 }) }));
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: entry({ position: 42 }) }),
+    );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     expect(screen.getByTestId("waiting-position")).toHaveTextContent("42");
     expect(screen.getByText("Posisimu")).toBeTruthy();
@@ -121,7 +126,9 @@ describe("WaitingRoomScreen — Buku Antrean layout", () => {
   });
 
   it("shows people ahead and the server-derived ETA as separate queue facts", () => {
-    mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ position: 42 }) }));
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: entry({ position: 42 }) }),
+    );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     expect(screen.getByTestId("waiting-ahead")).toHaveTextContent(/41/);
     expect(screen.getByTestId("waiting-eta")).toBeTruthy();
@@ -130,50 +137,73 @@ describe("WaitingRoomScreen — Buku Antrean layout", () => {
 
   it("drives the poller with the queueId prop", () => {
     render(<WaitingRoomScreen queueId="q-9" eventId="evt-1" />);
-    expect(mockUseQueuePolling).toHaveBeenCalledWith("q-9", expect.any(Boolean));
+    expect(mockUseQueuePolling).toHaveBeenCalledWith(
+      "q-9",
+      expect.any(Boolean),
+    );
   });
 });
 
 describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
   it("renders GUARANTEED (green) copy verbatim", () => {
-    mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ zone: "GUARANTEED" }) }));
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: entry({ zone: "GUARANTEED" }) }),
+    );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     const zone = screen.getByTestId("waiting-zone");
     expect(screen.getByTestId("waiting-icon-lock")).toBeTruthy();
     expect(zone).toHaveTextContent("Zona Aman", { exact: false });
-    expect(zone).toHaveTextContent("Tiket Anda terjamin saat giliran tiba", { exact: false });
+    expect(zone).toHaveTextContent("Tiket Anda terjamin saat giliran tiba", {
+      exact: false,
+    });
   });
 
   it("renders POSSIBLE (amber) copy verbatim", () => {
-    mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ zone: "POSSIBLE" }) }));
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: entry({ zone: "POSSIBLE" }) }),
+    );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     const zone = screen.getByTestId("waiting-zone");
     expect(screen.getByTestId("waiting-icon-ledger")).toBeTruthy();
     expect(zone).toHaveTextContent("Zona kemungkinan", { exact: false });
-    expect(zone).toHaveTextContent("Peluang masuk bergantung pada sisa tiket", { exact: false });
+    expect(zone).toHaveTextContent("Peluang masuk bergantung pada sisa tiket", {
+      exact: false,
+    });
   });
 
   it("renders NOT_ENOUGH (red) copy verbatim", () => {
-    mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ zone: "NOT_ENOUGH" }) }));
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: entry({ zone: "NOT_ENOUGH" }) }),
+    );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     const zone = screen.getByTestId("waiting-zone");
     expect(screen.getByTestId("waiting-icon-alert")).toBeTruthy();
     expect(zone).toHaveTextContent("Peluang Terbatas", { exact: false });
-    expect(zone).toHaveTextContent("Posisi Anda melewati perkiraan stok", { exact: false });
+    expect(zone).toHaveTextContent("Posisi Anda melewati perkiraan stok", {
+      exact: false,
+    });
   });
 
   it("status is never color-only: the zone node carries a text label (a11y)", () => {
-    mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ zone: "POSSIBLE" }) }));
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: entry({ zone: "POSSIBLE" }) }),
+    );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     // Has readable text, not just a color — label present.
-    expect(screen.getByTestId("waiting-zone")).toHaveTextContent("Zona kemungkinan", { exact: false });
+    expect(screen.getByTestId("waiting-zone")).toHaveTextContent(
+      "Zona kemungkinan",
+      { exact: false },
+    );
   });
 });
 
 describe("WaitingRoomScreen — admit live region", () => {
   it("renders the admitted state while the ticket session is being claimed", () => {
     mockUseQueuePolling.mockReturnValue(
-      polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
+      polling({
+        entry: entry({ status: "ADMITTED", position: 0 }),
+        isSettled: true,
+      }),
     );
     mockUseAutoClaim.mockReturnValue(claim({ claiming: true }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
@@ -185,7 +215,10 @@ describe("WaitingRoomScreen — admit live region", () => {
 
   it("redirects to checkout immediately when claim yields a sessionId", () => {
     mockUseQueuePolling.mockReturnValue(
-      polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
+      polling({
+        entry: entry({ status: "ADMITTED", position: 0 }),
+        isSettled: true,
+      }),
     );
     mockUseAutoClaim.mockReturnValue(claim({ claimedSessionId: "sess-7" }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
@@ -200,7 +233,10 @@ describe("WaitingRoomScreen — terminal + error states", () => {
       polling({ entry: entry({ status: "SOLD_OUT" }), isSettled: true }),
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    expect(screen.getByTestId("waiting-terminal")).toHaveTextContent("Tiket Habis", { exact: false });
+    expect(screen.getByTestId("waiting-terminal")).toHaveTextContent(
+      "Tiket Habis",
+      { exact: false },
+    );
   });
 
   it("renders 'Penjualan Berakhir' for an ENDED terminal entry", () => {
@@ -208,29 +244,44 @@ describe("WaitingRoomScreen — terminal + error states", () => {
       polling({ entry: entry({ status: "ENDED" }), isSettled: true }),
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    expect(screen.getByTestId("waiting-terminal")).toHaveTextContent("Penjualan Berakhir", { exact: false });
+    expect(screen.getByTestId("waiting-terminal")).toHaveTextContent(
+      "Penjualan Berakhir",
+      { exact: false },
+    );
   });
 
   it("renders the EVENT_SOLD_OUT claim-error state ('Tiket Habis')", () => {
     mockUseQueuePolling.mockReturnValue(
-      polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
+      polling({
+        entry: entry({ status: "ADMITTED", position: 0 }),
+        isSettled: true,
+      }),
     );
     mockUseAutoClaim.mockReturnValue(
       claim({ errorState: "EVENT_SOLD_OUT", error: new Error("sold") }),
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent("Tiket Habis", { exact: false });
+    expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent(
+      "Tiket Habis",
+      { exact: false },
+    );
   });
 
   it("renders the TURN_MISSED claim-error state ('Giliran Berakhir')", () => {
     mockUseQueuePolling.mockReturnValue(
-      polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
+      polling({
+        entry: entry({ status: "ADMITTED", position: 0 }),
+        isSettled: true,
+      }),
     );
     mockUseAutoClaim.mockReturnValue(
       claim({ errorState: "TURN_MISSED", error: new Error("missed") }),
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent("Giliran Berakhir", { exact: false });
+    expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent(
+      "Giliran Berakhir",
+      { exact: false },
+    );
   });
 
   it("renders the polling-error state", () => {
@@ -246,12 +297,18 @@ describe("WaitingRoomScreen — terminal + error states", () => {
       polling({ entry: undefined, isError: true, error: null }),
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    expect(screen.getByTestId("waiting-error")).toHaveTextContent(/Terjadi kendala\. Silakan coba lagi\./);
+    expect(screen.getByTestId("waiting-error")).toHaveTextContent(
+      /Terjadi kendala\. Silakan coba lagi\./,
+    );
   });
 
   it("keeps the last queue position visible while a poll is timing out", () => {
     mockUseQueuePolling.mockReturnValue(
-      polling({ isError: true, isConnectionLost: true, error: new Error("timeout") }),
+      polling({
+        isError: true,
+        isConnectionLost: true,
+        error: new Error("timeout"),
+      }),
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     expect(screen.getByTestId("waiting-active")).toBeTruthy();
@@ -292,16 +349,23 @@ describe("WaitingRoomScreen — terminal + error states", () => {
 
   it("returns to Home when a claim error cannot identify the prior event", () => {
     mockUseQueuePolling.mockReturnValue(
-      polling({ entry: entry({ status: "ADMITTED", position: 0 }), isSettled: true }),
+      polling({
+        entry: entry({ status: "ADMITTED", position: 0 }),
+        isSettled: true,
+      }),
     );
-    mockUseAutoClaim.mockReturnValue(claim({ errorState: "UNKNOWN", error: new Error("unknown") }));
+    mockUseAutoClaim.mockReturnValue(
+      claim({ errorState: "UNKNOWN", error: new Error("unknown") }),
+    );
     render(<WaitingRoomScreen queueId="q-1" eventId="" />);
     fireEvent.press(screen.getByTestId("waiting-claim-error-state"));
     expect(mockReplace).toHaveBeenCalledWith("/");
   });
 
   it("renders a loading state while the first poll is in flight", () => {
-    mockUseQueuePolling.mockReturnValue(polling({ entry: undefined, isLoading: true }));
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: undefined, isLoading: true }),
+    );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     expect(screen.getByTestId("waiting-loading")).toBeTruthy();
   });

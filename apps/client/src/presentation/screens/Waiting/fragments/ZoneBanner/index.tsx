@@ -1,9 +1,9 @@
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
 
-import type { QueueZone } from '@domain/repositories/queue.repository';
-import { zoneCopy } from '../../display';
-import { palette, styles } from '../../style';
-import { QueueIcon } from '../QueueIcon';
+import type { QueueZone } from "@domain/repositories/queue.repository";
+import { zoneCopy } from "../../display";
+import { palette, styles } from "../../style";
+import { QueueIcon } from "../QueueIcon";
 
 export function ZoneBanner({
   zone,
@@ -13,7 +13,7 @@ export function ZoneBanner({
   readonly isDesktop: boolean;
 }) {
   const copy = zoneCopy(zone as "GUARANTEED" | "POSSIBLE" | "NOT_ENOUGH");
-  const icon = copy.icon === 'warning' ? 'ledger' : copy.icon;
+  const icon = copy.icon === "warning" ? "ledger" : copy.icon;
 
   return (
     <View
@@ -25,8 +25,22 @@ export function ZoneBanner({
         <QueueIcon kind={icon} size={isDesktop ? 34 : 26} color={palette.ink} />
       </View>
       <View style={styles.zoneTextWrap}>
-        <Text style={[styles.zoneTitleLedger, isDesktop && styles.zoneTitleLedgerDesktop]}>{copy.label}</Text>
-        <Text style={[styles.zoneBodyLedger, isDesktop && styles.zoneBodyLedgerDesktop]}>{copy.body}</Text>
+        <Text
+          style={[
+            styles.zoneTitleLedger,
+            isDesktop && styles.zoneTitleLedgerDesktop,
+          ]}
+        >
+          {copy.label}
+        </Text>
+        <Text
+          style={[
+            styles.zoneBodyLedger,
+            isDesktop && styles.zoneBodyLedgerDesktop,
+          ]}
+        >
+          {copy.body}
+        </Text>
       </View>
     </View>
   );

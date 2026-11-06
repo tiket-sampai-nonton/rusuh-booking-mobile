@@ -16,7 +16,9 @@ describe("ExpoNotificationAdapter (RBT-072)", () => {
     jest.clearAllMocks();
     Notifications.getPermissionsAsync.mockResolvedValue({ granted: true });
     Notifications.requestPermissionsAsync.mockResolvedValue({ granted: true });
-    Notifications.getExpoPushTokenAsync.mockResolvedValue({ data: "ExpoPushToken[xyz]" });
+    Notifications.getExpoPushTokenAsync.mockResolvedValue({
+      data: "ExpoPushToken[xyz]",
+    });
     Notifications.scheduleNotificationAsync.mockResolvedValue("id");
   });
 
@@ -48,7 +50,9 @@ describe("ExpoNotificationAdapter (RBT-072)", () => {
   });
 
   it("registerForRemotePush: null (not throw) when token mint fails", async () => {
-    Notifications.getExpoPushTokenAsync.mockRejectedValue(new Error("no projectId"));
+    Notifications.getExpoPushTokenAsync.mockRejectedValue(
+      new Error("no projectId"),
+    );
     const a = new ExpoNotificationAdapter();
     expect(await a.registerForRemotePush()).toBeNull();
   });
@@ -63,13 +67,21 @@ describe("ExpoNotificationAdapter (RBT-072)", () => {
     });
     const call = Notifications.scheduleNotificationAsync.mock.calls[0][0];
     expect(call.trigger).toBeNull();
-    expect(call.content.data).toEqual({ deepLink: "/success/bk-1", kind: "payment_success" });
+    expect(call.content.data).toEqual({
+      deepLink: "/success/bk-1",
+      kind: "payment_success",
+    });
   });
 
   it("scheduleLocal: a future time schedules with a date trigger", async () => {
     const a = new ExpoNotificationAdapter();
     const future = Date.now() + 60_000;
-    await a.scheduleLocal({ kind: "expiry_reminder", title: "T", body: "B", scheduledAtMs: future });
+    await a.scheduleLocal({
+      kind: "expiry_reminder",
+      title: "T",
+      body: "B",
+      scheduledAtMs: future,
+    });
     const call = Notifications.scheduleNotificationAsync.mock.calls[0][0];
     expect(call.trigger).toBeTruthy();
     expect(call.trigger.date instanceof Date).toBe(true);
@@ -77,7 +89,14 @@ describe("ExpoNotificationAdapter (RBT-072)", () => {
 
   it("scheduleLocal: a PAST scheduled time fires immediately", async () => {
     const a = new ExpoNotificationAdapter();
-    await a.scheduleLocal({ kind: "admission", title: "T", body: "B", scheduledAtMs: Date.now() - 1000 });
-    expect(Notifications.scheduleNotificationAsync.mock.calls[0][0].trigger).toBeNull();
+    await a.scheduleLocal({
+      kind: "admission",
+      title: "T",
+      body: "B",
+      scheduledAtMs: Date.now() - 1000,
+    });
+    expect(
+      Notifications.scheduleNotificationAsync.mock.calls[0][0].trigger,
+    ).toBeNull();
   });
 });

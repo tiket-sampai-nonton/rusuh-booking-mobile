@@ -12,8 +12,6 @@ import { Pressable, Text } from "react-native";
 import { LoginModal } from "@presentation/components/auth/LoginModal";
 import { componentStyles } from "./style";
 
-
-
 export interface LoginButtonProps {
   /** Optional style override for host-specific nav placement. */
   readonly testID?: string;
@@ -34,11 +32,7 @@ export function LoginButton({
         onPress={show}
         style={componentStyles.elementBorderRadius0}
       >
-        <Text
-          style={componentStyles.elementFontWeight1}
-        >
-          Masuk / Daftar
-        </Text>
+        <Text style={componentStyles.elementFontWeight1}>Masuk / Daftar</Text>
       </Pressable>
       {/* Mount the modal (and its useAuth hook) only when open, so the Home
           landing renders without requiring a ServiceProvider until the user

@@ -26,7 +26,14 @@
  */
 import { useCallback, useState } from "react";
 import { useRouter, type Href } from "expo-router";
-import { Platform, ScrollView, Text, View, type NativeSyntheticEvent, type NativeScrollEvent } from "react-native";
+import {
+  Platform,
+  ScrollView,
+  Text,
+  View,
+  type NativeSyntheticEvent,
+  type NativeScrollEvent,
+} from "react-native";
 
 import { ctaFor } from "@domain/rules/event-detail-cta";
 import { parseDescription } from "@domain/rules/event-description";
@@ -51,7 +58,10 @@ import { Lineup } from "./fragments/Lineup";
 import { TrustBox } from "./fragments/TrustBox";
 import { Venue } from "./fragments/Venue";
 import type { EventDetailScreenProps, LightboxState } from "./interface";
-import { designDetailScrollContent, designDetailStyles as styles } from "./style";
+import {
+  designDetailScrollContent,
+  designDetailStyles as styles,
+} from "./style";
 import { CheckIcon } from "@presentation/components/ArrowIcon";
 import { designColors } from "@presentation/theme";
 
@@ -91,7 +101,6 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
     currentIndex: 0,
   });
 
-
   // Scroll state for header (native only)
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -111,12 +120,15 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   }, [event?.name]);
 
   // Scroll handler for header visibility (native only)
-  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (Platform.OS !== "web") {
-      const scrollY = e.nativeEvent.contentOffset.y;
-      setIsScrolled(scrollY > 100);
-    }
-  }, []);
+  const handleScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (Platform.OS !== "web") {
+        const scrollY = e.nativeEvent.contentOffset.y;
+        setIsScrolled(scrollY > 100);
+      }
+    },
+    [],
+  );
 
   // Lightbox handlers
   const openLightbox = useCallback((index: number) => {
@@ -162,7 +174,9 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
     event.status !== "SOLD_OUT" &&
     event.status !== "CLOSED"
   ) {
-    chips.push(`${event.remainingTickets.toLocaleString("id-ID")} tiket tersedia`);
+    chips.push(
+      `${event.remainingTickets.toLocaleString("id-ID")} tiket tersedia`,
+    );
   }
   chips.push(`Maks ${MAX_TICKETS} tiket / NIK`);
 
@@ -175,11 +189,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
     <ScreenFade>
       <DetailBackground testID="event-detail-screen">
         {/* Fixed Header */}
-        <Header
-          onBack={goHome}
-          onShare={handleShare}
-          isScrolled={isScrolled}
-        />
+        <Header onBack={goHome} onShare={handleShare} isScrolled={isScrolled} />
 
         {/* Scrollable Content */}
         <ScrollView
@@ -230,37 +240,37 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
 
             {/* Both native and web share these event information sections. */}
             <>
-                <Block label="Lokasi">
-                  {venueInfo ? (
-                    <Venue
-                      name={venueInfo.name}
-                      address={venueInfo.address}
-                      mapImage={venueInfo.mapImage}
-                      mapsUrl={venueInfo.mapsUrl}
-                    />
-                  ) : (
-                    <Text style={styles.description}>Lokasi akan diumumkan.</Text>
-                  )}
-                </Block>
+              <Block label="Lokasi">
+                {venueInfo ? (
+                  <Venue
+                    name={venueInfo.name}
+                    address={venueInfo.address}
+                    mapImage={venueInfo.mapImage}
+                    mapsUrl={venueInfo.mapsUrl}
+                  />
+                ) : (
+                  <Text style={styles.description}>Lokasi akan diumumkan.</Text>
+                )}
+              </Block>
 
-                <Block label="Galeri">
-                  <Gallery images={galleryImages} onImagePress={openLightbox} />
-                </Block>
+              <Block label="Galeri">
+                <Gallery images={galleryImages} onImagePress={openLightbox} />
+              </Block>
 
-                <Block label="Syarat & Ketentuan">
-                  {desc.terms.length > 0 ? (
-                    <View style={styles.termsList}>
-                      {desc.terms.map((t) => (
-                        <View key={t} style={styles.termsItem}>
-                          <CheckIcon color={designColors.ink} size={14} />
-                          <Text style={styles.termsText}>{t}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  ) : (
-                    <Text style={styles.description}>Ketentuan menyusul.</Text>
-                  )}
-                </Block>
+              <Block label="Syarat & Ketentuan">
+                {desc.terms.length > 0 ? (
+                  <View style={styles.termsList}>
+                    {desc.terms.map((t) => (
+                      <View key={t} style={styles.termsItem}>
+                        <CheckIcon color={designColors.ink} size={14} />
+                        <Text style={styles.termsText}>{t}</Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  <Text style={styles.description}>Ketentuan menyusul.</Text>
+                )}
+              </Block>
             </>
 
             {/* Trust Box (web only - can be removed if using inline badges) */}

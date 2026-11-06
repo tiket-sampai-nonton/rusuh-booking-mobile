@@ -33,7 +33,10 @@ function ev(id: string, name: string): EventSummary {
   };
 }
 
-const EVENTS: readonly EventSummary[] = [ev("rock", "Rock Reunion"), ev("jazz", "Jazz Night")];
+const EVENTS: readonly EventSummary[] = [
+  ev("rock", "Rock Reunion"),
+  ev("jazz", "Jazz Night"),
+];
 
 describe("HistoryGrid (RBT-095)", () => {
   it("renders a single column when `columns` is omitted (default-param branch)", () => {
@@ -62,7 +65,9 @@ describe("HistoryGrid (RBT-095)", () => {
     renderWithProviders(<HistoryGrid events={EVENTS} onPress={onPress} />);
     // History cards are disabled, so the press is swallowed — the assertion is
     // that wiring onPress does not throw and the card still renders.
-    expect(() => fireEvent.press(screen.getByTestId("v2-event-card-rock"))).not.toThrow();
+    expect(() =>
+      fireEvent.press(screen.getByTestId("v2-event-card-rock")),
+    ).not.toThrow();
     expect(screen.getByTestId("v2-event-card-rock")).toBeTruthy();
   });
 });

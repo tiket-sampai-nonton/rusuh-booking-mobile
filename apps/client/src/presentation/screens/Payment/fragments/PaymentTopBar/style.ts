@@ -1,4 +1,3 @@
-
 import { StyleSheet } from "react-native";
 import { designColors } from "@presentation/theme";
 
@@ -10,9 +9,15 @@ export const componentStyles = StyleSheet.create({
 });
 
 export function styleForPaymentTopBarView0(): DynamicStyle {
-  return { backgroundColor: designColors.ground, borderBottomWidth: designBorder.base, borderBottomColor: designColors.ink } as DynamicStyle;
+  return {
+    backgroundColor: designColors.ground,
+    borderBottomWidth: designBorder.base,
+    borderBottomColor: designColors.ink,
+  } as DynamicStyle;
 }
 
 export function styleForPaymentTopBarView1(arg0: boolean): DynamicStyle {
-  return { backgroundColor: arg0 ? designColors.accent : designColors.ink } as DynamicStyle;
+  return {
+    backgroundColor: arg0 ? designColors.accent : designColors.ink,
+  } as DynamicStyle;
 }

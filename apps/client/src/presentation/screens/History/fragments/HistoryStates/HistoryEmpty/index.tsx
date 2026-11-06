@@ -15,7 +15,11 @@ export function HistoryEmpty() {
 
   return (
     <View style={[historyStyles.main, historyStateStyles.main]}>
-      <View style={historyStateStyles.emptyCard} testID="history-empty" accessibilityLiveRegion="polite">
+      <View
+        style={historyStateStyles.emptyCard}
+        testID="history-empty"
+        accessibilityLiveRegion="polite"
+      >
         <View style={historyStateStyles.emptyIcon}>
           <CalendarIcon color={designColors.ink} size={32} />
         </View>

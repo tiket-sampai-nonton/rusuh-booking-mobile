@@ -18,10 +18,7 @@ import type {
   QueueRepository,
   QueueStatus,
 } from "@domain/repositories/queue.repository";
-import {
-  DEFAULT_POLL_MS,
-  MAX_JITTER_MS,
-} from "@domain/rules/queue-polling";
+import { DEFAULT_POLL_MS, MAX_JITTER_MS } from "@domain/rules/queue-polling";
 import {
   computeRefetchInterval,
   isRecoverableConnectionError,
@@ -29,7 +26,13 @@ import {
 } from "@presentation/hooks/useQueuePolling";
 
 function entry(status: QueueStatus, nextPollAfterMs = 2000): QueueEntry {
-  return { queueId: "q-1", eventId: "evt-1", position: 1, status, nextPollAfterMs };
+  return {
+    queueId: "q-1",
+    eventId: "evt-1",
+    position: 1,
+    status,
+    nextPollAfterMs,
+  };
 }
 
 // -- 1. Pure refetch-interval decision (no timers) --------------------------
@@ -70,10 +73,18 @@ describe("RBT-042 computeRefetchInterval", () => {
 
 describe("RBT-119 connection error classification", () => {
   it("keeps timeouts, network failures, rate limits, and server errors recoverable", () => {
-    const timeout = Object.assign(new Error("request failed"), { httpStatus: 408 });
-    const rateLimited = Object.assign(new Error("request failed"), { httpStatus: 429 });
-    const serverError = Object.assign(new Error("request failed"), { httpStatus: 503 });
-    const socketError = Object.assign(new Error("request failed"), { code: "ECONNRESET" });
+    const timeout = Object.assign(new Error("request failed"), {
+      httpStatus: 408,
+    });
+    const rateLimited = Object.assign(new Error("request failed"), {
+      httpStatus: 429,
+    });
+    const serverError = Object.assign(new Error("request failed"), {
+      httpStatus: 503,
+    });
+    const socketError = Object.assign(new Error("request failed"), {
+      code: "ECONNRESET",
+    });
     const fetchError = new Error("Failed to fetch");
 
     expect(isRecoverableConnectionError(new Error("fetch failed"))).toBe(true);
@@ -85,7 +96,9 @@ describe("RBT-119 connection error classification", () => {
   });
 
   it("does not label missing or client validation errors as connection loss", () => {
-    const clientError = Object.assign(new Error("invalid queue"), { httpStatus: 400 });
+    const clientError = Object.assign(new Error("invalid queue"), {
+      httpStatus: 400,
+    });
 
     expect(isRecoverableConnectionError(null)).toBe(false);
     expect(isRecoverableConnectionError(clientError)).toBe(false);
@@ -231,10 +244,10 @@ describe("RBT-042 useQueuePolling render seam", () => {
     const queueQuery = client.getQueryCache().find({
       queryKey: ["queue", "q-1", "evt-1"],
     });
-    const cachedData = queueQuery?.state.data as { entry: QueueEntry } | undefined;
-    expect(
-      computeRefetchInterval(cachedData?.entry),
-    ).not.toBe(false);
+    const cachedData = queueQuery?.state.data as
+      | { entry: QueueEntry }
+      | undefined;
+    expect(computeRefetchInterval(cachedData?.entry)).not.toBe(false);
 
     repo.status = "ADMITTED";
     await act(async () => {
@@ -245,7 +258,9 @@ describe("RBT-042 useQueuePolling render seam", () => {
     expect(last?.entry?.position).toBe(9);
     expect(last?.isConnectionLost).toBe(false);
     await waitFor(() => expect(last?.isReconnected).toBe(true));
-    await waitFor(() => expect(last?.isReconnected).toBe(false), { timeout: 3500 });
+    await waitFor(() => expect(last?.isReconnected).toBe(false), {
+      timeout: 3500,
+    });
   });
 
   it("stops after a single fetch for a settled (ADMITTED) entry — no storm", async () => {

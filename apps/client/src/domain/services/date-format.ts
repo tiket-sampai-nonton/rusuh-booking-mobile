@@ -8,8 +8,18 @@
 
 /** Indonesian abbreviated month names, Jan..Des (index 0..11). */
 export const ID_MONTHS = [
-  "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-  "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Mei",
+  "Jun",
+  "Jul",
+  "Agu",
+  "Sep",
+  "Okt",
+  "Nov",
+  "Des",
 ] as const;
 
 /**
@@ -40,7 +50,9 @@ export function formatTimeID(iso: string | null | undefined): string {
 /** Format a milliseconds-remaining value as `MM:SS` (for payment/booking timers). */
 export function formatCountdown(remainingMs: number): string {
   const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
-  const mm = Math.floor(totalSec / 60).toString().padStart(2, "0");
+  const mm = Math.floor(totalSec / 60)
+    .toString()
+    .padStart(2, "0");
   const ss = (totalSec % 60).toString().padStart(2, "0");
   return `${mm}:${ss}`;
 }

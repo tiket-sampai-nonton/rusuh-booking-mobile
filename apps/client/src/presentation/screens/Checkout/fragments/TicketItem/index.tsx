@@ -14,17 +14,32 @@ import { designColors } from "@presentation/theme";
 import { Field } from ".././common";
 import type { TicketItemProps } from "../../interface";
 import { componentStyles } from "./style";
-import { styleForTicketItemPressable0, styleForTicketItemText1, styleForTicketItemText2 } from './style';
-
+import {
+  styleForTicketItemPressable0,
+  styleForTicketItemText1,
+  styleForTicketItemText2,
+} from "./style";
 
 const STATUS_TEXT: Record<string, { label: string; color: string }> = {
   checking: { label: "Mengecek ketersediaan NIK…", color: designColors.gray },
   available: { label: "NIK tersedia", color: designColors.success },
   blocked: { label: "NIK sudah terdaftar untuk event ini.", color: "#ff0000" },
-  warning: { label: "Batas pengecekan tercapai — lanjut, server memvalidasi.", color: designColors.warning },
+  warning: {
+    label: "Batas pengecekan tercapai — lanjut, server memvalidasi.",
+    color: designColors.warning,
+  },
 };
 
-export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuyer, status = "idle", categories }: TicketItemProps) {
+export function TicketItem({
+  index,
+  row,
+  canRemove,
+  onRemove,
+  onPatch,
+  onUseBuyer,
+  status = "idle",
+  categories,
+}: TicketItemProps) {
   const statusInfo = STATUS_TEXT[status];
   return (
     <View
@@ -32,11 +47,7 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
       testID={`ticket-row-${index}`}
     >
       <View style={componentStyles.elementFlexDirection1}>
-        <Text
-          style={componentStyles.elementFontSize2}
-        >
-          Tiket #{index + 1}
-        </Text>
+        <Text style={componentStyles.elementFontSize2}>Tiket #{index + 1}</Text>
         {canRemove ? (
           <Pressable
             accessibilityRole="button"
@@ -44,20 +55,12 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
             onPress={onRemove}
             testID={`remove-ticket-${index}`}
           >
-            <Text
-              style={componentStyles.elementFontSize3}
-            >
-              Hapus
-            </Text>
+            <Text style={componentStyles.elementFontSize3}>Hapus</Text>
           </Pressable>
         ) : null}
       </View>
 
-      <Text
-        style={componentStyles.elementMarginTop4}
-      >
-        Kategori
-      </Text>
+      <Text style={componentStyles.elementMarginTop4}>Kategori</Text>
       <View style={componentStyles.elementMarginTop5}>
         {categories.map((category) => {
           const selected = row.categoryId === category.categoryId;
@@ -71,9 +74,7 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
               testID={`cat-${index}-${category.code}`}
               style={styleForTicketItemPressable0(selected)}
             >
-              <Text
-                style={styleForTicketItemText1(selected)}
-              >
+              <Text style={styleForTicketItemText1(selected)}>
                 {category.name}
               </Text>
             </Pressable>
@@ -92,11 +93,17 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
       <Field
         label="NIK Penonton (16 digit)"
         value={row.useBuyerNik ? "" : row.attendeeNik}
-        onChangeText={(t) => onPatch({ attendeeNik: t.replace(/\D/g, "").slice(0, 16) })}
+        onChangeText={(t) =>
+          onPatch({ attendeeNik: t.replace(/\D/g, "").slice(0, 16) })
+        }
         placeholder="16 digit KTP penonton"
         keyboardType="number-pad"
         editable={!row.useBuyerNik}
-        invalid={!row.useBuyerNik && row.attendeeNik.length > 0 && !isValidNik(row.attendeeNik)}
+        invalid={
+          !row.useBuyerNik &&
+          row.attendeeNik.length > 0 &&
+          !isValidNik(row.attendeeNik)
+        }
         testID={`attendee-nik-${index}`}
       />
 
@@ -111,9 +118,7 @@ export function TicketItem({ index, row, canRemove, onRemove, onPatch, onUseBuye
       ) : null}
 
       <View style={componentStyles.elementMarginTop6}>
-        <Text
-          style={componentStyles.elementFlex7}
-        >
+        <Text style={componentStyles.elementFlex7}>
           Gunakan NIK pembeli (pembeli ikut nonton)
         </Text>
         <Switch

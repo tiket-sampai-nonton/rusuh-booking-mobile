@@ -7,7 +7,13 @@
  * updated query so the URL stays the single source of truth (deep-linkable +
  * back/forward safe). The pure filter math is covered in browse-filter.test.ts.
  */
-import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react-native";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+} from "@testing-library/react-native";
 import { Dimensions, Platform } from "react-native";
 
 import type {
@@ -76,8 +82,13 @@ describe("BrowseScreen — URL-driven filters", () => {
 
   afterEach(() => {
     cleanup();
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
-    act(() => Dimensions.set({ window: originalWindow, screen: originalScreen }));
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
+    act(() =>
+      Dimensions.set({ window: originalWindow, screen: originalScreen }),
+    );
   });
 
   it("hydrates the UI from the URL query (genre=rock → filtered by category)", async () => {
@@ -115,15 +126,22 @@ describe("BrowseScreen — URL-driven filters", () => {
   it("supports desktop sorting, category, view, navigation, and filter actions", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     const desktopDimensions = { ...originalWindow, width: 1024, height: 900 };
-    Dimensions.set({ window: desktopDimensions, screen: { ...originalScreen, width: 1024, height: 900 } });
-    useAccountStore.getState().setProfile({ emailMasked: "u***@example.com", hasNik: true });
+    Dimensions.set({
+      window: desktopDimensions,
+      screen: { ...originalScreen, width: 1024, height: 900 },
+    });
+    useAccountStore
+      .getState()
+      .setProfile({ emailMasked: "u***@example.com", hasNik: true });
 
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
 
-    fireEvent.scroll(screen.getByTestId("browse-scroll"), { nativeEvent: { contentOffset: { y: 120 } } });
+    fireEvent.scroll(screen.getByTestId("browse-scroll"), {
+      nativeEvent: { contentOffset: { y: 120 } },
+    });
     fireEvent.press(screen.getByTestId("category-concert"));
     fireEvent.press(screen.getByTestId("category-festival"));
     fireEvent.press(screen.getByTestId("view-list"));
@@ -136,7 +154,9 @@ describe("BrowseScreen — URL-driven filters", () => {
     fireEvent.press(screen.getByTestId("filter-close"));
     fireEvent.press(screen.getByTestId("browse-filter"));
     fireEvent.press(screen.getByTestId("filter-apply"));
-    expect(mockRouter.push).toHaveBeenCalledWith(expect.stringMatching(/^\/browse\?/));
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/browse\?/),
+    );
 
     const sortSelect = screen.getByLabelText("Urutkan event");
     fireEvent(sortSelect, "change", { target: { value: "price-low" } });
@@ -177,12 +197,18 @@ describe("BrowseScreen — URL-driven filters", () => {
   });
 
   it("opens event details from an unavailable card instead of disabling the whole card", async () => {
-    const soldOut = { ...ev("sold-out", "Sold Out Show", 5), status: "SOLD_OUT" as const, remainingTickets: 0 };
+    const soldOut = {
+      ...ev("sold-out", "Sold Out Show", 5),
+      status: "SOLD_OUT" as const,
+      remainingTickets: 0,
+    };
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo([soldOut]) },
     });
 
-    const card = await waitFor(() => screen.getByTestId("v2-event-card-sold-out"));
+    const card = await waitFor(() =>
+      screen.getByTestId("v2-event-card-sold-out"),
+    );
     expect(card.props.accessibilityState).toEqual({ disabled: false });
     fireEvent.press(card);
     expect(mockRouter.push).toHaveBeenCalledWith("/events/sold-out");
@@ -200,7 +226,10 @@ describe("BrowseScreen — URL-driven filters", () => {
 
   it("keeps the guest desktop header CTA inert on Browse", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
-    Dimensions.set({ window: { ...originalWindow, width: 1024 }, screen: { ...originalScreen, width: 1024 } });
+    Dimensions.set({
+      window: { ...originalWindow, width: 1024 },
+      screen: { ...originalScreen, width: 1024 },
+    });
     renderWithProviders(<BrowseScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });

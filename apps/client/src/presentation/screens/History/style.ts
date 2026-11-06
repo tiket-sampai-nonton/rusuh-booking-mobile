@@ -8,7 +8,12 @@
  */
 import { StyleSheet, type DimensionValue, type ViewStyle } from "react-native";
 
-import { designColors, designBorders, designSpacingSemantic, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  designSpacingSemantic,
+  interFonts,
+} from "@presentation/theme";
 
 /** Grid gap between cards */
 const GRID_GAP = 2;
@@ -164,7 +169,10 @@ export const historyStateStyles = StyleSheet.create({
 });
 
 /** Scroll content factory with bottom inset + desktop container. */
-export const historyScrollContent = (bottom: number, isDesktop: boolean): ViewStyle => ({
+export const historyScrollContent = (
+  bottom: number,
+  isDesktop: boolean,
+): ViewStyle => ({
   paddingBottom: bottom + 64,
   ...(isDesktop
     ? {
@@ -185,7 +193,8 @@ export const historyGridRow: ViewStyle = {
 
 /** One cell in the multi-column grid. */
 export const historyGridCell = (columns: number): ViewStyle => ({
-  width: `${(100 - (GRID_GAP * (columns - 1)) / columns) / columns}%` as DimensionValue,
+  width:
+    `${(100 - (GRID_GAP * (columns - 1)) / columns) / columns}%` as DimensionValue,
   flexGrow: 1,
   flexBasis: `${100 / columns - 1}%` as DimensionValue,
 });

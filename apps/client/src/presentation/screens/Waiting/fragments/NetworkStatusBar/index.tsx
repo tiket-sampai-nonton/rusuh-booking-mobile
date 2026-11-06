@@ -1,6 +1,6 @@
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
 
-import { styles } from '../../style';
+import { styles } from "../../style";
 
 export function NetworkStatusBar({
   isOffline,

@@ -8,8 +8,11 @@ import { ExternalLinkIcon } from "@presentation/components/ArrowIcon";
 import type { PaymentBarProps } from "../../interface";
 import { paymentBar } from "../../style";
 import { componentStyles } from "./style";
-import { styleForPaymentBarView0, styleForPaymentBarPressable1, styleForPaymentBarText2 } from './style';
-
+import {
+  styleForPaymentBarView0,
+  styleForPaymentBarPressable1,
+  styleForPaymentBarText2,
+} from "./style";
 
 export function PaymentBar({
   amountMinor,
@@ -37,8 +40,18 @@ export function PaymentBar({
       ) : null}
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-2xs uppercase tracking-tag" style={componentStyles.elementColor1}>Total Bayar</Text>
-          <Text className="text-xl font-extrabold" style={componentStyles.elementColor2}>{minorToIDR(amountMinor)}</Text>
+          <Text
+            className="text-2xs uppercase tracking-tag"
+            style={componentStyles.elementColor1}
+          >
+            Total Bayar
+          </Text>
+          <Text
+            className="text-xl font-extrabold"
+            style={componentStyles.elementColor2}
+          >
+            {minorToIDR(amountMinor)}
+          </Text>
         </View>
         <Pressable
           accessibilityRole="button"
@@ -65,7 +78,11 @@ export function PaymentBar({
   );
 }
 
-function paymentButtonLabel(pending: boolean, expired: boolean, resumeLabel?: string): string {
+function paymentButtonLabel(
+  pending: boolean,
+  expired: boolean,
+  resumeLabel?: string,
+): string {
   if (pending) return "Memproses…";
   if (expired) return "Waktu habis";
   return resumeLabel ?? "Bayar Sekarang";

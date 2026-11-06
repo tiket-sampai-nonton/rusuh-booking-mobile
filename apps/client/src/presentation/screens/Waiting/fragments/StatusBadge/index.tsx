@@ -1,10 +1,24 @@
 import { useEffect } from "react";
 import { Text } from "react-native";
-import Animated, { cancelAnimation, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
+import Animated, {
+  cancelAnimation,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 
 import { styles } from "../../style";
 
-type BadgeVariant = "queue" | "yourTurn" | "soldOut" | "expired" | "offline" | "paused";
+type BadgeVariant =
+  | "queue"
+  | "yourTurn"
+  | "soldOut"
+  | "expired"
+  | "offline"
+  | "paused";
 
 export function StatusBadge({
   variant,
@@ -22,10 +36,10 @@ export function StatusBadge({
       opacity.value = withRepeat(
         withSequence(
           withTiming(0.7, { duration: 1000 }),
-          withTiming(1, { duration: 1000 })
+          withTiming(1, { duration: 1000 }),
         ),
         -1, // infinite
-        false
+        false,
       );
     } else {
       opacity.value = 1;
@@ -41,10 +55,10 @@ export function StatusBadge({
       opacity.value = withRepeat(
         withSequence(
           withTiming(0.3, { duration: 500 }),
-          withTiming(1, { duration: 500 })
+          withTiming(1, { duration: 500 }),
         ),
         -1,
-        false
+        false,
       );
     }
   }, [variant, reducedMotion, opacity]);
@@ -56,12 +70,17 @@ export function StatusBadge({
   const badgeStyle = [
     styles.statusBadge,
     variant === "yourTurn" && styles.statusBadgeYourTurn,
-    (variant === "soldOut" || variant === "expired") && styles.statusBadgeSoldOut,
-    (variant === "offline" || variant === "paused") && styles.statusBadgeOffline,
+    (variant === "soldOut" || variant === "expired") &&
+      styles.statusBadgeSoldOut,
+    (variant === "offline" || variant === "paused") &&
+      styles.statusBadgeOffline,
   ];
 
   return (
-    <Animated.View style={[badgeStyle, animatedStyle]} testID="waiting-status-badge">
+    <Animated.View
+      style={[badgeStyle, animatedStyle]}
+      testID="waiting-status-badge"
+    >
       <Text style={styles.statusBadgeText}>{label}</Text>
     </Animated.View>
   );

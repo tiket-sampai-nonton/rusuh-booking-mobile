@@ -46,10 +46,20 @@ describe("parseDescription — defensive rich-description parsing", () => {
 
   it("preserves mock/API lineup details when provided", () => {
     const d = parseDescription({
-      lineup: [{ name: "Ahmad Dhani", role: "Keyboards", avatar: "https://example.test/a.png" }],
+      lineup: [
+        {
+          name: "Ahmad Dhani",
+          role: "Keyboards",
+          avatar: "https://example.test/a.png",
+        },
+      ],
     });
     expect(d.lineup).toEqual([
-      { name: "Ahmad Dhani", role: "Keyboards", avatar: "https://example.test/a.png" },
+      {
+        name: "Ahmad Dhani",
+        role: "Keyboards",
+        avatar: "https://example.test/a.png",
+      },
     ]);
   });
 

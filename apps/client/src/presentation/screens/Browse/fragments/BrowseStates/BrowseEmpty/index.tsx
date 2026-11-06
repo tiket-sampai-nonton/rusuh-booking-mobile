@@ -28,7 +28,8 @@ export function BrowseEmpty() {
     <View style={browseEmpty} testID="browse-empty">
       <Text style={styles.title}>Tidak Ada Event</Text>
       <Text style={styles.message}>
-        Tidak ada event yang cocok dengan filter ini. Coba ubah filter atau kembali ke beranda.
+        Tidak ada event yang cocok dengan filter ini. Coba ubah filter atau
+        kembali ke beranda.
       </Text>
     </View>
   );

@@ -2,7 +2,7 @@ import { Text, View } from "react-native";
 
 import { designDetailStyles as styles } from "../../../style";
 import type { AvailabilityStatus } from "../types";
-import { getAvailabilityStyle } from './style';
+import { getAvailabilityStyle } from "./style";
 
 export interface CategoryRowProps {
   readonly name: string;
@@ -12,7 +12,13 @@ export interface CategoryRowProps {
   readonly status: AvailabilityStatus;
 }
 
-export function CategoryRow({ name, description, price, availability, status }: CategoryRowProps) {
+export function CategoryRow({
+  name,
+  description,
+  price,
+  availability,
+  status,
+}: CategoryRowProps) {
   const isSoldOut = status === "sold-out";
   const availabilityStyle = getAvailabilityStyle(status);
 
@@ -21,7 +27,9 @@ export function CategoryRow({ name, description, price, availability, status }: 
       <View style={styles.categoryItem}>
         <View style={styles.categoryInfo}>
           <Text style={styles.categoryName}>{name}</Text>
-          {description && <Text style={styles.categoryDesc}>{description}</Text>}
+          {description && (
+            <Text style={styles.categoryDesc}>{description}</Text>
+          )}
         </View>
         <View style={styles.categoryPrice}>
           <Text style={styles.categoryPriceValue}>{price}</Text>

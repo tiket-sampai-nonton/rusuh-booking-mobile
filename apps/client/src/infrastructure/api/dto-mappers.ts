@@ -29,7 +29,10 @@ import type {
   QueueEntry,
   QueueStatus,
 } from "@domain/repositories/queue.repository";
-import type { AuthSession, UserProfile } from "@domain/repositories/user.repository";
+import type {
+  AuthSession,
+  UserProfile,
+} from "@domain/repositories/user.repository";
 
 /**
  * Minimal structural shapes of the generated DTOs we read. We declare them

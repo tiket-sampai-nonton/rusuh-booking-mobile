@@ -17,7 +17,13 @@ export const paymentTopBar = (top: number) => ({ paddingTop: top + 10 });
 export const paymentScrollContent = (isDesktop: boolean) => ({
   padding: 20,
   paddingBottom: 120,
-  ...(isDesktop ? { maxWidth: 620, width: "100%" as DimensionValue, alignSelf: "center" as const } : {}),
+  ...(isDesktop
+    ? {
+        maxWidth: 620,
+        width: "100%" as DimensionValue,
+        alignSelf: "center" as const,
+      }
+    : {}),
 });
 
 /**  mobile prototype sticky checkout bar — white ground + bottom safe-area inset. */

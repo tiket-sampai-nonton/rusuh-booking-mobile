@@ -7,25 +7,43 @@ describe("Lineup", () => {
   const originalPlatform = Platform.OS;
 
   afterEach(() => {
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
   });
 
   it("shows the fallback when the lineup is empty", () => {
     render(<Lineup items={[]} />);
-    expect(screen.getByText("Daftar pengisi acara akan diumumkan menyusul.")).toBeTruthy();
+    expect(
+      screen.getByText("Daftar pengisi acara akan diumumkan menyusul."),
+    ).toBeTruthy();
   });
 
   it("renders native cards with explicit and generated avatars and pressed states", () => {
-    Object.defineProperty(Platform, "OS", { configurable: true, value: "android" });
-    const { UNSAFE_getAllByType } = render(<Lineup items={[
-      { name: "Nadia", role: "Vokal", avatar: "https://example.com/nadia.jpg" },
-      { name: "Raka Putra", role: "Gitar" },
-    ]} />);
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "android",
+    });
+    const { UNSAFE_getAllByType } = render(
+      <Lineup
+        items={[
+          {
+            name: "Nadia",
+            role: "Vokal",
+            avatar: "https://example.com/nadia.jpg",
+          },
+          { name: "Raka Putra", role: "Gitar" },
+        ]}
+      />,
+    );
 
     expect(screen.getByText("Nadia")).toBeTruthy();
     expect(screen.getByText("Raka Putra")).toBeTruthy();
     expect(screen.getByText("Gitar")).toBeTruthy();
-    expect(UNSAFE_getAllByType(Image)[1].props.source.uri).toContain("format=png");
+    expect(UNSAFE_getAllByType(Image)[1].props.source.uri).toContain(
+      "format=png",
+    );
     fireEvent(screen.getByText("Nadia"), "pressIn");
     fireEvent(screen.getByText("Nadia"), "pressOut");
   });

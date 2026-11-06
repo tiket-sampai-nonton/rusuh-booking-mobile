@@ -5,7 +5,6 @@ import type { ExpiryReason } from "@domain/rules/payment-recovery";
 import { designColors } from "@presentation/theme";
 import { styles } from "./style";
 
-
 const REASON_ICON_PATH: Readonly<Record<ExpiryReason, string>> = {
   payment: "M3 7h18v12H3z M3 11h18 M7 15h4",
   hold: "M12 7v5l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
@@ -22,8 +21,20 @@ export interface RecoveryMessageProps {
 export function RecoveryMessage({ reason, title, body }: RecoveryMessageProps) {
   return (
     <View className="w-full max-w-sm items-center gap-4">
-      <View className="h-[100px] w-[100px] items-center justify-center rounded-full" style={styles.icon}>
-        <Svg width={42} height={42} viewBox="0 0 24 24" fill="none" stroke={designColors.danger} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <View
+        className="h-[100px] w-[100px] items-center justify-center rounded-full"
+        style={styles.icon}
+      >
+        <Svg
+          width={42}
+          height={42}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={designColors.danger}
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <Path d={REASON_ICON_PATH[reason]} />
           {reason === "hold" ? <Circle cx={12} cy={12} r={9} /> : null}
         </Svg>

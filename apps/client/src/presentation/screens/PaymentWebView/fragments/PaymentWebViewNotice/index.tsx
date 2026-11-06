@@ -2,7 +2,12 @@ import { Text, View } from "react-native";
 
 export type PaymentWebViewNoticeVariant = "web" | "error" | "loading";
 
-const NOTICE_COPY: Readonly<Record<PaymentWebViewNoticeVariant, { testID: string; text: string; textClassName: string }>> = {
+const NOTICE_COPY: Readonly<
+  Record<
+    PaymentWebViewNoticeVariant,
+    { testID: string; text: string; textClassName: string }
+  >
+> = {
   web: {
     testID: "paywv-web",
     text: "Pembayaran dibuka langsung di halaman ini (tanpa WebView di web).",
@@ -20,7 +25,11 @@ const NOTICE_COPY: Readonly<Record<PaymentWebViewNoticeVariant, { testID: string
   },
 };
 
-export function PaymentWebViewNotice({ variant }: { readonly variant: PaymentWebViewNoticeVariant }) {
+export function PaymentWebViewNotice({
+  variant,
+}: {
+  readonly variant: PaymentWebViewNoticeVariant;
+}) {
   const copy = NOTICE_COPY[variant];
   const textClass = variant === "loading" ? "text-sm" : "text-center text-sm";
 

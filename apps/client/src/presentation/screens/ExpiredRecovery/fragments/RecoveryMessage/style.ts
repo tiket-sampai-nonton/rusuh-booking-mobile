@@ -1,4 +1,3 @@
-
 import { StyleSheet } from "react-native";
 import { designColors, designBorder } from "@presentation/theme";
 

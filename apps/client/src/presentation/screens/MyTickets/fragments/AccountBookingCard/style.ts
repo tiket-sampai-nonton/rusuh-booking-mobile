@@ -1,6 +1,5 @@
-
-import { StyleSheet } from 'react-native';
-import { designBorders, designColors, interFonts } from '@presentation/theme';
+import { StyleSheet } from "react-native";
+import { designBorders, designColors, interFonts } from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   card: {
@@ -13,7 +12,7 @@ export const styles = StyleSheet.create({
     color: designColors.ink,
     fontFamily: interFonts.black,
     fontSize: 17,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   details: {
     marginTop: 8,
@@ -30,14 +29,14 @@ export const styles = StyleSheet.create({
   qrButton: {
     marginTop: 14,
     minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: designColors.ink,
   },
   qrLabel: {
     color: designColors.ground,
     fontFamily: interFonts.bold,
     fontSize: 12,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
 });

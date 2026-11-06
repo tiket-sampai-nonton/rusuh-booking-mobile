@@ -17,8 +17,14 @@ export function BrowseChips({
   onReset,
 }: BrowseChipsProps) {
   return (
-    <View className="mt-3 flex-row flex-wrap items-center" style={browseChipsStyles.container}>
-      <BrowseChip label="Kategori" value={genre === "Semua" ? "Semua" : genre} />
+    <View
+      className="mt-3 flex-row flex-wrap items-center"
+      style={browseChipsStyles.container}
+    >
+      <BrowseChip
+        label="Kategori"
+        value={genre === "Semua" ? "Semua" : genre}
+      />
       <BrowseChip label="Waktu" value={TIME_LABEL[time] ?? "Semua waktu"} />
       <BrowseChip label="Urutan" value={SORT_LABEL[sort] ?? "Terdekat"} />
       <Pressable
@@ -28,7 +34,14 @@ export function BrowseChips({
         testID="browse-refine"
         style={browseChipsStyles.refineButton}
       >
-        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={designColors.ink} strokeWidth={2}>
+        <Svg
+          width={18}
+          height={18}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={designColors.ink}
+          strokeWidth={2}
+        >
           <Path d="M4 6h16M7 12h10m-7 6h4" />
         </Svg>
       </Pressable>
@@ -40,7 +53,10 @@ export function BrowseChips({
           testID="browse-reset"
           style={browseChipsStyles.resetButton}
         >
-          <Text style={browseChipsStyles.resetText} className="text-2xs font-v2 font-bold uppercase">
+          <Text
+            style={browseChipsStyles.resetText}
+            className="text-2xs font-v2 font-bold uppercase"
+          >
             Hapus Penyaringan
           </Text>
         </Pressable>

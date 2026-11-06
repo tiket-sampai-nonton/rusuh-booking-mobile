@@ -13,7 +13,13 @@
  */
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 const EASE = Easing.bezier(0.32, 0.72, 0, 1);
 

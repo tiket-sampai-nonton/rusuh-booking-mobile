@@ -15,7 +15,13 @@ import { usePaymentWebView } from "@presentation/hooks/usePaymentWebView";
 class FakeRepo implements PaymentRepository {
   exchanged: string[] = [];
   async getPaymentPage(bookingId: string): Promise<PaymentPage> {
-    return { bookingId, methods: ["QRIS"], amountMinor: 1, paymentExpiresAt: "", serverTime: "" };
+    return {
+      bookingId,
+      methods: ["QRIS"],
+      amountMinor: 1,
+      paymentExpiresAt: "",
+      serverTime: "",
+    };
   }
   async createAttempt(bookingId: string): Promise<PaymentAttempt> {
     return { attemptId: "a", bookingId, status: "AWAITING_PAYMENT" };
@@ -24,7 +30,10 @@ class FakeRepo implements PaymentRepository {
     return { attemptId: "a", bookingId: "b", status: "PAID" };
   }
   async createPageToken(bookingId: string): Promise<PageToken> {
-    return { pageToken: "pgt_9", pageUrl: `/payment/${bookingId}?rb_pay_token=pgt_9` };
+    return {
+      pageToken: "pgt_9",
+      pageUrl: `/payment/${bookingId}?rb_pay_token=pgt_9`,
+    };
   }
   async exchangePageToken(pageToken: string): Promise<void> {
     this.exchanged.push(pageToken);

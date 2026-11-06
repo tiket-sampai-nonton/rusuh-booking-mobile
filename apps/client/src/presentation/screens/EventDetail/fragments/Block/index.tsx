@@ -14,7 +14,7 @@ import { Animated, Text, View } from "react-native";
 import type { BlockProps } from "../../interface";
 import { designDetailStyles as styles } from "../../style";
 import { nativeDriverSupported } from "@presentation/utils/style";
-import { styleForBlockAnimatedView0 } from './style';
+import { styleForBlockAnimatedView0 } from "./style";
 
 export function Block({ label, heading, children }: BlockProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;

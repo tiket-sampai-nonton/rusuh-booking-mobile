@@ -16,14 +16,17 @@ import { useRouter, type Href } from "expo-router";
 import { Platform, View } from "react-native";
 
 import type { PaymentStatus } from "@domain/repositories/payment.repository";
-import { decideRecovery, requeueRoute, type ExpiryReason } from "@domain/rules/payment-recovery";
+import {
+  decideRecovery,
+  requeueRoute,
+  type ExpiryReason,
+} from "@domain/rules/payment-recovery";
 import { Seo } from "@presentation/components/Seo";
 import { RecoveryActions } from "./fragments/RecoveryActions";
 import { RecoveryInfo } from "./fragments/RecoveryInfo";
 import { RecoveryMessage } from "./fragments/RecoveryMessage";
 import { EXPIRY_COPY } from "./recovery-copy";
 import { styles } from "./style";
-
 
 export interface ExpiredRecoveryScreenProps {
   readonly resourceId: string;
@@ -68,7 +71,11 @@ export function ExpiredRecoveryScreen({
   const primaryText = primaryButtonText(canRetry, reason, eventId);
 
   return (
-    <View className="flex-1 items-center justify-center gap-6 p-6" style={styles.screen} testID="expired-recovery">
+    <View
+      className="flex-1 items-center justify-center gap-6 p-6"
+      style={styles.screen}
+      testID="expired-recovery"
+    >
       <Seo
         title="Kedaluwarsa"
         description="Waktu sesi telah berakhir."
@@ -91,8 +98,13 @@ export function ExpiredRecoveryScreen({
   );
 }
 
-function primaryButtonText(canRetry: boolean, reason: ExpiryReason, eventId?: string): string {
+function primaryButtonText(
+  canRetry: boolean,
+  reason: ExpiryReason,
+  eventId?: string,
+): string {
   if (canRetry) return "Coba Lagi";
-  if (reason === "queue" || reason === "turn" || !eventId) return "Cari Event Lain";
+  if (reason === "queue" || reason === "turn" || !eventId)
+    return "Cari Event Lain";
   return "Masuk Antrean Lagi";
 }

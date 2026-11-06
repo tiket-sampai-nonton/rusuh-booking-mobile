@@ -24,16 +24,26 @@ export const homeStyles = StyleSheet.create({
     borderRadius: 20,
   },
   gridList: { gap: GAP },
-  gridRow: { flexDirection: "row", flexWrap: "wrap", marginHorizontal: -GAP / 2 },
+  gridRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginHorizontal: -GAP / 2,
+  },
 });
 
 /** Scroll content bottom inset (runtime). */
-export const homeScrollContent = (bottom: number) => ({ paddingBottom: bottom });
+export const homeScrollContent = (bottom: number) => ({
+  paddingBottom: bottom,
+});
 
 /** Desktop centered container (web-wide only). */
 export const homeContainer = (isDesktop: boolean) =>
   isDesktop
-    ? { maxWidth: DESKTOP_MAX, width: "100%" as DimensionValue, alignSelf: "center" as const }
+    ? {
+        maxWidth: DESKTOP_MAX,
+        width: "100%" as DimensionValue,
+        alignSelf: "center" as const,
+      }
     : undefined;
 
 /** Floating nav wrapper (absolute, clears the top safe-area inset). */

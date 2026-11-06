@@ -1,7 +1,10 @@
-
 import { StyleSheet } from "react-native";
 import { interFonts } from "@presentation/theme/fonts";
-import { designColors, designFontSizes, designSpacingSemantic } from "@presentation/theme/event-design-tokens";
+import {
+  designColors,
+  designFontSizes,
+  designSpacingSemantic,
+} from "@presentation/theme/event-design-tokens";
 
 import { Animated } from "react-native";
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -39,10 +42,14 @@ export const lightboxStyles = StyleSheet.create({
   },
 });
 
-export function styleForLightboxAnimatedView0(arg0: Animated.Value): DynamicStyle {
+export function styleForLightboxAnimatedView0(
+  arg0: Animated.Value,
+): DynamicStyle {
   return { opacity: arg0 } as DynamicStyle;
 }
 
-export function styleForLightboxAnimatedView1(arg0: Animated.Value): DynamicStyle {
+export function styleForLightboxAnimatedView1(
+  arg0: Animated.Value,
+): DynamicStyle {
   return { transform: [{ scale: arg0 }] } as DynamicStyle;
 }

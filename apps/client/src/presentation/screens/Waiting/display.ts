@@ -6,7 +6,10 @@
  * copy unit-testable and keeps the "status is never color-only" a11y invariant
  * (RBT-080) honest: every zone carries an icon + label + body, not just a hue.
  */
-import type { QueueStatus, QueueZone } from "@domain/repositories/queue.repository";
+import type {
+  QueueStatus,
+  QueueZone,
+} from "@domain/repositories/queue.repository";
 
 /** id-ID grouped number, mirroring the prototype's `toLocaleString('id-ID')`. */
 export function formatCount(n: number): string {
@@ -20,7 +23,10 @@ export function peopleAhead(position: number): number {
 }
 
 /** Estimate copy only when the server supplies its configured throughput. */
-export function etaText(position: number, admissionRatePerMin?: number): string {
+export function etaText(
+  position: number,
+  admissionRatePerMin?: number,
+): string {
   if (position <= 0) return "Siap!";
   if (!isValidAdmissionRate(admissionRatePerMin)) return "Belum tersedia";
   const mins = Math.max(1, Math.ceil(position / admissionRatePerMin));
@@ -104,7 +110,9 @@ export function terminalBody(status: QueueStatus): string {
 }
 
 /** Claim-error (RBT-044) title mirrors the terminal titles. */
-export function claimErrorTitle(errorState: "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN"): string {
+export function claimErrorTitle(
+  errorState: "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN",
+): string {
   return errorState === "EVENT_SOLD_OUT" ? "Tiket Habis" : "Giliran Berakhir";
 }
 
@@ -168,9 +176,11 @@ export const COPY = {
   saleEndedTitle: "Penjualan Berakhir",
   saleEndedText: "Masa penjualan tiket event ini telah berakhir.",
   sessionExpiredTitle: "Sesi Kedaluwarsa",
-  sessionExpiredText: "Sesi antrean Anda berakhir karena tidak aktif. Silakan bergabung kembali.",
+  sessionExpiredText:
+    "Sesi antrean Anda berakhir karena tidak aktif. Silakan bergabung kembali.",
   turnExpiredTitle: "Giliran Berakhir",
-  turnExpiredText: "Anda belum memilih tiket tepat waktu. Giliran diberikan kepada orang berikutnya dalam antrean.",
+  turnExpiredText:
+    "Anda belum memilih tiket tepat waktu. Giliran diberikan kepada orang berikutnya dalam antrean.",
 
   //  buttons
   browseEvents: "Jelajahi Event Lain",

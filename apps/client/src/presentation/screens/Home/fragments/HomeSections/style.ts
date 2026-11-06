@@ -1,5 +1,5 @@
-import { StyleSheet, type ViewStyle } from 'react-native';
-import { designColors, designSpacingSemantic } from '@presentation/theme';
+import { StyleSheet, type ViewStyle } from "react-native";
+import { designColors, designSpacingSemantic } from "@presentation/theme";
 
 const styles = StyleSheet.create({
   historySection: {

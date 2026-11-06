@@ -26,7 +26,13 @@ const NIK_LIMIT = "3171010101010199"; // ...99 → CHECK_LIMIT_REACHED
 class FakeRepo implements BookingRepository {
   calls: string[] = [];
   async createSession(eventId: string): Promise<BookingSession> {
-    return { sessionId: "s", eventId, expiresAt: "", maxSelectable: 3, categories: [] };
+    return {
+      sessionId: "s",
+      eventId,
+      expiresAt: "",
+      maxSelectable: 3,
+      categories: [],
+    };
   }
   async getCurrentSession(): Promise<BookingSession | null> {
     return null;
@@ -85,7 +91,9 @@ describe("useAttendeeCheck (RBT-052 AC2)", () => {
     await act(async () => {
       jest.advanceTimersByTime(500);
     });
-    await waitFor(() => expect(result.current.checks[NIK_OK]).toBe("AVAILABLE"));
+    await waitFor(() =>
+      expect(result.current.checks[NIK_OK]).toBe("AVAILABLE"),
+    );
     expect(repo.calls).toEqual([NIK_OK]);
   });
 
@@ -119,7 +127,9 @@ describe("useAttendeeCheck (RBT-052 AC2)", () => {
     await act(async () => {
       jest.advanceTimersByTime(20);
     });
-    await waitFor(() => expect(result.current.checks[NIK_OK]).toBe("AVAILABLE"));
+    await waitFor(() =>
+      expect(result.current.checks[NIK_OK]).toBe("AVAILABLE"),
+    );
     act(() => result.current.request(NIK_OK)); // same NIK again
     await act(async () => {
       jest.advanceTimersByTime(20);

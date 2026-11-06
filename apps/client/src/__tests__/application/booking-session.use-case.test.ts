@@ -43,7 +43,12 @@ class FakeBookingRepo implements BookingRepository {
     _i: readonly BookingItemInput[],
     _k: string,
   ): Promise<Booking> {
-    return { bookingId: "b1", sessionId: "sess-1", status: "HELD", amountMinor: 1 };
+    return {
+      bookingId: "b1",
+      sessionId: "sess-1",
+      status: "HELD",
+      amountMinor: 1,
+    };
   }
 }
 
@@ -75,7 +80,10 @@ describe("RestoreBookingSession", () => {
 describe("CheckAttendee (RBT-052)", () => {
   it("delegates to the port with the session + NIK and returns the verdict", async () => {
     const repo = new FakeBookingRepo();
-    const out = await new CheckAttendee(repo).execute("sess-1", "3171010101010001");
+    const out = await new CheckAttendee(repo).execute(
+      "sess-1",
+      "3171010101010001",
+    );
     expect(repo.checkedWith).toEqual([["sess-1", "3171010101010001"]]);
     expect(out.result).toBe("AVAILABLE");
   });
@@ -84,7 +92,11 @@ describe("CheckAttendee (RBT-052)", () => {
 describe("SetBuyer (RBT-053)", () => {
   it("delegates to the port with the session, NIK, and email", async () => {
     const repo = new FakeBookingRepo();
-    await new SetBuyer(repo).execute("sess-1", "3171999999999999", "b@mail.com");
+    await new SetBuyer(repo).execute(
+      "sess-1",
+      "3171999999999999",
+      "b@mail.com",
+    );
     expect(repo.buyerCalls).toEqual([
       ["sess-1", "3171999999999999", "b@mail.com"],
     ]);

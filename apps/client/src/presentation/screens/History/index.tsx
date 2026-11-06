@@ -19,7 +19,11 @@ import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import { HistoryGrid } from "./fragments/HistoryGrid";
-import { HistoryEmpty, HistoryError, HistoryLoading } from "./fragments/HistoryStates";
+import {
+  HistoryEmpty,
+  HistoryError,
+  HistoryLoading,
+} from "./fragments/HistoryStates";
 import { historyStyles, historyScrollContent } from "./style";
 
 export function HistoryScreen() {
@@ -32,7 +36,9 @@ export function HistoryScreen() {
 
   // Past cards are disabled in EventCard (history mode) — this is a no-op
   const noop = (): void => undefined;
-  let historyContent = <HistoryGrid events={history} onPress={noop} columns={gridColumns} />;
+  let historyContent = (
+    <HistoryGrid events={history} onPress={noop} columns={gridColumns} />
+  );
   if (isLoading) {
     historyContent = <HistoryLoading />;
   } else if (isError) {

@@ -1,7 +1,16 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from "react-native";
 
-import { BROWSE_CATEGORIES, type BrowseCategoryKey } from '../categories';
-import { browseCategories, browseCategoriesInner, browseCategoryBtn, browseCategoryBtnActive, browseCategoryGrid, browseCategoryHeading, browseCategoryHeadingWrap, browseCategoryLabel } from '../../style';
+import { BROWSE_CATEGORIES, type BrowseCategoryKey } from "../categories";
+import {
+  browseCategories,
+  browseCategoriesInner,
+  browseCategoryBtn,
+  browseCategoryBtnActive,
+  browseCategoryGrid,
+  browseCategoryHeading,
+  browseCategoryHeadingWrap,
+  browseCategoryLabel,
+} from "../../style";
 
 interface BrowseCategoriesSectionProps {
   readonly activeCategory: BrowseCategoryKey;
@@ -30,7 +39,9 @@ export function BrowseCategoriesSection({
                 onPress={() => onSelect(category.key)}
                 testID={`category-${category.key}`}
               >
-                <Text style={browseCategoryLabel(isActive)}>{category.label}</Text>
+                <Text style={browseCategoryLabel(isActive)}>
+                  {category.label}
+                </Text>
               </Pressable>
             );
           })}

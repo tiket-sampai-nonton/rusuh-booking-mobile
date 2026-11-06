@@ -35,8 +35,16 @@ function repo(over: Partial<PaymentRepository> = {}): PaymentRepository {
       bookingId: string,
       _m: PaymentMethod,
       _k: string,
-    ): Promise<PaymentAttempt> => ({ attemptId: "a", bookingId, status: "AWAITING_PAYMENT" }),
-    getStatus: async (): Promise<PaymentAttempt> => ({ attemptId: "a", bookingId: "b", status: "PAID" }),
+    ): Promise<PaymentAttempt> => ({
+      attemptId: "a",
+      bookingId,
+      status: "AWAITING_PAYMENT",
+    }),
+    getStatus: async (): Promise<PaymentAttempt> => ({
+      attemptId: "a",
+      bookingId: "b",
+      status: "PAID",
+    }),
     createPageToken: async (bookingId: string): Promise<PageToken> => ({
       pageToken: "pgt_1",
       pageUrl: `/payment/${bookingId}?rb_pay_token=pgt_1`,
@@ -54,12 +62,18 @@ function repo(over: Partial<PaymentRepository> = {}): PaymentRepository {
 describe("PaymentWebViewScreen (RBT-062)", () => {
   const origOS = RN.Platform.OS;
   afterEach(() => {
-    Object.defineProperty(RN.Platform, "OS", { value: origOS, configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: origOS,
+      configurable: true,
+    });
     mockRouter.replace.mockReset();
   });
 
   it("native: mints a token, mounts the WebView, exchanges on load", async () => {
-    Object.defineProperty(RN.Platform, "OS", { value: "ios", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "ios",
+      configurable: true,
+    });
     const exchanged: string[] = [];
     renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
       container: {
@@ -70,13 +84,18 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
         }),
       },
     });
-    await waitFor(() => expect(screen.getByTestId("paywv-webview")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("paywv-webview")).toBeTruthy(),
+    );
     // The mocked WebView fires onLoadEnd once → token exchanged.
     await waitFor(() => expect(exchanged).toEqual(["pgt_1"]));
   });
 
   it("native: shows an error when the token mint fails", async () => {
-    Object.defineProperty(RN.Platform, "OS", { value: "ios", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "ios",
+      configurable: true,
+    });
     renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
       container: {
         paymentRepository: repo({
@@ -90,7 +109,10 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
   });
 
   it("web: renders the no-WebView notice (handoff not needed on web)", async () => {
-    Object.defineProperty(RN.Platform, "OS", { value: "web", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "web",
+      configurable: true,
+    });
     renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
       container: { paymentRepository: repo() },
     });
@@ -98,7 +120,10 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
   });
 
   it("native: a SNAP success return routes to the verify gate, not /success (RBT-063)", async () => {
-    Object.defineProperty(RN.Platform, "OS", { value: "ios", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "ios",
+      configurable: true,
+    });
     renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
       container: {
         paymentRepository: repo({
@@ -116,7 +141,10 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
   });
 
   it("native: an intermediate SNAP URL does not navigate", async () => {
-    Object.defineProperty(RN.Platform, "OS", { value: "ios", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "ios",
+      configurable: true,
+    });
     renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
       container: {
         paymentRepository: repo({
@@ -127,12 +155,17 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
         }),
       },
     });
-    await waitFor(() => expect(screen.getByTestId("paywv-webview")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("paywv-webview")).toBeTruthy(),
+    );
     expect(mockRouter.replace).not.toHaveBeenCalled(); // route === null → stay
   });
 
   it("native: unmounting mid-mint does not set state (cleanup guard)", async () => {
-    Object.defineProperty(RN.Platform, "OS", { value: "ios", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "ios",
+      configurable: true,
+    });
     let release!: () => void;
     const gate = new Promise<void>((r) => (release = r));
     const { unmount } = renderWithProviders(
@@ -154,7 +187,10 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
   });
 
   it("native: an exchange failure surfaces the error state", async () => {
-    Object.defineProperty(RN.Platform, "OS", { value: "ios", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "ios",
+      configurable: true,
+    });
     renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
       container: {
         paymentRepository: repo({
@@ -181,8 +217,12 @@ describe("resolveWebViewNav (RBT-062)", () => {
     );
   });
   it("routes a failed or expired return straight to /expired", () => {
-    expect(resolveWebViewNav("https://app/failed?x=1", "bk-1")).toBe("/expired/bk-1");
-    expect(resolveWebViewNav("https://app/expired/bk-1", "bk-1")).toBe("/expired/bk-1");
+    expect(resolveWebViewNav("https://app/failed?x=1", "bk-1")).toBe(
+      "/expired/bk-1",
+    );
+    expect(resolveWebViewNav("https://app/expired/bk-1", "bk-1")).toBe(
+      "/expired/bk-1",
+    );
   });
   it("stays (null) for an intermediate SNAP URL", () => {
     expect(resolveWebViewNav("https://snap.mock/bk-1/step", "bk-1")).toBeNull();

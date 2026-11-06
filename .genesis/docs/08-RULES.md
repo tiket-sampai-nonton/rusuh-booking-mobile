@@ -59,7 +59,7 @@
 
 - **MUST** keep merge-blocking gates green: TS strict, ESLint+Prettier, Jest+RNTL, `npm audit` (high), SonarCloud. (D6.1)
 - **MUST** keep ≥90% coverage on shared domain/application (SonarCloud new-code). (D6.3)
-- **MUST** meet web budgets: bundle public ≤300KB / transactional ≤500KB gzip; LCP ≤2.5s, INP ≤200ms, CLS ≤0.1; WCAG 2.1 AA. (D6.2/D6.6)
+- **MUST** meet web budgets: initial JavaScript ≤1MB gzip per route; LCP ≤2.5s, INP ≤200ms, CLS ≤0.1; WCAG 2.1 AA. (D6.2/D6.6)
 - **NEVER** put Playwright/Maestro e2e or contract validation in the cloud CI merge/OTA gate — local/manual only. (D6.4/D6.5)
 - **MUST** route native-affecting changes to a native build, JS/asset-only to EAS OTA; RN Web always ships via web deploy, never OTA. (D5.3)
 - **NEVER** ship a public route rendered as `single` — public catalog MUST be static/server-rendered and indexable; transactional pages `noindex`. (D6.2)

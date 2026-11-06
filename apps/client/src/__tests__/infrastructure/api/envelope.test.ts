@@ -74,7 +74,9 @@ describe("assertOk", () => {
   });
   it("throws with meta code on an error envelope", () => {
     try {
-      assertOk(res(409, { meta: { code: 1900, message: "expired" }, data: null }));
+      assertOk(
+        res(409, { meta: { code: 1900, message: "expired" }, data: null }),
+      );
     } catch (e) {
       expect((e as TransportError).code).toBe(1900);
     }

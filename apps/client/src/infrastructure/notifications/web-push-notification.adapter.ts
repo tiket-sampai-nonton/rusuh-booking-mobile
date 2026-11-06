@@ -36,7 +36,10 @@ export interface WebPushRegistration {
 
 /** True when the browser supports the full web-push stack. */
 export function webPushSupported(
-  env: Pick<WebPushEnv, "hasNotification" | "hasServiceWorker" | "hasPushManager">,
+  env: Pick<
+    WebPushEnv,
+    "hasNotification" | "hasServiceWorker" | "hasPushManager"
+  >,
 ): boolean {
   return env.hasNotification && env.hasServiceWorker && env.hasPushManager;
 }
@@ -83,7 +86,9 @@ export function defaultWebPushEnv(): WebPushEnv {
     navigator?: {
       serviceWorker?: {
         register(url: string): Promise<{
-          pushManager?: { subscribe(opts: unknown): Promise<{ endpoint?: string }> };
+          pushManager?: {
+            subscribe(opts: unknown): Promise<{ endpoint?: string }>;
+          };
           showNotification(title: string, options: unknown): Promise<void>;
         }>;
       };
@@ -106,7 +111,9 @@ export function defaultWebPushEnv(): WebPushEnv {
       return {
         async subscribe() {
           try {
-            const sub = await reg.pushManager?.subscribe({ userVisibleOnly: true });
+            const sub = await reg.pushManager?.subscribe({
+              userVisibleOnly: true,
+            });
             return sub?.endpoint ?? null;
           } catch {
             return null;

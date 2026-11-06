@@ -10,11 +10,17 @@ describe("NetworkStatusBar", () => {
 
   it("shows the recoverable offline message", () => {
     render(<NetworkStatusBar isOffline isReconnected={false} />);
-    expect(screen.getByText("Koneksi terputus. Posisi antrean Anda tetap tersimpan…")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Koneksi terputus. Posisi antrean Anda tetap tersimpan…",
+      ),
+    ).toBeTruthy();
   });
 
   it("prioritizes the reconnected message when both flags are set", () => {
     render(<NetworkStatusBar isOffline isReconnected />);
-    expect(screen.getByText("Koneksi tersambung kembali. Memperbarui antrean…")).toBeTruthy();
+    expect(
+      screen.getByText("Koneksi tersambung kembali. Memperbarui antrean…"),
+    ).toBeTruthy();
   });
 });

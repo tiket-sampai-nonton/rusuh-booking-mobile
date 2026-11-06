@@ -15,7 +15,13 @@
  */
 import { useRouter, type Href } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { minorToIDR } from "@domain/services/money";
@@ -30,7 +36,7 @@ import { ArrowIcon } from "@presentation/components/ArrowIcon";
 import { useSessionStore } from "@presentation/stores/session-store";
 import { designColors } from "@presentation/theme";
 import { successStyles, componentStyles } from "./style";
-import { styleForSuccessScreenView0 } from './style';
+import { styleForSuccessScreenView0 } from "./style";
 
 export interface SuccessScreenProps {
   readonly bookingId: string;
@@ -57,10 +63,16 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   const handleDownload = async () => {
     setDownloadError("");
     try {
-      const qrPayloads = Array.from({ length: count }, (_, index) => ticketRef(bookingId, index));
+      const qrPayloads = Array.from({ length: count }, (_, index) =>
+        ticketRef(bookingId, index),
+      );
       await downloadTickets(bookingId, count, qrPayloads, event?.name);
     } catch (error) {
-      setDownloadError(error instanceof Error ? error.message : "E-tiket gagal disimpan. Coba lagi.");
+      setDownloadError(
+        error instanceof Error
+          ? error.message
+          : "E-tiket gagal disimpan. Coba lagi.",
+      );
     }
   };
 
@@ -85,7 +97,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
     >
       <Seo
         title="E-Tiket"
-          description="Tiket Anda telah dikonfirmasi."
+        description="Tiket Anda telah dikonfirmasi."
         path={`/success/${bookingId}`}
         noindex
       />
@@ -107,106 +119,131 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
       )}
       {confirmed && (
         <>
-        <ScrollView
-          className="w-full"
-          contentContainerClassName="w-full max-w-md self-center"
-          contentContainerStyle={successStyles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Green success ring (prototype `.success-icon`). */}
-          <View className="mb-6 items-center">
-            <View
-              className="h-20 w-20 items-center justify-center rounded-full"
+          <ScrollView
+            className="w-full"
+            contentContainerClassName="w-full max-w-md self-center"
+            contentContainerStyle={successStyles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Green success ring (prototype `.success-icon`). */}
+            <View className="mb-6 items-center">
+              <View
+                className="h-20 w-20 items-center justify-center rounded-full"
                 style={componentStyles.elementBorderWidth1}
-            >
-              <CheckIcon color={designColors.ground} size={32} />
+              >
+                <CheckIcon color={designColors.ground} size={32} />
+              </View>
             </View>
-          </View>
 
-          <Text
-            className="text-center text-2xs font-extrabold uppercase"
-            style={componentStyles.elementColor2}
-            testID="success-eyebrow"
-          >
-            Pembayaran berhasil
-          </Text>
-          <Text
-            className="mt-2 text-center text-2xl font-extrabold uppercase text-white"
-            style={componentStyles.elementLetterSpacing3}
-            accessibilityRole="header"
-          >
-            Tiket kamu sudah aktif
-          </Text>
-          <Text className="mt-2.5 text-center text-xs leading-5 text-white/70">
-            Simpan e-tiket ini. Tunjukkan QR di pintu masuk.
-          </Text>
-
-          {/* Summary card — translucent on the dark ground (prototype `.summary-card`). */}
-          <View
-            className="my-6 gap-1 p-5"
-            style={componentStyles.elementBackgroundColor4}
-          >
-            <SummaryRow label="Nomor Pesanan" value={bookingId} />
-            <SummaryRow label="Jumlah tiket" value={`${ticketCount ?? 1} tiket`} />
-            <SummaryRow label="Total dibayar" value={minorToIDR(amountMinor)} />
-            <SummaryRow label="NIK pembeli" value={buyerNikMasked ?? "••••"} />
-          </View>
-
-          {/* One e-ticket card + QR per ticket (RBT-071). QR encodes a safe
-              reference, never PII. */}
-          <View className="gap-6" testID="eticket-list">
-            {Array.from({ length: count }, (_, i) => (
-              // Static derived list (fixed length, never reordered): the
-              // booking id + ticket index IS the stable identity.
-              <ETicketCard
-                key={`${bookingId}-ticket-${i}`}
-                bookingId={bookingId}
-                index={i}
-                total={count}
-                eventName={event?.name}
-                venue={event?.venue}
-                startsAt={event?.startsAt}
-                attendeeNikMasked={buyerNikMasked}
-              />
-            ))}
-          </View>
-
-          <View className="mt-7 flex-row gap-3">
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Unduh e-tiket"
-              testID="success-download"
-              onPress={() => void handleDownload()}
-              className="flex-1 items-center py-4"
-              style={componentStyles.elementBackgroundColor5}
+            <Text
+              className="text-center text-2xs font-extrabold uppercase"
+              style={componentStyles.elementColor2}
+              testID="success-eyebrow"
             >
-              <View className="flex-row items-center gap-2"><ArrowIcon direction="download" color={designColors.ink} /><Text className="text-sm font-bold uppercase" style={componentStyles.elementColor6}>Unduh E-Tiket</Text></View>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ke Beranda"
-              testID="success-home"
-              onPress={() => router.replace("/" as Href)}
-              className="flex-1 items-center py-4"
-              style={componentStyles.elementBorderWidth7}
-            >
-              <Text className="text-sm font-bold uppercase text-white" style={componentStyles.elementLetterSpacing8}>
-                Ke Beranda
-              </Text>
-            </Pressable>
-          </View>
-          {downloadError ? (
-            <Text className="mt-3 text-center text-xs" style={componentStyles.elementColor9}>
-              {downloadError}
+              Pembayaran berhasil
             </Text>
-          ) : null}
+            <Text
+              className="mt-2 text-center text-2xl font-extrabold uppercase text-white"
+              style={componentStyles.elementLetterSpacing3}
+              accessibilityRole="header"
+            >
+              Tiket kamu sudah aktif
+            </Text>
+            <Text className="mt-2.5 text-center text-xs leading-5 text-white/70">
+              Simpan e-tiket ini. Tunjukkan QR di pintu masuk.
+            </Text>
 
-          {/* Email note (v2-mobile prototype 10-success.html `.email-note`) */}
-          <View className="mt-4 flex-row items-center justify-center gap-2">
-            <MailIcon color="rgba(255,255,255,0.6)" size={16} />
-            <Text style={componentStyles.elementFontSize10}>E-tiket juga dikirim ke email kamu</Text>
-          </View>
-        </ScrollView>
+            {/* Summary card — translucent on the dark ground (prototype `.summary-card`). */}
+            <View
+              className="my-6 gap-1 p-5"
+              style={componentStyles.elementBackgroundColor4}
+            >
+              <SummaryRow label="Nomor Pesanan" value={bookingId} />
+              <SummaryRow
+                label="Jumlah tiket"
+                value={`${ticketCount ?? 1} tiket`}
+              />
+              <SummaryRow
+                label="Total dibayar"
+                value={minorToIDR(amountMinor)}
+              />
+              <SummaryRow
+                label="NIK pembeli"
+                value={buyerNikMasked ?? "••••"}
+              />
+            </View>
+
+            {/* One e-ticket card + QR per ticket (RBT-071). QR encodes a safe
+              reference, never PII. */}
+            <View className="gap-6" testID="eticket-list">
+              {Array.from({ length: count }, (_, i) => (
+                // Static derived list (fixed length, never reordered): the
+                // booking id + ticket index IS the stable identity.
+                <ETicketCard
+                  key={`${bookingId}-ticket-${i}`}
+                  bookingId={bookingId}
+                  index={i}
+                  total={count}
+                  eventName={event?.name}
+                  venue={event?.venue}
+                  startsAt={event?.startsAt}
+                  attendeeNikMasked={buyerNikMasked}
+                />
+              ))}
+            </View>
+
+            <View className="mt-7 flex-row gap-3">
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Unduh e-tiket"
+                testID="success-download"
+                onPress={() => void handleDownload()}
+                className="flex-1 items-center py-4"
+                style={componentStyles.elementBackgroundColor5}
+              >
+                <View className="flex-row items-center gap-2">
+                  <ArrowIcon direction="download" color={designColors.ink} />
+                  <Text
+                    className="text-sm font-bold uppercase"
+                    style={componentStyles.elementColor6}
+                  >
+                    Unduh E-Tiket
+                  </Text>
+                </View>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ke Beranda"
+                testID="success-home"
+                onPress={() => router.replace("/" as Href)}
+                className="flex-1 items-center py-4"
+                style={componentStyles.elementBorderWidth7}
+              >
+                <Text
+                  className="text-sm font-bold uppercase text-white"
+                  style={componentStyles.elementLetterSpacing8}
+                >
+                  Ke Beranda
+                </Text>
+              </Pressable>
+            </View>
+            {downloadError ? (
+              <Text
+                className="mt-3 text-center text-xs"
+                style={componentStyles.elementColor9}
+              >
+                {downloadError}
+              </Text>
+            ) : null}
+
+            {/* Email note (v2-mobile prototype 10-success.html `.email-note`) */}
+            <View className="mt-4 flex-row items-center justify-center gap-2">
+              <MailIcon color="rgba(255,255,255,0.6)" size={16} />
+              <Text style={componentStyles.elementFontSize10}>
+                E-tiket juga dikirim ke email kamu
+              </Text>
+            </View>
+          </ScrollView>
         </>
       )}
     </View>

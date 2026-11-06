@@ -67,16 +67,25 @@ export function isRecoverableConnectionError(error: Error | null): boolean {
   const message = error.message.toLowerCase();
   const name = error.name.toLowerCase();
   const code = (error as Error & { code?: unknown }).code;
-  if (/timeout|timed out|network|fetch failed|failed to fetch|abort/.test(`${name} ${message}`)) {
+  if (
+    /timeout|timed out|network|fetch failed|failed to fetch|abort/.test(
+      `${name} ${message}`,
+    )
+  ) {
     return true;
   }
-  if (typeof code === 'string' && /timeout|network|abort|econnreset/.test(code.toLowerCase())) {
+  if (
+    typeof code === "string" &&
+    /timeout|network|abort|econnreset/.test(code.toLowerCase())
+  ) {
     return true;
   }
 
   const httpStatus = (error as Error & { httpStatus?: unknown }).httpStatus;
-  return typeof httpStatus === 'number' &&
-    (httpStatus === 408 || httpStatus === 429 || httpStatus >= 500);
+  return (
+    typeof httpStatus === "number" &&
+    (httpStatus === 408 || httpStatus === 429 || httpStatus >= 500)
+  );
 }
 
 /**
@@ -150,7 +159,8 @@ export function useQueuePolling(
     refetchOnReconnect: true,
   });
 
-  const isConnectionLost = query.isError && isRecoverableConnectionError(query.error);
+  const isConnectionLost =
+    query.isError && isRecoverableConnectionError(query.error);
 
   useEffect(() => {
     if (isConnectionLost) {
@@ -171,7 +181,8 @@ export function useQueuePolling(
 
   const entry = query.data?.entry;
   const isSettled =
-    entry !== undefined && (isTerminal(entry.status) || isAdmitted(entry.status));
+    entry !== undefined &&
+    (isTerminal(entry.status) || isAdmitted(entry.status));
 
   return {
     entry,

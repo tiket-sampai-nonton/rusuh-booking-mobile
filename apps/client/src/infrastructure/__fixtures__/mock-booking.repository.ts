@@ -101,7 +101,8 @@ export class MockBookingRepository implements BookingRepository {
     const amountMinor = items.reduce((sum, item) => {
       const category = bookingCategories.find(
         (candidate) =>
-          candidate.categoryId === item.categoryId || candidate.code === item.categoryId,
+          candidate.categoryId === item.categoryId ||
+          candidate.code === item.categoryId,
       );
       return sum + (category?.priceMinor ?? 0);
     }, 0);

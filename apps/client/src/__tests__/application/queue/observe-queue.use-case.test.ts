@@ -35,7 +35,9 @@ class FakeQueueRepository implements QueueRepository {
     this.getStatusCalls.push(queueId);
     return this.entry;
   }
-  async getQueueStatus(eventId: string): Promise<{ admissionRatePerMin?: number }> {
+  async getQueueStatus(
+    eventId: string,
+  ): Promise<{ admissionRatePerMin?: number }> {
     this.getQueueStatusCalls.push(eventId);
     return { admissionRatePerMin: 900 };
   }

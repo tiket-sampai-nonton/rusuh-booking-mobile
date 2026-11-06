@@ -47,7 +47,10 @@ describe("VerifyOtp", () => {
   it("normalizes email+code and returns the session (isNew=false)", async () => {
     const repo = new FakeUserRepository();
     repo.nextSession = { token: "tok-1", isNew: false };
-    const session = await new VerifyOtp(repo).execute(" a@b.com ", "1 2-3x4 5 6");
+    const session = await new VerifyOtp(repo).execute(
+      " a@b.com ",
+      "1 2-3x4 5 6",
+    );
     expect(repo.verifyCalls).toEqual([{ email: "a@b.com", code: "123456" }]);
     expect(session).toEqual({ token: "tok-1", isNew: false });
   });
@@ -79,8 +82,8 @@ describe("VerifyOtp", () => {
       userMessage: "locked",
     });
     repo.verifyError = typed;
-    await expect(
-      new VerifyOtp(repo).execute("a@b.com", "123456"),
-    ).rejects.toBe(typed);
+    await expect(new VerifyOtp(repo).execute("a@b.com", "123456")).rejects.toBe(
+      typed,
+    );
   });
 });

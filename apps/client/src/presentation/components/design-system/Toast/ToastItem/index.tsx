@@ -1,6 +1,12 @@
 import { useEffect, useMemo } from "react";
 import { Text } from "react-native";
-import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import { designColors, designEasing } from "@presentation/theme";
 
@@ -30,7 +36,10 @@ export function ToastItem({ toast, onDismiss }: ToastItemProps) {
   }, [toast.variant]);
 
   useEffect(() => {
-    progress.value = withTiming(1, { duration: ENTRANCE_DURATION_MS, easing: EASE });
+    progress.value = withTiming(1, {
+      duration: ENTRANCE_DURATION_MS,
+      easing: EASE,
+    });
 
     if (toast.duration <= 0) return undefined;
 
@@ -58,7 +67,11 @@ export function ToastItem({ toast, onDismiss }: ToastItemProps) {
     <Animated.View
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"
-      style={[toastStyles.toast, toastBackgroundStyle(backgroundColor), animatedStyle]}
+      style={[
+        toastStyles.toast,
+        toastBackgroundStyle(backgroundColor),
+        animatedStyle,
+      ]}
     >
       <Text style={toastStyles.message}>{toast.message}</Text>
     </Animated.View>

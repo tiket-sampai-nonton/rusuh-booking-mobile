@@ -16,6 +16,8 @@ describe("EstimatedTime", () => {
     render(<EstimatedTime position={3000} />);
 
     expect(screen.getByTestId("waiting-eta-unavailable")).toBeTruthy();
-    expect(screen.getByText("Estimasi waktu tunggu belum tersedia.")).toBeTruthy();
+    expect(
+      screen.getByText("Estimasi waktu tunggu belum tersedia."),
+    ).toBeTruthy();
   });
 });

@@ -10,14 +10,20 @@
  * - Venue name + address info below
  */
 import { useState } from "react";
-import { Image, Linking, Platform, Pressable, Text, View, type ImageStyle } from "react-native";
-
+import {
+  Image,
+  Linking,
+  Platform,
+  Pressable,
+  Text,
+  View,
+  type ImageStyle,
+} from "react-native";
 
 import { designColors } from "@presentation/theme/event-design-tokens";
 import { PinIcon } from "@presentation/components/ArrowIcon";
 import { venueStyles } from "./style";
-import { styleForVenueImage0, styleForVenueView1 } from './style';
-
+import { styleForVenueImage0, styleForVenueView1 } from "./style";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // VENUE COMPONENT
@@ -39,7 +45,9 @@ export function Venue({ name, address, mapImage, mapsUrl }: VenueProps) {
     } else {
       // Default: open Google Maps search for the venue name
       const query = encodeURIComponent(`${name} ${address}`);
-      Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`);
+      Linking.openURL(
+        `https://www.google.com/maps/search/?api=1&query=${query}`,
+      );
     }
   };
 
@@ -64,19 +72,15 @@ export function Venue({ name, address, mapImage, mapsUrl }: VenueProps) {
           style={[
             venueStyles.mapImage,
             // Web-only grayscale filter
-            Platform.OS === "web" && (styleForVenueImage0(isHovered) as unknown as ImageStyle),
+            Platform.OS === "web" &&
+              (styleForVenueImage0(isHovered) as unknown as ImageStyle),
           ]}
           resizeMode="cover"
           accessibilityIgnoresInvertColors
         />
 
         {/* Hover Overlay */}
-        <View
-          style={[
-            venueStyles.mapOverlay,
-            styleForVenueView1(isHovered),
-          ]}
-        >
+        <View style={[venueStyles.mapOverlay, styleForVenueView1(isHovered)]}>
           <View style={venueStyles.mapBtn}>
             <PinIcon color={designColors.ground} size={16} />
             <Text style={venueStyles.mapBtnText}>Buka Peta</Text>

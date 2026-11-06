@@ -1,15 +1,21 @@
-import { useEffect } from 'react';
-import { Pressable, Text, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming, useReducedMotion } from 'react-native-reanimated';
+import { useEffect } from "react";
+import { Pressable, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+  useReducedMotion,
+} from "react-native-reanimated";
 
-import type { EventSummary } from '@domain/repositories/event.repository';
-import type { ServerClock } from '@domain/services/server-clock';
-import { formatDateID } from '@domain/services/date-format';
-import { INFO_FADE_DELAY_MS, EASE } from '../../constants';
-import { componentStyles } from '../../style';
-import { CalendarIcon } from '../CalendarIcon';
-import { MapPinIcon } from '../MapPinIcon';
-import { CountdownTimer } from '../CountdownTimer';
+import type { EventSummary } from "@domain/repositories/event.repository";
+import type { ServerClock } from "@domain/services/server-clock";
+import { formatDateID } from "@domain/services/date-format";
+import { INFO_FADE_DELAY_MS, EASE } from "../../constants";
+import { componentStyles } from "../../style";
+import { CalendarIcon } from "../CalendarIcon";
+import { MapPinIcon } from "../MapPinIcon";
+import { CountdownTimer } from "../CountdownTimer";
 
 export function HeroInfo({
   event,
@@ -38,8 +44,14 @@ export function HeroInfo({
     opacity.value = 0;
     translateY.value = 30;
 
-    opacity.value = withDelay(INFO_FADE_DELAY_MS, withTiming(1, { duration: 800, easing: EASE }));
-    translateY.value = withDelay(INFO_FADE_DELAY_MS, withTiming(0, { duration: 800, easing: EASE }));
+    opacity.value = withDelay(
+      INFO_FADE_DELAY_MS,
+      withTiming(1, { duration: 800, easing: EASE }),
+    );
+    translateY.value = withDelay(
+      INFO_FADE_DELAY_MS,
+      withTiming(0, { duration: 800, easing: EASE }),
+    );
   }, [event.id, reducedMotion, opacity, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -53,11 +65,7 @@ export function HeroInfo({
   return (
     <Animated.View key={event.id} style={animatedStyle}>
       {/* Tagline (prototype .hero-tagline) */}
-      <Text
-        style={componentStyles.elementColor7}
-      >
-        {tagline}
-      </Text>
+      <Text style={componentStyles.elementColor7}>{tagline}</Text>
 
       {/* Countdown only appears when the event has a real start time. */}
       {targetDateIso ? (
@@ -68,29 +76,24 @@ export function HeroInfo({
       <View style={componentStyles.elementGap8}>
         <View style={componentStyles.elementFlexDirection9}>
           <CalendarIcon />
-          <Text
-            style={componentStyles.elementColor10}
-          >
+          <Text style={componentStyles.elementColor10}>
             {formatDateID(event.startsAt)}
           </Text>
         </View>
         {event.venue && (
           <View style={componentStyles.elementFlexDirection11}>
             <MapPinIcon />
-            <Text
-              style={componentStyles.elementColor12}
-            >
-              {event.venue}
-            </Text>
+            <Text style={componentStyles.elementColor12}>{event.venue}</Text>
           </View>
         )}
       </View>
 
       {/* Price (prototype .hero-price) */}
-      <Text
-        style={componentStyles.elementColor13}
-      >
-        Mulai <Text style={componentStyles.elementFontFamily14}>Rp {((event.minPriceMinor ?? 0) / 100).toLocaleString("id-ID")}</Text>
+      <Text style={componentStyles.elementColor13}>
+        Mulai{" "}
+        <Text style={componentStyles.elementFontFamily14}>
+          Rp {((event.minPriceMinor ?? 0) / 100).toLocaleString("id-ID")}
+        </Text>
       </Text>
 
       {/* CTAs (prototype .hero-cta) */}
@@ -103,11 +106,7 @@ export function HeroInfo({
           onPress={() => onBook(event.id)}
           style={componentStyles.elementBackgroundColor16}
         >
-          <Text
-            style={componentStyles.elementColor17}
-          >
-            Beli Tiket
-          </Text>
+          <Text style={componentStyles.elementColor17}>Beli Tiket</Text>
         </Pressable>
 
         {/* Secondary: Lihat Detail (prototype .btn-ghost .btn-large) */}
@@ -118,11 +117,7 @@ export function HeroInfo({
           onPress={() => onBook(event.id)}
           style={componentStyles.elementBackgroundColor18}
         >
-          <Text
-            style={componentStyles.elementColor19}
-          >
-            Lihat Detail
-          </Text>
+          <Text style={componentStyles.elementColor19}>Lihat Detail</Text>
         </Pressable>
       </View>
     </Animated.View>

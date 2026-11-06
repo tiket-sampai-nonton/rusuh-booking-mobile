@@ -11,11 +11,26 @@ interface TicketTabsProps {
   readonly onChange: (tab: TicketTab) => void;
 }
 
-export function TicketTabs({ activeTab, upcomingCount, pastCount, onChange }: TicketTabsProps) {
+export function TicketTabs({
+  activeTab,
+  upcomingCount,
+  pastCount,
+  onChange,
+}: TicketTabsProps) {
   return (
     <View style={ticketTabsStyles.container} accessibilityRole="tablist">
-      <TicketTabButton tab="upcoming" activeTab={activeTab} count={upcomingCount} onChange={onChange} />
-      <TicketTabButton tab="past" activeTab={activeTab} count={pastCount} onChange={onChange} />
+      <TicketTabButton
+        tab="upcoming"
+        activeTab={activeTab}
+        count={upcomingCount}
+        onChange={onChange}
+      />
+      <TicketTabButton
+        tab="past"
+        activeTab={activeTab}
+        count={pastCount}
+        onChange={onChange}
+      />
     </View>
   );
 }

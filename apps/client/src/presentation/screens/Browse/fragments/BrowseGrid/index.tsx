@@ -9,14 +9,14 @@
  * - Mobile: 2 columns with 16px gap (--space-s)
  * - Desktop: responsive columns with 32px gap (2rem)
  */
-import { Platform, View } from 'react-native';
+import { Platform, View } from "react-native";
 
-import { EventCard, Reveal } from '@presentation/components/design-system';
+import { EventCard, Reveal } from "@presentation/components/design-system";
 
-import type { BrowseGridProps } from '../../interface';
-import { browseGridCell, browseGridRow, browseGridList } from '../../style';
+import type { BrowseGridProps } from "../../interface";
+import { browseGridCell, browseGridRow, browseGridList } from "../../style";
 
-const isNative = Platform.OS !== 'web';
+const isNative = Platform.OS !== "web";
 
 export function BrowseGrid({ events, onPress, columns = 1 }: BrowseGridProps) {
   const isListMode = columns <= 1;

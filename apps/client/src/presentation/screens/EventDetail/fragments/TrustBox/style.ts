@@ -1,7 +1,11 @@
-
 import { StyleSheet } from "react-native";
 import { interFonts } from "@presentation/theme/fonts";
-import { designBorders, designColors, designFontSizes, designSpacingSemantic } from "@presentation/theme/event-design-tokens";
+import {
+  designBorders,
+  designColors,
+  designFontSizes,
+  designSpacingSemantic,
+} from "@presentation/theme/event-design-tokens";
 
 export const trustStyles = StyleSheet.create({
   container: {

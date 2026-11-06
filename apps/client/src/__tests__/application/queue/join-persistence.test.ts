@@ -109,7 +109,10 @@ describe("RBT-041 RestoreMembership", () => {
       const resumed = await new RestoreMembership(repo, storage).execute();
       expect(repo.getStatusCalls).toEqual(["q-evt-1"]);
       expect(resumed).not.toBeNull();
-      expect(resumed?.membership).toEqual({ eventId: "evt-1", queueId: "q-evt-1" });
+      expect(resumed?.membership).toEqual({
+        eventId: "evt-1",
+        queueId: "q-evt-1",
+      });
       expect(resumed?.entry.status).toBe(status);
       // Still persisted — an active slot is not cleared.
       expect(await storage.load()).not.toBeNull();

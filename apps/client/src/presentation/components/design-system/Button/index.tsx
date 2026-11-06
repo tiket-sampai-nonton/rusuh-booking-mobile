@@ -15,19 +15,36 @@
  * PRIMARY: bg #000, text #fff
  * PRIMARY hover: bg #fff, text #000 (reveal animation from top)
  */
-import { useCallback } from 'react';
-import type { ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
-import Animated, { Easing, interpolateColor, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useCallback } from "react";
+import type { ReactNode } from "react";
+import { Pressable, Text, View } from "react-native";
+import Animated, {
+  Easing,
+  interpolateColor,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
-import { designColors, designButton, designEasing, designDuration } from '@presentation/theme';
+import {
+  designColors,
+  designButton,
+  designEasing,
+  designDuration,
+} from "@presentation/theme";
 import { pointerEventsNone } from "@presentation/utils/style";
-import { styleForButtonPressable0, styleForButtonAnimatedView1, styleForButtonAnimatedText2, styleForButtonText3 } from './style';
+import {
+  styleForButtonPressable0,
+  styleForButtonAnimatedView1,
+  styleForButtonAnimatedText2,
+  styleForButtonText3,
+} from "./style";
 
 const EASE = Easing.bezier(...designEasing.primary);
 const DURATION = designDuration.slow; // 400ms for button fill per MASTER-SPEC
 
-export type ButtonVariant = 'primary' | 'ghost' | 'danger';
+export type ButtonVariant = "primary" | "ghost" | "danger";
 
 export interface ButtonProps {
   /** Button label text */
@@ -52,7 +69,7 @@ export interface ButtonProps {
  */
 function getPalette(variant: ButtonVariant) {
   switch (variant) {
-    case 'ghost':
+    case "ghost":
       // Ghost: transparent → ink fill from bottom
       return {
         bg: designColors.ground,
@@ -60,7 +77,7 @@ function getPalette(variant: ButtonVariant) {
         fill: designColors.ink,
         filledFg: designColors.ground,
       };
-    case 'danger':
+    case "danger":
       // Danger: red bg → ink fill
       return {
         bg: designColors.danger,
@@ -68,7 +85,7 @@ function getPalette(variant: ButtonVariant) {
         fill: designColors.ink,
         filledFg: designColors.ground,
       };
-    case 'primary':
+    case "primary":
     default:
       // Primary: ink bg → ground reveal from top
       return {
@@ -83,7 +100,7 @@ function getPalette(variant: ButtonVariant) {
 export function Button({
   label,
   onPress,
-  variant = 'primary',
+  variant = "primary",
   disabled = false,
   large = false,
   testID,
@@ -113,24 +130,33 @@ export function Button({
   );
 
   // Fill layer slides in from bottom (ghost) or top (primary)
-  const fillDirection = variant === 'primary' ? -1 : 1; // -1 = from top, 1 = from bottom
+  const fillDirection = variant === "primary" ? -1 : 1; // -1 = from top, 1 = from bottom
 
   const fillStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateY: `${(1 - progress.value) * 100 * fillDirection}%` as `${number}%`,
+        translateY:
+          `${(1 - progress.value) * 100 * fillDirection}%` as `${number}%`,
       },
     ],
   }));
 
   // Label color interpolates between base and filled
   const labelStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(progress.value, [0, 1], [palette.fg, palette.filledFg]),
+    color: interpolateColor(
+      progress.value,
+      [0, 1],
+      [palette.fg, palette.filledFg],
+    ),
   }));
 
   // Padding based on size
-  const paddingVertical = large ? designButton.paddingYLarge : designButton.paddingY;
-  const paddingHorizontal = large ? designButton.paddingXLarge : designButton.paddingX;
+  const paddingVertical = large
+    ? designButton.paddingYLarge
+    : designButton.paddingY;
+  const paddingHorizontal = large
+    ? designButton.paddingXLarge
+    : designButton.paddingX;
   const fontSize = large ? designButton.fontSizeLarge : designButton.fontSize;
 
   return (
@@ -145,7 +171,12 @@ export function Button({
       // Web hover handlers - only fire on web
       onHoverIn={() => setFilled(true)}
       onHoverOut={() => setFilled(false)}
-      style={styleForButtonPressable0(palette, paddingVertical, paddingHorizontal, disabled)}
+      style={styleForButtonPressable0(
+        palette,
+        paddingVertical,
+        paddingHorizontal,
+        disabled,
+      )}
     >
       {/* Fill layer */}
       <Animated.View
@@ -158,10 +189,7 @@ export function Button({
 
       {/* Label */}
       <Animated.Text
-        style={[
-          labelStyle,
-          styleForButtonAnimatedText2(fontSize, fontSize),
-        ]}
+        style={[labelStyle, styleForButtonAnimatedText2(fontSize, fontSize)]}
       >
         {label}
       </Animated.Text>
@@ -169,10 +197,8 @@ export function Button({
       {/* Trailing element */}
       {trailing != null && (
         <View style={pointerEventsNone}>
-          {typeof trailing === 'string' ? (
-            <Text
-              style={styleForButtonText3(palette, fontSize)}
-            >
+          {typeof trailing === "string" ? (
+            <Text style={styleForButtonText3(palette, fontSize)}>
               {trailing}
             </Text>
           ) : (

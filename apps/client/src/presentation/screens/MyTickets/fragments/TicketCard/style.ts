@@ -1,4 +1,3 @@
-
 import { StyleSheet } from "react-native";
 import { designColors, designBorders, interFonts } from "@presentation/theme";
 import { hardShadowStyle } from "@presentation/utils/style";
@@ -22,7 +21,11 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     textTransform: "uppercase",
   },
-  status: { fontFamily: interFonts.bold, fontSize: 11, textTransform: "uppercase" },
+  status: {
+    fontFamily: interFonts.bold,
+    fontSize: 11,
+    textTransform: "uppercase",
+  },
   statusPast: { color: designColors.inkMuted },
   statusUpcoming: { color: designColors.success },
   dateVenue: {
@@ -46,8 +49,16 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     textTransform: "uppercase",
   },
-  ticketCount: { color: designColors.ink, fontFamily: interFonts.bold, fontSize: 13 },
-  amount: { color: designColors.ink, fontFamily: interFonts.bold, fontSize: 13 },
+  ticketCount: {
+    color: designColors.ink,
+    fontFamily: interFonts.bold,
+    fontSize: 13,
+  },
+  amount: {
+    color: designColors.ink,
+    fontFamily: interFonts.bold,
+    fontSize: 13,
+  },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 16 },
   qrButton: {
     width: "100%",

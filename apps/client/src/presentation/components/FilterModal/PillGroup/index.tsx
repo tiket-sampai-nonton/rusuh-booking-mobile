@@ -15,10 +15,19 @@ interface PillGroupProps {
   readonly testPrefix: string;
 }
 
-export function PillGroup({ label, options, value, onPick, testPrefix }: PillGroupProps) {
+export function PillGroup({
+  label,
+  options,
+  value,
+  onPick,
+  testPrefix,
+}: PillGroupProps) {
   return (
     <View style={pillGroupStyles.group}>
-      <Text className="mb-2 text-xs font-semibold text-muted-foreground" style={pillGroupStyles.label}>
+      <Text
+        className="mb-2 text-xs font-semibold text-muted-foreground"
+        style={pillGroupStyles.label}
+      >
         {label}
       </Text>
       <View style={pillGroupStyles.choices}>
@@ -34,7 +43,11 @@ export function PillGroup({ label, options, value, onPick, testPrefix }: PillGro
               testID={`${testPrefix}-${option.v}`}
               style={[pillGroupStyles.option, pillOptionStyle(selected)]}
             >
-              <Text style={[pillGroupStyles.optionText, pillTextStyle(selected)]}>{option.l}</Text>
+              <Text
+                style={[pillGroupStyles.optionText, pillTextStyle(selected)]}
+              >
+                {option.l}
+              </Text>
             </Pressable>
           );
         })}

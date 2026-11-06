@@ -20,7 +20,12 @@ export function DetailLoading() {
   return (
     <View style={styles.loader} testID="detail-loading">
       <View style={styles.loaderBar}>
-        <Animated.View style={[styles.loaderProgress, detailLoadingProgressStyle(progressAnim)]} />
+        <Animated.View
+          style={[
+            styles.loaderProgress,
+            detailLoadingProgressStyle(progressAnim),
+          ]}
+        />
       </View>
     </View>
   );

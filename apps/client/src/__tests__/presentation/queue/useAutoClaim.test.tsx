@@ -84,10 +84,9 @@ function makeWrapper(repo: BookingRepository) {
 describe("useAutoClaim", () => {
   it("waits for an authoritative queue status before claiming", async () => {
     const repo = new FakeBookingRepository();
-    const { result } = renderHook(
-      () => useAutoClaim({ eventId: "evt-1" }),
-      { wrapper: makeWrapper(repo) },
-    );
+    const { result } = renderHook(() => useAutoClaim({ eventId: "evt-1" }), {
+      wrapper: makeWrapper(repo),
+    });
 
     await waitFor(() => expect(result.current.claiming).toBe(false));
     expect(repo.createSessionCalls).toEqual([]);
@@ -97,8 +96,7 @@ describe("useAutoClaim", () => {
     const repo = new FakeBookingRepository();
     const onClaimed = jest.fn();
     const { result } = renderHook(
-      () =>
-        useAutoClaim({ eventId: "evt-1", status: "ADMITTED", onClaimed }),
+      () => useAutoClaim({ eventId: "evt-1", status: "ADMITTED", onClaimed }),
       { wrapper: makeWrapper(repo) },
     );
 
@@ -165,9 +163,7 @@ describe("useAutoClaim", () => {
       () => useAutoClaim({ eventId: "evt-1", status: "ADMITTED" }),
       { wrapper: makeWrapper(repo) },
     );
-    await waitFor(() =>
-      expect(result.current.errorState).toBe("TURN_MISSED"),
-    );
+    await waitFor(() => expect(result.current.errorState).toBe("TURN_MISSED"));
     expect(result.current.claimedSessionId).toBeUndefined();
   });
 

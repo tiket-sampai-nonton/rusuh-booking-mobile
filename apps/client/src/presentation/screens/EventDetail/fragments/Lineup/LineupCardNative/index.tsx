@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Animated, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Animated,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import { designDuration } from "@presentation/theme/event-design-tokens";
 import { nativeDriverSupported } from "@presentation/utils/style";
@@ -12,7 +19,12 @@ interface LineupCardNativeProps extends LineupItem {
   readonly index: number;
 }
 
-export function LineupCardNative({ name, role, avatar, index }: LineupCardNativeProps) {
+export function LineupCardNative({
+  name,
+  role,
+  avatar,
+  index,
+}: LineupCardNativeProps) {
   const [isPressed, setIsPressed] = useState(false);
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -40,7 +52,9 @@ export function LineupCardNative({ name, role, avatar, index }: LineupCardNative
   }, [scaleAnim, opacityAnim, index]);
 
   return (
-    <Animated.View style={lineupNativeCardAnimationStyle(opacityAnim, scaleAnim)}>
+    <Animated.View
+      style={lineupNativeCardAnimationStyle(opacityAnim, scaleAnim)}
+    >
       <Pressable
         style={lineupStyles.cardNative}
         onPressIn={() => setIsPressed(true)}
@@ -55,13 +69,21 @@ export function LineupCardNative({ name, role, avatar, index }: LineupCardNative
           />
           {!isPressed && (
             <>
-              <View style={[StyleSheet.absoluteFill, lineupStyles.grayscaleDark]} />
-              <View style={[StyleSheet.absoluteFill, lineupStyles.grayscaleGray]} />
+              <View
+                style={[StyleSheet.absoluteFill, lineupStyles.grayscaleDark]}
+              />
+              <View
+                style={[StyleSheet.absoluteFill, lineupStyles.grayscaleGray]}
+              />
             </>
           )}
         </View>
-        <Text style={lineupStyles.name} numberOfLines={2}>{name}</Text>
-        <Text style={lineupStyles.role} numberOfLines={1}>{role}</Text>
+        <Text style={lineupStyles.name} numberOfLines={2}>
+          {name}
+        </Text>
+        <Text style={lineupStyles.role} numberOfLines={1}>
+          {role}
+        </Text>
       </Pressable>
     </Animated.View>
   );

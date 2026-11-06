@@ -15,7 +15,11 @@ export function Lineup({ items }: LineupProps) {
   const isNative = Platform.OS !== "web";
 
   if (items.length === 0) {
-    return <Text style={lineupStyles.empty}>Daftar pengisi acara akan diumumkan menyusul.</Text>;
+    return (
+      <Text style={lineupStyles.empty}>
+        Daftar pengisi acara akan diumumkan menyusul.
+      </Text>
+    );
   }
 
   if (isNative) {

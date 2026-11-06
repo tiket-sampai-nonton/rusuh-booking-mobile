@@ -1,5 +1,12 @@
 import { useEffect } from "react";
-import Animated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from "react-native-reanimated";
 
 import { splashLetterStyle } from "./style";
 
@@ -9,13 +16,20 @@ interface SplashLetterProps {
   readonly reducedMotion: boolean;
 }
 
-export function SplashLetter({ letter, index, reducedMotion }: SplashLetterProps) {
+export function SplashLetter({
+  letter,
+  index,
+  reducedMotion,
+}: SplashLetterProps) {
   const progress = useSharedValue(reducedMotion ? 1 : 0);
 
   useEffect(() => {
     progress.value = reducedMotion
       ? 1
-      : withDelay(400 + index * 50, withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) }));
+      : withDelay(
+          400 + index * 50,
+          withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) }),
+        );
   }, [index, progress, reducedMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({

@@ -1,22 +1,37 @@
-import { useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
-import { cancelAnimation, Easing, useReducedMotion, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import { useEffect, useRef, useState } from "react";
+import { View } from "react-native";
+import {
+  cancelAnimation,
+  Easing,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 
-import type { EventSummary } from '@domain/repositories/event.repository';
-import { eventImage } from '@domain/rules/event-image';
-import { useResponsive } from '@presentation/hooks/useResponsive';
-import { useServices } from '@providers/service-context';
+import type { EventSummary } from "@domain/repositories/event.repository";
+import { eventImage } from "@domain/rules/event-image";
+import { useResponsive } from "@presentation/hooks/useResponsive";
+import { useServices } from "@providers/service-context";
 
-import { FADE_DURATION_MS, SLIDE_DURATION_MS, ZOOM_DURATION_MS } from './constants';
-import { HeroInfo } from './fragments/HeroInfo';
-import { HeroInfoMobile } from './fragments/HeroInfoMobile';
-import { HeroSlide } from './fragments/HeroSlide';
-import { GradientOverlay } from './fragments/GradientOverlay';
-import { HeroTitle } from './fragments/HeroTitle';
-import { ScrollIndicator } from './fragments/ScrollIndicator';
-import { SlideDots } from './fragments/SlideDots';
-import { componentStyles, styleForHeroCarouselView12, styleForHeroCarouselView13 } from './style';
-import { heroInfoColumnStyle } from './style';
+import {
+  FADE_DURATION_MS,
+  SLIDE_DURATION_MS,
+  ZOOM_DURATION_MS,
+} from "./constants";
+import { HeroInfo } from "./fragments/HeroInfo";
+import { HeroInfoMobile } from "./fragments/HeroInfoMobile";
+import { HeroSlide } from "./fragments/HeroSlide";
+import { GradientOverlay } from "./fragments/GradientOverlay";
+import { HeroTitle } from "./fragments/HeroTitle";
+import { ScrollIndicator } from "./fragments/ScrollIndicator";
+import { SlideDots } from "./fragments/SlideDots";
+import {
+  componentStyles,
+  styleForHeroCarouselView12,
+  styleForHeroCarouselView13,
+} from "./style";
+import { heroInfoColumnStyle } from "./style";
 
 export interface HeroCarouselProps {
   readonly events: readonly EventSummary[];
@@ -26,7 +41,12 @@ export interface HeroCarouselProps {
   readonly autoPlay?: boolean;
 }
 
-export function HeroCarousel({ events, onBook, onSeeAll, autoPlay = true }: HeroCarouselProps) {
+export function HeroCarousel({
+  events,
+  onBook,
+  onSeeAll,
+  autoPlay = true,
+}: HeroCarouselProps) {
   const { serverClock } = useServices();
   const reducedMotion = useReducedMotion();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -35,7 +55,12 @@ export function HeroCarousel({ events, onBook, onSeeAll, autoPlay = true }: Hero
   const top = events.slice(0, autoPlay ? 3 : 1);
   const zoom = useSharedValue(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const { width: screenWidth, height: screenHeight, heroHeightVh, isNative } = useResponsive();
+  const {
+    width: screenWidth,
+    height: screenHeight,
+    heroHeightVh,
+    isNative,
+  } = useResponsive();
 
   // Viewport height: 70vh on mobile/native, 100vh on desktop web
   // v2-mobile prototype: .hero { min-height: 70vh }
@@ -50,9 +75,12 @@ export function HeroCarousel({ events, onBook, onSeeAll, autoPlay = true }: Hero
   useEffect(() => {
     if (reducedMotion) return;
     zoom.value = withRepeat(
-      withTiming(1, { duration: ZOOM_DURATION_MS, easing: Easing.inOut(Easing.quad) }),
+      withTiming(1, {
+        duration: ZOOM_DURATION_MS,
+        easing: Easing.inOut(Easing.quad),
+      }),
       -1,
-      true
+      true,
     );
     return () => cancelAnimation(zoom);
   }, [reducedMotion, zoom]);
@@ -119,10 +147,7 @@ export function HeroCarousel({ events, onBook, onSeeAll, autoPlay = true }: Hero
   const targetDateIso = currentEvent.startsAt;
 
   return (
-    <View
-      style={styleForHeroCarouselView12(heroHeight)}
-      testID="v2-hero"
-    >
+    <View style={styleForHeroCarouselView12(heroHeight)} testID="v2-hero">
       {/* Background slides (prototype .hero-slides) */}
       <View style={componentStyles.elementPosition32}>
         {top.map((ev, i) => (
@@ -154,9 +179,7 @@ export function HeroCarousel({ events, onBook, onSeeAll, autoPlay = true }: Hero
         - Badge → Title → Meta → CTA
         - Positioned at bottom with frame padding
       */}
-      <View
-        style={styleForHeroCarouselView13(isNative, isNarrow)}
-      >
+      <View style={styleForHeroCarouselView13(isNative, isNarrow)}>
         {/*
           Native (mobile): Use HeroInfoMobile which includes the title
           Web/Desktop: Separate title column + HeroInfo column
@@ -187,7 +210,13 @@ export function HeroCarousel({ events, onBook, onSeeAll, autoPlay = true }: Hero
 
       {/* Navigation dots (prototype .hero-nav) - bottom right */}
       {/* On native mobile: hide dots for cleaner look per v2-mobile prototype (no carousel nav) */}
-      {!isNative && top.length > 1 && <SlideDots count={top.length} current={currentIndex} onSelect={handleDotPress} />}
+      {!isNative && top.length > 1 && (
+        <SlideDots
+          count={top.length}
+          current={currentIndex}
+          onSelect={handleDotPress}
+        />
+      )}
 
       {/* Scroll indicator (prototype .scroll-indicator) - bottom left, desktop only */}
       {!isNarrow && <ScrollIndicator />}

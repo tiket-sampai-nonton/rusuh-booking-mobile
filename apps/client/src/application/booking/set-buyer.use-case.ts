@@ -10,7 +10,11 @@ import type { BookingRepository } from "@domain/repositories/booking.repository"
 export class SetBuyer {
   constructor(private readonly booking: BookingRepository) {}
 
-  async execute(sessionId: string, buyerNik: string, email: string): Promise<void> {
+  async execute(
+    sessionId: string,
+    buyerNik: string,
+    email: string,
+  ): Promise<void> {
     await this.booking.setBuyer(sessionId, buyerNik, email);
   }
 }

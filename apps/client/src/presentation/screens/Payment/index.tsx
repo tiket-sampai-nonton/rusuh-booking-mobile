@@ -76,7 +76,9 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
         className="flex-1 items-center justify-center bg-background"
         testID="payment-loading"
       >
-        <Text className="text-sm text-muted-foreground">Memuat pembayaran…</Text>
+        <Text className="text-sm text-muted-foreground">
+          Memuat pembayaran…
+        </Text>
       </View>
     );
   }
@@ -96,7 +98,10 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
           testID="payment-scroll"
         >
           <PaymentHoldBanner />
-          <PaymentSummary bookingId={bookingId} amountMinor={page.amountMinor} />
+          <PaymentSummary
+            bookingId={bookingId}
+            amountMinor={page.amountMinor}
+          />
           <View className="h-3.5" />
           <PaymentMethods
             methods={page.methods}

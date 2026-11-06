@@ -28,6 +28,10 @@ const config = {
       {
         origin:
           process.env.EXPO_PUBLIC_SITE_URL || "https://rusuh-booking.pages.dev",
+        // Split web route code into async chunks in production so the initial
+        // public and transactional JavaScript can meet the D6.2 budgets.
+        // Expo Router keeps native development/builds unaffected.
+        asyncRoutes: "production",
       },
     ],
     "expo-asset",

@@ -16,9 +16,19 @@ describe("CategoryCard", () => {
 
   it("renders its label and count, and invokes the category action", () => {
     const onPress = jest.fn();
-    render(<CategoryCard name="Konser" count="24 event" imageUri="https://example.com/concert.jpg" onPress={onPress} testID="category-card" />);
+    render(
+      <CategoryCard
+        name="Konser"
+        count="24 event"
+        imageUri="https://example.com/concert.jpg"
+        onPress={onPress}
+        testID="category-card"
+      />,
+    );
 
-    const card = screen.getByRole("button", { name: "Kategori Konser, 24 event" });
+    const card = screen.getByRole("button", {
+      name: "Kategori Konser, 24 event",
+    });
     fireEvent(card, "hoverIn");
     fireEvent(card, "hoverOut");
     fireEvent(card, "pressIn");
@@ -34,8 +44,17 @@ describe("CategoryCard", () => {
   it("uses animated hover transitions when reduced motion is disabled", () => {
     mockReducedMotion = false;
     const onPress = jest.fn();
-    render(<CategoryCard name="Festival" count="8 event" imageUri="https://example.com/festival.jpg" onPress={onPress} />);
-    const card = screen.getByRole("button", { name: "Kategori Festival, 8 event" });
+    render(
+      <CategoryCard
+        name="Festival"
+        count="8 event"
+        imageUri="https://example.com/festival.jpg"
+        onPress={onPress}
+      />,
+    );
+    const card = screen.getByRole("button", {
+      name: "Kategori Festival, 8 event",
+    });
     fireEvent(card, "hoverIn");
     fireEvent(card, "hoverOut");
     expect(card).toBeTruthy();

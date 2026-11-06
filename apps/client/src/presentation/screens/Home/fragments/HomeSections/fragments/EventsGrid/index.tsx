@@ -1,9 +1,8 @@
-import { Text, View } from 'react-native';
-import { EventCard, Reveal } from '@presentation/components/design-system';
-import type { EventSummary } from '@domain/repositories/event.repository';
+import { Text, View } from "react-native";
+import { EventCard, Reveal } from "@presentation/components/design-system";
+import type { EventSummary } from "@domain/repositories/event.repository";
 import { styles } from "./style";
-import { gridItemStyle } from './style';
-
+import { gridItemStyle } from "./style";
 
 interface EventsGridProps {
   readonly events: readonly EventSummary[];
@@ -12,7 +11,12 @@ interface EventsGridProps {
   readonly history?: boolean;
 }
 
-export function EventsGrid({ events, onPress, columns, history = false }: EventsGridProps) {
+export function EventsGrid({
+  events,
+  onPress,
+  columns,
+  history = false,
+}: EventsGridProps) {
   if (events.length === 0) {
     return (
       <View style={styles.empty}>
@@ -24,7 +28,10 @@ export function EventsGrid({ events, onPress, columns, history = false }: Events
   return (
     <View style={styles.grid}>
       {events.map((event, index) => (
-        <View key={event.id} style={gridItemStyle(index, events.length, columns)}>
+        <View
+          key={event.id}
+          style={gridItemStyle(index, events.length, columns)}
+        >
           <Reveal delay={index * 80}>
             <EventCard event={event} onPress={onPress} history={history} />
           </Reveal>

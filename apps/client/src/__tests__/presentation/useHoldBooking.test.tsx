@@ -28,7 +28,13 @@ class FakeRepo implements BookingRepository {
   throwOnHold: Error | null = null;
   holds = 0;
   async createSession(eventId: string): Promise<BookingSession> {
-    return { sessionId: "s", eventId, expiresAt: "", maxSelectable: 3, categories: [] };
+    return {
+      sessionId: "s",
+      eventId,
+      expiresAt: "",
+      maxSelectable: 3,
+      categories: [],
+    };
   }
   async getCurrentSession(): Promise<BookingSession | null> {
     return null;
@@ -44,7 +50,12 @@ class FakeRepo implements BookingRepository {
   ): Promise<Booking> {
     this.holds += 1;
     if (this.throwOnHold) throw this.throwOnHold;
-    return { bookingId: "bk-9", sessionId: "s", status: "HELD", amountMinor: 90000000 };
+    return {
+      bookingId: "bk-9",
+      sessionId: "s",
+      status: "HELD",
+      amountMinor: 90000000,
+    };
   }
 }
 
@@ -103,7 +114,9 @@ describe("useHoldBooking (RBT-054)", () => {
         buyerNik: "3171999999999999",
       }),
     ).rejects.toMatchObject({ code: "CATEGORY_UNAVAILABLE" });
-    await waitFor(() => expect(result.current.error?.code).toBe("CATEGORY_UNAVAILABLE"));
+    await waitFor(() =>
+      expect(result.current.error?.code).toBe("CATEGORY_UNAVAILABLE"),
+    );
     expect(useSessionStore.getState().bookingId).toBeUndefined();
   });
 });

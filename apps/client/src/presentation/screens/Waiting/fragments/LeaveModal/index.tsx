@@ -1,7 +1,7 @@
-import { Platform, Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, Text, View } from "react-native";
 
-import { styles } from '../../style';
-import { QueueIcon } from '../QueueIcon';
+import { styles } from "../../style";
+import { QueueIcon } from "../QueueIcon";
 
 export function LeaveModal({
   visible,
@@ -15,9 +15,19 @@ export function LeaveModal({
   if (!visible) return null;
 
   return (
-    <View style={[styles.modalOverlay, Platform.OS !== "web" && styles.modalOverlayNative]} testID="waiting-leave-modal">
-      <View style={[styles.modal, Platform.OS !== "web" && styles.modalPanelNative]}>
-        <View style={styles.iconCentered}><QueueIcon kind="warning" /></View>
+    <View
+      style={[
+        styles.modalOverlay,
+        Platform.OS !== "web" && styles.modalOverlayNative,
+      ]}
+      testID="waiting-leave-modal"
+    >
+      <View
+        style={[styles.modal, Platform.OS !== "web" && styles.modalPanelNative]}
+      >
+        <View style={styles.iconCentered}>
+          <QueueIcon kind="warning" />
+        </View>
         <Text style={styles.modalTitle}>Keluar dari Antrean?</Text>
         <Text style={styles.modalText}>
           Jika Anda keluar sekarang, posisi antrean akan hilang dan Anda harus

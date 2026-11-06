@@ -6,9 +6,21 @@ import { designDetailStyles as styles } from "../../../style";
 import type { CTAButtonProps } from "../types";
 import { webCtaPulseStyle } from "./style";
 
-export function WebCTAButton({ label, disabled, canJoin, onJoin, pulseAnim }: CTAButtonProps) {
+export function WebCTAButton({
+  label,
+  disabled,
+  canJoin,
+  onJoin,
+  pulseAnim,
+}: CTAButtonProps) {
   return (
-    <Animated.View style={canJoin ? (webCtaPulseStyle(pulseAnim) as unknown as ViewStyle) : undefined}>
+    <Animated.View
+      style={
+        canJoin
+          ? (webCtaPulseStyle(pulseAnim) as unknown as ViewStyle)
+          : undefined
+      }
+    >
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
@@ -16,10 +28,15 @@ export function WebCTAButton({ label, disabled, canJoin, onJoin, pulseAnim }: CT
         disabled={disabled}
         onPress={onJoin}
         testID="join-cta"
-        style={[styles.floatingCtaBtn, disabled && styles.floatingCtaBtnDisabled]}
+        style={[
+          styles.floatingCtaBtn,
+          disabled && styles.floatingCtaBtnDisabled,
+        ]}
       >
         <Text style={styles.floatingCtaBtnText}>{label}</Text>
-        {canJoin && <ArrowIcon color={styles.floatingCtaArrow.color as string} />}
+        {canJoin && (
+          <ArrowIcon color={styles.floatingCtaArrow.color as string} />
+        )}
       </Pressable>
     </Animated.View>
   );

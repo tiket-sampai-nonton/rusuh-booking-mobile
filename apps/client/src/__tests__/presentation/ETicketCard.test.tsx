@@ -17,9 +17,7 @@ describe("ticketRef (RBT-071)", () => {
 
 describe("ETicketCard (RBT-071)", () => {
   it("renders the card + QR whose value is the safe ticket ref", () => {
-    const screen = render(
-      <ETicketCard bookingId="bk-1" index={0} total={3} />,
-    );
+    const screen = render(<ETicketCard bookingId="bk-1" index={0} total={3} />);
     expect(screen.getByTestId("eticket-0")).toBeTruthy();
     // QR mock carries the encoded value as accessibilityLabel
     expect(screen.getByLabelText("RBT|bk-1|1")).toBeTruthy();
@@ -27,15 +25,18 @@ describe("ETicketCard (RBT-071)", () => {
   });
 
   it("the rendered card never contains a raw 16-digit NIK", () => {
-    const screen = render(
-      <ETicketCard bookingId="bk-9" index={1} total={2} />,
-    );
+    const screen = render(<ETicketCard bookingId="bk-9" index={1} total={2} />);
     expect(screen.queryByText(/\d{16}/)).toBeNull();
   });
 
   it("shows event details with safe fallbacks when optional details are missing", () => {
     const screen = render(
-      <ETicketCard bookingId="bk-2" index={0} total={1} eventName="Rusuh Fest" />,
+      <ETicketCard
+        bookingId="bk-2"
+        index={0}
+        total={1}
+        eventName="Rusuh Fest"
+      />,
     );
     expect(screen.getByText("Rusuh Fest")).toBeTruthy();
     expect(screen.getByText("Pemegang tiket · ••••")).toBeTruthy();
@@ -56,6 +57,8 @@ describe("ETicketCard (RBT-071)", () => {
       />,
     );
     expect(screen.getByText("Penonton QA · 31****99")).toBeTruthy();
-    expect(screen.getByText("15 November 2026 · Gelora Bung Karno")).toBeTruthy();
+    expect(
+      screen.getByText("15 November 2026 · Gelora Bung Karno"),
+    ).toBeTruthy();
   });
 });

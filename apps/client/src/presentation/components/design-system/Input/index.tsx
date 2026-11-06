@@ -14,24 +14,36 @@
  * VALID STATE: borderColor: #00aa00
  * ERROR STATE: borderColor: #ff0000
  */
-import { forwardRef, useState, useCallback } from 'react';
-import type { TextInputProps } from 'react-native';
-import { TextInput, View, Text } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
+import { forwardRef, useState, useCallback } from "react";
+import type { TextInputProps } from "react-native";
+import { TextInput, View, Text } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
-import { designColors, designEasing, designDuration } from '@presentation/theme';
+import {
+  designColors,
+  designEasing,
+  designDuration,
+} from "@presentation/theme";
 import { componentStyles } from "./style";
-import { styleForComponentAnimatedView0, styleForComponentAnimatedTextInput1 } from './style';
-
+import {
+  styleForComponentAnimatedView0,
+  styleForComponentAnimatedTextInput1,
+} from "./style";
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 const EASE = Easing.bezier(...designEasing.primary);
 const DURATION = designDuration.normal; // 300ms
 
-export type InputState = 'default' | 'valid' | 'error';
+export type InputState = "default" | "valid" | "error";
 
-export interface InputProps extends Omit<TextInputProps, 'style'> {
+export interface InputProps extends Omit<TextInputProps, "style"> {
   /** Validation state */
   readonly state?: InputState;
   /** Label above input */
@@ -49,9 +61,9 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
  */
 function getBorderColor(state: InputState): string {
   switch (state) {
-    case 'valid':
+    case "valid":
       return designColors.success;
-    case 'error':
+    case "error":
       return designColors.danger;
     default:
       return designColors.ink;
@@ -59,7 +71,7 @@ function getBorderColor(state: InputState): string {
 }
 
 export const Input = forwardRef<TextInput, InputProps>(function Input(
-  { state = 'default', label, error, hint, testID, onFocus, onBlur, ...props },
+  { state = "default", label, error, hint, testID, onFocus, onBlur, ...props },
   ref,
 ) {
   const reducedMotion = useReducedMotion();
@@ -72,7 +84,10 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
       if (reducedMotion) {
         focusProgress.value = 1;
       } else {
-        focusProgress.value = withTiming(1, { duration: DURATION, easing: EASE });
+        focusProgress.value = withTiming(1, {
+          duration: DURATION,
+          easing: EASE,
+        });
       }
       onFocus?.(e);
     },
@@ -85,7 +100,10 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
       if (reducedMotion) {
         focusProgress.value = 0;
       } else {
-        focusProgress.value = withTiming(0, { duration: DURATION, easing: EASE });
+        focusProgress.value = withTiming(0, {
+          duration: DURATION,
+          easing: EASE,
+        });
       }
       onBlur?.(e);
     },
@@ -103,26 +121,17 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
   const borderColor = getBorderColor(state);
 
   // Show error message only when in error state
-  const showError = state === 'error' && error;
+  const showError = state === "error" && error;
   const showHint = !showError && hint;
 
   return (
     <View style={componentStyles.elementGap0}>
       {/* Label */}
-      {label && (
-        <Text
-          style={componentStyles.elementFontSize1}
-        >
-          {label}
-        </Text>
-      )}
+      {label && <Text style={componentStyles.elementFontSize1}>{label}</Text>}
 
       {/* Input container with shadow on focus */}
       <Animated.View
-        style={[
-          containerStyle,
-          styleForComponentAnimatedView0(isFocused),
-        ]}
+        style={[containerStyle, styleForComponentAnimatedView0(isFocused)]}
       >
         <AnimatedTextInput
           ref={ref}
@@ -137,21 +146,11 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
 
       {/* Error message */}
       {showError && (
-        <Text
-          style={componentStyles.elementFontSize2}
-        >
-          {error}
-        </Text>
+        <Text style={componentStyles.elementFontSize2}>{error}</Text>
       )}
 
       {/* Hint text */}
-      {showHint && (
-        <Text
-          style={componentStyles.elementFontSize3}
-        >
-          {hint}
-        </Text>
-      )}
+      {showHint && <Text style={componentStyles.elementFontSize3}>{hint}</Text>}
     </View>
   );
 });

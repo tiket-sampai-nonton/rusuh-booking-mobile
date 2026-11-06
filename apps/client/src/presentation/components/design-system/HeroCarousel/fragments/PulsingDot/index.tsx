@@ -1,7 +1,16 @@
-import { useEffect } from 'react';
-import Animated, { cancelAnimation, Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+import { useEffect } from "react";
+import Animated, {
+  cancelAnimation,
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 
-import { styleForPulsingDotAnimatedView5 } from '../../style';
+import { styleForPulsingDotAnimatedView5 } from "../../style";
 
 export function PulsingDot() {
   const reducedMotion = useReducedMotion();
@@ -14,18 +23,18 @@ export function PulsingDot() {
     scale.value = withRepeat(
       withSequence(
         withTiming(1.3, { duration: 500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 500, easing: Easing.inOut(Easing.ease) })
+        withTiming(1, { duration: 500, easing: Easing.inOut(Easing.ease) }),
       ),
       -1,
-      false
+      false,
     );
     opacityVal.value = withRepeat(
       withSequence(
         withTiming(0.7, { duration: 500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 500, easing: Easing.inOut(Easing.ease) })
+        withTiming(1, { duration: 500, easing: Easing.inOut(Easing.ease) }),
       ),
       -1,
-      false
+      false,
     );
     return () => {
       cancelAnimation(scale);
@@ -39,11 +48,6 @@ export function PulsingDot() {
   }));
 
   return (
-    <Animated.View
-      style={[
-        styleForPulsingDotAnimatedView5(),
-        dotStyle,
-      ]}
-    />
+    <Animated.View style={[styleForPulsingDotAnimatedView5(), dotStyle]} />
   );
 }

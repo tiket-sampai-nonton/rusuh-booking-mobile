@@ -10,26 +10,41 @@ describe("MockBookingRepository", () => {
     expect(session.eventId).toBe("evt-1");
     expect(await repo.getCurrentSession()).toEqual(session);
 
-    const check = await repo.checkAttendee(session.sessionId, "3201234567890001");
+    const check = await repo.checkAttendee(
+      session.sessionId,
+      "3201234567890001",
+    );
     expect(check.result).toBe("AVAILABLE");
     expect(check.nikMasked).toMatch(/\*\*\*\*/);
 
     // Deterministic verdicts by NIK suffix (RBT-052 AC2).
-    const blocked = await repo.checkAttendee(session.sessionId, "3201234567890100");
+    const blocked = await repo.checkAttendee(
+      session.sessionId,
+      "3201234567890100",
+    );
     expect(blocked.result).toBe("ALREADY_REGISTERED");
-    const limited = await repo.checkAttendee(session.sessionId, "3201234567890199");
+    const limited = await repo.checkAttendee(
+      session.sessionId,
+      "3201234567890199",
+    );
     expect(limited.result).toBe("CHECK_LIMIT_REACHED");
     expect(limited.checksRemaining).toBe(0);
 
     // setBuyer records the MASKED NIK only (SECURITY — never the raw NIK).
     expect(repo.getBuyerSet()).toBeNull();
-    await repo.setBuyer(session.sessionId, "3171999999999999", "buyer@mail.com");
+    await repo.setBuyer(
+      session.sessionId,
+      "3171999999999999",
+      "buyer@mail.com",
+    );
     const set = repo.getBuyerSet();
     expect(set?.email).toBe("buyer@mail.com");
     expect(set?.nikMasked).toBe("31****99");
     expect(set?.nikMasked).not.toContain("3171999999999999"); // no raw NIK
 
-    const items = [{ categoryId: "REG", attendeeName: "A", attendeeNik: "3171010101010001" }];
+    const items = [
+      { categoryId: "REG", attendeeName: "A", attendeeNik: "3171010101010001" },
+    ];
     const b1 = await repo.hold(session.sessionId, items, "idem-1");
     const b2 = await repo.hold(session.sessionId, items, "idem-1");
     expect(b2.bookingId).toBe(b1.bookingId); // idempotent
@@ -51,7 +66,11 @@ describe("MockBookingRepository", () => {
         s.sessionId,
         [
           { ...base, categoryId: "REG" },
-          { categoryId: "VIP", attendeeName: "B", attendeeNik: "3171010101010002" },
+          {
+            categoryId: "VIP",
+            attendeeName: "B",
+            attendeeNik: "3171010101010002",
+          },
         ],
         "k2",
       ),
@@ -61,8 +80,16 @@ describe("MockBookingRepository", () => {
       repo.hold(
         s.sessionId,
         [
-          { categoryId: "REG", attendeeName: "A", attendeeNik: "3171010101010001" },
-          { categoryId: "REG", attendeeName: "B", attendeeNik: "3171010101010001" },
+          {
+            categoryId: "REG",
+            attendeeName: "A",
+            attendeeNik: "3171010101010001",
+          },
+          {
+            categoryId: "REG",
+            attendeeName: "B",
+            attendeeNik: "3171010101010001",
+          },
         ],
         "k3",
       ),
@@ -99,7 +126,9 @@ describe("MockUserRepository", () => {
   it("rejects a wrong OTP code", async () => {
     const repo = new MockUserRepository();
     await repo.requestOtp("a@b.com");
-    await expect(repo.verifyOtp("a@b.com", "000000")).rejects.toThrow(/invalid OTP/);
+    await expect(repo.verifyOtp("a@b.com", "000000")).rejects.toThrow(
+      /invalid OTP/,
+    );
   });
 
   it("returns isNew=false for a returning user (second verify)", async () => {

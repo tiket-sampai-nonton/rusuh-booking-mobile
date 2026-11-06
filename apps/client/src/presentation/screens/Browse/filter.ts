@@ -25,6 +25,21 @@ export const GENRES = [
 export const TIMES = ["all", "week", "month", "quarter"] as const;
 export const SORTS = ["closest", "furthest"] as const;
 
+/**
+ * Query-result pages are client-filtered and have no dedicated static HTML.
+ * Until server-backed filters land, any non-empty query is noindex while the
+ * Seo component keeps its canonical URL at `/browse`.
+ */
+export function hasBrowseQueryParams(
+  params: Readonly<Record<string, string | string[] | undefined>>,
+): boolean {
+  return Object.values(params).some((value) =>
+    Array.isArray(value)
+      ? value.some((item) => item.trim().length > 0)
+      : typeof value === "string" && value.trim().length > 0,
+  );
+}
+
 export const TIME_LABEL: Record<string, string> = {
   all: "Semua waktu",
   week: "Minggu ini",
@@ -50,7 +65,9 @@ export function matchesCategory(
   event: Pick<EventSummary, "name" | "venue">,
   category: string,
 ): boolean {
-  const terms = CATEGORY_TERMS[category.toLowerCase()] ?? [category.toLowerCase()];
+  const terms = CATEGORY_TERMS[category.toLowerCase()] ?? [
+    category.toLowerCase(),
+  ];
   const searchable = `${event.name} ${event.venue ?? ""}`.toLowerCase();
   return terms.some((term) => searchable.includes(term));
 }

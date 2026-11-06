@@ -1,9 +1,9 @@
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
 
-import type { ServerClock } from '@domain/services/server-clock';
-import { useServerCountdown } from '@presentation/hooks/useServerCountdown';
+import type { ServerClock } from "@domain/services/server-clock";
+import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
 
-import { componentStyles } from '../../style';
+import { componentStyles } from "../../style";
 
 export function CountdownTimer({
   expiresAtIso,
@@ -23,10 +23,7 @@ export function CountdownTimer({
   const pad = (n: number) => n.toString().padStart(2, "0");
 
   return (
-    <View
-      style={componentStyles.elementFlexDirection3}
-      testID="hero-countdown"
-    >
+    <View style={componentStyles.elementFlexDirection3} testID="hero-countdown">
       {[
         { value: pad(time.days), label: "Hari" },
         { value: pad(time.hours), label: "Jam" },
@@ -34,16 +31,8 @@ export function CountdownTimer({
         { value: pad(time.secs), label: "Detik" },
       ].map((item) => (
         <View key={item.label} style={componentStyles.elementAlignItems4}>
-          <Text
-            style={componentStyles.elementColor5}
-          >
-            {item.value}
-          </Text>
-          <Text
-            style={componentStyles.elementColor6}
-          >
-            {item.label}
-          </Text>
+          <Text style={componentStyles.elementColor5}>{item.value}</Text>
+          <Text style={componentStyles.elementColor6}>{item.label}</Text>
         </View>
       ))}
     </View>

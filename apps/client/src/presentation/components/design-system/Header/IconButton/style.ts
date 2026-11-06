@@ -13,16 +13,26 @@ export const headerIconButtonStyles = StyleSheet.create({
   },
 });
 
-export function iconButtonShadowStyle(pressed: number, platform: PlatformOSType, shadowColor: string): ViewStyle {
+export function iconButtonShadowStyle(
+  pressed: number,
+  platform: PlatformOSType,
+  shadowColor: string,
+): ViewStyle {
   "worklet";
   const offset = 2 - pressed * 2;
   if (platform === "web") {
-    return { boxShadow: `${offset}px ${offset}px 0 ${shadowColor}` } as unknown as ViewStyle;
+    return {
+      boxShadow: `${offset}px ${offset}px 0 ${shadowColor}`,
+    } as unknown as ViewStyle;
   }
   return { elevation: pressed > 0.5 ? 0 : 2 };
 }
 
-export function iconButtonBackgroundColor(pressed: number, inkColor: string, groundColor: string): string {
+export function iconButtonBackgroundColor(
+  pressed: number,
+  inkColor: string,
+  groundColor: string,
+): string {
   "worklet";
   return pressed > 0.5 ? inkColor : groundColor;
 }

@@ -70,7 +70,9 @@ const NOW = Date.parse("2026-06-01T00:00:00.000Z");
 
 describe("isPastEvent", () => {
   it("CLOSED is always past", () => {
-    expect(isPastEvent({ status: "CLOSED", startsAt: undefined }, NOW)).toBe(true);
+    expect(isPastEvent({ status: "CLOSED", startsAt: undefined }, NOW)).toBe(
+      true,
+    );
   });
 
   it("an event with no start date is not past", () => {
@@ -81,10 +83,16 @@ describe("isPastEvent", () => {
 
   it("compares startsAt against the server clock", () => {
     expect(
-      isPastEvent({ status: "AVAILABLE", startsAt: "2026-01-01T00:00:00Z" }, NOW),
+      isPastEvent(
+        { status: "AVAILABLE", startsAt: "2026-01-01T00:00:00Z" },
+        NOW,
+      ),
     ).toBe(true);
     expect(
-      isPastEvent({ status: "AVAILABLE", startsAt: "2026-12-01T00:00:00Z" }, NOW),
+      isPastEvent(
+        { status: "AVAILABLE", startsAt: "2026-12-01T00:00:00Z" },
+        NOW,
+      ),
     ).toBe(false);
   });
 });
@@ -94,8 +102,18 @@ describe("splitCatalog", () => {
     const events: EventSummary[] = [
       { ...base, id: "late", startsAt: "2026-12-01T00:00:00Z" },
       { ...base, id: "soon", startsAt: "2026-07-01T00:00:00Z" },
-      { ...base, id: "old", status: "CLOSED", startsAt: "2025-01-01T00:00:00Z" },
-      { ...base, id: "older", status: "CLOSED", startsAt: "2024-01-01T00:00:00Z" },
+      {
+        ...base,
+        id: "old",
+        status: "CLOSED",
+        startsAt: "2025-01-01T00:00:00Z",
+      },
+      {
+        ...base,
+        id: "older",
+        status: "CLOSED",
+        startsAt: "2024-01-01T00:00:00Z",
+      },
       { ...base, id: "nodate", startsAt: undefined },
     ];
     const { upcoming, history } = splitCatalog(events, NOW);

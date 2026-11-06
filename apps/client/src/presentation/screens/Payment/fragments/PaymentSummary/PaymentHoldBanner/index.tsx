@@ -13,7 +13,8 @@ export function PaymentHoldBanner() {
     >
       <LockIcon color={designColors.ground} size={16} />
       <Text className="flex-1 text-xs font-semibold text-white">
-        Tiket sudah disimpan sementara. Selesaikan pembayaran sebelum waktu habis.
+        Tiket sudah disimpan sementara. Selesaikan pembayaran sebelum waktu
+        habis.
       </Text>
     </View>
   );

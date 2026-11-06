@@ -36,7 +36,9 @@ export default function RootLayout() {
         </View>
       )}
       <StatusBar style={showSplash ? "light" : "auto"} />
-      {showSplash && Platform.OS !== "web" ? <NativeLaunchSplash onFinish={finishSplash} /> : null}
+      {showSplash && Platform.OS !== "web" ? (
+        <NativeLaunchSplash onFinish={finishSplash} />
+      ) : null}
     </View>
   );
 }

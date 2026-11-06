@@ -11,29 +11,42 @@
  * - Header: slides in from top, fixed position
  * - All animations exactly as prototype
  */
-import { useRouter, type Href } from 'expo-router';
-import { useRef, useState } from 'react';
-import { View } from 'react-native';
-import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter, type Href } from "expo-router";
+import { useRef, useState } from "react";
+import { View } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { LoginModal } from '@presentation/components/auth/LoginModal';
-import { FilterModal, type FilterValue } from '@presentation/components/FilterModal';
-import { ToastProvider, Loader, ScrollProgress, Header, HeroCarousel, BottomNav } from '@presentation/components/design-system';
-import { useEvents } from '@presentation/hooks/useEvents';
-import { useResponsive } from '@presentation/hooks/useResponsive';
-import { useAccountStore } from '@presentation/stores/account-store';
+import { LoginModal } from "@presentation/components/auth/LoginModal";
+import {
+  FilterModal,
+  type FilterValue,
+} from "@presentation/components/FilterModal";
+import {
+  ToastProvider,
+  Loader,
+  ScrollProgress,
+  Header,
+  HeroCarousel,
+  BottomNav,
+} from "@presentation/components/design-system";
+import { useEvents } from "@presentation/hooks/useEvents";
+import { useResponsive } from "@presentation/hooks/useResponsive";
+import { useAccountStore } from "@presentation/stores/account-store";
 
-
-import { HomeSections } from './fragments/HomeSections';
-import { HomeError } from './fragments/HomeStates';
-import { homeScrollContent, componentStyles } from './style';
+import { HomeSections } from "./fragments/HomeSections";
+import { HomeError } from "./fragments/HomeStates";
+import { homeScrollContent, componentStyles } from "./style";
 
 export function HomeScreen() {
   const router = useRouter();
   const { data, isLoading, isError, error } = useEvents();
   const scrollRef = useRef<Animated.ScrollView>(null);
-  const { isWeb, isDesktop, isNative, width, gridColumns, bottomBarHeight } = useResponsive();
+  const { isWeb, isDesktop, isNative, width, gridColumns, bottomBarHeight } =
+    useResponsive();
   const insets = useSafeAreaInsets();
   const profile = useAccountStore((s) => s.profile);
 
@@ -41,7 +54,9 @@ export function HomeScreen() {
   const showNavLinks = isWeb && width > 768;
 
   // Bottom padding: account for bottom nav on native
-  const bottomPadding = isNative ? bottomBarHeight + insets.bottom : insets.bottom;
+  const bottomPadding = isNative
+    ? bottomBarHeight + insets.bottom
+    : insets.bottom;
 
   // Scroll offset drives the hero parallax + scroll progress.
   const scrollY = useSharedValue(0);
@@ -53,13 +68,18 @@ export function HomeScreen() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
-  const goToEvent = (eventId: string): void => router.push(`/events/${eventId}` as Href);
-  const goBrowse = (): void => router.push('/browse' as Href);
+  const goToEvent = (eventId: string): void =>
+    router.push(`/events/${eventId}` as Href);
+  const goBrowse = (): void => router.push("/browse" as Href);
 
   // Filter "Terapkan" → /browse with the chosen params.
   const applyFilter = (f: FilterValue): void => {
     setFilterOpen(false);
-    const qs = new URLSearchParams({ genre: f.genre, time: f.time, sort: f.sort }).toString();
+    const qs = new URLSearchParams({
+      genre: f.genre,
+      time: f.time,
+      sort: f.sort,
+    }).toString();
     router.push(`/browse?${qs}` as Href);
   };
 
@@ -115,31 +135,52 @@ export function HomeScreen() {
           topInset={insets.top}
           showLinks={showNavLinks}
           links={[
-            { label: 'Beranda', onPress: () => scrollRef.current?.scrollTo({ y: 0, animated: true }), testID: 'nav-home' },
-            { label: 'Jelajahi', onPress: goBrowse, testID: 'nav-browse' },
-            ...(profile ? [
-              { label: 'Tiket Saya', onPress: () => router.push('/my-tickets' as Href), testID: 'nav-tickets' },
-              { label: 'Profil', onPress: () => router.push('/profile' as Href), testID: 'nav-profile' },
-            ] : []),
+            {
+              label: "Beranda",
+              onPress: () =>
+                scrollRef.current?.scrollTo({ y: 0, animated: true }),
+              testID: "nav-home",
+            },
+            { label: "Jelajahi", onPress: goBrowse, testID: "nav-browse" },
+            ...(profile
+              ? [
+                  {
+                    label: "Tiket Saya",
+                    onPress: () => router.push("/my-tickets" as Href),
+                    testID: "nav-tickets",
+                  },
+                  {
+                    label: "Profil",
+                    onPress: () => router.push("/profile" as Href),
+                    testID: "nav-profile",
+                  },
+                ]
+              : []),
           ]}
           isLoggedIn={Boolean(profile)}
           onCtaPress={() => setLoginOpen(true)}
-          onLogoPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+          onLogoPress={() =>
+            scrollRef.current?.scrollTo({ y: 0, animated: true })
+          }
           actions={[]}
         />
 
         {/* Login/OTP + Filter modals */}
         <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
-        <FilterModal visible={filterOpen} onClose={() => setFilterOpen(false)} onApply={applyFilter} />
+        <FilterModal
+          visible={filterOpen}
+          onClose={() => setFilterOpen(false)}
+          onApply={applyFilter}
+        />
 
         {/* Bottom Navigation (native only, handled internally by BottomNav) */}
         <BottomNav
           activeRoute="home"
           isLoggedIn={Boolean(profile)}
           onNavigate={(route) => {
-            if (route === 'browse') router.push('/browse' as Href);
-            else if (route === 'tickets') router.push('/my-tickets' as Href);
-            else if (route === 'profile') router.push('/profile' as Href);
+            if (route === "browse") router.push("/browse" as Href);
+            else if (route === "tickets") router.push("/my-tickets" as Href);
+            else if (route === "profile") router.push("/profile" as Href);
             // home = current screen, no-op
           }}
         />

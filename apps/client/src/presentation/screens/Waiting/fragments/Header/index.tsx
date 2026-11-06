@@ -24,7 +24,9 @@ export function Header({ status = "MENUNGGU" }: { readonly status?: string }) {
         accessibilityLabel="Beranda Rusuh Tiket"
         onPress={() => router.push("/" as Href)}
       >
-        <Text style={[styles.logo, isDesktop && styles.logoDesktop]}>RUSUH TIKET</Text>
+        <Text style={[styles.logo, isDesktop && styles.logoDesktop]}>
+          RUSUH TIKET
+        </Text>
       </Pressable>
       <Text style={[styles.headerMeta, isDesktop && styles.headerMetaDesktop]}>
         {isDesktop ? `RUANG TUNGGU / STATUS ${status}` : "ANTREAN / 01"}

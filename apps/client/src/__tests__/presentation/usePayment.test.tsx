@@ -16,7 +16,13 @@ import { useSessionStore } from "@presentation/stores/session-store";
 
 class FakeRepo implements PaymentRepository {
   async getPaymentPage(bookingId: string): Promise<PaymentPage> {
-    return { bookingId, methods: ["QRIS"], amountMinor: 1, paymentExpiresAt: "", serverTime: "" };
+    return {
+      bookingId,
+      methods: ["QRIS"],
+      amountMinor: 1,
+      paymentExpiresAt: "",
+      serverTime: "",
+    };
   }
   async createAttempt(
     bookingId: string,
@@ -122,12 +128,18 @@ describe("openSnapHandoff (platform branches)", () => {
   const origOpen = RN.Linking.openURL;
 
   afterEach(() => {
-    Object.defineProperty(RN.Platform, "OS", { value: origOS, configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: origOS,
+      configurable: true,
+    });
     RN.Linking.openURL = origOpen;
   });
 
   it("assigns window.location on web", async () => {
-    Object.defineProperty(RN.Platform, "OS", { value: "web", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "web",
+      configurable: true,
+    });
     const assign = jest.fn();
     Object.defineProperty(globalThis, "location", {
       value: { assign },
@@ -140,7 +152,10 @@ describe("openSnapHandoff (platform branches)", () => {
   });
 
   it("opens the URL via Linking on native", async () => {
-    Object.defineProperty(RN.Platform, "OS", { value: "ios", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "ios",
+      configurable: true,
+    });
     const openURL = jest.fn().mockResolvedValue(undefined);
     RN.Linking.openURL = openURL as typeof RN.Linking.openURL;
     await openSnapHandoff("https://snap.mock/native");
@@ -148,7 +163,10 @@ describe("openSnapHandoff (platform branches)", () => {
   });
 
   it("routes a native booking handoff to the encoded in-app payment WebView", async () => {
-    Object.defineProperty(RN.Platform, "OS", { value: "android", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "android",
+      configurable: true,
+    });
     jest.resetModules();
     const push = jest.fn();
     jest.doMock("expo-router", () => ({ router: { push } }));

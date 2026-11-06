@@ -61,17 +61,17 @@ export function useETicketShare(
 }
 
 function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /** Web default: open a print window with the manifest. */
 function defaultOpenPrint(html: string): void {
   const w = (globalThis as { open?: (u?: string) => unknown }).open?.("");
   const win = w as
-    | { document?: { write: (s: string) => void; close: () => void }; print?: () => void }
+    | {
+        document?: { write: (s: string) => void; close: () => void };
+        print?: () => void;
+      }
     | undefined;
   if (win?.document) {
     win.document.write(`<html><body>${html}</body></html>`);
@@ -85,7 +85,8 @@ async function defaultWriteAndShare(
   filename: string,
   content: string,
 ): Promise<void> {
-  const FileSystem = require("expo-file-system") as typeof import("expo-file-system");
+  const FileSystem =
+    require("expo-file-system") as typeof import("expo-file-system");
   const Sharing = require("expo-sharing") as typeof import("expo-sharing");
   const uri = `${FileSystem.cacheDirectory ?? ""}${filename}`;
   await FileSystem.writeAsStringAsync(uri, content);

@@ -117,17 +117,30 @@ describe("ExpiredRecoveryScreen (RBT-064)", () => {
   it("retry is a no-op guard when bookingId is missing", () => {
     // status FAILED + payable but no bookingId → canRetry false (no button)
     const screen = render(
-      <ExpiredRecoveryScreen resourceId="bk-1" reason="payment" status="FAILED" remainingMs={60_000} />,
+      <ExpiredRecoveryScreen
+        resourceId="bk-1"
+        reason="payment"
+        status="FAILED"
+        remainingMs={60_000}
+      />,
     );
     expect(screen.queryByTestId("expired-retry")).toBeNull();
   });
 
   it("returns to Home from the native recovery screen", () => {
     const originalPlatform = Platform.OS;
-    Object.defineProperty(Platform, "OS", { configurable: true, value: "android" });
-    const screen = render(<ExpiredRecoveryScreen resourceId="hold-1" reason="hold" />);
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "android",
+    });
+    const screen = render(
+      <ExpiredRecoveryScreen resourceId="hold-1" reason="hold" />,
+    );
     fireEvent.press(screen.getByTestId("expired-home"));
     expect(mockRouter.replace).toHaveBeenCalledWith("/");
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
   });
 });

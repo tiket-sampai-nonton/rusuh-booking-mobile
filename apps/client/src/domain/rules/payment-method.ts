@@ -18,11 +18,36 @@ export interface MethodMeta {
 
 /** Ordered method metadata (prototype payment.html `methodLabels`). */
 export const PAYMENT_METHODS: readonly MethodMeta[] = [
-  { code: "VA_BCA", icon: "BCA", name: "Virtual Account BCA", sub: "Transfer via ATM / m-banking BCA" },
-  { code: "VA_BNI", icon: "BNI", name: "Virtual Account BNI", sub: "Transfer via ATM / m-banking BNI" },
-  { code: "VA_BRI", icon: "BRI", name: "Virtual Account BRI", sub: "Transfer via ATM / m-banking BRI" },
-  { code: "VA_PERMATA", icon: "PRM", name: "Virtual Account Permata", sub: "Transfer via ATM / m-banking Permata" },
-  { code: "QRIS", icon: "QR", name: "QRIS", sub: "Scan dari semua e-wallet & m-banking" },
+  {
+    code: "VA_BCA",
+    icon: "BCA",
+    name: "Virtual Account BCA",
+    sub: "Transfer via ATM / m-banking BCA",
+  },
+  {
+    code: "VA_BNI",
+    icon: "BNI",
+    name: "Virtual Account BNI",
+    sub: "Transfer via ATM / m-banking BNI",
+  },
+  {
+    code: "VA_BRI",
+    icon: "BRI",
+    name: "Virtual Account BRI",
+    sub: "Transfer via ATM / m-banking BRI",
+  },
+  {
+    code: "VA_PERMATA",
+    icon: "PRM",
+    name: "Virtual Account Permata",
+    sub: "Transfer via ATM / m-banking Permata",
+  },
+  {
+    code: "QRIS",
+    icon: "QR",
+    name: "QRIS",
+    sub: "Scan dari semua e-wallet & m-banking",
+  },
   { code: "GOPAY", icon: "GP", name: "GoPay", sub: "Bayar via aplikasi Gojek" },
 ];
 

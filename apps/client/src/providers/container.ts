@@ -170,7 +170,9 @@ export function createContainer(options: ContainerOptions = {}): Container {
       ? new WebPushNotificationAdapter()
       : new ExpoNotificationAdapter();
   const fileShareAdapter: FileSharePort =
-    Platform.OS === "web" ? new WebFileShareAdapter() : new ExpoFileShareAdapter();
+    Platform.OS === "web"
+      ? new WebFileShareAdapter()
+      : new ExpoFileShareAdapter();
   // Server-authoritative clock layered over the device clock. Unsynced until a
   // server timestamp arrives (offset 0 → serverNow === device now); the catalog
   // split + timers read through it so a later sync corrects everything at once.
@@ -182,7 +184,8 @@ export function createContainer(options: ContainerOptions = {}): Container {
   const tokenStorage: TokenStorage = createTokenStorage();
   // Queue membership persistence is also a platform primitive (native secure
   // store vs web in-memory, driven by Platform.OS) → bound in BOTH modes (RBT-041).
-  const queueMembership: QueueMembershipStorage = createQueueMembershipStorage();
+  const queueMembership: QueueMembershipStorage =
+    createQueueMembershipStorage();
   // Idempotency keys are a client-side primitive over an in-memory store →
   // bound in BOTH modes (RBT-012/054).
   const idempotencyKeys = new IdempotencyKeys(new InMemoryIdempotencyStore());
@@ -232,7 +235,10 @@ export function createContainer(options: ContainerOptions = {}): Container {
     bookingRepository: new HttpBookingRepository(httpClient),
     paymentRepository: new HttpPaymentRepository(httpClient),
     userRepository: new HttpUserRepository(httpClient, tokenStorage),
-    ticketHistoryRepository: new HttpTicketHistoryRepository(httpClient, tokenStorage),
+    ticketHistoryRepository: new HttpTicketHistoryRepository(
+      httpClient,
+      tokenStorage,
+    ),
     // RBT-072: native uses expo-notifications; web falls back to the mock until
     // web-push (RBT-073). fileShare is bound in E6.
     notification: notificationAdapter,

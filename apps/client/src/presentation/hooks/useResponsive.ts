@@ -80,7 +80,9 @@ export function useResponsive(): Responsive {
     height,
     gridColumns,
     detailTwoCol: width > 820,
-    headerHeight: isDesktop ? designLayout.headerHeight : designLayout.headerHeightMobile,
+    headerHeight: isDesktop
+      ? designLayout.headerHeight
+      : designLayout.headerHeightMobile,
     heroHeightVh: isDesktop ? 100 : 70,
     bottomBarHeight: 0, // Web uses top nav, no bottom bar
     tapTarget: designLayout.tapTarget,

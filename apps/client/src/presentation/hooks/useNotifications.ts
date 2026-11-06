@@ -21,7 +21,9 @@ export interface TappedNotificationData {
 }
 
 /** Pure: given a tap's data, the route to open (or null to stay). Exported for test. */
-export function routeForTap(data: TappedNotificationData | undefined): string | null {
+export function routeForTap(
+  data: TappedNotificationData | undefined,
+): string | null {
   if (!data) return null;
   return notificationRoute({ deepLink: data.deepLink });
 }
@@ -45,7 +47,8 @@ export function useNotifications(): void {
         // (clients.navigate to the deep link) — no in-app JS listener needed.
         return;
       }
-      const api = require("expo-notifications") as typeof import("expo-notifications");
+      const api =
+        require("expo-notifications") as typeof import("expo-notifications");
       // Native tap handler: route to the notification's deep link.
       subscription = api.addNotificationResponseReceivedListener((response) => {
         const data = response.notification.request.content.data as

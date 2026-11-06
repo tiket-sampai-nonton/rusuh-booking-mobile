@@ -1,9 +1,23 @@
-import { useEffect } from 'react';
-import { View } from 'react-native';
-import Animated, { cancelAnimation, interpolate, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withRepeat, withTiming, Easing } from 'react-native-reanimated';
+import { useEffect } from "react";
+import { View } from "react-native";
+import Animated, {
+  cancelAnimation,
+  interpolate,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 
-import { EASE, SCROLL_INDICATOR_DELAY_MS } from '../../constants';
-import { componentStyles, styleForScrollIndicatorAnimatedView10, styleForScrollIndicatorAnimatedView11 } from '../../style';
+import { EASE, SCROLL_INDICATOR_DELAY_MS } from "../../constants";
+import {
+  componentStyles,
+  styleForScrollIndicatorAnimatedView10,
+  styleForScrollIndicatorAnimatedView11,
+} from "../../style";
 
 export function ScrollIndicator() {
   const reducedMotion = useReducedMotion();
@@ -16,13 +30,20 @@ export function ScrollIndicator() {
       opacity.value = 1;
       return;
     }
-    opacity.value = withDelay(SCROLL_INDICATOR_DELAY_MS, withTiming(1, { duration: 1000, easing: EASE }));
+    opacity.value = withDelay(
+      SCROLL_INDICATOR_DELAY_MS,
+      withTiming(1, { duration: 1000, easing: EASE }),
+    );
   }, [reducedMotion, opacity]);
 
   // Scroll pulse animation: translateX -100% → 100% (1.5s infinite)
   useEffect(() => {
     if (reducedMotion) return;
-    pulse.value = withRepeat(withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }), -1, true);
+    pulse.value = withRepeat(
+      withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true,
+    );
     return () => cancelAnimation(pulse);
   }, [reducedMotion, pulse]);
 
@@ -31,24 +52,18 @@ export function ScrollIndicator() {
   }));
 
   const lineStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: interpolate(pulse.value, [0, 0.5, 1], [-40, 40, -40]) }],
+    transform: [
+      { translateX: interpolate(pulse.value, [0, 0.5, 1], [-40, 40, -40]) },
+    ],
   }));
 
   return (
     <Animated.View
-      style={[
-        styleForScrollIndicatorAnimatedView10(),
-        containerStyle,
-      ]}
+      style={[styleForScrollIndicatorAnimatedView10(), containerStyle]}
     >
-      <View
-        style={componentStyles.elementWidth31}
-      >
+      <View style={componentStyles.elementWidth31}>
         <Animated.View
-          style={[
-            styleForScrollIndicatorAnimatedView11(),
-            lineStyle,
-          ]}
+          style={[styleForScrollIndicatorAnimatedView11(), lineStyle]}
         />
       </View>
     </Animated.View>

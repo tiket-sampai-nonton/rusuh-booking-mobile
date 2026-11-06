@@ -1,6 +1,13 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from "react-native-reanimated";
 
 import { designMotion } from "@presentation/theme";
 
@@ -15,7 +22,12 @@ export interface RevealProps {
   readonly testID?: string;
 }
 
-export function Reveal({ children, delay = 0, rise = DEFAULT_RISE, testID }: RevealProps) {
+export function Reveal({
+  children,
+  delay = 0,
+  rise = DEFAULT_RISE,
+  testID,
+}: RevealProps) {
   const reducedMotion = useReducedMotion();
   const progress = useSharedValue(reducedMotion ? 1 : 0);
 
@@ -24,7 +36,10 @@ export function Reveal({ children, delay = 0, rise = DEFAULT_RISE, testID }: Rev
       progress.value = 1;
       return;
     }
-    progress.value = withDelay(delay, withTiming(1, { duration: DURATION_MS, easing: EASE }));
+    progress.value = withDelay(
+      delay,
+      withTiming(1, { duration: DURATION_MS, easing: EASE }),
+    );
   }, [reducedMotion, delay, progress]);
 
   const animatedStyle = useAnimatedStyle(() => ({

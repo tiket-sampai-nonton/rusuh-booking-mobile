@@ -23,7 +23,13 @@ jest.mock("expo-router", () => ({
 // Responsive hook is mockable per-test: default phone (1 column); a desktop
 // override exercises the multi-column grid branch.
 const mockResponsive = {
-  current: { isWeb: false, isDesktop: false, width: 390, gridColumns: 1, detailTwoCol: false },
+  current: {
+    isWeb: false,
+    isDesktop: false,
+    width: 390,
+    gridColumns: 1,
+    detailTwoCol: false,
+  },
 };
 jest.mock("@presentation/hooks/useResponsive", () => ({
   useResponsive: () => mockResponsive.current,

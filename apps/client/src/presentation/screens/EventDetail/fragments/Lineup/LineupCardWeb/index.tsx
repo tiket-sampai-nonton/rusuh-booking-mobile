@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Image, Platform, Pressable, Text, type ImageStyle } from "react-native";
+import {
+  Image,
+  Platform,
+  Pressable,
+  Text,
+  type ImageStyle,
+} from "react-native";
 
 import { lineupStyles } from "../style";
 import type { LineupItem } from "../types";
@@ -21,15 +27,22 @@ export function LineupCardWeb({ name, role, avatar }: LineupItem) {
         source={{ uri: avatarUri }}
         style={[
           lineupStyles.avatar,
-          Platform.OS === "web" && (lineupWebImageStyle(isHovered) as unknown as ImageStyle),
+          Platform.OS === "web" &&
+            (lineupWebImageStyle(isHovered) as unknown as ImageStyle),
         ]}
         resizeMode="cover"
         accessibilityIgnoresInvertColors
       />
-      <Text style={[lineupStyles.name, isHovered && lineupStyles.nameHover]} numberOfLines={2}>
+      <Text
+        style={[lineupStyles.name, isHovered && lineupStyles.nameHover]}
+        numberOfLines={2}
+      >
         {name}
       </Text>
-      <Text style={[lineupStyles.role, isHovered && lineupStyles.roleHover]} numberOfLines={1}>
+      <Text
+        style={[lineupStyles.role, isHovered && lineupStyles.roleHover]}
+        numberOfLines={1}
+      >
         {role}
       </Text>
     </Pressable>

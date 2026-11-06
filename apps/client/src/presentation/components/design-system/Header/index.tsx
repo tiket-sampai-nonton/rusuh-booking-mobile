@@ -19,18 +19,39 @@
  * Links (desktop > 720px): center nav links with hover underline slide
  * CTA: "Masuk / Daftar" black button with ink-spread hover (desktop only)
  */
-import { useEffect } from 'react';
-import { Pressable, Text, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming, interpolate } from 'react-native-reanimated';
-import { designColors, designEasing, designDuration } from '@presentation/theme';
-import { useResponsive } from '@presentation/hooks/useResponsive';
-import { pointerEventsBoxNone, pointerEventsNone } from "@presentation/utils/style";
-import { IconButton } from './IconButton';
-import { NavLink } from './NavLink';
-import type { HeaderAction } from './types';
-import { componentStyles, headerContainerStyle, headerInnerStyle, headerRowStyle } from "./style";
-import { styleForHeaderAnimatedView2, styleForHeaderAnimatedText3 } from './style';
-
+import { useEffect } from "react";
+import { Pressable, Text, View } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+  interpolate,
+} from "react-native-reanimated";
+import {
+  designColors,
+  designEasing,
+  designDuration,
+} from "@presentation/theme";
+import { useResponsive } from "@presentation/hooks/useResponsive";
+import {
+  pointerEventsBoxNone,
+  pointerEventsNone,
+} from "@presentation/utils/style";
+import { IconButton } from "./IconButton";
+import { NavLink } from "./NavLink";
+import type { HeaderAction } from "./types";
+import {
+  componentStyles,
+  headerContainerStyle,
+  headerInnerStyle,
+  headerRowStyle,
+} from "./style";
+import {
+  styleForHeaderAnimatedView2,
+  styleForHeaderAnimatedText3,
+} from "./style";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const EASE = Easing.bezier(...designEasing.primary);
@@ -41,7 +62,11 @@ export interface HeaderProps {
   /** Show center nav links (desktop only) */
   readonly showLinks?: boolean;
   /** Nav link data */
-  readonly links?: readonly { label: string; testID?: string; onPress: () => void }[];
+  readonly links?: readonly {
+    label: string;
+    testID?: string;
+    onPress: () => void;
+  }[];
   /** CTA button press handler (desktop: "Masuk / Daftar", mobile: login icon) */
   readonly onCtaPress?: () => void;
   /** Logo press handler */
@@ -60,7 +85,7 @@ export function Header({
   links = [],
   onCtaPress,
   onLogoPress,
-  ctaLabel = 'Masuk / Daftar',
+  ctaLabel = "Masuk / Daftar",
   isLoggedIn = false,
   actions = [],
 }: HeaderProps) {
@@ -87,7 +112,11 @@ export function Header({
   const headerStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateY: interpolate(slideIn.value, [0, 1], [-headerHeight - topInset, 0]),
+        translateY: interpolate(
+          slideIn.value,
+          [0, 1],
+          [-headerHeight - topInset, 0],
+        ),
       },
     ],
   }));
@@ -101,10 +130,7 @@ export function Header({
   }));
 
   const ctaTextStyle = useAnimatedStyle(() => ({
-    color:
-      ctaHover.value > 0.5
-        ? designColors.ink
-        : designColors.ground,
+    color: ctaHover.value > 0.5 ? designColors.ink : designColors.ground,
   }));
 
   const setCtaHover = (v: boolean) => {
@@ -133,11 +159,7 @@ export function Header({
             onPress={onLogoPress}
             testID="header-logo"
           >
-            <Text
-              style={componentStyles.elementColor2}
-            >
-              Rusuh Tiket
-            </Text>
+            <Text style={componentStyles.elementColor2}>Rusuh Tiket</Text>
           </Pressable>
 
           {/* Center nav links (desktop only) */}
@@ -160,15 +182,23 @@ export function Header({
           {isNative && actions.length > 0 && (
             <View style={componentStyles.elementFlexDirection4}>
               {actions.map((action) => (
-                <View key={action.testID ?? action.label} style={componentStyles.elementPosition5}>
+                <View
+                  key={action.testID ?? action.label}
+                  style={componentStyles.elementPosition5}
+                >
                   <IconButton
                     icon={action.icon}
                     label={action.label}
                     onPress={action.onPress}
                     testID={action.testID}
                   />
-                  {typeof action.count === 'number' && action.count > 0 && (
-                    <View style={[componentStyles.elementPosition6, pointerEventsNone]}>
+                  {typeof action.count === "number" && action.count > 0 && (
+                    <View
+                      style={[
+                        componentStyles.elementPosition6,
+                        pointerEventsNone,
+                      ]}
+                    >
                       <Text style={componentStyles.elementColor7}>
                         {formatActionCount(action.count)}
                       </Text>
@@ -200,10 +230,7 @@ export function Header({
                 ]}
               />
               <Animated.Text
-                style={[
-                  styleForHeaderAnimatedText3(),
-                  ctaTextStyle,
-                ]}
+                style={[styleForHeaderAnimatedText3(), ctaTextStyle]}
               >
                 {ctaLabel}
               </Animated.Text>
@@ -217,11 +244,7 @@ export function Header({
 
 export default Header;
 
-
-
-
-
 function formatActionCount(count: number): string {
-  if (count > 99) return '99+';
+  if (count > 99) return "99+";
   return String(count);
 }

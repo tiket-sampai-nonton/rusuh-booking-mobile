@@ -1,5 +1,11 @@
 /** Read-only, authenticated e-ticket history contract (Booking Service API). */
-export type MyBookingStatus = "PENDING_PAYMENT" | "VERIFYING" | "PAID" | "EXPIRED" | "CANCELLED" | "REVIEW";
+export type MyBookingStatus =
+  | "PENDING_PAYMENT"
+  | "VERIFYING"
+  | "PAID"
+  | "EXPIRED"
+  | "CANCELLED"
+  | "REVIEW";
 
 export interface MyBookingSummary {
   readonly bookingId: string;
@@ -29,7 +35,10 @@ export interface BookingTickets {
 }
 
 export interface TicketHistoryRepository {
-  listMyBookings(cursor?: string, limit?: number): Promise<{
+  listMyBookings(
+    cursor?: string,
+    limit?: number,
+  ): Promise<{
     readonly bookings: readonly MyBookingSummary[];
     readonly nextCursor?: string | null;
   }>;

@@ -19,7 +19,8 @@ class FixedClock implements ClockPort {
 function makeRepo(events: EventSummary[]): EventRepository {
   return {
     listEvents: async () => events,
-    getEventDetail: async (id) => events.find((e) => e.id === id) as EventDetail,
+    getEventDetail: async (id) =>
+      events.find((e) => e.id === id) as EventDetail,
   };
 }
 
@@ -36,7 +37,12 @@ describe("ListEvents use case", () => {
   it("returns the catalog split on the server clock", async () => {
     const events: EventSummary[] = [
       { ...base, id: "soon", startsAt: "2026-07-01T00:00:00.000Z" },
-      { ...base, id: "old", status: "CLOSED", startsAt: "2025-01-01T00:00:00.000Z" },
+      {
+        ...base,
+        id: "old",
+        status: "CLOSED",
+        startsAt: "2025-01-01T00:00:00.000Z",
+      },
     ];
     const clock = new ServerClock(new FixedClock(NOW));
     const result = await new ListEvents(makeRepo(events), clock).execute();

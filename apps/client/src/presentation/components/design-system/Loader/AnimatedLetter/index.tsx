@@ -1,6 +1,6 @@
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
-import { loaderStyles } from '../style';
+import { loaderStyles } from "../style";
 
 interface AnimatedLetterProps {
   readonly letter: string;

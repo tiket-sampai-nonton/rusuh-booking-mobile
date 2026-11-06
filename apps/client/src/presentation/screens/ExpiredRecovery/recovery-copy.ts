@@ -21,7 +21,8 @@ export const EXPIRY_COPY: Readonly<Record<ExpiryReason, ExpiryCopy>> = {
   hold: {
     title: "Pemesanan Kedaluwarsa",
     body: "Batas waktu pemesanan telah berakhir. Tiket sudah dilepas.",
-    infoText: "Sesi pemesanan dibatasi untuk memastikan akses yang adil bagi semua pengguna.",
+    infoText:
+      "Sesi pemesanan dibatasi untuk memastikan akses yang adil bagi semua pengguna.",
     infoList: [
       "Tiket yang dipilih dikembalikan ke inventori",
       "Tidak ada pembayaran yang diproses",

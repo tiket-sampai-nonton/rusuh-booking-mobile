@@ -36,7 +36,12 @@ describe("eventJsonLd", () => {
   });
 
   it("marks sold-out availability when a price is present", () => {
-    const ld = eventJsonLd({ name: "Y", path: "/events/y", priceFromMinor: 100, soldOut: true });
+    const ld = eventJsonLd({
+      name: "Y",
+      path: "/events/y",
+      priceFromMinor: 100,
+      soldOut: true,
+    });
     expect((ld.offers as Record<string, unknown>).availability).toBe(
       "https://schema.org/SoldOut",
     );

@@ -6,10 +6,18 @@ import { methodMeta } from "@domain/rules/payment-method";
 import type { PaymentMethodsProps } from "../../interface";
 import { paymentStyles } from "../../style";
 import { componentStyles } from "./style";
-import { styleForPaymentMethodsPressable0, styleForPaymentMethodsText1, styleForPaymentMethodsText2, styleForPaymentMethodsView3 } from './style';
+import {
+  styleForPaymentMethodsPressable0,
+  styleForPaymentMethodsText1,
+  styleForPaymentMethodsText2,
+  styleForPaymentMethodsView3,
+} from "./style";
 
-
-export function PaymentMethods({ methods, selected, onSelect }: PaymentMethodsProps) {
+export function PaymentMethods({
+  methods,
+  selected,
+  onSelect,
+}: PaymentMethodsProps) {
   return (
     <View style={componentStyles.elementBorderWidth0}>
       <Text
@@ -38,15 +46,24 @@ export function PaymentMethods({ methods, selected, onSelect }: PaymentMethodsPr
                 style={paymentStyles.methodIcon}
                 className="items-center justify-center"
               >
-                <Text className="text-2xs font-extrabold" style={componentStyles.elementColor2}>
+                <Text
+                  className="text-2xs font-extrabold"
+                  style={componentStyles.elementColor2}
+                >
                   {m.icon}
                 </Text>
               </View>
               <View className="flex-1">
-                <Text className="text-sm font-bold uppercase" style={styleForPaymentMethodsText1(isSelected)}>
+                <Text
+                  className="text-sm font-bold uppercase"
+                  style={styleForPaymentMethodsText1(isSelected)}
+                >
                   {m.name}
                 </Text>
-                <Text className="text-2xs" style={styleForPaymentMethodsText2(isSelected)}>
+                <Text
+                  className="text-2xs"
+                  style={styleForPaymentMethodsText2(isSelected)}
+                >
                   {m.sub}
                 </Text>
               </View>
@@ -55,7 +72,12 @@ export function PaymentMethods({ methods, selected, onSelect }: PaymentMethodsPr
                 className="h-5 w-5 items-center justify-center"
                 style={styleForPaymentMethodsView3(isSelected)}
               >
-                {isSelected ? <View className="h-2.5 w-2.5" style={componentStyles.elementBackgroundColor3} /> : null}
+                {isSelected ? (
+                  <View
+                    className="h-2.5 w-2.5"
+                    style={componentStyles.elementBackgroundColor3}
+                  />
+                ) : null}
               </View>
             </Pressable>
           );

@@ -1,28 +1,60 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react-native";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react-native";
 import { Animated, Platform } from "react-native";
 
 import { Lightbox } from "../../../../../../presentation/screens/EventDetail/fragments/Lightbox/index";
 
 describe("Lightbox", () => {
   const originalPlatform = Platform.OS;
-  const images = ["https://example.com/one.jpg", "https://example.com/two.jpg", "https://example.com/three.jpg"];
+  const images = [
+    "https://example.com/one.jpg",
+    "https://example.com/two.jpg",
+    "https://example.com/three.jpg",
+  ];
   let keydownHandler: ((event: KeyboardEvent) => void) | undefined;
   let addEventListenerDescriptor: PropertyDescriptor | undefined;
   let removeEventListenerDescriptor: PropertyDescriptor | undefined;
 
   beforeEach(() => {
-    jest.spyOn(Animated, "timing").mockReturnValue({ start: jest.fn(), stop: jest.fn(), reset: jest.fn() } as never);
-    addEventListenerDescriptor = Object.getOwnPropertyDescriptor(window, "addEventListener");
-    removeEventListenerDescriptor = Object.getOwnPropertyDescriptor(window, "removeEventListener");
+    jest.spyOn(Animated, "timing").mockReturnValue({
+      start: jest.fn(),
+      stop: jest.fn(),
+      reset: jest.fn(),
+    } as never);
+    addEventListenerDescriptor = Object.getOwnPropertyDescriptor(
+      window,
+      "addEventListener",
+    );
+    removeEventListenerDescriptor = Object.getOwnPropertyDescriptor(
+      window,
+      "removeEventListener",
+    );
   });
 
   afterEach(() => {
     cleanup();
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
     jest.restoreAllMocks();
-    if (addEventListenerDescriptor) Object.defineProperty(window, "addEventListener", addEventListenerDescriptor);
+    if (addEventListenerDescriptor)
+      Object.defineProperty(
+        window,
+        "addEventListener",
+        addEventListenerDescriptor,
+      );
     else Reflect.deleteProperty(window, "addEventListener");
-    if (removeEventListenerDescriptor) Object.defineProperty(window, "removeEventListener", removeEventListenerDescriptor);
+    if (removeEventListenerDescriptor)
+      Object.defineProperty(
+        window,
+        "removeEventListener",
+        removeEventListenerDescriptor,
+      );
     else Reflect.deleteProperty(window, "removeEventListener");
     keydownHandler = undefined;
   });
@@ -30,7 +62,15 @@ describe("Lightbox", () => {
   it("closes and wraps previous/next navigation", () => {
     const onClose = jest.fn();
     const onNavigate = jest.fn();
-    render(<Lightbox images={images} currentIndex={0} visible onClose={onClose} onNavigate={onNavigate} />);
+    render(
+      <Lightbox
+        images={images}
+        currentIndex={0}
+        visible
+        onClose={onClose}
+        onNavigate={onNavigate}
+      />,
+    );
 
     expect(screen.getByText("1 / 3")).toBeTruthy();
     fireEvent.press(screen.getByRole("button", { name: "Gambar sebelumnya" }));
@@ -45,14 +85,31 @@ describe("Lightbox", () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     Object.defineProperty(window, "addEventListener", {
       configurable: true,
-      value: jest.fn((_type: string, listener: (event: KeyboardEvent) => void) => { keydownHandler = listener; }),
+      value: jest.fn(
+        (_type: string, listener: (event: KeyboardEvent) => void) => {
+          keydownHandler = listener;
+        },
+      ),
     });
-    Object.defineProperty(window, "removeEventListener", { configurable: true, value: jest.fn() });
+    Object.defineProperty(window, "removeEventListener", {
+      configurable: true,
+      value: jest.fn(),
+    });
     const onClose = jest.fn();
     const onNavigate = jest.fn();
-    render(<Lightbox images={[images[0]]} currentIndex={0} visible onClose={onClose} onNavigate={onNavigate} />);
+    render(
+      <Lightbox
+        images={[images[0]]}
+        currentIndex={0}
+        visible
+        onClose={onClose}
+        onNavigate={onNavigate}
+      />,
+    );
 
-    expect(screen.queryByRole("button", { name: "Gambar sebelumnya" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Gambar sebelumnya" }),
+    ).toBeNull();
     keydownHandler?.({ key: "Escape" } as KeyboardEvent);
     expect(onClose).toHaveBeenCalledTimes(1);
     keydownHandler?.({ key: "ArrowLeft" } as KeyboardEvent);
@@ -62,7 +119,15 @@ describe("Lightbox", () => {
   });
 
   it("does not show a hidden lightbox", () => {
-    render(<Lightbox images={images} currentIndex={1} visible={false} onClose={jest.fn()} onNavigate={jest.fn()} />);
+    render(
+      <Lightbox
+        images={images}
+        currentIndex={1}
+        visible={false}
+        onClose={jest.fn()}
+        onNavigate={jest.fn()}
+      />,
+    );
     expect(screen.queryByText("2 / 3")).toBeNull();
   });
 });

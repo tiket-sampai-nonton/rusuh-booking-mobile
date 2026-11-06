@@ -36,18 +36,32 @@ describe("Block ( brutalist section)", () => {
 });
 
 describe("Categories (prototype preview)", () => {
-	it("renders no category table when the server has no categories", () => {
+  it("renders no category table when the server has no categories", () => {
     render(<Categories categories={[]} />);
-		expect(screen.queryByText("Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.")).toBeNull();
+    expect(
+      screen.queryByText(
+        "Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.",
+      ),
+    ).toBeNull();
   });
 
-	it("renders available / low-stock / sold-out arms without prototype-external copy", () => {
+  it("renders available / low-stock / sold-out arms without prototype-external copy", () => {
     render(
       <Categories
         categories={[
           { code: "VIP", name: "VIP", priceMinor: 75000000, available: 200 }, // Tersedia
-          { code: "CAT-50", name: "Ambang Tersedia", priceMinor: 30000000, available: 50 },
-          { code: "CAT-49", name: "Ambang Menipis", priceMinor: 30000000, available: 49 },
+          {
+            code: "CAT-50",
+            name: "Ambang Tersedia",
+            priceMinor: 30000000,
+            available: 50,
+          },
+          {
+            code: "CAT-49",
+            name: "Ambang Menipis",
+            priceMinor: 30000000,
+            available: 49,
+          },
           { code: "REG", name: "Reguler", priceMinor: 45000000, available: 12 }, // Sisa 12
           { code: "", name: "Festival", priceMinor: 30000000, available: 0 }, // Habis (no code)
         ]}
@@ -58,6 +72,10 @@ describe("Categories (prototype preview)", () => {
     expect(screen.getByText("Sisa 49")).toBeTruthy();
     expect(screen.getByText("Habis")).toBeTruthy();
     expect(screen.getByText("Kode VIP")).toBeTruthy();
-		expect(screen.queryByText("Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.")).toBeNull();
+    expect(
+      screen.queryByText(
+        "Kategori tiket final akan dipilih setelah kamu berhasil melewati antrean.",
+      ),
+    ).toBeNull();
   });
 });

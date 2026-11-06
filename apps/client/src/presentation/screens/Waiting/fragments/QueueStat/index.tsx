@@ -1,6 +1,6 @@
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
 
-import { styles } from '../../style';
+import { styles } from "../../style";
 
 interface QueueStatProps {
   readonly label: string;
@@ -28,8 +28,22 @@ export function QueueStat({
       testID={testID}
       accessibilityLiveRegion="polite"
     >
-      <Text style={[styles.ledgerStatLabel, isDesktop && styles.ledgerStatLabelDesktop]}>{label}</Text>
-      <Text style={[styles.ledgerStatValue, isDesktop && styles.ledgerStatValueDesktop]}>{value}</Text>
+      <Text
+        style={[
+          styles.ledgerStatLabel,
+          isDesktop && styles.ledgerStatLabelDesktop,
+        ]}
+      >
+        {label}
+      </Text>
+      <Text
+        style={[
+          styles.ledgerStatValue,
+          isDesktop && styles.ledgerStatValueDesktop,
+        ]}
+      >
+        {value}
+      </Text>
     </View>
   );
 }
