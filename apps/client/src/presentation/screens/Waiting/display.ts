@@ -24,7 +24,7 @@ export function etaText(position: number, admissionRatePerMin?: number): string 
   if (position <= 0) return "Siap!";
   if (!isValidAdmissionRate(admissionRatePerMin)) return "Belum tersedia";
   const mins = Math.max(1, Math.ceil(position / admissionRatePerMin));
-  return mins <= 1 ? "~1 menit" : `~${mins} menit`;
+  return mins <= 1 ? "~1 mnt" : `~${mins} mnt`;
 }
 
 /**
@@ -76,8 +76,8 @@ export const ZONE_COPY: Readonly<Record<QueueZone, ZoneCopy>> = {
   POSSIBLE: {
     tone: "warn",
     icon: "warning",
-    label: "Zona Cadangan",
-    body: "Anda berada di zona cadangan. Ketersediaan tiket bergantung pada sisa stok.",
+    label: "Zona kemungkinan",
+    body: "Peluang masuk bergantung pada sisa tiket.",
   },
   NOT_ENOUGH: {
     tone: "error",

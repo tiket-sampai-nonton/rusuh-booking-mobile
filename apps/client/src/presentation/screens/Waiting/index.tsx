@@ -19,12 +19,13 @@
  */
 import { useRouter, type Href } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
 import { isAdmitted, isTerminal } from '@domain/state-machines/queue-state-machine';
 import { useAutoClaim } from '@presentation/hooks/useAutoClaim';
 import { useQueuePolling } from '@presentation/hooks/useQueuePolling';
+import { useResponsive } from '@presentation/hooks/useResponsive';
 
 import { claimErrorBody, claimErrorTitle, COPY, terminalBody, terminalTitle } from './display';
 import type { WaitingRoomScreenProps } from './interface';
@@ -48,6 +49,7 @@ import { YourTurnState } from './fragments/YourTurnState';
 export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) {
   const router = useRouter();
   const reducedMotion = useReducedMotion() ?? false;
+  const { isDesktop } = useResponsive();
 
   // Modal state
   const [showLeaveModal, setShowLeaveModal] = useState(false);
@@ -268,15 +270,24 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
 
     return (
       <View style={styles.root} testID="waiting-admitted">
-        <Header />
-        <View style={styles.shell}>
-          <View style={styles.waitingContainer}>
+        <Header status="GILIRAN ANDA" />
+        <ScrollView
+          style={styles.waitingScrollView}
+          contentContainerStyle={[
+            styles.waitingScroll,
+            isDesktop && styles.waitingScrollDesktop,
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.waitingPage, isDesktop && styles.waitingPageDesktop]}>
             <YourTurnState
               onLeavePress={handleLeavePress}
               claiming={claiming}
+              eventId={eventId}
+              isDesktop={isDesktop}
             />
           </View>
-        </View>
+        </ScrollView>
         <LeaveModal
           visible={showLeaveModal}
           onStay={handleStay}
@@ -293,16 +304,25 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
   return (
     <View style={styles.root} testID="waiting-active">
       <Header />
-      <View style={styles.shell}>
-        <View style={styles.waitingContainer}>
+      <ScrollView
+        style={styles.waitingScrollView}
+        contentContainerStyle={[
+          styles.waitingScroll,
+          isDesktop && styles.waitingScrollDesktop,
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.waitingPage, isDesktop && styles.waitingPageDesktop]}>
           <WaitingActive
             position={entry.position}
             admissionRatePerMin={admissionRatePerMin}
             zone={entry.zone ?? "GUARANTEED"}
             onLeavePress={handleLeavePress}
+            eventId={eventId}
+            isDesktop={isDesktop}
           />
         </View>
-      </View>
+      </ScrollView>
       <LeaveModal
         visible={showLeaveModal}
         onStay={handleStay}

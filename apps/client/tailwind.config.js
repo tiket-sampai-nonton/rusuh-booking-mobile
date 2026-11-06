@@ -116,11 +116,11 @@ module.exports = {
 
       // ---- Typography (prototype font-size scale, px → rem @16) ----
       fontFamily: {
-        // prototype: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif
-        sans: ["Plus Jakarta Sans", "system-ui", "-apple-system", "sans-serif"],
+        // Use the exact family registered by expo-font on web and native.
+        sans: ["Inter_400Regular", "system-ui", "-apple-system", "sans-serif"],
         // ---- V2 Brutalist Mono (RBT-086) ----
         // V2 body/display font: Inter 400/500/700/900.
-        v2: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        v2: ["Inter_400Regular", "system-ui", "-apple-system", "sans-serif"],
         // Waiting-room MONO variant (prototype 06-waiting uses JetBrains Mono).
         // DECISION: kept as a deliberate variant for the queue/terminal feel,
         // NOT normalized away — scoped to the waiting room via `font-v2-mono`.

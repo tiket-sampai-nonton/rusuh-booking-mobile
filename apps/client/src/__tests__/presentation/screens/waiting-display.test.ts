@@ -37,8 +37,8 @@ describe("etaText", () => {
     expect(etaText(-3)).toBe("Siap!");
   });
   it("uses Indonesian minute wording for the estimate", () => {
-    expect(etaText(5, 1400)).toBe("~1 menit");
-    expect(etaText(3000, 1400)).toBe("~3 menit");
+    expect(etaText(5, 1400)).toBe("~1 mnt");
+    expect(etaText(3000, 1400)).toBe("~3 mnt");
   });
   it("does not invent an estimate when the server rate is missing or invalid", () => {
     expect(etaText(3000)).toBe("Belum tersedia");
@@ -66,7 +66,7 @@ describe("ringProgress", () => {
 describe("zoneCopy", () => {
   it("returns Indonesian copy per zone and defaults to GUARANTEED", () => {
     expect(zoneCopy("GUARANTEED")).toBe(ZONE_COPY.GUARANTEED);
-    expect(zoneCopy("POSSIBLE").label).toBe("Zona Cadangan");
+    expect(zoneCopy("POSSIBLE").label).toBe("Zona kemungkinan");
     expect(zoneCopy("NOT_ENOUGH").icon).toBe("alert");
     expect(zoneCopy(undefined)).toBe(ZONE_COPY.GUARANTEED);
   });

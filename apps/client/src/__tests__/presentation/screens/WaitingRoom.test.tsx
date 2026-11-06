@@ -25,6 +25,7 @@ import type { QueueEntry } from "@domain/repositories/queue.repository";
 // --- Mock the two merged hooks: the screen must CONSUME, not rebuild them. ---
 const mockUseQueuePolling = jest.fn<QueuePollingView, [string, boolean?, string?]>();
 const mockUseAutoClaim = jest.fn<UseAutoClaimResult, [unknown]>();
+const mockUseEventDetail = jest.fn();
 
 jest.mock("@presentation/hooks/useQueuePolling", () => ({
   useQueuePolling: (queueId: string, reducedMotion?: boolean) =>
@@ -32,6 +33,9 @@ jest.mock("@presentation/hooks/useQueuePolling", () => ({
 }));
 jest.mock("@presentation/hooks/useAutoClaim", () => ({
   useAutoClaim: (params: unknown) => mockUseAutoClaim(params),
+}));
+jest.mock("@presentation/hooks/useEventDetail", () => ({
+  useEventDetail: (eventId: string) => mockUseEventDetail(eventId),
 }));
 
 // Mock reduced-motion so tests can flip the branch deterministically.
@@ -92,24 +96,36 @@ beforeEach(() => {
   mockReducedMotion.mockReturnValue(false);
   mockUseQueuePolling.mockReturnValue(polling());
   mockUseAutoClaim.mockReturnValue(claim());
+  mockUseEventDetail.mockReturnValue({
+    data: {
+      id: "evt-1",
+      slug: "rusuh-fest-2026",
+      name: "Rusuh Fest 2026",
+      venue: "Gelora Bung Karno, Jakarta",
+      startsAt: "2026-12-01T12:00:00.000Z",
+      salesStartsAt: "2026-01-01T00:00:00.000Z",
+      salesEndsAt: "2026-12-01T00:00:00.000Z",
+      status: "AVAILABLE",
+    },
+  });
 });
 
-describe("WaitingRoomScreen — position + stats", () => {
-  it("renders the position number in the ring with the position label", () => {
+describe("WaitingRoomScreen — Buku Antrean layout", () => {
+  it("renders the position number in the position panel", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ position: 42 }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     expect(screen.getByTestId("waiting-position")).toHaveTextContent("42");
-    //  uses "Your Position" label
+    expect(screen.getByText("Posisimu")).toBeTruthy();
+    expect(screen.getByText("Rusuh Fest 2026")).toBeTruthy();
     expect(screen.getByTestId("waiting-position")).toBeTruthy();
   });
 
-  it("shows ETA in minutes/seconds format", () => {
+  it("shows people ahead and the server-derived ETA as separate queue facts", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ position: 42 }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    //  shows ETA as minutes/seconds blocks instead of "ahead" count
+    expect(screen.getByTestId("waiting-ahead")).toHaveTextContent(/41/);
     expect(screen.getByTestId("waiting-eta")).toBeTruthy();
-    expect(screen.getByText("Menit")).toBeTruthy();
-    expect(screen.getByText("Detik")).toBeTruthy();
+    expect(screen.getByTestId("waiting-eta")).toHaveTextContent(/~1 mnt/);
   });
 
   it("drives the poller with the queueId prop", () => {
@@ -132,9 +148,9 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ zone: "POSSIBLE" }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     const zone = screen.getByTestId("waiting-zone");
-    expect(screen.getByTestId("waiting-icon-warning")).toBeTruthy();
-    expect(zone).toHaveTextContent("Zona Cadangan", { exact: false });
-    expect(zone).toHaveTextContent("Anda berada di zona cadangan", { exact: false });
+    expect(screen.getByTestId("waiting-icon-ledger")).toBeTruthy();
+    expect(zone).toHaveTextContent("Zona kemungkinan", { exact: false });
+    expect(zone).toHaveTextContent("Peluang masuk bergantung pada sisa tiket", { exact: false });
   });
 
   it("renders NOT_ENOUGH (red) copy verbatim", () => {
@@ -150,7 +166,7 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     mockUseQueuePolling.mockReturnValue(polling({ entry: entry({ zone: "POSSIBLE" }) }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     // Has readable text, not just a color — label present.
-    expect(screen.getByTestId("waiting-zone")).toHaveTextContent("Zona Cadangan", { exact: false });
+    expect(screen.getByTestId("waiting-zone")).toHaveTextContent("Zona kemungkinan", { exact: false });
   });
 });
 
@@ -163,7 +179,7 @@ describe("WaitingRoomScreen — admit live region", () => {
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     //  uses "waiting-admitted" as the wrapper testID
     expect(screen.getByTestId("waiting-admitted")).toBeTruthy();
-    expect(screen.getByText(/Giliran Anda/i)).toBeTruthy();
+    expect(screen.getByText("Giliran Anda!")).toBeTruthy();
     expect(screen.queryByTestId("waiting-redirect")).toBeNull();
   });
 

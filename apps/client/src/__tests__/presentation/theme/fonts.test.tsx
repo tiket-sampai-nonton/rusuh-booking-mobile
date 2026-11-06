@@ -12,7 +12,11 @@ jest.mock("@expo-google-fonts/inter", () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { interFontForWeight, interFonts, useInterFonts } from "../../../presentation/theme/fonts";
+import {
+  interFontForWeight,
+  interFonts,
+  useInterFonts,
+} from "../../../presentation/theme/fonts";
 
 function FontState() {
   const { fontsLoaded, fontError } = useInterFonts();
@@ -36,17 +40,20 @@ describe("Inter font helpers", () => {
     expect(interFontForWeight(800)).toBe(interFonts.regular);
   });
 
-  it("passes all Inter assets to Expo and reports loading, loaded, and error states", () => {
+  it("passes the Inter and JetBrains Mono assets to Expo and reports load states", () => {
     mockUseFonts.mockReturnValueOnce([false, null]);
     const loading = render(<FontState />);
     expect(screen.getByText("loading")).toBeTruthy();
-    expect(mockUseFonts).toHaveBeenLastCalledWith({
-      Inter_400Regular: "regular-asset",
-      Inter_500Medium: "medium-asset",
-      Inter_600SemiBold: "semibold-asset",
-      Inter_700Bold: "bold-asset",
-      Inter_900Black: "black-asset",
-    });
+    expect(mockUseFonts).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        Inter_400Regular: "regular-asset",
+        Inter_500Medium: "medium-asset",
+        Inter_600SemiBold: "semibold-asset",
+        Inter_700Bold: "bold-asset",
+        Inter_900Black: "black-asset",
+        "JetBrains Mono": expect.anything(),
+      }),
+    );
 
     loading.unmount();
     mockUseFonts.mockReturnValueOnce([true, null]);

@@ -1,12 +1,12 @@
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 
 import type { QueueZone } from '@domain/repositories/queue.repository';
-import { ringProgress } from '../../display';
+import { etaText, formatCount, peopleAhead } from '../../display';
 import { styles } from '../../style';
-import { EstimatedTime } from '../EstimatedTime';
+import { EventIntro } from '../EventIntro';
 import { LeaveButton } from '../LeaveButton';
-import { RingProgress } from '../RingProgress';
-import { StatusBadge } from '../StatusBadge';
+import { QueuePositionPanel } from '../QueuePositionPanel';
+import { QueueStat } from '../QueueStat';
 import { ZoneBanner } from '../ZoneBanner';
 
 interface WaitingActiveProps {
@@ -14,6 +14,8 @@ interface WaitingActiveProps {
   readonly admissionRatePerMin?: number;
   readonly zone: QueueZone;
   readonly onLeavePress: () => void;
+  readonly eventId: string;
+  readonly isDesktop: boolean;
 }
 
 export function WaitingActive({
@@ -21,29 +23,51 @@ export function WaitingActive({
   admissionRatePerMin,
   zone,
   onLeavePress,
+  eventId,
+  isDesktop,
 }: WaitingActiveProps) {
-  const progress = ringProgress(position);
+  const estimate = etaText(position, admissionRatePerMin);
 
   return (
     <>
-      <StatusBadge variant="queue" label="Dalam Antrean" />
+      <EventIntro eventId={eventId} isDesktop={isDesktop} />
 
-      <RingProgress
-        progress={progress}
-        position={position}
-        isWarning={position <= 10}
-      />
+      <View style={[styles.dashboard, isDesktop && styles.dashboardDesktop]}>
+        <QueuePositionPanel
+          position={position}
+          statusLabel="Menunggu"
+          isDesktop={isDesktop}
+        />
 
-      <ZoneBanner zone={zone} />
+        <View style={[styles.summary, isDesktop && styles.summaryDesktop]}>
+          {isDesktop ? <Text style={[styles.summaryHeading, styles.summaryHeadingDesktop]}>Ringkasan antrean</Text> : null}
+          <View style={[styles.ledgerStats, isDesktop && styles.ledgerStatsDesktop]}>
+            <QueueStat
+              label="Orang di depan"
+              value={formatCount(peopleAhead(position))}
+              testID="waiting-ahead"
+              isDesktop={isDesktop}
+            />
+            <QueueStat
+              label="Estimasi"
+              value={estimate}
+              testID="waiting-eta"
+              isDesktop={isDesktop}
+              isSecond
+            />
+          </View>
+          <ZoneBanner zone={zone} isDesktop={isDesktop} />
+        </View>
+      </View>
 
-      <EstimatedTime position={position} admissionRatePerMin={admissionRatePerMin} />
+      <View style={styles.waitingSpacer} />
 
-      <Text style={styles.infoText}>
-        Jangan tutup halaman ini. Posisi antrean diperbarui otomatis. Jangan
-        muat ulang atau tinggalkan halaman agar posisi Anda tetap terjaga.
-      </Text>
-
-      <LeaveButton onPress={onLeavePress} />
+      <View style={[styles.waitingFooter, isDesktop && styles.waitingFooterDesktop]}>
+        <Text style={[styles.waitingFootnote, isDesktop && styles.waitingFootnoteDesktop]}>
+          Posisi tersimpan dan diperbarui otomatis dari server. Tetap di halaman ini sampai giliranmu tiba.
+        </Text>
+        <LeaveButton onPress={onLeavePress} isDesktop={isDesktop} />
+      </View>
     </>
   );
 }
