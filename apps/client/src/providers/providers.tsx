@@ -11,6 +11,7 @@
  * deterministic error-state assertions.
  */
 import React, { useMemo } from "react";
+import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import type { Container } from "@providers/container";
@@ -21,14 +22,14 @@ export interface AppProvidersProps {
   /** Override the container (tests inject mocks). */
   readonly container?: Container;
   /** Override the TanStack QueryClient (tests inject a retry-disabled client). */
-  readonly queryClient?: unknown;
+  readonly queryClient?: QueryClient;
   readonly children: React.ReactNode;
 }
 
 /**
  * Wrap the subtree with the composition-root providers.
  *
- * Order (outer → inner): SafeAreaProvider → QueryClientProvider (when present)
+ * Order (outer → inner): SafeAreaProvider → QueryClientProvider
  * → ServiceProvider. TODO(RBT-003): add ThemeProvider once the theme lands.
  */
 export function AppProviders({
@@ -44,21 +45,9 @@ export function AppProviders({
   const serviceTree = (
     <ServiceProvider container={container}>{children}</ServiceProvider>
   );
-
-  let tree = serviceTree;
-  if (client !== null) {
-    // RBT-010: wrap with QueryClientProvider now that @tanstack/react-query is
-    // a declared dependency. Kept as a guarded require so the RBT-004-era
-    // providers test can still mock it virtually without a hard import.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports -- guarded so the RBT-004 providers test can virtual-mock it
-    const { QueryClientProvider } = require("@tanstack/react-query") as {
-      QueryClientProvider: React.ComponentType<{
-        client: unknown;
-        children: React.ReactNode;
-      }>;
-    };
-    tree = <QueryClientProvider client={client}>{serviceTree}</QueryClientProvider>;
-  }
-
-  return <SafeAreaProvider>{tree}</SafeAreaProvider>;
+  return (
+    <SafeAreaProvider>
+      <QueryClientProvider client={client}>{serviceTree}</QueryClientProvider>
+    </SafeAreaProvider>
+  );
 }

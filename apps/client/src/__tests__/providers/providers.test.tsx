@@ -38,19 +38,7 @@ describe("providers/AppProviders", () => {
     mockCreateQueryClient.mockReset();
   });
 
-  it("renders children with only ServiceProvider when no query client (RBT-004 state)", () => {
-    mockCreateQueryClient.mockReturnValue(null);
-    const container = createContainer({ useMocks: true });
-    const { getByText } = render(
-      <AppProviders container={container}>
-        <Text>child</Text>
-      </AppProviders>,
-    );
-    expect(getByText("child")).toBeTruthy();
-    expect(receivedClient).toBeNull();
-  });
-
-  it("wraps children in QueryClientProvider when a client exists (RBT-010 state)", () => {
+  it("wraps children in QueryClientProvider with the required client", () => {
     const fakeClient = { marker: "fake" };
     mockCreateQueryClient.mockReturnValue(fakeClient);
     const container = createContainer({ useMocks: true });
