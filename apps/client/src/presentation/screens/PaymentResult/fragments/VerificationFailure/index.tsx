@@ -1,13 +1,15 @@
 import { Pressable, Text, View } from "react-native";
 import { styles } from "./style";
 
-
 export interface VerificationFailureProps {
   readonly missingAttemptId: boolean;
   readonly onReturn: () => void;
 }
 
-export function VerificationFailure({ missingAttemptId, onReturn }: VerificationFailureProps) {
+export function VerificationFailure({
+  missingAttemptId,
+  onReturn,
+}: VerificationFailureProps) {
   return (
     <View className="items-center gap-5">
       <Text

@@ -4,7 +4,11 @@ const mockPush = jest.fn();
 jest.mock("expo-router", () => ({ useRouter: () => ({ push: mockPush }) }));
 
 // eslint-disable-next-line import/first
-import { HistoryEmpty, HistoryError, HistoryLoading } from "../../../../../../presentation/screens/History/fragments/HistoryStates/index";
+import {
+  HistoryEmpty,
+  HistoryError,
+  HistoryLoading,
+} from "../../../../../../presentation/screens/History/fragments/HistoryStates/index";
 
 describe("History states", () => {
   beforeEach(() => mockPush.mockReset());
@@ -24,7 +28,9 @@ describe("History states", () => {
 
   it("shows the fallback and a supplied error message", () => {
     const { rerender } = render(<HistoryError />);
-    expect(screen.getByText("Terjadi kesalahan. Silakan coba lagi.")).toBeTruthy();
+    expect(
+      screen.getByText("Terjadi kesalahan. Silakan coba lagi."),
+    ).toBeTruthy();
     rerender(<HistoryError message="Layanan tidak tersedia" />);
     expect(screen.getByText("Layanan tidak tersedia")).toBeTruthy();
   });

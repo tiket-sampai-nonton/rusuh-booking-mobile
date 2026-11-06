@@ -41,10 +41,12 @@ import { hardShadowStyle } from "@presentation/utils/style";
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 /** Hero height: 50vh on native (matches prototype), 400px on web */
-export const HERO_HEIGHT = Platform.OS === "web" ? 400 : Math.max(SCREEN_HEIGHT * 0.5, 300);
+export const HERO_HEIGHT =
+  Platform.OS === "web" ? 400 : Math.max(SCREEN_HEIGHT * 0.5, 300);
 
 /** Header height for padding calculations */
-export const HEADER_HEIGHT = Platform.OS === "web" ? 60 : designLayout.headerHeightMobile;
+export const HEADER_HEIGHT =
+  Platform.OS === "web" ? 60 : designLayout.headerHeightMobile;
 
 /** Floating CTA height */
 export const FLOATING_CTA_HEIGHT = 100;
@@ -94,7 +96,8 @@ export const designDetailStyles = StyleSheet.create({
     paddingVertical: designSpacingSemantic.s, // 16px
     paddingHorizontal: designSpacingSemantic.m, // 24px
     // Web: solid background, Native: controlled by headerScrolled
-    backgroundColor: Platform.OS === "web" ? designColors.ground : "transparent",
+    backgroundColor:
+      Platform.OS === "web" ? designColors.ground : "transparent",
     borderBottomWidth: Platform.OS === "web" ? designBorders.standard : 0,
     borderBottomColor: designColors.ink,
   },
@@ -281,7 +284,10 @@ export const designDetailStyles = StyleSheet.create({
     zIndex: 10,
     // Native: padding-m (24px) top/bottom, frame (16px) horizontal - matches prototype
     // Web: larger padding for desktop layout
-    padding: Platform.OS === "web" ? designSpacingSemantic.xl : designSpacingSemantic.m,
+    padding:
+      Platform.OS === "web"
+        ? designSpacingSemantic.xl
+        : designSpacingSemantic.m,
     paddingHorizontal: Platform.OS === "web" ? designSpacingSemantic.m : 16, // frame = 16px
     maxWidth: 1200,
     width: "100%",
@@ -295,7 +301,10 @@ export const designDetailStyles = StyleSheet.create({
     paddingHorizontal: designSpacingSemantic.s,
     backgroundColor: designColors.ink,
     // Native: space-xs (8px), Web: space-m (24px)
-    marginBottom: Platform.OS === "web" ? designSpacingSemantic.m : designSpacingSemantic.xs,
+    marginBottom:
+      Platform.OS === "web"
+        ? designSpacingSemantic.m
+        : designSpacingSemantic.xs,
   },
   heroBadgeText: {
     fontFamily: interFonts.bold,
@@ -316,9 +325,13 @@ export const designDetailStyles = StyleSheet.create({
     lineHeight: (Platform.OS === "web" ? 48 : designFontSizes["2xl"]) * 1.1,
     color: designColors.ink,
     textTransform: "uppercase",
-    letterSpacing: -0.03 * (Platform.OS === "web" ? 48 : designFontSizes["2xl"]),
+    letterSpacing:
+      -0.03 * (Platform.OS === "web" ? 48 : designFontSizes["2xl"]),
     // Native: space-xs (8px), Web: space-s (16px)
-    marginBottom: Platform.OS === "web" ? designSpacingSemantic.s : designSpacingSemantic.xs,
+    marginBottom:
+      Platform.OS === "web"
+        ? designSpacingSemantic.s
+        : designSpacingSemantic.xs,
   },
   heroSubtitle: {
     fontFamily: interFonts.medium,
@@ -390,7 +403,8 @@ export const designDetailStyles = StyleSheet.create({
     // Native: padding-m (24px) top, frame (16px) horizontal - matches prototype
     // Web: larger padding for desktop layout
     paddingHorizontal: Platform.OS === "web" ? designSpacingSemantic.m : 16, // frame = 16px
-    paddingTop: Platform.OS === "web" ? designSpacingSemantic.l : designSpacingSemantic.m, // space-m = 24px
+    paddingTop:
+      Platform.OS === "web" ? designSpacingSemantic.l : designSpacingSemantic.m, // space-m = 24px
     paddingBottom: designSpacingSemantic.xl + FLOATING_CTA_HEIGHT,
   },
 
@@ -408,13 +422,18 @@ export const designDetailStyles = StyleSheet.create({
     fontSize: Platform.OS === "web" ? designFontSizes.xl : designFontSizes.xs,
     color: designColors.ink,
     textTransform: "uppercase",
-    letterSpacing: (Platform.OS === "web" ? designFontSizes.xl : designFontSizes.xs) * 0.05,
+    letterSpacing:
+      (Platform.OS === "web" ? designFontSizes.xl : designFontSizes.xs) * 0.05,
     // Native: space-xs (8px), Web: space-s (16px)
-    paddingBottom: Platform.OS === "web" ? designSpacingSemantic.s : designSpacingSemantic.xs,
+    paddingBottom:
+      Platform.OS === "web"
+        ? designSpacingSemantic.s
+        : designSpacingSemantic.xs,
     borderBottomWidth: designBorders.standard,
     borderBottomColor: designColors.ink,
     // Native: space-s (16px), Web: space-m (24px)
-    marginBottom: Platform.OS === "web" ? designSpacingSemantic.m : designSpacingSemantic.s,
+    marginBottom:
+      Platform.OS === "web" ? designSpacingSemantic.m : designSpacingSemantic.s,
   },
 
   // ---------------------------------------------------------------------------
@@ -451,7 +470,10 @@ export const designDetailStyles = StyleSheet.create({
     alignItems: "flex-start",
     justifyContent: "space-between",
     // Inner content sits 16px from the outer 2px border on mobile.
-    padding: Platform.OS === "web" ? designSpacingSemantic.m : designSpacingSemantic.s - designBorders.standard,
+    padding:
+      Platform.OS === "web"
+        ? designSpacingSemantic.m
+        : designSpacingSemantic.s - designBorders.standard,
   },
   categoryItemHover: {
     backgroundColor: designColors.field,
@@ -470,7 +492,8 @@ export const designDetailStyles = StyleSheet.create({
     fontSize: Platform.OS === "web" ? designFontSizes.m : designFontSizes.s,
     // Explicit lineHeight on native keeps the left column height predictable
     // so it always matches the right column's height (name ↔ price, desc ↔ status)
-    lineHeight: Platform.OS === "web" ? undefined : Math.round(designFontSizes.s * 1.35),
+    lineHeight:
+      Platform.OS === "web" ? undefined : Math.round(designFontSizes.s * 1.35),
     color: designColors.ink,
     textTransform: "uppercase",
   },
@@ -478,7 +501,8 @@ export const designDetailStyles = StyleSheet.create({
     fontFamily: interFonts.regular,
     // Native: text-xs (12px) per prototype, Web: text-s (14px)
     fontSize: Platform.OS === "web" ? designFontSizes.s : designFontSizes.xs,
-    lineHeight: Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
+    lineHeight:
+      Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
     color: designColors.inkMuted,
     marginTop: 2,
   },
@@ -492,25 +516,29 @@ export const designDetailStyles = StyleSheet.create({
     fontFamily: interFonts.black,
     // Native: text-m (16px) per prototype, Web: text-l (18px)
     fontSize: Platform.OS === "web" ? designFontSizes.l : designFontSizes.m,
-    lineHeight: Platform.OS === "web" ? undefined : Math.round(designFontSizes.m * 1.35),
+    lineHeight:
+      Platform.OS === "web" ? undefined : Math.round(designFontSizes.m * 1.35),
     color: designColors.ink,
   },
   categoryAvail: {
     fontFamily: interFonts.semiBold,
     fontSize: designFontSizes.xs,
-    lineHeight: Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
+    lineHeight:
+      Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
     color: designColors.success,
   },
   categoryAvailLimited: {
     fontFamily: interFonts.semiBold,
     fontSize: designFontSizes.xs,
-    lineHeight: Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
+    lineHeight:
+      Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
     color: designColors.warning,
   },
   categoryAvailOut: {
     fontFamily: interFonts.semiBold,
     fontSize: designFontSizes.xs,
-    lineHeight: Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
+    lineHeight:
+      Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
     color: designColors.danger, // #ff0000 - "Habis" per Design Palette Guide
     textDecorationLine: "line-through",
   },
@@ -705,7 +733,10 @@ export const designDetailStyles = StyleSheet.create({
     right: 0,
     paddingVertical: designSpacingSemantic.s,
     paddingHorizontal: Platform.OS === "web" ? designSpacingSemantic.m : 16, // frame padding on mobile
-    paddingBottom: Platform.OS === "web" ? designSpacingSemantic.m : designSpacingSemantic.s + SAFE_AREA_BOTTOM,
+    paddingBottom:
+      Platform.OS === "web"
+        ? designSpacingSemantic.m
+        : designSpacingSemantic.s + SAFE_AREA_BOTTOM,
     backgroundColor: designColors.ground,
     borderTopWidth: designBorders.standard,
     borderTopColor: designColors.ink,
@@ -736,7 +767,12 @@ export const designDetailStyles = StyleSheet.create({
     color: designColors.ink,
   },
   // Native: static container style for shadow (avoids NOBRIDGE error)
-  floatingCtaBtnContainer: hardShadowStyle(designShadows.md.x, designShadows.md.y, designColors.ink, 4),
+  floatingCtaBtnContainer: hardShadowStyle(
+    designShadows.md.x,
+    designShadows.md.y,
+    designColors.ink,
+    4,
+  ),
   floatingCtaBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -744,7 +780,8 @@ export const designDetailStyles = StyleSheet.create({
     gap: designSpacingSemantic.xs,
     // Native: 1rem 2rem (16px 32px) per prototype
     // Web: larger padding for desktop layout
-    paddingVertical: Platform.OS === "web" ? designSpacingSemantic.m : designSpacingSemantic.s, // 24px web, 16px native
+    paddingVertical:
+      Platform.OS === "web" ? designSpacingSemantic.m : designSpacingSemantic.s, // 24px web, 16px native
     paddingHorizontal: Platform.OS === "web" ? designSpacingSemantic.l : 32, // 48px web, 32px native
     backgroundColor: designColors.ink,
     borderWidth: designBorders.standard,
@@ -760,7 +797,8 @@ export const designDetailStyles = StyleSheet.create({
     fontSize: Platform.OS === "web" ? designFontSizes.m : designFontSizes.s,
     color: designColors.ground,
     textTransform: "uppercase",
-    letterSpacing: (Platform.OS === "web" ? designFontSizes.m : designFontSizes.s) * 0.04,
+    letterSpacing:
+      (Platform.OS === "web" ? designFontSizes.m : designFontSizes.s) * 0.04,
   },
   floatingCtaArrow: {
     fontFamily: interFonts.bold,

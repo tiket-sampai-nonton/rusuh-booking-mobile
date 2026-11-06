@@ -40,7 +40,10 @@ describe("InMemoryQueueMembership", () => {
     const store = new InMemoryQueueMembership();
     await store.save(M);
     await store.save({ eventId: "evt-2", queueId: "q-evt-2" });
-    expect(await store.load()).toEqual({ eventId: "evt-2", queueId: "q-evt-2" });
+    expect(await store.load()).toEqual({
+      eventId: "evt-2",
+      queueId: "q-evt-2",
+    });
   });
 
   it("clear after save returns null", async () => {

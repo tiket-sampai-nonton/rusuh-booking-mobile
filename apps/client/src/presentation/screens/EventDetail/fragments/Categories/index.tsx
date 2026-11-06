@@ -57,7 +57,10 @@ function categoryAvailabilityStatus(available: number): AvailabilityStatus {
   return "available";
 }
 
-function categoryAvailabilityLabel(status: AvailabilityStatus, available: number): string {
+function categoryAvailabilityLabel(
+  status: AvailabilityStatus,
+  available: number,
+): string {
   switch (status) {
     case "sold-out":
       return "Habis";

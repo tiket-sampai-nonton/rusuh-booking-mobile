@@ -9,5 +9,3 @@ Disallow: /checkout/
 Disallow: /payment/
 Disallow: /success/
 Disallow: /expired/
-
-Sitemap: https://rusuh-booking.example/sitemap.xml

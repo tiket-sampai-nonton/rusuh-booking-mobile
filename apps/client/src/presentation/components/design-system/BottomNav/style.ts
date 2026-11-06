@@ -3,7 +3,7 @@ import { designLayout, designColors, designBorders } from "@presentation/theme";
 
 export function bottomNavBarStyle(bottomInset: number): ViewStyle {
   return {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
@@ -12,7 +12,7 @@ export function bottomNavBarStyle(bottomInset: number): ViewStyle {
     backgroundColor: designColors.ground,
     borderTopWidth: designBorders.standard,
     borderTopColor: designColors.ink,
-    flexDirection: 'row',
+    flexDirection: "row",
     zIndex: 100,
   };
 }

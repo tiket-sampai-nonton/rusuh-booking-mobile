@@ -4,170 +4,170 @@
  */
 
 export interface paths {
-    "/api/v1/push-subscriptions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Daftarkan token push untuk event (mobile, opsional) */
-        post: operations["registerPush"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  "/api/v1/push-subscriptions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/push-subscriptions/{eventId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Hapus token push */
-        delete: operations["deletePush"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Daftarkan token push untuk event (mobile, opsional) */
+    post: operations["registerPush"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/push-subscriptions/{eventId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Health (ALB dan HEALTHCHECK container, D-23) */
-        get: operations["health"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Hapus token push */
+    delete: operations["deletePush"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/health": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    /** Health (ALB dan HEALTHCHECK container, D-23) */
+    get: operations["health"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        Meta: {
-            code: number;
-            message?: string;
-        };
-        /** @description Error envelope SRS §3.1.4. Tidak pernah memuat SQL, stack trace, secret, atau payload provider. */
-        ErrorEnvelope: {
-            meta: components["schemas"]["Meta"];
-            data: null;
-        };
-        Health: {
-            /** @enum {string} */
-            status: "UP" | "DOWN";
-            service: string;
-            /** Format: date-time */
-            checkedAt: string;
-            dependencies: {
-                name: string;
-                /** @enum {string} */
-                status: "UP" | "DOWN";
-                latencyMs?: number;
-                reason?: string;
-            }[];
-        };
-        PushSubscription: {
-            /** Format: uuid */
-            eventId: string;
-            /** @enum {string} */
-            platform: "ANDROID" | "IOS";
-            pushToken: string;
-        };
+  schemas: {
+    Meta: {
+      code: number;
+      message?: string;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    /** @description Error envelope SRS §3.1.4. Tidak pernah memuat SQL, stack trace, secret, atau payload provider. */
+    ErrorEnvelope: {
+      meta: components["schemas"]["Meta"];
+      data: null;
+    };
+    Health: {
+      /** @enum {string} */
+      status: "UP" | "DOWN";
+      service: string;
+      /** Format: date-time */
+      checkedAt: string;
+      dependencies: {
+        name: string;
+        /** @enum {string} */
+        status: "UP" | "DOWN";
+        latencyMs?: number;
+        reason?: string;
+      }[];
+    };
+    PushSubscription: {
+      /** Format: uuid */
+      eventId: string;
+      /** @enum {string} */
+      platform: "ANDROID" | "IOS";
+      pushToken: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    registerPush: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PushSubscription"];
-            };
-        };
-        responses: {
-            /** @description Tersimpan terenkripsi; dihapus saat penjualan berakhir */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  registerPush: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    deletePush: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example  */
-                eventId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Dihapus */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PushSubscription"];
+      };
     };
-    health: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description Tersimpan terenkripsi; dihapus saat penjualan berakhir */
+      204: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Semua dependency UP */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Health"];
-                };
-            };
-            /** @description Ada dependency DOWN */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Health"];
-                };
-            };
-        };
+        content?: never;
+      };
     };
+  };
+  deletePush: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @example  */
+        eventId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Dihapus */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  health: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Semua dependency UP */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Health"];
+        };
+      };
+      /** @description Ada dependency DOWN */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Health"];
+        };
+      };
+    };
+  };
 }

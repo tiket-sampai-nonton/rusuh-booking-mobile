@@ -1,7 +1,7 @@
-import { View } from 'react-native';
+import { View } from "react-native";
 
-import { componentStyles } from '../../style';
-import { NavDot } from '../NavDot';
+import { componentStyles } from "../../style";
+import { NavDot } from "../NavDot";
 
 export function SlideDots({
   count,
@@ -13,12 +13,14 @@ export function SlideDots({
   readonly onSelect: (index: number) => void;
 }) {
   return (
-    <View
-      style={componentStyles.elementPosition30}
-      accessibilityRole="tablist"
-    >
+    <View style={componentStyles.elementPosition30} accessibilityRole="tablist">
       {Array.from({ length: count }, (_, i) => (
-        <NavDot key={i} index={i} isActive={i === current} onPress={() => onSelect(i)} />
+        <NavDot
+          key={i}
+          index={i}
+          isActive={i === current}
+          onPress={() => onSelect(i)}
+        />
       ))}
     </View>
   );

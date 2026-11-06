@@ -1,6 +1,11 @@
 import { render, screen } from "@testing-library/react-native";
 
-const mockUseLocalSearchParams = jest.fn((): { resourceId?: string; reason?: string; remainingMs?: string } => ({ resourceId: "res-1", reason: "queue" }));
+const mockUseLocalSearchParams = jest.fn(
+  (): { resourceId?: string; reason?: string; remainingMs?: string } => ({
+    resourceId: "res-1",
+    reason: "queue",
+  }),
+);
 
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => mockUseLocalSearchParams(),
@@ -34,7 +39,11 @@ describe("/expired/[resourceId] route", () => {
     expect(unsupportedReason.props.reason).toBeUndefined();
     expect(unsupportedReason.props.remainingMs).toBe(0);
 
-    mockUseLocalSearchParams.mockReturnValue({ resourceId: "res-2", reason: undefined, remainingMs: "" });
+    mockUseLocalSearchParams.mockReturnValue({
+      resourceId: "res-2",
+      reason: undefined,
+      remainingMs: "",
+    });
     const missingReason = ExpiredScreen();
     expect(missingReason.props.reason).toBeUndefined();
     expect(missingReason.props.remainingMs).toBeUndefined();

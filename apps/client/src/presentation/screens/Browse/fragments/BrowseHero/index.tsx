@@ -1,7 +1,7 @@
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
 
-import { browseHero, browseHeroText, browseHeroTitle } from '../../style';
-import { styleForBrowseHeroView0 } from './style';
+import { browseHero, browseHeroText, browseHeroTitle } from "../../style";
+import { styleForBrowseHeroView0 } from "./style";
 
 interface BrowseHeroProps {
   readonly topInset: number;

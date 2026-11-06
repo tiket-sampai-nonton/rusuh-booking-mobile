@@ -5,7 +5,10 @@ import { SignedInProfile } from "@presentation/screens/Profile/fragments/SignedI
 
 describe("SignedInProfile optional profile details", () => {
   it("uses the account fallback and omits masked NIK when the profile has no name or NIK", () => {
-    const profile: UserProfile = { emailMasked: "a***@example.test", hasNik: false };
+    const profile: UserProfile = {
+      emailMasked: "a***@example.test",
+      hasNik: false,
+    };
     const onEdit = jest.fn();
     const onSignOut = jest.fn();
     render(

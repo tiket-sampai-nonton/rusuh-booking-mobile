@@ -2,7 +2,8 @@ jest.mock("react-native/Libraries/Utilities/Platform", () => ({
   __esModule: true,
   default: {
     OS: "web",
-    select: (options: Record<string, unknown>) => options.web ?? options.default,
+    select: (options: Record<string, unknown>) =>
+      options.web ?? options.default,
   },
 }));
 

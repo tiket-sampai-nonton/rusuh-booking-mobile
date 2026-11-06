@@ -9,11 +9,18 @@
  */
 import { useEffect } from "react";
 import { Text, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming, Easing } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 import { StepCircle } from "./StepCircle";
 import { componentStyles } from "./style";
-import { styleForProgressStepsAnimatedView2, styleForProgressStepsText3 } from './style';
-
+import {
+  styleForProgressStepsAnimatedView2,
+  styleForProgressStepsText3,
+} from "./style";
 
 interface ProgressStepsProps {
   /**
@@ -52,25 +59,14 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
   }));
 
   return (
-    <View
-      style={componentStyles.elementBackgroundColor0}
-    >
-      <View
-        style={componentStyles.elementMaxWidth1}
-      >
-        <View
-          style={componentStyles.elementFlexDirection2}
-        >
+    <View style={componentStyles.elementBackgroundColor0}>
+      <View style={componentStyles.elementMaxWidth1}>
+        <View style={componentStyles.elementFlexDirection2}>
           {/* Background line */}
-          <View
-            style={componentStyles.elementPosition3}
-          />
+          <View style={componentStyles.elementPosition3} />
           {/* Progress line fill (animated) */}
           <Animated.View
-            style={[
-              styleForProgressStepsAnimatedView2(),
-              animatedLineStyle,
-            ]}
+            style={[styleForProgressStepsAnimatedView2(), animatedLineStyle]}
           />
 
           {/* Steps */}
@@ -79,18 +75,13 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
             const isActive = step.id === currentStep;
 
             return (
-              <View
-                key={step.id}
-                style={componentStyles.elementAlignItems4}
-              >
+              <View key={step.id} style={componentStyles.elementAlignItems4}>
                 <StepCircle
                   number={step.id}
                   isActive={isActive}
                   isCompleted={isCompleted}
                 />
-                <Text
-                  style={styleForProgressStepsText3(isActive, isCompleted)}
-                >
+                <Text style={styleForProgressStepsText3(isActive, isCompleted)}>
                   {step.label}
                 </Text>
               </View>

@@ -1,19 +1,21 @@
-import { fireEvent, render } from '@testing-library/react-native';
-import React from 'react';
+import { fireEvent, render } from "@testing-library/react-native";
+import React from "react";
 
 let mockReducedMotion = false;
-jest.mock('react-native-reanimated', () => ({
-  ...jest.requireActual('react-native-reanimated/mock'),
+jest.mock("react-native-reanimated", () => ({
+  ...jest.requireActual("react-native-reanimated/mock"),
   useReducedMotion: () => mockReducedMotion,
 }));
 
 // eslint-disable-next-line import/first
-import { Input } from '../../../../../presentation/components/design-system/Input/index';
+import { Input } from "../../../../../presentation/components/design-system/Input/index";
 
-describe('Input', () => {
-  afterEach(() => { mockReducedMotion = false; });
+describe("Input", () => {
+  afterEach(() => {
+    mockReducedMotion = false;
+  });
 
-  it('renders its label and hint and forwards focus, blur, and text changes', () => {
+  it("renders its label and hint and forwards focus, blur, and text changes", () => {
     const onFocus = jest.fn();
     const onBlur = jest.fn();
     const onChangeText = jest.fn();
@@ -28,19 +30,19 @@ describe('Input', () => {
       />,
     );
 
-    const input = getByTestId('email-input');
-    expect(getByText('Email')).toBeTruthy();
-    expect(getByText('Gunakan email aktif.')).toBeTruthy();
-    fireEvent.changeText(input, 'rizky@example.com');
-    fireEvent(input, 'focus');
-    fireEvent(input, 'blur');
+    const input = getByTestId("email-input");
+    expect(getByText("Email")).toBeTruthy();
+    expect(getByText("Gunakan email aktif.")).toBeTruthy();
+    fireEvent.changeText(input, "rizky@example.com");
+    fireEvent(input, "focus");
+    fireEvent(input, "blur");
 
-    expect(onChangeText).toHaveBeenCalledWith('rizky@example.com');
+    expect(onChangeText).toHaveBeenCalledWith("rizky@example.com");
     expect(onFocus).toHaveBeenCalledTimes(1);
     expect(onBlur).toHaveBeenCalledTimes(1);
   });
 
-  it('shows only the validation error in the error state', () => {
+  it("shows only the validation error in the error state", () => {
     const { getByText, queryByText } = render(
       <Input
         state="error"
@@ -50,22 +52,22 @@ describe('Input', () => {
       />,
     );
 
-    expect(getByText('NIK harus terdiri dari 16 digit.')).toBeTruthy();
-    expect(queryByText('Gunakan nomor pada KTP.')).toBeNull();
+    expect(getByText("NIK harus terdiri dari 16 digit.")).toBeTruthy();
+    expect(queryByText("Gunakan nomor pada KTP.")).toBeNull();
   });
 
-  it('renders a valid input without hint or error copy', () => {
+  it("renders a valid input without hint or error copy", () => {
     const { queryByText } = render(<Input state="valid" label="Nama" />);
 
-    expect(queryByText('Nama')).toBeTruthy();
-    expect(queryByText('undefined')).toBeNull();
+    expect(queryByText("Nama")).toBeTruthy();
+    expect(queryByText("undefined")).toBeNull();
   });
 
-  it('applies focus and blur immediately when reduced motion is enabled', () => {
+  it("applies focus and blur immediately when reduced motion is enabled", () => {
     mockReducedMotion = true;
     const { getByTestId } = render(<Input testID="reduced-input" />);
-    fireEvent(getByTestId('reduced-input'), 'focus');
-    fireEvent(getByTestId('reduced-input'), 'blur');
-    expect(getByTestId('reduced-input')).toBeTruthy();
+    fireEvent(getByTestId("reduced-input"), "focus");
+    fireEvent(getByTestId("reduced-input"), "blur");
+    expect(getByTestId("reduced-input")).toBeTruthy();
   });
 });

@@ -7,7 +7,10 @@ import React from "react";
 
 import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
-import { routeForTap, useNotifications } from "@presentation/hooks/useNotifications";
+import {
+  routeForTap,
+  useNotifications,
+} from "@presentation/hooks/useNotifications";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
 jest.mock("expo-router", () => ({
@@ -34,7 +37,9 @@ describe("useNotifications (RBT-072)", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     Notifications.getPermissionsAsync.mockResolvedValue({ granted: true });
-    Notifications.getExpoPushTokenAsync.mockResolvedValue({ data: "ExpoPushToken[xyz]" });
+    Notifications.getExpoPushTokenAsync.mockResolvedValue({
+      data: "ExpoPushToken[xyz]",
+    });
   });
 
   function wrapper({ children }: { children: React.ReactNode }) {
@@ -55,12 +60,18 @@ describe("useNotifications (RBT-072)", () => {
     );
     renderHook(() => useNotifications(), { wrapper });
     await waitFor(() =>
-      expect(Notifications.addNotificationResponseReceivedListener).toHaveBeenCalled(),
+      expect(
+        Notifications.addNotificationResponseReceivedListener,
+      ).toHaveBeenCalled(),
     );
     // simulate a tap on a payment-success notification
     handler?.({
       notification: {
-        request: { content: { data: { deepLink: "/success/bk-1", kind: "payment_success" } } },
+        request: {
+          content: {
+            data: { deepLink: "/success/bk-1", kind: "payment_success" },
+          },
+        },
       },
     });
     expect(mockRouter.push).toHaveBeenCalledWith("/success/bk-1");
@@ -70,16 +81,27 @@ describe("useNotifications (RBT-072)", () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const RN = require("react-native") as typeof import("react-native");
     const orig = RN.Platform.OS;
-    Object.defineProperty(RN.Platform, "OS", { value: "web", configurable: true });
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "web",
+      configurable: true,
+    });
     const container = createContainer({ useMocks: true });
-    const register = jest.spyOn(container.notification, "registerForRemotePush");
+    const register = jest.spyOn(
+      container.notification,
+      "registerForRemotePush",
+    );
     const webWrapper = ({ children }: { children: React.ReactNode }) => (
       <ServiceProvider container={container}>{children}</ServiceProvider>
     );
     renderHook(() => useNotifications(), { wrapper: webWrapper });
     await waitFor(() => expect(register).toHaveBeenCalled());
-    expect(Notifications.addNotificationResponseReceivedListener).not.toHaveBeenCalled();
-    Object.defineProperty(RN.Platform, "OS", { value: orig, configurable: true });
+    expect(
+      Notifications.addNotificationResponseReceivedListener,
+    ).not.toHaveBeenCalled();
+    Object.defineProperty(RN.Platform, "OS", {
+      value: orig,
+      configurable: true,
+    });
   });
 
   it("a tap with no deep link does not navigate", async () => {
@@ -92,7 +114,9 @@ describe("useNotifications (RBT-072)", () => {
     );
     renderHook(() => useNotifications(), { wrapper });
     await waitFor(() =>
-      expect(Notifications.addNotificationResponseReceivedListener).toHaveBeenCalled(),
+      expect(
+        Notifications.addNotificationResponseReceivedListener,
+      ).toHaveBeenCalled(),
     );
     handler?.({ notification: { request: { content: { data: {} } } } });
     expect(mockRouter.push).not.toHaveBeenCalled();

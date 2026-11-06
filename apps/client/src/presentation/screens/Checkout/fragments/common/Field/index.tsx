@@ -1,6 +1,11 @@
 import { useRef, useState } from "react";
 import { Text, TextInput, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 
 import { NIK_LENGTH } from "@domain/auth/nik";
 import { designColors } from "@presentation/theme";
@@ -52,7 +57,10 @@ export function Field({
           testID={testID}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          style={[fieldInputStyle(invalid, editable), fieldFocusStyle(isFocused)]}
+          style={[
+            fieldInputStyle(invalid, editable),
+            fieldFocusStyle(isFocused),
+          ]}
         />
       </Animated.View>
       {invalid ? (

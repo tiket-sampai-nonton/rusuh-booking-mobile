@@ -1,9 +1,9 @@
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
 
-import { formatDateID, formatTimeID } from '@domain/services/date-format';
-import { useEventDetail } from '@presentation/hooks/useEventDetail';
+import { formatDateID, formatTimeID } from "@domain/services/date-format";
+import { useEventDetail } from "@presentation/hooks/useEventDetail";
 
-import { styles } from '../../style';
+import { styles } from "../../style";
 
 interface EventIntroProps {
   readonly eventId: string;
@@ -22,17 +22,23 @@ export function EventIntro({ eventId, isDesktop }: EventIntroProps) {
     <View style={[styles.eventBlock, isDesktop && styles.eventBlockDesktop]}>
       <View style={styles.eventCopy}>
         <Text style={styles.eventEyebrow}>
-          {isDesktop ? 'Ruang tunggu virtual · antrean aktif' : 'Ruang tunggu virtual'}
+          {isDesktop
+            ? "Ruang tunggu virtual · antrean aktif"
+            : "Ruang tunggu virtual"}
         </Text>
         {event?.name ? (
-          <Text style={[styles.eventTitle, isDesktop && styles.eventTitleDesktop]}>
+          <Text
+            style={[styles.eventTitle, isDesktop && styles.eventTitleDesktop]}
+          >
             {event.name}
           </Text>
         ) : null}
       </View>
       {details.length > 0 ? (
-        <Text style={[styles.eventDetails, isDesktop && styles.eventDetailsDesktop]}>
-          {details.join(' · ')}
+        <Text
+          style={[styles.eventDetails, isDesktop && styles.eventDetailsDesktop]}
+        >
+          {details.join(" · ")}
         </Text>
       ) : null}
     </View>

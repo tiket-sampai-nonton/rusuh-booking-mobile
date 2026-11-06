@@ -21,21 +21,45 @@
  * Sign-in is OPTIONAL (D8.5): modal can be dismissed at any time.
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, BackHandler, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Animated,
+  BackHandler,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 import { NIK_LENGTH, validateNik } from "@domain/auth/nik";
 import { DomainError } from "@domain/errors/domain-error";
 import { MAX_TICKETS } from "@domain/rules/checkout";
-import { EMAIL_ERROR, isValidCode, isValidEmail } from "@presentation/components/auth/auth.schema";
+import {
+  EMAIL_ERROR,
+  isValidCode,
+  isValidEmail,
+} from "@presentation/components/auth/auth.schema";
 import { useAuth } from "@presentation/hooks/useAuth";
 import { CheckIcon, CloseIcon } from "@presentation/components/ArrowIcon";
-import { designColors, designDuration } from "@presentation/theme/event-design-tokens";
+import {
+  designColors,
+  designDuration,
+} from "@presentation/theme/event-design-tokens";
 
 import { loginStyles as styles, componentStyles } from "./style";
 import { nativeDriverSupported } from "@presentation/utils/style";
 import { GhostButton } from "./GhostButton";
 import { PrimaryButton } from "./PrimaryButton";
-import { styleForLoginModalView0, styleForLoginModalAnimatedView1, styleForLoginModalPressable2, styleForLoginModalText3, styleForLoginModalView4 } from './style';
+import {
+  styleForLoginModalView0,
+  styleForLoginModalAnimatedView1,
+  styleForLoginModalPressable2,
+  styleForLoginModalText3,
+  styleForLoginModalView4,
+} from "./style";
 
 type Step = "phone" | "otp" | "register" | "success" | "signed";
 
@@ -76,7 +100,14 @@ export function LoginModal({
   const [emailFocused, setEmailFocused] = useState(false);
 
   // OTP as array of 6 digits
-  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [otpDigits, setOtpDigits] = useState<string[]>([
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]);
   const otpRefs = useRef<(TextInput | null)[]>([]);
 
   // Resend timer
@@ -163,10 +194,13 @@ export function LoginModal({
 
   useEffect(() => {
     if (!visible || Platform.OS !== "android") return;
-    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
-      close();
-      return true;
-    });
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        close();
+        return true;
+      },
+    );
     return () => subscription.remove();
   }, [close, visible]);
 
@@ -190,7 +224,8 @@ export function LoginModal({
       resendIntervalRef.current = setInterval(() => {
         setResendTimer((t) => {
           if (t <= 1) {
-            if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+            if (resendIntervalRef.current)
+              clearInterval(resendIntervalRef.current);
             return 0;
           }
           return t - 1;
@@ -208,25 +243,31 @@ export function LoginModal({
   // ---------------------------------------------------------------------------
   // OTP digit handling (6 separate boxes like prototype)
   // ---------------------------------------------------------------------------
-  const handleOtpChange = useCallback((index: number, value: string) => {
-    // Only allow single digit
-    const digit = value.replace(/\D/g, "").slice(-1);
-    const newDigits = [...otpDigits];
-    newDigits[index] = digit;
-    setOtpDigits(newDigits);
+  const handleOtpChange = useCallback(
+    (index: number, value: string) => {
+      // Only allow single digit
+      const digit = value.replace(/\D/g, "").slice(-1);
+      const newDigits = [...otpDigits];
+      newDigits[index] = digit;
+      setOtpDigits(newDigits);
 
-    // Auto-advance to next box
-    if (digit && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
-  }, [otpDigits]);
+      // Auto-advance to next box
+      if (digit && index < 5) {
+        otpRefs.current[index + 1]?.focus();
+      }
+    },
+    [otpDigits],
+  );
 
-  const handleOtpKeyPress = useCallback((index: number, key: string) => {
-    // Handle backspace to go to previous box
-    if (key === "Backspace" && !otpDigits[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  }, [otpDigits]);
+  const handleOtpKeyPress = useCallback(
+    (index: number, key: string) => {
+      // Handle backspace to go to previous box
+      if (key === "Backspace" && !otpDigits[index] && index > 0) {
+        otpRefs.current[index - 1]?.focus();
+      }
+    },
+    [otpDigits],
+  );
 
   // ---------------------------------------------------------------------------
   // Step 2: Verify OTP
@@ -261,7 +302,8 @@ export function LoginModal({
       resendIntervalRef.current = setInterval(() => {
         setResendTimer((t) => {
           if (t <= 1) {
-            if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+            if (resendIntervalRef.current)
+              clearInterval(resendIntervalRef.current);
             return 0;
           }
           return t - 1;
@@ -314,43 +356,57 @@ export function LoginModal({
   }, [auth, regName, regNik]);
 
   const modalBody = (
-      <View
-        style={[styles.overlay, Platform.OS !== "web" && styleForLoginModalView0()]}
+    <View
+      style={[
+        styles.overlay,
+        Platform.OS !== "web" && styleForLoginModalView0(),
+      ]}
+    >
+      <Pressable
+        testID="login-backdrop"
+        accessibilityLabel="Tutup dialog"
+        onPress={close}
+        style={StyleSheet.absoluteFillObject}
+      />
+      {/* Animated card */}
+      <Animated.View
+        style={styleForLoginModalAnimatedView1(
+          fadeAnim,
+          scaleAnim,
+          translateYAnim,
+        )}
       >
         <Pressable
-          testID="login-backdrop"
-          accessibilityLabel="Tutup dialog"
-          onPress={close}
-          style={StyleSheet.absoluteFillObject}
-        />
-        {/* Animated card */}
-        <Animated.View
-          style={styleForLoginModalAnimatedView1(fadeAnim, scaleAnim, translateYAnim)}
+          testID="login-card"
+          accessible={false}
+          accessibilityViewIsModal
+          accessibilityRole={Platform.OS === "web" ? "none" : undefined}
+          onPress={(e) => e.stopPropagation()}
+          style={[
+            styles.card,
+            Platform.OS !== "web" && styleForLoginModalPressable2(),
+          ]}
         >
+          {/* Close button */}
           <Pressable
-            testID="login-card"
-            accessible={false}
-            accessibilityViewIsModal
-            accessibilityRole={Platform.OS === "web" ? "none" : undefined}
-            onPress={(e) => e.stopPropagation()}
-            style={[styles.card, Platform.OS !== "web" && styleForLoginModalPressable2()]}
+            testID="login-close"
+            accessibilityLabel="Tutup"
+            onPress={close}
+            style={styles.closeBtn}
           >
-            {/* Close button */}
-            <Pressable
-              testID="login-close"
-              accessibilityLabel="Tutup"
-              onPress={close}
-              style={styles.closeBtn}
-            >
-              <CloseIcon color={designColors.ink} />
-            </Pressable>
+            <CloseIcon color={designColors.ink} />
+          </Pressable>
 
-            <ScrollView
-              style={componentStyles.elementFlexShrink0}
-              contentContainerStyle={Platform.OS === "web" ? undefined : { padding: 24, paddingTop: 72 }}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-            >
+          <ScrollView
+            style={componentStyles.elementFlexShrink0}
+            contentContainerStyle={
+              Platform.OS === "web"
+                ? undefined
+                : { padding: 24, paddingTop: 72 }
+            }
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
             {/* Step 1: Phone/Email */}
             {step === "phone" && (
               <View>
@@ -427,7 +483,9 @@ export function LoginModal({
                     {otpDigits.map((digit, idx) => (
                       <TextInput
                         key={idx}
-                        ref={(ref) => { otpRefs.current[idx] = ref; }}
+                        ref={(ref) => {
+                          otpRefs.current[idx] = ref;
+                        }}
                         testID={`login-otp-${idx}`}
                         value={digit}
                         onChangeText={(v) => handleOtpChange(idx, v)}
@@ -438,10 +496,7 @@ export function LoginModal({
                         inputMode="numeric"
                         maxLength={1}
                         selectTextOnFocus
-                        style={[
-                          styles.otpBox,
-                          digit && styles.otpBoxFocused,
-                        ]}
+                        style={[styles.otpBox, digit && styles.otpBoxFocused]}
                       />
                     ))}
                   </View>
@@ -460,9 +515,7 @@ export function LoginModal({
 
                 {/* Resend timer */}
                 <View style={styles.resendRow}>
-                  <Text style={styles.resendText}>
-                    Tidak menerima kode?{" "}
-                  </Text>
+                  <Text style={styles.resendText}>Tidak menerima kode? </Text>
                   <Pressable
                     testID="login-resend"
                     disabled={resendTimer > 0}
@@ -505,7 +558,8 @@ export function LoginModal({
                   Lengkapi Pendaftaran
                 </Text>
                 <Text style={styles.sub}>
-                  Email baru — isi data diri sekali saja untuk checkout otomatis.
+                  Email baru — isi data diri sekali saja untuk checkout
+                  otomatis.
                 </Text>
 
                 {/* Email (verified, read-only) */}
@@ -559,7 +613,8 @@ export function LoginModal({
                     {regNikError}
                   </Text>
                   <Text style={styles.hint}>
-                    NIK dipakai untuk batas {MAX_TICKETS} tiket/NIK & divalidasi server.
+                    NIK dipakai untuk batas {MAX_TICKETS} tiket/NIK & divalidasi
+                    server.
                   </Text>
                 </View>
 
@@ -578,7 +633,9 @@ export function LoginModal({
                       regConsent && styles.checkboxChecked,
                     ]}
                   >
-                    {regConsent && <CheckIcon color={designColors.ground} size={14} />}
+                    {regConsent && (
+                      <CheckIcon color={designColors.ground} size={14} />
+                    )}
                   </View>
                   <Text style={styles.consentText}>
                     Saya menyetujui pemrosesan data sesuai{" "}
@@ -630,7 +687,10 @@ export function LoginModal({
                     <Text testID="login-signed-name" style={styles.signedName}>
                       {auth.profile?.fullName ?? "—"}
                     </Text>
-                    <Text testID="login-signed-email" style={styles.signedEmail}>
+                    <Text
+                      testID="login-signed-email"
+                      style={styles.signedEmail}
+                    >
                       {auth.profile?.emailMasked ?? email}
                     </Text>
                   </View>
@@ -679,10 +739,10 @@ export function LoginModal({
                 </View>
               </View>
             )}
-            </ScrollView>
-          </Pressable>
-        </Animated.View>
-      </View>
+          </ScrollView>
+        </Pressable>
+      </Animated.View>
+    </View>
   );
 
   if (Platform.OS !== "web") {
@@ -698,7 +758,12 @@ export function LoginModal({
   }
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={close}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={close}
+    >
       {modalBody}
     </Modal>
   );

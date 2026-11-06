@@ -12,13 +12,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { formatCountdown } from "@domain/services/date-format";
 import { ArrowIcon } from "@presentation/components/ArrowIcon";
 
-
 import type { CheckoutTopBarProps } from "../../interface";
 import { styles, componentStyles } from "./style";
-import { styleForCheckoutTopBarView0 } from './style';
+import { styleForCheckoutTopBarView0 } from "./style";
 
-
-export function CheckoutTopBar({ remainingMs, warn, expired, onBack }: CheckoutTopBarProps) {
+export function CheckoutTopBar({
+  remainingMs,
+  warn,
+  expired,
+  onBack,
+}: CheckoutTopBarProps) {
   const insets = useSafeAreaInsets();
   const alarm = warn || expired;
 
@@ -33,7 +36,10 @@ export function CheckoutTopBar({ remainingMs, warn, expired, onBack }: CheckoutT
           testID="checkout-back"
           style={styles.backButton}
         >
-          <View style={componentStyles.elementFlexDirection0}><ArrowIcon direction="left" /><Text style={styles.backText}>Kembali</Text></View>
+          <View style={componentStyles.elementFlexDirection0}>
+            <ArrowIcon direction="left" />
+            <Text style={styles.backText}>Kembali</Text>
+          </View>
         </Pressable>
 
         {/* Timer badge (prototype .timer-bar style) */}

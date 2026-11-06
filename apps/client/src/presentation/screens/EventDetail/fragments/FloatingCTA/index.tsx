@@ -77,7 +77,7 @@ export function FloatingCTA({
             duration: 1000,
             useNativeDriver: isNative,
           }),
-        ])
+        ]),
       ).start();
     }
   }, [slideAnim, pulseAnim, canJoin, isNative]);
@@ -91,10 +91,7 @@ export function FloatingCTA({
 
   return (
     <Animated.View
-      style={[
-        styles.floatingCta,
-        floatingCtaEntranceStyle(slideAnim),
-      ]}
+      style={[styles.floatingCta, floatingCtaEntranceStyle(slideAnim)]}
     >
       <View style={styles.floatingCtaInner}>
         {/* Left: Price Info */}

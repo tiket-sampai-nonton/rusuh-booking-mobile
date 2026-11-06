@@ -1,6 +1,10 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from "react-native";
 
-import { browseLoadMore, browseLoadMoreButtonStyle, browseLoadMoreLabel } from '../../style';
+import {
+  browseLoadMore,
+  browseLoadMoreButtonStyle,
+  browseLoadMoreLabel,
+} from "../../style";
 
 interface BrowseLoadMoreProps {
   readonly disabled: boolean;
@@ -17,7 +21,7 @@ export function BrowseLoadMore({ disabled, onPress }: BrowseLoadMoreProps) {
         testID="load-more-btn"
       >
         <Text style={browseLoadMoreLabel(disabled)}>
-          {disabled ? 'Semua Event Ditampilkan' : 'Muat Lebih Banyak Event'}
+          {disabled ? "Semua Event Ditampilkan" : "Muat Lebih Banyak Event"}
         </Text>
       </Pressable>
     </View>

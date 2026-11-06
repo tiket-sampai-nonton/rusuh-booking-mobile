@@ -46,13 +46,21 @@ describe("shared SVG icons", () => {
       </IconFrame>,
     );
 
-    expect(UNSAFE_getByType(Svg).props).toMatchObject({ width: 16, height: 16, strokeWidth: 2 });
+    expect(UNSAFE_getByType(Svg).props).toMatchObject({
+      width: 16,
+      height: 16,
+      strokeWidth: 2,
+    });
   });
 
   it.each(["left", "right", "download"] as const)(
     "renders the %s arrow path",
     (direction) => {
-      expect(render(<ArrowIcon direction={direction} color="#123456" size={24} />).toJSON()).toBeTruthy();
+      expect(
+        render(
+          <ArrowIcon direction={direction} color="#123456" size={24} />,
+        ).toJSON(),
+      ).toBeTruthy();
     },
   );
 });

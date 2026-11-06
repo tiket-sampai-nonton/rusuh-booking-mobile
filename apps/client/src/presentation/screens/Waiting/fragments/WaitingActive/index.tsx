@@ -1,13 +1,13 @@
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
 
-import type { QueueZone } from '@domain/repositories/queue.repository';
-import { etaText, formatCount, peopleAhead } from '../../display';
-import { styles } from '../../style';
-import { EventIntro } from '../EventIntro';
-import { LeaveButton } from '../LeaveButton';
-import { QueuePositionPanel } from '../QueuePositionPanel';
-import { QueueStat } from '../QueueStat';
-import { ZoneBanner } from '../ZoneBanner';
+import type { QueueZone } from "@domain/repositories/queue.repository";
+import { etaText, formatCount, peopleAhead } from "../../display";
+import { styles } from "../../style";
+import { EventIntro } from "../EventIntro";
+import { LeaveButton } from "../LeaveButton";
+import { QueuePositionPanel } from "../QueuePositionPanel";
+import { QueueStat } from "../QueueStat";
+import { ZoneBanner } from "../ZoneBanner";
 
 interface WaitingActiveProps {
   readonly position: number;
@@ -40,8 +40,14 @@ export function WaitingActive({
         />
 
         <View style={[styles.summary, isDesktop && styles.summaryDesktop]}>
-          {isDesktop ? <Text style={[styles.summaryHeading, styles.summaryHeadingDesktop]}>Ringkasan antrean</Text> : null}
-          <View style={[styles.ledgerStats, isDesktop && styles.ledgerStatsDesktop]}>
+          {isDesktop ? (
+            <Text style={[styles.summaryHeading, styles.summaryHeadingDesktop]}>
+              Ringkasan antrean
+            </Text>
+          ) : null}
+          <View
+            style={[styles.ledgerStats, isDesktop && styles.ledgerStatsDesktop]}
+          >
             <QueueStat
               label="Orang di depan"
               value={formatCount(peopleAhead(position))}
@@ -62,9 +68,17 @@ export function WaitingActive({
 
       <View style={styles.waitingSpacer} />
 
-      <View style={[styles.waitingFooter, isDesktop && styles.waitingFooterDesktop]}>
-        <Text style={[styles.waitingFootnote, isDesktop && styles.waitingFootnoteDesktop]}>
-          Posisi tersimpan dan diperbarui otomatis dari server. Tetap di halaman ini sampai giliranmu tiba.
+      <View
+        style={[styles.waitingFooter, isDesktop && styles.waitingFooterDesktop]}
+      >
+        <Text
+          style={[
+            styles.waitingFootnote,
+            isDesktop && styles.waitingFootnoteDesktop,
+          ]}
+        >
+          Posisi tersimpan dan diperbarui otomatis dari server. Tetap di halaman
+          ini sampai giliranmu tiba.
         </Text>
         <LeaveButton onPress={onLeavePress} isDesktop={isDesktop} />
       </View>

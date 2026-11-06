@@ -16,7 +16,20 @@ import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PlusIcon } from "@presentation/components/ArrowIcon";
 
-import { appendRow, effectiveCap, isAttendeeBlocked, isAttendeeWarning, isCheckoutReady, isValidNik, maskNik, patchRowAt, removeRowAt, setBuyerUseAt, type AttendeeCheckResult, type TicketRow } from "@domain/rules/checkout";
+import {
+  appendRow,
+  effectiveCap,
+  isAttendeeBlocked,
+  isAttendeeWarning,
+  isCheckoutReady,
+  isValidNik,
+  maskNik,
+  patchRowAt,
+  removeRowAt,
+  setBuyerUseAt,
+  type AttendeeCheckResult,
+  type TicketRow,
+} from "@domain/rules/checkout";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { designColors } from "@presentation/theme";
 import { WarningIcon } from "@presentation/components/ArrowIcon";
@@ -26,7 +39,10 @@ import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession"
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
 import { useHoldBooking } from "@presentation/hooks/useHoldBooking";
 import { useSetBuyer } from "@presentation/hooks/useSetBuyer";
-import { prefillFromProfile, useAccountStore } from "@presentation/stores/account-store";
+import {
+  prefillFromProfile,
+  useAccountStore,
+} from "@presentation/stores/account-store";
 import { useSessionStore } from "@presentation/stores/session-store";
 import { useServices } from "@providers/service-context";
 
@@ -41,7 +57,7 @@ import { ProgressSteps } from "./fragments/ProgressSteps";
 import { TicketItem } from "./fragments/TicketItem";
 import type { CheckoutScreenProps, RowCheckStatus } from "./interface";
 import { checkoutScrollContent, componentStyles } from "./style";
-import { addTicketButtonStyle } from './style';
+import { addTicketButtonStyle } from "./style";
 
 /** Map a resolved NIK verdict (+ pending flag) to the row's display status. */
 function rowStatus(
@@ -80,10 +96,13 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const [confirmLeave, setConfirmLeave] = useState(false);
 
   useEffect(() => {
-    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
-      if (!confirmLeave) setConfirmLeave(true);
-      return true;
-    });
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        if (!confirmLeave) setConfirmLeave(true);
+        return true;
+      },
+    );
     return () => subscription.remove();
   }, [confirmLeave]);
 
@@ -130,7 +149,12 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   );
 
   const totalMinor = useMemo(
-    () => rows.reduce((sum, row) => sum + categoryPrice(row.categoryId, session?.categories ?? []), 0),
+    () =>
+      rows.reduce(
+        (sum, row) =>
+          sum + categoryPrice(row.categoryId, session?.categories ?? []),
+        0,
+      ),
     [rows, session?.categories],
   );
 
@@ -146,7 +170,11 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   // Row mutations delegate to the pure domain rules (cap / min-1 / single-use).
   const addRow = (): void =>
     setRows((current) =>
-      appendRow(current, emptyRow(session?.categories[0]?.categoryId ?? ""), cap),
+      appendRow(
+        current,
+        emptyRow(session?.categories[0]?.categoryId ?? ""),
+        cap,
+      ),
     );
   const removeRow = (i: number): void => setRows((r) => removeRowAt(r, i));
   const patchRow = (i: number, patch: Partial<TicketRow>): void =>
@@ -194,7 +222,10 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
                 style={componentStyles.buyerPrefillBadge}
                 testID="prefill-badge"
               >
-                <Text style={componentStyles.buyerPrefillBadgeText} className="text-2xs font-v2 font-bold uppercase">
+                <Text
+                  style={componentStyles.buyerPrefillBadgeText}
+                  className="text-2xs font-v2 font-bold uppercase"
+                >
                   Terisi dari akun
                 </Text>
               </View>
@@ -202,7 +233,9 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
             <Field
               label="NIK Pembeli (16 digit)"
               value={buyerNik}
-              onChangeText={(t) => setBuyerNik(t.replace(/\D/g, "").slice(0, 16))}
+              onChangeText={(t) =>
+                setBuyerNik(t.replace(/\D/g, "").slice(0, 16))
+              }
               placeholder="16 digit KTP pembeli"
               keyboardType="number-pad"
               testID="buyer-nik"
@@ -248,19 +281,23 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               style={addTicketButtonStyle(rows, cap)}
             >
               <Text style={componentStyles.addTicketText}>
-                <View className="flex-row items-center gap-2"><PlusIcon color={designColors.ink} size={16} /><Text style={componentStyles.addTicketLabel}>Tambah tiket</Text></View>
+                <View className="flex-row items-center gap-2">
+                  <PlusIcon color={designColors.ink} size={16} />
+                  <Text style={componentStyles.addTicketLabel}>
+                    Tambah tiket
+                  </Text>
+                </View>
               </Text>
             </Pressable>
-            <View
-              style={componentStyles.quotaWarning}
-            >
+            <View style={componentStyles.quotaWarning}>
               <WarningIcon color={designColors.warn} />
               <Text style={componentStyles.quotaWarningText}>
                 Batas{" "}
                 <Text style={componentStyles.quotaWarningEmphasis}>
                   {cap} tiket per NIK
                 </Text>{" "}
-                divalidasi server saat Lanjut Bayar. Tiap tiket butuh 1 NIK penonton.
+                divalidasi server saat Lanjut Bayar. Tiap tiket butuh 1 NIK
+                penonton.
               </Text>
             </View>
           </Section>

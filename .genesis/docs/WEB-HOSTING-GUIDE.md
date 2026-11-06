@@ -254,19 +254,65 @@ Skip this while testing — the `*.pages.dev` URL is fully functional. Do it for
 
 ---
 
-## 9. Phase E — (Optional) Automate via GitHub Actions
+## 9. Phase E — Manual GitHub Actions deployment to development
 
-Git integration (Phase C) already auto-deploys on every push, so this is optional. If the team
-later wants deploys driven by the existing GitHub Actions pipeline (PIPELINE.md §7.3) instead of
-Cloudflare's Git integration, the web-deploy job would:
+The `rusuh-booking` Pages project was created by Direct Upload and has no Git connection. The
+GitHub Actions workflow is the single deployment path; it keeps deployment manual and runs the
+quality gates before uploading the static artifact.
 
-1. Run `npx expo export --platform web` inside `apps/client`.
-2. Run the SEO-output and bundle-budget gates (PIPELINE.md §5.1 / §12).
-3. Publish `dist` with `wrangler pages deploy dist --project-name rusuh-booking`,
-   authenticating with a Cloudflare API token stored as the `Web hosting credentials`
-   secret (PIPELINE.md §10).
+### Configure GitHub
 
-Deploy only output that passed the gates. This is a pipeline change to groom separately.
+1. Open **Settings → Environments** in `tiket-sampai-nonton/rusuh-booking-mobile`.
+2. Create an environment named `development`.
+3. Add these **environment secrets**:
+
+   | Secret | Value |
+   |---|---|
+   | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages Edit permission for this account |
+   | `TELEGRAM_BOT_TOKEN` | Token created by BotFather |
+   | `TELEGRAM_CHAT_ID` | Telegram group or chat ID where release notices should arrive |
+
+4. Add these **environment variables**:
+
+   | Variable | Development value |
+   |---|---|
+   | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID |
+   | `CLOUDFLARE_PAGES_PROJECT` | `rusuh-booking` |
+   | `EXPO_PUBLIC_API_BASE_URL` | Development API URL; a placeholder is safe while mocks are enabled |
+   | `EXPO_PUBLIC_USE_MOCKS` | `true` |
+   | `EXPO_PUBLIC_ENV` | `development` |
+   | `EXPO_PUBLIC_SITE_URL` | `https://rusuh-booking.pages.dev` |
+
+SonarCloud is temporarily disabled in this workflow, so `SONAR_TOKEN`, `SONAR_ORGANIZATION`, and
+`SONAR_PROJECT_KEY` are not currently required for deployment. Keep the SonarCloud quality gate in
+the broader repository pipeline policy; restore the scan here when the temporary exemption ends.
+
+`EXPO_PUBLIC_USE_MOCKS=true` is required for this QA deployment. It prevents the demo app from
+calling a placeholder or production API.
+
+### Run the workflow
+
+1. Open a pull request into `develop`. `Deploy Web Development` runs typecheck, lint/format,
+   Jest/RNTL, and dependency audit. SonarCloud is temporarily skipped for this workflow. PR runs do
+   not deploy. If the SonarCloud GitHub App independently reports a PR check, that integration is
+   separate from this workflow and may still run.
+2. After the approved change is on `develop`, open the repository's **Actions** tab.
+3. Select **Deploy Web Development → Run workflow** and choose branch `develop`.
+4. The manual run rechecks the current `develop` head, builds Expo Web, creates the sitemap,
+   verifies SEO metadata and the public/transactional gzip budgets, and deploys the checked
+   `dist/` artifact to Cloudflare Pages.
+5. The workflow sends a Telegram message with each job's result and a link to the run logs.
+
+GitHub only exposes the **Run workflow** control when the workflow file is present on the
+repository's default branch. This repository's default branch is `main`, so merging the workflow
+to `develop` alone does not make the manual button available. Promote the workflow file to `main`
+through the normal `develop` → `main` release process; the workflow still rejects a manual run
+unless the operator selects `develop`. The `main` branch is not deployed by this development
+workflow.
+
+The deploy job stays blocked unless the artifact passes the SEO checks and the bundle limits in
+PIPELINE.md §5.1: initial JavaScript must be at most 1 MB gzip per route. The workflow does not
+publish mobile OTA updates or native builds.
 
 ---
 

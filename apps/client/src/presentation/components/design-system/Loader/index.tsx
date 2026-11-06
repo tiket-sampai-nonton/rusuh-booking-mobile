@@ -12,14 +12,31 @@
  *
  * EXIT: clip-path inset animation (0 0 0 0 → 0 0 100% 0), 0.8s
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View } from 'react-native';
-import Animated, { cancelAnimation, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withRepeat, withSequence, withTiming, runOnJS, makeMutable } from 'react-native-reanimated';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { View } from "react-native";
+import Animated, {
+  cancelAnimation,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+  runOnJS,
+  makeMutable,
+} from "react-native-reanimated";
 
-import { AnimatedLetter } from './AnimatedLetter';
-import { ProgressBar } from './ProgressBar';
-import { LOADER_EASE, LOADER_EXIT_DURATION_MS, LOADER_LETTER_DELAY_MS, LOADER_LETTER_DURATION_MS, LOADER_MAX_LETTERS } from './constants';
-import { loaderStyles } from './style';
+import { AnimatedLetter } from "./AnimatedLetter";
+import { ProgressBar } from "./ProgressBar";
+import {
+  LOADER_EASE,
+  LOADER_EXIT_DURATION_MS,
+  LOADER_LETTER_DELAY_MS,
+  LOADER_LETTER_DURATION_MS,
+  LOADER_MAX_LETTERS,
+} from "./constants";
+import { loaderStyles } from "./style";
 
 // Maximum number of letters supported (fixed array size for hooks)
 export interface LoaderProps {
@@ -35,12 +52,15 @@ export interface LoaderProps {
 
 export function Loader({
   visible,
-  label = 'RUSUH',
+  label = "RUSUH",
   onExitComplete,
   testID,
 }: LoaderProps) {
   const reducedMotion = useReducedMotion();
-  const letters = useMemo(() => label.split('').slice(0, LOADER_MAX_LETTERS), [label]);
+  const letters = useMemo(
+    () => label.split("").slice(0, LOADER_MAX_LETTERS),
+    [label],
+  );
   const [hasExited, setHasExited] = useState(false);
   const exitCompleted = useRef(false);
 
@@ -51,7 +71,9 @@ export function Loader({
   // Use useRef with makeMutable to avoid calling useSharedValue in a loop
   const letterBouncesRef = useRef<Animated.SharedValue<number>[] | null>(null);
   if (!letterBouncesRef.current) {
-    letterBouncesRef.current = Array.from({ length: LOADER_MAX_LETTERS }, () => makeMutable(0));
+    letterBouncesRef.current = Array.from({ length: LOADER_MAX_LETTERS }, () =>
+      makeMutable(0),
+    );
   }
   const letterBounces = letterBouncesRef.current;
 
@@ -84,8 +106,14 @@ export function Loader({
         i * LOADER_LETTER_DELAY_MS,
         withRepeat(
           withSequence(
-            withTiming(-10, { duration: LOADER_LETTER_DURATION_MS / 2, easing: LOADER_EASE }),
-            withTiming(0, { duration: LOADER_LETTER_DURATION_MS / 2, easing: LOADER_EASE }),
+            withTiming(-10, {
+              duration: LOADER_LETTER_DURATION_MS / 2,
+              easing: LOADER_EASE,
+            }),
+            withTiming(0, {
+              duration: LOADER_LETTER_DURATION_MS / 2,
+              easing: LOADER_EASE,
+            }),
           ),
           -1, // infinite
           false,

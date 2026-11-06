@@ -23,12 +23,18 @@ jest.mock("expo-router", () => ({
 describe("RBT-080 — interactive controls expose role + label", () => {
   it("SnapActions buttons all have button role + accessible label", () => {
     const screen = render(
-      <SnapActions onSuccess={jest.fn()} onFail={jest.fn()} onUnknown={jest.fn()} />,
+      <SnapActions
+        onSuccess={jest.fn()}
+        onFail={jest.fn()}
+        onUnknown={jest.fn()}
+      />,
     );
     for (const id of ["snap-success", "snap-fail", "snap-unknown"]) {
       const el = screen.getByTestId(id);
       expect(el.props.accessibilityRole).toBe("button");
-      expect(String(el.props.accessibilityLabel ?? "").length).toBeGreaterThan(0);
+      expect(String(el.props.accessibilityLabel ?? "").length).toBeGreaterThan(
+        0,
+      );
     }
   });
 
@@ -54,6 +60,8 @@ describe("RBT-080 — interactive controls expose role + label", () => {
   it("ETicketCard exposes an accessible label describing the ticket", () => {
     const screen = render(<ETicketCard bookingId="bk-1" index={0} total={2} />);
     const card = screen.getByTestId("eticket-0");
-    expect(String(card.props.accessibilityLabel ?? "")).toMatch(/E-tiket 1 dari 2/);
+    expect(String(card.props.accessibilityLabel ?? "")).toMatch(
+      /E-tiket 1 dari 2/,
+    );
   });
 });

@@ -12,15 +12,26 @@
  * faithful RN equivalent of the prototype's dropdowns).
  */
 import { useEffect, useState } from "react";
-import { BackHandler, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  BackHandler,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CloseIcon } from "@presentation/components/ArrowIcon";
 import { designColors } from "@presentation/theme";
 import { PillGroup } from "./PillGroup";
 import { componentStyles } from "./style";
-import { styleForFilterModalPressable0, styleForFilterModalView1 } from './style';
-
+import {
+  styleForFilterModalPressable0,
+  styleForFilterModalView1,
+} from "./style";
 
 export interface FilterValue {
   readonly genre: string;
@@ -35,7 +46,15 @@ export interface FilterModalProps {
   readonly onApply: (value: FilterValue) => void;
 }
 
-const GENRES = ["Semua", "Festival", "Jazz", "Rock", "Elektronik", "Folk", "Orkestra"];
+const GENRES = [
+  "Semua",
+  "Festival",
+  "Jazz",
+  "Rock",
+  "Elektronik",
+  "Folk",
+  "Orkestra",
+];
 const TIMES = [
   { v: "all", l: "Semua waktu" },
   { v: "week", l: "Minggu ini" },
@@ -59,94 +78,103 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
 
   useEffect(() => {
     if (!visible || Platform.OS !== "android") return;
-    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
-      onClose();
-      return true;
-    });
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        onClose();
+        return true;
+      },
+    );
     return () => subscription.remove();
   }, [onClose, visible]);
 
   const sheetContent = (
-    <View
-      style={componentStyles.elementFlex0}
-    >
+    <View style={componentStyles.elementFlex0}>
       <Pressable
         accessibilityLabel="Tutup penyaringan"
         onPress={onClose}
         style={StyleSheet.absoluteFillObject}
         testID="filter-backdrop"
       />
-        <Pressable
-          onPress={(e) => e.stopPropagation()}
-          accessibilityViewIsModal
-          style={styleForFilterModalPressable0(insets)}
-          testID="filter-modal"
+      <Pressable
+        onPress={(e) => e.stopPropagation()}
+        accessibilityViewIsModal
+        style={styleForFilterModalPressable0(insets)}
+        testID="filter-modal"
+      >
+        <View style={componentStyles.elementFlexDirection1}>
+          <View style={componentStyles.elementFlex2}>
+            <Text
+              accessibilityRole="header"
+              style={componentStyles.elementColor3}
+            >
+              Saring Event
+            </Text>
+            <Text style={componentStyles.elementMarginTop4}>
+              Pilih kategori, waktu, dan urutan event.
+            </Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Tutup penyaringan"
+            onPress={onClose}
+            style={componentStyles.elementWidth5}
+            testID="filter-close"
+          >
+            <CloseIcon color={designColors.ink} />
+          </Pressable>
+        </View>
+
+        <ScrollView
+          style={componentStyles.elementMaxHeight6}
+          keyboardShouldPersistTaps="handled"
         >
-          <View style={componentStyles.elementFlexDirection1}>
-            <View style={componentStyles.elementFlex2}>
-              <Text accessibilityRole="header" style={componentStyles.elementColor3}>
-                Saring Event
-              </Text>
-              <Text style={componentStyles.elementMarginTop4}>
-                Pilih kategori, waktu, dan urutan event.
-              </Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Tutup penyaringan"
-              onPress={onClose}
-              style={componentStyles.elementWidth5}
-              testID="filter-close"
-            >
-              <CloseIcon color={designColors.ink} />
-            </Pressable>
-          </View>
+          <PillGroup
+            label="Kategori Musik"
+            options={GENRES.map((g) => ({ v: g, l: g }))}
+            value={genre}
+            onPick={setGenre}
+            testPrefix="filter-genre"
+          />
+          <PillGroup
+            label="Waktu"
+            options={TIMES}
+            value={time}
+            onPick={setTime}
+            testPrefix="filter-time"
+          />
+          <PillGroup
+            label="Urutkan"
+            options={SORTS}
+            value={sort}
+            onPick={setSort}
+            testPrefix="filter-sort"
+          />
+        </ScrollView>
 
-          <ScrollView style={componentStyles.elementMaxHeight6} keyboardShouldPersistTaps="handled">
-            <PillGroup
-              label="Kategori Musik"
-              options={GENRES.map((g) => ({ v: g, l: g }))}
-              value={genre}
-              onPick={setGenre}
-              testPrefix="filter-genre"
-            />
-            <PillGroup
-              label="Waktu"
-              options={TIMES}
-              value={time}
-              onPick={setTime}
-              testPrefix="filter-time"
-            />
-            <PillGroup
-              label="Urutkan"
-              options={SORTS}
-              value={sort}
-              onPick={setSort}
-              testPrefix="filter-sort"
-            />
-          </ScrollView>
-
-          <View style={componentStyles.elementMarginTop7}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Batal"
-              onPress={onClose}
-              testID="filter-cancel"
-              style={componentStyles.elementMinHeight8}
-            >
-              <Text style={componentStyles.elementColor9}>Batal</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Terapkan Saringan"
-              onPress={apply}
-              testID="filter-apply"
-              style={componentStyles.elementMinHeight10}
-            >
-              <Text style={componentStyles.elementColor11}>Terapkan Saringan</Text>
-            </Pressable>
-          </View>
-        </Pressable>
+        <View style={componentStyles.elementMarginTop7}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Batal"
+            onPress={onClose}
+            testID="filter-cancel"
+            style={componentStyles.elementMinHeight8}
+          >
+            <Text style={componentStyles.elementColor9}>Batal</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Terapkan Saringan"
+            onPress={apply}
+            testID="filter-apply"
+            style={componentStyles.elementMinHeight10}
+          >
+            <Text style={componentStyles.elementColor11}>
+              Terapkan Saringan
+            </Text>
+          </Pressable>
+        </View>
+      </Pressable>
     </View>
   );
 
@@ -160,7 +188,12 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
   }
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       {sheetContent}
     </Modal>
   );

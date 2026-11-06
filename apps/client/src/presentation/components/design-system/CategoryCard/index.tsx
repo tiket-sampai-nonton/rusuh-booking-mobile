@@ -10,18 +10,32 @@
  * - Count: opacity 0 → 0.8, translateY(10px) → translateY(0) on hover (delayed 0.1s)
  * - Animated border on hover: inset border fades in + scales to 1
  */
-import { useCallback, useState } from 'react';
-import { Image, Platform, Pressable, View } from 'react-native';
-import Animated, { Easing, interpolate, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useCallback, useState } from "react";
+import { Image, Platform, Pressable, View } from "react-native";
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
-import { designEasing, designDuration } from '@presentation/theme';
+import { designEasing, designDuration } from "@presentation/theme";
 import { pointerEventsNone } from "@presentation/utils/style";
 import { componentStyles } from "./style";
-import { getCategoryImageStyle, styleForCategoryCardAnimatedView0, styleForCategoryCardAnimatedView1, styleForCategoryCardAnimatedView2, styleForCategoryCardAnimatedView3, styleForCategoryCardAnimatedText4, styleForCategoryCardAnimatedText5 } from './style';
-
+import {
+  getCategoryImageStyle,
+  styleForCategoryCardAnimatedView0,
+  styleForCategoryCardAnimatedView1,
+  styleForCategoryCardAnimatedView2,
+  styleForCategoryCardAnimatedView3,
+  styleForCategoryCardAnimatedText4,
+  styleForCategoryCardAnimatedText5,
+} from "./style";
 
 const EASE = Easing.bezier(...designEasing.primary);
-const isWeb = Platform.OS === 'web';
+const isWeb = Platform.OS === "web";
 
 export interface CategoryCardProps {
   readonly name: string;
@@ -166,25 +180,15 @@ export function CategoryCard({
       />
 
       {/* Content overlay */}
-      <View
-        style={componentStyles.elementPosition0}
-      >
+      <View style={componentStyles.elementPosition0}>
         {/* Category name */}
-        <Animated.Text
-          style={[
-            styleForCategoryCardAnimatedText4(),
-            nameStyle,
-          ]}
-        >
+        <Animated.Text style={[styleForCategoryCardAnimatedText4(), nameStyle]}>
           {name}
         </Animated.Text>
 
         {/* Event count */}
         <Animated.Text
-          style={[
-            styleForCategoryCardAnimatedText5(),
-            countStyle,
-          ]}
+          style={[styleForCategoryCardAnimatedText5(), countStyle]}
         >
           {count}
         </Animated.Text>

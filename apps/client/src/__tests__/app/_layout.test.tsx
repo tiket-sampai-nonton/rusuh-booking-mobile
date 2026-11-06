@@ -24,7 +24,9 @@ jest.mock("expo-router", () => ({
 jest.mock("expo-font", () => ({
   useFonts: () => [mockFontsLoaded, mockFontError],
 }));
-jest.mock("@presentation/hooks/useNotifications", () => ({ useNotifications: jest.fn() }));
+jest.mock("@presentation/hooks/useNotifications", () => ({
+  useNotifications: jest.fn(),
+}));
 jest.mock("@providers/service-context", () => ({
   useServices: () => mockServices,
   ServiceProvider: ({ children }: { children: ReactNode }) => children,
@@ -66,7 +68,9 @@ describe("RootLayout (skeleton)", () => {
     mockFontError = new Error("font unavailable");
     const { queryByTestId, UNSAFE_queryByType } = render(<RootLayout />);
     expect(queryByTestId("mock-splash-finish")).toBeTruthy();
-    expect(UNSAFE_queryByType(require("react-native").ActivityIndicator)).toBeNull();
+    expect(
+      UNSAFE_queryByType(require("react-native").ActivityIndicator),
+    ).toBeNull();
   });
 
   it("shows the native launch splash on the native test platform", () => {
@@ -77,27 +81,39 @@ describe("RootLayout (skeleton)", () => {
   });
 
   it("restores a saved account after reading a session token", async () => {
-    const profile = { emailMasked: "a***@mail.com", fullName: "Penonton", hasNik: false };
+    const profile = {
+      emailMasked: "a***@mail.com",
+      fullName: "Penonton",
+      hasNik: false,
+    };
     mockServices.tokenStorage.load.mockResolvedValue("saved-session");
     mockServices.userRepository.getMe.mockResolvedValue(profile);
 
     render(<RootLayout />);
 
-    await waitFor(() => expect(useAccountStore.getState().profile).toEqual(profile));
+    await waitFor(() =>
+      expect(useAccountStore.getState().profile).toEqual(profile),
+    );
     expect(mockServices.userRepository.getMe).toHaveBeenCalledTimes(1);
   });
 
   it("does not request an account when no session token is saved", async () => {
     render(<RootLayout />);
-    await waitFor(() => expect(mockServices.tokenStorage.load).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(mockServices.tokenStorage.load).toHaveBeenCalledTimes(1),
+    );
     expect(mockServices.userRepository.getMe).not.toHaveBeenCalled();
   });
 
   it("keeps a guest session when the profile request fails", async () => {
     mockServices.tokenStorage.load.mockResolvedValue("expired-session");
-    mockServices.userRepository.getMe.mockRejectedValue(new Error("unavailable"));
+    mockServices.userRepository.getMe.mockRejectedValue(
+      new Error("unavailable"),
+    );
     render(<RootLayout />);
-    await waitFor(() => expect(mockServices.userRepository.getMe).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(mockServices.userRepository.getMe).toHaveBeenCalledTimes(1),
+    );
     expect(useAccountStore.getState().profile).toBeUndefined();
   });
 });

@@ -1,13 +1,17 @@
-import { Platform, View, type ViewStyle } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Platform, View, type ViewStyle } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
-import { designColors } from '@presentation/theme';
-import { pointerEventsNone } from '@presentation/utils/style';
+import { designColors } from "@presentation/theme";
+import { pointerEventsNone } from "@presentation/utils/style";
 
-import { componentStyles, styleForGradientOverlayView3 } from '../../style';
+import { componentStyles, styleForGradientOverlayView3 } from "../../style";
 
-export function GradientOverlay({ isMobile = false }: { readonly isMobile?: boolean }) {
-  const isWeb = Platform.OS === 'web';
+export function GradientOverlay({
+  isMobile = false,
+}: {
+  readonly isMobile?: boolean;
+}) {
+  const isWeb = Platform.OS === "web";
   // Web: use real CSS linear-gradient (exact match to prototype)
   let webGradientStyle: ViewStyle | null = null;
   if (isWeb) {
@@ -27,10 +31,10 @@ export function GradientOverlay({ isMobile = false }: { readonly isMobile?: bool
       <LinearGradient
         // Gradient from top to bottom (CSS "to top" reversed for RN)
         colors={[
-          "rgba(255,255,255,0.3)",   // top (100% in CSS)
-          "rgba(255,255,255,0.7)",   // 60% point in CSS → 0.4 from top
-          "rgba(255,255,255,0.95)",  // 30% point in CSS → 0.7 from top
-          designColors.ground,            // bottom (0% in CSS)
+          "rgba(255,255,255,0.3)", // top (100% in CSS)
+          "rgba(255,255,255,0.7)", // 60% point in CSS → 0.4 from top
+          "rgba(255,255,255,0.95)", // 30% point in CSS → 0.7 from top
+          designColors.ground, // bottom (0% in CSS)
         ]}
         locations={[0, 0.4, 0.7, 1]}
         style={[componentStyles.elementPosition2, pointerEventsNone]}

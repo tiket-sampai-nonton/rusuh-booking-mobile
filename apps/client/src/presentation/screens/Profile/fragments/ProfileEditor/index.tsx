@@ -1,8 +1,5 @@
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from "react-native";
 import { styles } from "./style";
-
-
-
 
 interface ProfileEditorProps {
   readonly fullName: string;
@@ -44,16 +41,26 @@ export function ProfileEditor({
         style={styles.input}
         testID="profile-nik-input"
       />
-      {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <Text accessibilityRole="alert" style={styles.error}>
+          {error}
+        </Text>
+      ) : null}
       <Pressable
         onPress={onSave}
         disabled={saving}
         style={[styles.button, saving && styles.disabledButton]}
         testID="profile-save"
       >
-        <Text style={styles.buttonText}>{saving ? 'Menyimpan…' : 'Simpan Profil'}</Text>
+        <Text style={styles.buttonText}>
+          {saving ? "Menyimpan…" : "Simpan Profil"}
+        </Text>
       </Pressable>
-      <Pressable onPress={onCancel} style={styles.cancelButton} testID="profile-cancel">
+      <Pressable
+        onPress={onCancel}
+        style={styles.cancelButton}
+        testID="profile-cancel"
+      >
         <Text style={styles.cancelText}>Batal</Text>
       </Pressable>
     </View>

@@ -11,7 +11,12 @@ export default function PaymentWebViewRoute() {
   const id = bookingId ?? "";
   return (
     <Fragment>
-      <Seo title="Pembayaran" description="Membuka pembayaran." path={`/payment-webview/${id}`} noindex />
+      <Seo
+        title="Pembayaran"
+        description="Membuka pembayaran."
+        path={`/payment-webview/${id}`}
+        noindex
+      />
       <PaymentWebViewScreen bookingId={id} />
     </Fragment>
   );

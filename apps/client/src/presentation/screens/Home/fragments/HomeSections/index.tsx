@@ -1,13 +1,13 @@
 /** Home screen sections composed from screen-owned fragments. */
-import { View } from 'react-native';
-import { Reveal } from '@presentation/components/design-system';
-import { useResponsive } from '@presentation/hooks/useResponsive';
-import { HomeFooter } from '../HomeFooter';
-import type { HomeSectionsProps } from '../../interface';
-import { EventsGrid } from './fragments/EventsGrid';
-import { EventsHorizontalScroll } from './fragments/EventsHorizontalScroll';
-import { SectionHeader } from './fragments/SectionHeader';
-import { homeSectionsStyles } from './style';
+import { View } from "react-native";
+import { Reveal } from "@presentation/components/design-system";
+import { useResponsive } from "@presentation/hooks/useResponsive";
+import { HomeFooter } from "../HomeFooter";
+import type { HomeSectionsProps } from "../../interface";
+import { EventsGrid } from "./fragments/EventsGrid";
+import { EventsHorizontalScroll } from "./fragments/EventsHorizontalScroll";
+import { SectionHeader } from "./fragments/SectionHeader";
+import { homeSectionsStyles } from "./style";
 
 export function HomeSections({
   data,
@@ -39,9 +39,16 @@ export function HomeSections({
           />
         </Reveal>
         {isNative ? (
-          <EventsHorizontalScroll events={data.upcoming} onPress={onPressEvent} />
+          <EventsHorizontalScroll
+            events={data.upcoming}
+            onPress={onPressEvent}
+          />
         ) : (
-          <EventsGrid events={data.upcoming} onPress={onPressEvent} columns={columns} />
+          <EventsGrid
+            events={data.upcoming}
+            onPress={onPressEvent}
+            columns={columns}
+          />
         )}
       </View>
 
@@ -55,9 +62,17 @@ export function HomeSections({
             <SectionHeader title="Event Sebelumnya" />
           </Reveal>
           {isNative ? (
-            <EventsHorizontalScroll events={data.history} onPress={onPressEvent} />
+            <EventsHorizontalScroll
+              events={data.history}
+              onPress={onPressEvent}
+            />
           ) : (
-            <EventsGrid events={data.history} onPress={onPressEvent} columns={columns} history />
+            <EventsGrid
+              events={data.history}
+              onPress={onPressEvent}
+              columns={columns}
+              history
+            />
           )}
         </View>
       )}

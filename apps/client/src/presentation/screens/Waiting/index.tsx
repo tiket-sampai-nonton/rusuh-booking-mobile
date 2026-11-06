@@ -17,27 +17,36 @@
  * no infrastructure import, no TanStack here (it lives in the hooks). Status is
  * never color-only: every zone/state carries an icon + text label (RBT-080 a11y).
  */
-import { useRouter, type Href } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { useReducedMotion } from 'react-native-reanimated';
+import { useRouter, type Href } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { ScrollView, View } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 
-import { isAdmitted, isTerminal } from '@domain/state-machines/queue-state-machine';
-import { useAutoClaim } from '@presentation/hooks/useAutoClaim';
-import { useQueuePolling } from '@presentation/hooks/useQueuePolling';
-import { useResponsive } from '@presentation/hooks/useResponsive';
+import {
+  isAdmitted,
+  isTerminal,
+} from "@domain/state-machines/queue-state-machine";
+import { useAutoClaim } from "@presentation/hooks/useAutoClaim";
+import { useQueuePolling } from "@presentation/hooks/useQueuePolling";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 
-import { claimErrorBody, claimErrorTitle, COPY, terminalBody, terminalTitle } from './display';
-import type { WaitingRoomScreenProps } from './interface';
-import { styles } from './style';
-import { ErrorState } from './fragments/ErrorState';
-import { Header } from './fragments/Header';
-import { LeaveModal } from './fragments/LeaveModal';
-import { LoadingOverlay } from './fragments/LoadingOverlay';
-import { NetworkStatusBar } from './fragments/NetworkStatusBar';
-import { StatusBadge } from './fragments/StatusBadge';
-import { WaitingActive } from './fragments/WaitingActive';
-import { YourTurnState } from './fragments/YourTurnState';
+import {
+  claimErrorBody,
+  claimErrorTitle,
+  COPY,
+  terminalBody,
+  terminalTitle,
+} from "./display";
+import type { WaitingRoomScreenProps } from "./interface";
+import { styles } from "./style";
+import { ErrorState } from "./fragments/ErrorState";
+import { Header } from "./fragments/Header";
+import { LeaveModal } from "./fragments/LeaveModal";
+import { LoadingOverlay } from "./fragments/LoadingOverlay";
+import { NetworkStatusBar } from "./fragments/NetworkStatusBar";
+import { StatusBadge } from "./fragments/StatusBadge";
+import { WaitingActive } from "./fragments/WaitingActive";
+import { YourTurnState } from "./fragments/YourTurnState";
 
 // MAIN SCREEN
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -46,7 +55,10 @@ import { YourTurnState } from './fragments/YourTurnState';
  * Waiting room screen. Driven by `queueId`; renders the correct state view via
  * the RBT-040 state machine and the two merged hooks.
  */
-export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) {
+export function WaitingRoomScreen({
+  queueId,
+  eventId,
+}: WaitingRoomScreenProps) {
   const router = useRouter();
   const reducedMotion = useReducedMotion() ?? false;
   const { isDesktop } = useResponsive();
@@ -75,7 +87,8 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
 
   // A successful, server-authorized claim proceeds immediately to checkout.
   useEffect(() => {
-    if (claimedSessionId) router.replace(`/checkout/${claimedSessionId}` as Href);
+    if (claimedSessionId)
+      router.replace(`/checkout/${claimedSessionId}` as Href);
   }, [claimedSessionId, router]);
 
   const handleLeavePress = useCallback(() => {
@@ -258,7 +271,9 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
                 icon={isSoldOut ? "ticket" : "clock"}
                 title={claimErrorTitle(errorState)}
                 message={claimErrorBody(errorState)}
-                buttonText={isSoldOut ? "Jelajahi Event Lain" : "Bergabung Kembali"}
+                buttonText={
+                  isSoldOut ? "Jelajahi Event Lain" : "Bergabung Kembali"
+                }
                 onPress={isSoldOut ? handleBrowseEvents : handleRejoinQueue}
                 testID="waiting-claim-error-state"
               />
@@ -279,7 +294,9 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
           ]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.waitingPage, isDesktop && styles.waitingPageDesktop]}>
+          <View
+            style={[styles.waitingPage, isDesktop && styles.waitingPageDesktop]}
+          >
             <YourTurnState
               onLeavePress={handleLeavePress}
               claiming={claiming}
@@ -293,7 +310,10 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
           onStay={handleStay}
           onLeave={handleConfirmLeave}
         />
-        <NetworkStatusBar isOffline={isConnectionLost} isReconnected={isReconnected} />
+        <NetworkStatusBar
+          isOffline={isConnectionLost}
+          isReconnected={isReconnected}
+        />
       </View>
     );
   }
@@ -312,7 +332,9 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.waitingPage, isDesktop && styles.waitingPageDesktop]}>
+        <View
+          style={[styles.waitingPage, isDesktop && styles.waitingPageDesktop]}
+        >
           <WaitingActive
             position={entry.position}
             admissionRatePerMin={admissionRatePerMin}
@@ -328,7 +350,10 @@ export function WaitingRoomScreen({ queueId, eventId }: WaitingRoomScreenProps) 
         onStay={handleStay}
         onLeave={handleConfirmLeave}
       />
-      <NetworkStatusBar isOffline={isConnectionLost} isReconnected={isReconnected} />
+      <NetworkStatusBar
+        isOffline={isConnectionLost}
+        isReconnected={isReconnected}
+      />
     </View>
   );
 }

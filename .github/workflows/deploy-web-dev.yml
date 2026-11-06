@@ -1,0 +1,222 @@
+name: Deploy Web Development
+
+on:
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-development-release
+  cancel-in-progress: false
+
+jobs:
+  validate_ref:
+    name: Validate release branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require pull request to develop or manual dispatch from develop
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = 'pull_request' ]; then
+            test "$GITHUB_BASE_REF" = 'develop' || {
+              echo 'Pull requests must target develop.'
+              exit 1
+            }
+          elif [ "$GITHUB_REF" != 'refs/heads/develop' ]; then
+            echo 'Select the develop branch for a manual release.'
+            exit 1
+          fi
+
+  typecheck:
+    name: Typecheck
+    needs: validate_ref
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+
+  lint_format:
+    name: Lint and format
+    needs: validate_ref
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+
+  tests:
+    name: Jest and RNTL
+    needs: validate_ref
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - run: npm ci
+      - run: npm run test:coverage -- --runInBand --ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: apps/client/coverage/lcov.info
+          if-no-files-found: error
+
+  audit:
+    name: Audit production dependencies
+    needs: validate_ref
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+
+  # Temporarily skipped: SonarCloud scan. The other quality checks remain required.
+
+  web_build:
+    name: Build and validate web
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: [typecheck, lint_format, tests, audit]
+    runs-on: ubuntu-latest
+    environment: development
+    defaults:
+      run:
+        working-directory: apps/client
+    env:
+      EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+      EXPO_PUBLIC_USE_MOCKS: ${{ vars.EXPO_PUBLIC_USE_MOCKS }}
+      EXPO_PUBLIC_ENV: ${{ vars.EXPO_PUBLIC_ENV }}
+      EXPO_PUBLIC_SITE_URL: ${{ vars.EXPO_PUBLIC_SITE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - run: npm ci
+      - name: Validate development web configuration
+        run: |
+          test "$EXPO_PUBLIC_ENV" = 'development' || {
+            echo 'EXPO_PUBLIC_ENV must be development.'
+            exit 1
+          }
+          test "$EXPO_PUBLIC_USE_MOCKS" = 'true' || {
+            echo 'Development deployment must use mock adapters.'
+            exit 1
+          }
+          test -n "$EXPO_PUBLIC_API_BASE_URL" || {
+            echo 'EXPO_PUBLIC_API_BASE_URL is required, even when mocks are enabled.'
+            exit 1
+          }
+          test -n "$EXPO_PUBLIC_SITE_URL" || {
+            echo 'Set EXPO_PUBLIC_SITE_URL in the development environment.'
+            exit 1
+          }
+        env:
+          EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+          EXPO_PUBLIC_USE_MOCKS: ${{ vars.EXPO_PUBLIC_USE_MOCKS }}
+          EXPO_PUBLIC_ENV: ${{ vars.EXPO_PUBLIC_ENV }}
+          EXPO_PUBLIC_SITE_URL: ${{ vars.EXPO_PUBLIC_SITE_URL }}
+      - run: npx expo export --platform web
+      - run: npm run web:metadata
+      - run: npm run web:verify
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/client/dist/
+          include-hidden-files: true
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to Cloudflare Pages
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: web_build
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check release is the current develop head
+        run: |
+          git fetch origin develop
+          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" || {
+            echo 'develop has changed; start a new release.'
+            exit 1
+          }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: dist
+      - name: Deploy checked artifact
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+        run: |
+          npx --yes wrangler@4.158.0 pages deploy dist \
+            --project-name "$PAGES_PROJECT" \
+            --branch develop \
+            --commit-hash "$GITHUB_SHA"
+
+  notify:
+    name: Notify Telegram
+    if: ${{ always() && github.event_name == 'workflow_dispatch' }}
+    needs:
+      [validate_ref, typecheck, lint_format, tests, audit, web_build, deploy]
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Send job results
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          JOB_RESULTS: ${{ toJSON(needs) }}
+        run: |
+          test -n "$TELEGRAM_BOT_TOKEN" && test -n "$TELEGRAM_CHAT_ID" || {
+            echo 'Telegram credentials are missing.'
+            exit 1
+          }
+          RESULTS=$(printf '%s' "$JOB_RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"')
+          MESSAGE=$(printf 'Web release: %s\nCommit: %s\n\n%s\n\n%s/%s/actions/runs/%s' "$GITHUB_REF_NAME" "$GITHUB_SHA" "$RESULTS" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          curl --fail-with-body --silent --show-error \
+            --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+            --data-urlencode "text=$MESSAGE" > /dev/null

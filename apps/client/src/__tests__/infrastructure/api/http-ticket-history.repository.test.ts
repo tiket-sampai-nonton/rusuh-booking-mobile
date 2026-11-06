@@ -8,14 +8,39 @@ describe("HttpTicketHistoryRepository", () => {
       request: jest.fn().mockResolvedValue({
         status: 200,
         headers: {},
-        data: { meta: { code: 0 }, data: { bookings: [{ bookingId: "booking-1", publicRef: "RB-1", eventName: "Rusuh Fest", status: "PAID", amountMinor: 45000000 }], nextCursor: "next-page" } },
+        data: {
+          meta: { code: 0 },
+          data: {
+            bookings: [
+              {
+                bookingId: "booking-1",
+                publicRef: "RB-1",
+                eventName: "Rusuh Fest",
+                status: "PAID",
+                amountMinor: 45000000,
+              },
+            ],
+            nextCursor: "next-page",
+          },
+        },
       }),
     } as unknown as HttpClient;
-    const tokenStorage = { load: jest.fn().mockResolvedValue("access-token") } as unknown as TokenStorage;
+    const tokenStorage = {
+      load: jest.fn().mockResolvedValue("access-token"),
+    } as unknown as TokenStorage;
     const repository = new HttpTicketHistoryRepository(http, tokenStorage);
 
     await expect(repository.listMyBookings("cursor/1", 50)).resolves.toEqual({
-      bookings: [{ bookingId: "booking-1", publicRef: "RB-1", eventName: "Rusuh Fest", status: "PAID", amountMinor: 45000000, createdAt: undefined }],
+      bookings: [
+        {
+          bookingId: "booking-1",
+          publicRef: "RB-1",
+          eventName: "Rusuh Fest",
+          status: "PAID",
+          amountMinor: 45000000,
+          createdAt: undefined,
+        },
+      ],
       nextCursor: "next-page",
     });
     expect(http.request).toHaveBeenCalledWith({
@@ -30,10 +55,31 @@ describe("HttpTicketHistoryRepository", () => {
       request: jest.fn().mockResolvedValue({
         status: 200,
         headers: {},
-        data: { meta: { code: 0 }, data: { bookingId: "booking-1", orderId: "order-1", publicRef: "RB-1", amountMinor: 45000000, ticketQuantity: 1, buyerNikMasked: "3174********0001", tickets: [{ ticketCode: "T-1", categoryCode: "VIP", attendeeName: "Ari", attendeeNikMasked: "3174********0001", qrPayload: "server-qr-payload" }] } },
+        data: {
+          meta: { code: 0 },
+          data: {
+            bookingId: "booking-1",
+            orderId: "order-1",
+            publicRef: "RB-1",
+            amountMinor: 45000000,
+            ticketQuantity: 1,
+            buyerNikMasked: "3174********0001",
+            tickets: [
+              {
+                ticketCode: "T-1",
+                categoryCode: "VIP",
+                attendeeName: "Ari",
+                attendeeNikMasked: "3174********0001",
+                qrPayload: "server-qr-payload",
+              },
+            ],
+          },
+        },
       }),
     } as unknown as HttpClient;
-    const tokenStorage = { load: jest.fn().mockResolvedValue("access-token") } as unknown as TokenStorage;
+    const tokenStorage = {
+      load: jest.fn().mockResolvedValue("access-token"),
+    } as unknown as TokenStorage;
     const repository = new HttpTicketHistoryRepository(http, tokenStorage);
 
     const result = await repository.getBookingTickets("booking/1");
@@ -50,21 +96,28 @@ describe("HttpTicketHistoryRepository", () => {
       request: jest.fn().mockResolvedValue({
         status: 200,
         headers: {},
-        data: { meta: { code: 0 }, data: { bookings: [{}, { bookingId: "booking-2" }] } },
+        data: {
+          meta: { code: 0 },
+          data: { bookings: [{}, { bookingId: "booking-2" }] },
+        },
       }),
     } as unknown as HttpClient;
-    const tokenStorage = { load: jest.fn().mockResolvedValue(null) } as unknown as TokenStorage;
+    const tokenStorage = {
+      load: jest.fn().mockResolvedValue(null),
+    } as unknown as TokenStorage;
     const repository = new HttpTicketHistoryRepository(http, tokenStorage);
 
     await expect(repository.listMyBookings()).resolves.toEqual({
-      bookings: [{
-        bookingId: "booking-2",
-        publicRef: "booking-2",
-        eventName: "Event",
-        status: "REVIEW",
-        amountMinor: 0,
-        createdAt: undefined,
-      }],
+      bookings: [
+        {
+          bookingId: "booking-2",
+          publicRef: "booking-2",
+          eventName: "Event",
+          status: "REVIEW",
+          amountMinor: 0,
+          createdAt: undefined,
+        },
+      ],
       nextCursor: undefined,
     });
     expect(http.request).toHaveBeenCalledWith({
@@ -76,15 +129,34 @@ describe("HttpTicketHistoryRepository", () => {
 
   it("returns an empty list when the response omits bookings and reads tickets without a token", async () => {
     const http = {
-      request: jest.fn()
-        .mockResolvedValueOnce({ status: 200, headers: {}, data: { meta: { code: 0 }, data: {} } })
-        .mockResolvedValueOnce({ status: 200, headers: {}, data: { meta: { code: 0 }, data: { bookingId: "booking-3", tickets: [] } } }),
+      request: jest
+        .fn()
+        .mockResolvedValueOnce({
+          status: 200,
+          headers: {},
+          data: { meta: { code: 0 }, data: {} },
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          headers: {},
+          data: {
+            meta: { code: 0 },
+            data: { bookingId: "booking-3", tickets: [] },
+          },
+        }),
     } as unknown as HttpClient;
-    const tokenStorage = { load: jest.fn().mockResolvedValue(null) } as unknown as TokenStorage;
+    const tokenStorage = {
+      load: jest.fn().mockResolvedValue(null),
+    } as unknown as TokenStorage;
     const repository = new HttpTicketHistoryRepository(http, tokenStorage);
 
-    await expect(repository.listMyBookings()).resolves.toEqual({ bookings: [], nextCursor: undefined });
-    await expect(repository.getBookingTickets("booking-3")).resolves.toMatchObject({ bookingId: "booking-3", tickets: [] });
+    await expect(repository.listMyBookings()).resolves.toEqual({
+      bookings: [],
+      nextCursor: undefined,
+    });
+    await expect(
+      repository.getBookingTickets("booking-3"),
+    ).resolves.toMatchObject({ bookingId: "booking-3", tickets: [] });
     expect(http.request).toHaveBeenLastCalledWith({
       method: "GET",
       url: "bookings/booking-3/tickets",

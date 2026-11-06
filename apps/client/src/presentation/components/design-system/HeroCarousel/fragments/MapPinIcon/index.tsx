@@ -1,10 +1,14 @@
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Circle, Path } from "react-native-svg";
 
-import { designColors } from '@presentation/theme';
+import { designColors } from "@presentation/theme";
 
-import { ICON_SIZE } from '../../constants';
+import { ICON_SIZE } from "../../constants";
 
-export function MapPinIcon({ color = designColors.ink }: { readonly color?: string }) {
+export function MapPinIcon({
+  color = designColors.ink,
+}: {
+  readonly color?: string;
+}) {
   return (
     <Svg width={ICON_SIZE} height={ICON_SIZE} viewBox="0 0 24 24" fill="none">
       <Path

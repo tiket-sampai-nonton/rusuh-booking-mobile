@@ -1,6 +1,6 @@
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View } from "react-native";
 
-import { palette, styles } from '../../style';
+import { palette, styles } from "../../style";
 
 export function LoadingOverlay() {
   return (

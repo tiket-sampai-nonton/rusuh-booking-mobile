@@ -19,7 +19,9 @@ describe("OpenPaymentWebView (RBT-062) + mock page-token exchange", () => {
     const uc = new OpenPaymentWebView(repo);
     const token = await uc.createToken("bk-1");
     await uc.exchange(token.pageToken); // consume
-    await expect(uc.exchange(token.pageToken)).rejects.toBeInstanceOf(DomainError);
+    await expect(uc.exchange(token.pageToken)).rejects.toBeInstanceOf(
+      DomainError,
+    );
     await expect(uc.exchange("never-minted")).rejects.toMatchObject({
       code: "PAYMENT_PAGE_TOKEN_INVALID",
     });

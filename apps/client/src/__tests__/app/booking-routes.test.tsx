@@ -1,10 +1,12 @@
 import { render, screen } from "@testing-library/react-native";
 
-const mockUseLocalSearchParams = jest.fn((): { eventId?: string; sessionId?: string; bookingId?: string } => ({
-  eventId: "evt-1",
-  sessionId: "sess-1",
-  bookingId: "bk-1",
-}));
+const mockUseLocalSearchParams = jest.fn(
+  (): { eventId?: string; sessionId?: string; bookingId?: string } => ({
+    eventId: "evt-1",
+    sessionId: "sess-1",
+    bookingId: "bk-1",
+  }),
+);
 
 jest.mock("expo-router", () => ({
   Stack: () => null,
@@ -12,13 +14,27 @@ jest.mock("expo-router", () => ({
   useLocalSearchParams: () => mockUseLocalSearchParams(),
 }));
 jest.mock("@presentation/components/Seo", () => ({ Seo: () => null }));
-jest.mock("@presentation/screens/Checkout", () => ({ CheckoutScreen: jest.fn(() => null) }));
-jest.mock("@presentation/screens/Payment", () => ({ PaymentScreen: jest.fn(() => null) }));
-jest.mock("@presentation/screens/PaymentResult", () => ({ PaymentResultScreen: jest.fn(() => null) }));
-jest.mock("@presentation/screens/PaymentWebView", () => ({ PaymentWebViewScreen: jest.fn(() => null) }));
-jest.mock("@presentation/screens/Success", () => ({ SuccessScreen: jest.fn(() => null) }));
-jest.mock("@presentation/screens/MyTickets", () => ({ MyTicketsScreen: jest.fn(() => null) }));
-jest.mock("@presentation/screens/Profile", () => ({ ProfileScreen: jest.fn(() => null) }));
+jest.mock("@presentation/screens/Checkout", () => ({
+  CheckoutScreen: jest.fn(() => null),
+}));
+jest.mock("@presentation/screens/Payment", () => ({
+  PaymentScreen: jest.fn(() => null),
+}));
+jest.mock("@presentation/screens/PaymentResult", () => ({
+  PaymentResultScreen: jest.fn(() => null),
+}));
+jest.mock("@presentation/screens/PaymentWebView", () => ({
+  PaymentWebViewScreen: jest.fn(() => null),
+}));
+jest.mock("@presentation/screens/Success", () => ({
+  SuccessScreen: jest.fn(() => null),
+}));
+jest.mock("@presentation/screens/MyTickets", () => ({
+  MyTicketsScreen: jest.fn(() => null),
+}));
+jest.mock("@presentation/screens/Profile", () => ({
+  ProfileScreen: jest.fn(() => null),
+}));
 
 // The waiting route composes the RBT-043 screen, which consumes the queue hooks.
 // Mock the seams so the routing-only smoke test needs no providers.
@@ -127,38 +143,58 @@ describe("(booking) routes", () => {
 
   it("passes route parameters to each transactional screen", () => {
     render(<CheckoutScreen />);
-    expect((MockCheckoutScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({ sessionId: "sess-1" });
+    expect((MockCheckoutScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({
+      sessionId: "sess-1",
+    });
 
     render(<PaymentScreen />);
-    expect((MockPaymentScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({ bookingId: "bk-1" });
+    expect((MockPaymentScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({
+      bookingId: "bk-1",
+    });
 
     render(<PaymentResultRoute />);
-    expect((MockPaymentResultScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({ bookingId: "bk-1", attemptId: undefined });
+    expect(
+      (MockPaymentResultScreen as jest.Mock).mock.calls.at(-1)?.[0],
+    ).toEqual({ bookingId: "bk-1", attemptId: undefined });
 
     render(<PaymentWebViewRoute />);
-    expect((MockPaymentWebViewScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({ bookingId: "bk-1" });
+    expect(
+      (MockPaymentWebViewScreen as jest.Mock).mock.calls.at(-1)?.[0],
+    ).toEqual({ bookingId: "bk-1" });
 
     render(<SuccessScreen />);
-    expect((MockSuccessScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({ bookingId: "bk-1" });
+    expect((MockSuccessScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({
+      bookingId: "bk-1",
+    });
   });
 
   it("uses an empty id when a transactional route parameter is missing", () => {
     mockUseLocalSearchParams.mockReturnValue({});
 
     render(<CheckoutScreen />);
-    expect((MockCheckoutScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({ sessionId: "" });
+    expect((MockCheckoutScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({
+      sessionId: "",
+    });
 
     render(<PaymentScreen />);
-    expect((MockPaymentScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({ bookingId: "" });
+    expect((MockPaymentScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({
+      bookingId: "",
+    });
 
     render(<PaymentResultRoute />);
-    expect((MockPaymentResultScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({ bookingId: "", attemptId: undefined });
+    expect(
+      (MockPaymentResultScreen as jest.Mock).mock.calls.at(-1)?.[0],
+    ).toEqual({ bookingId: "", attemptId: undefined });
 
     render(<PaymentWebViewRoute />);
-    expect((MockPaymentWebViewScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({ bookingId: "" });
+    expect(
+      (MockPaymentWebViewScreen as jest.Mock).mock.calls.at(-1)?.[0],
+    ).toEqual({ bookingId: "" });
 
     render(<SuccessScreen />);
-    expect((MockSuccessScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({ bookingId: "" });
+    expect((MockSuccessScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({
+      bookingId: "",
+    });
   });
 
   it("renders the public account route wrappers", () => {

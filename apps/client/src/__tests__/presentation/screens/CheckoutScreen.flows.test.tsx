@@ -18,7 +18,15 @@ jest.mock("expo-router", () => ({
 jest.mock("@presentation/hooks/useServerCountdown", () => {
   const { useEffect, useRef } = jest.requireActual("react");
   return {
-    useServerCountdown: ({ expiresAtIso, serverTimeIso, onExpire }: { expiresAtIso?: string; serverTimeIso?: string; onExpire?: () => void }) => {
+    useServerCountdown: ({
+      expiresAtIso,
+      serverTimeIso,
+      onExpire,
+    }: {
+      expiresAtIso?: string;
+      serverTimeIso?: string;
+      onExpire?: () => void;
+    }) => {
       const deadline = expiresAtIso ? Date.parse(expiresAtIso) : 0;
       const serverNow = serverTimeIso ? Date.parse(serverTimeIso) : deadline;
       const expired = Boolean(expiresAtIso && deadline <= serverNow);
@@ -117,11 +125,19 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: verdictRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByTestId("checkout-consent")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("checkout-consent")).toBeTruthy(),
+    );
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
-    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
-    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010001");
+    fireEvent.changeText(
+      screen.getByTestId("attendee-name-0"),
+      "Penonton Satu",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("attendee-nik-0"),
+      "3171010101010001",
+    );
     await waitFor(
       () =>
         expect(screen.getByTestId("attendee-status-0").props.children).toMatch(
@@ -148,7 +164,9 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: verdictRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
     expect(screen.queryByTestId("checkout-consent")).toBeNull();
   });
 
@@ -157,11 +175,19 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: verdictRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
-    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
-    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010100");
+    fireEvent.changeText(
+      screen.getByTestId("attendee-name-0"),
+      "Penonton Satu",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("attendee-nik-0"),
+      "3171010101010100",
+    );
     await waitFor(
       () =>
         expect(screen.getByTestId("attendee-status-0").props.children).toMatch(
@@ -179,11 +205,19 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: verdictRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
-    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
-    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010199");
+    fireEvent.changeText(
+      screen.getByTestId("attendee-name-0"),
+      "Penonton Satu",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("attendee-nik-0"),
+      "3171010101010199",
+    );
     await waitFor(
       () =>
         expect(screen.getByTestId("attendee-status-0").props.children).toMatch(
@@ -208,15 +242,21 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByTestId("prefill-badge")).toBeTruthy());
-    expect(screen.getByTestId("buyer-email").props.value).toBe("ri****@mail.com");
+    await waitFor(() =>
+      expect(screen.getByTestId("prefill-badge")).toBeTruthy(),
+    );
+    expect(screen.getByTestId("buyer-email").props.value).toBe(
+      "ri****@mail.com",
+    );
   });
 
   it("back opens the confirm-leave dialog; leaving re-queues to home", async () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByTestId("checkout-back")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("checkout-back")).toBeTruthy(),
+    );
     fireEvent.press(screen.getByTestId("checkout-back"));
     await waitFor(() =>
       expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy(),
@@ -245,11 +285,19 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: repo },
     });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
-    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
-    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010001");
+    fireEvent.changeText(
+      screen.getByTestId("attendee-name-0"),
+      "Penonton Satu",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("attendee-nik-0"),
+      "3171010101010001",
+    );
     await waitFor(
       () =>
         expect(
@@ -271,11 +319,19 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: verdictRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
-    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
-    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010001");
+    fireEvent.changeText(
+      screen.getByTestId("attendee-name-0"),
+      "Penonton Satu",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("attendee-nik-0"),
+      "3171010101010001",
+    );
     await waitFor(
       () =>
         expect(
@@ -301,11 +357,19 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: repo },
     });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
-    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
-    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010001");
+    fireEvent.changeText(
+      screen.getByTestId("attendee-name-0"),
+      "Penonton Satu",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("attendee-nik-0"),
+      "3171010101010001",
+    );
     await waitFor(
       () =>
         expect(

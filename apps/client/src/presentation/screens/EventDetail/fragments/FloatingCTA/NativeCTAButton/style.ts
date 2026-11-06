@@ -13,6 +13,8 @@ export const nativeCtaButtonStyles = StyleSheet.create({
   },
 });
 
-export function nativeCtaPulseStyle(scale: 1 | Animated.AnimatedInterpolation<string | number>): DynamicStyle {
+export function nativeCtaPulseStyle(
+  scale: 1 | Animated.AnimatedInterpolation<string | number>,
+): DynamicStyle {
   return { transform: [{ scale }] } as DynamicStyle;
 }

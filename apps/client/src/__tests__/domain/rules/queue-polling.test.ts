@@ -13,7 +13,9 @@ import {
   pollIntervalMs,
 } from "@domain/rules/queue-polling";
 
-const entry = (nextPollAfterMs?: number): Pick<QueueEntry, "nextPollAfterMs"> => ({
+const entry = (
+  nextPollAfterMs?: number,
+): Pick<QueueEntry, "nextPollAfterMs"> => ({
   nextPollAfterMs,
 });
 

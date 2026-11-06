@@ -6,14 +6,21 @@ import { CheckoutBar } from "@presentation/screens/Checkout/fragments/CheckoutBa
 import { ConsentGate } from "@presentation/screens/Checkout/fragments/ConsentGate";
 import { LeaveConfirm } from "@presentation/screens/Checkout/fragments/LeaveConfirm";
 import { TicketItem } from "@presentation/screens/Checkout/fragments/TicketItem";
-import { Field, Section } from "@presentation/screens/Checkout/fragments/common";
+import {
+  Field,
+  Section,
+} from "@presentation/screens/Checkout/fragments/common";
 
 describe("checkout shared form fragments", () => {
   it("renders section headings with and without a numeric badge", () => {
     render(
       <>
-        <Section number={2} title="Tiket"><Text>Tiket pertama</Text></Section>
-        <Section title="Persetujuan"><Text>Kebijakan privasi</Text></Section>
+        <Section number={2} title="Tiket">
+          <Text>Tiket pertama</Text>
+        </Section>
+        <Section title="Persetujuan">
+          <Text>Kebijakan privasi</Text>
+        </Section>
       </>,
     );
     expect(screen.getByText("Tiket pertama")).toBeTruthy();
@@ -23,7 +30,15 @@ describe("checkout shared form fragments", () => {
 
   it("updates a field, handles focus and blur, and shows its invalid state", () => {
     const onChangeText = jest.fn();
-    render(<Field label="NIK" value="" onChangeText={onChangeText} placeholder="16 digit" invalid />);
+    render(
+      <Field
+        label="NIK"
+        value=""
+        onChangeText={onChangeText}
+        placeholder="16 digit"
+        invalid
+      />,
+    );
     const input = screen.getByLabelText("NIK");
     expect(screen.getByText("NIK harus 16 digit.")).toBeTruthy();
     fireEvent(input, "focus");

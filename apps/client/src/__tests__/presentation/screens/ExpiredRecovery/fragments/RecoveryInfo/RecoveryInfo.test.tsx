@@ -4,7 +4,12 @@ import { RecoveryInfo } from "../../../../../../presentation/screens/ExpiredReco
 
 describe("RecoveryInfo", () => {
   it("shows the explanation and each recovery detail", () => {
-    render(<RecoveryInfo text="Sesi berakhir." items={["Tiket dilepas", "Masuk antrean lagi"]} />);
+    render(
+      <RecoveryInfo
+        text="Sesi berakhir."
+        items={["Tiket dilepas", "Masuk antrean lagi"]}
+      />,
+    );
 
     expect(screen.getByText("Apa yang terjadi?")).toBeTruthy();
     expect(screen.getByText("Sesi berakhir.")).toBeTruthy();

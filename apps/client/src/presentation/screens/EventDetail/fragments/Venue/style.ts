@@ -1,7 +1,11 @@
-
 import { StyleSheet } from "react-native";
 import { interFonts } from "@presentation/theme/fonts";
-import { designBorders, designColors, designFontSizes, designSpacingSemantic } from "@presentation/theme/event-design-tokens";
+import {
+  designBorders,
+  designColors,
+  designFontSizes,
+  designSpacingSemantic,
+} from "@presentation/theme/event-design-tokens";
 
 import type { DynamicStyle } from "@presentation/utils/style";
 
@@ -64,9 +68,9 @@ export const venueStyles = StyleSheet.create({
 
 export function styleForVenueImage0(arg0: boolean): DynamicStyle {
   return {
-              filter: arg0 ? "grayscale(0%)" : "grayscale(100%)",
-              transition: "filter 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-            } as DynamicStyle;
+    filter: arg0 ? "grayscale(0%)" : "grayscale(100%)",
+    transition: "filter 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+  } as DynamicStyle;
 }
 
 export function styleForVenueView1(arg0: boolean): DynamicStyle {

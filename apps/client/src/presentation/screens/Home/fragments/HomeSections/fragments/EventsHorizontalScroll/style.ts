@@ -1,6 +1,10 @@
-
-import { StyleSheet } from 'react-native';
-import { designBorders, designColors, designSpacingSemantic, interFonts } from '@presentation/theme';
+import { StyleSheet } from "react-native";
+import {
+  designBorders,
+  designColors,
+  designSpacingSemantic,
+  interFonts,
+} from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   content: { paddingRight: designSpacingSemantic.m, gap: 16 },
@@ -8,14 +12,17 @@ export const styles = StyleSheet.create({
   empty: {
     padding: 48,
     borderWidth: designBorders.standard,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
     borderColor: designColors.ink,
   },
   emptyLabel: {
     color: designColors.inkMuted,
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     fontFamily: interFonts.regular,
   },
-  list: { marginHorizontal: -designSpacingSemantic.m, paddingLeft: designSpacingSemantic.m },
+  list: {
+    marginHorizontal: -designSpacingSemantic.m,
+    paddingLeft: designSpacingSemantic.m,
+  },
 });

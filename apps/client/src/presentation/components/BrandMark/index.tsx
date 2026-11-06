@@ -9,8 +9,7 @@ import Svg, { Path } from "react-native-svg";
 
 import { brand, neutral } from "@presentation/theme";
 import { componentStyles } from "./style";
-import { styleForBrandMarkText0 } from './style';
-
+import { styleForBrandMarkText0 } from "./style";
 
 export interface BrandMarkProps {
   /** Wordmark color (defaults to ink for light surfaces). */
@@ -27,11 +26,19 @@ export function BrandMark({ color = neutral.ink, testID }: BrandMarkProps) {
         end={{ x: 1, y: 1 }}
         style={componentStyles.elementWidth0}
       >
-        <Svg width={12} height={12} viewBox="0 0 24 24" accessibilityElementsHidden>
+        <Svg
+          width={12}
+          height={12}
+          viewBox="0 0 24 24"
+          accessibilityElementsHidden
+        >
           <Path d="M8 5v14l11-7L8 5Z" fill={neutral.card} />
         </Svg>
       </LinearGradient>
-      <Text className="text-md font-extrabold" style={styleForBrandMarkText0(color)}>
+      <Text
+        className="text-md font-extrabold"
+        style={styleForBrandMarkText0(color)}
+      >
         Rusuh Tiket
       </Text>
     </View>

@@ -1,10 +1,14 @@
-import { Pressable, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import { ArrowIcon } from '@presentation/components/ArrowIcon';
-import { designColors } from '@presentation/theme';
+import { Pressable, Text, View } from "react-native";
+import Svg, { Path } from "react-native-svg";
+import { ArrowIcon } from "@presentation/components/ArrowIcon";
+import { designColors } from "@presentation/theme";
 import { styles } from "./style";
-import { sectionHeaderContainerStyle, sectionHeaderTitleStyle, sectionLinkStyle, sectionLinkTextStyle } from './style';
-
+import {
+  sectionHeaderContainerStyle,
+  sectionHeaderTitleStyle,
+  sectionLinkStyle,
+  sectionLinkTextStyle,
+} from "./style";
 
 interface SectionHeaderProps {
   readonly title: string;
@@ -14,8 +18,6 @@ interface SectionHeaderProps {
   readonly onFilterPress?: () => void;
   readonly isNative?: boolean;
 }
-
-
 
 export function SectionHeader({
   title,
@@ -43,7 +45,14 @@ export function SectionHeader({
             testID="filter-btn"
             style={styles.filterButton}
           >
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={designColors.ink} strokeWidth={2}>
+            <Svg
+              width={16}
+              height={16}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={designColors.ink}
+              strokeWidth={2}
+            >
               <Path d="M4 6h16M7 12h10m-7 6h4" />
             </Svg>
           </Pressable>
@@ -56,12 +65,13 @@ export function SectionHeader({
             onPress={onLinkPress}
             style={[styles.link, sectionLinkStyle(isNative)]}
           >
-            <Text
-              style={[styles.linkText, sectionLinkTextStyle(isNative)]}
-            >
+            <Text style={[styles.linkText, sectionLinkTextStyle(isNative)]}>
               {linkText}
             </Text>
-            <ArrowIcon color={sectionArrowColor(isNative)} size={sectionArrowSize(isNative)} />
+            <ArrowIcon
+              color={sectionArrowColor(isNative)}
+              size={sectionArrowSize(isNative)}
+            />
           </Pressable>
         ) : null}
       </View>

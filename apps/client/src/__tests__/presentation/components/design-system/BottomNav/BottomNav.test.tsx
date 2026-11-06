@@ -11,7 +11,10 @@ jest.mock("react-native-reanimated", () => {
 });
 
 // eslint-disable-next-line import/first
-import { BottomNav, type BottomNavRoute } from "../../../../../presentation/components/design-system/BottomNav/index";
+import {
+  BottomNav,
+  type BottomNavRoute,
+} from "../../../../../presentation/components/design-system/BottomNav/index";
 
 describe("BottomNav", () => {
   afterEach(() => {
@@ -22,7 +25,11 @@ describe("BottomNav", () => {
   it("hides tickets for guests and navigates from a selected tab", () => {
     const onNavigate = jest.fn();
     const { getByTestId, queryByTestId } = render(
-      <BottomNav activeRoute="home" onNavigate={onNavigate} testIDPrefix="nav" />,
+      <BottomNav
+        activeRoute="home"
+        onNavigate={onNavigate}
+        testIDPrefix="nav"
+      />,
     );
 
     expect(queryByTestId("nav-tickets")).toBeNull();
@@ -52,7 +59,9 @@ describe("BottomNav", () => {
     ["browse", "Jelajahi"],
     ["tickets", "Tiket"],
     ["profile", "Akun"],
-  ])("renders the %s icon and active tab for an authenticated user", (activeRoute, label) => {
+  ])(
+    "renders the %s icon and active tab for an authenticated user",
+    (activeRoute, label) => {
       const { getByRole, getByText, getByTestId } = render(
         <BottomNav
           activeRoute={activeRoute}
@@ -65,12 +74,17 @@ describe("BottomNav", () => {
       expect(getByTestId(`nav-${activeRoute}`)).toBeTruthy();
       expect(getByText(label)).toBeTruthy();
       expect(getByRole("tab", { name: label, selected: true })).toBeTruthy();
-    });
+    },
+  );
 
   it("applies reduced-motion behavior to the active indicator", () => {
     mockMotionReduced = true;
     const { getByTestId } = render(
-      <BottomNav activeRoute="profile" onNavigate={jest.fn()} testIDPrefix="nav" />,
+      <BottomNav
+        activeRoute="profile"
+        onNavigate={jest.fn()}
+        testIDPrefix="nav"
+      />,
     );
     fireEvent(getByTestId("nav-profile"), "pressIn");
     fireEvent(getByTestId("nav-profile"), "pressOut");
@@ -80,7 +94,11 @@ describe("BottomNav", () => {
   it("does not render the native bar on web", () => {
     Object.defineProperty(Platform, "OS", { value: "web", configurable: true });
     const { toJSON } = render(
-      <BottomNav activeRoute="home" onNavigate={jest.fn()} testIDPrefix="nav" />,
+      <BottomNav
+        activeRoute="home"
+        onNavigate={jest.fn()}
+        testIDPrefix="nav"
+      />,
     );
     expect(toJSON()).toBeNull();
   });

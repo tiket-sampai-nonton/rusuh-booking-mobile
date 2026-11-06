@@ -16,18 +16,31 @@ describe("DetailHero", () => {
   const originalPlatform = Platform.OS;
 
   beforeEach(() => {
-    jest.spyOn(Animated, "timing").mockReturnValue({ start: jest.fn(), stop: jest.fn(), reset: jest.fn() } as never);
-    jest.spyOn(Animated, "loop").mockReturnValue({ start: jest.fn(), stop: jest.fn(), reset: jest.fn() } as never);
+    jest.spyOn(Animated, "timing").mockReturnValue({
+      start: jest.fn(),
+      stop: jest.fn(),
+      reset: jest.fn(),
+    } as never);
+    jest.spyOn(Animated, "loop").mockReturnValue({
+      start: jest.fn(),
+      stop: jest.fn(),
+      reset: jest.fn(),
+    } as never);
   });
 
   afterEach(() => {
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
     jest.restoreAllMocks();
   });
 
   it("renders web metadata, chips, and an optional subtitle", () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
-    render(<DetailHero {...hero} subtitle="Satu malam bersama musisi terbaik." />);
+    render(
+      <DetailHero {...hero} subtitle="Satu malam bersama musisi terbaik." />,
+    );
 
     expect(screen.getByText(hero.name)).toBeTruthy();
     expect(screen.getByText(hero.statusLabel)).toBeTruthy();
@@ -40,7 +53,10 @@ describe("DetailHero", () => {
   });
 
   it("keeps metadata and chips out of the native hero when chips are empty", () => {
-    Object.defineProperty(Platform, "OS", { configurable: true, value: "android" });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "android",
+    });
     render(<DetailHero {...hero} chips={[]} statusLabel="Selesai" />);
 
     expect(screen.getByText(hero.name)).toBeTruthy();

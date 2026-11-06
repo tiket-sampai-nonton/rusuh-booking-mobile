@@ -11,7 +11,12 @@ export default function PaymentRoute() {
   const id = bookingId ?? "";
   return (
     <Fragment>
-      <Seo title="Pembayaran" description="Selesaikan pembayaran tiket." path={`/payment/${id}`} noindex />
+      <Seo
+        title="Pembayaran"
+        description="Selesaikan pembayaran tiket."
+        path={`/payment/${id}`}
+        noindex
+      />
       <PaymentScreen bookingId={id} />
     </Fragment>
   );

@@ -1,9 +1,11 @@
 import type { ViewStyle } from "react-native";
-import { StyleSheet } from 'react-native';
-import { interFonts, designColors } from '@presentation/theme';
+import { StyleSheet } from "react-native";
+import { interFonts, designColors } from "@presentation/theme";
 
-
-export function profileContentContainerStyle(topInset: number, bottomInset: number): ViewStyle {
+export function profileContentContainerStyle(
+  topInset: number,
+  bottomInset: number,
+): ViewStyle {
   return {
     paddingTop: topInset + 96,
     paddingHorizontal: 16,
@@ -17,6 +19,6 @@ export const styles = StyleSheet.create({
     color: designColors.ink,
     fontFamily: interFonts.black,
     fontSize: 32,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
 });

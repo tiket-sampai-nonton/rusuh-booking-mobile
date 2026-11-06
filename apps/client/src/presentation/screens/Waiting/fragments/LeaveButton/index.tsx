@@ -1,6 +1,6 @@
-import { Pressable, Text } from 'react-native';
+import { Pressable, Text } from "react-native";
 
-import { styles } from '../../style';
+import { styles } from "../../style";
 
 export function LeaveButton({
   onPress,
@@ -17,7 +17,9 @@ export function LeaveButton({
       accessibilityLabel="Keluar dari Antrean"
       testID="waiting-leave"
     >
-      <Text style={[styles.leaveBtnText, isDesktop && styles.leaveBtnTextDesktop]}>
+      <Text
+        style={[styles.leaveBtnText, isDesktop && styles.leaveBtnTextDesktop]}
+      >
         Keluar dari Antrean
       </Text>
     </Pressable>

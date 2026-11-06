@@ -9,33 +9,44 @@
  */
 import { Modal, Platform, Pressable, Text, View } from "react-native";
 
-
-
 import type { LeaveConfirmProps } from "../../interface";
 import { styles } from "./style";
-import { styleForLeaveConfirmPressable0, styleForLeaveConfirmPressable1 } from './style';
-
+import {
+  styleForLeaveConfirmPressable0,
+  styleForLeaveConfirmPressable1,
+} from "./style";
 
 export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onStay}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onStay}
+    >
       <Pressable
         accessibilityLabel="Tutup"
         onPress={onStay}
-        style={[styles.overlay, Platform.OS !== "web" && styleForLeaveConfirmPressable0()]}
+        style={[
+          styles.overlay,
+          Platform.OS !== "web" && styleForLeaveConfirmPressable0(),
+        ]}
         testID="checkout-leave-backdrop"
       >
         <Pressable
           onPress={(e) => e.stopPropagation()}
-          style={[styles.modal, Platform.OS !== "web" && styleForLeaveConfirmPressable1()]}
+          style={[
+            styles.modal,
+            Platform.OS !== "web" && styleForLeaveConfirmPressable1(),
+          ]}
           testID="checkout-leave-modal"
         >
           <Text style={styles.title} accessibilityRole="header">
             Tinggalkan halaman?
           </Text>
           <Text style={styles.body}>
-            Kalau kamu keluar sekarang, sesi pemilihan tiket dilepas dan kamu harus
-            mengulang antrean dari awal. Yakin mau keluar?
+            Kalau kamu keluar sekarang, sesi pemilihan tiket dilepas dan kamu
+            harus mengulang antrean dari awal. Yakin mau keluar?
           </Text>
           <View style={styles.actions}>
             <Pressable

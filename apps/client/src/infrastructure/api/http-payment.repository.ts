@@ -45,7 +45,9 @@ export class HttpPaymentRepository implements PaymentRepository {
       headers: { "idempotency-key": idempotencyKey },
       body: { method },
     });
-    return toPaymentAttempt(unwrap<Parameters<typeof toPaymentAttempt>[0]>(res));
+    return toPaymentAttempt(
+      unwrap<Parameters<typeof toPaymentAttempt>[0]>(res),
+    );
   }
 
   async getStatus(attemptId: string): Promise<PaymentAttempt> {
@@ -53,7 +55,9 @@ export class HttpPaymentRepository implements PaymentRepository {
       method: "GET",
       url: `payments/attempts/${encodeURIComponent(attemptId)}`,
     });
-    return toPaymentAttempt(unwrap<Parameters<typeof toPaymentAttempt>[0]>(res));
+    return toPaymentAttempt(
+      unwrap<Parameters<typeof toPaymentAttempt>[0]>(res),
+    );
   }
 
   async createPageToken(bookingId: string): Promise<PageToken> {
@@ -85,6 +89,8 @@ export class HttpPaymentRepository implements PaymentRepository {
       url: `payments/attempts/${encodeURIComponent(attemptId)}/snap-callback`,
       body: { outcome },
     });
-    return toPaymentAttempt(unwrap<Parameters<typeof toPaymentAttempt>[0]>(res));
+    return toPaymentAttempt(
+      unwrap<Parameters<typeof toPaymentAttempt>[0]>(res),
+    );
   }
 }

@@ -1,5 +1,11 @@
 import { Pressable, Text } from "react-native";
-import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import { designDuration, designEasing } from "@presentation/theme";
 
@@ -14,7 +20,9 @@ interface NavLinkProps {
   readonly testID?: string;
 }
 
-export function getUnderlineTransformOrigin(progress: number): "left" | "right" {
+export function getUnderlineTransformOrigin(
+  progress: number,
+): "left" | "right" {
   "worklet";
   return progress > 0.5 ? "left" : "right";
 }
@@ -33,7 +41,10 @@ export function NavLink({ label, onPress, testID }: NavLinkProps) {
       hovered.value = isHovered ? 1 : 0;
       return;
     }
-    hovered.value = withTiming(isHovered ? 1 : 0, { duration: designDuration.slow, easing: EASE });
+    hovered.value = withTiming(isHovered ? 1 : 0, {
+      duration: designDuration.slow,
+      easing: EASE,
+    });
   };
 
   return (

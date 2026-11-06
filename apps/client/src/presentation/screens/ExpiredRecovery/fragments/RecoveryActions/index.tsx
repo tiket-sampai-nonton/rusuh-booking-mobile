@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 import { styles } from "./style";
 
-
 export interface RecoveryActionsProps {
   readonly canRetry: boolean;
   readonly primaryText: string;
@@ -11,7 +10,14 @@ export interface RecoveryActionsProps {
   readonly onHome: () => void;
 }
 
-export function RecoveryActions({ canRetry, primaryText, showHome, onRetry, onRequeue, onHome }: RecoveryActionsProps) {
+export function RecoveryActions({
+  canRetry,
+  primaryText,
+  showHome,
+  onRetry,
+  onRequeue,
+  onHome,
+}: RecoveryActionsProps) {
   return (
     <View className="w-full max-w-sm gap-3">
       <Pressable

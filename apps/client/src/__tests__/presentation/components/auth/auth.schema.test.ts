@@ -1,4 +1,9 @@
-import { EMAIL_ERROR, isValidCode, isValidEmail, normalizeCode } from "../../../../presentation/components/auth/auth.schema";
+import {
+  EMAIL_ERROR,
+  isValidCode,
+  isValidEmail,
+  normalizeCode,
+} from "../../../../presentation/components/auth/auth.schema";
 
 describe("OTP form validators", () => {
   it("trims and validates email addresses", () => {

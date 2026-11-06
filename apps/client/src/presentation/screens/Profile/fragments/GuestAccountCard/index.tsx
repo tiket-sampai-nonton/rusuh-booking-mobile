@@ -1,8 +1,5 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from "react-native";
 import { styles } from "./style";
-
-
-
 
 interface GuestAccountCardProps {
   readonly onLogin: () => void;

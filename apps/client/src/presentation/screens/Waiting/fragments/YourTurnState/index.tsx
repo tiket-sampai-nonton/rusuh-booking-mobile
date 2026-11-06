@@ -1,10 +1,10 @@
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from "react-native";
 
-import { COPY } from '../../display';
-import { palette, styles } from '../../style';
-import { EventIntro } from '../EventIntro';
-import { LeaveButton } from '../LeaveButton';
-import { QueuePositionPanel } from '../QueuePositionPanel';
+import { COPY } from "../../display";
+import { palette, styles } from "../../style";
+import { EventIntro } from "../EventIntro";
+import { LeaveButton } from "../LeaveButton";
+import { QueuePositionPanel } from "../QueuePositionPanel";
 
 interface YourTurnStateProps {
   readonly onLeavePress: () => void;
@@ -29,7 +29,12 @@ export function YourTurnState({
           statusLabel="Giliran Anda"
           isDesktop={isDesktop}
         />
-        <View style={[styles.yourTurnPanel, isDesktop && styles.yourTurnPanelDesktop]}>
+        <View
+          style={[
+            styles.yourTurnPanel,
+            isDesktop && styles.yourTurnPanelDesktop,
+          ]}
+        >
           <Text style={styles.yourTurnTitle}>Giliran Anda!</Text>
           {claiming ? <ActivityIndicator color={palette.ink} /> : null}
           <Text style={styles.yourTurnText} accessibilityLiveRegion="polite">
@@ -39,9 +44,17 @@ export function YourTurnState({
       </View>
 
       <View style={styles.waitingSpacer} />
-      <View style={[styles.waitingFooter, isDesktop && styles.waitingFooterDesktop]}>
-        <Text style={[styles.waitingFootnote, isDesktop && styles.waitingFootnoteDesktop]}>
-          Posisi tersimpan dan diperbarui otomatis dari server. Giliranmu sedang diproses.
+      <View
+        style={[styles.waitingFooter, isDesktop && styles.waitingFooterDesktop]}
+      >
+        <Text
+          style={[
+            styles.waitingFootnote,
+            isDesktop && styles.waitingFootnoteDesktop,
+          ]}
+        >
+          Posisi tersimpan dan diperbarui otomatis dari server. Giliranmu sedang
+          diproses.
         </Text>
         <LeaveButton onPress={onLeavePress} isDesktop={isDesktop} />
       </View>

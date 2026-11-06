@@ -31,7 +31,9 @@ describe("MockEventRepository", () => {
   });
 
   it("throws for an unknown event", async () => {
-    await expect(repo.getEventDetail("nope")).rejects.toThrow(/unknown event nope/);
+    await expect(repo.getEventDetail("nope")).rejects.toThrow(
+      /unknown event nope/,
+    );
   });
 });
 
@@ -90,7 +92,9 @@ describe("MockPaymentRepository", () => {
     const repo = new MockPaymentRepository();
     const a = await repo.createAttempt("book-9", "QRIS", "k");
     expect((await repo.getStatus(a.attemptId)).attemptId).toBe(a.attemptId);
-    await expect(repo.getStatus("ghost")).rejects.toThrow(/unknown attempt ghost/);
+    await expect(repo.getStatus("ghost")).rejects.toThrow(
+      /unknown attempt ghost/,
+    );
   });
 
   it("getStatus settles a pending attempt to PAID after 2 polls (RBT-063)", async () => {
@@ -119,7 +123,9 @@ describe("MockPaymentRepository", () => {
   it("snapCallback PAID/FAILED set terminal status; UNKNOWN stays pending (RBT-065)", async () => {
     const repo = new MockPaymentRepository();
     const paid = await repo.createAttempt("book-a", "QRIS", "ka");
-    expect((await repo.snapCallback(paid.attemptId, "PAID")).status).toBe("PAID");
+    expect((await repo.snapCallback(paid.attemptId, "PAID")).status).toBe(
+      "PAID",
+    );
     // getStatus agrees immediately (settled poll)
     expect((await repo.getStatus(paid.attemptId)).status).toBe("PAID");
 
@@ -167,7 +173,11 @@ describe("MockNotificationAdapter", () => {
   it("grants permission, records schedules, and returns a push token", async () => {
     const adapter = new MockNotificationAdapter();
     expect(await adapter.requestPermission()).toBe(true);
-    await adapter.scheduleLocal({ kind: "payment_success", title: "T", body: "B" });
+    await adapter.scheduleLocal({
+      kind: "payment_success",
+      title: "T",
+      body: "B",
+    });
     expect(adapter.scheduled).toHaveLength(1);
     expect(adapter.scheduled[0].title).toBe("T");
     expect(await adapter.registerForRemotePush()).toBe("mock-push-token");

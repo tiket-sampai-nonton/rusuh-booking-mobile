@@ -12,6 +12,7 @@ import {
   SORTS,
   TIMES,
   filterEvents,
+  hasBrowseQueryParams,
   inTimeBucket,
   isFiltered,
   matchesCategory,
@@ -59,6 +60,22 @@ describe("readParam", () => {
 
   it("reads the first element of an array param", () => {
     expect(readParam(["month", "week"], TIMES, "all")).toBe("month");
+  });
+});
+
+describe("hasBrowseQueryParams", () => {
+  it("keeps the unfiltered browse page indexable", () => {
+    expect(hasBrowseQueryParams({})).toBe(false);
+  });
+
+  it("marks non-empty filter, unknown, and invalid query values as filtered", () => {
+    expect(hasBrowseQueryParams({ genre: "rock" })).toBe(true);
+    expect(hasBrowseQueryParams({ genre: "not-a-genre" })).toBe(true);
+    expect(hasBrowseQueryParams({ campaign: "unknown" })).toBe(true);
+  });
+
+  it("ignores empty query values", () => {
+    expect(hasBrowseQueryParams({ genre: "", time: ["", " "] })).toBe(false);
   });
 });
 
@@ -138,7 +155,9 @@ describe("filterEvents — genre", () => {
 describe("matchesCategory", () => {
   it("matches common category aliases in event names", () => {
     expect(matchesCategory(CATALOG[0], "festival")).toBe(true);
-    expect(matchesCategory(ev("concert", "Jakarta Konser", 1), "concert")).toBe(true);
+    expect(matchesCategory(ev("concert", "Jakarta Konser", 1), "concert")).toBe(
+      true,
+    );
   });
 
   it("does not match unrelated categories", () => {

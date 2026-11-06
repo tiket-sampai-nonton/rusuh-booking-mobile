@@ -78,15 +78,16 @@ export function useAuth(): UseAuthResult {
   const { userRepository, tokenStorage } = useServices();
   const setAccountProfile = useAccountStore((s) => s.setProfile);
 
-  const { requestOtp, verifyOtp, completeRegistration, persistSession } = useMemo(
-    () => ({
-      requestOtp: new RequestOtp(userRepository),
-      verifyOtp: new VerifyOtp(userRepository),
-      completeRegistration: new CompleteRegistration(userRepository),
-      persistSession: new PersistSession(tokenStorage),
-    }),
-    [userRepository, tokenStorage],
-  );
+  const { requestOtp, verifyOtp, completeRegistration, persistSession } =
+    useMemo(
+      () => ({
+        requestOtp: new RequestOtp(userRepository),
+        verifyOtp: new VerifyOtp(userRepository),
+        completeRegistration: new CompleteRegistration(userRepository),
+        persistSession: new PersistSession(tokenStorage),
+      }),
+      [userRepository, tokenStorage],
+    );
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
 

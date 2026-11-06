@@ -5,7 +5,13 @@ import { BrowseNativeCategoryBar } from "../../../../../../presentation/screens/
 describe("BrowseNativeCategoryBar", () => {
   it("renders all category choices and forwards the selected key", () => {
     const onSelect = jest.fn();
-    render(<BrowseNativeCategoryBar top={44} activeCategory="all" onSelect={onSelect} />);
+    render(
+      <BrowseNativeCategoryBar
+        top={44}
+        activeCategory="all"
+        onSelect={onSelect}
+      />,
+    );
 
     expect(screen.getByText("Semua")).toBeTruthy();
     expect(screen.getByText("Konser")).toBeTruthy();
@@ -17,7 +23,13 @@ describe("BrowseNativeCategoryBar", () => {
   });
 
   it("supports a non-default active category", () => {
-    render(<BrowseNativeCategoryBar top={0} activeCategory="sports" onSelect={jest.fn()} />);
+    render(
+      <BrowseNativeCategoryBar
+        top={0}
+        activeCategory="sports"
+        onSelect={jest.fn()}
+      />,
+    );
     expect(screen.getByTestId("category-sports")).toBeTruthy();
   });
 });

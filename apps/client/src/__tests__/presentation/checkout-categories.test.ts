@@ -30,8 +30,18 @@ describe("Checkout style helpers (RBT-051)", () => {
 
 describe("Checkout categories (RBT-051)", () => {
   it("categoryPrice resolves prices by the contract category ID", () => {
-    expect(categoryPrice(BOOKING_CATEGORY_FIXTURE[0].categoryId, BOOKING_CATEGORY_FIXTURE)).toBe(45000000);
-    expect(categoryPrice(BOOKING_CATEGORY_FIXTURE[1].categoryId, BOOKING_CATEGORY_FIXTURE)).toBe(95000000);
+    expect(
+      categoryPrice(
+        BOOKING_CATEGORY_FIXTURE[0].categoryId,
+        BOOKING_CATEGORY_FIXTURE,
+      ),
+    ).toBe(45000000);
+    expect(
+      categoryPrice(
+        BOOKING_CATEGORY_FIXTURE[1].categoryId,
+        BOOKING_CATEGORY_FIXTURE,
+      ),
+    ).toBe(95000000);
   });
 
   it("categoryPrice falls back to 0 for an unknown category", () => {

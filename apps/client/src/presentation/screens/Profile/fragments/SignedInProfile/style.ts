@@ -1,6 +1,5 @@
-
-import { StyleSheet } from 'react-native';
-import { interFonts, designBorders, designColors } from '@presentation/theme';
+import { StyleSheet } from "react-native";
+import { interFonts, designBorders, designColors } from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   card: {
@@ -10,12 +9,22 @@ export const styles = StyleSheet.create({
     borderColor: designColors.ink,
   },
   name: { color: designColors.ink, fontFamily: interFonts.black, fontSize: 20 },
-  email: { marginTop: 6, color: designColors.inkMuted, fontFamily: interFonts.regular, fontSize: 14 },
-  maskedNik: { marginTop: 6, color: designColors.inkMuted, fontFamily: interFonts.regular, fontSize: 13 },
+  email: {
+    marginTop: 6,
+    color: designColors.inkMuted,
+    fontFamily: interFonts.regular,
+    fontSize: 14,
+  },
+  maskedNik: {
+    marginTop: 6,
+    color: designColors.inkMuted,
+    fontFamily: interFonts.regular,
+    fontSize: 13,
+  },
   button: {
     minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   editButton: { marginTop: 20, backgroundColor: designColors.ink },
   signOutButton: {
@@ -27,12 +36,12 @@ export const styles = StyleSheet.create({
     color: designColors.ground,
     fontFamily: interFonts.bold,
     fontSize: 12,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   signOutText: {
     color: designColors.ink,
     fontFamily: interFonts.bold,
     fontSize: 12,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
 });

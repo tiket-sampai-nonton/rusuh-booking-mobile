@@ -38,7 +38,9 @@ describe("providers/service-context", () => {
   });
 
   it("throws when useServices is called outside a ServiceProvider", () => {
-    const spy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+    const spy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
     expect(() => render(<Probe />)).toThrow(
       /useServices must be used within a ServiceProvider/,
     );

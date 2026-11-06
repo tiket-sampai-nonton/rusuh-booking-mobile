@@ -2,7 +2,9 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import { Platform } from "react-native";
 
 const mockResponsive = { isDesktop: false };
-jest.mock("@presentation/hooks/useResponsive", () => ({ useResponsive: () => mockResponsive }));
+jest.mock("@presentation/hooks/useResponsive", () => ({
+  useResponsive: () => mockResponsive,
+}));
 
 // eslint-disable-next-line import/first
 import { Gallery } from "../../../../../../presentation/screens/EventDetail/fragments/Gallery/index";
@@ -11,7 +13,10 @@ describe("Gallery", () => {
   const originalPlatform = Platform.OS;
 
   afterEach(() => {
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
   });
 
   it("shows the empty state", () => {
@@ -22,7 +27,12 @@ describe("Gallery", () => {
   it("opens the requested image and handles hover styling on web", () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     const onImagePress = jest.fn();
-    render(<Gallery images={["https://example.com/one.jpg", "https://example.com/two.jpg"]} onImagePress={onImagePress} />);
+    render(
+      <Gallery
+        images={["https://example.com/one.jpg", "https://example.com/two.jpg"]}
+        onImagePress={onImagePress}
+      />,
+    );
 
     const firstImage = screen.getByRole("button", { name: "Lihat gambar 1" });
     fireEvent(firstImage, "hoverIn");
@@ -35,7 +45,9 @@ describe("Gallery", () => {
   it("allows gallery items without a callback", () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "ios" });
     render(<Gallery images={["https://example.com/one.jpg"]} />);
-    expect(() => fireEvent.press(screen.getByRole("button", { name: "Lihat gambar 1" }))).not.toThrow();
+    expect(() =>
+      fireEvent.press(screen.getByRole("button", { name: "Lihat gambar 1" })),
+    ).not.toThrow();
   });
 
   it("uses the four-column desktop grid", () => {

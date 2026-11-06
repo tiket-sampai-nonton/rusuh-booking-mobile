@@ -27,7 +27,13 @@ class FakeRepo implements BookingRepository {
   /** When set, hold throws this instead of succeeding. */
   throwOnHold: Error | null = null;
   async createSession(eventId: string): Promise<BookingSession> {
-    return { sessionId: "s", eventId, expiresAt: "", maxSelectable: 3, categories: [] };
+    return {
+      sessionId: "s",
+      eventId,
+      expiresAt: "",
+      maxSelectable: 3,
+      categories: [],
+    };
   }
   async getCurrentSession(): Promise<BookingSession | null> {
     return null;
@@ -43,7 +49,12 @@ class FakeRepo implements BookingRepository {
   ): Promise<Booking> {
     if (this.throwOnHold) throw this.throwOnHold;
     this.held.push({ items, key });
-    return { bookingId: "bk-1", sessionId: "sess-1", status: "HELD", amountMinor: 90000000 };
+    return {
+      bookingId: "bk-1",
+      sessionId: "sess-1",
+      status: "HELD",
+      amountMinor: 90000000,
+    };
   }
 }
 
@@ -58,7 +69,10 @@ describe("HoldBooking (RBT-054)", () => {
     const { repo, uc } = build();
     const booking = await uc.execute(
       "sess-1",
-      [row({ attendeeNik: "3171010101010001" }), row({ useBuyerNik: true, attendeeName: "", attendeeNik: "" })],
+      [
+        row({ attendeeNik: "3171010101010001" }),
+        row({ useBuyerNik: true, attendeeName: "", attendeeNik: "" }),
+      ],
       "3171999999999999",
     );
     expect(booking.bookingId).toBe("bk-1");
@@ -82,7 +96,9 @@ describe("HoldBooking (RBT-054)", () => {
     const { repo, keys, uc } = build();
     const actionId = HoldBooking.actionId("sess-1");
     repo.throwOnHold = mapError({ code: "DEPENDENCY_UNAVAILABLE" });
-    await expect(uc.execute("sess-1", [row()], "3171999999999999")).rejects.toBeInstanceOf(DomainError);
+    await expect(
+      uc.execute("sess-1", [row()], "3171999999999999"),
+    ).rejects.toBeInstanceOf(DomainError);
     const keptKey = keys.peek(actionId);
     expect(keptKey).toMatch(/^idem_/); // retained for an idempotent retry
 
@@ -105,6 +121,9 @@ describe("HoldBooking (RBT-054)", () => {
     repo.throwOnHold = new Error("socket hang up");
     await expect(
       uc.execute("sess-1", [row()], "3171999999999999"),
-    ).rejects.toMatchObject({ code: "DEPENDENCY_UNAVAILABLE", kind: "dependency" });
+    ).rejects.toMatchObject({
+      code: "DEPENDENCY_UNAVAILABLE",
+      kind: "dependency",
+    });
   });
 });

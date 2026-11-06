@@ -1,7 +1,11 @@
-
 import { StyleSheet } from "react-native";
 import { interFonts } from "@presentation/theme/fonts";
-import { designBorders, designColors, designFontSizes, designSpacingSemantic } from "@presentation/theme/event-design-tokens";
+import {
+  designBorders,
+  designColors,
+  designFontSizes,
+  designSpacingSemantic,
+} from "@presentation/theme/event-design-tokens";
 
 import { Animated } from "react-native";
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -46,9 +50,12 @@ export const infoStyles = StyleSheet.create({
   },
 });
 
-export function styleForInfoCardAnimatedView0(arg0: Animated.Value, arg1: Animated.Value): DynamicStyle {
+export function styleForInfoCardAnimatedView0(
+  arg0: Animated.Value,
+  arg1: Animated.Value,
+): DynamicStyle {
   return {
-          opacity: arg0,
-          transform: [{ translateY: arg1 }],
-        } as DynamicStyle;
+    opacity: arg0,
+    transform: [{ translateY: arg1 }],
+  } as DynamicStyle;
 }

@@ -49,10 +49,7 @@ export function minorToIDR(
     if (abs >= 1_000_000) {
       // "Rp 1,2jt" — Indonesian decimal comma, 1 fraction digit, trailing 0 cut.
       const jt = abs / 1_000_000;
-      const txt = jt
-        .toFixed(1)
-        .replace(/\.0$/, "")
-        .replace(".", ",");
+      const txt = jt.toFixed(1).replace(/\.0$/, "").replace(".", ",");
       return `${sign}Rp ${txt}jt`;
     }
     return `${sign}Rp ${Math.round(abs / 1000)}rb`;

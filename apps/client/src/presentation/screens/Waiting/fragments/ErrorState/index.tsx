@@ -1,7 +1,7 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from "react-native";
 
-import { styles } from '../../style';
-import { QueueIcon } from '../QueueIcon';
+import { styles } from "../../style";
+import { QueueIcon } from "../QueueIcon";
 
 export function ErrorState({
   icon,
@@ -20,7 +20,9 @@ export function ErrorState({
 }) {
   return (
     <View style={styles.errorState} testID={testID}>
-      <View style={styles.iconCentered}><QueueIcon kind={icon} /></View>
+      <View style={styles.iconCentered}>
+        <QueueIcon kind={icon} />
+      </View>
       <Text style={styles.errorTitle}>{title}</Text>
       <Text style={styles.errorText}>{message}</Text>
       <Pressable style={styles.errorBtn} onPress={onPress}>

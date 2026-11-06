@@ -1,6 +1,5 @@
-
-import { StyleSheet } from 'react-native';
-import { interFonts, designBorders, designColors } from '@presentation/theme';
+import { StyleSheet } from "react-native";
+import { interFonts, designBorders, designColors } from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   card: {
@@ -14,7 +13,7 @@ export const styles = StyleSheet.create({
     color: designColors.ink,
     fontFamily: interFonts.black,
     fontSize: 20,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   description: {
     marginTop: 8,
@@ -26,14 +25,14 @@ export const styles = StyleSheet.create({
   button: {
     marginTop: 18,
     minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: designColors.ink,
   },
   buttonText: {
     color: designColors.ground,
     fontFamily: interFonts.bold,
     fontSize: 12,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
 });

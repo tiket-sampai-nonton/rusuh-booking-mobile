@@ -20,14 +20,18 @@ export function RevealStagger({
   return (
     <>
       {items.map((child, index) => {
-        const key = isValidElement(child) ? ((child as ReactElement).key ?? index) : index;
+        const key = isValidElement(child)
+          ? ((child as ReactElement).key ?? index)
+          : index;
         return (
           <Reveal
             key={key}
             delay={baseDelay + index * step}
             testID={testID ? `${testID}-${index}` : undefined}
           >
-            {isValidElement(child) ? cloneElement(child as ReactElement) : child}
+            {isValidElement(child)
+              ? cloneElement(child as ReactElement)
+              : child}
           </Reveal>
         );
       })}

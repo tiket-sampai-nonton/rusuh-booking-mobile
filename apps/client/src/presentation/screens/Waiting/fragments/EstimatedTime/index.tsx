@@ -1,7 +1,7 @@
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
 
-import { etaMinutesSeconds } from '../../display';
-import { styles } from '../../style';
+import { etaMinutesSeconds } from "../../display";
+import { styles } from "../../style";
 
 export function EstimatedTime({
   position,
@@ -15,7 +15,9 @@ export function EstimatedTime({
   if (!estimate) {
     return (
       <View style={styles.estimatedTime} testID="waiting-eta-unavailable">
-        <Text style={styles.etaUnavailable}>Estimasi waktu tunggu belum tersedia.</Text>
+        <Text style={styles.etaUnavailable}>
+          Estimasi waktu tunggu belum tersedia.
+        </Text>
       </View>
     );
   }

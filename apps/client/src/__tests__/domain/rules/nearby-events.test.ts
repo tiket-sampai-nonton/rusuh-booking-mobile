@@ -23,8 +23,17 @@ const DAY = 86_400_000;
 const NOW = Date.parse("2026-06-01T00:00:00.000Z");
 
 /** Build an event that starts `days` from NOW. */
-function at(id: string, days: number, extra: Partial<EventSummary> = {}): EventSummary {
-  return { ...base, id, startsAt: new Date(NOW + days * DAY).toISOString(), ...extra };
+function at(
+  id: string,
+  days: number,
+  extra: Partial<EventSummary> = {},
+): EventSummary {
+  return {
+    ...base,
+    id,
+    startsAt: new Date(NOW + days * DAY).toISOString(),
+    ...extra,
+  };
 }
 
 describe("nearbyEvents", () => {
@@ -81,19 +90,15 @@ describe("nearbyEvents", () => {
     });
 
     it("'week' keeps only events within 7 days (inclusive boundary)", () => {
-      expect(nearbyEvents(events, NOW, { window: "week" }).map((e) => e.id)).toEqual([
-        "inWeek",
-        "weekEdge",
-      ]);
+      expect(
+        nearbyEvents(events, NOW, { window: "week" }).map((e) => e.id),
+      ).toEqual(["inWeek", "weekEdge"]);
     });
 
     it("'month' keeps only events within 30 days (inclusive boundary)", () => {
-      expect(nearbyEvents(events, NOW, { window: "month" }).map((e) => e.id)).toEqual([
-        "inWeek",
-        "weekEdge",
-        "inMonth",
-        "monthEdge",
-      ]);
+      expect(
+        nearbyEvents(events, NOW, { window: "month" }).map((e) => e.id),
+      ).toEqual(["inWeek", "weekEdge", "inMonth", "monthEdge"]);
     });
 
     it("window boundary is inclusive to the millisecond", () => {
@@ -101,7 +106,11 @@ describe("nearbyEvents", () => {
       expect(nearbyEvents(exactly7, NOW, { window: "week" })).toHaveLength(1);
       // one ms past the window → excluded
       const justOver = [
-        { ...base, id: "over", startsAt: new Date(NOW + 7 * DAY + 1).toISOString() },
+        {
+          ...base,
+          id: "over",
+          startsAt: new Date(NOW + 7 * DAY + 1).toISOString(),
+        },
       ];
       expect(nearbyEvents(justOver, NOW, { window: "week" })).toHaveLength(0);
     });
@@ -129,7 +138,10 @@ describe("nearbyEvents", () => {
   });
 
   it("an upcoming event with no start date still appears (not filtered by window)", () => {
-    const events = [{ ...base, id: "nodate", startsAt: undefined }, at("soon", 2)];
+    const events = [
+      { ...base, id: "nodate", startsAt: undefined },
+      at("soon", 2),
+    ];
     // dateless sorts to the front via splitCatalog; window math skips it.
     const r = nearbyEvents(events, NOW, { window: "week" });
     expect(r.map((e) => e.id)).toContain("nodate");

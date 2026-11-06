@@ -13,14 +13,15 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Animated, Image, Modal, Platform, Text } from "react-native";
 
-
 import { designDuration } from "@presentation/theme/event-design-tokens";
 import { nativeDriverSupported } from "@presentation/utils/style";
 import { NavButton } from "./NavButton";
 import { lightboxNavButtonStyles } from "./NavButton/style";
 import { lightboxStyles } from "./style";
-import { styleForLightboxAnimatedView0, styleForLightboxAnimatedView1 } from './style';
-
+import {
+  styleForLightboxAnimatedView0,
+  styleForLightboxAnimatedView1,
+} from "./style";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LIGHTBOX COMPONENT
@@ -108,7 +109,12 @@ export function Lightbox({
       animationType="none"
       onRequestClose={onClose}
     >
-      <Animated.View style={[lightboxStyles.container, styleForLightboxAnimatedView0(fadeAnim)]}>
+      <Animated.View
+        style={[
+          lightboxStyles.container,
+          styleForLightboxAnimatedView0(fadeAnim),
+        ]}
+      >
         {/* Close Button */}
         <NavButton
           kind="close"
@@ -122,7 +128,10 @@ export function Lightbox({
           <NavButton
             kind="previous"
             onPress={handlePrev}
-            style={[lightboxNavButtonStyles.navigation, lightboxNavButtonStyles.previous]}
+            style={[
+              lightboxNavButtonStyles.navigation,
+              lightboxNavButtonStyles.previous,
+            ]}
             accessibilityLabel="Gambar sebelumnya"
           />
         )}
@@ -132,7 +141,10 @@ export function Lightbox({
           <NavButton
             kind="next"
             onPress={handleNext}
-            style={[lightboxNavButtonStyles.navigation, lightboxNavButtonStyles.next]}
+            style={[
+              lightboxNavButtonStyles.navigation,
+              lightboxNavButtonStyles.next,
+            ]}
             accessibilityLabel="Gambar selanjutnya"
           />
         )}

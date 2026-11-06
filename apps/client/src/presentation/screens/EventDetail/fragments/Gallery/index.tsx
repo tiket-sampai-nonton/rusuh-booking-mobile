@@ -30,9 +30,7 @@ export function Gallery({ images, onImagePress }: GalleryProps) {
   const columns = isDesktop ? 4 : 2;
 
   if (images.length === 0) {
-    return (
-      <Text style={galleryStyles.empty}>Galeri belum tersedia.</Text>
-    );
+    return <Text style={galleryStyles.empty}>Galeri belum tersedia.</Text>;
   }
 
   return (

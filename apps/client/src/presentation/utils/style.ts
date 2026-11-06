@@ -1,4 +1,9 @@
-import { Platform, type ImageStyle, type TextStyle, type ViewStyle } from "react-native";
+import {
+  Platform,
+  type ImageStyle,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 
 /** Style object accepted by React Native text, view, and image surfaces. */
 export type DynamicStyle = ViewStyle & TextStyle & ImageStyle;
@@ -27,7 +32,9 @@ export function hardShadowStyle(
 }
 
 /** Native Animated does not support useNativeDriver on the web platform. */
-export function nativeDriverSupported(platform: typeof Platform.OS = Platform.OS): boolean {
+export function nativeDriverSupported(
+  platform: typeof Platform.OS = Platform.OS,
+): boolean {
   return platform !== "web";
 }
 

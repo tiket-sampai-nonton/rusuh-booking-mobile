@@ -14,15 +14,30 @@
  *
  * ENTRANCE: opacity 0→1, translateY 20→0, scale 0.95→1, 0.4s
  */
-import { useEffect } from 'react';
-import type { ReactNode } from 'react';
-import { Modal as NativeModal, Platform, Pressable, Text, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useEffect } from "react";
+import type { ReactNode } from "react";
+import {
+  Modal as NativeModal,
+  Platform,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
-import { designEasing } from '@presentation/theme';
+import { designEasing } from "@presentation/theme";
 import { styles } from "./style";
-import { styleForModalPressable0, styleForModalPressable1, styleForModalAnimatedView2 } from './style';
-
+import {
+  styleForModalPressable0,
+  styleForModalPressable1,
+  styleForModalAnimatedView2,
+} from "./style";
 
 const EASE = Easing.bezier(...designEasing.primary);
 const ENTRANCE_DURATION = 400; // 0.4s
@@ -86,26 +101,37 @@ export function Modal({
     >
       {/* Backdrop */}
       <Pressable
-        testID={testID ? `${testID}-backdrop` : 'v2-modal-backdrop'}
+        testID={testID ? `${testID}-backdrop` : "v2-modal-backdrop"}
         accessibilityLabel="Tutup dialog"
         onPress={onClose}
-        style={[styles.backdrop, Platform.OS !== 'web' && styleForModalPressable0()]}
+        style={[
+          styles.backdrop,
+          Platform.OS !== "web" && styleForModalPressable0(),
+        ]}
       >
         {/* Modal card - stop propagation to prevent close on card tap */}
         <Pressable
-          testID={testID ?? 'v2-modal-card'}
+          testID={testID ?? "v2-modal-card"}
           accessibilityViewIsModal
-          accessibilityRole={Platform.OS === 'web' ? ('dialog' as 'none') : undefined}
+          accessibilityRole={
+            Platform.OS === "web" ? ("dialog" as "none") : undefined
+          }
           onPress={(e) => e.stopPropagation()}
-          style={[styles.cardWrapper, Platform.OS !== 'web' && styleForModalPressable1()]}
+          style={[
+            styles.cardWrapper,
+            Platform.OS !== "web" && styleForModalPressable1(),
+          ]}
         >
-          <Animated.View style={[styles.card, Platform.OS !== 'web' && styleForModalAnimatedView2(), cardStyle]}>
+          <Animated.View
+            style={[
+              styles.card,
+              Platform.OS !== "web" && styleForModalAnimatedView2(),
+              cardStyle,
+            ]}
+          >
             {/* Title */}
             {title && (
-              <Text
-                accessibilityRole="header"
-                style={styles.title}
-              >
+              <Text accessibilityRole="header" style={styles.title}>
                 {title}
               </Text>
             )}
@@ -118,7 +144,5 @@ export function Modal({
     </NativeModal>
   );
 }
-
-
 
 export default Modal;

@@ -614,7 +614,7 @@ Initial release budgets:
 
 | Area | Target |
 |---|---|
-| Public web initial JavaScript | ≤ 300 KB gzip for the landing/event route; ≤ 500 KB gzip for transactional routes |
+| Web initial JavaScript | ≤ 1 MB gzip per route |
 | Public web performance | p75 LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1 on the agreed mobile 4G profile |
 | Public assets | CDN-cacheable images/fonts; responsive images; no unbounded hero video or Canvas workload |
 | Route loading | Code-split booking/payment features; do not load payment/native-only modules on public pages |

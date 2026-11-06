@@ -17,7 +17,11 @@ jest.mock("react-native-reanimated", () => {
   return {
     ...actual,
     useReducedMotion: () => mockMotionReduced,
-    withTiming: (toValue: unknown, _config: unknown, callback?: (finished: boolean) => void) => {
+    withTiming: (
+      toValue: unknown,
+      _config: unknown,
+      callback?: (finished: boolean) => void,
+    ) => {
       callback?.(mockAnimationFinished);
       return toValue;
     },
@@ -161,7 +165,9 @@ describe("Reveal / RevealStagger", () => {
 
 describe("Loader", () => {
   it("renders nothing when not visible", () => {
-    const { queryByTestId } = render(<Loader visible={false} testID="loader" />);
+    const { queryByTestId } = render(
+      <Loader visible={false} testID="loader" />,
+    );
     expect(queryByTestId("loader")).toBeNull();
   });
 
@@ -190,7 +196,13 @@ describe("Loader", () => {
       <Loader visible testID="loader" onExitComplete={onExitComplete} />,
     );
 
-    rerender(<Loader visible={false} testID="loader" onExitComplete={onExitComplete} />);
+    rerender(
+      <Loader
+        visible={false}
+        testID="loader"
+        onExitComplete={onExitComplete}
+      />,
+    );
 
     expect(onExitComplete).toHaveBeenCalledTimes(1);
   });
@@ -207,7 +219,10 @@ describe("Modal", () => {
   const originalPlatform = Platform.OS;
 
   afterEach(() => {
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
   });
 
   it("renders title + children when visible and closes on backdrop", () => {
@@ -263,7 +278,9 @@ describe("Modal", () => {
   it("uses web dialog semantics and fallback test identifiers", () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     const { getByTestId, getByRole } = render(
-      <Modal visible onClose={jest.fn()}><Text>Default identifiers</Text></Modal>,
+      <Modal visible onClose={jest.fn()}>
+        <Text>Default identifiers</Text>
+      </Modal>,
     );
     expect(getByTestId("v2-modal-backdrop")).toBeTruthy();
     expect(getByTestId("v2-modal-card")).toBeTruthy();
@@ -273,14 +290,24 @@ describe("Modal", () => {
 
 describe("standalone animated states", () => {
   it("renders a non-animated progress bar when hidden", () => {
-    const { toJSON } = render(<ProgressBar visible={false} reducedMotion={false} />);
+    const { toJSON } = render(
+      <ProgressBar visible={false} reducedMotion={false} />,
+    );
     expect(toJSON()).toBeTruthy();
   });
 
   it("renders default toast items without scheduling a dismissal for zero duration", () => {
     const onDismiss = jest.fn();
     const { getByText } = render(
-      <ToastItem toast={{ id: "zero", message: "Pinned", variant: "default", duration: 0 }} onDismiss={onDismiss} />,
+      <ToastItem
+        toast={{
+          id: "zero",
+          message: "Pinned",
+          variant: "default",
+          duration: 0,
+        }}
+        onDismiss={onDismiss}
+      />,
     );
     expect(getByText("Pinned")).toBeTruthy();
     expect(onDismiss).not.toHaveBeenCalled();
@@ -289,7 +316,15 @@ describe("standalone animated states", () => {
   it("schedules dismissal for a toast with a positive duration", () => {
     jest.useFakeTimers();
     const { getByText, unmount } = render(
-      <ToastItem toast={{ id: "timed", message: "Timed", variant: "success", duration: 100 }} onDismiss={jest.fn()} />,
+      <ToastItem
+        toast={{
+          id: "timed",
+          message: "Timed",
+          variant: "success",
+          duration: 100,
+        }}
+        onDismiss={jest.fn()}
+      />,
     );
     expect(getByText("Timed")).toBeTruthy();
     act(() => jest.advanceTimersByTime(100));
@@ -302,7 +337,15 @@ describe("standalone animated states", () => {
     mockAnimationFinished = false;
     const onDismiss = jest.fn();
     render(
-      <ToastItem toast={{ id: "interrupted", message: "Keep visible", variant: "default", duration: 100 }} onDismiss={onDismiss} />,
+      <ToastItem
+        toast={{
+          id: "interrupted",
+          message: "Keep visible",
+          variant: "default",
+          duration: 100,
+        }}
+        onDismiss={onDismiss}
+      />,
     );
     act(() => jest.advanceTimersByTime(100));
     expect(onDismiss).not.toHaveBeenCalled();
@@ -379,10 +422,8 @@ describe("useToast", () => {
 describe("ToastProvider / useToastContext", () => {
   it("delivers show() through context to a descendant", () => {
     jest.useFakeTimers();
-    const {
-      ToastProvider,
-      useToastContext,
-    } = require("@presentation/components/design-system") as typeof import("@presentation/components/design-system");
+    const { ToastProvider, useToastContext } =
+      require("@presentation/components/design-system") as typeof import("@presentation/components/design-system");
 
     function Child() {
       const { show } = useToastContext();
@@ -405,9 +446,8 @@ describe("ToastProvider / useToastContext", () => {
   });
 
   it("throws when used outside a provider", () => {
-    const {
-      useToastContext,
-    } = require("@presentation/components/design-system") as typeof import("@presentation/components/design-system");
+    const { useToastContext } =
+      require("@presentation/components/design-system") as typeof import("@presentation/components/design-system");
     function Bad() {
       useToastContext();
       return null;

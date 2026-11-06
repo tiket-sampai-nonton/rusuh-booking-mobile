@@ -13,15 +13,20 @@ export interface StepCircleProps {
 
 export function StepCircle({ number, isActive, isCompleted }: StepCircleProps) {
   const filled = isActive || isCompleted;
-  const numberStyle = filled ? stepCircleStyles.filledNumber : stepCircleStyles.emptyNumber;
+  const numberStyle = filled
+    ? stepCircleStyles.filledNumber
+    : stepCircleStyles.emptyNumber;
   return (
-    <View style={[stepCircleStyles.circle, filled ? stepCircleStyles.filledCircle : stepCircleStyles.emptyCircle]}>
+    <View
+      style={[
+        stepCircleStyles.circle,
+        filled ? stepCircleStyles.filledCircle : stepCircleStyles.emptyCircle,
+      ]}
+    >
       {isCompleted ? (
         <CheckIcon color={designColors.ground} size={16} />
       ) : (
-        <Text style={[stepCircleStyles.number, numberStyle]}>
-          {number}
-        </Text>
+        <Text style={[stepCircleStyles.number, numberStyle]}>{number}</Text>
       )}
     </View>
   );

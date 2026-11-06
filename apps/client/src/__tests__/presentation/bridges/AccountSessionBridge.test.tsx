@@ -20,7 +20,11 @@ describe("AccountSessionBridge lifecycle", () => {
   it("does not request a profile when a session was already restored", async () => {
     const base = createContainer({ useMocks: true });
     const getMe = jest.fn();
-    useAccountStore.getState().setProfile({ emailMasked: "a***@example.test", fullName: "Penonton", hasNik: false });
+    useAccountStore.getState().setProfile({
+      emailMasked: "a***@example.test",
+      fullName: "Penonton",
+      hasNik: false,
+    });
     renderBridge({
       ...base,
       tokenStorage: { ...base.tokenStorage, load: async () => "session-token" },
@@ -34,18 +38,41 @@ describe("AccountSessionBridge lifecycle", () => {
   it("ignores a session result after the bridge unmounts", async () => {
     const base = createContainer({ useMocks: true });
     let resolveToken: (value: string | null) => void = () => undefined;
-    let resolveProfile: (value: { emailMasked: string; fullName: string; hasNik: boolean }) => void = () => undefined;
-    const getMe = jest.fn(() => new Promise<{ emailMasked: string; fullName: string; hasNik: boolean }>((resolve) => { resolveProfile = resolve; }));
+    let resolveProfile: (value: {
+      emailMasked: string;
+      fullName: string;
+      hasNik: boolean;
+    }) => void = () => undefined;
+    const getMe = jest.fn(
+      () =>
+        new Promise<{ emailMasked: string; fullName: string; hasNik: boolean }>(
+          (resolve) => {
+            resolveProfile = resolve;
+          },
+        ),
+    );
     const view = renderBridge({
       ...base,
-      tokenStorage: { ...base.tokenStorage, load: () => new Promise<string | null>((resolve) => { resolveToken = resolve; }) },
+      tokenStorage: {
+        ...base.tokenStorage,
+        load: () =>
+          new Promise<string | null>((resolve) => {
+            resolveToken = resolve;
+          }),
+      },
       userRepository: { ...base.userRepository, getMe },
     });
 
     await act(async () => resolveToken("session-token"));
     expect(resolveProfile).toBeDefined();
     view.unmount();
-    await act(async () => resolveProfile({ emailMasked: "a***@example.test", fullName: "Penonton", hasNik: false }));
+    await act(async () =>
+      resolveProfile({
+        emailMasked: "a***@example.test",
+        fullName: "Penonton",
+        hasNik: false,
+      }),
+    );
     expect(getMe).toHaveBeenCalledTimes(1);
     expect(useAccountStore.getState().profile).toBeUndefined();
   });

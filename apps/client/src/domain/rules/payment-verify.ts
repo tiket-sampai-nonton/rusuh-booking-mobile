@@ -35,7 +35,9 @@ export function isPaymentTerminal(status: PaymentStatus): boolean {
 
 /** Backoff schedule (ms) for the authoritative verify poll — capped, with an
  * anti-storm floor. Index past the end clamps to the last (steady) cadence. */
-const VERIFY_BACKOFF_MS: readonly number[] = [1_500, 2_500, 4_000, 6_000, 8_000];
+const VERIFY_BACKOFF_MS: readonly number[] = [
+  1_500, 2_500, 4_000, 6_000, 8_000,
+];
 
 /**
  * The next verify poll delay, or `false` to STOP. Stops the moment the status

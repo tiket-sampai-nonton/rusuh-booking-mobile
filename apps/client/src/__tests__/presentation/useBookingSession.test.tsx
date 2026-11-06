@@ -42,7 +42,12 @@ class FakeBookingRepo implements BookingRepository {
     _i: readonly BookingItemInput[],
     _k: string,
   ): Promise<Booking> {
-    return { bookingId: "b1", sessionId: "sess-1", status: "HELD", amountMinor: 1 };
+    return {
+      bookingId: "b1",
+      sessionId: "sess-1",
+      status: "HELD",
+      amountMinor: 1,
+    };
   }
 }
 
@@ -90,7 +95,9 @@ describe("useRestoreBookingSession", () => {
     const { result } = renderHook(() => useRestoreBookingSession(true), {
       wrapper: wrapper(new FakeBookingRepo()),
     });
-    await waitFor(() => expect(result.current.session?.sessionId).toBe("sess-1"));
+    await waitFor(() =>
+      expect(result.current.session?.sessionId).toBe("sess-1"),
+    );
     expect(useSessionStore.getState().sessionId).toBe("sess-1");
   });
 
@@ -116,6 +123,8 @@ describe("useRestoreBookingSession", () => {
     const { result } = renderHook(() => useRestoreBookingSession(), {
       wrapper: wrapper(new FakeBookingRepo()),
     });
-    await waitFor(() => expect(result.current.session?.sessionId).toBe("sess-1"));
+    await waitFor(() =>
+      expect(result.current.session?.sessionId).toBe("sess-1"),
+    );
   });
 });

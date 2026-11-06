@@ -33,29 +33,35 @@ export interface CreateAttemptInput {
  * opens the URL via `Linking`. Overridable for tests. Returns a promise so a
  * caller can await the open.
  */
-export async function openSnapHandoff(url: string, bookingId?: string): Promise<void> {
+export async function openSnapHandoff(
+  url: string,
+  bookingId?: string,
+): Promise<void> {
   // An in-app relative path (the mock SNAP simulator route `/snap/...`, RBT-065)
   // is navigated with the router, NOT window.location / Linking. The real BE
   // returns an absolute SNAP URL, which takes the external-open path below.
   // expo-router is required LAZILY (only when a relative path is handed off) so
   // importing this module in a test does not eagerly load the router internals.
   if (url.startsWith("/")) {
-    const { router } =
-      require("expo-router") as typeof import("expo-router");
+    const { router } = require("expo-router") as typeof import("expo-router");
     router.push(url as import("expo-router").Href);
     return;
   }
   if (Platform.OS === "web") {
     // Full-page redirect to the external SNAP gateway (D10.2).
     if (typeof globalThis !== "undefined" && "location" in globalThis) {
-      (globalThis as { location: { assign: (u: string) => void } }).location.assign(url);
+      (
+        globalThis as { location: { assign: (u: string) => void } }
+      ).location.assign(url);
     }
     return;
   }
   // Native: open the external SNAP page in the in-app browser / WebView.
   if (bookingId) {
     const { router } = require("expo-router") as typeof import("expo-router");
-    router.push(`/payment-webview/${encodeURIComponent(bookingId)}` as import("expo-router").Href);
+    router.push(
+      `/payment-webview/${encodeURIComponent(bookingId)}` as import("expo-router").Href,
+    );
     return;
   }
   await Linking.openURL(url);
@@ -82,13 +88,15 @@ export function usePayment(
     mutationFn: ({ bookingId, method }) => usecase.execute(bookingId, method),
     onSuccess: async (attempt, { method }) => {
       setPaymentMethod(method, attempt.attemptId);
-      if (attempt.redirectUrl) await handoff(attempt.redirectUrl, attempt.bookingId);
+      if (attempt.redirectUrl)
+        await handoff(attempt.redirectUrl, attempt.bookingId);
     },
   });
 
   // "Kembali ke SNAP" — re-open the handoff for an in-flight attempt (AC2).
   const resumeHandoff = async (attempt: PaymentAttempt): Promise<void> => {
-    if (attempt.redirectUrl) await handoff(attempt.redirectUrl, attempt.bookingId);
+    if (attempt.redirectUrl)
+      await handoff(attempt.redirectUrl, attempt.bookingId);
   };
 
   return { createAttempt, resumeHandoff };

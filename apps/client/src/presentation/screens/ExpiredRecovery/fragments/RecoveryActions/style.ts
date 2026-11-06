@@ -1,4 +1,3 @@
-
 import { StyleSheet } from "react-native";
 import { designColors } from "@presentation/theme";
 
@@ -31,7 +30,24 @@ export const styles = StyleSheet.create({
     borderWidth: designBorder.base,
     borderColor: designColors.ink,
   },
-  primaryText: { color: designColors.ground, letterSpacing: 0.5, fontSize: 14, fontWeight: "700", textTransform: "uppercase" },
-  homeText: { color: designColors.ink, fontWeight: "800", fontSize: 12, textTransform: "uppercase" },
-  requeueText: { color: designColors.ink, letterSpacing: 0.5, fontSize: 14, fontWeight: "700", textTransform: "uppercase" },
+  primaryText: {
+    color: designColors.ground,
+    letterSpacing: 0.5,
+    fontSize: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  homeText: {
+    color: designColors.ink,
+    fontWeight: "800",
+    fontSize: 12,
+    textTransform: "uppercase",
+  },
+  requeueText: {
+    color: designColors.ink,
+    letterSpacing: 0.5,
+    fontSize: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
 });

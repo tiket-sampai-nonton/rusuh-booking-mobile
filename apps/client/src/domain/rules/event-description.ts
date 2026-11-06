@@ -105,9 +105,7 @@ function parseTerms(v: unknown): string[] {
     return s.length > 0 ? [s] : [];
   }
   if (Array.isArray(v)) {
-    return v
-      .map((t) => asString(t).trim())
-      .filter((t) => t.length > 0);
+    return v.map((t) => asString(t).trim()).filter((t) => t.length > 0);
   }
   return [];
 }

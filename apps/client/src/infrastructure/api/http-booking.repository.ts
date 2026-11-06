@@ -30,7 +30,9 @@ export class HttpBookingRepository implements BookingRepository {
       url: "booking-sessions",
       body: { eventId },
     });
-    return toBookingSession(unwrap<Parameters<typeof toBookingSession>[0]>(res));
+    return toBookingSession(
+      unwrap<Parameters<typeof toBookingSession>[0]>(res),
+    );
   }
 
   async getCurrentSession(): Promise<BookingSession | null> {

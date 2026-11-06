@@ -15,7 +15,12 @@ const TAB_LABELS: Readonly<Record<TicketTab, string>> = {
   past: "Sebelumnya",
 };
 
-export function TicketTabButton({ tab, activeTab, count, onChange }: TicketTabButtonProps) {
+export function TicketTabButton({
+  tab,
+  activeTab,
+  count,
+  onChange,
+}: TicketTabButtonProps) {
   const isActive = tab === activeTab;
 
   return (

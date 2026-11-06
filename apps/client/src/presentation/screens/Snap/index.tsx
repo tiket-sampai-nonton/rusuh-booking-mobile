@@ -25,7 +25,15 @@ import { SnapLogo } from "./fragments/SnapLogo";
 import { SnapSummary } from "./fragments/SnapSummary";
 import type { SnapSimulatorScreenProps } from "./interface";
 import { snapStyles, componentStyles } from "./style";
-import { styleForSnapSimulatorScreenView0, styleForSnapSimulatorScreenView1, styleForSnapSimulatorScreenView2, styleForSnapSimulatorScreenPressable3, styleForSnapSimulatorScreenText4, styleForSnapSimulatorScreenPressable5, styleForSnapSimulatorScreenPressable6 } from './style';
+import {
+  styleForSnapSimulatorScreenView0,
+  styleForSnapSimulatorScreenView1,
+  styleForSnapSimulatorScreenView2,
+  styleForSnapSimulatorScreenPressable3,
+  styleForSnapSimulatorScreenText4,
+  styleForSnapSimulatorScreenPressable5,
+  styleForSnapSimulatorScreenPressable6,
+} from "./style";
 
 export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
   const insets = useSafeAreaInsets();
@@ -60,9 +68,7 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
         style={componentStyles.elementBackgroundColor0}
         testID="snap-screen"
       >
-        <View
-          style={styleForSnapSimulatorScreenView0(insets)}
-        >
+        <View style={styleForSnapSimulatorScreenView0(insets)}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Kembali ke pembayaran"
@@ -78,7 +84,12 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
         <ScrollView
           contentContainerStyle={[
             snapStyles.scrollContent,
-            { paddingHorizontal: 28, paddingTop: 28, paddingBottom: insets.bottom + 40, width: "100%" },
+            {
+              paddingHorizontal: 28,
+              paddingTop: 28,
+              paddingBottom: insets.bottom + 40,
+              width: "100%",
+            },
           ]}
         >
           <View
@@ -98,11 +109,31 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
             />
 
             <View style={componentStyles.elementMarginBottom5}>
-              <Text className="mb-3 text-xs font-extrabold uppercase" style={componentStyles.elementColor6}>Metode Pembayaran</Text>
-              <View className="flex-row" style={componentStyles.elementBorderWidth7}>
+              <Text
+                className="mb-3 text-xs font-extrabold uppercase"
+                style={componentStyles.elementColor6}
+              >
+                Metode Pembayaran
+              </Text>
+              <View
+                className="flex-row"
+                style={componentStyles.elementBorderWidth7}
+              >
                 {(["bank", "wallet"] as const).map((value) => (
-                  <Pressable key={value} onPress={() => setChannel(value)} style={styleForSnapSimulatorScreenPressable3(channel, value)} testID={`snap-channel-${value}`}>
-                    <Text style={styleForSnapSimulatorScreenText4(channel, value)}>{value === "bank" ? "Transfer Bank" : "Dompet Digital"}</Text>
+                  <Pressable
+                    key={value}
+                    onPress={() => setChannel(value)}
+                    style={styleForSnapSimulatorScreenPressable3(
+                      channel,
+                      value,
+                    )}
+                    testID={`snap-channel-${value}`}
+                  >
+                    <Text
+                      style={styleForSnapSimulatorScreenText4(channel, value)}
+                    >
+                      {value === "bank" ? "Transfer Bank" : "Dompet Digital"}
+                    </Text>
                   </Pressable>
                 ))}
               </View>
@@ -110,32 +141,73 @@ export function SnapSimulatorScreen({ bookingId }: SnapSimulatorScreenProps) {
                 <>
                   <View className="mt-3 flex-row gap-2">
                     {["BCA", "BNI", "Mandiri"].map((value) => (
-                      <Pressable key={value} onPress={() => setBank(value)} style={styleForSnapSimulatorScreenPressable5(bank, value)}>
-                        <Text style={componentStyles.elementColor8}>{value}</Text>
+                      <Pressable
+                        key={value}
+                        onPress={() => setBank(value)}
+                        style={styleForSnapSimulatorScreenPressable5(
+                          bank,
+                          value,
+                        )}
+                      >
+                        <Text style={componentStyles.elementColor8}>
+                          {value}
+                        </Text>
                       </Pressable>
                     ))}
                   </View>
-                  <View className="mt-3 p-4" style={componentStyles.elementBorderWidth9}>
-                    <Text className="text-xs font-bold uppercase" style={componentStyles.elementColor10}>Akun virtual {bank}</Text>
-                    <Text className="mt-2 text-xl font-extrabold" style={componentStyles.elementColor11}>8800 1234 5678</Text>
-                    <Text className="mt-2 text-xs" style={componentStyles.elementColor12}>Transfer sesuai jumlah tagihan, lalu tunggu verifikasi pembayaran.</Text>
+                  <View
+                    className="mt-3 p-4"
+                    style={componentStyles.elementBorderWidth9}
+                  >
+                    <Text
+                      className="text-xs font-bold uppercase"
+                      style={componentStyles.elementColor10}
+                    >
+                      Akun virtual {bank}
+                    </Text>
+                    <Text
+                      className="mt-2 text-xl font-extrabold"
+                      style={componentStyles.elementColor11}
+                    >
+                      8800 1234 5678
+                    </Text>
+                    <Text
+                      className="mt-2 text-xs"
+                      style={componentStyles.elementColor12}
+                    >
+                      Transfer sesuai jumlah tagihan, lalu tunggu verifikasi
+                      pembayaran.
+                    </Text>
                   </View>
                 </>
               ) : (
-                <View className="mt-3 gap-3" style={componentStyles.elementBorderWidth13}>
+                <View
+                  className="mt-3 gap-3"
+                  style={componentStyles.elementBorderWidth13}
+                >
                   {["GoPay", "QRIS"].map((value) => (
                     <Pressable
                       key={value}
                       accessibilityRole="button"
                       accessibilityState={{ selected: wallet === value }}
                       onPress={() => setWallet(value)}
-                      style={styleForSnapSimulatorScreenPressable6(wallet, value)}
+                      style={styleForSnapSimulatorScreenPressable6(
+                        wallet,
+                        value,
+                      )}
                       testID={`snap-wallet-${value.toLowerCase()}`}
                     >
-                      <Text style={componentStyles.elementColor14}>{value}</Text>
+                      <Text style={componentStyles.elementColor14}>
+                        {value}
+                      </Text>
                     </Pressable>
                   ))}
-                  <Text className="text-xs" style={componentStyles.elementColor15}>Pilih dompet digital di atas untuk melanjutkan pembayaran.</Text>
+                  <Text
+                    className="text-xs"
+                    style={componentStyles.elementColor15}
+                  >
+                    Pilih dompet digital di atas untuk melanjutkan pembayaran.
+                  </Text>
                 </View>
               )}
             </View>

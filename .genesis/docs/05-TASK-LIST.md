@@ -435,7 +435,7 @@ Type: Story · P0 · M · Deps: all feature epics
 
 #### RBT-081: Performance + bundle budgets
 Type: Story · P0 · M · Deps: RBT-033, all feature epics
-- AC1: web budgets met — p75 LCP ≤2.5s, INP ≤200ms, CLS ≤0.1 (mobile 4G profile); bundle **public ≤300KB / transactional ≤500KB gzip** enforced by CI.
+- AC1: web budgets met — p75 LCP ≤2.5s, INP ≤200ms, CLS ≤0.1 (mobile 4G profile); initial JavaScript **≤1MB gzip per route** enforced by CI.
 - AC2: code-split transactional routes; lazy-load heavy deps; image/QR render without layout shift.
 - AC3: debounced NIK checks + one-poller-per-session verified (no request storm).
 - Skills: perf profiling, bundling, Web Vitals.

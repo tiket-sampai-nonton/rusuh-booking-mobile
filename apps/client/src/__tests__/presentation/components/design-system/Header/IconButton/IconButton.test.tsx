@@ -15,13 +15,21 @@ describe("Header IconButton platform and motion states", () => {
 
   afterEach(() => {
     mockReducedMotion = false;
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
   });
 
   it("uses native elevation and animated press feedback", () => {
-    Object.defineProperty(Platform, "OS", { configurable: true, value: "android" });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "android",
+    });
     const onPress = jest.fn();
-    const { getByLabelText } = render(<IconButton icon="login" label="Masuk" onPress={onPress} />);
+    const { getByLabelText } = render(
+      <IconButton icon="login" label="Masuk" onPress={onPress} />,
+    );
     const button = getByLabelText("Masuk");
     fireEvent(button, "pressIn");
     fireEvent.press(button);
@@ -32,7 +40,9 @@ describe("Header IconButton platform and motion states", () => {
   it("uses web shadow and immediate feedback for reduced motion", () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     mockReducedMotion = true;
-    const { getByLabelText } = render(<IconButton icon="login" label="Masuk" />);
+    const { getByLabelText } = render(
+      <IconButton icon="login" label="Masuk" />,
+    );
     const button = getByLabelText("Masuk");
     fireEvent(button, "pressIn");
     fireEvent(button, "pressOut");

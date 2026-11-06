@@ -33,14 +33,20 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       lineup: ["Band A", "Band B", "DJ C"],
       gallery: MOCK_EVENT_GALLERY,
       terms: "Tiket tidak dapat dikembalikan. Wajib membawa KTP sesuai NIK.",
-      bannerImage: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80&auto=format&fit=crop",
+      bannerImage:
+        "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80&auto=format&fit=crop",
       // FE-NEED (O2): pricing categories + availability, mocked until the BE
       // typed `priceMinor`/`available` contract lands. Read defensively by the
       // detail screen (parseDescription).
       categories: [
         { code: "FEST", name: "Festival", priceMinor: 45000000, available: 90 },
         { code: "VIP", name: "VIP", priceMinor: 120000000, available: 20 },
-        { code: "CAT1", name: "Tribun Cat 1", priceMinor: 65000000, available: 10 },
+        {
+          code: "CAT1",
+          name: "Tribun Cat 1",
+          priceMinor: 65000000,
+          available: 10,
+        },
       ],
     },
   },
@@ -58,14 +64,35 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     description: {
       longDesc: "Nobar final dengan layar raksasa dan zona komunitas.",
       lineup: [
-        { name: "Ahmad Dhani", role: "Keyboards", avatar: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=200&q=80" },
-        { name: "Once Mekel", role: "Vocal", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80" },
-        { name: "Andra Ramadhan", role: "Guitar", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80" },
-        { name: "Yuke Sampurna", role: "Bass", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80" },
+        {
+          name: "Ahmad Dhani",
+          role: "Keyboards",
+          avatar:
+            "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=200&q=80",
+        },
+        {
+          name: "Once Mekel",
+          role: "Vocal",
+          avatar:
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
+        },
+        {
+          name: "Andra Ramadhan",
+          role: "Guitar",
+          avatar:
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
+        },
+        {
+          name: "Yuke Sampurna",
+          role: "Bass",
+          avatar:
+            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80",
+        },
       ],
       gallery: MOCK_EVENT_GALLERY,
       terms: "Masuk sesuai sesi pada tiket.",
-      bannerImage: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=1200&q=80&auto=format&fit=crop",
+      bannerImage:
+        "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=1200&q=80&auto=format&fit=crop",
       categories: [
         { code: "REG", name: "Reguler", priceMinor: 30000000, available: 8 },
         { code: "VIP", name: "VIP Lounge", priceMinor: 75000000, available: 0 },
@@ -88,7 +115,8 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       lineup: ["Indie X", "Indie Y"],
       gallery: MOCK_EVENT_GALLERY,
       terms: "Penjualan dibuka 20 Desember.",
-      bannerImage: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=1200&q=80&auto=format&fit=crop",
+      bannerImage:
+        "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=1200&q=80&auto=format&fit=crop",
     },
   },
   {
@@ -107,7 +135,8 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       lineup: ["Headliner Z"],
       gallery: MOCK_EVENT_GALLERY,
       terms: "Sold out. Tidak ada penjualan di lokasi.",
-      bannerImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80&auto=format&fit=crop",
+      bannerImage:
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80&auto=format&fit=crop",
       categories: [
         { code: "REG", name: "Reguler", priceMinor: 75000000, available: 0 },
         { code: "VIP", name: "VIP", priceMinor: 150000000, available: 0 },
@@ -130,7 +159,8 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       lineup: ["Jazz Trio"],
       gallery: MOCK_EVENT_GALLERY,
       terms: "Acara telah selesai.",
-      bannerImage: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1200&q=80&auto=format&fit=crop",
+      bannerImage:
+        "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1200&q=80&auto=format&fit=crop",
     },
   },
   {
@@ -149,10 +179,21 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       lineup: ["DJ One", "DJ Two", "DJ Three"],
       gallery: MOCK_EVENT_GALLERY,
       terms: "Usia 18+. Wajib NIK.",
-      bannerImage: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&q=80&auto=format&fit=crop",
+      bannerImage:
+        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&q=80&auto=format&fit=crop",
       categories: [
-        { code: "GA", name: "General Admission", priceMinor: 35000000, available: 300 },
-        { code: "FRONT", name: "Front of Stage", priceMinor: 90000000, available: 40 },
+        {
+          code: "GA",
+          name: "General Admission",
+          priceMinor: 35000000,
+          available: 300,
+        },
+        {
+          code: "FRONT",
+          name: "Front of Stage",
+          priceMinor: 90000000,
+          available: 40,
+        },
       ],
     },
   },

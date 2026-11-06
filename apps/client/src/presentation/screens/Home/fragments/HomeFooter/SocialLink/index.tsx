@@ -1,9 +1,20 @@
 import { useCallback } from "react";
 import { Pressable } from "react-native";
-import Animated, { Easing, interpolate, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import { useToast } from "@presentation/components/design-system";
-import { designColors, designDuration, designEasing } from "@presentation/theme";
+import {
+  designColors,
+  designDuration,
+  designEasing,
+} from "@presentation/theme";
 
 import {
   socialLinkBorderStyle,
@@ -33,7 +44,10 @@ export function SocialLink({ label, name, handle }: SocialLinkProps) {
         hovered.value = isHovered ? 1 : 0;
         return;
       }
-      hovered.value = withTiming(isHovered ? 1 : 0, { duration: designDuration.normal, easing: EASE });
+      hovered.value = withTiming(isHovered ? 1 : 0, {
+        duration: designDuration.normal,
+        easing: EASE,
+      });
     },
     [reducedMotion, hovered],
   );
@@ -59,9 +73,17 @@ export function SocialLink({ label, name, handle }: SocialLinkProps) {
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
     >
-      <Animated.View style={[socialLinkStyles.container, socialLinkBorderStyle(), containerStyle]}>
+      <Animated.View
+        style={[
+          socialLinkStyles.container,
+          socialLinkBorderStyle(),
+          containerStyle,
+        ]}
+      >
         <Animated.View style={[socialLinkStyles.fill, fillStyle]} />
-        <Animated.Text style={[socialLinkStyles.label, textStyle]}>{label}</Animated.Text>
+        <Animated.Text style={[socialLinkStyles.label, textStyle]}>
+          {label}
+        </Animated.Text>
       </Animated.View>
     </Pressable>
   );

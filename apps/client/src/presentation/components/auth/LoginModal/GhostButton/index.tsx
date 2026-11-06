@@ -9,7 +9,11 @@ interface GhostButtonProps {
   readonly testID?: string;
 }
 
-export function GhostButton({ label, onPress, testID }: GhostButtonProps): ReactElement {
+export function GhostButton({
+  label,
+  onPress,
+  testID,
+}: GhostButtonProps): ReactElement {
   return (
     <Pressable
       testID={testID}

@@ -49,7 +49,9 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
   it("renders the simulator shell + summary", () => {
     const screen = renderScreen("bk-1");
     expect(screen.getByTestId("snap-screen")).toBeTruthy();
-    expect(screen.getByTestId("snap-screen").props.style.backgroundColor).toBe("#ffffff");
+    expect(screen.getByTestId("snap-screen").props.style.backgroundColor).toBe(
+      "#ffffff",
+    );
     expect(screen.getByTestId("snap-content").props.style[1]).toMatchObject({
       borderWidth: 2,
       borderColor: "#000000",
@@ -66,7 +68,9 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
     const screen = renderScreen("bk-1");
     fireEvent.press(screen.getByTestId("snap-channel-wallet"));
     fireEvent.press(screen.getByTestId("snap-wallet-qris"));
-    expect(screen.getByTestId("snap-wallet-qris").props.accessibilityState.selected).toBe(true);
+    expect(
+      screen.getByTestId("snap-wallet-qris").props.accessibilityState.selected,
+    ).toBe(true);
   });
 
   it("selects a bank and returns to the payment page", () => {

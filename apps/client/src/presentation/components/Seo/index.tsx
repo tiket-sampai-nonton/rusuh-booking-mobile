@@ -94,7 +94,9 @@ export function eventJsonLd(input: {
     name: input.name,
     url: `${BASE_URL}${input.path}`,
     ...(input.startsAt ? { startDate: input.startsAt } : {}),
-    ...(input.venue ? { location: { "@type": "Place", name: input.venue } } : {}),
+    ...(input.venue
+      ? { location: { "@type": "Place", name: input.venue } }
+      : {}),
     eventStatus: "https://schema.org/EventScheduled",
     ...(offers ? { offers } : {}),
   };

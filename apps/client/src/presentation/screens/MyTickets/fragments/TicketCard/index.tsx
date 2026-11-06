@@ -5,11 +5,13 @@ import { formatDateID } from "@domain/services/date-format";
 import { minorToIDR } from "@domain/services/money";
 import { styles } from "./style";
 
-
-
-
 interface TicketCardProps {
-  readonly event: { id: string; name: string; venue?: string; startsAt?: string };
+  readonly event: {
+    id: string;
+    name: string;
+    venue?: string;
+    startsAt?: string;
+  };
   readonly bookingId: string;
   readonly amountMinor: number;
   readonly ticketCount: number;
@@ -18,8 +20,6 @@ interface TicketCardProps {
   readonly onShare: () => void;
   readonly past?: boolean;
 }
-
-
 
 export function TicketCard({
   event,
@@ -36,11 +36,20 @@ export function TicketCard({
       style={[styles.card, past && styles.past]}
       testID={`ticket-card-${bookingId}`}
     >
-      <Image source={{ uri: eventImage(event.id) }} resizeMode="cover" style={styles.image} />
+      <Image
+        source={{ uri: eventImage(event.id) }}
+        resizeMode="cover"
+        style={styles.image}
+      />
       <View style={styles.content}>
         <View style={styles.heading}>
           <Text style={styles.eventName}>{event.name}</Text>
-          <Text style={[styles.status, past ? styles.statusPast : styles.statusUpcoming]}>
+          <Text
+            style={[
+              styles.status,
+              past ? styles.statusPast : styles.statusUpcoming,
+            ]}
+          >
             {past ? "Terpakai" : "Terkonfirmasi"}
           </Text>
         </View>
@@ -52,12 +61,16 @@ export function TicketCard({
             <Text style={styles.ticketLabel}>Tiket</Text>
             <Text style={styles.ticketCount}>{ticketCount} × Tiket Umum</Text>
           </View>
-          <Text style={styles.amount}>{minorToIDR(amountMinor, { compact: true })}</Text>
+          <Text style={styles.amount}>
+            {minorToIDR(amountMinor, { compact: true })}
+          </Text>
         </View>
         <View style={styles.actions}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={past ? "QR tiket sudah digunakan" : "Buka QR tiket"}
+            accessibilityLabel={
+              past ? "QR tiket sudah digunakan" : "Buka QR tiket"
+            }
             accessibilityState={{ disabled: past }}
             disabled={past}
             onPress={onOpenQr}

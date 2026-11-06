@@ -1,6 +1,9 @@
 import { StyleSheet } from "react-native";
 
-import { designColors, designSpacingSemantic } from "@presentation/theme/event-design-tokens";
+import {
+  designColors,
+  designSpacingSemantic,
+} from "@presentation/theme/event-design-tokens";
 
 import type { StyleProp, ViewStyle } from "react-native";
 

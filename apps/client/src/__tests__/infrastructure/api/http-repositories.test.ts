@@ -38,7 +38,9 @@ const ok = <T>(data: T): HttpResponse<unknown> => ({
 describe("HttpEventRepository", () => {
   it("lists events (unwrap + map DTO→domain)", async () => {
     const http = new FakeHttpClient();
-    const serverClock = new ServerClock({ now: () => Date.parse("2030-01-01T00:00:00Z") });
+    const serverClock = new ServerClock({
+      now: () => Date.parse("2030-01-01T00:00:00Z"),
+    });
     http.queueResponse(
       ok({
         events: [
@@ -138,18 +140,26 @@ describe("HttpPaymentRepository", () => {
     );
     const repo = new HttpPaymentRepository(http);
     const page = await repo.getPaymentPage("b1");
-    expect(http.calls[0]).toMatchObject({ method: "GET", url: "payments/b1/page" });
+    expect(http.calls[0]).toMatchObject({
+      method: "GET",
+      url: "payments/b1/page",
+    });
     expect(page.methods).toEqual(["VA_BCA", "QRIS"]);
     expect(page.amountMinor).toBe(45000000);
   });
 
   it("mints a page token and exchanges it (RBT-062)", async () => {
     const http = new FakeHttpClient();
-    http.queueResponse(ok({ pageToken: "pgt_1", pageUrl: "/payment/b1?rb_pay_token=pgt_1" }));
+    http.queueResponse(
+      ok({ pageToken: "pgt_1", pageUrl: "/payment/b1?rb_pay_token=pgt_1" }),
+    );
     http.queueResponse({ status: 204, headers: {}, data: null });
     const repo = new HttpPaymentRepository(http);
     const token = await repo.createPageToken("b1");
-    expect(http.calls[0]).toMatchObject({ method: "POST", url: "payments/b1/page-tokens" });
+    expect(http.calls[0]).toMatchObject({
+      method: "POST",
+      url: "payments/b1/page-tokens",
+    });
     expect(token.pageToken).toBe("pgt_1");
     await repo.exchangePageToken("pgt_1");
     expect(http.calls[1]).toMatchObject({
@@ -166,21 +176,27 @@ describe("HttpPaymentRepository", () => {
     );
     const repo = new HttpPaymentRepository(http);
     const out = await repo.createAttempt("b1", "QRIS", "idem-1");
-    expect(http.calls[0].headers).toMatchObject({ "idempotency-key": "idem-1" });
+    expect(http.calls[0].headers).toMatchObject({
+      "idempotency-key": "idem-1",
+    });
     expect(http.calls[0].body).toEqual({ method: "QRIS" });
     expect(out.attemptId).toBe("a1");
   });
 
   it("reads attempt status", async () => {
     const http = new FakeHttpClient();
-    http.queueResponse(ok({ attemptId: "a1", bookingId: "b1", status: "PAID" }));
+    http.queueResponse(
+      ok({ attemptId: "a1", bookingId: "b1", status: "PAID" }),
+    );
     const repo = new HttpPaymentRepository(http);
     expect((await repo.getStatus("a1")).status).toBe("PAID");
   });
 
   it("POSTs the SNAP callback and maps the attempt (RBT-065)", async () => {
     const http = new FakeHttpClient();
-    http.queueResponse(ok({ attemptId: "a1", bookingId: "b1", status: "PAID" }));
+    http.queueResponse(
+      ok({ attemptId: "a1", bookingId: "b1", status: "PAID" }),
+    );
     const repo = new HttpPaymentRepository(http);
     const out = await repo.snapCallback("a1", "PAID");
     expect(http.calls[0]).toMatchObject({
@@ -260,7 +276,9 @@ describe("HttpBookingRepository", () => {
 
   it("returns null when the transport rejects with a 404", async () => {
     const http = new FakeHttpClient();
-    jest.spyOn(http, "request").mockRejectedValue(new TransportError({ code: 1404, httpStatus: 404 }));
+    jest
+      .spyOn(http, "request")
+      .mockRejectedValue(new TransportError({ code: 1404, httpStatus: 404 }));
     const repo = new HttpBookingRepository(http);
     await expect(repo.getCurrentSession()).resolves.toBeNull();
   });
@@ -273,7 +291,9 @@ describe("HttpBookingRepository", () => {
       data: { meta: { code: 1500 }, data: null },
     });
     const repo = new HttpBookingRepository(http);
-    await expect(repo.getCurrentSession()).rejects.toBeInstanceOf(TransportError);
+    await expect(repo.getCurrentSession()).rejects.toBeInstanceOf(
+      TransportError,
+    );
   });
 
   it("re-throws a non-TransportError (malformed 200) from current session", async () => {
@@ -292,13 +312,21 @@ describe("HttpUserRepository", () => {
     http.queueResponse({ status: 204, headers: {}, data: null }); // requestOtp
     http.queueResponse(ok({ token: "t1", isNew: true })); // verify
     http.queueResponse(
-      ok({ emailMasked: "a***@x.io", fullName: "A", nikMasked: "32****89", hasNik: true }),
+      ok({
+        emailMasked: "a***@x.io",
+        fullName: "A",
+        nikMasked: "32****89",
+        hasNik: true,
+      }),
     ); // register
     http.queueResponse(ok({ emailMasked: "a***@x.io", hasNik: true })); // me
     const repo = new HttpUserRepository(http);
 
     await expect(repo.requestOtp("a@x.io")).resolves.toBeUndefined();
-    expect(http.calls[0]).toMatchObject({ method: "POST", url: "auth/otp/request" });
+    expect(http.calls[0]).toMatchObject({
+      method: "POST",
+      url: "auth/otp/request",
+    });
 
     const sess = await repo.verifyOtp("a@x.io", "123456");
     expect(sess).toEqual({ token: "t1", isNew: true });

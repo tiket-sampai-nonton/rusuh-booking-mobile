@@ -9,19 +9,23 @@ import { designColors } from "@presentation/theme";
 import type { PaymentTopBarProps } from "../../interface";
 import { paymentStyles, paymentTopBar } from "../../style";
 import { componentStyles } from "./style";
-import { styleForPaymentTopBarView0, styleForPaymentTopBarView1 } from './style';
+import {
+  styleForPaymentTopBarView0,
+  styleForPaymentTopBarView1,
+} from "./style";
 
-
-export function PaymentTopBar({ remainingMs, warn, expired, onBack }: PaymentTopBarProps) {
+export function PaymentTopBar({
+  remainingMs,
+  warn,
+  expired,
+  onBack,
+}: PaymentTopBarProps) {
   const insets = useSafeAreaInsets();
   const danger = warn || expired;
   return (
     <View
       className="flex-row items-center justify-between px-5 pb-3"
-      style={[
-        paymentTopBar(insets.top),
-        styleForPaymentTopBarView0(),
-      ]}
+      style={[paymentTopBar(insets.top), styleForPaymentTopBarView0()]}
     >
       <Pressable
         accessibilityRole="button"
@@ -29,7 +33,15 @@ export function PaymentTopBar({ remainingMs, warn, expired, onBack }: PaymentTop
         onPress={onBack}
         testID="payment-back"
       >
-        <View className="flex-row items-center gap-1.5"><ArrowIcon direction="left" color={designColors.ink} /><Text className="text-sm font-bold uppercase tracking-tag" style={componentStyles.elementColor0}>Kembali</Text></View>
+        <View className="flex-row items-center gap-1.5">
+          <ArrowIcon direction="left" color={designColors.ink} />
+          <Text
+            className="text-sm font-bold uppercase tracking-tag"
+            style={componentStyles.elementColor0}
+          >
+            Kembali
+          </Text>
+        </View>
       </Pressable>
       <View
         className="flex-row items-center gap-2.25 px-3.5 py-2"

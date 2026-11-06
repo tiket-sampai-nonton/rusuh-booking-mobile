@@ -87,16 +87,23 @@ describe("LoginModal (RBT-020)", () => {
   beforeEach(() => {
     jest
       .spyOn(Animated, "timing")
-      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.timing>);
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.timing>,
+      );
     jest
       .spyOn(Animated, "parallel")
-      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.parallel>);
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.parallel>,
+      );
   });
 
   afterEach(() => {
     jest.useRealTimers();
     jest.restoreAllMocks();
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
   });
 
   it("renders the email step with prototype title + copy", () => {
@@ -125,7 +132,9 @@ describe("LoginModal (RBT-020)", () => {
     fireEvent(email, "focus");
     fireEvent.changeText(email, "bad-email");
     fireEvent.press(getByTestId("login-send"));
-    expect(getByTestId("login-email-error").props.children).toBe("Format email belum benar");
+    expect(getByTestId("login-email-error").props.children).toBe(
+      "Format email belum benar",
+    );
     fireEvent.changeText(email, "valid@example.com");
     fireEvent(email, "blur");
     act(() => jest.advanceTimersByTime(500));
@@ -135,12 +144,20 @@ describe("LoginModal (RBT-020)", () => {
   it("shows a typed Bahasa request error from the domain", async () => {
     const repo = new FakeUserRepository();
     jest.spyOn(repo, "requestOtp").mockRejectedValueOnce(
-      new DomainError({ kind: "auth", code: "OTP_FAILED", userMessage: "Email belum terdaftar." }),
+      new DomainError({
+        kind: "auth",
+        code: "OTP_FAILED",
+        userMessage: "Email belum terdaftar.",
+      }),
     );
     const { getByTestId } = renderModal(repo);
     fireEvent.changeText(getByTestId("login-email-input"), "valid@example.com");
     fireEvent.press(getByTestId("login-send"));
-    await waitFor(() => expect(getByTestId("login-email-error").props.children).toBe("Email belum terdaftar."));
+    await waitFor(() =>
+      expect(getByTestId("login-email-error").props.children).toBe(
+        "Email belum terdaftar.",
+      ),
+    );
   });
 
   it("uses the generic request fallback for an untyped error", async () => {
@@ -149,7 +166,11 @@ describe("LoginModal (RBT-020)", () => {
     const { getByTestId } = renderModal(repo);
     fireEvent.changeText(getByTestId("login-email-input"), "valid@example.com");
     fireEvent.press(getByTestId("login-send"));
-    await waitFor(() => expect(getByTestId("login-email-error").props.children).toBe("Terjadi kesalahan. Silakan coba lagi."));
+    await waitFor(() =>
+      expect(getByTestId("login-email-error").props.children).toBe(
+        "Terjadi kesalahan. Silakan coba lagi.",
+      ),
+    );
   });
 
   it("advances to the OTP step and echoes the entered email", async () => {
@@ -196,7 +217,9 @@ describe("LoginModal (RBT-020)", () => {
     await waitFor(() => getByText("Verifikasi OTP"));
 
     expect(requestOtp).toHaveBeenCalledTimes(1);
-    expect(getByTestId("login-verify").props.accessibilityState.disabled).toBe(true);
+    expect(getByTestId("login-verify").props.accessibilityState.disabled).toBe(
+      true,
+    );
     expect(getByText("Kirim ulang (60s)")).toBeTruthy();
   });
 
@@ -212,8 +235,12 @@ describe("LoginModal (RBT-020)", () => {
     fireEvent.changeText(getByTestId("login-otp-0"), "1");
     fireEvent.changeText(getByTestId("login-otp-1"), "2");
     fireEvent.changeText(getByTestId("login-otp-1"), "");
-    fireEvent(getByTestId("login-otp-1"), "keyPress", { nativeEvent: { key: "Backspace" } });
-    fireEvent(getByTestId("login-otp-0"), "keyPress", { nativeEvent: { key: "Backspace" } });
+    fireEvent(getByTestId("login-otp-1"), "keyPress", {
+      nativeEvent: { key: "Backspace" },
+    });
+    fireEvent(getByTestId("login-otp-0"), "keyPress", {
+      nativeEvent: { key: "Backspace" },
+    });
     act(() => jest.advanceTimersByTime(60_000));
     expect(getByTestId("login-resend").props.disabled).toBeFalsy();
     fireEvent.press(getByTestId("login-resend"));
@@ -331,10 +358,16 @@ describe("LoginModal (RBT-020)", () => {
     const submit = () => getByTestId("login-reg-submit");
     expect(submit().props.accessibilityState.disabled).toBe(true);
 
-    fireEvent.changeText(getByTestId("login-reg-name-input"), "Rizky Rachmawan");
+    fireEvent.changeText(
+      getByTestId("login-reg-name-input"),
+      "Rizky Rachmawan",
+    );
     expect(submit().props.accessibilityState.disabled).toBe(true);
 
-    fireEvent.changeText(getByTestId("login-reg-nik-input"), "3201234567890123");
+    fireEvent.changeText(
+      getByTestId("login-reg-nik-input"),
+      "3201234567890123",
+    );
     // Still missing consent.
     expect(submit().props.accessibilityState.disabled).toBe(true);
 
@@ -350,9 +383,13 @@ describe("LoginModal (RBT-020)", () => {
     const completeRegistration = jest.spyOn(repo, "completeRegistration");
     const { getByTestId, getByText } = renderModal(repo);
     await reachRegisterStep(getByTestId, getByText);
-    expect(getByTestId("login-reg-submit").props.accessibilityState.disabled).toBe(true);
+    expect(
+      getByTestId("login-reg-submit").props.accessibilityState.disabled,
+    ).toBe(true);
     expect(completeRegistration).not.toHaveBeenCalled();
-    fireEvent(getByTestId("login-card"), "press", { stopPropagation: jest.fn() });
+    fireEvent(getByTestId("login-card"), "press", {
+      stopPropagation: jest.fn(),
+    });
   });
 
   it("uses a safe avatar and name for a returning profile with missing fields", async () => {
@@ -361,10 +398,15 @@ describe("LoginModal (RBT-020)", () => {
     const { getByTestId, getByText } = renderModal(repo);
     await reachOtpStep(getByTestId, getByText);
     for (let index = 0; index < 6; index += 1) {
-      fireEvent.changeText(getByTestId(`login-otp-${index}`), "123456"[index] ?? "");
+      fireEvent.changeText(
+        getByTestId(`login-otp-${index}`),
+        "123456"[index] ?? "",
+      );
     }
     fireEvent.press(getByTestId("login-verify"));
-    await waitFor(() => expect(getByTestId("login-signed-name").props.children).toBe("—"));
+    await waitFor(() =>
+      expect(getByTestId("login-signed-name").props.children).toBe("—"),
+    );
     expect(getByTestId("login-signed-email").props.children).toBe("");
     expect(getByText("B")).toBeTruthy();
   });
@@ -378,9 +420,9 @@ describe("LoginModal (RBT-020)", () => {
     fireEvent.changeText(getByTestId("login-reg-nik-input"), "320123");
     fireEvent.press(getByTestId("login-reg-consent"));
     // 6 digits → still invalid NIK, submit stays disabled.
-    expect(getByTestId("login-reg-submit").props.accessibilityState.disabled).toBe(
-      true,
-    );
+    expect(
+      getByTestId("login-reg-submit").props.accessibilityState.disabled,
+    ).toBe(true);
   });
 
   it("submits trimmed name + NIK via completeRegistration and shows success", async () => {
@@ -399,7 +441,10 @@ describe("LoginModal (RBT-020)", () => {
       getByTestId("login-reg-name-input"),
       "  Rizky Rachmawan  ",
     );
-    fireEvent.changeText(getByTestId("login-reg-nik-input"), "3201234567890123");
+    fireEvent.changeText(
+      getByTestId("login-reg-nik-input"),
+      "3201234567890123",
+    );
     fireEvent.press(getByTestId("login-reg-consent"));
     fireEvent.press(getByTestId("login-reg-submit"));
     // : "Berhasil!" success title
@@ -421,7 +466,10 @@ describe("LoginModal (RBT-020)", () => {
     const { getByTestId, getByText } = renderModal(repo);
     await reachRegisterStep(getByTestId, getByText);
     fireEvent.changeText(getByTestId("login-reg-name-input"), "Rizky");
-    fireEvent.changeText(getByTestId("login-reg-nik-input"), "3201234567890123");
+    fireEvent.changeText(
+      getByTestId("login-reg-nik-input"),
+      "3201234567890123",
+    );
     fireEvent.press(getByTestId("login-reg-consent"));
     fireEvent.press(getByTestId("login-reg-submit"));
     await waitFor(() => {
@@ -457,12 +505,17 @@ describe("LoginModal (RBT-020)", () => {
   });
 
   it("registers and handles Android hardware back", () => {
-    Object.defineProperty(Platform, "OS", { configurable: true, value: "android" });
-    let handler: (() => boolean | null | undefined) | undefined;
-    jest.spyOn(BackHandler, "addEventListener").mockImplementation((_event, callback) => {
-      handler = callback;
-      return { remove: jest.fn() };
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "android",
     });
+    let handler: (() => boolean | null | undefined) | undefined;
+    jest
+      .spyOn(BackHandler, "addEventListener")
+      .mockImplementation((_event, callback) => {
+        handler = callback;
+        return { remove: jest.fn() };
+      });
     const { onClose } = renderModal(new FakeUserRepository());
 
     expect(handler).toBeDefined();

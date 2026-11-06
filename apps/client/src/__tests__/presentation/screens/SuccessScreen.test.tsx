@@ -31,7 +31,10 @@ jest.mock("react-native-qrcode-svg", () => {
   const ReactMock = require("react");
   const Native = require("react-native");
   function QrCodeMock(props: { value: string }) {
-    return ReactMock.createElement(Native.View, { testID: "success-qr", accessibilityLabel: props.value });
+    return ReactMock.createElement(Native.View, {
+      testID: "success-qr",
+      accessibilityLabel: props.value,
+    });
   }
   return { __esModule: true, default: QrCodeMock };
 });
@@ -39,9 +42,19 @@ jest.mock("react-native-qrcode-svg", () => {
 class StatusRepo implements PaymentRepository {
   constructor(private readonly attempt: PaymentAttempt) {}
   async getPaymentPage(bookingId: string): Promise<PaymentPage> {
-    return { bookingId, methods: ["QRIS"], amountMinor: 1, paymentExpiresAt: "", serverTime: "" };
+    return {
+      bookingId,
+      methods: ["QRIS"],
+      amountMinor: 1,
+      paymentExpiresAt: "",
+      serverTime: "",
+    };
   }
-  async createAttempt(bookingId: string, _m: PaymentMethod, _k: string): Promise<PaymentAttempt> {
+  async createAttempt(
+    bookingId: string,
+    _m: PaymentMethod,
+    _k: string,
+  ): Promise<PaymentAttempt> {
     return { attemptId: "a1", bookingId, status: "AWAITING_PAYMENT" };
   }
   async getStatus(): Promise<PaymentAttempt> {
@@ -88,14 +101,18 @@ describe("SuccessScreen (RBT-070)", () => {
   it("shows the verifying state before the authoritative status resolves", async () => {
     const screen = renderScreen("AWAITING_PAYMENT");
     expect(screen.getByTestId("success-verifying")).toBeTruthy();
-    await waitFor(() => expect(screen.getByText("Menyiapkan tiket…")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByText("Menyiapkan tiket…")).toBeTruthy(),
+    );
   });
 
   it("renders the order summary ONLY when verified PAID (orderId/qty/amount/masked NIK)", async () => {
     useSessionStore.getState().setBooking("bk-1", 45000000);
     useSessionStore.getState().setOrderDetail("31****89", 2);
     const screen = renderScreen("PAID");
-    await waitFor(() => expect(screen.getByTestId("success-eyebrow")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("success-eyebrow")).toBeTruthy(),
+    );
     expect(screen.getByText("bk-1")).toBeTruthy();
     expect(screen.getByText("2 tiket")).toBeTruthy();
     expect(screen.getByText("Rp 450.000")).toBeTruthy();
@@ -111,7 +128,9 @@ describe("SuccessScreen (RBT-070)", () => {
   it("the home action routes to / (RBT-071)", async () => {
     useSessionStore.getState().setOrderDetail("31****89", 1);
     const screen = renderScreen("PAID");
-    await waitFor(() => expect(screen.getByTestId("success-home")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("success-home")).toBeTruthy(),
+    );
     fireEvent.press(screen.getByTestId("success-home"));
     expect(mockRouter.replace).toHaveBeenCalledWith("/");
   });
@@ -119,7 +138,9 @@ describe("SuccessScreen (RBT-070)", () => {
   it("shows the MASKED NIK, never a raw 16-digit NIK", async () => {
     useSessionStore.getState().setOrderDetail("31****89", 1);
     const screen = renderScreen("PAID");
-    await waitFor(() => expect(screen.getByTestId("success-eyebrow")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("success-eyebrow")).toBeTruthy(),
+    );
     // no 16-digit run anywhere in the rendered tree
     expect(screen.queryByText(/\d{16}/)).toBeNull();
     expect(screen.getByText("31****89")).toBeTruthy();
@@ -127,7 +148,9 @@ describe("SuccessScreen (RBT-070)", () => {
 
   it("falls back to a dotted placeholder when no masked NIK was recorded", async () => {
     const screen = renderScreen("PAID");
-    await waitFor(() => expect(screen.getByTestId("success-eyebrow")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("success-eyebrow")).toBeTruthy(),
+    );
     expect(screen.getByText("••••")).toBeTruthy();
     // default qty 1 when ticketCount unset
     expect(screen.getByText("1 tiket")).toBeTruthy();
@@ -136,29 +159,51 @@ describe("SuccessScreen (RBT-070)", () => {
   it("downloads ticket references without reading the rendered native QR (RBT-071)", async () => {
     useSessionStore.getState().setOrderDetail("31****89", 1);
     const screen = renderScreen("PAID");
-    await waitFor(() => expect(screen.getByTestId("success-download")).toBeTruthy());
-    expect(() => fireEvent.press(screen.getByTestId("success-download"))).not.toThrow();
-    await waitFor(() => expect(mockDownloadTickets).toHaveBeenCalledWith(
-      "bk-1", 1, ["RBT|bk-1|1"], undefined,
-    ));
+    await waitFor(() =>
+      expect(screen.getByTestId("success-download")).toBeTruthy(),
+    );
+    expect(() =>
+      fireEvent.press(screen.getByTestId("success-download")),
+    ).not.toThrow();
+    await waitFor(() =>
+      expect(mockDownloadTickets).toHaveBeenCalledWith(
+        "bk-1",
+        1,
+        ["RBT|bk-1|1"],
+        undefined,
+      ),
+    );
   });
 
   it("generates one safe ticket reference per ticket", async () => {
     useSessionStore.getState().setOrderDetail("31****89", 2);
     const screen = renderScreen("PAID");
-    await waitFor(() => expect(screen.getByTestId("success-download")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("success-download")).toBeTruthy(),
+    );
     fireEvent.press(screen.getByTestId("success-download"));
-    await waitFor(() => expect(mockDownloadTickets).toHaveBeenCalledWith(
-      "bk-1", 2, ["RBT|bk-1|1", "RBT|bk-1|2"], undefined,
-    ));
+    await waitFor(() =>
+      expect(mockDownloadTickets).toHaveBeenCalledWith(
+        "bk-1",
+        2,
+        ["RBT|bk-1|1", "RBT|bk-1|2"],
+        undefined,
+      ),
+    );
   });
 
   it("uses the generic message for non-Error download failures", async () => {
     mockDownloadTickets.mockRejectedValueOnce("disk unavailable");
     const screen = renderScreen("PAID");
-    await waitFor(() => expect(screen.getByTestId("success-download")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("success-download")).toBeTruthy(),
+    );
     fireEvent.press(screen.getByTestId("success-download"));
-    await waitFor(() => expect(screen.getByText("E-tiket gagal disimpan. Coba lagi.")).toBeTruthy());
+    await waitFor(() =>
+      expect(
+        screen.getByText("E-tiket gagal disimpan. Coba lagi."),
+      ).toBeTruthy(),
+    );
   });
 
   it("a non-PAID (FAILED) status redirects to the recovery screen", async () => {

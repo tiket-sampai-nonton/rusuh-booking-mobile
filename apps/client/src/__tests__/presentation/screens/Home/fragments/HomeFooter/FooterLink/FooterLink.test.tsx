@@ -18,10 +18,16 @@ describe("FooterLink navigation", () => {
   });
 
   it("shows the fallback toast when an external destination cannot open", async () => {
-    jest.spyOn(Linking, "openURL").mockRejectedValueOnce(new Error("not available"));
+    jest
+      .spyOn(Linking, "openURL")
+      .mockRejectedValueOnce(new Error("not available"));
     render(
       <ToastProvider>
-        <FooterLink label="Instagram" href="https://example.test" onNavigate={jest.fn()} />
+        <FooterLink
+          label="Instagram"
+          href="https://example.test"
+          onNavigate={jest.fn()}
+        />
       </ToastProvider>,
     );
 

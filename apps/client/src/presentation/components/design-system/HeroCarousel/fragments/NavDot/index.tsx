@@ -1,9 +1,19 @@
-import { useEffect } from 'react';
-import { Pressable } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useEffect } from "react";
+import { Pressable } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
-import { SLIDE_DURATION_MS } from '../../constants';
-import { styleForNavDotAnimatedView8, styleForNavDotAnimatedView9, styleForNavDotPressable7 } from '../../style';
+import { SLIDE_DURATION_MS } from "../../constants";
+import {
+  styleForNavDotAnimatedView8,
+  styleForNavDotAnimatedView9,
+  styleForNavDotPressable7,
+} from "../../style";
 
 export function NavDot({
   isActive,

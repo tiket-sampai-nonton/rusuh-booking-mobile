@@ -13,7 +13,11 @@ const ARROW_PATH: Readonly<Record<ArrowDirection, string>> = {
   right: "M5 12h14m-6-6 6 6-6 6",
 };
 
-export function ArrowIcon({ direction = "right", color, size = 16 }: ArrowIconProps) {
+export function ArrowIcon({
+  direction = "right",
+  color,
+  size = 16,
+}: ArrowIconProps) {
   return (
     <IconFrame color={color} size={size}>
       <Path d={ARROW_PATH[direction]} />

@@ -8,11 +8,12 @@ import type {
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
 const mockRouter = { push: jest.fn() };
-const originalNavigator = global.navigator;
-const originalWindow = global.window;
+const originalNavigator = globalThis.navigator;
+const originalWindow = globalThis.window;
 const originalPlatform = Platform.OS;
 const completedAnimation = {
-  start: (callback?: (result: { finished: boolean }) => void) => callback?.({ finished: true }),
+  start: (callback?: (result: { finished: boolean }) => void) =>
+    callback?.({ finished: true }),
   stop: () => undefined,
   reset: () => undefined,
 };
@@ -61,18 +62,45 @@ function repo(detail: EventDetail): EventRepository {
 describe("EventDetailScreen", () => {
   beforeEach(() => {
     mockRouter.push.mockReset();
-    jest.spyOn(Animated, "timing").mockReturnValue(completedAnimation as ReturnType<typeof Animated.timing>);
-    jest.spyOn(Animated, "spring").mockReturnValue(completedAnimation as ReturnType<typeof Animated.spring>);
-    jest.spyOn(Animated, "parallel").mockReturnValue(completedAnimation as ReturnType<typeof Animated.parallel>);
-    jest.spyOn(Animated, "sequence").mockReturnValue(completedAnimation as ReturnType<typeof Animated.sequence>);
-    jest.spyOn(Animated, "loop").mockReturnValue(completedAnimation as ReturnType<typeof Animated.loop>);
+    jest
+      .spyOn(Animated, "timing")
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.timing>,
+      );
+    jest
+      .spyOn(Animated, "spring")
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.spring>,
+      );
+    jest
+      .spyOn(Animated, "parallel")
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.parallel>,
+      );
+    jest
+      .spyOn(Animated, "sequence")
+      .mockReturnValue(
+        completedAnimation as ReturnType<typeof Animated.sequence>,
+      );
+    jest
+      .spyOn(Animated, "loop")
+      .mockReturnValue(completedAnimation as ReturnType<typeof Animated.loop>);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
-    Object.defineProperty(global, "navigator", { configurable: true, value: originalNavigator });
-    Object.defineProperty(global, "window", { configurable: true, value: originalWindow });
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: originalNavigator,
+    });
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: originalWindow,
+    });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
   });
 
   it("shows a loading state before data resolves", () => {
@@ -96,7 +124,9 @@ describe("EventDetailScreen", () => {
     renderWithProviders(<EventDetailScreen eventId="nope" />, {
       container: { eventRepository: failing },
     });
-    await waitFor(() => expect(screen.getByTestId("detail-error")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("detail-error")).toBeTruthy(),
+    );
     expect(screen.getByText("Event tidak ditemukan.")).toBeTruthy();
   });
 
@@ -212,7 +242,9 @@ describe("EventDetailScreen", () => {
 
   it("renders the NOT_STARTED hero status label", async () => {
     renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
-      container: { eventRepository: repo({ ...available, status: "NOT_STARTED" }) },
+      container: {
+        eventRepository: repo({ ...available, status: "NOT_STARTED" }),
+      },
     });
     await waitFor(() => screen.getByTestId("join-cta"));
     expect(screen.getByText("Segera Dibuka")).toBeTruthy();
@@ -224,7 +256,9 @@ describe("EventDetailScreen", () => {
     });
     await waitFor(() => screen.getByTestId("join-cta"));
     //  shows "Penjualan Ditutup" in both StatusBadge and CTA button for CLOSED status
-    expect(screen.getAllByText("Penjualan Ditutup").length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText("Penjualan Ditutup").length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it("navigates home from the back button (goHome)", async () => {
@@ -255,15 +289,24 @@ describe("EventDetailScreen", () => {
 
   it("shares event information on web and displays the remaining-ticket chip", async () => {
     const previousPlatform = Platform.OS;
-    const previousWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
-    const previousShare = Object.getOwnPropertyDescriptor(globalThis.navigator, "share");
+    const previousWindow = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "window",
+    );
+    const previousShare = Object.getOwnPropertyDescriptor(
+      globalThis.navigator,
+      "share",
+    );
     const share = jest.fn().mockResolvedValue(undefined);
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     Object.defineProperty(globalThis, "window", {
       configurable: true,
       value: { location: { href: "https://example.invalid/events/evt-1" } },
     });
-    Object.defineProperty(globalThis.navigator, "share", { configurable: true, value: share });
+    Object.defineProperty(globalThis.navigator, "share", {
+      configurable: true,
+      value: share,
+    });
     try {
       renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
         container: { eventRepository: repo(available) },
@@ -271,19 +314,28 @@ describe("EventDetailScreen", () => {
       await waitFor(() => screen.getByTestId("join-cta"));
       expect(screen.getByText("120 tiket tersedia")).toBeTruthy();
       fireEvent.press(screen.getByLabelText("Bagikan"));
-      expect(share).toHaveBeenCalledWith(expect.objectContaining({ title: available.name }));
+      expect(share).toHaveBeenCalledWith(
+        expect.objectContaining({ title: available.name }),
+      );
     } finally {
-      Object.defineProperty(Platform, "OS", { configurable: true, value: previousPlatform });
-      if (previousWindow) Object.defineProperty(globalThis, "window", previousWindow);
+      Object.defineProperty(Platform, "OS", {
+        configurable: true,
+        value: previousPlatform,
+      });
+      if (previousWindow)
+        Object.defineProperty(globalThis, "window", previousWindow);
       else Reflect.deleteProperty(globalThis, "window");
-      if (previousShare) Object.defineProperty(globalThis.navigator, "share", previousShare);
+      if (previousShare)
+        Object.defineProperty(globalThis.navigator, "share", previousShare);
       else Reflect.deleteProperty(globalThis.navigator, "share");
     }
   });
 
   it("does not join when the CTA is disabled (SOLD_OUT guard)", async () => {
     renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
-      container: { eventRepository: repo({ ...available, status: "SOLD_OUT" }) },
+      container: {
+        eventRepository: repo({ ...available, status: "SOLD_OUT" }),
+      },
     });
     await waitFor(() => screen.getByTestId("join-cta"));
     fireEvent.press(screen.getByTestId("join-cta"));
@@ -296,8 +348,14 @@ describe("EventDetailScreen", () => {
   it("uses a safe label for unknown status, supports native sharing, and handles scrolling", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "ios" });
     const share = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(global, "navigator", { configurable: true, value: { share } });
-    Object.defineProperty(global, "window", { configurable: true, value: { location: { href: "https://example.test/events/evt-1" } } });
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: { share },
+    });
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { location: { href: "https://example.test/events/evt-1" } },
+    });
     const unknown = {
       ...available,
       status: "MYSTERY" as unknown as EventDetail["status"],
@@ -309,17 +367,22 @@ describe("EventDetailScreen", () => {
     await waitFor(() => expect(screen.getByTestId("join-cta")).toBeTruthy());
     expect(screen.getByText("MYSTERY")).toBeTruthy();
     fireEvent.press(screen.getByRole("button", { name: "Bagikan" }));
-    expect(share).toHaveBeenCalledWith({ title: "Rusuh Fest 2026", url: "https://example.test/events/evt-1" });
+    expect(share).toHaveBeenCalledWith({
+      title: "Rusuh Fest 2026",
+      url: "https://example.test/events/evt-1",
+    });
     const scrollHandler = screen.getByTestId("detail-scroll").props.onScroll as
       | ((event: { nativeEvent: { contentOffset: { y: number } } }) => void)
       | undefined;
     act(() => scrollHandler?.({ nativeEvent: { contentOffset: { y: 180 } } }));
-
   });
 
   it("keeps the web header static on scroll and safely skips an unavailable share API", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
-    Object.defineProperty(global, "navigator", { configurable: true, value: {} });
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: {},
+    });
     renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
       container: { eventRepository: repo(available) },
     });

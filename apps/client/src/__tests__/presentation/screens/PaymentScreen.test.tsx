@@ -74,12 +74,17 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     const gate = new Promise<PaymentPage>((r) => (release = r));
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: {
-        paymentRepository: { ...paymentRepo(page()), getPaymentPage: () => gate },
+        paymentRepository: {
+          ...paymentRepo(page()),
+          getPaymentPage: () => gate,
+        },
       },
     });
     expect(screen.getByTestId("payment-loading")).toBeTruthy();
     release(page());
-    await waitFor(() => expect(screen.queryByTestId("payment-loading")).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByTestId("payment-loading")).toBeNull(),
+    );
   });
 
   it("renders the total == amountMinor with NO service-fee line (D10.1)", async () => {
@@ -87,7 +92,9 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
       container: { paymentRepository: paymentRepo(page()) },
     });
     await waitFor(() =>
-      expect(screen.getByTestId("payment-total").props.children).toBe("Rp 450.000"),
+      expect(screen.getByTestId("payment-total").props.children).toBe(
+        "Rp 450.000",
+      ),
     );
     expect(useSessionStore.getState().amountMinor).toBe(45000000);
     expect(screen.queryByText(/biaya layanan/i)).toBeNull();
@@ -95,9 +102,15 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
 
   it("renders ONLY the server-provided methods (AC2)", async () => {
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
-      container: { paymentRepository: paymentRepo(page({ methods: ["VA_BCA", "QRIS", "GOPAY"] })) },
+      container: {
+        paymentRepository: paymentRepo(
+          page({ methods: ["VA_BCA", "QRIS", "GOPAY"] }),
+        ),
+      },
     });
-    await waitFor(() => expect(screen.getByTestId("method-VA_BCA")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("method-VA_BCA")).toBeTruthy(),
+    );
     expect(screen.getByTestId("method-QRIS")).toBeTruthy();
     expect(screen.getByTestId("method-GOPAY")).toBeTruthy();
     // A method the server did NOT offer is absent.
@@ -108,7 +121,9 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: { paymentRepository: paymentRepo(page()) },
     });
-    await waitFor(() => expect(screen.getByTestId("method-VA_BCA")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("method-VA_BCA")).toBeTruthy(),
+    );
     // First method default-selected → Bayar already enabled.
     await waitFor(() =>
       expect(
@@ -160,7 +175,9 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: { paymentRepository: paymentRepo(withAttempt) },
     });
-    await waitFor(() => expect(screen.getByText("Kembali ke SNAP")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByText("Kembali ke SNAP")).toBeTruthy(),
+    );
     // The resume CTA is pressable (does not throw without a redirectUrl).
     fireEvent.press(screen.getByTestId("pay-now"));
   });
@@ -190,7 +207,9 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: { paymentRepository: paymentRepo(page()) },
     });
-    await waitFor(() => expect(screen.getByTestId("payment-back")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("payment-back")).toBeTruthy(),
+    );
     fireEvent.press(screen.getByTestId("payment-back"));
     expect(mockRouter.replace).toHaveBeenCalledWith("/");
   });

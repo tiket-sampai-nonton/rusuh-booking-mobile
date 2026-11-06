@@ -1,7 +1,10 @@
 /** RBT-043 — Waiting room screen prop + fragment types. */
 import type { ReactNode } from "react";
 
-import type { QueueEntry, QueueZone } from "@domain/repositories/queue.repository";
+import type {
+  QueueEntry,
+  QueueZone,
+} from "@domain/repositories/queue.repository";
 
 /**
  * The waiting room is driven by a `queueId` (the persisted queue entry, from the

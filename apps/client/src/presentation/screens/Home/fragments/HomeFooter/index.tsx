@@ -16,14 +16,13 @@
  * - Links: underline slides from left on hover
  * - Social icons: scale + fill animation
  */
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
 
-import { Reveal } from '@presentation/components/design-system';
+import { Reveal } from "@presentation/components/design-system";
 
-import { FooterLink } from './FooterLink';
-import { SocialLink } from './SocialLink';
+import { FooterLink } from "./FooterLink";
+import { SocialLink } from "./SocialLink";
 import { componentStyles } from "./style";
-
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // DATA
@@ -31,68 +30,62 @@ import { componentStyles } from "./style";
 
 const LINK_COLUMNS = [
   {
-    title: 'Event',
+    title: "Event",
     links: [
-      { label: 'Konser', href: '/browse?genre=concert' },
-      { label: 'Festival', href: '/browse?genre=festival' },
-      { label: 'Olahraga', href: '/browse?genre=sports' },
-      { label: 'Teater', href: '/browse?genre=theater' },
+      { label: "Konser", href: "/browse?genre=concert" },
+      { label: "Festival", href: "/browse?genre=festival" },
+      { label: "Olahraga", href: "/browse?genre=sports" },
+      { label: "Teater", href: "/browse?genre=theater" },
     ],
   },
   {
-    title: 'Bantuan',
+    title: "Bantuan",
     links: [
-      { label: 'Pusat Bantuan', href: '#' },
-      { label: 'Cara Beli', href: '#' },
-      { label: 'Pembayaran', href: '#' },
-      { label: 'Pengembalian Dana', href: '#' },
+      { label: "Pusat Bantuan", href: "#" },
+      { label: "Cara Beli", href: "#" },
+      { label: "Pembayaran", href: "#" },
+      { label: "Pengembalian Dana", href: "#" },
     ],
   },
   {
-    title: 'Perusahaan',
+    title: "Perusahaan",
     links: [
-      { label: 'Tentang Kami', href: '#' },
-      { label: 'Karir', href: '#' },
-      { label: 'Media', href: '#' },
-      { label: 'Kontak', href: '#' },
+      { label: "Tentang Kami", href: "#" },
+      { label: "Karir", href: "#" },
+      { label: "Media", href: "#" },
+      { label: "Kontak", href: "#" },
     ],
   },
 ] as const;
 
 const SOCIAL_LINKS = [
-  { label: 'IG', name: 'Instagram', handle: '@rusuhtiket' },
-  { label: 'TW', name: 'Twitter', handle: '@rusuhtiket' },
-  { label: 'FB', name: 'Facebook', handle: 'Rusuh Tiket' },
-  { label: 'YT', name: 'YouTube', handle: 'Rusuh Tiket Official' },
+  { label: "IG", name: "Instagram", handle: "@rusuhtiket" },
+  { label: "TW", name: "Twitter", handle: "@rusuhtiket" },
+  { label: "FB", name: "Facebook", handle: "Rusuh Tiket" },
+  { label: "YT", name: "YouTube", handle: "Rusuh Tiket Official" },
 ] as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN FOOTER
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export function HomeFooter({ onNavigate }: { readonly onNavigate: (href: string) => void }) {
+export function HomeFooter({
+  onNavigate,
+}: {
+  readonly onNavigate: (href: string) => void;
+}) {
   return (
-    <View
-      style={componentStyles.elementBackgroundColor3}
-      testID="footer"
-    >
+    <View style={componentStyles.elementBackgroundColor3} testID="footer">
       {/* Main Grid */}
-      <View
-        style={componentStyles.elementFlexDirection4}
-      >
+      <View style={componentStyles.elementFlexDirection4}>
         {/* Brand Column */}
         <Reveal>
           <View style={componentStyles.elementFlex5}>
-            <Text
-              style={componentStyles.elementColor6}
-            >
-              Rusuh Tiket
-            </Text>
+            <Text style={componentStyles.elementColor6}>Rusuh Tiket</Text>
 
-            <Text
-              style={componentStyles.elementColor7}
-            >
-              Platform tiket event terpercaya di Indonesia. Beli tiket konser, festival, olahraga, dan teater dengan mudah dan aman.
+            <Text style={componentStyles.elementColor7}>
+              Platform tiket event terpercaya di Indonesia. Beli tiket konser,
+              festival, olahraga, dan teater dengan mudah dan aman.
             </Text>
           </View>
         </Reveal>
@@ -101,14 +94,15 @@ export function HomeFooter({ onNavigate }: { readonly onNavigate: (href: string)
         {LINK_COLUMNS.map((column, i) => (
           <Reveal key={column.title} delay={(i + 1) * 80}>
             <View style={componentStyles.elementMinWidth8}>
-              <Text
-                style={componentStyles.elementColor9}
-              >
-                {column.title}
-              </Text>
+              <Text style={componentStyles.elementColor9}>{column.title}</Text>
 
               {column.links.map((link) => (
-                <FooterLink key={link.label} label={link.label} href={link.href} onNavigate={onNavigate} />
+                <FooterLink
+                  key={link.label}
+                  label={link.label}
+                  href={link.href}
+                  onNavigate={onNavigate}
+                />
               ))}
             </View>
           </Reveal>
@@ -116,13 +110,9 @@ export function HomeFooter({ onNavigate }: { readonly onNavigate: (href: string)
       </View>
 
       {/* Bottom Bar */}
-      <View
-        style={componentStyles.elementFlexDirection10}
-      >
+      <View style={componentStyles.elementFlexDirection10}>
         {/* Copyright */}
-        <Text
-          style={componentStyles.elementColor11}
-        >
+        <Text style={componentStyles.elementColor11}>
           © 2025 Rusuh Tiket. Hak cipta dilindungi.
         </Text>
 

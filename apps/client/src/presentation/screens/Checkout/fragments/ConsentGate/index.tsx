@@ -12,8 +12,7 @@ import { CheckIcon } from "@presentation/components/ArrowIcon";
 
 import type { ConsentGateProps } from "../../interface";
 import { componentStyles } from "./style";
-import { styleForConsentGateView0 } from './style';
-
+import { styleForConsentGateView0 } from "./style";
 
 export function ConsentGate({ checked, onToggle }: ConsentGateProps) {
   return (
@@ -27,17 +26,11 @@ export function ConsentGate({ checked, onToggle }: ConsentGateProps) {
       style={componentStyles.elementMarginTop0}
     >
       {/* Checkbox */}
-      <View
-        style={styleForConsentGateView0(checked)}
-      >
-        {checked ? (
-          <CheckIcon color={designColors.ground} size={15} />
-        ) : null}
+      <View style={styleForConsentGateView0(checked)}>
+        {checked ? <CheckIcon color={designColors.ground} size={15} /> : null}
       </View>
       {/* Label */}
-      <Text
-        style={componentStyles.elementFlex1}
-      >
+      <Text style={componentStyles.elementFlex1}>
         Saya menyetujui pemrosesan data (termasuk NIK) sesuai{" "}
         <Text style={componentStyles.elementFontFamily2}>
           Kebijakan Privasi

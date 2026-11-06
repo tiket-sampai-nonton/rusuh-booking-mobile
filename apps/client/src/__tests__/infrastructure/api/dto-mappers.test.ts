@@ -15,14 +15,16 @@ describe("toPaymentPage", () => {
   });
 
   it("maps a restored current attempt", () => {
-    expect(toPaymentPage({
-      ...page,
-      currentAttempt: {
-        attemptId: "attempt-1",
-        bookingId: "booking-1",
-        status: "AWAITING_PAYMENT",
-      },
-    }).currentAttempt).toMatchObject({
+    expect(
+      toPaymentPage({
+        ...page,
+        currentAttempt: {
+          attemptId: "attempt-1",
+          bookingId: "booking-1",
+          status: "AWAITING_PAYMENT",
+        },
+      }).currentAttempt,
+    ).toMatchObject({
       attemptId: "attempt-1",
       bookingId: "booking-1",
       status: "AWAITING_PAYMENT",

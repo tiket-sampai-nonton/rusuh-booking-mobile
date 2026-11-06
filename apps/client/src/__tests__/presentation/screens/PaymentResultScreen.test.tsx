@@ -28,9 +28,19 @@ jest.mock("expo-router", () => ({
 class StatusRepo implements PaymentRepository {
   constructor(private readonly attempt: PaymentAttempt) {}
   async getPaymentPage(bookingId: string): Promise<PaymentPage> {
-    return { bookingId, methods: ["QRIS"], amountMinor: 1, paymentExpiresAt: "", serverTime: "" };
+    return {
+      bookingId,
+      methods: ["QRIS"],
+      amountMinor: 1,
+      paymentExpiresAt: "",
+      serverTime: "",
+    };
   }
-  async createAttempt(bookingId: string, _m: PaymentMethod, _k: string): Promise<PaymentAttempt> {
+  async createAttempt(
+    bookingId: string,
+    _m: PaymentMethod,
+    _k: string,
+  ): Promise<PaymentAttempt> {
     return { attemptId: "a1", bookingId, status: "AWAITING_PAYMENT" };
   }
   async getStatus(): Promise<PaymentAttempt> {
@@ -66,7 +76,10 @@ function renderScreen(
   );
 }
 
-function attempt(status: PaymentStatus, extra: Partial<PaymentAttempt> = {}): PaymentAttempt {
+function attempt(
+  status: PaymentStatus,
+  extra: Partial<PaymentAttempt> = {},
+): PaymentAttempt {
   return { attemptId: "a1", bookingId: "bk-1", status, ...extra };
 }
 
@@ -80,7 +93,10 @@ describe("PaymentResultScreen (RBT-063)", () => {
     const future = new Date(Date.now() + 300_000).toISOString();
     const screen = renderScreen(
       new StatusRepo(
-        attempt("AWAITING_PAYMENT", { paymentExpiresAt: future, serverTime: new Date().toISOString() }),
+        attempt("AWAITING_PAYMENT", {
+          paymentExpiresAt: future,
+          serverTime: new Date().toISOString(),
+        }),
       ),
       { bookingId: "bk-1", attemptId: "a1" },
     );

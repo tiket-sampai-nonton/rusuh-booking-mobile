@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useReducedMotion } from 'react-native-reanimated';
+import { useEffect, useState } from "react";
+import { useReducedMotion } from "react-native-reanimated";
 
-import { SCRAMBLE_CHARS, SCRAMBLE_INTERVAL_MS } from '../constants';
+import { SCRAMBLE_CHARS, SCRAMBLE_INTERVAL_MS } from "../constants";
 
 export function useTextScramble(text: string): string {
   const [displayText, setDisplayText] = useState(text);
@@ -22,9 +22,11 @@ export function useTextScramble(text: string): string {
           .split("")
           .map((char, index) => {
             if (index < iteration) return originalText[index];
-            return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+            return SCRAMBLE_CHARS[
+              Math.floor(Math.random() * SCRAMBLE_CHARS.length)
+            ];
           })
-          .join("")
+          .join(""),
       );
 
       if (iteration >= text.length) {

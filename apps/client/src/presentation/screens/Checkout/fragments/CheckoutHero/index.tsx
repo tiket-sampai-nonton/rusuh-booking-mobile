@@ -10,10 +10,8 @@ import { Image, Text, View } from "react-native";
 
 import { eventImage } from "@domain/rules/event-image";
 
-
 import type { CheckoutHeroProps } from "../../interface";
 import { styles } from "./style";
-
 
 export function CheckoutHero({ eventId }: CheckoutHeroProps) {
   return (

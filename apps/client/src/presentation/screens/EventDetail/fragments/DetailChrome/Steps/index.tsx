@@ -23,12 +23,29 @@ export function Steps({ activeStep = 1 }: StepsProps) {
 
         return (
           <View key={step.number} style={styles.step}>
-            <View style={[styles.stepNum, isActive ? styles.stepNumActive : styles.stepNumInactive]}>
-              <Text style={[styles.stepNumText, isActive ? styles.stepNumTextActive : styles.stepNumTextInactive]}>
+            <View
+              style={[
+                styles.stepNum,
+                isActive ? styles.stepNumActive : styles.stepNumInactive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.stepNumText,
+                  isActive
+                    ? styles.stepNumTextActive
+                    : styles.stepNumTextInactive,
+                ]}
+              >
                 {step.number}
               </Text>
             </View>
-            <Text style={[styles.stepLabel, isActive ? styles.stepLabelActive : styles.stepLabelInactive]}>
+            <Text
+              style={[
+                styles.stepLabel,
+                isActive ? styles.stepLabelActive : styles.stepLabelInactive,
+              ]}
+            >
               {step.label}
             </Text>
             {!isLast && <View style={styles.stepConnector} />}

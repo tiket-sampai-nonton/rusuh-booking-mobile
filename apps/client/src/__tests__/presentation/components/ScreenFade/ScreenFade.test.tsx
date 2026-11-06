@@ -11,16 +11,26 @@ jest.mock("react-native-reanimated", () => {
 import { ScreenFade } from "../../../../presentation/components/ScreenFade/index";
 
 describe("ScreenFade", () => {
-  afterEach(() => { mockReducedMotion = false; });
+  afterEach(() => {
+    mockReducedMotion = false;
+  });
 
   it("wraps its screen content in the standard entrance transition", () => {
-    render(<ScreenFade><Text>Screen body</Text></ScreenFade>);
+    render(
+      <ScreenFade>
+        <Text>Screen body</Text>
+      </ScreenFade>,
+    );
     expect(screen.getByText("Screen body")).toBeTruthy();
   });
 
   it("renders immediately when reduced motion is enabled", () => {
     mockReducedMotion = true;
-    render(<ScreenFade><Text>Reduced motion body</Text></ScreenFade>);
+    render(
+      <ScreenFade>
+        <Text>Reduced motion body</Text>
+      </ScreenFade>,
+    );
     expect(screen.getByText("Reduced motion body")).toBeTruthy();
   });
 });

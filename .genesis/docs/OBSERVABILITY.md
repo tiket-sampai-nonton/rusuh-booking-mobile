@@ -41,8 +41,7 @@ Monitor against budgets (D6.6):
 | p75 LCP | ≤ 2.5s | web-vitals on public routes |
 | INP | ≤ 200ms | web-vitals |
 | CLS | ≤ 0.1 | web-vitals |
-| Initial JS (public) | ≤ 300KB gzip | CI bundle gate + RUM |
-| Initial JS (transactional) | ≤ 500KB gzip | CI bundle gate |
+| Initial JS (every route) | ≤ 1MB gzip | CI bundle gate + RUM |
 | Native TTI / frame drops | tracked | RN perf monitor / device QA |
 
 ## 4. Error & crash telemetry

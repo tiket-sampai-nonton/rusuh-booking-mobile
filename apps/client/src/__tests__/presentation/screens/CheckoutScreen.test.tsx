@@ -19,7 +19,15 @@ jest.mock("expo-router", () => ({
 jest.mock("@presentation/hooks/useServerCountdown", () => {
   const { useEffect, useRef } = jest.requireActual("react");
   return {
-    useServerCountdown: ({ expiresAtIso, serverTimeIso, onExpire }: { expiresAtIso?: string; serverTimeIso?: string; onExpire?: () => void }) => {
+    useServerCountdown: ({
+      expiresAtIso,
+      serverTimeIso,
+      onExpire,
+    }: {
+      expiresAtIso?: string;
+      serverTimeIso?: string;
+      onExpire?: () => void;
+    }) => {
       const deadline = expiresAtIso ? Date.parse(expiresAtIso) : 0;
       const serverNow = serverTimeIso ? Date.parse(serverTimeIso) : deadline;
       const expired = Boolean(expiresAtIso && deadline <= serverNow);
@@ -93,9 +101,15 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
-    expect(screen.getByTestId("cat-0-REG").props.accessibilityState.selected).toBe(true);
-    expect(screen.getByTestId("checkout-total").props.children).toBe("Rp 450.000");
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
+    expect(
+      screen.getByTestId("cat-0-REG").props.accessibilityState.selected,
+    ).toBe(true);
+    expect(screen.getByTestId("checkout-total").props.children).toBe(
+      "Rp 450.000",
+    );
     expect(screen.queryByTestId("ticket-row-1")).toBeNull();
   });
 
@@ -106,7 +120,9 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
     fireEvent.press(screen.getByTestId("add-ticket"));
     fireEvent.press(screen.getByTestId("add-ticket"));
-    await waitFor(() => expect(screen.getByTestId("ticket-row-2")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-2")).toBeTruthy(),
+    );
     // 4th add is capped: pressing again does not create row-3.
     fireEvent.press(screen.getByTestId("add-ticket"));
     expect(screen.queryByTestId("ticket-row-3")).toBeNull();
@@ -118,32 +134,56 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     });
     await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
     fireEvent.press(screen.getByTestId("add-ticket"));
-    await waitFor(() => expect(screen.getByTestId("ticket-row-1")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-1")).toBeTruthy(),
+    );
     fireEvent.press(screen.getByTestId("remove-ticket-1"));
-    await waitFor(() => expect(screen.queryByTestId("ticket-row-1")).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByTestId("ticket-row-1")).toBeNull(),
+    );
   });
 
   it("honors a lower maxSelectable from the session (cap 2)", async () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
-      container: { bookingRepository: bookingRepo({ ...SESSION, maxSelectable: 2 }) },
+      container: {
+        bookingRepository: bookingRepo({ ...SESSION, maxSelectable: 2 }),
+      },
     });
     await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
     fireEvent.press(screen.getByTestId("add-ticket")); // → 2 rows (at cap)
-    await waitFor(() => expect(screen.getByTestId("ticket-row-1")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-1")).toBeTruthy(),
+    );
     fireEvent.press(screen.getByTestId("add-ticket")); // capped at 2
     expect(screen.queryByTestId("ticket-row-2")).toBeNull();
   });
 
   it("keeps rows stable when refreshed categories arrive and supports an empty catalog", async () => {
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
-    queryClient.setQueryData(["booking-session", "current"], SESSION);
-    const refreshedView = renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
-      container: { bookingRepository: bookingRepo(SESSION) },
-      queryClient,
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: Infinity } },
     });
-    await waitFor(() => expect(screen.getByTestId("cat-0-REG").props.accessibilityState.selected).toBe(true));
-    act(() => queryClient.setQueryData(["booking-session", "current"], { ...SESSION, categories: [...SESSION.categories] }));
-    expect(screen.getByTestId("cat-0-REG").props.accessibilityState.selected).toBe(true);
+    queryClient.setQueryData(["booking-session", "current"], SESSION);
+    const refreshedView = renderWithProviders(
+      <CheckoutScreen sessionId="sess-1" />,
+      {
+        container: { bookingRepository: bookingRepo(SESSION) },
+        queryClient,
+      },
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("cat-0-REG").props.accessibilityState.selected,
+      ).toBe(true),
+    );
+    act(() =>
+      queryClient.setQueryData(["booking-session", "current"], {
+        ...SESSION,
+        categories: [...SESSION.categories],
+      }),
+    );
+    expect(
+      screen.getByTestId("cat-0-REG").props.accessibilityState.selected,
+    ).toBe(true);
     refreshedView.unmount();
 
     const emptySession = { ...SESSION, categories: [] };
@@ -157,41 +197,69 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
 
   it("handles hardware back repeatedly while the leave-confirm dialog is open", async () => {
     const originalPlatform = Platform.OS;
-    Object.defineProperty(Platform, "OS", { configurable: true, value: "android" });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "android",
+    });
     const remove = jest.fn();
     let handler: (() => boolean) | undefined;
-    const addListener = jest.spyOn(BackHandler, "addEventListener").mockImplementation((_event, callback) => {
-      handler = callback as () => boolean;
-      return { remove } as never;
-    });
+    const addListener = jest
+      .spyOn(BackHandler, "addEventListener")
+      .mockImplementation((_event, callback) => {
+        handler = callback as () => boolean;
+        return { remove } as never;
+      });
     const view = renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
-    await act(async () => { expect(handler?.()).toBe(true); });
-    await waitFor(() => expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy());
-    await act(async () => { expect(handler?.()).toBe(true); });
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
+    await act(async () => {
+      expect(handler?.()).toBe(true);
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy(),
+    );
+    await act(async () => {
+      expect(handler?.()).toBe(true);
+    });
     view.unmount();
     expect(addListener).toHaveBeenCalled();
-    Object.defineProperty(Platform, "OS", { configurable: true, value: originalPlatform });
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatform,
+    });
   });
 
   it("selecting a category + filling valid buyer/attendee enables Lanjut Bayar", async () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
-    await waitFor(() => expect(screen.getByTestId("ticket-row-0")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
     // Submit starts disabled (empty buyer/attendee).
-    expect(screen.getByTestId("checkout-submit").props.accessibilityState.disabled).toBe(true);
+    expect(
+      screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
+    ).toBe(true);
 
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
     fireEvent.press(screen.getByTestId("cat-0-VIP")); // pick VIP category
     await waitFor(() =>
-      expect(screen.getByTestId("checkout-total").props.children).toBe("Rp 950.000"),
+      expect(screen.getByTestId("checkout-total").props.children).toBe(
+        "Rp 950.000",
+      ),
     );
-    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton Satu");
-    fireEvent.changeText(screen.getByTestId("attendee-nik-0"), "3171010101010001");
+    fireEvent.changeText(
+      screen.getByTestId("attendee-name-0"),
+      "Penonton Satu",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("attendee-nik-0"),
+      "3171010101010001",
+    );
     fireEvent.press(screen.getByTestId("checkout-consent")); // guest consent (RBT-052)
 
     await waitFor(() =>
@@ -246,12 +314,18 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     });
     await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
     fireEvent.press(screen.getByTestId("add-ticket")); // 2 rows
-    await waitFor(() => expect(screen.getByTestId("attendee-name-1")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("attendee-name-1")).toBeTruthy(),
+    );
     fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Penonton A");
     fireEvent.changeText(screen.getByTestId("attendee-name-1"), "Penonton B");
     // Each row kept its own value (patchRow matches only the edited index).
-    expect(screen.getByTestId("attendee-name-0").props.value).toBe("Penonton A");
-    expect(screen.getByTestId("attendee-name-1").props.value).toBe("Penonton B");
+    expect(screen.getByTestId("attendee-name-0").props.value).toBe(
+      "Penonton A",
+    );
+    expect(screen.getByTestId("attendee-name-1").props.value).toBe(
+      "Penonton B",
+    );
   });
 
   it("refuses to remove the last row (stays at min 1)", async () => {
@@ -260,9 +334,13 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     });
     await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
     fireEvent.press(screen.getByTestId("add-ticket")); // 2 rows
-    await waitFor(() => expect(screen.getByTestId("remove-ticket-1")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByTestId("remove-ticket-1")).toBeTruthy(),
+    );
     fireEvent.press(screen.getByTestId("remove-ticket-1")); // back to 1
-    await waitFor(() => expect(screen.queryByTestId("ticket-row-1")).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByTestId("ticket-row-1")).toBeNull(),
+    );
     // The lone row has no remove control, so the min-1 guard holds.
     expect(screen.queryByTestId("remove-ticket-0")).toBeNull();
     expect(screen.getByTestId("ticket-row-0")).toBeTruthy();
