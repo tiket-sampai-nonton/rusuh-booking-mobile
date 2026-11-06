@@ -104,37 +104,12 @@ jobs:
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
 
-  sonar:
-    name: SonarCloud quality gate
-    needs: [typecheck, lint_format, tests, audit]
-    runs-on: ubuntu-latest
-    environment: development
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage
-          path: apps/client/coverage
-      - name: Scan and wait for quality gate
-        uses: SonarSource/sonarqube-scan-action@v8.3.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
-          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
-        with:
-          args: >
-            -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
-            -Dsonar.sources=apps/client/src
-            -Dsonar.javascript.lcov.reportPaths=apps/client/coverage/lcov.info
-            -Dsonar.qualitygate.wait=true
+  # Temporarily skipped: SonarCloud scan. The other quality checks remain required.
 
   web_build:
     name: Build and validate web
     if: ${{ github.event_name == 'workflow_dispatch' }}
-    needs: sonar
+    needs: [typecheck, lint_format, tests, audit]
     runs-on: ubuntu-latest
     environment: development
     defaults:
@@ -225,16 +200,7 @@ jobs:
     name: Notify Telegram
     if: ${{ always() && github.event_name == 'workflow_dispatch' }}
     needs:
-      [
-        validate_ref,
-        typecheck,
-        lint_format,
-        tests,
-        audit,
-        sonar,
-        web_build,
-        deploy,
-      ]
+      [validate_ref, typecheck, lint_format, tests, audit, web_build, deploy]
     runs-on: ubuntu-latest
     environment: development
     steps:

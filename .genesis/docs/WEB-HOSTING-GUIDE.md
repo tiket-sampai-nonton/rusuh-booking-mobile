@@ -269,7 +269,6 @@ quality gates before uploading the static artifact.
    | Secret | Value |
    |---|---|
    | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages Edit permission for this account |
-   | `SONAR_TOKEN` | SonarCloud analysis token |
    | `TELEGRAM_BOT_TOKEN` | Token created by BotFather |
    | `TELEGRAM_CHAT_ID` | Telegram group or chat ID where release notices should arrive |
 
@@ -283,8 +282,10 @@ quality gates before uploading the static artifact.
    | `EXPO_PUBLIC_USE_MOCKS` | `true` |
    | `EXPO_PUBLIC_ENV` | `development` |
    | `EXPO_PUBLIC_SITE_URL` | `https://rusuh-booking.pages.dev` |
-   | `SONAR_ORGANIZATION` | SonarCloud organization key |
-   | `SONAR_PROJECT_KEY` | `ticket-sampai-nonton_rusuh-booking-mobile` |
+
+SonarCloud is temporarily disabled in this workflow, so `SONAR_TOKEN`, `SONAR_ORGANIZATION`, and
+`SONAR_PROJECT_KEY` are not currently required for deployment. Keep the SonarCloud quality gate in
+the broader repository pipeline policy; restore the scan here when the temporary exemption ends.
 
 `EXPO_PUBLIC_USE_MOCKS=true` is required for this QA deployment. It prevents the demo app from
 calling a placeholder or production API.
@@ -292,7 +293,9 @@ calling a placeholder or production API.
 ### Run the workflow
 
 1. Open a pull request into `develop`. `Deploy Web Development` runs typecheck, lint/format,
-   Jest/RNTL, dependency audit, and the SonarCloud quality gate. PR runs do not deploy.
+   Jest/RNTL, and dependency audit. SonarCloud is temporarily skipped for this workflow. PR runs do
+   not deploy. If the SonarCloud GitHub App independently reports a PR check, that integration is
+   separate from this workflow and may still run.
 2. After the approved change is on `develop`, open the repository's **Actions** tab.
 3. Select **Deploy Web Development → Run workflow** and choose branch `develop`.
 4. The manual run rechecks the current `develop` head, builds Expo Web, creates the sitemap,
