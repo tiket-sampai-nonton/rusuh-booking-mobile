@@ -55,8 +55,8 @@ export const styles = StyleSheet.create({
   mobileWebTotalValue: { color: designColors.ink, fontSize: 16 },
   payButton: {
     borderWidth: designBorders.standard,
-    borderColor: designColors.ground,
-    backgroundColor: designColors.ground,
+    borderColor: designColors.danger,
+    backgroundColor: designColors.danger,
     paddingVertical: 16,
     paddingHorizontal: 32,
   },
@@ -64,8 +64,8 @@ export const styles = StyleSheet.create({
     minHeight: 48,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: designColors.ink,
-    borderColor: designColors.ink,
+    backgroundColor: designColors.danger,
+    borderColor: designColors.danger,
   },
   payButtonNative: {
     minWidth: 160,
@@ -75,14 +75,16 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   payButtonPressed: {
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.danger,
+    borderColor: designColors.danger,
   },
   payButtonDisabled: {
     opacity: 0.5,
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.inkMuted,
+    borderColor: designColors.inkMuted,
   },
   payButtonText: {
-    color: designColors.ink,
+    color: designColors.ground,
     fontSize: 14,
     fontFamily: plusJakartaSansFonts.extraBold,
     textTransform: "uppercase",

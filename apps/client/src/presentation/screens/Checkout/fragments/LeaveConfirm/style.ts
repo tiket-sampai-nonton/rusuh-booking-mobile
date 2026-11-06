@@ -63,8 +63,8 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 16,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
-    backgroundColor: designColors.ground,
+    borderColor: designColors.danger,
+    backgroundColor: designColors.danger,
     alignItems: "center",
   },
   leaveButtonText: {
@@ -72,7 +72,7 @@ export const styles = StyleSheet.create({
     fontFamily: plusJakartaSansFonts.bold,
     textTransform: "uppercase",
     letterSpacing: 1,
-    color: designColors.ink,
+    color: designColors.ground,
   },
 });
 

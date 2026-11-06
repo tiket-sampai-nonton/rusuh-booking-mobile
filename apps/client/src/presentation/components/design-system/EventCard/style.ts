@@ -56,7 +56,6 @@ export function eventCardImageContainerStyle(
     aspectRatio = listMode ? 16 / 9 : 1;
   } else if (isMobileWeb && listMode) {
     width = 100;
-    height = 116;
   } else if (!listMode) {
     aspectRatio = 4 / 3;
   } else if (isWeb && listMode) {
@@ -68,6 +67,7 @@ export function eventCardImageContainerStyle(
     aspectRatio,
     width,
     height,
+    alignSelf: isMobileWeb && listMode ? "stretch" : undefined,
     flexShrink: 0,
     overflow: "hidden",
     position: "relative",
@@ -254,23 +254,42 @@ export function styleForEventCardText11(arg0: boolean): DynamicStyle {
   } as DynamicStyle;
 }
 
-export function styleForEventCardView12(arg0: boolean): DynamicStyle {
+export function styleForEventCardView12(
+  disabled: boolean,
+  isHovered = false,
+): DynamicStyle {
+  const isActive = isHovered && !disabled;
   return {
     width: MOBILE_ACTION_SIZE,
     height: MOBILE_ACTION_SIZE,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
-    backgroundColor: arg0 ? designColors.inkMuted : designColors.ground,
+    borderColor: isActive ? designColors.danger : designColors.ink,
+    backgroundColor: disabled
+      ? designColors.inkMuted
+      : isActive
+        ? designColors.danger
+        : designColors.ground,
     alignItems: "center",
     justifyContent: "center",
   } as DynamicStyle;
 }
 
-export function styleForEventCardView13(arg0: boolean): DynamicStyle {
+export function styleForEventCardView13(
+  disabled: boolean,
+  isHovered = false,
+): DynamicStyle {
   return {
-    backgroundColor: arg0 ? designColors.inkMuted : designColors.ink,
+    backgroundColor: disabled
+      ? designColors.inkMuted
+      : isHovered
+        ? designColors.danger
+        : designColors.ink,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
+    borderColor: disabled
+      ? designColors.inkMuted
+      : isHovered
+        ? designColors.danger
+        : designColors.ink,
     paddingHorizontal: 16,
     paddingVertical: 8,
   } as DynamicStyle;

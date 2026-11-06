@@ -42,10 +42,7 @@ export function HeroInfoMobile({
   const translateY = useSharedValue(30);
   const { width } = useWindowDimensions();
 
-  // Text scramble animation for native/desktop; web mobile should show the
-  // event name immediately so the compact hero never appears empty on load.
   const scrambledTitle = useTextScramble(event.name);
-  const displayTitle = isMobileWeb ? event.name : scrambledTitle;
 
   // fadeSlideUp animation from prototype: 0.6s delay after loader exit
   useEffect(() => {
@@ -102,7 +99,7 @@ export function HeroInfoMobile({
         style={styleForHeroInfoMobileText6(titleFontSize, isMobileWeb)}
         numberOfLines={2}
       >
-        {displayTitle}
+        {scrambledTitle}
       </Text>
 
       {/* Meta: Date · Venue (compact, single line with wrap) */}

@@ -66,10 +66,11 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
+    borderColor: designColors.danger,
+    backgroundColor: designColors.danger,
   },
   downloadText: {
-    color: designColors.ink,
+    color: designColors.ground,
     fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",

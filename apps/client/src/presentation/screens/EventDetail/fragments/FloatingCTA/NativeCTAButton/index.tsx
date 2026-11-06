@@ -47,13 +47,7 @@ export function NativeCTAButton({
         >
           {label}
         </Text>
-        {canJoin && (
-          <ArrowIcon
-            color={
-              isPressed && !disabled ? designColors.ink : designColors.ground
-            }
-          />
-        )}
+        {canJoin && <ArrowIcon color={designColors.ground} />}
       </Pressable>
     </Animated.View>
   );

@@ -395,16 +395,16 @@ export function EventCard({
               {/* Action: Mobile: 32x32 icon button, Desktop: text button */}
               {isNative ? (
                 // Mobile: 32x32 icon box
-                <View style={styleForEventCardView12(disabled)}>
+                <View style={styleForEventCardView12(disabled, isHovered)}>
                   <ArrowIcon
                     direction="right"
-                    color={eventCardArrowColor(disabled)}
+                    color={eventCardArrowColor(disabled, isHovered)}
                     size={16}
                   />
                 </View>
               ) : (
                 // Desktop: text button
-                <View style={styleForEventCardView13(disabled)}>
+                <View style={styleForEventCardView13(disabled, isHovered)}>
                   <Text style={componentStyles.elementColor2}>
                     {eventCardActionLabel(disabled)}
                   </Text>
@@ -426,8 +426,8 @@ function grayscaleImageUrl(image: string): string {
   return `${image}${separator}sat=-100`;
 }
 
-function eventCardArrowColor(disabled: boolean): string {
-  return disabled ? designColors.ground : designColors.ink;
+function eventCardArrowColor(disabled: boolean, isHovered: boolean): string {
+  return disabled || isHovered ? designColors.ground : designColors.ink;
 }
 
 function eventCardActionLabel(disabled: boolean): string {

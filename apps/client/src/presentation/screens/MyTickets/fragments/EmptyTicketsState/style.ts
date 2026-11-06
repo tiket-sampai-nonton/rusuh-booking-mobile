@@ -7,6 +7,9 @@ import {
 
 export const styles = StyleSheet.create({
   container: {
+    width: "100%",
+    minWidth: 0,
+    flexShrink: 1,
     paddingVertical: 56,
     paddingHorizontal: 20,
     alignItems: "center",
@@ -15,6 +18,7 @@ export const styles = StyleSheet.create({
     borderColor: designColors.ink,
   },
   title: {
+    maxWidth: "100%",
     color: designColors.ink,
     fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 20,
@@ -22,6 +26,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
   description: {
+    maxWidth: "100%",
     marginTop: 10,
     color: designColors.inkMuted,
     fontFamily: plusJakartaSansFonts.regular,
