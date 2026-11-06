@@ -27,12 +27,28 @@ export const componentStyles = StyleSheet.create({
   elementLetterSpacing8: { letterSpacing: 0.5 },
   elementColor9: { color: designColors.accent },
   elementFontSize10: { fontSize: 14, color: "rgba(255,255,255,0.6)" },
+  mobileWebSuccessRing: { borderColor: designColors.success },
+  mobileWebSummary: {
+    backgroundColor: designColors.field,
+    borderColor: designColors.ink,
+    borderWidth: 1,
+  },
+  mobileWebText: { color: designColors.ink },
+  mobileWebMutedText: { color: designColors.gray, fontSize: 12 },
+  mobileWebSecondaryButton: {
+    borderColor: designColors.ink,
+    borderWidth: 1,
+  },
 });
 
-export function styleForSuccessScreenView0(arg0: EdgeInsets): DynamicStyle {
+export function styleForSuccessScreenView0(
+  arg0: EdgeInsets,
+  isMobileWeb = false,
+): DynamicStyle {
   return {
-    backgroundColor: designColors.ink,
+    backgroundColor: isMobileWeb ? designColors.ground : designColors.ink,
     paddingTop: arg0.top + 16,
     paddingBottom: arg0.bottom + 16,
+    ...(isMobileWeb && { justifyContent: "flex-start" }),
   } as DynamicStyle;
 }

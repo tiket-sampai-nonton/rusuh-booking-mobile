@@ -64,6 +64,7 @@ export function DetailHero({
   meta,
   chips,
   subtitle,
+  isMobileWeb = false,
 }: DetailHeroProps & { subtitle?: string }) {
   // Ken Burns zoom animation (web only)
   const scaleAnim = useRef(new Animated.Value(1.1)).current;
@@ -74,17 +75,19 @@ export function DetailHero({
 
   useEffect(() => {
     // Entrance animations
+    const entranceDuration = isMobileWeb ? 160 : designDuration.slow;
+    const entranceDelay = isMobileWeb ? 0 : 500;
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: designDuration.slow,
-        delay: 500,
+        duration: entranceDuration,
+        delay: entranceDelay,
         useNativeDriver: nativeDriverSupported(),
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 600,
-        delay: 500,
+        duration: entranceDuration,
+        delay: entranceDelay,
         useNativeDriver: nativeDriverSupported(),
       }),
     ]).start();
@@ -113,7 +116,7 @@ export function DetailHero({
         useNativeDriver: nativeDriverSupported(),
       }).start();
     }
-  }, [fadeAnim, scaleAnim, slideAnim]);
+  }, [fadeAnim, isMobileWeb, scaleAnim, slideAnim]);
 
   const isLive =
     statusLabel.toLowerCase().includes("live") ||
@@ -121,7 +124,7 @@ export function DetailHero({
     statusLabel.toLowerCase().includes("dibuka");
 
   return (
-    <View style={styles.hero}>
+    <View style={[styles.hero, isMobileWeb && styles.mobileWebHero]}>
       {/* Background Image (Grayscale + Ken Burns/Settle) */}
       <Animated.View
         style={[
@@ -169,29 +172,45 @@ export function DetailHero({
           style={StyleSheet.absoluteFill}
         />
       ) : (
-        <View style={[StyleSheet.absoluteFill, heroStyles.overlayWeb]} />
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            isMobileWeb ? heroStyles.mobileWebOverlay : heroStyles.overlayWeb,
+          ]}
+        />
       )}
 
       {/* Scan Lines (web only) */}
       {Platform.OS === "web" && <View style={styles.heroScanlines} />}
 
       {/* Content */}
-      <View style={styles.heroContent}>
+      <View
+        style={[styles.heroContent, isMobileWeb && styles.mobileWebHeroContent]}
+      >
         {/* Badge */}
         <Animated.View
           style={[
             styles.heroBadge,
+            isMobileWeb && styles.mobileWebHeroBadge,
             styleForDetailHeroAnimatedView2(fadeAnim, slideAnim),
           ]}
         >
           {isLive && <View style={styles.liveDot} />}
-          <Text style={styles.heroBadgeText}>{statusLabel}</Text>
+          <Text
+            style={[
+              styles.heroBadgeText,
+              isMobileWeb && styles.mobileWebHeroBadgeText,
+            ]}
+          >
+            {statusLabel}
+          </Text>
         </Animated.View>
 
         {/* Title */}
         <Animated.Text
           style={[
             styles.heroTitle,
+            isMobileWeb && styles.mobileWebHeroTitle,
             styleForDetailHeroAnimatedText3(fadeAnim, slideAnim),
           ]}
           accessibilityRole="header"
@@ -205,6 +224,7 @@ export function DetailHero({
           <Animated.Text
             style={[
               styles.heroSubtitle,
+              isMobileWeb && styles.mobileWebHeroSubtitle,
               styleForDetailHeroAnimatedText4(fadeAnim, slideAnim),
             ]}
           >
@@ -217,20 +237,28 @@ export function DetailHero({
           <Animated.View
             style={[
               styles.heroMeta,
+              isMobileWeb && styles.mobileWebHeroMeta,
               styleForDetailHeroAnimatedView5(fadeAnim, slideAnim),
             ]}
           >
             {meta.split(" · ").map((item, i) => (
               <View key={i} style={styles.heroMetaItem}>
                 {getMetaIcon(i)}
-                <Text style={styles.heroMetaText}>{item}</Text>
+                <Text
+                  style={[
+                    styles.heroMetaText,
+                    isMobileWeb && styles.mobileWebHeroMetaText,
+                  ]}
+                >
+                  {item}
+                </Text>
               </View>
             ))}
           </Animated.View>
         )}
 
         {/* Chips (WEB ONLY - optional ticket count, etc) */}
-        {!isNative && chips && chips.length > 0 && (
+        {!isNative && !isMobileWeb && chips && chips.length > 0 && (
           <Animated.View
             style={[
               heroStyles.chipRow,

@@ -15,6 +15,12 @@ export const styles = StyleSheet.create({
     borderTopWidth: designBorders.standard,
     borderTopColor: designColors.ground,
   },
+  mobileWebContainer: {
+    backgroundColor: designColors.ground,
+    borderTopColor: designColors.ink,
+    paddingTop: 8,
+    paddingHorizontal: 16,
+  },
   errorText: {
     color: "#ff4444",
     fontSize: 12,
@@ -27,6 +33,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  mobileWebContent: { gap: 12 },
   totalLabel: {
     color: "rgba(255,255,255,0.5)",
     fontSize: 10,
@@ -34,18 +41,31 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
   },
+  mobileWebTotalLabel: {
+    color: designColors.gray,
+    fontSize: 9,
+    letterSpacing: 0.4,
+  },
   totalValue: {
     color: designColors.ground,
     fontSize: 20,
     fontFamily: plusJakartaSansFonts.extraBold,
     letterSpacing: -0.4,
   },
+  mobileWebTotalValue: { color: designColors.ink, fontSize: 16 },
   payButton: {
     borderWidth: designBorders.standard,
     borderColor: designColors.ground,
     backgroundColor: designColors.ground,
     paddingVertical: 16,
     paddingHorizontal: 32,
+  },
+  mobileWebPayButton: {
+    minHeight: 48,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: designColors.ink,
+    borderColor: designColors.ink,
   },
   payButtonNative: {
     minWidth: 160,
@@ -68,13 +88,21 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: -0.28,
   },
+  mobileWebPayButtonText: { color: designColors.ground, fontSize: 12 },
   payButtonTextPressed: {
     color: designColors.ground,
   },
 });
 
-export function styleForCheckoutBarView0(arg0: number): DynamicStyle {
-  return { paddingBottom: arg0 + 16 } as DynamicStyle;
+export function styleForCheckoutBarView0(
+  bottomInset: number,
+  isMobileWeb = false,
+): DynamicStyle {
+  return {
+    paddingBottom: bottomInset + (isMobileWeb ? 8 : 16),
+    paddingTop: isMobileWeb ? 8 : 16,
+    paddingHorizontal: isMobileWeb ? 16 : 20,
+  } as DynamicStyle;
 }
 
 export function styleForCheckoutBarButton0(canSubmit: boolean): DynamicStyle {

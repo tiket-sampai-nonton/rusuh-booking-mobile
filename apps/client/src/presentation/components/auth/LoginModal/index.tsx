@@ -43,6 +43,7 @@ import {
   isValidEmail,
 } from "@presentation/components/auth/auth.schema";
 import { useAuth } from "@presentation/hooks/useAuth";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 import { CheckIcon, CloseIcon } from "@presentation/components/ArrowIcon";
 import {
   designColors,
@@ -122,6 +123,7 @@ export function LoginModal({
   const [regDoneName, setRegDoneName] = useState("");
 
   const auth = useAuth();
+  const { isMobileWeb } = useResponsive();
   const emailInputRef = useRef<TextInput>(null);
   const regNameInputRef = useRef<TextInput>(null);
 
@@ -359,6 +361,7 @@ export function LoginModal({
     <View
       style={[
         styles.overlay,
+        isMobileWeb && styles.mobileWebOverlay,
         Platform.OS !== "web" && styleForLoginModalView0(),
       ]}
     >
@@ -374,6 +377,7 @@ export function LoginModal({
           fadeAnim,
           scaleAnim,
           translateYAnim,
+          isMobileWeb,
         )}
       >
         <Pressable
@@ -384,6 +388,7 @@ export function LoginModal({
           onPress={(e) => e.stopPropagation()}
           style={[
             styles.card,
+            isMobileWeb && styles.mobileWebCard,
             Platform.OS !== "web" && styleForLoginModalPressable2(),
           ]}
         >
@@ -392,7 +397,7 @@ export function LoginModal({
             testID="login-close"
             accessibilityLabel="Tutup"
             onPress={close}
-            style={styles.closeBtn}
+            style={[styles.closeBtn, isMobileWeb && styles.mobileWebCloseBtn]}
           >
             <CloseIcon color={designColors.ink} />
           </Pressable>
@@ -479,7 +484,12 @@ export function LoginModal({
                 </Text>
 
                 <View style={styles.fld}>
-                  <View style={styles.otpRow}>
+                  <View
+                    style={[
+                      styles.otpRow,
+                      isMobileWeb && styles.mobileWebOtpRow,
+                    ]}
+                  >
                     {otpDigits.map((digit, idx) => (
                       <TextInput
                         key={idx}
@@ -496,7 +506,11 @@ export function LoginModal({
                         inputMode="numeric"
                         maxLength={1}
                         selectTextOnFocus
-                        style={[styles.otpBox, digit && styles.otpBoxFocused]}
+                        style={[
+                          styles.otpBox,
+                          isMobileWeb && styles.mobileWebOtpBox,
+                          digit && styles.otpBoxFocused,
+                        ]}
                       />
                     ))}
                   </View>

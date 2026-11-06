@@ -74,7 +74,7 @@ function rowStatus(
 export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isDesktop } = useResponsive();
+  const { isDesktop, isMobileWeb } = useResponsive();
   const { serverClock } = useServices();
   const { session, isLoading } = useRestoreBookingSession();
   const { checks, pending, request } = useAttendeeCheck(sessionId);
@@ -211,10 +211,12 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
         <ProgressSteps currentStep={2} />
 
         <ScrollView
-          contentContainerStyle={checkoutScrollContent(isDesktop)}
+          contentContainerStyle={checkoutScrollContent(isDesktop, isMobileWeb)}
           testID="checkout-scroll"
         >
-          {session ? <CheckoutHero eventId={session.eventId} /> : null}
+          {session ? (
+            <CheckoutHero eventId={session.eventId} isMobileWeb={isMobileWeb} />
+          ) : null}
 
           <Section title="Data Pembeli" number={1}>
             {prefill.fromAccount ? (

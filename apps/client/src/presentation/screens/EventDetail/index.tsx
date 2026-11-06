@@ -92,7 +92,7 @@ function heroStatusLabel(status: string): string {
 export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   const router = useRouter();
   const { data: event, isLoading, isError, error } = useEventDetail(eventId);
-  const { isDesktop, isNative } = useResponsive();
+  const { isDesktop, isNative, isMobileWeb } = useResponsive();
   const joinQueue = useJoinQueue();
 
   // Lightbox state
@@ -189,18 +189,26 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
     <ScreenFade>
       <DetailBackground testID="event-detail-screen">
         {/* Fixed Header */}
-        <Header onBack={goHome} onShare={handleShare} isScrolled={isScrolled} />
+        <Header
+          onBack={goHome}
+          onShare={handleShare}
+          isScrolled={isScrolled}
+          isMobileWeb={isMobileWeb}
+        />
 
         {/* Scrollable Content */}
         <ScrollView
-          contentContainerStyle={designDetailScrollContent(isDesktop)}
+          contentContainerStyle={designDetailScrollContent(
+            isDesktop,
+            isMobileWeb,
+          )}
           testID="detail-scroll"
           showsVerticalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}
         >
           {/* Flow Steps Indicator (web only - hidden via styles on native) */}
-          <Steps activeStep={1} />
+          <Steps activeStep={1} isMobileWeb={isMobileWeb} />
 
           {/* Hero Section (Grayscale + Ken Burns/Settle) */}
           <DetailHero
@@ -210,10 +218,36 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
             meta={meta}
             chips={chips}
             subtitle={desc.subtitle}
+            isMobileWeb={isMobileWeb}
           />
 
+          {isMobileWeb ? (
+            <View style={styles.mobileWebTicketStats}>
+              <View style={styles.mobileWebTicketStat}>
+                <Text style={styles.mobileWebTicketStatLabel}>
+                  Tiket tersedia
+                </Text>
+                <Text style={styles.mobileWebTicketStatValue}>
+                  {typeof event.remainingTickets === "number"
+                    ? `${event.remainingTickets.toLocaleString("id-ID")} tiket`
+                    : "Cek saat checkout"}
+                </Text>
+              </View>
+              <View style={styles.mobileWebTicketStat}>
+                <Text style={styles.mobileWebTicketStatLabel}>
+                  Maks. pembelian
+                </Text>
+                <Text style={styles.mobileWebTicketStatValue}>
+                  {MAX_TICKETS} tiket / NIK
+                </Text>
+              </View>
+            </View>
+          ) : null}
+
           {/* Content Sections */}
-          <View style={styles.content}>
+          <View
+            style={[styles.content, isMobileWeb && styles.mobileWebContent]}
+          >
             {/* Info Card (native only - date/location) */}
             <InfoCard
               date={dateTxt}
@@ -288,6 +322,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
           canJoin={cta.enabled}
           ctaLabel={cta.label}
           onJoin={onJoin}
+          isMobileWeb={isMobileWeb}
         />
 
         {/* Lightbox Modal */}

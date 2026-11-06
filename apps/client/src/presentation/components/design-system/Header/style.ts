@@ -44,6 +44,56 @@ export const componentStyles = StyleSheet.create({
     paddingHorizontal: 16,
     overflow: "hidden",
   },
+  mobileActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  mobileCta: {
+    minWidth: 70,
+    minHeight: 44,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: designBorders.standard,
+    borderColor: designColors.ink,
+    backgroundColor: designColors.ground,
+  },
+  mobileCtaText: {
+    color: designColors.ink,
+    fontSize: 12,
+    fontFamily: plusJakartaSansFonts.bold,
+    textTransform: "uppercase",
+  },
+  mobileMenuToggle: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+  },
+  menuLine: {
+    width: 16,
+    height: 2,
+    backgroundColor: designColors.ink,
+  },
+  mobileMenuItem: {
+    minHeight: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: designColors.inkMuted,
+  },
+  mobileMenuLabel: {
+    color: designColors.ink,
+    fontSize: 15,
+    fontFamily: plusJakartaSansFonts.bold,
+  },
+  mobileMenuArrow: {
+    color: designColors.inkMuted,
+    fontSize: 24,
+  },
 });
 
 export function styleForHeaderAnimatedView2(): DynamicStyle {
@@ -90,5 +140,30 @@ export function headerRowStyle(headerHeight: number): ViewStyle {
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
+  };
+}
+
+export function headerMobileMenuBackdrop(top: number): ViewStyle {
+  return {
+    position: "absolute",
+    top,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1,
+  };
+}
+
+export function headerMobileMenuPanel(top: number): ViewStyle {
+  return {
+    position: "absolute",
+    top,
+    left: 0,
+    right: 0,
+    zIndex: 2,
+    paddingHorizontal: 16,
+    backgroundColor: designColors.ground,
+    borderBottomWidth: designBorders.standard,
+    borderBottomColor: designColors.ink,
   };
 }

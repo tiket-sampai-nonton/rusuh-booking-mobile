@@ -19,23 +19,24 @@ export function HomeSections({
   onSeeAll,
   onNavigate,
 }: HomeSectionsProps) {
-  const { isNative } = useResponsive();
+  const { isNative, isMobileWeb } = useResponsive();
 
   return (
     <View>
       <View
-        style={homeSectionsStyles.featuredSection(isNative)}
+        style={homeSectionsStyles.featuredSection(isNative, isMobileWeb)}
         onLayout={(event) => onFeaturedLayout(event.nativeEvent.layout.y)}
         testID="section-events"
       >
         <Reveal>
           <SectionHeader
-            title="Daftar Event"
+            title={isMobileWeb ? "Event populer" : "Daftar Event"}
             linkText="Lihat Semua"
             onLinkPress={onSeeAll}
             showFilter={!isNative}
             onFilterPress={onFilter}
             isNative={isNative}
+            isMobileWeb={isMobileWeb}
           />
         </Reveal>
         {isNative ? (
@@ -54,12 +55,16 @@ export function HomeSections({
 
       {data.history.length > 0 && (
         <View
-          style={homeSectionsStyles.historySection}
+          style={homeSectionsStyles.historySection(isMobileWeb)}
           onLayout={(event) => onHistoryLayout(event.nativeEvent.layout.y)}
           testID="section-history"
         >
           <Reveal>
-            <SectionHeader title="Event Sebelumnya" />
+            <SectionHeader
+              title={isMobileWeb ? "Event sebelumnya" : "Event Sebelumnya"}
+              isNative={isNative}
+              isMobileWeb={isMobileWeb}
+            />
           </Reveal>
           {isNative ? (
             <EventsHorizontalScroll

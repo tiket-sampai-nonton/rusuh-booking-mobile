@@ -2,6 +2,7 @@
 import { Pressable, Text, View } from "react-native";
 
 import { methodMeta } from "@domain/rules/payment-method";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import type { PaymentMethodsProps } from "../../interface";
 import { paymentStyles } from "../../style";
@@ -18,15 +19,25 @@ export function PaymentMethods({
   selected,
   onSelect,
 }: PaymentMethodsProps) {
+  const { isMobileWeb } = useResponsive();
   return (
-    <View style={componentStyles.elementBorderWidth0}>
+    <View
+      style={[
+        componentStyles.elementBorderWidth0,
+        isMobileWeb && componentStyles.mobileWebContainer,
+      ]}
+    >
       <Text
-        className="px-5 py-3.5 text-2xs font-extrabold uppercase"
+        className={
+          isMobileWeb
+            ? "px-3 py-2.5 text-2xs font-extrabold uppercase"
+            : "px-5 py-3.5 text-2xs font-extrabold uppercase"
+        }
         style={componentStyles.elementColor1}
       >
         Metode Pembayaran
       </Text>
-      <View className="gap-2.5 p-5">
+      <View className={isMobileWeb ? "gap-2 p-3" : "gap-2.5 p-5"}>
         {/* Server-driven list (RBT-060 AC2) — only `page.methods`, in order. */}
         {methods.map((code) => {
           const m = methodMeta(code);
@@ -39,7 +50,11 @@ export function PaymentMethods({
               accessibilityState={{ selected: isSelected }}
               onPress={() => onSelect(m.code)}
               testID={`method-${m.code}`}
-              className="flex-row items-center gap-3 p-3.5"
+              className={
+                isMobileWeb
+                  ? "flex-row items-center gap-3 p-3"
+                  : "flex-row items-center gap-3 p-3.5"
+              }
               style={styleForPaymentMethodsPressable0(isSelected)}
             >
               <View

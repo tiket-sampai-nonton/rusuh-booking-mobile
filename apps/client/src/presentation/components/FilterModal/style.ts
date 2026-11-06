@@ -17,6 +17,7 @@ export const componentStyles = StyleSheet.create({
     padding: Platform.OS === "web" ? 24 : 0,
     backgroundColor: "rgba(0,0,0,0.72)",
   },
+  mobileWebOverlay: { justifyContent: "flex-end", padding: 0 },
   elementFlexDirection1: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -83,15 +84,27 @@ export const componentStyles = StyleSheet.create({
   },
 });
 
-export function styleForFilterModalPressable0(arg0: EdgeInsets): DynamicStyle {
+export function styleForFilterModalPressable0(
+  insets: EdgeInsets,
+  isMobileWeb = false,
+): DynamicStyle {
   return {
     width: "100%",
-    maxWidth: 480,
-    maxHeight: "90%",
-    padding: 24,
-    paddingBottom: Platform.OS === "web" ? 24 : Math.max(24, arg0.bottom + 16),
+    maxWidth: isMobileWeb ? "100%" : 480,
+    maxHeight: isMobileWeb ? "88%" : "90%",
+    padding: isMobileWeb ? 16 : 24,
+    paddingBottom: isMobileWeb
+      ? Math.max(16, insets.bottom + 12)
+      : Platform.OS === "web"
+        ? 24
+        : Math.max(24, insets.bottom + 16),
     borderWidth: designBorders.standard,
     borderColor: designColors.ink,
+    ...(isMobileWeb && {
+      borderLeftWidth: 0,
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+    }),
     backgroundColor: designColors.ground,
     ...hardShadowStyle(4, 4, designColors.ink, 5),
   } as DynamicStyle;

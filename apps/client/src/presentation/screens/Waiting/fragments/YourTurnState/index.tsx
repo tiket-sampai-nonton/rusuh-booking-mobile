@@ -11,6 +11,7 @@ interface YourTurnStateProps {
   readonly claiming: boolean;
   readonly eventId: string;
   readonly isDesktop: boolean;
+  readonly isMobileWeb?: boolean;
 }
 
 export function YourTurnState({
@@ -18,6 +19,7 @@ export function YourTurnState({
   claiming,
   eventId,
   isDesktop,
+  isMobileWeb = false,
 }: YourTurnStateProps) {
   return (
     <>
@@ -43,9 +45,18 @@ export function YourTurnState({
         </View>
       </View>
 
-      <View style={styles.waitingSpacer} />
       <View
-        style={[styles.waitingFooter, isDesktop && styles.waitingFooterDesktop]}
+        style={[
+          styles.waitingSpacer,
+          isMobileWeb && styles.mobileWebWaitingSpacer,
+        ]}
+      />
+      <View
+        style={[
+          styles.waitingFooter,
+          isDesktop && styles.waitingFooterDesktop,
+          isMobileWeb && styles.mobileWebWaitingFooter,
+        ]}
       >
         <Text
           style={[

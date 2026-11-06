@@ -38,30 +38,49 @@ export const styles = StyleSheet.create({
   linkText: { textTransform: "uppercase" },
 });
 
-export function sectionHeaderContainerStyle(isNative: boolean): ViewStyle {
+export function sectionHeaderContainerStyle(
+  isNative: boolean,
+  isMobileWeb = false,
+): ViewStyle {
   return {
-    marginBottom: isNative ? designSpacingSemantic.m : designSpacingSemantic.l,
+    marginBottom: isMobileWeb
+      ? 12
+      : isNative
+        ? designSpacingSemantic.m
+        : designSpacingSemantic.l,
+    paddingBottom: isMobileWeb ? 0 : undefined,
+    borderBottomWidth: isMobileWeb ? 0 : undefined,
   };
 }
 
-export function sectionHeaderTitleStyle(isNative: boolean): TextStyle {
+export function sectionHeaderTitleStyle(
+  isNative: boolean,
+  isMobileWeb = false,
+): TextStyle {
   return {
-    fontSize: isNative ? 20 : 24,
-    letterSpacing: isNative ? -0.2 : 0.48,
+    fontSize: isMobileWeb ? 18 : isNative ? 20 : 24,
+    letterSpacing: isMobileWeb ? -0.3 : isNative ? -0.2 : 0.48,
+    textTransform: isMobileWeb ? "none" : undefined,
   };
 }
 
-export function sectionLinkStyle(isNative: boolean): ViewStyle {
-  return { gap: isNative ? 4 : 8 };
+export function sectionLinkStyle(
+  isNative: boolean,
+  isMobileWeb = false,
+): ViewStyle {
+  return { gap: isMobileWeb ? 4 : isNative ? 4 : 8 };
 }
 
-export function sectionLinkTextStyle(isNative: boolean): TextStyle {
+export function sectionLinkTextStyle(
+  isNative: boolean,
+  isMobileWeb = false,
+): TextStyle {
   return {
     color: isNative ? designColors.inkMuted : designColors.ink,
-    fontSize: isNative ? 12 : 14,
+    fontSize: isMobileWeb ? 12 : isNative ? 12 : 14,
     fontFamily: isNative
       ? plusJakartaSansFonts.semiBold
       : plusJakartaSansFonts.bold,
-    letterSpacing: isNative ? 0.6 : 0.56,
+    letterSpacing: isMobileWeb ? 0.48 : isNative ? 0.6 : 0.56,
   };
 }

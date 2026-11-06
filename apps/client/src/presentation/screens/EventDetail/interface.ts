@@ -41,6 +41,7 @@ export interface DetailHeroProps {
   readonly name: string;
   readonly meta: string;
   readonly chips: readonly string[];
+  readonly isMobileWeb?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

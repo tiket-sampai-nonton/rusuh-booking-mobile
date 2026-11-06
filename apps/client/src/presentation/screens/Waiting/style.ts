@@ -127,6 +127,11 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 32,
   },
+  mobileWebShell: {
+    justifyContent: "flex-start",
+    paddingTop: 18,
+    paddingBottom: 20,
+  },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // HEADER (sticky top bar with logo)
@@ -871,6 +876,11 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
   },
+  mobileWebWaitingScroll: {
+    flexGrow: 0,
+    alignItems: "flex-start",
+    paddingHorizontal: 16,
+  },
   waitingScrollView: {
     flex: 1,
   },
@@ -887,6 +897,13 @@ export const styles = StyleSheet.create({
   waitingPageDesktop: {
     paddingTop: 55,
     paddingBottom: 34,
+  },
+  mobileWebWaitingPage: {
+    width: "100%",
+    maxWidth: 430,
+    alignSelf: "center",
+    paddingTop: 16,
+    paddingBottom: 12,
   },
   eventBlock: {
     gap: 5,
@@ -1203,9 +1220,11 @@ export const styles = StyleSheet.create({
     flexGrow: 1,
     minHeight: 18,
   },
+  mobileWebWaitingSpacer: { flexGrow: 0, minHeight: 16 },
   waitingFooter: {
     gap: 20,
   },
+  mobileWebWaitingFooter: { gap: 12 },
   waitingFooterDesktop: {
     flexDirection: "row",
     alignItems: "flex-end",

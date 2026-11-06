@@ -17,6 +17,7 @@ export const componentStyles = StyleSheet.create({
   },
   elementColor2: { color: designColors.ground },
   elementBackgroundColor3: { backgroundColor: designColors.ground },
+  mobileWebContainer: { borderWidth: 1 },
 });
 
 export function styleForPaymentMethodsPressable0(arg0: boolean): DynamicStyle {

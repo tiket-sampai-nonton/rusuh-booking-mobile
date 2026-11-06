@@ -9,9 +9,15 @@ export interface StepCircleProps {
   readonly number: number;
   readonly isActive: boolean;
   readonly isCompleted: boolean;
+  readonly compact?: boolean;
 }
 
-export function StepCircle({ number, isActive, isCompleted }: StepCircleProps) {
+export function StepCircle({
+  number,
+  isActive,
+  isCompleted,
+  compact = false,
+}: StepCircleProps) {
   const filled = isActive || isCompleted;
   const numberStyle = filled
     ? stepCircleStyles.filledNumber
@@ -20,13 +26,22 @@ export function StepCircle({ number, isActive, isCompleted }: StepCircleProps) {
     <View
       style={[
         stepCircleStyles.circle,
+        compact && stepCircleStyles.compactCircle,
         filled ? stepCircleStyles.filledCircle : stepCircleStyles.emptyCircle,
       ]}
     >
       {isCompleted ? (
-        <CheckIcon color={designColors.ground} size={16} />
+        <CheckIcon color={designColors.ground} size={compact ? 12 : 16} />
       ) : (
-        <Text style={[stepCircleStyles.number, numberStyle]}>{number}</Text>
+        <Text
+          style={[
+            stepCircleStyles.number,
+            compact && stepCircleStyles.compactNumber,
+            numberStyle,
+          ]}
+        >
+          {number}
+        </Text>
       )}
     </View>
   );

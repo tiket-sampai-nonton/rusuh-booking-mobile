@@ -6,29 +6,43 @@
  * - Grayscale image filter (web-only, RN needs library)
  * - Black/white typography with uppercase title
  */
-import { Image, Text, View } from "react-native";
+import { Image, Text, View, type ImageStyle } from "react-native";
 
 import { eventImage } from "@domain/rules/event-image";
 
 import type { CheckoutHeroProps } from "../../interface";
 import { styles } from "./style";
 
-export function CheckoutHero({ eventId }: CheckoutHeroProps) {
+export function CheckoutHero({
+  eventId,
+  isMobileWeb = false,
+}: CheckoutHeroProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isMobileWeb && styles.compactContainer]}>
       {/* Event image with grayscale filter */}
-      <View style={styles.imageContainer}>
+      <View
+        style={[
+          styles.imageContainer,
+          isMobileWeb && styles.compactImageContainer,
+        ]}
+      >
         <Image
           source={{ uri: eventImage(eventId) }}
           resizeMode="cover"
-          style={styles.image}
+          style={[
+            styles.image,
+            isMobileWeb &&
+              ({ filter: "grayscale(100%)" } as unknown as ImageStyle),
+          ]}
         />
       </View>
 
       {/* Event info */}
-      <View style={styles.info}>
-        <Text style={styles.title}>Pilih Tiketmu</Text>
-        <Text style={styles.subtitle}>
+      <View style={[styles.info, isMobileWeb && styles.compactInfo]}>
+        <Text style={[styles.title, isMobileWeb && styles.compactTitle]}>
+          Pilih Tiketmu
+        </Text>
+        <Text style={[styles.subtitle, isMobileWeb && styles.compactSubtitle]}>
           Lengkapi data pembeli &amp; penonton sebelum lanjut bayar.
         </Text>
       </View>

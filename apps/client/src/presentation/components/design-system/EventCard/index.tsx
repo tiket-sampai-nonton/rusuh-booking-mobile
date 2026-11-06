@@ -116,7 +116,9 @@ export function EventCard({
   isImageVisible = true,
 }: EventCardProps) {
   const reducedMotion = useReducedMotion();
-  const { isNative } = useResponsive();
+  const { isNative, isMobileWeb } = useResponsive();
+  const isMobileLayout = isNative || isMobileWeb;
+  const compactListMode = listMode || isMobileWeb;
   const hovered = useSharedValue(0);
   const colorReveal = useSharedValue(isNative ? 0 : 1);
   const staggerOpacity = useSharedValue(reducedMotion ? 1 : 0);
@@ -145,12 +147,14 @@ export function EventCard({
   }));
 
   // Mobile vs Desktop sizing
-  const contentPadding = isNative
-    ? MOBILE_CONTENT_PADDING
-    : DESKTOP_CONTENT_PADDING;
-  const dateSize = isNative ? MOBILE_DATE_SIZE : DESKTOP_DATE_SIZE;
-  const titleSize = isNative ? MOBILE_TITLE_SIZE : DESKTOP_TITLE_SIZE;
-  const venueSize = isNative ? MOBILE_VENUE_SIZE : DESKTOP_VENUE_SIZE;
+  const contentPadding = isMobileWeb
+    ? 10
+    : isNative
+      ? MOBILE_CONTENT_PADDING
+      : DESKTOP_CONTENT_PADDING;
+  const dateSize = isMobileLayout ? MOBILE_DATE_SIZE : DESKTOP_DATE_SIZE;
+  const titleSize = isMobileLayout ? MOBILE_TITLE_SIZE : DESKTOP_TITLE_SIZE;
+  const venueSize = isMobileLayout ? MOBILE_VENUE_SIZE : DESKTOP_VENUE_SIZE;
 
   // Stagger animation on mount (mobile: FadeInUp.delay(index * 100))
   useEffect(() => {
@@ -192,7 +196,7 @@ export function EventCard({
   // Note: Shadow properties are set in containerStyle for native to avoid NOBRIDGE errors
   const cardStyle = useAnimatedStyle(() => ({
     opacity: staggerOpacity.value,
-    transform: isNative
+    transform: isMobileLayout
       ? [
           // Mobile: press feedback (translate down on press)
           {
@@ -251,17 +255,19 @@ export function EventCard({
   const containerStyle = eventCardContainerStyle(isHovered, disabled, isNative);
   const imageContainerStyle = eventCardImageContainerStyle(
     isNative,
-    listMode,
+    compactListMode,
     isWeb,
+    isMobileWeb,
   );
   const webImageStyle = eventCardImageStyle(isWeb, isHovered);
   const contentStyle = eventCardContentStyle(
     contentPadding,
     isNative,
     isWeb,
-    listMode,
+    compactListMode,
+    isMobileWeb,
   );
-  const footerStyle = eventCardFooterStyle(isNative);
+  const footerStyle = eventCardFooterStyle(isNative, isMobileWeb);
 
   return (
     <View style={isNative ? styleForEventCardView0() : undefined}>
@@ -288,7 +294,11 @@ export function EventCard({
           onPressIn={() => setHovered(true)}
           onPressOut={() => setHovered(false)}
           testID={`v2-event-card-${event.id}`}
-          style={isWeb && listMode ? styleForEventCardPressable2() : undefined}
+          style={
+            isWeb && compactListMode
+              ? styleForEventCardPressable2(isMobileWeb)
+              : undefined
+          }
         >
           {/* Image with grayscale → color effect */}
           <View style={imageContainerStyle}>
@@ -322,11 +332,11 @@ export function EventCard({
             {/* Badge */}
             <Animated.View
               style={[
-                styleForEventCardAnimatedView5(isNative, badge),
+                styleForEventCardAnimatedView5(isMobileLayout, badge),
                 badgeStyle,
               ]}
             >
-              <Text style={styleForEventCardText6(isNative)}>
+              <Text style={styleForEventCardText6(isMobileLayout)}>
                 {BADGE_LABEL[badge.tone]}
               </Text>
             </Animated.View>
@@ -338,7 +348,7 @@ export function EventCard({
             <View>
               {/* Date: Mobile: 12px uppercase, Desktop: 14px */}
               {dateTxt && (
-                <Text style={styleForEventCardText7(dateSize, isNative)}>
+                <Text style={styleForEventCardText7(dateSize, isMobileLayout)}>
                   {dateTxt}
                 </Text>
               )}
@@ -346,8 +356,8 @@ export function EventCard({
               {/* Title: Mobile: 16px weight 700 not-uppercase, Desktop: 20px weight 800 uppercase */}
               <Animated.Text
                 style={[
-                  styleForEventCardAnimatedText8(titleSize, isNative),
-                  !isNative && titleStyle, // Desktop: hover letter-spacing animation
+                  styleForEventCardAnimatedText8(titleSize, isMobileLayout),
+                  !isMobileLayout && titleStyle,
                 ]}
                 numberOfLines={2}
               >
@@ -374,10 +384,10 @@ export function EventCard({
             <View style={footerStyle}>
               {/* Price: Mobile shows "Mulai dari" subtext */}
               <View>
-                {isNative && (
+                {isMobileLayout && (
                   <Text style={componentStyles.elementColor1}>Mulai dari</Text>
                 )}
-                <Text style={styleForEventCardText11(isNative)}>
+                <Text style={styleForEventCardText11(isMobileLayout)}>
                   {minorToIDR(event.minPriceMinor, { compact: true })}
                 </Text>
               </View>

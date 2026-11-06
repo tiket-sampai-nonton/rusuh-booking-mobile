@@ -35,7 +35,7 @@ import { paymentScrollContent } from "./style";
 export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isDesktop } = useResponsive();
+  const { isDesktop, isMobileWeb } = useResponsive();
   const { serverClock } = useServices();
   const { page, isLoading } = usePaymentPage(bookingId);
   const { createAttempt, resumeHandoff } = usePayment();
@@ -94,7 +94,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
         />
 
         <ScrollView
-          contentContainerStyle={paymentScrollContent(isDesktop)}
+          contentContainerStyle={paymentScrollContent(isDesktop, isMobileWeb)}
           testID="payment-scroll"
         >
           <PaymentHoldBanner />

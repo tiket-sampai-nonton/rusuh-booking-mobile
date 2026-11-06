@@ -36,7 +36,11 @@ export function gridItemStyle(
   index: number,
   itemCount: number,
   columns: number,
+  isMobileWeb = false,
 ): ViewStyle {
+  if (isMobileWeb) {
+    return { width: "100%", borderWidth: 0 };
+  }
   const isLastInRow = (index + 1) % columns === 0;
   const totalRows = Math.ceil(itemCount / columns);
   const currentRow = Math.floor(index / columns) + 1;
@@ -48,4 +52,8 @@ export function gridItemStyle(
     borderBottomWidth: isLastRow ? 0 : GRID_GAP,
     borderColor: designColors.ink,
   };
+}
+
+export function gridContainerStyle(isMobileWeb: boolean): ViewStyle {
+  return isMobileWeb ? { borderWidth: 0, gap: 8, overflow: "visible" } : {};
 }

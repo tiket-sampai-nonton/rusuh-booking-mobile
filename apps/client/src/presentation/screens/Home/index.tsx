@@ -45,8 +45,16 @@ export function HomeScreen() {
   const router = useRouter();
   const { data, isLoading, isError, error } = useEvents();
   const scrollRef = useRef<Animated.ScrollView>(null);
-  const { isWeb, isDesktop, isNative, width, gridColumns, bottomBarHeight } =
-    useResponsive();
+  const {
+    isWeb,
+    isDesktop,
+    isNative,
+    isMobileWeb,
+    width,
+    headerHeight,
+    gridColumns,
+    bottomBarHeight,
+  } = useResponsive();
   const insets = useSafeAreaInsets();
   const profile = useAccountStore((s) => s.profile);
 
@@ -97,7 +105,10 @@ export function HomeScreen() {
         <Animated.ScrollView
           ref={scrollRef}
           style={componentStyles.elementFlex1}
-          contentContainerStyle={homeScrollContent(bottomPadding)}
+          contentContainerStyle={homeScrollContent(
+            bottomPadding,
+            isMobileWeb ? insets.top + headerHeight : 0,
+          )}
           onScroll={onScroll}
           scrollEventThrottle={16}
           testID="home-scroll"
@@ -156,6 +167,30 @@ export function HomeScreen() {
                   },
                 ]
               : []),
+          ]}
+          mobileMenuLinks={[
+            {
+              label: "Beranda",
+              onPress: () =>
+                scrollRef.current?.scrollTo({ y: 0, animated: true }),
+              testID: "nav-home",
+            },
+            { label: "Cari Event", onPress: goBrowse, testID: "nav-browse" },
+            {
+              label: "Tiket Saya",
+              onPress: () => router.push("/my-tickets" as Href),
+              testID: "nav-tickets",
+            },
+            {
+              label: "Arsip Event",
+              onPress: () => router.push("/history" as Href),
+              testID: "nav-history",
+            },
+            {
+              label: "Profil",
+              onPress: () => router.push("/profile" as Href),
+              testID: "nav-profile",
+            },
           ]}
           isLoggedIn={Boolean(profile)}
           onCtaPress={() => setLoginOpen(true)}

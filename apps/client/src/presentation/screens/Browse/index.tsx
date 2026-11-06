@@ -49,7 +49,8 @@ import {
 export function BrowseScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isWeb, isDesktop, isNative, width, gridColumns } = useResponsive();
+  const { isWeb, isDesktop, isNative, isMobileWeb, width, gridColumns } =
+    useResponsive();
   const params = useLocalSearchParams<{
     genre?: string;
     time?: string;
@@ -108,28 +109,38 @@ export function BrowseScreen() {
         <ScrollView
           style={browseScroll}
           contentContainerStyle={[
-            browseScrollContent(insets.bottom, isDesktop),
+            browseScrollContent(insets.bottom, isDesktop, isMobileWeb),
             isNative && browseNativeScrollContent(insets.top + 56 + 52 + 12),
           ]}
           testID="browse-scroll"
         >
           {!isNative && (
-            <BrowseHero topInset={insets.top} isDesktop={isDesktop} />
+            <BrowseHero
+              topInset={insets.top}
+              isDesktop={isDesktop}
+              isMobileWeb={isMobileWeb}
+            />
           )}
           {!isNative && (
             <BrowseCategoriesSection
               activeCategory={activeCategory as BrowseCategoryKey}
               isDesktop={isDesktop}
+              isMobileWeb={isMobileWeb}
               onSelect={setActiveCategory}
             />
           )}
 
-          <View style={isNative ? browseNativeMain : browseMain(isDesktop)}>
+          <View
+            style={
+              isNative ? browseNativeMain : browseMain(isDesktop, isMobileWeb)
+            }
+          >
             <BrowseResultsToolbar
               count={results.length}
               isNative={isNative}
               sortBy={sortBy}
               viewMode={viewMode}
+              isMobileWeb={isMobileWeb}
               onFilterPress={() => setFilterOpen(true)}
               onSortChange={setSortBy}
               onViewModeChange={setViewMode}
@@ -140,7 +151,12 @@ export function BrowseScreen() {
               <BrowseGrid
                 events={results}
                 onPress={goToEvent}
-                columns={browseGridColumnCount(viewMode, isNative, gridColumns)}
+                columns={browseGridColumnCount(
+                  viewMode,
+                  isNative,
+                  gridColumns,
+                  isMobileWeb,
+                )}
               />
             )}
             {!isNative && results.length > 0 && (
@@ -174,7 +190,25 @@ export function BrowseScreen() {
                 ]
               : []),
           ]}
-          onCtaPress={() => {}}
+          mobileMenuLinks={[
+            { label: "Beranda", onPress: goHome, testID: "nav-home" },
+            { label: "Cari Event", onPress: () => {}, testID: "nav-browse" },
+            {
+              label: "Tiket Saya",
+              onPress: () => router.push("/my-tickets" as Href),
+              testID: "nav-tickets",
+            },
+            {
+              label: "Arsip Event",
+              onPress: () => router.push("/history" as Href),
+              testID: "nav-history",
+            },
+            {
+              label: "Profil",
+              onPress: () => router.push("/profile" as Href),
+              testID: "nav-profile",
+            },
+          ]}
           onLogoPress={goHome}
           actions={[]}
         />
@@ -208,9 +242,11 @@ function browseGridColumnCount(
   viewMode: "grid" | "list",
   isNative: boolean,
   responsiveColumns: 1 | 2 | 3,
+  isMobileWeb = false,
 ): 1 | 2 | 3 {
   if (viewMode === "list") return 1;
   if (isNative) return 2;
+  if (isMobileWeb) return 1;
   return responsiveColumns;
 }
 

@@ -12,11 +12,17 @@ const FLOW_STEPS = [
 
 export interface StepsProps {
   readonly activeStep?: number;
+  readonly isMobileWeb?: boolean;
 }
 
-export function Steps({ activeStep = 1 }: StepsProps) {
+export function Steps({ activeStep = 1, isMobileWeb = false }: StepsProps) {
   return (
-    <View style={styles.stepsContainer}>
+    <View
+      style={[
+        styles.stepsContainer,
+        isMobileWeb && styles.mobileWebStepsContainer,
+      ]}
+    >
       {FLOW_STEPS.map((step, index) => {
         const isActive = step.number === activeStep;
         const isLast = index === FLOW_STEPS.length - 1;

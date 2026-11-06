@@ -17,6 +17,7 @@ interface SectionHeaderProps {
   readonly showFilter?: boolean;
   readonly onFilterPress?: () => void;
   readonly isNative?: boolean;
+  readonly isMobileWeb?: boolean;
 }
 
 export function SectionHeader({
@@ -26,12 +27,18 @@ export function SectionHeader({
   showFilter,
   onFilterPress,
   isNative = false,
+  isMobileWeb = false,
 }: SectionHeaderProps) {
   return (
-    <View style={[styles.container, sectionHeaderContainerStyle(isNative)]}>
+    <View
+      style={[
+        styles.container,
+        sectionHeaderContainerStyle(isNative, isMobileWeb),
+      ]}
+    >
       <Text
         accessibilityRole="header"
-        style={[styles.title, sectionHeaderTitleStyle(isNative)]}
+        style={[styles.title, sectionHeaderTitleStyle(isNative, isMobileWeb)]}
       >
         {title}
       </Text>
@@ -63,9 +70,14 @@ export function SectionHeader({
             accessibilityRole="link"
             accessibilityLabel={linkText}
             onPress={onLinkPress}
-            style={[styles.link, sectionLinkStyle(isNative)]}
+            style={[styles.link, sectionLinkStyle(isNative, isMobileWeb)]}
           >
-            <Text style={[styles.linkText, sectionLinkTextStyle(isNative)]}>
+            <Text
+              style={[
+                styles.linkText,
+                sectionLinkTextStyle(isNative, isMobileWeb),
+              ]}
+            >
               {linkText}
             </Text>
             <ArrowIcon

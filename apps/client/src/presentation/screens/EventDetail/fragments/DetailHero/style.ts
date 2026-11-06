@@ -19,6 +19,13 @@ export const heroStyles = StyleSheet.create({
       )`,
     }),
   },
+  mobileWebOverlay: {
+    backgroundColor: "transparent",
+    ...(Platform.OS === "web" && {
+      backgroundImage:
+        "linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.42) 42%, rgba(0,0,0,.08) 100%)",
+    }),
+  },
   // Native grayscale layers (simulates grayscale filter)
   nativeGrayscaleDark: {
     backgroundColor: "rgba(0, 0, 0, 0.25)",

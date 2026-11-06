@@ -32,6 +32,12 @@ export const historyStyles = StyleSheet.create({
     paddingBottom: 64,
     paddingHorizontal: designSpacingSemantic.m,
   },
+  mobileWebHero: {
+    backgroundColor: designColors.ground,
+    paddingTop: 72,
+    paddingBottom: 24,
+    paddingHorizontal: 16,
+  },
   heroContent: {
     maxWidth: 800,
     alignSelf: "center" as const,
@@ -46,6 +52,14 @@ export const historyStyles = StyleSheet.create({
     lineHeight: 48 * 0.9,
     textAlign: "center" as const,
   },
+  mobileWebHeroTitle: {
+    color: designColors.ink,
+    fontSize: 30,
+    lineHeight: 32,
+    textAlign: "left",
+    letterSpacing: -1.2,
+    textTransform: "none",
+  },
   heroSubtitle: {
     color: designColors.ground,
     opacity: 0.7,
@@ -53,6 +67,13 @@ export const historyStyles = StyleSheet.create({
     fontFamily: plusJakartaSansFonts.regular,
     textAlign: "center" as const,
     marginTop: 16,
+  },
+  mobileWebHeroSubtitle: {
+    color: designColors.gray,
+    opacity: 1,
+    fontSize: 14,
+    textAlign: "left",
+    marginTop: 6,
   },
   /** Main content container */
   main: {
@@ -62,6 +83,7 @@ export const historyStyles = StyleSheet.create({
     paddingHorizontal: designSpacingSemantic.m,
     paddingTop: designSpacingSemantic.xl,
   },
+  mobileWebMain: { paddingHorizontal: 16, paddingTop: 0 },
   /** Section title */
   sectionTitle: {
     color: designColors.ink,

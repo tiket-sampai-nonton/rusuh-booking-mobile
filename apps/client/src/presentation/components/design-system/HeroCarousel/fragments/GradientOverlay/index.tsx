@@ -8,8 +8,10 @@ import { componentStyles, styleForGradientOverlayView3 } from "../../style";
 
 export function GradientOverlay({
   isMobile = false,
+  isMobileWeb = false,
 }: {
   readonly isMobile?: boolean;
+  readonly isMobileWeb?: boolean;
 }) {
   const isWeb = Platform.OS === "web";
   // Web: use real CSS linear-gradient (exact match to prototype)
@@ -18,6 +20,10 @@ export function GradientOverlay({
     let background = `linear-gradient(to top, ${designColors.ground} 0%, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.3) 100%)`;
     if (isMobile) {
       background = `linear-gradient(to top, ${designColors.ground} 0%, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.7) 60%, rgba(255,255,255,0.3) 100%)`;
+    }
+    if (isMobileWeb) {
+      background =
+        "linear-gradient(to top, rgba(0,0,0,0.86) 0%, rgba(0,0,0,0.58) 54%, rgba(0,0,0,0.18) 100%)";
     }
     webGradientStyle = { background } as unknown as ViewStyle;
   }

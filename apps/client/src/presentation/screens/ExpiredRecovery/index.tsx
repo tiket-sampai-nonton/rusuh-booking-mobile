@@ -22,6 +22,7 @@ import {
   type ExpiryReason,
 } from "@domain/rules/payment-recovery";
 import { Seo } from "@presentation/components/Seo";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 import { RecoveryActions } from "./fragments/RecoveryActions";
 import { RecoveryInfo } from "./fragments/RecoveryInfo";
 import { RecoveryMessage } from "./fragments/RecoveryMessage";
@@ -53,6 +54,7 @@ export function ExpiredRecoveryScreen({
   remainingMs = 0,
 }: ExpiredRecoveryScreenProps) {
   const router = useRouter();
+  const { isMobileWeb } = useResponsive();
   const recovery = decideRecovery(status, remainingMs, errorCode);
   const copy = EXPIRY_COPY[reason];
 
@@ -72,8 +74,12 @@ export function ExpiredRecoveryScreen({
 
   return (
     <View
-      className="flex-1 items-center justify-center gap-6 p-6"
-      style={styles.screen}
+      className={
+        isMobileWeb
+          ? "flex-1 items-center gap-4 px-4 py-8"
+          : "flex-1 items-center justify-center gap-6 p-6"
+      }
+      style={[styles.screen, isMobileWeb && styles.mobileWebScreen]}
       testID="expired-recovery"
     >
       <Seo

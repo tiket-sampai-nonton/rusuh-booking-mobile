@@ -61,7 +61,8 @@ export function WaitingRoomScreen({
 }: WaitingRoomScreenProps) {
   const router = useRouter();
   const reducedMotion = useReducedMotion() ?? false;
-  const { isDesktop } = useResponsive();
+  const { isDesktop, isMobileWeb } = useResponsive();
+  const shellStyle = [styles.shell, isMobileWeb && styles.mobileWebShell];
 
   // Modal state
   const [showLeaveModal, setShowLeaveModal] = useState(false);
@@ -140,7 +141,7 @@ export function WaitingRoomScreen({
     return (
       <View style={styles.root} testID="waiting-reconnecting">
         <Header />
-        <View style={styles.shell}>
+        <View style={shellStyle}>
           <View style={styles.waitingContainer}>
             <ErrorState
               icon="warning"
@@ -161,7 +162,7 @@ export function WaitingRoomScreen({
     return (
       <View style={styles.root} testID="waiting-error">
         <Header />
-        <View style={styles.shell}>
+        <View style={shellStyle}>
           <View style={styles.waitingContainer}>
             <ErrorState
               icon="warning"
@@ -184,7 +185,7 @@ export function WaitingRoomScreen({
     return (
       <View style={styles.root} testID="waiting-noqueue">
         <Header />
-        <View style={styles.shell}>
+        <View style={shellStyle}>
           <View style={styles.waitingContainer}>
             <ErrorState
               icon="warning"
@@ -207,7 +208,7 @@ export function WaitingRoomScreen({
     return (
       <View style={styles.root} testID="waiting-error">
         <Header />
-        <View style={styles.shell}>
+        <View style={shellStyle}>
           <View style={styles.waitingContainer}>
             <ErrorState
               icon="warning"
@@ -231,7 +232,7 @@ export function WaitingRoomScreen({
     return (
       <View style={styles.root} testID="waiting-terminal">
         <Header />
-        <View style={styles.shell}>
+        <View style={shellStyle}>
           <View style={styles.waitingContainer}>
             <StatusBadge
               variant={isSoldOut ? "soldOut" : "expired"}
@@ -261,7 +262,7 @@ export function WaitingRoomScreen({
       return (
         <View style={styles.root} testID="waiting-claim-error">
           <Header />
-          <View style={styles.shell}>
+          <View style={shellStyle}>
             <View style={styles.waitingContainer}>
               <StatusBadge
                 variant={isSoldOut ? "soldOut" : "expired"}
@@ -291,17 +292,23 @@ export function WaitingRoomScreen({
           contentContainerStyle={[
             styles.waitingScroll,
             isDesktop && styles.waitingScrollDesktop,
+            isMobileWeb && styles.mobileWebWaitingScroll,
           ]}
           showsVerticalScrollIndicator={false}
         >
           <View
-            style={[styles.waitingPage, isDesktop && styles.waitingPageDesktop]}
+            style={[
+              styles.waitingPage,
+              isDesktop && styles.waitingPageDesktop,
+              isMobileWeb && styles.mobileWebWaitingPage,
+            ]}
           >
             <YourTurnState
               onLeavePress={handleLeavePress}
               claiming={claiming}
               eventId={eventId}
               isDesktop={isDesktop}
+              isMobileWeb={isMobileWeb}
             />
           </View>
         </ScrollView>
@@ -329,11 +336,16 @@ export function WaitingRoomScreen({
         contentContainerStyle={[
           styles.waitingScroll,
           isDesktop && styles.waitingScrollDesktop,
+          isMobileWeb && styles.mobileWebWaitingScroll,
         ]}
         showsVerticalScrollIndicator={false}
       >
         <View
-          style={[styles.waitingPage, isDesktop && styles.waitingPageDesktop]}
+          style={[
+            styles.waitingPage,
+            isDesktop && styles.waitingPageDesktop,
+            isMobileWeb && styles.mobileWebWaitingPage,
+          ]}
         >
           <WaitingActive
             position={entry.position}
@@ -342,6 +354,7 @@ export function WaitingRoomScreen({
             onLeavePress={handleLeavePress}
             eventId={eventId}
             isDesktop={isDesktop}
+            isMobileWeb={isMobileWeb}
           />
         </View>
       </ScrollView>

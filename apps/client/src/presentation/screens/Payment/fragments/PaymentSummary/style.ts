@@ -11,6 +11,7 @@ export const paymentSummaryStyles = StyleSheet.create({
     borderColor: designColors.ink,
     backgroundColor: designColors.ground,
   },
+  mobileWebContainer: { borderWidth: 1 },
   heading: {
     color: designColors.gray,
     letterSpacing: 2,

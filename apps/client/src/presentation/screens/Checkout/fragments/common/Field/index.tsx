@@ -9,6 +9,7 @@ import Animated, {
 
 import { NIK_LENGTH } from "@domain/auth/nik";
 import { designColors } from "@presentation/theme";
+import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import type { FieldProps } from "../../../interface";
 
@@ -24,6 +25,7 @@ export function Field({
   invalid = false,
   editable = true,
 }: FieldProps) {
+  const { isMobileWeb } = useResponsive();
   const [isFocused, setIsFocused] = useState(false);
   const shakeX = useSharedValue(0);
   const prevInvalid = useRef(invalid);
@@ -43,8 +45,20 @@ export function Field({
   }));
 
   return (
-    <View style={checkoutFieldStyles.container}>
-      <Text style={checkoutFieldStyles.label}>{label}</Text>
+    <View
+      style={[
+        checkoutFieldStyles.container,
+        isMobileWeb && checkoutFieldStyles.mobileWebContainer,
+      ]}
+    >
+      <Text
+        style={[
+          checkoutFieldStyles.label,
+          isMobileWeb && checkoutFieldStyles.mobileWebLabel,
+        ]}
+      >
+        {label}
+      </Text>
       <Animated.View style={animatedStyle}>
         <TextInput
           accessibilityLabel={label}
@@ -59,6 +73,7 @@ export function Field({
           onBlur={() => setIsFocused(false)}
           style={[
             fieldInputStyle(invalid, editable),
+            isMobileWeb && checkoutFieldStyles.mobileWebInput,
             fieldFocusStyle(isFocused),
           ]}
         />

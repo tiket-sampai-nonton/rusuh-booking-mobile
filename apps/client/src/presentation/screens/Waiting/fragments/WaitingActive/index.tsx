@@ -16,6 +16,7 @@ interface WaitingActiveProps {
   readonly onLeavePress: () => void;
   readonly eventId: string;
   readonly isDesktop: boolean;
+  readonly isMobileWeb?: boolean;
 }
 
 export function WaitingActive({
@@ -25,6 +26,7 @@ export function WaitingActive({
   onLeavePress,
   eventId,
   isDesktop,
+  isMobileWeb = false,
 }: WaitingActiveProps) {
   const estimate = etaText(position, admissionRatePerMin);
 
@@ -66,10 +68,19 @@ export function WaitingActive({
         </View>
       </View>
 
-      <View style={styles.waitingSpacer} />
+      <View
+        style={[
+          styles.waitingSpacer,
+          isMobileWeb && styles.mobileWebWaitingSpacer,
+        ]}
+      />
 
       <View
-        style={[styles.waitingFooter, isDesktop && styles.waitingFooterDesktop]}
+        style={[
+          styles.waitingFooter,
+          isDesktop && styles.waitingFooterDesktop,
+          isMobileWeb && styles.mobileWebWaitingFooter,
+        ]}
       >
         <Text
           style={[

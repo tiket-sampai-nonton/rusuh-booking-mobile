@@ -4,12 +4,17 @@ import {
   browseCountText,
   browseCountValue,
   browseFilterButton,
+  browseFilterButtonCompactStyle,
   browseHeader,
+  browseHeaderCompactStyle,
   browseNativeHeader,
   browseNativeViewButton,
   browseSortControl,
   browseSortSelect,
+  browseSortSelectCompactStyle,
+  browseSortControlCompactStyle,
   browseToolbarActions,
+  browseToolbarActionsCompactStyle,
   browseViewBtn,
   browseViewBtnActive,
   browseViewDivider,
@@ -29,6 +34,7 @@ const SORT_OPTIONS = [
 interface BrowseResultsToolbarProps {
   readonly count: number;
   readonly isNative: boolean;
+  readonly isMobileWeb?: boolean;
   readonly sortBy: string;
   readonly viewMode: "grid" | "list";
   readonly onFilterPress: () => void;
@@ -39,6 +45,7 @@ interface BrowseResultsToolbarProps {
 export function BrowseResultsToolbar({
   count,
   isNative,
+  isMobileWeb = false,
   sortBy,
   viewMode,
   onFilterPress,
@@ -46,27 +53,50 @@ export function BrowseResultsToolbar({
   onViewModeChange,
 }: BrowseResultsToolbarProps) {
   return (
-    <View style={[browseHeader, isNative && browseNativeHeader]}>
+    <View
+      style={[
+        browseHeader,
+        isNative && browseNativeHeader,
+        isMobileWeb && browseHeaderCompactStyle,
+      ]}
+    >
       <Text style={browseCountText} testID="browse-count">
         Menampilkan <Text style={browseCountValue}>{count}</Text> event
       </Text>
-      <View style={browseToolbarActions}>
+      <View
+        style={[
+          browseToolbarActions,
+          isMobileWeb && browseToolbarActionsCompactStyle,
+        ]}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Saring event"
           onPress={onFilterPress}
-          style={browseFilterButton}
+          style={[
+            browseFilterButton,
+            isMobileWeb && browseFilterButtonCompactStyle,
+          ]}
           testID="browse-filter"
         >
           <FilterIcon />
         </Pressable>
         {Platform.OS === "web" ? (
-          <View style={browseSortSelect}>
+          <View
+            style={[
+              browseSortSelect,
+              isMobileWeb && browseSortSelectCompactStyle,
+            ]}
+          >
             <select
               aria-label="Urutkan event"
               value={sortBy}
               onChange={(event) => onSortChange(event.target.value)}
-              style={browseSortControl}
+              style={
+                isMobileWeb
+                  ? { ...browseSortControl, ...browseSortControlCompactStyle }
+                  : browseSortControl
+              }
             >
               {SORT_OPTIONS.map((option) => (
                 <option key={option.key} value={option.key}>
@@ -76,29 +106,31 @@ export function BrowseResultsToolbar({
             </select>
           </View>
         ) : null}
-        <View style={browseViewToggle}>
-          <Pressable
-            style={[
-              viewMode === "grid" ? browseViewBtnActive : browseViewBtn,
-              isNative && browseNativeViewButton,
-            ]}
-            onPress={() => onViewModeChange("grid")}
-            testID="view-grid"
-          >
-            <GridIcon active={viewMode === "grid"} />
-          </Pressable>
-          <View style={browseViewDivider} />
-          <Pressable
-            style={[
-              viewMode === "list" ? browseViewBtnActive : browseViewBtn,
-              isNative && browseNativeViewButton,
-            ]}
-            onPress={() => onViewModeChange("list")}
-            testID="view-list"
-          >
-            <ListIcon active={viewMode === "list"} />
-          </Pressable>
-        </View>
+        {!isMobileWeb && (
+          <View style={browseViewToggle}>
+            <Pressable
+              style={[
+                viewMode === "grid" ? browseViewBtnActive : browseViewBtn,
+                isNative && browseNativeViewButton,
+              ]}
+              onPress={() => onViewModeChange("grid")}
+              testID="view-grid"
+            >
+              <GridIcon active={viewMode === "grid"} />
+            </Pressable>
+            <View style={browseViewDivider} />
+            <Pressable
+              style={[
+                viewMode === "list" ? browseViewBtnActive : browseViewBtn,
+                isNative && browseNativeViewButton,
+              ]}
+              onPress={() => onViewModeChange("list")}
+              testID="view-list"
+            >
+              <ListIcon active={viewMode === "list"} />
+            </Pressable>
+          </View>
+        )}
       </View>
     </View>
   );

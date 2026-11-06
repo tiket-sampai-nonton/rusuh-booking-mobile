@@ -282,15 +282,18 @@ export function styleForPulsingDotAnimatedView5(): DynamicStyle {
   } as DynamicStyle;
 }
 
-export function styleForHeroInfoMobileText6(arg0: number): DynamicStyle {
+export function styleForHeroInfoMobileText6(
+  arg0: number,
+  isMobileWeb = false,
+): DynamicStyle {
   return {
-    color: designColors.ink,
-    fontSize: arg0,
+    color: isMobileWeb ? designColors.ground : designColors.ink,
+    fontSize: isMobileWeb ? Math.min(arg0, 36) : arg0,
     fontFamily: plusJakartaSansFonts.extraBold, // weight 800
-    lineHeight: arg0 * 1.1, // line-height: 1.1 to prevent top clipping
+    lineHeight: arg0 * (isMobileWeb ? 0.98 : 1.1),
     textTransform: "uppercase",
     letterSpacing: arg0 * -0.02, // letter-spacing: -0.02em
-    marginBottom: SPACE_S,
+    marginBottom: isMobileWeb ? SPACE_XS : SPACE_S,
   } as DynamicStyle;
 }
 
@@ -352,18 +355,19 @@ export function styleForHeroCarouselView12(arg0: number): DynamicStyle {
 export function styleForHeroCarouselView13(
   arg0: boolean,
   arg1: boolean,
+  arg2 = false,
 ): DynamicStyle {
   return {
     position: "absolute",
-    bottom: arg0 ? SPACE_L : SPACE_L + 40, // Native: no extra room for dots at bottom
-    left: FRAME_PADDING,
-    right: FRAME_PADDING,
+    bottom: arg0 || arg2 ? SPACE_S : SPACE_L + 40,
+    left: arg0 || arg2 ? 16 : FRAME_PADDING,
+    right: arg0 || arg2 ? 16 : FRAME_PADDING,
     zIndex: 10,
     // Desktop: row layout with title + info side by side
     // Native: single column (mobile prototype has Badge→Title→Meta→CTA stacked)
-    flexDirection: arg0 || arg1 ? "column" : "row",
-    gap: arg1 ? SPACE_M : SPACE_L,
-    alignItems: arg1 ? "flex-start" : "flex-end",
+    flexDirection: arg0 || arg1 || arg2 ? "column" : "row",
+    gap: arg2 ? SPACE_XS : arg1 ? SPACE_M : SPACE_L,
+    alignItems: arg1 || arg2 ? "flex-start" : "flex-end",
   } as DynamicStyle;
 }
 
