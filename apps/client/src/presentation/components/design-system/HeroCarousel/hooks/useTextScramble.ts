@@ -21,6 +21,7 @@ export function useTextScramble(text: string): string {
         text
           .split("")
           .map((char, index) => {
+            if (/\s/.test(char)) return char;
             if (index < iteration) return originalText[index];
             return SCRAMBLE_CHARS[
               Math.floor(Math.random() * SCRAMBLE_CHARS.length)

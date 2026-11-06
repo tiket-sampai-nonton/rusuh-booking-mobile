@@ -73,8 +73,8 @@ export const componentStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
-    backgroundColor: designColors.ink,
+    borderColor: designColors.danger,
+    backgroundColor: designColors.danger,
   },
   elementColor11: {
     color: designColors.ground,

@@ -16,8 +16,8 @@ export function styleForPaymentTopBarView0(): DynamicStyle {
   } as DynamicStyle;
 }
 
-export function styleForPaymentTopBarView1(arg0: boolean): DynamicStyle {
+export function styleForPaymentTopBarView1(_arg0: boolean): DynamicStyle {
   return {
-    backgroundColor: arg0 ? designColors.accent : designColors.ink,
+    backgroundColor: designColors.danger,
   } as DynamicStyle;
 }

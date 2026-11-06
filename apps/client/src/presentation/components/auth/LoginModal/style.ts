@@ -77,7 +77,8 @@ export const loginStyles = StyleSheet.create({
   },
   mobileWebCard: {
     maxWidth: "100%",
-    maxHeight: "92%",
+    maxHeight: "100%",
+    flexShrink: 1,
     padding: 16,
     paddingTop: 56,
     borderLeftWidth: 0,
@@ -241,9 +242,9 @@ export const loginStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: designColors.ink, // black
+    backgroundColor: designColors.danger,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
+    borderColor: designColors.danger,
     borderRadius: 0, // Brutalist: NO border-radius
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -254,7 +255,7 @@ export const loginStyles = StyleSheet.create({
   goText: {
     fontFamily: plusJakartaSansFonts.bold, // weight 700
     fontSize: designFontSizes.s, // 14px
-    color: designColors.ground, // white
+    color: designColors.ground,
     textTransform: "uppercase",
     letterSpacing: designFontSizes.s * 0.04, // 0.04em
   },

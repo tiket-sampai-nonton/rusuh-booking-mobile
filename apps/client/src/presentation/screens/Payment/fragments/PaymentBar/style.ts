@@ -23,14 +23,8 @@ export function styleForPaymentBarPressable1(
   isMobileWeb = false,
 ): DynamicStyle {
   return {
-    backgroundColor: isMobileWeb
-      ? canPay
-        ? designColors.ink
-        : designColors.inkMuted
-      : canPay
-        ? designColors.ground
-        : designColors.inkMuted,
-    borderColor: designColors.ink,
+    backgroundColor: canPay ? designColors.danger : designColors.inkMuted,
+    borderColor: canPay ? designColors.danger : designColors.inkMuted,
     minHeight: 48,
     paddingHorizontal: isMobileWeb ? 14 : 24,
     paddingVertical: isMobileWeb ? 10 : 14,
@@ -42,13 +36,7 @@ export function styleForPaymentBarText2(
   isMobileWeb = false,
 ): DynamicStyle {
   return {
-    color: isMobileWeb
-      ? canPay
-        ? designColors.ground
-        : designColors.ground
-      : canPay
-        ? designColors.ink
-        : designColors.ground,
+    color: designColors.ground,
     letterSpacing: 0.5,
     fontSize: isMobileWeb ? 12 : 14,
   } as DynamicStyle;
