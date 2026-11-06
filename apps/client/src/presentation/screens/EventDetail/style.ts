@@ -10,7 +10,7 @@
  * - Borders: 2px solid black (NO border-radius)
  * - Shadows: hard offset, NO blur (4px 4px 0 #000)
  * - Images: grayscale(100%) default, color on hover
- * - Fonts: Inter (weight 900 for titles, 700 for labels)
+ * - Fonts: Plus Jakarta Sans (weight 800 for titles, 700 for labels)
  *
  * Mobile-specific (native only):
  * - Header: transparent → solid on scroll
@@ -22,7 +22,7 @@
  */
 import { Dimensions, Platform, StyleSheet } from "react-native";
 
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import {
   designBorders,
   designColors,
@@ -128,14 +128,14 @@ export const designDetailStyles = StyleSheet.create({
     ...hardShadowStyle(3, 3, designColors.ink, 3),
   },
   backBtnText: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: designFontSizes.s,
     color: designColors.ink,
     textTransform: "uppercase",
     letterSpacing: designFontSizes.s * 0.04,
   },
   logo: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 18,
     color: designColors.ink,
     textTransform: "uppercase",
@@ -198,7 +198,7 @@ export const designDetailStyles = StyleSheet.create({
     borderColor: designColors.inkMuted,
   },
   stepNumText: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 10,
   },
   stepNumTextActive: {
@@ -208,7 +208,7 @@ export const designDetailStyles = StyleSheet.create({
     color: designColors.inkMuted,
   },
   stepLabel: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.xs,
     textTransform: "uppercase",
     letterSpacing: designFontSizes.xs * 0.08,
@@ -307,7 +307,7 @@ export const designDetailStyles = StyleSheet.create({
         : designSpacingSemantic.xs,
   },
   heroBadgeText: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.xs,
     color: designColors.ground,
     textTransform: "uppercase",
@@ -320,7 +320,7 @@ export const designDetailStyles = StyleSheet.create({
     backgroundColor: designColors.danger, // #ff0000 - Live red dot per Design Palette Guide
   },
   heroTitle: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: Platform.OS === "web" ? 48 : designFontSizes["2xl"], // 24px on mobile
     lineHeight: (Platform.OS === "web" ? 48 : designFontSizes["2xl"]) * 1.1,
     color: designColors.ink,
@@ -334,7 +334,7 @@ export const designDetailStyles = StyleSheet.create({
         : designSpacingSemantic.xs,
   },
   heroSubtitle: {
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     fontSize: designFontSizes.l,
     color: designColors.inkMuted,
     marginBottom: designSpacingSemantic.m,
@@ -350,7 +350,7 @@ export const designDetailStyles = StyleSheet.create({
     gap: designSpacingSemantic.xs,
   },
   heroMetaText: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: designFontSizes.m,
     color: designColors.ink,
   },
@@ -380,14 +380,14 @@ export const designDetailStyles = StyleSheet.create({
     marginTop: 2,
   },
   infoLabel: {
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     fontSize: designFontSizes.xs,
     color: designColors.inkMuted,
     textTransform: "uppercase",
     letterSpacing: designFontSizes.xs * 0.05,
   },
   infoValue: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: designFontSizes.s,
     color: designColors.ink,
     marginTop: 2,
@@ -417,7 +417,7 @@ export const designDetailStyles = StyleSheet.create({
     opacity: 1, // Controlled by Animated.View
   },
   sectionTitle: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     // Native: text-xs (12px), Web: text-xl (20px)
     fontSize: Platform.OS === "web" ? designFontSizes.xl : designFontSizes.xs,
     color: designColors.ink,
@@ -440,7 +440,7 @@ export const designDetailStyles = StyleSheet.create({
   // Description Text
   // ---------------------------------------------------------------------------
   description: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.m,
     lineHeight: designFontSizes.m * 1.8,
     color: designColors.inkMuted,
@@ -487,7 +487,7 @@ export const designDetailStyles = StyleSheet.create({
     paddingRight: Platform.OS === "web" ? 0 : 12,
   },
   categoryName: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     // Native: text-s (14px) per prototype, Web: text-m (16px)
     fontSize: Platform.OS === "web" ? designFontSizes.m : designFontSizes.s,
     // Explicit lineHeight on native keeps the left column height predictable
@@ -498,7 +498,7 @@ export const designDetailStyles = StyleSheet.create({
     textTransform: "uppercase",
   },
   categoryDesc: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     // Native: text-xs (12px) per prototype, Web: text-s (14px)
     fontSize: Platform.OS === "web" ? designFontSizes.s : designFontSizes.xs,
     lineHeight:
@@ -513,7 +513,7 @@ export const designDetailStyles = StyleSheet.create({
     alignItems: "flex-end",
   },
   categoryPriceValue: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     // Native: text-m (16px) per prototype, Web: text-l (18px)
     fontSize: Platform.OS === "web" ? designFontSizes.l : designFontSizes.m,
     lineHeight:
@@ -521,21 +521,21 @@ export const designDetailStyles = StyleSheet.create({
     color: designColors.ink,
   },
   categoryAvail: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: designFontSizes.xs,
     lineHeight:
       Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
     color: designColors.success,
   },
   categoryAvailLimited: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: designFontSizes.xs,
     lineHeight:
       Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
     color: designColors.warning,
   },
   categoryAvailOut: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: designFontSizes.xs,
     lineHeight:
       Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
@@ -581,7 +581,7 @@ export const designDetailStyles = StyleSheet.create({
     // Remove grayscale on hover
   },
   lineupName: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.s,
     color: designColors.ink,
     textTransform: "uppercase",
@@ -591,7 +591,7 @@ export const designDetailStyles = StyleSheet.create({
     color: designColors.ground,
   },
   lineupRole: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.xs,
     color: designColors.inkMuted,
     textAlign: "center",
@@ -636,7 +636,7 @@ export const designDetailStyles = StyleSheet.create({
     backgroundColor: designColors.ground,
   },
   venueMapBtnText: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.s,
     color: designColors.ink,
     textTransform: "uppercase",
@@ -646,13 +646,13 @@ export const designDetailStyles = StyleSheet.create({
     marginTop: designSpacingSemantic.m,
   },
   venueName: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.l,
     color: designColors.ink,
     marginBottom: designSpacingSemantic.xs,
   },
   venueAddress: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.s,
     color: designColors.inkMuted,
   },
@@ -691,7 +691,7 @@ export const designDetailStyles = StyleSheet.create({
     opacity: 0, // Show on hover
   },
   galleryPlusText: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 32,
     color: designColors.ground,
   },
@@ -711,13 +711,13 @@ export const designDetailStyles = StyleSheet.create({
     borderBottomColor: designColors.field,
   },
   termsCheck: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: designFontSizes.s,
     color: designColors.success, // #00aa00 per Design Palette Guide
   },
   termsText: {
     flex: 1,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.s,
     color: designColors.ink,
   },
@@ -755,14 +755,14 @@ export const designDetailStyles = StyleSheet.create({
     flex: 1,
   },
   floatingCtaPriceLabel: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.xs,
     color: designColors.inkMuted,
     textTransform: "uppercase",
     letterSpacing: designFontSizes.xs * 0.04,
   },
   floatingCtaPrice: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: designFontSizes.xl,
     color: designColors.ink,
   },
@@ -792,7 +792,7 @@ export const designDetailStyles = StyleSheet.create({
     opacity: 0.45,
   },
   floatingCtaBtnText: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     // Native: text-s (14px) per prototype, Web: text-m (16px)
     fontSize: Platform.OS === "web" ? designFontSizes.m : designFontSizes.s,
     color: designColors.ground,
@@ -801,7 +801,7 @@ export const designDetailStyles = StyleSheet.create({
       (Platform.OS === "web" ? designFontSizes.m : designFontSizes.s) * 0.04,
   },
   floatingCtaArrow: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     // Native: text-s (14px) per prototype, Web: text-m (16px)
     fontSize: Platform.OS === "web" ? designFontSizes.m : designFontSizes.s,
     color: designColors.ground,
@@ -822,12 +822,12 @@ export const designDetailStyles = StyleSheet.create({
     gap: 4,
   },
   trustBadgeText: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.xs,
     color: designColors.inkMuted,
   },
   trustBadgeCheck: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     color: designColors.success, // #00aa00 per Design Palette Guide
   },
@@ -858,7 +858,7 @@ export const designDetailStyles = StyleSheet.create({
     justifyContent: "center",
   },
   lightboxCloseText: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.l,
     color: designColors.ground,
   },
@@ -873,7 +873,7 @@ export const designDetailStyles = StyleSheet.create({
     justifyContent: "center",
   },
   lightboxNavText: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.l,
     color: designColors.ground,
   },
@@ -914,7 +914,7 @@ export const designDetailStyles = StyleSheet.create({
     padding: designSpacingSemantic.l,
   },
   errorText: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.l,
     color: designColors.ink,
     textAlign: "center",

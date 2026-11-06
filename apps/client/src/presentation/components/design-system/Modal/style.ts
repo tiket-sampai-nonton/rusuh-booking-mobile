@@ -3,7 +3,7 @@ import {
   designColors,
   designBorders,
   designModal,
-  interFonts,
+  plusJakartaSansFonts,
 } from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -30,11 +30,11 @@ export const styles = StyleSheet.create({
   title: {
     color: designColors.ink,
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: -0.02 * 20, // --tracking-tight
     marginBottom: 12,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
   },
 });
 

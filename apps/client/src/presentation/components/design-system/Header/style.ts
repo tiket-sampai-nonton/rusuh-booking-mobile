@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorders, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 import type { ViewStyle } from "react-native";
 
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -8,7 +12,7 @@ export const componentStyles = StyleSheet.create({
   elementColor2: {
     color: designColors.ink,
     fontSize: 18,
-    fontFamily: interFonts.black, // weight 900
+    fontFamily: plusJakartaSansFonts.extraBold, // weight 800
     textTransform: "uppercase",
     letterSpacing: 0.36, // 0.02em * 18
   },
@@ -30,7 +34,7 @@ export const componentStyles = StyleSheet.create({
   elementColor7: {
     color: designColors.ground,
     fontSize: 10,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
   },
   elementBorderWidth8: {
     borderWidth: designBorders.standard,
@@ -56,7 +60,7 @@ export function styleForHeaderAnimatedView2(): DynamicStyle {
 export function styleForHeaderAnimatedText3(): DynamicStyle {
   return {
     fontSize: 12,
-    fontFamily: interFonts.bold, // weight 700
+    fontFamily: plusJakartaSansFonts.bold, // weight 700
     textTransform: "uppercase",
     letterSpacing: 0.48, // 0.04em * 12
   } as DynamicStyle;

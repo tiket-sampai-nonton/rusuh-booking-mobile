@@ -11,7 +11,7 @@ export const componentStyles = StyleSheet.create({
   elementColor1: {
     color: designColors.ink,
     fontSize: 32,
-    fontWeight: "900",
+    fontWeight: "800",
     letterSpacing: -0.64,
     marginBottom: 4,
   },

@@ -3,7 +3,7 @@ import {
   designBorders,
   designColors,
   designSpacingSemantic,
-  interFonts,
+  plusJakartaSansFonts,
 } from "@presentation/theme";
 
 import type { ViewStyle, TextStyle } from "react-native";
@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
   link: { flexDirection: "row", alignItems: "center" },
   title: {
     color: designColors.ink,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     textTransform: "uppercase",
   },
   linkText: { textTransform: "uppercase" },
@@ -59,7 +59,9 @@ export function sectionLinkTextStyle(isNative: boolean): TextStyle {
   return {
     color: isNative ? designColors.inkMuted : designColors.ink,
     fontSize: isNative ? 12 : 14,
-    fontFamily: isNative ? interFonts.semiBold : interFonts.bold,
+    fontFamily: isNative
+      ? plusJakartaSansFonts.semiBold
+      : plusJakartaSansFonts.bold,
     letterSpacing: isNative ? 0.6 : 0.56,
   };
 }

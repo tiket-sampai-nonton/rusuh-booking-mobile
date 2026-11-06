@@ -5,7 +5,7 @@
  * - Progress steps bar at top (4 steps: Pilih, Detail, Bayar, Selesai)
  * - Numbered sections with black boxes (1, 2, 3)
  * - 2px solid borders, no rounded corners
- * - Inter font family
+ * - Plus Jakarta Sans font family
  *
  * NIK is never logged; the buyer/attendee NIK fields are masked on handoff
  * (D7.1/D7.5). No infrastructure import — ports via useServices/hooks only.
@@ -224,7 +224,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               >
                 <Text
                   style={componentStyles.buyerPrefillBadgeText}
-                  className="text-2xs font-v2 font-bold uppercase"
+                  className="text-2xs font-sans font-bold uppercase"
                 >
                   Terisi dari akun
                 </Text>

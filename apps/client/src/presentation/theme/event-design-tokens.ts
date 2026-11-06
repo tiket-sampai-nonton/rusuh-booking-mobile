@@ -7,7 +7,7 @@
  * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000, #00aa00, #ff6600
  * - Borders: 2px solid black (3px for waiting room ONLY)
  * - Shadows: hard offset, NO blur (e.g. 4px 4px 0 #000)
- * - Fonts: Inter (waiting room: JetBrains Mono)
+ * - Fonts: Plus Jakarta Sans across the app
  */
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -44,8 +44,7 @@ export const designColors = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const designFonts = {
-  sans: "Inter", // Primary font
-  mono: "JetBrains Mono", // Waiting room ONLY
+  sans: "Plus Jakarta Sans",
 } as const;
 
 export const designFontWeights = {
@@ -53,7 +52,7 @@ export const designFontWeights = {
   medium: "500",
   semibold: "600",
   bold: "700",
-  black: "900",
+  extraBold: "800",
 } as const;
 
 export const designFontSizes = {

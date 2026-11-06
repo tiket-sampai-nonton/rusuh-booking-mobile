@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import {
   designBorders,
   designColors,
@@ -43,7 +43,7 @@ export const venueStyles = StyleSheet.create({
     fontSize: 16,
   },
   mapBtnText: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.s,
     color: designColors.ink,
     textTransform: "uppercase",
@@ -53,13 +53,13 @@ export const venueStyles = StyleSheet.create({
     marginTop: designSpacingSemantic.m,
   },
   name: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.l,
     color: designColors.ink,
     marginBottom: designSpacingSemantic.xs,
   },
   address: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.s,
     color: designColors.inkMuted,
     lineHeight: designFontSizes.s * 1.5,

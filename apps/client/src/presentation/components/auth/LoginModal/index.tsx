@@ -8,7 +8,7 @@
  * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000
  * - Borders: 2px solid black (NO border-radius)
  * - Shadows: hard offset, NO blur (4px 4px 0 #000)
- * - Fonts: Inter (weight 900 for titles, 700 for labels/buttons)
+ * - Fonts: Plus Jakarta Sans (weight 800 for titles, 700 for labels/buttons)
  * - Animation: modalIn (translateY 20→0, scale 0.95→1, opacity 0→1, 400ms)
  *
  * Steps (prototype flow):

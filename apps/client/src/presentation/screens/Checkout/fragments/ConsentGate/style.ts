@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { designColors, interFonts } from "@presentation/theme";
+import { designColors, plusJakartaSansFonts } from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
 
@@ -19,10 +19,10 @@ export const componentStyles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     color: designColors.ink,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
   },
   elementFontFamily2: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     textDecorationLine: "underline",
   },
 });

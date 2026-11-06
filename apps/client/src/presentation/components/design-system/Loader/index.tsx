@@ -6,7 +6,7 @@
  * - background: #000
  * - display: flex, center
  *
- * TEXT: white, fontSize 24-48, fontWeight 900, uppercase
+ * TEXT: white, fontSize 24-48, fontWeight 800, uppercase
  * Letter bounce animation: translateY 0 to -10px, 0.6s
  * Each letter delayed by 0.1s
  *

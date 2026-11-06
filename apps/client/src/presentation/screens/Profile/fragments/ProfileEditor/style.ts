@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { interFonts, designBorders, designColors } from "@presentation/theme";
+import {
+  plusJakartaSansFonts,
+  designBorders,
+  designColors,
+} from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   form: { marginTop: 20, gap: 12 },
@@ -9,7 +13,7 @@ export const styles = StyleSheet.create({
     borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     color: designColors.ink,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
   },
   error: { color: "#b00020", fontSize: 13 },
   button: {
@@ -21,7 +25,7 @@ export const styles = StyleSheet.create({
   disabledButton: { opacity: 0.5 },
   buttonText: {
     color: designColors.ground,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },
@@ -34,7 +38,7 @@ export const styles = StyleSheet.create({
   },
   cancelText: {
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },

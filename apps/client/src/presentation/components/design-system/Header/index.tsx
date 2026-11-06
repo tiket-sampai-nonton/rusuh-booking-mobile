@@ -4,7 +4,7 @@
  *
  * MASTER-SPEC + 01-home.html + v2-mobile/01-home.html:
  * - Fixed top, height 60px (desktop) / 56px (mobile)
- * - Logo: fontSize 18, fontWeight 900, uppercase
+ * - Logo: fontSize 18, fontWeight 800, uppercase
  * - Slide in from top on mount (translateY -100% → 0)
  * - border: 2px solid #000 (bottom only)
  * - Pure black/white, no shadows, no rounding

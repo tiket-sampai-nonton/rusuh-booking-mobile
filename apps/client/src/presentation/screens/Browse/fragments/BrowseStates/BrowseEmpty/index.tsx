@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 
-import { designColors, interFonts } from "@presentation/theme";
+import { designColors, plusJakartaSansFonts } from "@presentation/theme";
 
 import { browseEmpty } from "../../../style";
 
@@ -8,7 +8,7 @@ const styles = {
   title: {
     color: designColors.ink,
     fontSize: 18,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     textTransform: "uppercase" as const,
     letterSpacing: -0.36,
     textAlign: "center" as const,
@@ -17,7 +17,7 @@ const styles = {
   message: {
     color: designColors.inkMuted,
     fontSize: 14,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     textAlign: "center" as const,
     maxWidth: 320,
   },

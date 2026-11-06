@@ -2,8 +2,7 @@ import { StyleSheet } from "react-native";
 import {
   designColors,
   designBorders,
-  interFonts,
-  waitingRoomFont,
+  plusJakartaSansFonts,
 } from "@presentation/theme";
 
 import type { EdgeInsets } from "react-native-safe-area-context";
@@ -26,7 +25,7 @@ export const styles = StyleSheet.create({
   backText: {
     color: designColors.ink,
     fontSize: 14,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -56,8 +55,8 @@ export const styles = StyleSheet.create({
   timerText: {
     color: designColors.ink,
     fontSize: 16,
-    fontFamily: waitingRoomFont,
-    fontWeight: "900",
+    fontFamily: plusJakartaSansFonts.regular,
+    fontWeight: "800",
     fontVariant: ["tabular-nums"],
   },
   timerTextWarning: {

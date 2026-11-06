@@ -3,7 +3,7 @@ import {
   designBorders,
   designColors,
   designButton,
-  interFonts,
+  plusJakartaSansFonts,
 } from "@presentation/theme";
 
 export function styleForButtonPressable0(
@@ -55,7 +55,7 @@ export function styleForButtonAnimatedText2(
     fontWeight: designButton.fontWeight,
     textTransform: "uppercase",
     letterSpacing: arg1 * designButton.letterSpacing,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
   } as DynamicStyle;
 }
 
@@ -70,6 +70,6 @@ export function styleForButtonText3(
     color: arg0.fg,
     fontSize: arg1,
     fontWeight: designButton.fontWeight,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
   } as DynamicStyle;
 }

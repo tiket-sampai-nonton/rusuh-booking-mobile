@@ -1,6 +1,6 @@
 import { Platform, StyleSheet } from "react-native";
 
-import { designColors, interFonts } from "@presentation/theme";
+import { designColors, plusJakartaSansFonts } from "@presentation/theme";
 import type { DynamicStyle } from "@presentation/utils/style";
 
 export const checkoutFieldStyles = StyleSheet.create({
@@ -8,7 +8,7 @@ export const checkoutFieldStyles = StyleSheet.create({
   label: {
     color: designColors.ink,
     fontSize: 12,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     textTransform: "uppercase",
     letterSpacing: 0.6,
     marginBottom: 8,
@@ -16,7 +16,7 @@ export const checkoutFieldStyles = StyleSheet.create({
   error: {
     color: designColors.danger,
     fontSize: 12,
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     marginTop: 4,
   },
 });
@@ -32,7 +32,7 @@ export function fieldInputStyle(
     color: designColors.ink,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: 16,
   } as DynamicStyle;
 }

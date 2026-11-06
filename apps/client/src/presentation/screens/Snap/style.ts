@@ -16,7 +16,7 @@ export const snapStyles = StyleSheet.create({
     height: 40,
     backgroundColor: designColors.ink,
   },
-  logoArrow: { fontSize: 18, fontWeight: "900", color: designColors.ground },
+  logoArrow: { fontSize: 18, fontWeight: "800", color: designColors.ground },
   eyebrow: { letterSpacing: 2.5 },
   heading: { letterSpacing: -0.5 },
 });

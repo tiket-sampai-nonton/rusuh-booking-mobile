@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { designColors, interFonts } from "@presentation/theme";
+import { designColors, plusJakartaSansFonts } from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
 import { hardShadowStyle } from "@presentation/utils/style";
@@ -13,18 +13,18 @@ export const componentStyles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 12 * 0.1, // --tracking-wider
     color: designColors.ink,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
   },
   elementFontSize2: {
     fontSize: 12,
     color: designColors.danger,
     fontWeight: "600",
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
   },
   elementFontSize3: {
     fontSize: 12,
     color: designColors.inkMuted,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
   },
 });
 
@@ -51,6 +51,6 @@ export function styleForComponentAnimatedTextInput1(
     fontSize: designInput.fontSize,
     fontWeight: designInput.fontWeight,
     color: designColors.ink,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
   } as DynamicStyle;
 }

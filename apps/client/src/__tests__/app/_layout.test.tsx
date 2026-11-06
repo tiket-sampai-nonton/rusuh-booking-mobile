@@ -20,7 +20,7 @@ jest.mock("expo-router", () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
 }));
 
-// Mock expo-font's useFonts for  Inter font loading (RBT-096)
+// Mock expo-font's useFonts for Plus Jakarta Sans font loading.
 jest.mock("expo-font", () => ({
   useFonts: () => [mockFontsLoaded, mockFontError],
 }));

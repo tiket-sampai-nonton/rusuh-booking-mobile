@@ -22,7 +22,7 @@ Tokens are platform-neutral values defined once in `apps/client/tailwind.config.
 | Color — text | `text.primary`, `text.secondary`, `text.onBrand`, `text.disabled` |
 | Color — status | `status.available`, `status.soldOut`, `status.warning`, `status.danger`, `status.info` |
 | Color — queue zone | `zone.guaranteed` (green), `zone.possible` (amber), `zone.notEnough` (red) |
-| Typography | family `Plus Jakarta Sans`; scale `display/h1/h2/h3/body/caption/mono`; weights 400/500/600/700 |
+| Typography | family `Plus Jakarta Sans` across the app; scale `display/h1/h2/h3/body/caption`; weights 400/500/600/700/800 |
 | Spacing | 4-pt base scale: `space.1..10` (4,8,12,16,20,24,32,40,48,64) |
 | Radius | `radius.sm/md/lg/pill` |
 | Elevation | `elevation.0..3` (shadow tokens; web box-shadow / native elevation) |

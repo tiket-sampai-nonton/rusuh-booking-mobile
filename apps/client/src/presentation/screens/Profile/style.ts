@@ -1,6 +1,6 @@
 import type { ViewStyle } from "react-native";
 import { StyleSheet } from "react-native";
-import { interFonts, designColors } from "@presentation/theme";
+import { plusJakartaSansFonts, designColors } from "@presentation/theme";
 
 export function profileContentContainerStyle(
   topInset: number,
@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: designColors.ground },
   heading: {
     color: designColors.ink,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 32,
     textTransform: "uppercase",
   },

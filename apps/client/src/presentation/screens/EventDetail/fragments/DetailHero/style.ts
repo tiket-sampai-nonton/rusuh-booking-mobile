@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from "react-native";
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import { designColors } from "@presentation/theme/event-design-tokens";
 
 import { Animated } from "react-native";
@@ -43,7 +43,7 @@ export const heroStyles = StyleSheet.create({
     backgroundColor: designColors.ground,
   },
   chipText: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: 11,
     color: designColors.ink,
     textTransform: "uppercase",

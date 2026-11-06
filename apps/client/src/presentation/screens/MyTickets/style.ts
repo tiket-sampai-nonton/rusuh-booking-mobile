@@ -1,6 +1,10 @@
 import type { ViewStyle } from "react-native";
 import { StyleSheet } from "react-native";
-import { designBorders, designColors, interFonts } from "@presentation/theme";
+import {
+  designBorders,
+  designColors,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 export function ticketsScrollContent(
   topInset: number,
@@ -17,17 +21,21 @@ export const screenStyles = StyleSheet.create({
   root: { flex: 1, backgroundColor: designColors.ground },
   title: {
     color: designColors.ink,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 32,
     textTransform: "uppercase",
   },
   description: {
     marginTop: 8,
     color: designColors.inkMuted,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: 14,
   },
-  error: { color: "#b91c1c", fontFamily: interFonts.medium, fontSize: 13 },
+  error: {
+    color: "#b91c1c",
+    fontFamily: plusJakartaSansFonts.medium,
+    fontSize: 13,
+  },
   loadMore: {
     minHeight: 44,
     alignItems: "center",
@@ -37,7 +45,7 @@ export const screenStyles = StyleSheet.create({
   },
   loadMoreLabel: {
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },
@@ -45,12 +53,12 @@ export const screenStyles = StyleSheet.create({
     paddingVertical: 32,
     textAlign: "center",
     color: designColors.inkMuted,
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
   },
   downloadError: {
     marginTop: 12,
     color: "#b91c1c",
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     fontSize: 12,
   },
   qrOverlay: { zIndex: 10000, elevation: 10000 },

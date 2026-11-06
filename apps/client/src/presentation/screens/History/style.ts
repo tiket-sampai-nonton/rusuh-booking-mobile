@@ -12,7 +12,7 @@ import {
   designColors,
   designBorders,
   designSpacingSemantic,
-  interFonts,
+  plusJakartaSansFonts,
 } from "@presentation/theme";
 
 /** Grid gap between cards */
@@ -40,7 +40,7 @@ export const historyStyles = StyleSheet.create({
   heroTitle: {
     color: designColors.ground,
     fontSize: 48,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     textTransform: "uppercase",
     letterSpacing: -1.92, // -0.04em * 48
     lineHeight: 48 * 0.9,
@@ -50,7 +50,7 @@ export const historyStyles = StyleSheet.create({
     color: designColors.ground,
     opacity: 0.7,
     fontSize: 18,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     textAlign: "center" as const,
     marginTop: 16,
   },
@@ -66,7 +66,7 @@ export const historyStyles = StyleSheet.create({
   sectionTitle: {
     color: designColors.ink,
     fontSize: 14,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     textTransform: "uppercase",
     letterSpacing: 0.56, // 0.04em
     marginBottom: designSpacingSemantic.m,
@@ -117,7 +117,7 @@ export const historyStateStyles = StyleSheet.create({
   emptyTitle: {
     color: designColors.ink,
     fontSize: 24,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     textTransform: "uppercase",
     letterSpacing: -0.48, // -0.02em
     textAlign: "center" as const,
@@ -125,7 +125,7 @@ export const historyStateStyles = StyleSheet.create({
   emptyText: {
     color: designColors.inkMuted,
     fontSize: 14,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     textAlign: "center" as const,
     marginTop: 12,
     marginBottom: designSpacingSemantic.m,
@@ -142,13 +142,13 @@ export const historyStateStyles = StyleSheet.create({
   errorTitle: {
     color: designColors.danger,
     fontSize: 16,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     textTransform: "uppercase",
   },
   errorText: {
     color: designColors.inkMuted,
     fontSize: 14,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     marginTop: 8,
     textAlign: "center" as const,
   },
@@ -163,7 +163,7 @@ export const historyStateStyles = StyleSheet.create({
   browseBtnText: {
     color: designColors.ground,
     fontSize: 14,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     textTransform: "uppercase",
   },
 });

@@ -1,6 +1,10 @@
 import { StyleSheet } from "react-native";
 
-import { designColors, designBorders, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 export const stepCircleStyles = StyleSheet.create({
   circle: {
@@ -19,7 +23,7 @@ export const stepCircleStyles = StyleSheet.create({
   },
   number: {
     fontSize: 14,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
   },
   filledNumber: {
     color: designColors.ground,

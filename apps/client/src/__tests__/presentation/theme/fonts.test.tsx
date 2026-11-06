@@ -3,55 +3,57 @@ import { useFonts } from "expo-font";
 import { Text } from "react-native";
 
 jest.mock("expo-font", () => ({ useFonts: jest.fn() }));
-jest.mock("@expo-google-fonts/inter", () => ({
-  Inter_400Regular: "regular-asset",
-  Inter_500Medium: "medium-asset",
-  Inter_600SemiBold: "semibold-asset",
-  Inter_700Bold: "bold-asset",
-  Inter_900Black: "black-asset",
-}));
 
 // eslint-disable-next-line import/first
 import {
-  interFontForWeight,
-  interFonts,
-  useInterFonts,
+  plusJakartaSansFontForWeight,
+  plusJakartaSansFonts,
+  usePlusJakartaSansFonts,
 } from "../../../presentation/theme/fonts";
 
 function FontState() {
-  const { fontsLoaded, fontError } = useInterFonts();
+  const { fontsLoaded, fontError } = usePlusJakartaSansFonts();
   let status = "loading";
   if (fontError) status = "error";
   else if (fontsLoaded) status = "loaded";
   return <Text>{status}</Text>;
 }
 
-describe("Inter font helpers", () => {
+describe("Plus Jakarta Sans font helpers", () => {
   const mockUseFonts = jest.mocked(useFonts);
 
   afterEach(() => jest.clearAllMocks());
 
   it("maps supported weights and falls back for unknown weights", () => {
-    expect(interFontForWeight("400")).toBe(interFonts.regular);
-    expect(interFontForWeight("500")).toBe(interFonts.medium);
-    expect(interFontForWeight("600")).toBe(interFonts.semiBold);
-    expect(interFontForWeight("700")).toBe(interFonts.bold);
-    expect(interFontForWeight("900")).toBe(interFonts.black);
-    expect(interFontForWeight(800)).toBe(interFonts.regular);
+    expect(plusJakartaSansFontForWeight("400")).toBe(
+      plusJakartaSansFonts.regular,
+    );
+    expect(plusJakartaSansFontForWeight("500")).toBe(
+      plusJakartaSansFonts.medium,
+    );
+    expect(plusJakartaSansFontForWeight("600")).toBe(
+      plusJakartaSansFonts.semiBold,
+    );
+    expect(plusJakartaSansFontForWeight("700")).toBe(plusJakartaSansFonts.bold);
+    expect(plusJakartaSansFontForWeight("900")).toBe(
+      plusJakartaSansFonts.extraBold,
+    );
+    expect(plusJakartaSansFontForWeight(800)).toBe(
+      plusJakartaSansFonts.extraBold,
+    );
   });
 
-  it("passes the Inter and JetBrains Mono assets to Expo and reports load states", () => {
+  it("loads the bundled Plus Jakarta Sans weights and reports load states", () => {
     mockUseFonts.mockReturnValueOnce([false, null]);
     const loading = render(<FontState />);
     expect(screen.getByText("loading")).toBeTruthy();
     expect(mockUseFonts).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        Inter_400Regular: "regular-asset",
-        Inter_500Medium: "medium-asset",
-        Inter_600SemiBold: "semibold-asset",
-        Inter_700Bold: "bold-asset",
-        Inter_900Black: "black-asset",
-        "JetBrains Mono": expect.anything(),
+        [plusJakartaSansFonts.regular]: expect.anything(),
+        [plusJakartaSansFonts.medium]: expect.anything(),
+        [plusJakartaSansFonts.semiBold]: expect.anything(),
+        [plusJakartaSansFonts.bold]: expect.anything(),
+        [plusJakartaSansFonts.extraBold]: expect.anything(),
       }),
     );
 

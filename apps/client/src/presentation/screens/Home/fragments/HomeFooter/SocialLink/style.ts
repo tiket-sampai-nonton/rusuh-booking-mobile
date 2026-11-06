@@ -1,6 +1,10 @@
 import { StyleSheet } from "react-native";
 
-import { interFonts, designBorders, designColors } from "@presentation/theme";
+import {
+  plusJakartaSansFonts,
+  designBorders,
+  designColors,
+} from "@presentation/theme";
 import type { DynamicStyle } from "@presentation/utils/style";
 
 export const socialLinkStyles = StyleSheet.create({
@@ -22,7 +26,7 @@ export const socialLinkStyles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "700",
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     zIndex: 1,
   },
 });

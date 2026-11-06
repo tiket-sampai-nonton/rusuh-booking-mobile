@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import {
   designBorders,
   designColors,
@@ -36,14 +36,14 @@ export const infoStyles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     fontSize: designFontSizes.xs,
     color: designColors.inkMuted,
     textTransform: "uppercase",
     letterSpacing: designFontSizes.xs * 0.05,
   },
   value: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: designFontSizes.s,
     color: designColors.ink,
     marginTop: 2,

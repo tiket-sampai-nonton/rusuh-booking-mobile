@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import {
   designBorders,
   designColors,
@@ -62,7 +62,7 @@ export const lineupStyles = StyleSheet.create({
     backgroundColor: "rgba(128, 128, 128, 0.65)",
   },
   name: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.xs,
     color: designColors.ink,
     textTransform: "uppercase",
@@ -72,7 +72,7 @@ export const lineupStyles = StyleSheet.create({
     color: designColors.ground,
   },
   role: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: 10,
     color: designColors.inkMuted,
     textAlign: "center",
@@ -83,7 +83,7 @@ export const lineupStyles = StyleSheet.create({
     opacity: 0.7,
   },
   empty: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.m,
     color: designColors.inkMuted,
   },

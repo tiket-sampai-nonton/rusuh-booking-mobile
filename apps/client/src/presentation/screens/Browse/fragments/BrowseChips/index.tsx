@@ -55,7 +55,7 @@ export function BrowseChips({
         >
           <Text
             style={browseChipsStyles.resetText}
-            className="text-2xs font-v2 font-bold uppercase"
+            className="text-2xs font-sans font-bold uppercase"
           >
             Hapus Penyaringan
           </Text>

@@ -7,12 +7,12 @@
  * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000
  * - Borders: 2px solid black (NO border-radius)
  * - Shadows: hard offset, NO blur (4px 4px 0 #000)
- * - Fonts: Inter (weight 900 for titles, 700 for labels)
+ * - Fonts: Plus Jakarta Sans (weight 800 for titles, 700 for labels)
  * - Spacing: 48px modal padding (--space-l), 24px (--space-m) for fields
  */
 import { Platform, StyleSheet, type TextStyle } from "react-native";
 
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import { hardShadowStyle } from "@presentation/utils/style";
 import {
   designBorders,
@@ -92,7 +92,7 @@ export const loginStyles = StyleSheet.create({
     zIndex: 10,
   },
   closeBtnText: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 20,
     color: designColors.ink,
     lineHeight: 20,
@@ -102,7 +102,7 @@ export const loginStyles = StyleSheet.create({
   // Typography
   // ---------------------------------------------------------------------------
   title: {
-    fontFamily: interFonts.black, // weight 900
+    fontFamily: plusJakartaSansFonts.extraBold, // weight 800
     fontSize: designFontSizes.l, // 18px (--text-l)
     color: designColors.ink,
     textTransform: "uppercase",
@@ -110,14 +110,14 @@ export const loginStyles = StyleSheet.create({
     marginBottom: designSpacingSemantic.xs, // 8px
   },
   sub: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.s, // 14px (--text-s)
     color: designColors.inkMuted, // #666
     lineHeight: designFontSizes.s * 1.5, // 21px
     marginBottom: designSpacingSemantic.m, // 24px
   },
   bold: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     color: designColors.ink,
   },
 
@@ -128,7 +128,7 @@ export const loginStyles = StyleSheet.create({
     marginBottom: designSpacingSemantic.m, // 24px
   },
   label: {
-    fontFamily: interFonts.bold, // weight 700
+    fontFamily: plusJakartaSansFonts.bold, // weight 700
     fontSize: designFontSizes.xs, // 12px (--text-xs)
     color: designColors.ink,
     textTransform: "uppercase",
@@ -141,7 +141,7 @@ export const loginStyles = StyleSheet.create({
   // ---------------------------------------------------------------------------
   input: {
     width: "100%",
-    fontFamily: interFonts.medium, // weight 500
+    fontFamily: plusJakartaSansFonts.medium, // weight 500
     fontSize: designFontSizes.m, // 16px (--text-m)
     color: designColors.ink,
     letterSpacing: designFontSizes.m * 0.1, // 0.1em
@@ -174,14 +174,14 @@ export const loginStyles = StyleSheet.create({
   // Error + hint text
   // ---------------------------------------------------------------------------
   err: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: designFontSizes.xs, // 12px
     color: designColors.danger, // #ff0000
     marginTop: designSpacingSemantic.xs, // 8px
     minHeight: 16,
   },
   hint: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.xs, // 12px
     color: designColors.inkMuted, // #666
     marginTop: designSpacingSemantic.xs, // 8px
@@ -212,7 +212,7 @@ export const loginStyles = StyleSheet.create({
     justifyContent: "center",
   },
   ghostText: {
-    fontFamily: interFonts.bold, // weight 700
+    fontFamily: plusJakartaSansFonts.bold, // weight 700
     fontSize: designFontSizes.s, // 14px (--text-s)
     color: designColors.ink,
     textTransform: "uppercase",
@@ -239,7 +239,7 @@ export const loginStyles = StyleSheet.create({
     backgroundColor: designColors.danger,
   },
   goText: {
-    fontFamily: interFonts.bold, // weight 700
+    fontFamily: plusJakartaSansFonts.bold, // weight 700
     fontSize: designFontSizes.s, // 14px
     color: designColors.ground, // white
     textTransform: "uppercase",
@@ -251,7 +251,7 @@ export const loginStyles = StyleSheet.create({
 
   // Arrow icon in button
   arrow: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.s,
     color: designColors.ground,
   },
@@ -272,7 +272,7 @@ export const loginStyles = StyleSheet.create({
     backgroundColor: designColors.field,
     borderRadius: 0, // Brutalist: NO border-radius
     textAlign: "center",
-    fontFamily: interFonts.black, // weight 900
+    fontFamily: plusJakartaSansFonts.extraBold, // weight 800
     fontSize: designFontSizes.l, // 18px (--text-l)
     color: designColors.ink,
     padding: 0,
@@ -292,7 +292,7 @@ export const loginStyles = StyleSheet.create({
     marginTop: designSpacingSemantic.m, // 24px
   },
   resendText: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.xs, // 12px
     color: designColors.inkMuted,
   },
@@ -301,7 +301,7 @@ export const loginStyles = StyleSheet.create({
     padding: 4,
   },
   resendBtnText: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: designFontSizes.xs,
     color: designColors.ink,
     textDecorationLine: "underline",
@@ -330,17 +330,17 @@ export const loginStyles = StyleSheet.create({
     justifyContent: "center",
   },
   avatarText: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: designFontSizes.xl, // 20px
     color: designColors.ink,
   },
   signedName: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: designFontSizes.m, // 16px
     color: designColors.ink,
   },
   signedEmail: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.xs, // 12px
     color: designColors.inkMuted,
   },
@@ -368,19 +368,19 @@ export const loginStyles = StyleSheet.create({
     backgroundColor: designColors.ink,
   },
   checkboxMark: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 13,
     color: designColors.ground,
   },
   consentText: {
     flex: 1,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.s, // 14px
     color: designColors.inkMuted,
     lineHeight: 19,
   },
   link: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     color: designColors.ink,
     textDecorationLine: "underline",
   },
@@ -402,7 +402,7 @@ export const loginStyles = StyleSheet.create({
     marginTop: 4,
   },
   doneCheckMark: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 28,
     color: designColors.ground,
   },

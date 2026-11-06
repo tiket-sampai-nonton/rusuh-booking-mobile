@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorders, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
 
@@ -14,7 +18,7 @@ export const styles = StyleSheet.create({
   errorText: {
     color: "#ff4444",
     fontSize: 12,
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     textAlign: "center",
     marginBottom: 12,
   },
@@ -26,14 +30,14 @@ export const styles = StyleSheet.create({
   totalLabel: {
     color: "rgba(255,255,255,0.5)",
     fontSize: 10,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     textTransform: "uppercase",
     letterSpacing: 1,
   },
   totalValue: {
     color: designColors.ground,
     fontSize: 20,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     letterSpacing: -0.4,
   },
   payButton: {
@@ -60,7 +64,7 @@ export const styles = StyleSheet.create({
   payButtonText: {
     color: designColors.ink,
     fontSize: 14,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     textTransform: "uppercase",
     letterSpacing: -0.28,
   },

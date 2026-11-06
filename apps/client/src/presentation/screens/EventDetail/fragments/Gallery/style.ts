@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import { designColors } from "@presentation/theme/event-design-tokens";
 
 export const galleryStyles = StyleSheet.create({
@@ -30,12 +30,12 @@ export const galleryStyles = StyleSheet.create({
     justifyContent: "center",
   },
   plusText: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 32,
     color: designColors.ground,
   },
   empty: {
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: 14,
     color: designColors.inkMuted,
   },

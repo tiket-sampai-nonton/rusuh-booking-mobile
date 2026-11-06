@@ -1,6 +1,6 @@
 import { StyleSheet, type ViewStyle } from "react-native";
 
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import { designColors } from "@presentation/theme/event-design-tokens";
 
 export const detailHeaderStyles = StyleSheet.create({
@@ -10,7 +10,7 @@ export const detailHeaderStyles = StyleSheet.create({
     gap: 8,
   },
   webBackLabel: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: 14,
     color: designColors.ink,
   },
