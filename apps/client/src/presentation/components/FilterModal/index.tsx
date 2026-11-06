@@ -133,7 +133,10 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
         </View>
 
         <ScrollView
-          style={componentStyles.elementMaxHeight6}
+          style={[
+            componentStyles.elementMaxHeight6,
+            isMobileWeb && componentStyles.mobileWebScrollableList,
+          ]}
           keyboardShouldPersistTaps="handled"
         >
           <PillGroup

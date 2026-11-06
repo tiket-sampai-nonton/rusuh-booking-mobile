@@ -25,10 +25,8 @@ import { GridIcon } from "./icons/GridIcon";
 import { ListIcon } from "./icons/ListIcon";
 
 const SORT_OPTIONS = [
-  { key: "date", label: "Urutkan Berdasarkan Tanggal" },
-  { key: "price-low", label: "Harga Terendah" },
-  { key: "price-high", label: "Harga Tertinggi" },
-  { key: "popular", label: "Paling Populer" },
+  { key: "closest", label: "Terdekat" },
+  { key: "furthest", label: "Terjauh" },
 ] as const;
 
 interface BrowseResultsToolbarProps {
