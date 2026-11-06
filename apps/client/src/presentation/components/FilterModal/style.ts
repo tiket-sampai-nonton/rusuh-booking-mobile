@@ -46,6 +46,7 @@ export const componentStyles = StyleSheet.create({
     borderColor: designColors.ink,
   },
   elementMaxHeight6: { maxHeight: 340, marginTop: 12 },
+  mobileWebScrollableList: { maxHeight: 420 },
   elementMarginTop7: {
     marginTop: 20,
     flexDirection: "row",
@@ -91,7 +92,7 @@ export function styleForFilterModalPressable0(
   return {
     width: "100%",
     maxWidth: isMobileWeb ? "100%" : 480,
-    maxHeight: isMobileWeb ? "88%" : "90%",
+    maxHeight: isMobileWeb ? "100%" : "90%",
     padding: isMobileWeb ? 16 : 24,
     paddingBottom: isMobileWeb
       ? Math.max(16, insets.bottom + 12)

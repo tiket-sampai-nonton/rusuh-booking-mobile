@@ -65,7 +65,6 @@ export function BrowseScreen() {
     params.genre === "Semua" ? "all" : (params.genre ?? "all"),
   );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState(params.sort ?? "date");
   const [loadMoreDisabled, setLoadMoreDisabled] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -98,6 +97,11 @@ export function BrowseScreen() {
       time: value.time,
       sort: value.sort,
     }).toString();
+    router.push(`/browse?${query}` as Href);
+  };
+
+  const changeSort = (value: string): void => {
+    const query = new URLSearchParams({ genre, time, sort: value }).toString();
     router.push(`/browse?${query}` as Href);
   };
 
@@ -138,11 +142,11 @@ export function BrowseScreen() {
             <BrowseResultsToolbar
               count={results.length}
               isNative={isNative}
-              sortBy={sortBy}
+              sortBy={sort}
               viewMode={viewMode}
               isMobileWeb={isMobileWeb}
               onFilterPress={() => setFilterOpen(true)}
-              onSortChange={setSortBy}
+              onSortChange={changeSort}
               onViewModeChange={setViewMode}
             />
             {results.length === 0 ? (
