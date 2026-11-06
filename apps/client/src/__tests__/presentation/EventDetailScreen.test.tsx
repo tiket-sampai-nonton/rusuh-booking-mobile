@@ -8,8 +8,8 @@ import type {
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
 const mockRouter = { push: jest.fn() };
-const originalNavigator = global.navigator;
-const originalWindow = global.window;
+const originalNavigator = globalThis.navigator;
+const originalWindow = globalThis.window;
 const originalPlatform = Platform.OS;
 const completedAnimation = {
   start: (callback?: (result: { finished: boolean }) => void) =>
@@ -89,11 +89,11 @@ describe("EventDetailScreen", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
-    Object.defineProperty(global, "navigator", {
+    Object.defineProperty(globalThis, "navigator", {
       configurable: true,
       value: originalNavigator,
     });
-    Object.defineProperty(global, "window", {
+    Object.defineProperty(globalThis, "window", {
       configurable: true,
       value: originalWindow,
     });
@@ -348,11 +348,11 @@ describe("EventDetailScreen", () => {
   it("uses a safe label for unknown status, supports native sharing, and handles scrolling", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "ios" });
     const share = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(global, "navigator", {
+    Object.defineProperty(globalThis, "navigator", {
       configurable: true,
       value: { share },
     });
-    Object.defineProperty(global, "window", {
+    Object.defineProperty(globalThis, "window", {
       configurable: true,
       value: { location: { href: "https://example.test/events/evt-1" } },
     });
@@ -379,7 +379,7 @@ describe("EventDetailScreen", () => {
 
   it("keeps the web header static on scroll and safely skips an unavailable share API", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
-    Object.defineProperty(global, "navigator", {
+    Object.defineProperty(globalThis, "navigator", {
       configurable: true,
       value: {},
     });

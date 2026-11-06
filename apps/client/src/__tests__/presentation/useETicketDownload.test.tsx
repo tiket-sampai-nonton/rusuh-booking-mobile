@@ -20,7 +20,13 @@ function renderDownload(save: jest.Mock) {
 function savedHtml(save: jest.Mock): string {
   const savedFile = save.mock.calls[0]?.[0] as { base64: string } | undefined;
   if (!savedFile) throw new Error("Expected an e-ticket file to be saved.");
-  return Buffer.from(savedFile.base64, "base64").toString("utf8");
+  return decodeBase64Utf8(savedFile.base64);
+}
+
+function decodeBase64Utf8(value: string): string {
+  const binary = atob(value);
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
 }
 
 describe("useETicketDownload", () => {
@@ -49,9 +55,7 @@ describe("useETicketDownload", () => {
       ...html.matchAll(/src="data:image\/svg\+xml;base64,([^"]*)"/g),
     ].map((match) => match[1]);
     expect(qrDataUrls).toHaveLength(2);
-    expect(
-      Buffer.from(qrDataUrls[0] ?? "", "base64").toString("utf8"),
-    ).toContain("<svg");
+    expect(decodeBase64Utf8(qrDataUrls[0] ?? "")).toContain("<svg");
     expect(qrDataUrls[1]).toBe("");
     expect(html).toContain("Rock &amp; &lt;Night&gt; &quot;&#39;");
     expect(html).toContain("&lt;VIP&amp;&gt;");
