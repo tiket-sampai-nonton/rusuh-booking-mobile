@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { designBorders, designColors, interFonts } from "@presentation/theme";
+import {
+  designBorders,
+  designColors,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 import { hardShadowStyle } from "@presentation/utils/style";
 
 import type { ViewStyle } from "react-native";
@@ -22,7 +26,7 @@ export const styles = StyleSheet.create({
   },
   title: {
     color: designColors.ink,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 20,
     textTransform: "uppercase",
     textAlign: "center",
@@ -39,7 +43,7 @@ export const styles = StyleSheet.create({
   ticketCode: {
     marginTop: 8,
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
   },
   fallbackQr: {
     marginTop: 24,
@@ -51,7 +55,7 @@ export const styles = StyleSheet.create({
   instruction: {
     marginTop: 16,
     color: designColors.inkMuted,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: 12,
     textAlign: "center",
   },
@@ -66,7 +70,7 @@ export const styles = StyleSheet.create({
   },
   downloadText: {
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },
@@ -82,7 +86,7 @@ export const styles = StyleSheet.create({
   },
   closeText: {
     color: designColors.ground,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },

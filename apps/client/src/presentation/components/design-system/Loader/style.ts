@@ -1,6 +1,10 @@
 import { StyleSheet } from "react-native";
 
-import { designColors, designZIndex, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designZIndex,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 export const loaderStyles = StyleSheet.create({
   container: {
@@ -21,10 +25,10 @@ export const loaderStyles = StyleSheet.create({
   letter: {
     color: designColors.ground,
     fontSize: 48,
-    fontWeight: "900",
+    fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: 4,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
   },
   progressTrack: {
     marginTop: 24,

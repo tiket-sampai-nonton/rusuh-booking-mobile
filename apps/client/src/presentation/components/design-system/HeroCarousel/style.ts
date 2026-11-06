@@ -1,6 +1,10 @@
 import { StyleSheet } from "react-native";
 
-import { designBorders, designColors, interFonts } from "@presentation/theme";
+import {
+  designBorders,
+  designColors,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 import { hardShadowStyle, type DynamicStyle } from "@presentation/utils/style";
 
 import {
@@ -55,21 +59,21 @@ export const componentStyles = StyleSheet.create({
   elementColor5: {
     color: designColors.ground,
     fontSize: TEXT_XL,
-    fontFamily: interFonts.black, // weight 900
+    fontFamily: plusJakartaSansFonts.extraBold, // weight 800
     fontVariant: ["tabular-nums"],
   },
   elementColor6: {
     color: designColors.ground,
     opacity: 0.7,
     fontSize: TEXT_XS,
-    fontFamily: interFonts.medium, // weight 500
+    fontFamily: plusJakartaSansFonts.medium, // weight 500
     textTransform: "uppercase",
     letterSpacing: 1.6, // letter-spacing: 0.1em = 1.6px at 16px
   },
   elementColor7: {
     color: designColors.ink,
     fontSize: TEXT_L,
-    fontFamily: interFonts.medium, // weight 500
+    fontFamily: plusJakartaSansFonts.medium, // weight 500
     marginBottom: SPACE_M,
     maxWidth: 320,
   },
@@ -82,7 +86,7 @@ export const componentStyles = StyleSheet.create({
   elementColor10: {
     color: designColors.ink,
     fontSize: TEXT_M,
-    fontFamily: interFonts.medium, // weight 500
+    fontFamily: plusJakartaSansFonts.medium, // weight 500
   },
   elementFlexDirection11: {
     flexDirection: "row",
@@ -92,15 +96,15 @@ export const componentStyles = StyleSheet.create({
   elementColor12: {
     color: designColors.ink,
     fontSize: TEXT_M,
-    fontFamily: interFonts.medium, // weight 500
+    fontFamily: plusJakartaSansFonts.medium, // weight 500
   },
   elementColor13: {
     color: designColors.ink,
     fontSize: TEXT_XL,
-    fontFamily: interFonts.black, // weight 900
+    fontFamily: plusJakartaSansFonts.extraBold, // weight 800
     marginBottom: SPACE_M,
   },
-  elementFontFamily14: { fontFamily: interFonts.black },
+  elementFontFamily14: { fontFamily: plusJakartaSansFonts.extraBold },
   elementFlexDirection15: {
     flexDirection: "row",
     gap: SPACE_XS,
@@ -116,7 +120,7 @@ export const componentStyles = StyleSheet.create({
   elementColor17: {
     color: designColors.ground,
     fontSize: TEXT_M,
-    fontFamily: interFonts.bold, // weight 700
+    fontFamily: plusJakartaSansFonts.bold, // weight 700
     textTransform: "uppercase",
     letterSpacing: 0.64, // 0.04em at 16px
   },
@@ -130,7 +134,7 @@ export const componentStyles = StyleSheet.create({
   elementColor19: {
     color: designColors.ink,
     fontSize: TEXT_M,
-    fontFamily: interFonts.bold, // weight 700
+    fontFamily: plusJakartaSansFonts.bold, // weight 700
     textTransform: "uppercase",
     letterSpacing: 0.64,
   },
@@ -147,7 +151,7 @@ export const componentStyles = StyleSheet.create({
   elementColor21: {
     color: designColors.ground,
     fontSize: TEXT_XS,
-    fontFamily: interFonts.bold, // weight 700
+    fontFamily: plusJakartaSansFonts.bold, // weight 700
     textTransform: "uppercase",
     letterSpacing: 0.6, // 0.05em at 12px
   },
@@ -165,7 +169,7 @@ export const componentStyles = StyleSheet.create({
   elementColor24: {
     color: designColors.inkMuted,
     fontSize: TEXT_S,
-    fontFamily: interFonts.regular, // weight 400
+    fontFamily: plusJakartaSansFonts.regular, // weight 400
   },
   elementFlexDirection25: {
     flexDirection: "row",
@@ -175,7 +179,7 @@ export const componentStyles = StyleSheet.create({
   elementColor26: {
     color: designColors.inkMuted,
     fontSize: TEXT_S,
-    fontFamily: interFonts.regular, // weight 400
+    fontFamily: plusJakartaSansFonts.regular, // weight 400
   },
   elementAlignSelf27: {
     alignSelf: "flex-start",
@@ -197,7 +201,7 @@ export const componentStyles = StyleSheet.create({
   elementColor29: {
     color: designColors.ground,
     fontSize: TEXT_S,
-    fontFamily: interFonts.bold, // weight 700
+    fontFamily: plusJakartaSansFonts.bold, // weight 700
     textTransform: "uppercase",
     letterSpacing: 0.56, // 0.04em at 14px
   },
@@ -262,7 +266,7 @@ export function styleForHeroTitleText4(
   return {
     color: designColors.ink,
     fontSize: arg0,
-    fontFamily: interFonts.black, // Inter 900
+    fontFamily: plusJakartaSansFonts.extraBold, // Plus Jakarta Sans 800
     lineHeight: arg1 * 0.85, // line-height: 0.85
     textTransform: "uppercase",
     letterSpacing: arg1 * -0.03, // letter-spacing: -0.03em
@@ -282,7 +286,7 @@ export function styleForHeroInfoMobileText6(arg0: number): DynamicStyle {
   return {
     color: designColors.ink,
     fontSize: arg0,
-    fontFamily: interFonts.black, // weight 900
+    fontFamily: plusJakartaSansFonts.extraBold, // weight 800
     lineHeight: arg0 * 1.1, // line-height: 1.1 to prevent top clipping
     textTransform: "uppercase",
     letterSpacing: arg0 * -0.02, // letter-spacing: -0.02em

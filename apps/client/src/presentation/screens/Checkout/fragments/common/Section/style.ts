@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { designColors, interFonts } from "@presentation/theme";
+import { designColors, plusJakartaSansFonts } from "@presentation/theme";
 
 export const checkoutSectionStyles = StyleSheet.create({
   container: { marginTop: 32 },
@@ -23,12 +23,12 @@ export const checkoutSectionStyles = StyleSheet.create({
   number: {
     color: designColors.ground,
     fontSize: 14,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
   },
   title: {
     color: designColors.ink,
     fontSize: 20,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     textTransform: "uppercase",
     letterSpacing: -0.4,
   },

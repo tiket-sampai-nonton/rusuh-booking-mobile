@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorders, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   container: {
@@ -25,14 +29,14 @@ export const styles = StyleSheet.create({
   title: {
     color: designColors.ink,
     fontSize: 20,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     textTransform: "uppercase",
     letterSpacing: -0.4,
   },
   subtitle: {
     color: designColors.gray,
     fontSize: 14,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     marginTop: 8,
     lineHeight: 22,
   },

@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorders, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
 
@@ -21,7 +25,7 @@ export const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     textTransform: "uppercase",
     letterSpacing: -0.4,
     color: designColors.ink,
@@ -30,7 +34,7 @@ export const styles = StyleSheet.create({
   },
   body: {
     fontSize: 14,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     lineHeight: 22,
     color: designColors.gray,
     textAlign: "center",
@@ -50,7 +54,7 @@ export const styles = StyleSheet.create({
   },
   stayButtonText: {
     fontSize: 12,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     textTransform: "uppercase",
     letterSpacing: 1,
     color: designColors.ground,
@@ -65,7 +69,7 @@ export const styles = StyleSheet.create({
   },
   leaveButtonText: {
     fontSize: 12,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     textTransform: "uppercase",
     letterSpacing: 1,
     color: designColors.ink,

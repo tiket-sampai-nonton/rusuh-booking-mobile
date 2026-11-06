@@ -4,7 +4,7 @@
  * PROTOTYPE 05-browse.html EXACT COPY:
  * - White background (var(--white)), black ink (var(--black))
  * - 2px solid borders everywhere
- * - Inter font family (900 black, 700 bold)
+ * - Plus Jakarta Sans font family (800 extra-bold, 700 bold)
  * - Hero: black bg with noise texture
  * - Categories: button grid with fill-up hover
  * - Cards: grayscale→color on hover, 8px shadow offset
@@ -21,7 +21,7 @@ import {
   designBorders,
   designSpacingSemantic,
 } from "@presentation/theme";
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LAYOUT
@@ -56,7 +56,7 @@ export const browseHeroText = (isDesktop: boolean): TextStyle => {
   return {
     color: designColors.ground,
     fontSize: size,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     letterSpacing: -0.04 * size,
     lineHeight: isDesktop ? 72 : 36,
     textAlign: "center",
@@ -65,7 +65,7 @@ export const browseHeroText = (isDesktop: boolean): TextStyle => {
 export const browseCategoryHeading: TextStyle = {
   color: designColors.ink,
   fontSize: 24,
-  fontFamily: interFonts.black,
+  fontFamily: plusJakartaSansFonts.extraBold,
   textTransform: "uppercase",
   letterSpacing: -0.48,
 };
@@ -77,7 +77,7 @@ export const browseCategoryGrid: ViewStyle = {
 };
 export const browseCategoryLabel = (isActive: boolean): TextStyle => ({
   color: isActive ? designColors.ground : designColors.ink,
-  fontFamily: interFonts.bold,
+  fontFamily: plusJakartaSansFonts.bold,
   fontSize: 14,
   textTransform: "uppercase",
 });
@@ -91,12 +91,12 @@ export const browseNativeHeader: ViewStyle = {
 };
 export const browseCountText: TextStyle = {
   color: designColors.inkMuted,
-  fontFamily: interFonts.regular,
+  fontFamily: plusJakartaSansFonts.regular,
   fontSize: 14,
 };
 export const browseCountValue: TextStyle = {
   color: designColors.ink,
-  fontFamily: interFonts.bold,
+  fontFamily: plusJakartaSansFonts.bold,
 };
 export const browseToolbarActions: ViewStyle = {
   flexDirection: "row",
@@ -126,7 +126,7 @@ export const browseViewDivider: ViewStyle = {
 export const browseSortControl = {
   borderWidth: 0,
   backgroundColor: "transparent",
-  fontFamily: interFonts.medium,
+  fontFamily: plusJakartaSansFonts.medium,
   fontWeight: "500",
   fontSize: 14,
   cursor: "pointer",
@@ -138,7 +138,7 @@ export const browseLoadMorePressed: ViewStyle = {
 export const browseLoadMoreDisabled: ViewStyle = { opacity: 0.5 };
 export const browseLoadMoreLabel = (disabled: boolean): TextStyle => ({
   color: disabled ? designColors.inkMuted : designColors.ink,
-  fontFamily: interFonts.bold,
+  fontFamily: plusJakartaSansFonts.bold,
   fontSize: 14,
   textTransform: "uppercase",
 });
@@ -170,7 +170,7 @@ export const browseNativeCategoryButton = (active: boolean): ViewStyle => ({
 });
 export const browseNativeCategoryLabel = (active: boolean): TextStyle => ({
   color: active ? designColors.ground : designColors.ink,
-  fontFamily: interFonts.semiBold,
+  fontFamily: plusJakartaSansFonts.semiBold,
   fontSize: 12,
   textTransform: "uppercase",
 });

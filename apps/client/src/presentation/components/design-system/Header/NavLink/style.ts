@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { interFonts, designColors } from "@presentation/theme";
+import { plusJakartaSansFonts, designColors } from "@presentation/theme";
 
 export const navLinkStyles = StyleSheet.create({
   container: {
@@ -9,7 +9,7 @@ export const navLinkStyles = StyleSheet.create({
   label: {
     color: designColors.ink,
     fontSize: 14,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     textTransform: "uppercase",
     letterSpacing: 0.56,
   },

@@ -3,7 +3,7 @@
  *
  *  "Brutalist Mono" implementation matching `06-waiting.html`:
  * - WHITE background, BLACK text/borders
- * - JetBrains Mono font throughout
+ * - Plus Jakarta Sans font throughout
  * - SVG ring progress indicator (220px)
  * - Status badge with pulse animation
  * - Zone banners with semantic colors

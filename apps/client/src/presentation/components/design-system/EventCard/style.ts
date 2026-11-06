@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { designColors, interFonts } from "@presentation/theme";
+import { designColors, plusJakartaSansFonts } from "@presentation/theme";
 
 import type { ViewStyle, ImageStyle } from "react-native";
 import { designBorders, designSpacingSemantic } from "@presentation/theme";
@@ -13,12 +13,12 @@ export const componentStyles = StyleSheet.create({
   elementColor1: {
     color: designColors.inkMuted,
     fontSize: MOBILE_VENUE_SIZE,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
   },
   elementColor2: {
     color: designColors.ground,
     fontSize: 14,
-    fontFamily: interFonts.bold, // weight 700
+    fontFamily: plusJakartaSansFonts.bold, // weight 700
     textTransform: "uppercase",
     letterSpacing: 0.56,
   },
@@ -170,7 +170,7 @@ export function styleForEventCardText6(arg0: boolean): DynamicStyle {
   return {
     color: designColors.ground,
     fontSize: arg0 ? MOBILE_BADGE_SIZE : 12, // Mobile: 10px
-    fontFamily: interFonts.bold, // weight 700
+    fontFamily: plusJakartaSansFonts.bold, // weight 700
     textTransform: "uppercase",
     letterSpacing: 0.48, // 0.04em
   } as DynamicStyle;
@@ -183,7 +183,7 @@ export function styleForEventCardText7(
   return {
     color: designColors.inkMuted,
     fontSize: arg0,
-    fontFamily: interFonts.medium, // weight 500
+    fontFamily: plusJakartaSansFonts.medium, // weight 500
     textTransform: arg1 ? "uppercase" : "none", // Mobile: uppercase
     letterSpacing: arg1 ? 0.6 : 0, // Mobile: 0.05em at 12px
     marginBottom: arg1 ? 4 : 8, // Mobile: 0.25rem = 4px
@@ -197,7 +197,9 @@ export function styleForEventCardAnimatedText8(
   return {
     color: designColors.ink,
     fontSize: arg0,
-    fontFamily: arg1 ? interFonts.bold : interFonts.black, // Mobile: 700, Desktop: 900
+    fontFamily: arg1
+      ? plusJakartaSansFonts.bold
+      : plusJakartaSansFonts.extraBold, // Mobile: 700, Desktop: 900
     textTransform: arg1 ? "none" : "uppercase", // Mobile: NOT uppercase
     lineHeight: arg1 ? arg0 * 1.3 : undefined, // Mobile: line-height 1.3
     // Mobile: fixed height for 2 lines to ensure consistent card height
@@ -218,7 +220,7 @@ export function styleForEventCardText10(arg0: 14 | 12): DynamicStyle {
   return {
     color: designColors.inkMuted,
     fontSize: arg0,
-    fontFamily: interFonts.regular, // weight 400
+    fontFamily: plusJakartaSansFonts.regular, // weight 400
   } as DynamicStyle;
 }
 
@@ -226,7 +228,7 @@ export function styleForEventCardText11(arg0: boolean): DynamicStyle {
   return {
     color: designColors.ink,
     fontSize: arg0 ? 14 : 16,
-    fontFamily: interFonts.bold, // Mobile: 700, Desktop: similar
+    fontFamily: plusJakartaSansFonts.bold, // Mobile: 700, Desktop: similar
   } as DynamicStyle;
 }
 

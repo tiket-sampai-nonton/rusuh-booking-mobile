@@ -1,83 +1,53 @@
 /**
- * RBT-096 — Inter font loader for  "Brutalist Mono" design system.
+ * Loads the bundled Plus Jakarta Sans family for native and web.
  *
- * The prototype uses Google Fonts Inter with weights 400/500/600/700/900.
- * This module provides:
- * 1. Font loading hook using expo-font
- * 2. Font family constants for StyleSheet usage
- *
- * Usage in _layout.tsx:
- *   const { fontsLoaded, fontError } = useInterFonts();
- *   if (!fontsLoaded && !fontError) return null; // or splash
- *
- * Usage in components:
- *   import { interFonts } from '@presentation/theme/fonts';
- *   style={{ fontFamily: interFonts.bold }} // Inter_700Bold
+ * The prototype uses Plus Jakarta Sans with regular, medium, semibold, bold,
+ * and extra-bold weights. Separate static files keep the font compatible with
+ * this app's Expo SDK / React Native version while using one typeface family.
  */
 
 import { useFonts } from "expo-font";
-import JetBrainsMonoVariable from "../../assets/fonts/JetBrainsMono[wght].ttf";
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  Inter_900Black,
-} from "@expo-google-fonts/inter";
+import PlusJakartaSansBold from "../../assets/fonts/PlusJakartaSans-Bold.ttf";
+import PlusJakartaSansExtraBold from "../../assets/fonts/PlusJakartaSans-ExtraBold.ttf";
+import PlusJakartaSansMedium from "../../assets/fonts/PlusJakartaSans-Medium.ttf";
+import PlusJakartaSansRegular from "../../assets/fonts/PlusJakartaSans-Regular.ttf";
+import PlusJakartaSansSemiBold from "../../assets/fonts/PlusJakartaSans-SemiBold.ttf";
 
-/**
- * Hook to load Inter fonts via expo-font.
- * Returns { fontsLoaded, fontError } - wait for fontsLoaded before rendering.
- */
-export function useInterFonts() {
+export const plusJakartaSansFonts = {
+  regular: "PlusJakartaSans_400Regular",
+  medium: "PlusJakartaSans_500Medium",
+  semiBold: "PlusJakartaSans_600SemiBold",
+  bold: "PlusJakartaSans_700Bold",
+  extraBold: "PlusJakartaSans_800ExtraBold",
+} as const;
+
+/** Wait for the bundled typeface to load before rendering app text. */
+export function usePlusJakartaSansFonts() {
   const [fontsLoaded, fontError] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-    Inter_900Black,
-    "JetBrains Mono": JetBrainsMonoVariable,
+    [plusJakartaSansFonts.regular]: PlusJakartaSansRegular,
+    [plusJakartaSansFonts.medium]: PlusJakartaSansMedium,
+    [plusJakartaSansFonts.semiBold]: PlusJakartaSansSemiBold,
+    [plusJakartaSansFonts.bold]: PlusJakartaSansBold,
+    [plusJakartaSansFonts.extraBold]: PlusJakartaSansExtraBold,
   });
 
   return { fontsLoaded, fontError };
 }
 
-/**
- * Font family constants matching the loaded font names.
- * Use these in StyleSheet instead of plain 'Inter'.
- */
-export const interFonts = {
-  regular: "Inter_400Regular",
-  medium: "Inter_500Medium",
-  semiBold: "Inter_600SemiBold",
-  bold: "Inter_700Bold",
-  black: "Inter_900Black",
-} as const;
-
-/** The bundled mono face shared by the waiting room on web, iOS, and Android. */
-export const waitingRoomFont = "JetBrains Mono";
-
-/**
- * Resolve fontWeight (CSS-style) to Inter font family name.
- * Useful when you have dynamic weights.
- */
-export function interFontForWeight(
-  weight: "400" | "500" | "600" | "700" | "900" | number,
-): string {
-  const w = String(weight);
-  switch (w) {
-    case "400":
-      return interFonts.regular;
+/** Resolve CSS-style weights to the matching bundled Plus Jakarta Sans face. */
+export function plusJakartaSansFontForWeight(weight: string | number): string {
+  switch (String(weight)) {
     case "500":
-      return interFonts.medium;
+      return plusJakartaSansFonts.medium;
     case "600":
-      return interFonts.semiBold;
+      return plusJakartaSansFonts.semiBold;
     case "700":
-      return interFonts.bold;
+      return plusJakartaSansFonts.bold;
+    case "800":
     case "900":
-      return interFonts.black;
+      return plusJakartaSansFonts.extraBold;
+    case "400":
     default:
-      // Fallback to regular
-      return interFonts.regular;
+      return plusJakartaSansFonts.regular;
   }
 }

@@ -60,8 +60,7 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
 
   describe("designFonts (new API)", () => {
     it("defines fonts per MASTER-SPEC §1", () => {
-      expect(designFonts.sans).toBe("Inter");
-      expect(designFonts.mono).toBe("JetBrains Mono");
+      expect(designFonts.sans).toBe("Plus Jakarta Sans");
     });
   });
 

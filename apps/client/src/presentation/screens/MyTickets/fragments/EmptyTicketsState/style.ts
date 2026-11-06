@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorders, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   container: {
@@ -12,7 +16,7 @@ export const styles = StyleSheet.create({
   },
   title: {
     color: designColors.ink,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 20,
     textTransform: "uppercase",
     textAlign: "center",
@@ -20,7 +24,7 @@ export const styles = StyleSheet.create({
   description: {
     marginTop: 10,
     color: designColors.inkMuted,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: 13,
     textAlign: "center",
   },
@@ -34,7 +38,7 @@ export const styles = StyleSheet.create({
   },
   browseLabel: {
     color: designColors.ground,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },

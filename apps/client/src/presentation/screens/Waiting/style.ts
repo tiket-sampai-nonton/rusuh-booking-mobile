@@ -1,9 +1,9 @@
 /**
- * RBT-091 — Waiting-room styles,  "Brutalist Mono" (Light variant).
+ * RBT-091 — Waiting-room styles (Light variant).
  *
  * Matches the  prototype `06-waiting.html`:
  * - WHITE background, BLACK text/borders
- * - JetBrains Mono font throughout
+ * - Plus Jakarta Sans throughout
  * - 3px solid black borders
  * - SVG ring progress indicator (220px)
  * - Pulse animation on status badge
@@ -31,7 +31,7 @@ import {
   designColors,
   designZoneBanners,
 } from "@presentation/theme/event-design-tokens";
-import { waitingRoomFont } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 
 import type { ZoneTone } from "./display";
 
@@ -110,7 +110,7 @@ export const RING_STROKE = 6;
 export const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ~628
 
 const B = designBorders.thick; // 3px for waiting room
-const MONO = waitingRoomFont;
+const APP_FONT = plusJakartaSansFonts.regular;
 
 export const styles = StyleSheet.create({
   // ═══════════════════════════════════════════════════════════════════════════
@@ -152,7 +152,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: -1,
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   logoAccent: {
     color: palette.red,
@@ -175,7 +175,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 2,
     color: palette.ground,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   statusBadgeYourTurn: {
     backgroundColor: palette.red,
@@ -214,12 +214,12 @@ export const styles = StyleSheet.create({
     color: palette.ink,
     textAlign: "center",
     marginBottom: 8,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   eventDate: {
     fontSize: 14,
     color: palette.gray,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -245,7 +245,7 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     lineHeight: 56,
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
     fontVariant: ["tabular-nums"],
   },
   positionLabel: {
@@ -255,7 +255,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 2,
     color: palette.gray,
     marginTop: 8,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -284,13 +284,13 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: 4,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   zoneBody: {
     fontSize: 12,
     fontWeight: "600",
     lineHeight: 18,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   // Legacy zone text (single line)
   zoneText: {
@@ -298,7 +298,7 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     lineHeight: 18,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -323,7 +323,7 @@ export const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "800",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
     fontVariant: ["tabular-nums"],
   },
   timeLabel: {
@@ -333,7 +333,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1,
     color: palette.gray,
     marginTop: 4,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   etaUnavailable: {
     color: palette.gray,
@@ -361,13 +361,13 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: palette.ground,
     marginBottom: 8,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   redirectNumber: {
     fontSize: 48,
     fontWeight: "800",
     color: palette.ground,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
     fontVariant: ["tabular-nums"],
   },
   redirectText: {
@@ -375,7 +375,7 @@ export const styles = StyleSheet.create({
     color: palette.ground,
     opacity: 0.9,
     marginTop: 8,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -396,13 +396,13 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: palette.orange,
     marginBottom: 8,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   warningText: {
     fontSize: 12,
     color: palette.ink,
     lineHeight: 18,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // Turn expiry warning (red variant)
@@ -422,13 +422,13 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: palette.red,
     marginBottom: 8,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   turnExpiryTime: {
     fontSize: 24,
     fontWeight: "800",
     color: palette.red,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
     fontVariant: ["tabular-nums"],
   },
 
@@ -442,7 +442,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 19,
     marginBottom: 32,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -464,7 +464,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.4,
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -484,7 +484,7 @@ export const styles = StyleSheet.create({
     color: palette.ink,
     marginBottom: 16,
     textAlign: "center",
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   errorText: {
     fontSize: 14,
@@ -492,7 +492,7 @@ export const styles = StyleSheet.create({
     marginBottom: 32,
     textAlign: "center",
     maxWidth: 400,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   errorBtn: {
     paddingVertical: 16,
@@ -507,7 +507,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
     color: palette.ground,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -550,7 +550,7 @@ export const styles = StyleSheet.create({
     color: palette.ink,
     marginBottom: 16,
     textAlign: "center",
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   modalText: {
     fontSize: 14,
@@ -558,7 +558,7 @@ export const styles = StyleSheet.create({
     marginBottom: 32,
     textAlign: "center",
     lineHeight: 22,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   modalActions: {
     flexDirection: "row",
@@ -579,7 +579,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
     color: palette.ground,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   modalBtnLeave: {
     flex: 1,
@@ -595,7 +595,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -620,7 +620,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
     color: palette.ground,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -662,7 +662,7 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     color: palette.ground,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
     letterSpacing: 2,
     textTransform: "uppercase",
   },
@@ -708,7 +708,7 @@ export const styles = StyleSheet.create({
     color: palette.ink,
     textAlign: "center",
     marginBottom: 16,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   sub: {
     fontSize: 14,
@@ -716,7 +716,7 @@ export const styles = StyleSheet.create({
     color: palette.gray,
     maxWidth: 400,
     textAlign: "center",
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // Legacy stats (now using estimatedTime blocks)
@@ -739,7 +739,7 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "800",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
     fontVariant: ["tabular-nums"],
   },
   statLabel: {
@@ -748,7 +748,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: palette.gray,
     marginTop: 4,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // Legacy admit styles
@@ -773,7 +773,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: designZoneBanners.guaranteed.text,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   admitTitle: {
     fontSize: 24,
@@ -781,7 +781,7 @@ export const styles = StyleSheet.create({
     color: palette.ink,
     marginBottom: 16,
     textAlign: "center",
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // Legacy error box
@@ -800,14 +800,14 @@ export const styles = StyleSheet.create({
     color: palette.red,
     textAlign: "center",
     marginBottom: 8,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   errBody: {
     fontSize: 13,
     lineHeight: 20,
     color: palette.red,
     textAlign: "center",
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // Legacy leave link
@@ -825,7 +825,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 2,
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   footnote: {
     fontSize: 11,
@@ -833,7 +833,7 @@ export const styles = StyleSheet.create({
     marginTop: 24,
     textAlign: "center",
     maxWidth: 440,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -861,7 +861,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.1,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   headerMetaDesktop: {
     fontSize: 11,
@@ -910,17 +910,17 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.2,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   eventTitle: {
     marginTop: 5,
     fontSize: 20,
     lineHeight: 24,
-    fontWeight: "900",
+    fontWeight: "800",
     letterSpacing: -1.4,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   eventTitleDesktop: {
     marginTop: 13,
@@ -932,7 +932,7 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 16,
     color: palette.gray,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   eventDetailsDesktop: {
     maxWidth: 280,
@@ -1003,7 +1003,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.1,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   positionHeadLabelDesktop: {
     fontSize: 11,
@@ -1012,10 +1012,10 @@ export const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 68,
     lineHeight: 68,
-    fontWeight: "900",
+    fontWeight: "800",
     letterSpacing: -8,
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
     fontVariant: ["tabular-nums"],
   },
   positionNumberMobileLong: {
@@ -1029,10 +1029,10 @@ export const styles = StyleSheet.create({
     marginBottom: 28,
     fontSize: 196,
     lineHeight: 194,
-    fontWeight: "900",
+    fontWeight: "800",
     letterSpacing: -24,
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
     fontVariant: ["tabular-nums"],
   },
   positionNumberDesktopLong: {
@@ -1058,7 +1058,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.1,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   positionFootTextDesktop: {
     fontSize: 11,
@@ -1081,7 +1081,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.2,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   summaryHeadingDesktop: {
     fontSize: 11,
@@ -1126,7 +1126,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.9,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   ledgerStatLabelDesktop: {
     fontSize: 11,
@@ -1134,9 +1134,9 @@ export const styles = StyleSheet.create({
   ledgerStatValue: {
     fontSize: 19,
     lineHeight: 22,
-    fontWeight: "900",
+    fontWeight: "800",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
     fontVariant: ["tabular-nums"],
   },
   ledgerStatValueDesktop: {
@@ -1178,10 +1178,10 @@ export const styles = StyleSheet.create({
   zoneTitleLedger: {
     fontSize: 12,
     lineHeight: 14,
-    fontWeight: "900",
+    fontWeight: "800",
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   zoneTitleLedgerDesktop: {
     fontSize: 14,
@@ -1192,7 +1192,7 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 14,
     color: palette.gray,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   zoneBodyLedgerDesktop: {
     fontSize: 12,
@@ -1220,7 +1220,7 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
     color: palette.gray,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   waitingFootnoteDesktop: {
     maxWidth: 420,
@@ -1251,15 +1251,15 @@ export const styles = StyleSheet.create({
   yourTurnTitle: {
     fontSize: 18,
     lineHeight: 22,
-    fontWeight: "900",
+    fontWeight: "800",
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
   yourTurnText: {
     fontSize: 11,
     lineHeight: 16,
     color: palette.gray,
-    fontFamily: MONO,
+    fontFamily: APP_FONT,
   },
 });

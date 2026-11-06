@@ -3,7 +3,7 @@ import { designColors, designSpacingSemantic } from "@presentation/theme";
 
 import type { ImageStyle } from "react-native";
 import type { DynamicStyle } from "@presentation/utils/style";
-import { interFonts } from "@presentation/theme";
+import { plusJakartaSansFonts } from "@presentation/theme";
 
 export const componentStyles = StyleSheet.create({
   container: {
@@ -79,10 +79,10 @@ export function styleForCategoryCardAnimatedText4(): DynamicStyle {
   return {
     color: designColors.ground,
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: 0.4,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
   } as DynamicStyle;
 }
 
@@ -90,7 +90,7 @@ export function styleForCategoryCardAnimatedText5(): DynamicStyle {
   return {
     color: designColors.ground,
     fontSize: 14,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     marginTop: 4,
   } as DynamicStyle;
 }

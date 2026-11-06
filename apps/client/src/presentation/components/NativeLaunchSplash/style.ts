@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { interFonts, designColors } from "@presentation/theme";
+import { plusJakartaSansFonts, designColors } from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
 
@@ -49,14 +49,14 @@ export const componentStyles = StyleSheet.create({
     top: 28,
     right: 56,
     color: "#ffffff66",
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 10,
     letterSpacing: 1,
   },
   elementAlignItems5: { alignItems: "center", gap: 16 },
   elementColor6: {
     color: designColors.ink,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 48,
     lineHeight: 54,
   },
@@ -65,7 +65,7 @@ export const componentStyles = StyleSheet.create({
   elementFlexDirection9: { flexDirection: "row" },
   elementColor10: {
     color: "#ffffff99",
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     fontSize: 14,
     letterSpacing: 2,
   },
@@ -85,7 +85,7 @@ export const componentStyles = StyleSheet.create({
   },
   elementColor13: {
     color: "#ffffff66",
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: 10,
     letterSpacing: 2,
     textTransform: "uppercase",

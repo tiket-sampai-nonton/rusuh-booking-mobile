@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { interFonts, designColors } from "@presentation/theme";
+import { plusJakartaSansFonts, designColors } from "@presentation/theme";
 import type { DynamicStyle } from "@presentation/utils/style";
 
 export const footerLinkStyles = StyleSheet.create({
@@ -13,7 +13,7 @@ export const footerLinkStyles = StyleSheet.create({
   label: {
     color: designColors.ground,
     fontSize: 14,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     opacity: 0.8,
   },
 });

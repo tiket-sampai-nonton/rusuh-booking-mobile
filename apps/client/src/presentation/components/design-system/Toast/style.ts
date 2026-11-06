@@ -1,6 +1,10 @@
 import { StyleSheet, type ViewStyle } from "react-native";
 
-import { designColors, designZIndex, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designZIndex,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 export const toastStyles = StyleSheet.create({
   toast: {
@@ -18,7 +22,7 @@ export const toastStyles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     textAlign: "center",
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
   },
 });
 

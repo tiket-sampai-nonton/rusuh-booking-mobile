@@ -1,6 +1,10 @@
 import { StyleSheet } from "react-native";
 
-import { designBorders, designColors, interFonts } from "@presentation/theme";
+import {
+  designBorders,
+  designColors,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 export const ticketTabsStyles = StyleSheet.create({
   container: {
@@ -19,7 +23,7 @@ export const ticketTabsStyles = StyleSheet.create({
   inactiveTab: { backgroundColor: designColors.ground },
   label: {
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },

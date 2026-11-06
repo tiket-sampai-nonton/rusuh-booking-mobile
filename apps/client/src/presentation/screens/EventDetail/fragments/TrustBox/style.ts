@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import {
   designBorders,
   designColors,
@@ -21,14 +21,14 @@ export const trustStyles = StyleSheet.create({
     gap: designSpacingSemantic.s,
   },
   check: {
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: designFontSizes.s,
     color: designColors.success, // #00aa00 per Design Palette Guide
     lineHeight: designFontSizes.s * 1.5,
   },
   text: {
     flex: 1,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.s,
     color: designColors.inkMuted,
     lineHeight: designFontSizes.s * 1.5,

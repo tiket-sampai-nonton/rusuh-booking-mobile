@@ -1,5 +1,9 @@
 import { Platform, StyleSheet } from "react-native";
-import { interFonts, designBorders, designColors } from "@presentation/theme";
+import {
+  plusJakartaSansFonts,
+  designBorders,
+  designColors,
+} from "@presentation/theme";
 
 import type { EdgeInsets } from "react-native-safe-area-context";
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -22,14 +26,14 @@ export const componentStyles = StyleSheet.create({
   elementFlex2: { flex: 1 },
   elementColor3: {
     color: designColors.ink,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 20,
     textTransform: "uppercase",
   },
   elementMarginTop4: {
     marginTop: 6,
     color: designColors.inkMuted,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: 13,
   },
   elementWidth5: {
@@ -58,7 +62,7 @@ export const componentStyles = StyleSheet.create({
   },
   elementColor9: {
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 13,
     textTransform: "uppercase",
   },
@@ -73,7 +77,7 @@ export const componentStyles = StyleSheet.create({
   },
   elementColor11: {
     color: designColors.ground,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 13,
     textTransform: "uppercase",
   },

@@ -4,7 +4,7 @@
  * PROTOTYPE 03-checkout.html EXACT COPY:
  * - White background (var(--white)), black ink (var(--black))
  * - 2px solid borders everywhere
- * - Inter font family
+ * - Plus Jakarta Sans font family
  * - Progress steps bar at top
  * - No rounded corners
  */

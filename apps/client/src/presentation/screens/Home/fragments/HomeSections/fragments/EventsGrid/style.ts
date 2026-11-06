@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { designBorders, designColors, interFonts } from "@presentation/theme";
+import {
+  designBorders,
+  designColors,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 import type { ViewStyle } from "react-native";
 
@@ -16,7 +20,7 @@ export const styles = StyleSheet.create({
     color: designColors.inkMuted,
     fontSize: 14,
     textAlign: "center",
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
   },
   grid: {
     borderWidth: GRID_GAP,

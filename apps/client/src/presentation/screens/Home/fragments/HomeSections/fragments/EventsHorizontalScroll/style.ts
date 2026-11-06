@@ -3,7 +3,7 @@ import {
   designBorders,
   designColors,
   designSpacingSemantic,
-  interFonts,
+  plusJakartaSansFonts,
 } from "@presentation/theme";
 
 export const styles = StyleSheet.create({
@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
     color: designColors.inkMuted,
     fontSize: 14,
     textAlign: "center",
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
   },
   list: {
     marginHorizontal: -designSpacingSemantic.m,

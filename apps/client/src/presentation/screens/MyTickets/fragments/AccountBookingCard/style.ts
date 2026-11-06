@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { designBorders, designColors, interFonts } from "@presentation/theme";
+import {
+  designBorders,
+  designColors,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   card: {
@@ -10,20 +14,20 @@ export const styles = StyleSheet.create({
   },
   eventName: {
     color: designColors.ink,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 17,
     textTransform: "uppercase",
   },
   details: {
     marginTop: 8,
     color: designColors.inkMuted,
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     fontSize: 12,
   },
   amount: {
     marginTop: 8,
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 14,
   },
   qrButton: {
@@ -35,7 +39,7 @@ export const styles = StyleSheet.create({
   },
   qrLabel: {
     color: designColors.ground,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },

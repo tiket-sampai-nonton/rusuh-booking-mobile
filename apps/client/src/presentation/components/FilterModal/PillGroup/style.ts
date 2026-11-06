@@ -1,6 +1,10 @@
 import { StyleSheet, type TextStyle, type ViewStyle } from "react-native";
 
-import { designBorders, designColors, interFonts } from "@presentation/theme";
+import {
+  designBorders,
+  designColors,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 export const pillGroupStyles = StyleSheet.create({
   group: {
@@ -26,7 +30,7 @@ export const pillGroupStyles = StyleSheet.create({
     backgroundColor: designColors.ground,
   },
   optionText: {
-    fontFamily: interFonts.semiBold,
+    fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: 12,
   },
   selectedText: {

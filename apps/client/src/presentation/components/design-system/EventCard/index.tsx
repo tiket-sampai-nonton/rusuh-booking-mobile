@@ -343,7 +343,7 @@ export function EventCard({
                 </Text>
               )}
 
-              {/* Title: Mobile: 16px weight 700 not-uppercase, Desktop: 20px weight 900 uppercase */}
+              {/* Title: Mobile: 16px weight 700 not-uppercase, Desktop: 20px weight 800 uppercase */}
               <Animated.Text
                 style={[
                   styleForEventCardAnimatedText8(titleSize, isNative),

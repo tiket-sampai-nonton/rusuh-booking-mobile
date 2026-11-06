@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { interFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import {
   designColors,
   designFontSizes,
@@ -35,7 +35,7 @@ export const lightboxStyles = StyleSheet.create({
   counter: {
     position: "absolute",
     bottom: designSpacingSemantic.m,
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     fontSize: designFontSizes.s,
     color: designColors.ground,
     opacity: 0.7,

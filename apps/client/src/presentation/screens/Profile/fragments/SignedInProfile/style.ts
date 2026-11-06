@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { interFonts, designBorders, designColors } from "@presentation/theme";
+import {
+  plusJakartaSansFonts,
+  designBorders,
+  designColors,
+} from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   card: {
@@ -8,17 +12,21 @@ export const styles = StyleSheet.create({
     borderWidth: designBorders.standard,
     borderColor: designColors.ink,
   },
-  name: { color: designColors.ink, fontFamily: interFonts.black, fontSize: 20 },
+  name: {
+    color: designColors.ink,
+    fontFamily: plusJakartaSansFonts.extraBold,
+    fontSize: 20,
+  },
   email: {
     marginTop: 6,
     color: designColors.inkMuted,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: 14,
   },
   maskedNik: {
     marginTop: 6,
     color: designColors.inkMuted,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: 13,
   },
   button: {
@@ -34,13 +42,13 @@ export const styles = StyleSheet.create({
   },
   buttonText: {
     color: designColors.ground,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },
   signOutText: {
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },

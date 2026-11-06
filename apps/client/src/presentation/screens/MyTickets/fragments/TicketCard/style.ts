@@ -1,5 +1,9 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorders, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 import { hardShadowStyle } from "@presentation/utils/style";
 
 export const styles = StyleSheet.create({
@@ -17,12 +21,12 @@ export const styles = StyleSheet.create({
   eventName: {
     flex: 1,
     color: designColors.ink,
-    fontFamily: interFonts.black,
+    fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 18,
     textTransform: "uppercase",
   },
   status: {
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 11,
     textTransform: "uppercase",
   },
@@ -31,7 +35,7 @@ export const styles = StyleSheet.create({
   dateVenue: {
     marginTop: 8,
     color: designColors.inkMuted,
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     fontSize: 12,
   },
   details: {
@@ -45,18 +49,18 @@ export const styles = StyleSheet.create({
   },
   ticketLabel: {
     color: designColors.inkMuted,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     fontSize: 11,
     textTransform: "uppercase",
   },
   ticketCount: {
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 13,
   },
   amount: {
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 13,
   },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 16 },
@@ -85,13 +89,13 @@ export const styles = StyleSheet.create({
   },
   primaryActionText: {
     color: designColors.ground,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },
   secondaryActionText: {
     color: designColors.ink,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
     textTransform: "uppercase",
   },

@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import {
   designColors,
   designSpacingSemantic,
-  interFonts,
+  plusJakartaSansFonts,
 } from "@presentation/theme";
 
 export const componentStyles = StyleSheet.create({
@@ -21,10 +21,10 @@ export const componentStyles = StyleSheet.create({
   elementColor6: {
     color: designColors.ground,
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: -0.4,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     marginBottom: designSpacingSemantic.m,
   },
   elementColor7: {
@@ -32,7 +32,7 @@ export const componentStyles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22.4,
     opacity: 0.7,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     maxWidth: 300,
   },
   elementMinWidth8: { minWidth: 140 },
@@ -42,7 +42,7 @@ export const componentStyles = StyleSheet.create({
     fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: 0.96, // 0.08em
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     marginBottom: designSpacingSemantic.m,
   },
   elementFlexDirection10: {
@@ -60,7 +60,7 @@ export const componentStyles = StyleSheet.create({
     color: designColors.ground,
     fontSize: 14,
     opacity: 0.6,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
   },
   elementFlexDirection12: { flexDirection: "row", gap: 8 },
 });

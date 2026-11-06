@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { designColors, interFonts } from "@presentation/theme";
+import { designColors, plusJakartaSansFonts } from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
 
@@ -18,21 +18,21 @@ export const componentStyles = StyleSheet.create({
   },
   elementFontSize2: {
     fontSize: 14,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     color: designColors.ink,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   elementFontSize3: {
     fontSize: 12,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     color: "#ff0000",
     textTransform: "uppercase",
   },
   elementMarginTop4: {
     marginTop: 16,
     fontSize: 10,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     color: designColors.gray,
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -53,7 +53,7 @@ export const componentStyles = StyleSheet.create({
     flex: 1,
     paddingRight: 12,
     fontSize: 13,
-    fontFamily: interFonts.regular,
+    fontFamily: plusJakartaSansFonts.regular,
     color: designColors.ink,
   },
 });
@@ -71,7 +71,7 @@ export function styleForTicketItemPressable0(arg0: boolean): DynamicStyle {
 export function styleForTicketItemText1(arg0: boolean): DynamicStyle {
   return {
     fontSize: 12,
-    fontFamily: interFonts.bold,
+    fontFamily: plusJakartaSansFonts.bold,
     color: arg0 ? designColors.ground : designColors.ink,
     textTransform: "uppercase",
   } as DynamicStyle;
@@ -84,7 +84,7 @@ export function styleForTicketItemText2(arg0: {
   return {
     marginTop: 8,
     fontSize: 11,
-    fontFamily: interFonts.medium,
+    fontFamily: plusJakartaSansFonts.medium,
     color: arg0.color,
   } as DynamicStyle;
 }
