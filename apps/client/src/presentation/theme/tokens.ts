@@ -91,9 +91,9 @@ export const fontWeight = {
   extrabold: "800",
 } as const;
 
-/** Font family stack — prototype body font. */
+/** Font family stack — the bundled app body face plus platform fallbacks. */
 export const fontFamily = [
-  "Plus Jakarta Sans",
+  "Inter_400Regular",
   "system-ui",
   "-apple-system",
   "sans-serif",

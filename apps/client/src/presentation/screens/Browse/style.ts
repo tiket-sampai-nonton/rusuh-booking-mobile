@@ -74,7 +74,7 @@ export const browseCountText: TextStyle = {
   fontFamily: interFonts.regular,
   fontSize: 14,
 };
-export const browseCountValue: TextStyle = { color: designColors.ink, fontFamily: 'Inter_700Bold' };
+export const browseCountValue: TextStyle = { color: designColors.ink, fontFamily: interFonts.bold };
 export const browseToolbarActions: ViewStyle = { flexDirection: 'row', gap: 16, alignItems: 'center' };
 export const browseFilterButton: ViewStyle = {
   width: 36,
@@ -96,7 +96,7 @@ export const browseViewDivider: ViewStyle = { width: designBorders.standard, bac
 export const browseSortControl = {
   borderWidth: 0,
   backgroundColor: 'transparent',
-  fontFamily: 'Inter, sans-serif',
+  fontFamily: interFonts.medium,
   fontWeight: '500',
   fontSize: 14,
   cursor: 'pointer',

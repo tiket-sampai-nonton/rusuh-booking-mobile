@@ -16,6 +16,7 @@
  */
 
 import { useFonts } from "expo-font";
+import JetBrainsMonoVariable from "../../assets/fonts/JetBrainsMono[wght].ttf";
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -35,6 +36,7 @@ export function useInterFonts() {
     Inter_600SemiBold,
     Inter_700Bold,
     Inter_900Black,
+    "JetBrains Mono": JetBrainsMonoVariable,
   });
 
   return { fontsLoaded, fontError };
@@ -52,11 +54,16 @@ export const interFonts = {
   black: "Inter_900Black",
 } as const;
 
+/** The bundled mono face shared by the waiting room on web, iOS, and Android. */
+export const waitingRoomFont = "JetBrains Mono";
+
 /**
  * Resolve fontWeight (CSS-style) to Inter font family name.
  * Useful when you have dynamic weights.
  */
-export function interFontForWeight(weight: "400" | "500" | "600" | "700" | "900" | number): string {
+export function interFontForWeight(
+  weight: "400" | "500" | "600" | "700" | "900" | number,
+): string {
   const w = String(weight);
   switch (w) {
     case "400":

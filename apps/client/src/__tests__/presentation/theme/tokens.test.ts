@@ -81,8 +81,8 @@ describe("RBT-003 raw tokens", () => {
     });
   });
 
-  it("font family starts with Plus Jakarta Sans and ends with sans-serif", () => {
-    expect(fontFamily[0]).toBe("Plus Jakarta Sans");
+  it("font family starts with the bundled Inter face and ends with sans-serif", () => {
+    expect(fontFamily[0]).toBe("Inter_400Regular");
     expect(fontFamily[fontFamily.length - 1]).toBe("sans-serif");
   });
 

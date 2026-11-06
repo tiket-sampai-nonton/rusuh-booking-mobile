@@ -1,6 +1,10 @@
-
 import { StyleSheet } from "react-native";
-import { designColors, designBorders, interFonts } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  interFonts,
+  waitingRoomFont,
+} from "@presentation/theme";
 
 import type { EdgeInsets } from "react-native-safe-area-context";
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -52,7 +56,7 @@ export const styles = StyleSheet.create({
   timerText: {
     color: designColors.ink,
     fontSize: 16,
-    fontFamily: "JetBrains Mono",
+    fontFamily: waitingRoomFont,
     fontWeight: "900",
     fontVariant: ["tabular-nums"],
   },
