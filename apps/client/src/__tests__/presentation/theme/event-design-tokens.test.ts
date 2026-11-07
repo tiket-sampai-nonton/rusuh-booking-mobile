@@ -24,13 +24,13 @@ const tw = (
 
 describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
   describe("designColors", () => {
-    it("exposes the shared green and yellow palette", () => {
+    it("exposes blush surfaces and pink brand accents", () => {
       expect(designColors).toMatchObject({
-        ground: "#F6F9F4",
-        ink: "#142519",
-        overlay: "#0B1710",
-        inkMuted: "#58665A",
-        field: "#EAF2E7",
+        ground: "#FFF7FA",
+        ink: "#2D1B25",
+        overlay: "#1C0E16",
+        inkMuted: "#705A67",
+        field: "#FCEAF2",
         danger: "#B42318",
         success: "#15803D",
         warning: "#A16207",
@@ -38,11 +38,11 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
     });
 
     it("includes legacy aliases for backwards compatibility", () => {
-      expect(designColors.muted).toBe("#58665A");
+      expect(designColors.muted).toBe("#705A67");
       expect(designColors.warn).toBe("#A16207");
-      expect(designColors.accent).toBe("#15803D");
-      expect(designColors.yellow).toBe("#FACC15");
-      expect(designColors.yellowDeep).toBe("#A16207");
+      expect(designColors.accent).toBe("#BE185D");
+      expect(designColors.pink).toBe("#F472B6");
+      expect(designColors.pinkLight).toBe("#FBCFE8");
     });
   });
 
@@ -140,7 +140,7 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
     describe("Tailwind sync", () => {
       it("MIRRORS the tailwind.config.js v2 namespace for core colors", () => {
         // Every core raw token equals its tailwind counterpart — no drift.
-        (["ink", "ground", "field", "overlay", "yellow"] as const).forEach(
+        (["ink", "ground", "field", "overlay", "pink"] as const).forEach(
           (k) => {
             if (tw[k]) {
               expect(designColors[k]).toBe(tw[k]);

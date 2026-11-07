@@ -5,7 +5,7 @@
  * ~2100-2250 (HTML), ~2700-2900 (JS).
  *
  *  Design Rules:
- * - Colors and surfaces come from the shared green-and-yellow theme tokens.
+ * - Colors and surfaces come from the shared pink theme tokens.
  * - Fonts: Plus Jakarta Sans (weight 800 for titles, 700 for labels/buttons)
  * - Animation: modalIn (translateY 20→0, scale 0.95→1, opacity 0→1, 400ms)
  *

@@ -3,7 +3,7 @@ import type { DynamicStyle } from "@presentation/utils/style";
 
 export function splashLetterStyle(index: number): DynamicStyle {
   return {
-    color: index === 0 ? designColors.yellow : designColors.ground,
+    color: index === 0 ? designColors.pink : designColors.ground,
     fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: 34,
     lineHeight: 38,

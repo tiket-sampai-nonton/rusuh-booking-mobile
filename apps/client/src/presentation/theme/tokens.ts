@@ -14,13 +14,12 @@ const tailwind = require("../../../tailwind.config.js");
 const colors = tailwind.theme.extend.colors;
 const shadows = tailwind.theme.extend.boxShadow;
 
-/** Green and yellow brand hues mirrored from Tailwind's canonical tokens. */
+/** Pink brand hues derived from Tailwind's canonical palette. */
 export const brand = {
   primary: colors.brand.DEFAULT,
   deep: colors.brand.deep,
-  yellow: colors.brand.yellow,
-  yellowDeep: colors.brand["yellow-deep"],
-  yellowLight: colors.brand["yellow-light"],
+  pink: colors.brand.pink,
+  pinkLight: colors.brand["pink-light"],
 } as const;
 
 /** Status hues mirrored from Tailwind's semantic tokens. */

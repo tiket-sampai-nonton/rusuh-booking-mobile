@@ -24,12 +24,11 @@ const tailwindBrand = (
 ).theme?.extend?.colors?.brand;
 
 describe("RBT-003 raw tokens", () => {
-  it("exposes the green and yellow brand palette", () => {
-    expect(brand.primary).toBe("#15803D");
-    expect(brand.deep).toBe("#166534");
-    expect(brand.yellow).toBe("#FACC15");
-    expect(brand.yellowDeep).toBe("#A16207");
-    expect(brand.yellowLight).toBe("#FEF08A");
+  it("exposes the pink brand palette", () => {
+    expect(brand.primary).toBe("#BE185D");
+    expect(brand.deep).toBe("#831843");
+    expect(brand.pink).toBe("#F472B6");
+    expect(brand.pinkLight).toBe("#FBCFE8");
   });
 
   it("mirrors the Tailwind brand palette as the canonical token source", () => {
@@ -39,9 +38,8 @@ describe("RBT-003 raw tokens", () => {
 
     expect(brand.primary).toBe(tailwindBrand.DEFAULT);
     expect(brand.deep).toBe(tailwindBrand.deep);
-    expect(brand.yellow).toBe(tailwindBrand.yellow);
-    expect(brand.yellowDeep).toBe(tailwindBrand["yellow-deep"]);
-    expect(brand.yellowLight).toBe(tailwindBrand["yellow-light"]);
+    expect(brand.pink).toBe(tailwindBrand.pink);
+    expect(brand.pinkLight).toBe(tailwindBrand["pink-light"]);
   });
 
   it("exposes light + dark status hues", () => {
@@ -56,19 +54,19 @@ describe("RBT-003 raw tokens", () => {
   });
 
   it("exposes prototype neutral/surface hues", () => {
-    expect(neutral.ink).toBe("#142519");
-    expect(neutral.ink2).toBe("#24452E");
-    expect(neutral.paper).toBe("#F6F9F4");
+    expect(neutral.ink).toBe("#2D1B25");
+    expect(neutral.ink2).toBe("#4D2A3C");
+    expect(neutral.paper).toBe("#FFF7FA");
     expect(neutral.card).toBe("#FFFFFF");
-    expect(neutral.darkBackground).toBe("#0B1710");
-    expect(neutral.darkCard).toBe("#13251A");
-    expect(neutral.darkForeground).toBe("#F1F8F1");
-    expect(neutral.overlay).toBe("#0B1710");
-    expect(neutral.muted).toBe("#58665A");
-    expect(neutral.line).toBe("rgba(20,37,25,0.14)");
-    expect(neutral.mutedDark).toBe("#B7C8BA");
-    expect(neutral.lineDark).toBe("rgba(213,237,219,0.18)");
-    expect(neutral.field).toBe("#EAF2E7");
+    expect(neutral.darkBackground).toBe("#1C0E16");
+    expect(neutral.darkCard).toBe("#2A1722");
+    expect(neutral.darkForeground).toBe("#FCEAF2");
+    expect(neutral.overlay).toBe("#1C0E16");
+    expect(neutral.muted).toBe("#705A67");
+    expect(neutral.line).toBe("rgba(45,27,37,0.14)");
+    expect(neutral.mutedDark).toBe("#D6BBC8");
+    expect(neutral.lineDark).toBe("rgba(252,234,242,0.18)");
+    expect(neutral.field).toBe("#FCEAF2");
   });
 
   it("mirrors waiting-room zone colors from Tailwind", () => {
@@ -142,9 +140,9 @@ describe("RBT-003 raw tokens", () => {
   });
 
   it("shadow strings are present for the four prototype elevations", () => {
-    expect(shadow.brand).toContain("rgba(21,128,61,0.28)");
-    expect(shadow.button).toContain("rgba(20,37,25,0.42)");
-    expect(shadow.filter).toContain("rgba(36,69,46,0.5)");
+    expect(shadow.brand).toContain("rgba(190,24,93,0.28)");
+    expect(shadow.button).toContain("rgba(45,27,37,0.42)");
+    expect(shadow.filter).toContain("rgba(77,42,60,0.5)");
     expect(shadow.ok).toContain("rgba(21,128,61,0.36)");
   });
 
