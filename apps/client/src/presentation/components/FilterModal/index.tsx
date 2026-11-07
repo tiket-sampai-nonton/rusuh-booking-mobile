@@ -34,7 +34,7 @@ import {
 } from "./style";
 
 export interface FilterValue {
-  readonly genre: string;
+  readonly category: string;
   readonly time: string;
   readonly sort: string;
 }
@@ -44,18 +44,14 @@ export interface FilterModalProps {
   readonly onClose: () => void;
   /** Apply — receives the chosen filter (the screen navigates to /browse). */
   readonly onApply: (value: FilterValue) => void;
-  readonly genres?: readonly string[];
 }
 
-const GENRES = [
-  "Semua",
-  "Festival",
-  "Jazz",
-  "Rock",
-  "Elektronik",
-  "Folk",
-  "Orkestra",
-];
+const CATEGORIES = [
+  { v: "all", l: "Semua" },
+  { v: "concert", l: "Konser" },
+  { v: "festival", l: "Festival" },
+  { v: "sports", l: "Olahraga" },
+] as const;
 const TIMES = [
   { v: "all", l: "Semua waktu" },
   { v: "week", l: "Minggu ini" },
@@ -67,20 +63,15 @@ const SORTS = [
   { v: "furthest", l: "Terjauh" },
 ];
 
-export function FilterModal({
-  visible,
-  onClose,
-  onApply,
-  genres,
-}: FilterModalProps) {
+export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
   const insets = useSafeAreaInsets();
   const { isMobileWeb } = useResponsive();
-  const [genre, setGenre] = useState("Semua");
+  const [category, setCategory] = useState("all");
   const [time, setTime] = useState("all");
   const [sort, setSort] = useState("closest");
 
   const apply = (): void => {
-    onApply({ genre, time, sort });
+    onApply({ category, time, sort });
   };
 
   useEffect(() => {
@@ -145,13 +136,10 @@ export function FilterModal({
           keyboardShouldPersistTaps="handled"
         >
           <PillGroup
-            label="Kategori Musik"
-            options={(genres
-              ? ["Semua", ...genres.filter((g) => g.toLowerCase() !== "semua")]
-              : GENRES
-            ).map((g) => ({ v: g, l: g }))}
-            value={genre}
-            onPick={setGenre}
+            label="Kategori acara"
+            options={CATEGORIES}
+            value={category}
+            onPick={setCategory}
             testPrefix="filter-genre"
           />
           <PillGroup

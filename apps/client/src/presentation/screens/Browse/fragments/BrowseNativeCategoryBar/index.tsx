@@ -20,6 +20,10 @@ export function BrowseNativeCategoryBar({
   activeCategory,
   onSelect,
 }: BrowseNativeCategoryBarProps) {
+  const visibleCategories = BROWSE_CATEGORIES.filter(
+    (category) =>
+      category.key === "all" || category.key === (activeCategory ?? "all"),
+  );
   return (
     <View
       style={[browseNativeCategoryBar, browseNativeCategoryBarPosition(top)]}
@@ -29,7 +33,7 @@ export function BrowseNativeCategoryBar({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={browseNativeCategoryScrollContent}
       >
-        {BROWSE_CATEGORIES.map((category) => {
+        {visibleCategories.map((category) => {
           const active = activeCategory === category.key;
           return (
             <Pressable

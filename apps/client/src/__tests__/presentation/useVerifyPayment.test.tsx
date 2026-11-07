@@ -91,7 +91,7 @@ describe("useVerifyPayment (RBT-063)", () => {
     });
     await waitFor(() => expect(result.current.verdict).toBe("failed"));
     expect(result.current.route).toBe(
-      "/expired/bk-1?reason=payment&bookingId=bk-1&status=FAILED",
+      "/failed/bk-1?reason=payment&bookingId=bk-1&status=FAILED",
     );
   });
 
@@ -128,7 +128,7 @@ describe("useVerifyPayment (RBT-063)", () => {
     await waitFor(() => expect(result.current.attempt).toBeDefined());
     expect(result.current.verdict).toBe("pending");
     expect(result.current.route).toBe(
-      "/expired/bk-1?reason=payment&bookingId=bk-1&status=AWAITING_PAYMENT",
+      "/failed/bk-1?reason=payment&bookingId=bk-1&status=AWAITING_PAYMENT",
     );
   });
 
@@ -142,7 +142,7 @@ describe("useVerifyPayment (RBT-063)", () => {
     });
     await waitFor(() => expect(result.current.attempt).toBeDefined());
     expect(result.current.route).toBe(
-      "/expired/bk-1?reason=payment&bookingId=bk-1&status=AWAITING_PAYMENT",
+      "/failed/bk-1?reason=payment&bookingId=bk-1&status=AWAITING_PAYMENT",
     );
   });
 

@@ -115,10 +115,10 @@ describe("HomeScreen (web desktop)", () => {
     // The popup appears; no navigation yet (prototype opens a dialog).
     expect(screen.getByTestId("filter-modal")).toBeTruthy();
     expect(mockRouter.push).not.toHaveBeenCalled();
-    // Apply → /browse WITH the chosen params (prototype submit → browse.html?...).
+    // Apply → /browse WITH category, time, and sort query params.
     fireEvent.press(screen.getByTestId("filter-apply"));
     expect(mockRouter.push).toHaveBeenCalledWith(
-      expect.stringMatching(/^\/browse\?.*genre=/),
+      expect.stringMatching(/^\/browse\?.*category=/),
     );
   });
 

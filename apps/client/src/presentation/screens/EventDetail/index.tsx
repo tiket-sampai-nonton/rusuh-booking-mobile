@@ -288,7 +288,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
             {/* About Event */}
             <Block label="Tentang Event">
               <Text style={styles.description}>
-                {desc.longDesc || "Deskripsi event belum tersedia."}
+                {desc.longDesc || "Informasi tentang acara ini belum tersedia."}
               </Text>
             </Block>
 
@@ -308,7 +308,9 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
                     mapsUrl={venueInfo.mapsUrl}
                   />
                 ) : (
-                  <Text style={styles.description}>Lokasi akan diumumkan.</Text>
+                  <Text style={styles.description}>
+                    Informasi lokasi akan diumumkan penyelenggara.
+                  </Text>
                 )}
               </Block>
 
@@ -316,7 +318,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
                 <Gallery images={galleryImages} onImagePress={openLightbox} />
               </Block>
 
-              <Block label="Syarat & Ketentuan">
+              <Block label="Syarat dan ketentuan">
                 {desc.terms.length > 0 ? (
                   <View style={styles.termsList}>
                     {desc.terms.map((t) => (
@@ -327,7 +329,9 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
                     ))}
                   </View>
                 ) : (
-                  <Text style={styles.description}>Ketentuan menyusul.</Text>
+                  <Text style={styles.description}>
+                    Informasi syarat dan ketentuan belum tersedia.
+                  </Text>
                 )}
               </Block>
             </>

@@ -113,14 +113,14 @@ describe("PaymentResultScreen (RBT-063)", () => {
     );
   });
 
-  it("navigates to /expired on FAILED", async () => {
+  it("navigates to /failed on FAILED", async () => {
     renderScreen(new StatusRepo(attempt("FAILED")), {
       bookingId: "bk-1",
       attemptId: "a1",
     });
     await waitFor(() =>
       expect(mockRouter.replace).toHaveBeenCalledWith(
-        "/expired/bk-1?reason=payment&bookingId=bk-1&status=FAILED",
+        "/failed/bk-1?reason=payment&bookingId=bk-1&status=FAILED",
       ),
     );
   });

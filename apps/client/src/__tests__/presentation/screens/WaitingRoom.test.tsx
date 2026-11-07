@@ -158,7 +158,7 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     const zone = screen.getByTestId("waiting-zone");
     expect(screen.getByTestId("waiting-icon-lock")).toBeTruthy();
     expect(zone).toHaveTextContent("Zona Aman", { exact: false });
-    expect(zone).toHaveTextContent("Tiket Anda terjamin saat giliran tiba", {
+    expect(zone).toHaveTextContent("Tiketmu tetap tersedia sampai giliranmu tiba.", {
       exact: false,
     });
   });
@@ -171,7 +171,7 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     const zone = screen.getByTestId("waiting-zone");
     expect(screen.getByTestId("waiting-icon-ledger")).toBeTruthy();
     expect(zone).toHaveTextContent("Zona kemungkinan", { exact: false });
-    expect(zone).toHaveTextContent("Peluang masuk bergantung pada sisa tiket", {
+    expect(zone).toHaveTextContent("Kesempatan masuk bergantung pada sisa tiket.", {
       exact: false,
     });
   });
@@ -184,7 +184,7 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     const zone = screen.getByTestId("waiting-zone");
     expect(screen.getByTestId("waiting-icon-alert")).toBeTruthy();
     expect(zone).toHaveTextContent("Peluang Terbatas", { exact: false });
-    expect(zone).toHaveTextContent("Posisi Anda melewati perkiraan stok", {
+    expect(zone).toHaveTextContent("Posisimu sudah melewati perkiraan jumlah tiket.", {
       exact: false,
     });
   });
@@ -303,7 +303,7 @@ describe("WaitingRoomScreen — terminal + error states", () => {
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     expect(screen.getByTestId("waiting-error")).toHaveTextContent(
-      /Terjadi kendala\. Silakan coba lagi\./,
+      /Ada kendala saat memuat antrean\. Coba lagi sebentar\./,
     );
   });
 
@@ -415,7 +415,7 @@ describe("WaitingRoomScreen — guards + reduced motion", () => {
   it("renders the no-queue guard when queueId is empty", () => {
     render(<WaitingRoomScreen queueId="" eventId="evt-1" />);
     expect(screen.getByTestId("waiting-noqueue")).toHaveTextContent(
-      "Tidak Ada Antrean Aktif",
+      "Belum ada antrean",
       { exact: false },
     );
     // The poller must not be driven with an empty id.

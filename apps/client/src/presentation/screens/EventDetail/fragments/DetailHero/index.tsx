@@ -189,23 +189,25 @@ export function DetailHero({
         style={[styles.heroContent, isMobileWeb && styles.mobileWebHeroContent]}
       >
         {/* Badge */}
-        <Animated.View
-          style={[
-            styles.heroBadge,
-            isMobileWeb && styles.mobileWebHeroBadge,
-            styleForDetailHeroAnimatedView2(fadeAnim, slideAnim),
-          ]}
-        >
-          {isLive && <View style={styles.liveDot} />}
-          <Text
+        {!isMobileWeb && (
+          <Animated.View
             style={[
-              styles.heroBadgeText,
-              isMobileWeb && styles.mobileWebHeroBadgeText,
+              styles.heroBadge,
+              isMobileWeb && styles.mobileWebHeroBadge,
+              styleForDetailHeroAnimatedView2(fadeAnim, slideAnim),
             ]}
           >
-            {statusLabel}
-          </Text>
-        </Animated.View>
+            {isLive && <View style={styles.liveDot} />}
+            <Text
+              style={[
+                styles.heroBadgeText,
+                isMobileWeb && styles.mobileWebHeroBadgeText,
+              ]}
+            >
+              {statusLabel}
+            </Text>
+          </Animated.View>
+        )}
 
         {/* Title */}
         <Animated.Text

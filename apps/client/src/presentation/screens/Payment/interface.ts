@@ -9,6 +9,7 @@ export interface PaymentTopBarProps {
   readonly remainingMs: number;
   readonly warn: boolean;
   readonly expired: boolean;
+  readonly isMobileWeb?: boolean;
   readonly onBack: () => void;
 }
 

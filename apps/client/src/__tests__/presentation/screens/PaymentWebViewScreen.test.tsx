@@ -236,12 +236,12 @@ describe("resolveWebViewNav (RBT-062)", () => {
       "/payment-result/bk-1?attemptId=a7",
     );
   });
-  it("routes a failed or expired return straight to /expired", () => {
+  it("routes a failed or expired return straight to /failed", () => {
     expect(resolveWebViewNav("https://app/failed?x=1", "bk-1")).toBe(
-      "/expired/bk-1",
+      "/failed/bk-1",
     );
     expect(resolveWebViewNav("https://app/expired/bk-1", "bk-1")).toBe(
-      "/expired/bk-1",
+      "/failed/bk-1",
     );
   });
   it("stays (null) for an intermediate SNAP URL", () => {

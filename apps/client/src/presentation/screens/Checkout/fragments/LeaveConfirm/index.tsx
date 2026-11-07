@@ -16,7 +16,12 @@ import {
   styleForLeaveConfirmPressable1,
 } from "./style";
 
-export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
+export function LeaveConfirm({
+  visible,
+  onStay,
+  onLeave,
+  variant = "checkout",
+}: LeaveConfirmProps & { readonly variant?: "checkout" | "payment" }) {
   return (
     <Modal
       visible={visible}
@@ -42,11 +47,14 @@ export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
           testID="checkout-leave-modal"
         >
           <Text style={styles.title} accessibilityRole="header">
-            Tinggalkan halaman?
+            {variant === "payment"
+              ? "Tinggalkan pembayaran?"
+              : "Tinggalkan halaman?"}
           </Text>
           <Text style={styles.body}>
-            Kalau kamu keluar sekarang, sesi pemilihan tiket dilepas dan kamu
-            harus mengulang antrean dari awal. Yakin mau keluar?
+            {variant === "payment"
+              ? "Kamu akan keluar dari proses pembayaran. Status transaksi tetap perlu dikonfirmasi sebelum mencoba lagi. Yakin mau keluar?"
+              : "Kalau kamu keluar sekarang, sesi pemilihan tiket dilepas dan kamu harus mengulang antrean dari awal. Yakin mau keluar?"}
           </Text>
           <View style={styles.actions}>
             <Pressable

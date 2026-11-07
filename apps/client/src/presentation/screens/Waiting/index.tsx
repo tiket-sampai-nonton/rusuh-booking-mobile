@@ -21,6 +21,7 @@ import { useRouter, type Href } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   isAdmitted,
@@ -47,6 +48,7 @@ import { NetworkStatusBar } from "./fragments/NetworkStatusBar";
 import { StatusBadge } from "./fragments/StatusBadge";
 import { WaitingActive } from "./fragments/WaitingActive";
 import { YourTurnState } from "./fragments/YourTurnState";
+import { LeaveButton } from "./fragments/LeaveButton";
 
 // MAIN SCREEN
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -60,6 +62,7 @@ export function WaitingRoomScreen({
   eventId,
 }: WaitingRoomScreenProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const reducedMotion = useReducedMotion() ?? false;
   const { isDesktop, isMobileWeb } = useResponsive();
   const shellStyle = [styles.shell, isMobileWeb && styles.mobileWebShell];
@@ -317,6 +320,7 @@ export function WaitingRoomScreen({
             style={[
               styles.waitingPage,
               isDesktop && styles.waitingPageDesktop,
+              !isDesktop && styles.waitingPageMobile,
               isMobileWeb && styles.mobileWebWaitingPage,
             ]}
           >
@@ -329,6 +333,13 @@ export function WaitingRoomScreen({
             />
           </View>
         </ScrollView>
+        {!isDesktop && (
+          <View
+            style={[styles.mobilePinnedLeave, { bottom: insets.bottom + 12 }]}
+          >
+            <LeaveButton onPress={handleLeavePress} />
+          </View>
+        )}
         <LeaveModal
           visible={showLeaveModal}
           onStay={handleStay}
@@ -361,6 +372,7 @@ export function WaitingRoomScreen({
           style={[
             styles.waitingPage,
             isDesktop && styles.waitingPageDesktop,
+            !isDesktop && styles.waitingPageMobile,
             isMobileWeb && styles.mobileWebWaitingPage,
           ]}
         >
@@ -375,6 +387,13 @@ export function WaitingRoomScreen({
           />
         </View>
       </ScrollView>
+      {!isDesktop && (
+        <View
+          style={[styles.mobilePinnedLeave, { bottom: insets.bottom + 12 }]}
+        >
+          <LeaveButton onPress={handleLeavePress} />
+        </View>
+      )}
       <LeaveModal
         visible={showLeaveModal}
         onStay={handleStay}

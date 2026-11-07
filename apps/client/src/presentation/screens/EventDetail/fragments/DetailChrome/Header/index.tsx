@@ -102,7 +102,9 @@ export function Header({
             >
               <View style={detailHeaderStyles.webBackContent}>
                 <ArrowIcon direction="left" color={designColors.ink} />
-                <Text style={detailHeaderStyles.webBackLabel}>Kembali</Text>
+                {!isMobileWeb && (
+                  <Text style={detailHeaderStyles.webBackLabel}>Kembali</Text>
+                )}
               </View>
             </Pressable>
             <BrandMark size={28} color={designColors.ink} />

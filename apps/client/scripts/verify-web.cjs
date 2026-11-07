@@ -193,6 +193,7 @@ const transactionSegments = new Set([
   "success",
   "waiting",
   "expired",
+  "failed",
 ]);
 function walkHtml(dir, relative = "") {
   if (!fs.existsSync(dir)) return [];

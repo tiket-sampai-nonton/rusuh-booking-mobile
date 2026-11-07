@@ -12,8 +12,10 @@ import { renderWithProviders } from "@shared/test-fixtures/render-with-providers
 import { BOOKING_CATEGORY_FIXTURE } from "@shared/test-fixtures/booking-categories.fixture";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockNavigation = { addListener: jest.fn(() => jest.fn()) };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
+  useNavigation: () => mockNavigation,
 }));
 jest.mock("@presentation/hooks/useServerCountdown", () => {
   const { useEffect, useRef } = jest.requireActual("react");

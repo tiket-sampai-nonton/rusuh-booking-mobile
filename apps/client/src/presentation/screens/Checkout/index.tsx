@@ -10,7 +10,7 @@
  * NIK is never logged; the buyer/attendee NIK fields are masked on handoff
  * (D7.1/D7.5). No infrastructure import — ports via useServices/hooks only.
  */
-import { useRouter, type Href } from "expo-router";
+import { useNavigation, useRouter, type Href } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -76,6 +76,7 @@ function rowStatus(
 
 export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const router = useRouter();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { isDesktop, isMobileWeb } = useResponsive();
   const { serverClock, bookingRepository } = useServices();
@@ -127,10 +128,25 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
       router.replace(`/payment-result/${booking.bookingId}` as Href);
     } else if (booking.status === "EXPIRED" || booking.status === "CANCELLED") {
       router.replace(
-        `/expired/${booking.bookingId}?reason=payment&bookingId=${booking.bookingId}` as Href,
+        `/failed/${booking.bookingId}?reason=payment&bookingId=${booking.bookingId}` as Href,
       );
     }
   }, [router, session, sessionId]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (event) => {
+      const actionType = event.data.action.type;
+      if (
+        actionType === "GO_BACK" ||
+        actionType === "POP" ||
+        actionType === "POP_TO_TOP"
+      ) {
+        event.preventDefault();
+        setConfirmLeave(true);
+      }
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener(
@@ -151,7 +167,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     serverTimeIso: session?.serverTime,
     onExpire: () =>
       router.replace(
-        `/expired/${sessionId}?reason=hold&eventId=${encodeURIComponent(session?.eventId ?? "")}` as Href,
+        `/failed/${sessionId}?reason=hold&eventId=${encodeURIComponent(session?.eventId ?? "")}` as Href,
       ),
   });
 
@@ -161,7 +177,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
       (sessionError.code === "SESSION_EXPIRED" ||
         sessionError.code === "SESSION_INVALID")
     ) {
-      router.replace(`/expired/${sessionId}?reason=hold` as Href);
+      router.replace(`/failed/${sessionId}?reason=hold` as Href);
     }
   }, [router, sessionError, sessionId]);
 
@@ -316,7 +332,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
         />
 
         {/* Progress Steps Bar (prototype .progress-container) */}
-        <ProgressSteps currentStep={2} />
+        <ProgressSteps currentStep={3} />
 
         <ScrollView
           contentContainerStyle={checkoutScrollContent(isDesktop, isMobileWeb)}

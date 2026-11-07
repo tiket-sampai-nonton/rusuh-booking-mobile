@@ -94,64 +94,66 @@ export function ProfileScreen() {
             isMobileWeb,
           )}
         >
-          <View style={[styles.hero, isMobileWeb && styles.mobileWebHero]}>
-            <Image
-              source={require("../../../../assets/brand-mark.png")}
-              resizeMode="contain"
-              style={styles.heroWatermark}
-              accessible={false}
-            />
-            <View style={styles.heroContent}>
-              <Text style={styles.heroEyebrow}>RUSUH BOOKING</Text>
-              <Text
-                accessibilityRole="header"
-                style={[
-                  styles.heroHeading,
-                  isMobileWeb && styles.mobileWebHeading,
-                ]}
-              >
-                Profil
-              </Text>
-              <Text style={styles.heroDescription}>
-                {profile
-                  ? "Kelola informasi akun dan akses tiketmu di sini."
-                  : "Masuk untuk mengelola profil dan melihat tiket di berbagai perangkat."}
-              </Text>
-              <View style={styles.heroStatus}>
-                <View style={styles.heroStatusDot} />
-                <Text style={styles.heroStatusText}>
-                  {profile ? "Akun aktif" : "Akun tamu"}
+          <View style={styles.content}>
+            <View style={[styles.hero, isMobileWeb && styles.mobileWebHero]}>
+              <Image
+                source={require("../../../../assets/brand-mark.png")}
+                resizeMode="contain"
+                style={styles.heroWatermark}
+                accessible={false}
+              />
+              <View style={styles.heroContent}>
+                <Text style={styles.heroEyebrow}>RUSUH BOOKING</Text>
+                <Text
+                  accessibilityRole="header"
+                  style={[
+                    styles.heroHeading,
+                    isMobileWeb && styles.mobileWebHeading,
+                  ]}
+                >
+                  Profil
                 </Text>
+                <Text style={styles.heroDescription}>
+                  {profile
+                    ? "Kelola informasi akun dan akses tiketmu di sini."
+                    : "Masuk untuk mengelola profil dan melihat tiket di berbagai perangkat."}
+                </Text>
+                <View style={styles.heroStatus}>
+                  <View style={styles.heroStatusDot} />
+                  <Text style={styles.heroStatusText}>
+                    {profile ? "Akun aktif" : "Akun tamu"}
+                  </Text>
+                </View>
               </View>
             </View>
+            {profile ? (
+              <SignedInProfile
+                profile={profile}
+                editing={editing}
+                fullName={fullName}
+                nik={nik}
+                error={error}
+                saving={saving}
+                onEdit={() => {
+                  setFullName(profile.fullName ?? "");
+                  setEditing(true);
+                }}
+                onFullNameChange={setFullName}
+                onNikChange={(value) =>
+                  setNik(value.replace(/\D/g, "").slice(0, 16))
+                }
+                onSave={() => void saveProfile()}
+                onCancel={() => {
+                  setEditing(false);
+                  setNik("");
+                  setError("");
+                }}
+                onSignOut={() => void signOut()}
+              />
+            ) : (
+              <GuestAccountCard onLogin={() => setLoginOpen(true)} />
+            )}
           </View>
-          {profile ? (
-            <SignedInProfile
-              profile={profile}
-              editing={editing}
-              fullName={fullName}
-              nik={nik}
-              error={error}
-              saving={saving}
-              onEdit={() => {
-                setFullName(profile.fullName ?? "");
-                setEditing(true);
-              }}
-              onFullNameChange={setFullName}
-              onNikChange={(value) =>
-                setNik(value.replace(/\D/g, "").slice(0, 16))
-              }
-              onSave={() => void saveProfile()}
-              onCancel={() => {
-                setEditing(false);
-                setNik("");
-                setError("");
-              }}
-              onSignOut={() => void signOut()}
-            />
-          ) : (
-            <GuestAccountCard onLogin={() => setLoginOpen(true)} />
-          )}
         </ScrollView>
 
         <BottomNav

@@ -68,23 +68,23 @@ describe("resolvePaymentRoute", () => {
   it("PAID → /success", () => {
     expect(resolvePaymentRoute("PAID", b, 1_000)).toBe(`/success/${b}`);
   });
-  it("FAILED/EXPIRED → /expired with reason=payment + status (RBT-064 recovery)", () => {
+  it("FAILED/EXPIRED → /failed with reason=payment + status (RBT-064 recovery)", () => {
     expect(resolvePaymentRoute("FAILED", b, 1_000)).toBe(
-      `/expired/${b}?reason=payment&bookingId=${b}&status=FAILED`,
+      `/failed/${b}?reason=payment&bookingId=${b}&status=FAILED`,
     );
     expect(resolvePaymentRoute("EXPIRED", b, 1_000)).toBe(
-      `/expired/${b}?reason=payment&bookingId=${b}&status=EXPIRED`,
+      `/failed/${b}?reason=payment&bookingId=${b}&status=EXPIRED`,
     );
   });
   it("pending with time left → null (stay + keep polling)", () => {
     expect(resolvePaymentRoute("AWAITING_PAYMENT", b, 5_000)).toBeNull();
   });
-  it("pending past the SERVER deadline → /expired with reason=payment (reconciled)", () => {
+  it("pending past the SERVER deadline → /failed with reason=payment (reconciled)", () => {
     expect(resolvePaymentRoute("AWAITING_PAYMENT", b, 0)).toBe(
-      `/expired/${b}?reason=payment&bookingId=${b}&status=AWAITING_PAYMENT`,
+      `/failed/${b}?reason=payment&bookingId=${b}&status=AWAITING_PAYMENT`,
     );
     expect(resolvePaymentRoute("READY", b, -1)).toBe(
-      `/expired/${b}?reason=payment&bookingId=${b}&status=READY`,
+      `/failed/${b}?reason=payment&bookingId=${b}&status=READY`,
     );
   });
   it("no status → null", () => {

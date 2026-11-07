@@ -450,6 +450,26 @@ export const styles = StyleSheet.create({
     borderColor: palette.ink,
     backgroundColor: palette.ground,
   },
+  leaveBtnMobile: {
+    width: "100%",
+    minHeight: 54,
+    alignSelf: "stretch",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: palette.red,
+    borderColor: palette.red,
+  },
+  leaveBtnTextMobile: {
+    color: palette.ground,
+    fontSize: 12,
+  },
+  mobilePinnedLeave: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    bottom: 12,
+    zIndex: 100,
+  },
   leaveBtnText: {
     fontSize: 10,
     fontWeight: "700",
@@ -882,12 +902,13 @@ export const styles = StyleSheet.create({
     paddingTop: 55,
     paddingBottom: 34,
   },
+  waitingPageMobile: { paddingBottom: 104 },
   mobileWebWaitingPage: {
     width: "100%",
     maxWidth: 430,
     alignSelf: "center",
     paddingTop: 16,
-    paddingBottom: 12,
+    paddingBottom: 104,
   },
   eventBlock: {
     gap: 5,

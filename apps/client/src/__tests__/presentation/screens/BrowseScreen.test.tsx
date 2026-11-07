@@ -140,10 +140,20 @@ describe("BrowseScreen — URL-driven filters", () => {
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
 
     fireEvent.scroll(screen.getByTestId("browse-scroll"), {
-      nativeEvent: { contentOffset: { y: 120 } },
+      nativeEvent: {
+        contentOffset: { y: 120 },
+        contentSize: { height: 2000, width: 1024 },
+        layoutMeasurement: { height: 900, width: 1024 },
+      },
     });
-    fireEvent.press(screen.getByTestId("category-concert"));
-    fireEvent.press(screen.getByTestId("category-festival"));
+    expect(screen.getByTestId("category-all")).toBeTruthy();
+    expect(screen.queryByTestId("category-concert")).toBeNull();
+    expect(screen.queryByLabelText("Urutkan event")).toBeNull();
+    fireEvent.press(screen.getByTestId("browse-filter"));
+    fireEvent.press(screen.getByTestId("filter-genre-festival"));
+    fireEvent.press(screen.getByTestId("filter-apply"));
+    expect(screen.getByTestId("category-festival")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("category-all"));
     fireEvent.press(screen.getByTestId("view-list"));
     fireEvent.press(screen.getByTestId("view-grid"));
     fireEvent.press(screen.getByTestId("nav-home"));
@@ -153,13 +163,12 @@ describe("BrowseScreen — URL-driven filters", () => {
     fireEvent.press(screen.getByTestId("browse-filter"));
     fireEvent.press(screen.getByTestId("filter-close"));
     fireEvent.press(screen.getByTestId("browse-filter"));
+    fireEvent.press(screen.getByTestId("filter-sort-furthest"));
     fireEvent.press(screen.getByTestId("filter-apply"));
     expect(mockRouter.push).toHaveBeenCalledWith(
       expect.stringMatching(/^\/browse\?/),
     );
 
-    const sortSelect = screen.getByLabelText("Urutkan event");
-    fireEvent(sortSelect, "change", { target: { value: "price-low" } });
     fireEvent.press(screen.getByTestId("load-more-btn"));
     expect(screen.getByText("Semua Event Ditampilkan")).toBeTruthy();
   });

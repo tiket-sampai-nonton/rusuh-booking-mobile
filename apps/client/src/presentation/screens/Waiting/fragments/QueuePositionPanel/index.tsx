@@ -84,7 +84,7 @@ export function QueuePositionPanel({
               isDesktop && styles.positionFootTextDesktop,
             ]}
           >
-            FCFS
+            Urutan masuk
           </Text>
         </View>
       </View>

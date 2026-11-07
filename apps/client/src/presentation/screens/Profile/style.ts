@@ -11,11 +11,13 @@ export function profileContentContainerStyle(
     paddingTop: topInset + (isMobileWeb ? 72 : 96),
     paddingHorizontal: 16,
     paddingBottom: bottomInset + (isMobileWeb ? 24 : 120),
+    alignItems: "center",
   };
 }
 
 export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: designColors.ground },
+  content: { width: "100%", maxWidth: 960, alignSelf: "center" },
   hero: {
     minHeight: 216,
     justifyContent: "center",

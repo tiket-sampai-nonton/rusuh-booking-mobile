@@ -18,6 +18,7 @@ import { ExpiredRecoveryScreen } from "@presentation/screens/ExpiredRecovery";
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
+  useNavigation: () => ({ addListener: jest.fn(() => jest.fn()) }),
 }));
 
 describe("RBT-080 — interactive controls expose role + label", () => {

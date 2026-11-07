@@ -3,13 +3,12 @@
  *
  * URL query values are normalized here and sent to the server by Browse. This
  * module keeps the small category-chip filtering and mock fallback pure. No
- * React / RN / Expo imports. The public contract now supplies genres, although
- * category labels in the UI are mapped to backend genre values by the screen
- * and refined client-side for category chips.
+ * React / RN / Expo imports. Category filters are applied client-side; actual
+ * genre query values remain separate and follow the backend contract.
  */
 import type { EventSummary } from "@domain/repositories/event.repository";
 
-/** Genre chips (prototype browse.html select). "Semua" = no genre filter. */
+/** Known genre labels for legacy genre links. "Semua" = no genre filter. */
 export const GENRES = [
   "Semua",
   "Festival",

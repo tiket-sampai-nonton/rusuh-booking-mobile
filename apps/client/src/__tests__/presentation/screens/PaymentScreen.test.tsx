@@ -10,8 +10,10 @@ import { renderWithProviders } from "@shared/test-fixtures/render-with-providers
 import { useSessionStore } from "@presentation/stores/session-store";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockNavigation = { addListener: jest.fn(() => jest.fn()) };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
+  useNavigation: () => mockNavigation,
 }));
 
 // eslint-disable-next-line import/first
@@ -203,7 +205,7 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     );
   });
 
-  it("back navigates home", async () => {
+  it("asks before leaving when the payment back button is pressed", async () => {
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: { paymentRepository: paymentRepo(page()) },
     });
@@ -211,6 +213,9 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
       expect(screen.getByTestId("payment-back")).toBeTruthy(),
     );
     fireEvent.press(screen.getByTestId("payment-back"));
+    expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+    fireEvent.press(screen.getByTestId("checkout-leave-confirm"));
     expect(mockRouter.replace).toHaveBeenCalledWith("/");
   });
 
@@ -230,7 +235,7 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     );
   });
 
-  it("redirects to /expired when the payment countdown elapses", async () => {
+  it("redirects to /failed when the payment countdown elapses", async () => {
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: {
         paymentRepository: paymentRepo(
@@ -242,7 +247,7 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
       },
     });
     await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/expired/bk-1"),
+      expect(mockRouter.replace).toHaveBeenCalledWith("/failed/bk-1"),
     );
   });
 });

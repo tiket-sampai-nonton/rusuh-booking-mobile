@@ -1,7 +1,7 @@
 /**
  * RBT-065 — SnapSimulatorScreen: local SNAP simulator.
  * Renders the summary; success/unknown → the verify gate /payment-result,
- * fail → /expired?reason=payment. Drives the mock snapCallback.
+ * fail → /failed?reason=payment. Drives the mock snapCallback.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
@@ -112,7 +112,7 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
     expect((await payment.getStatus(attempt.attemptId)).status).toBe("PAID");
   });
 
-  it("fail routes to /expired?reason=payment", async () => {
+  it("fail routes to /failed?reason=payment", async () => {
     const base = createContainer({ useMocks: true });
     const payment = base.paymentRepository as MockPaymentRepository;
     const attempt = await payment.createAttempt("bk-1", "QRIS", "k2");
@@ -134,7 +134,7 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
     fireEvent.press(screen.getByTestId("snap-fail"));
     await waitFor(() =>
       expect(mockRouter.replace).toHaveBeenCalledWith(
-        "/expired/bk-1?reason=payment&bookingId=bk-1",
+        "/failed/bk-1?reason=payment&bookingId=bk-1",
       ),
     );
     expect((await payment.getStatus(attempt.attemptId)).status).toBe("FAILED");

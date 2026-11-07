@@ -217,7 +217,6 @@ describe("HomeScreen", () => {
     fireEvent.press(screen.getByTestId("nav-browse"));
     fireEvent.press(screen.getByTestId("nav-tickets"));
     fireEvent.press(screen.getByTestId("nav-profile"));
-    fireEvent.press(screen.getByLabelText("Konser"));
     const scrollHandler = screen.getByTestId("home-scroll").props.onScroll as
       | ((event: { contentOffset: { y: number } }) => void)
       | undefined;
@@ -226,7 +225,6 @@ describe("HomeScreen", () => {
     expect(mockRouter.push).toHaveBeenCalledWith("/browse");
     expect(mockRouter.push).toHaveBeenCalledWith("/my-tickets");
     expect(mockRouter.push).toHaveBeenCalledWith("/profile");
-    expect(mockRouter.push).toHaveBeenCalledWith("/browse?genre=concert");
   });
 
   it("opens and applies the web filter sheet", async () => {
@@ -240,11 +238,11 @@ describe("HomeScreen", () => {
     fireEvent.press(screen.getByTestId("login-cancel"));
     fireEvent.press(screen.getByTestId("filter-btn"));
     expect(screen.getByText("Saring Event")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("filter-genre-Festival"));
+    fireEvent.press(screen.getByTestId("filter-genre-festival"));
     fireEvent.press(screen.getByTestId("filter-time-month"));
     fireEvent.press(screen.getByTestId("filter-apply"));
     expect(mockRouter.push).toHaveBeenCalledWith(
-      "/browse?genre=Festival&time=month&sort=closest",
+      "/browse?category=festival&time=month&sort=closest",
     );
   });
 

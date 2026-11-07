@@ -115,7 +115,7 @@ describe("(booking) routes", () => {
     render(<WaitingScreen />);
     //  uses the localized no-queue message.
     expect(screen.getByTestId("waiting-noqueue")).toHaveTextContent(
-      "Tidak Ada Antrean Aktif",
+      "Belum ada antrean",
       { exact: false },
     );
   });

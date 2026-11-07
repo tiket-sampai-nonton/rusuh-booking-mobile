@@ -3,33 +3,33 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import { BrowseNativeCategoryBar } from "../../../../../../presentation/screens/Browse/fragments/BrowseNativeCategoryBar/index";
 
 describe("BrowseNativeCategoryBar", () => {
-  it("renders only the requested categories and forwards the selected key", () => {
-    const onSelect = jest.fn();
+  it("shows only the default category before the user filters", () => {
     render(
       <BrowseNativeCategoryBar
         top={44}
         activeCategory="all"
-        onSelect={onSelect}
+        onSelect={jest.fn()}
       />,
     );
 
     expect(screen.getByText("Semua")).toBeTruthy();
-    expect(screen.getByText("Konser")).toBeTruthy();
-    expect(screen.getByText("Festival")).toBeTruthy();
-    expect(screen.getByText("Olahraga")).toBeTruthy();
-    expect(screen.getAllByRole("button")).toHaveLength(4);
-    fireEvent.press(screen.getByTestId("category-festival"));
-    expect(onSelect).toHaveBeenCalledWith("festival");
+    expect(screen.queryByText("Konser")).toBeNull();
+    expect(screen.queryByText("Festival")).toBeNull();
+    expect(screen.queryByText("Olahraga")).toBeNull();
+    expect(screen.getAllByRole("button")).toHaveLength(1);
   });
 
   it("supports a non-default active category", () => {
+    const onSelect = jest.fn();
     render(
       <BrowseNativeCategoryBar
         top={0}
         activeCategory="sports"
-        onSelect={jest.fn()}
+        onSelect={onSelect}
       />,
     );
     expect(screen.getByTestId("category-sports")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("category-sports"));
+    expect(onSelect).toHaveBeenCalledWith("sports");
   });
 });

@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { Linking } from "react-native";
 
 let mockReducedMotion = true;
 jest.mock("react-native-reanimated", () => {
@@ -14,19 +15,26 @@ import { HomeFooter } from "@presentation/screens/Home/fragments/HomeFooter";
 describe("HomeFooter", () => {
   afterEach(() => {
     mockReducedMotion = true;
+    jest.restoreAllMocks();
   });
 
-  it("routes an event category link through the owning screen", () => {
+  it("opens WhatsApp support with the Indonesian help message", async () => {
     const onNavigate = jest.fn();
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(undefined);
     render(
       <ToastProvider>
         <HomeFooter onNavigate={onNavigate} />
       </ToastProvider>,
     );
 
-    fireEvent.press(screen.getByLabelText("Konser"));
+    fireEvent.press(screen.getByLabelText("Pusat Bantuan"));
 
-    expect(onNavigate).toHaveBeenCalledWith("/browse?genre=concert");
+    await waitFor(() => expect(openURL).toHaveBeenCalledTimes(1));
+    expect(openURL.mock.calls[0]?.[0]).toContain("https://wa.me/628113663068?");
+    expect(decodeURIComponent(openURL.mock.calls[0]?.[0] ?? "")).toContain(
+      "Halo, saya butuh bantuan terkait Rusuh Booking. Bisa dibantu?",
+    );
+    expect(onNavigate).not.toHaveBeenCalled();
   });
 
   it("renders the link columns and shows the selected social profile", () => {
@@ -38,7 +46,7 @@ describe("HomeFooter", () => {
     );
 
     expect(screen.getByText("Bantuan")).toBeTruthy();
-    expect(screen.getByText("Perusahaan")).toBeTruthy();
+    expect(screen.queryByText("Perusahaan")).toBeNull();
     expect(
       screen.getByText("© 2025 Rusuh Tiket. Hak cipta dilindungi."),
     ).toBeTruthy();
@@ -50,7 +58,7 @@ describe("HomeFooter", () => {
     expect(onNavigate).not.toHaveBeenCalled();
   });
 
-  it("keeps placeholder footer links inert and handles pointer states", () => {
+  it("handles pointer states for the WhatsApp support link", () => {
     const onNavigate = jest.fn();
     render(
       <ToastProvider>
@@ -72,7 +80,7 @@ describe("HomeFooter", () => {
         <HomeFooter onNavigate={onNavigate} />
       </ToastProvider>,
     );
-    const eventLink = screen.getByLabelText("Festival");
+    const eventLink = screen.getByLabelText("Pusat Bantuan");
     const socialLink = screen.getByLabelText("YouTube: Rusuh Tiket Official");
 
     fireEvent(eventLink, "hoverIn");

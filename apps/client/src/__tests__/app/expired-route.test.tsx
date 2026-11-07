@@ -6,8 +6,10 @@ const mockUseLocalSearchParams = jest.fn(
     reason: "queue",
   }),
 );
+const mockRedirect = jest.fn((_props: { href: string }) => null);
 
 jest.mock("expo-router", () => ({
+  Redirect: (props: { href: string }) => mockRedirect(props),
   useLocalSearchParams: () => mockUseLocalSearchParams(),
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
 }));
@@ -20,12 +22,9 @@ describe("/expired/[resourceId] route", () => {
     expect(typeof ExpiredScreen).toBe("function");
   });
 
-  it("renders the recovery screen (RBT-064) for the resource", () => {
+  it("redirects legacy expired links to the failed route", () => {
     render(<ExpiredScreen />);
-    // the recovery screen mounts with a header + a re-queue action
-    expect(screen.getByTestId("expired-recovery")).toBeTruthy();
-    expect(screen.getByRole("header")).toBeTruthy();
-    expect(screen.getByTestId("expired-requeue")).toBeTruthy();
+    expect(mockRedirect).toHaveBeenCalledWith({ href: "/failed/res-1?reason=queue" });
   });
 
   it("normalizes missing and unsupported expiry parameters safely", () => {
@@ -35,9 +34,7 @@ describe("/expired/[resourceId] route", () => {
       remainingMs: "0",
     });
     const unsupportedReason = ExpiredScreen();
-    expect(unsupportedReason.props.resourceId).toBe("");
-    expect(unsupportedReason.props.reason).toBeUndefined();
-    expect(unsupportedReason.props.remainingMs).toBe(0);
+    expect(unsupportedReason.props.children[1].props.href).toBe("/failed/?reason=unknown&remainingMs=0");
 
     mockUseLocalSearchParams.mockReturnValue({
       resourceId: "res-2",
@@ -45,7 +42,6 @@ describe("/expired/[resourceId] route", () => {
       remainingMs: "",
     });
     const missingReason = ExpiredScreen();
-    expect(missingReason.props.reason).toBeUndefined();
-    expect(missingReason.props.remainingMs).toBeUndefined();
+    expect(missingReason.props.children[1].props.href).toBe("/failed/res-2");
   });
 });

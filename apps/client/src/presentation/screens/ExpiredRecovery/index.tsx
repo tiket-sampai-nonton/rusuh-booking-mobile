@@ -1,6 +1,6 @@
 /**
  * ExpiredRecoveryScreen — failure/expiry recovery (RBT-064, E7 Payment,
- * AC1/FR-23). Rendered behind `/expired/[resourceId]`.
+ * AC1/FR-23). Rendered behind `/failed/[resourceId]`.
  * RBT-097 — Mobile: white background (not dark), add "turn" variant.
  *
  * Decides the RIGHT recovery from the authoritative state (never the callback,
@@ -12,7 +12,8 @@
  *
  * noindex: a crawler must never see a transactional failure state (SECURITY §6.5).
  */
-import { useRouter, type Href } from "expo-router";
+import { useNavigation, useRouter, type Href } from "expo-router";
+import { useEffect } from "react";
 import { Platform, View } from "react-native";
 
 import type { PaymentStatus } from "@domain/repositories/payment.repository";
@@ -54,9 +55,26 @@ export function ExpiredRecoveryScreen({
   remainingMs = 0,
 }: ExpiredRecoveryScreenProps) {
   const router = useRouter();
+  const navigation = useNavigation();
   const { isMobileWeb } = useResponsive();
   const recovery = decideRecovery(status, remainingMs, errorCode);
   const copy = EXPIRY_COPY[reason];
+
+  useEffect(
+    () =>
+      navigation.addListener("beforeRemove", (event) => {
+        const actionType = event.data.action.type;
+        if (
+          actionType === "GO_BACK" ||
+          actionType === "POP" ||
+          actionType === "POP_TO_TOP"
+        ) {
+          event.preventDefault();
+          router.replace("/" as Href);
+        }
+      }),
+    [navigation, router],
+  );
 
   // Retry is only reachable when canRetry (below) is true, which already
   // requires a bookingId — so no redundant guard here.
@@ -83,9 +101,9 @@ export function ExpiredRecoveryScreen({
       testID="expired-recovery"
     >
       <Seo
-        title="Kedaluwarsa"
-        description="Waktu sesi telah berakhir."
-        path={`/expired/${resourceId}`}
+        title="Pemesanan gagal"
+        description="Pemesanan tidak berhasil diselesaikan."
+        path={`/failed/${resourceId}`}
         noindex
       />
       <View className="w-full max-w-sm items-center gap-4">
