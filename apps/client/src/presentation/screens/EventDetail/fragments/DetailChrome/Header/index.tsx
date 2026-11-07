@@ -3,6 +3,7 @@ import Svg, { Circle, Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArrowIcon } from "@presentation/components/ArrowIcon";
+import { BrandMark } from "@presentation/components/BrandMark";
 import {
   designBorders,
   designColors,
@@ -104,7 +105,7 @@ export function Header({
                 <Text style={detailHeaderStyles.webBackLabel}>Kembali</Text>
               </View>
             </Pressable>
-            <Text style={styles.logo}>Rusuh Tiket</Text>
+            <BrandMark size={28} color={designColors.ink} />
           </View>
 
           <View style={styles.headerActions}>

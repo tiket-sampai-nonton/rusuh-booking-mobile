@@ -50,7 +50,7 @@ export function fieldFocusStyle(isFocused: boolean): DynamicStyle {
   if (!isFocused) return {};
   return Platform.select({
     web: {
-      boxShadow: "4px 4px 0 #000",
+      boxShadow: `4px 4px 0 ${designColors.ink}`,
       transform: [{ translateX: -2 }, { translateY: -2 }],
     } as object,
     default: {

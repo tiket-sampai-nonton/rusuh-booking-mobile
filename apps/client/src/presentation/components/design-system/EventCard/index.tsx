@@ -3,11 +3,11 @@
  * RBT-097 — Mobile: stagger animation (FadeInUp.delay(index * 100))
  *
  * MASTER-SPEC §3.1 Event Card:
- * - Background: #fff
+ * - Background: shared ground token
  * - Hover: translateY(-8px) rotateX(2deg), shadow
  * - Image: grayscale 100% → 0% on hover (CSS filter on web)
  * - Badge slides in from left on hover
- * - border: 2px solid #000
+ * - border: 2px solid the shared ink token
  * - Gap: 2px creates border effect (handled by parent grid)
  *
  * Mobile prototype v2-mobile/01-home.html differences:
@@ -42,6 +42,7 @@ import {
   designDuration,
   designSpacingSemantic,
   designShadows,
+  withAlpha,
 } from "@presentation/theme";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { pointerEventsNone } from "@presentation/utils/style";
@@ -220,7 +221,7 @@ export function EventCard({
     // Web only: animate shadow (native shadow is static in containerStyle)
     ...(isWeb
       ? {
-          boxShadow: `${interpolate(hovered.value, [0, 1], [0, designShadows.lg.x])}px ${interpolate(hovered.value, [0, 1], [0, designShadows.lg.y])}px 0 rgba(0, 0, 0, ${interpolate(hovered.value, [0, 1], [0, 0.15])})`,
+          boxShadow: `${interpolate(hovered.value, [0, 1], [0, designShadows.lg.x])}px ${interpolate(hovered.value, [0, 1], [0, designShadows.lg.y])}px 0 ${withAlpha(designColors.overlay, interpolate(hovered.value, [0, 1], [0, 0.15]))}`,
         }
       : {}),
   }));

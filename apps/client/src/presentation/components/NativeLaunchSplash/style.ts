@@ -1,5 +1,10 @@
 import { StyleSheet } from "react-native";
-import { plusJakartaSansFonts, designColors } from "@presentation/theme";
+import {
+  plusJakartaSansFonts,
+  designColors,
+  withAlpha,
+  brand,
+} from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
 
@@ -12,7 +17,7 @@ export const componentStyles = StyleSheet.create({
     height: 24,
     borderTopWidth: 2,
     borderLeftWidth: 2,
-    borderColor: "#ffffff33",
+    borderColor: withAlpha(designColors.ground, 0.2),
   },
   elementPosition1: {
     position: "absolute",
@@ -22,7 +27,7 @@ export const componentStyles = StyleSheet.create({
     height: 24,
     borderTopWidth: 2,
     borderRightWidth: 2,
-    borderColor: "#ffffff33",
+    borderColor: withAlpha(designColors.ground, 0.2),
   },
   elementPosition2: {
     position: "absolute",
@@ -32,7 +37,7 @@ export const componentStyles = StyleSheet.create({
     height: 24,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
-    borderColor: "#ffffff33",
+    borderColor: withAlpha(designColors.ground, 0.2),
   },
   elementPosition3: {
     position: "absolute",
@@ -42,29 +47,23 @@ export const componentStyles = StyleSheet.create({
     height: 24,
     borderRightWidth: 2,
     borderBottomWidth: 2,
-    borderColor: "#ffffff33",
+    borderColor: withAlpha(designColors.ground, 0.2),
   },
   elementPosition4: {
     position: "absolute",
     top: 28,
     right: 56,
-    color: "#ffffff66",
+    color: withAlpha(designColors.ground, 0.4),
     fontFamily: plusJakartaSansFonts.bold,
     fontSize: 10,
     letterSpacing: 1,
   },
   elementAlignItems5: { alignItems: "center", gap: 16 },
-  elementColor6: {
-    color: designColors.ink,
-    fontFamily: plusJakartaSansFonts.extraBold,
-    fontSize: 48,
-    lineHeight: 54,
-  },
   elementFlexDirection7: { flexDirection: "row", gap: 12 },
   elementFlexDirection8: { flexDirection: "row" },
   elementFlexDirection9: { flexDirection: "row" },
   elementColor10: {
-    color: "#ffffff99",
+    color: withAlpha(designColors.ground, 0.6),
     fontFamily: plusJakartaSansFonts.medium,
     fontSize: 14,
     letterSpacing: 2,
@@ -81,10 +80,10 @@ export const componentStyles = StyleSheet.create({
     width: "100%",
     height: 2,
     overflow: "hidden",
-    backgroundColor: "#ffffff33",
+    backgroundColor: withAlpha(designColors.ground, 0.2),
   },
   elementColor13: {
-    color: "#ffffff66",
+    color: withAlpha(designColors.ground, 0.4),
     fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: 10,
     lineHeight: 16,
@@ -113,13 +112,14 @@ export function styleForNativeLaunchSplashAnimatedView1(): DynamicStyle {
 
 export function styleForNativeLaunchSplashAnimatedView2(): DynamicStyle {
   return {
-    width: 80,
-    height: 80,
+    width: 96,
+    height: 96,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: designColors.ground,
-    borderWidth: 3,
-    borderColor: designColors.ground,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: brand.magenta,
+    backgroundColor: withAlpha(brand.purpleDeep, 0.24),
   } as DynamicStyle;
 }
 

@@ -1,14 +1,10 @@
 /**
- * EventDetail  Brutalist Mono styles
+ * Event detail screen styles. Colors are read from the shared theme tokens.
  *
  * MATCHES: `.genesis/prototype/v2-mobile/02-event-detail.html` (native)
  * MATCHES: `.oil-ui/v2/02-event-detail.html` (web)
  *
- *  Design Rules:
- * - Background: WHITE (#ffffff) — not dark
- * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000, #00aa00
- * - Borders: 2px solid black (NO border-radius)
- * - Shadows: hard offset, NO blur (4px 4px 0 #000)
+ * - Semantic colors, surfaces, and overlays come from the shared theme tokens.
  * - Images: grayscale(100%) default, color on hover
  * - Fonts: Plus Jakarta Sans (weight 800 for titles, 700 for labels)
  *
@@ -23,6 +19,7 @@
 import { Dimensions, Platform, StyleSheet } from "react-native";
 
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
+import { withAlpha } from "@presentation/theme";
 import {
   designBorders,
   designColors,
@@ -133,13 +130,6 @@ export const designDetailStyles = StyleSheet.create({
     color: designColors.ink,
     textTransform: "uppercase",
     letterSpacing: designFontSizes.s * 0.04,
-  },
-  logo: {
-    fontFamily: plusJakartaSansFonts.extraBold,
-    fontSize: 18,
-    color: designColors.ink,
-    textTransform: "uppercase",
-    letterSpacing: 0.02 * 18,
   },
   headerActions: {
     flexDirection: "row",
@@ -271,8 +261,8 @@ export const designDetailStyles = StyleSheet.create({
         to bottom,
         transparent 0px,
         transparent 2px,
-        rgba(0,0,0,0.03) 2px,
-        rgba(0,0,0,0.03) 4px
+        ${withAlpha(designColors.overlay, 0.03)} 2px,
+        ${withAlpha(designColors.overlay, 0.03)} 4px
       )`,
     }),
   },
@@ -305,7 +295,7 @@ export const designDetailStyles = StyleSheet.create({
     marginBottom: 6,
   },
   mobileWebHeroSubtitle: {
-    color: "rgba(255,255,255,0.9)",
+    color: withAlpha(designColors.ground, 0.9),
     fontSize: 13,
     marginBottom: 8,
   },
@@ -396,7 +386,7 @@ export const designDetailStyles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: designColors.danger, // #ff0000 - Live red dot per Design Palette Guide
+    backgroundColor: designColors.danger,
   },
   heroTitle: {
     fontFamily: plusJakartaSansFonts.extraBold,
@@ -618,7 +608,7 @@ export const designDetailStyles = StyleSheet.create({
     fontSize: designFontSizes.xs,
     lineHeight:
       Platform.OS === "web" ? undefined : Math.round(designFontSizes.xs * 1.35),
-    color: designColors.danger, // #ff0000 - "Habis" per Design Palette Guide
+    color: designColors.danger,
     textDecorationLine: "line-through",
   },
   categorySoldOut: {
@@ -701,7 +691,7 @@ export const designDetailStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: withAlpha(designColors.overlay, 0.5),
     alignItems: "center",
     justifyContent: "center",
     opacity: 0, // Show on hover
@@ -766,7 +756,7 @@ export const designDetailStyles = StyleSheet.create({
     bottom: 0,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: withAlpha(designColors.overlay, 0.5),
     opacity: 0, // Show on hover
   },
   galleryPlusText: {
@@ -792,7 +782,7 @@ export const designDetailStyles = StyleSheet.create({
   termsCheck: {
     fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: designFontSizes.s,
-    color: designColors.success, // #00aa00 per Design Palette Guide
+    color: designColors.success,
   },
   termsText: {
     flex: 1,
@@ -908,7 +898,7 @@ export const designDetailStyles = StyleSheet.create({
   trustBadgeCheck: {
     fontFamily: plusJakartaSansFonts.bold,
     fontSize: 12,
-    color: designColors.success, // #00aa00 per Design Palette Guide
+    color: designColors.success,
   },
 
   // ---------------------------------------------------------------------------
@@ -920,7 +910,7 @@ export const designDetailStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.95)",
+    backgroundColor: withAlpha(designColors.overlay, 0.95),
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1000,
@@ -978,7 +968,7 @@ export const designDetailStyles = StyleSheet.create({
   loaderBar: {
     width: 200,
     height: 4,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: withAlpha(designColors.ground, 0.2),
     overflow: "hidden",
   },
   loaderProgress: {

@@ -33,6 +33,7 @@ import {
   designColors,
   designDuration,
 } from "@presentation/theme/event-design-tokens";
+import { withAlpha } from "@presentation/theme";
 import {
   CalendarIcon,
   ClockIcon,
@@ -157,13 +158,13 @@ export function DetailHero({
       </Animated.View>
 
       {/* Gradient Overlay */}
-      {/* Native: linear-gradient(to top, ground 0%, rgba(0,0,0,0.3) 50%, transparent 100%) */}
+      {/* Native: ground-to-overlay gradient from the shared color tokens */}
       {/* Web: linear-gradient(to top, ground 0%, 0.8 30%, 0.3 60%, transparent 100%) */}
       {isNative ? (
         <LinearGradient
           colors={[
             designColors.ground, // 0% - ground at bottom
-            "rgba(0,0,0,0.3)", // 50% - dark overlay
+            withAlpha(designColors.overlay, 0.3), // 50% - dark overlay
             "transparent", // 100% - transparent at top
           ]}
           locations={[0, 0.5, 1]}

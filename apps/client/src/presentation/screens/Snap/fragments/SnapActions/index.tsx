@@ -1,7 +1,7 @@
 /**  brutalist SNAP simulate-success / -fail / -unknown actions + verify note. */
 import { Pressable, Text, View } from "react-native";
 
-import { designBorder } from "@presentation/theme";
+import { designBorder, designColors } from "@presentation/theme";
 
 import type { SnapActionsProps } from "../../interface";
 import { componentStyles } from "./style";
@@ -34,8 +34,11 @@ export function SnapActions({
         style={styleForSnapActionsPressable0(btnBase)}
       >
         <Text
-          className="text-sm font-bold uppercase text-white"
-          style={componentStyles.elementLetterSpacing0}
+          className="text-sm font-bold uppercase"
+          style={[
+            componentStyles.elementLetterSpacing0,
+            { color: designColors.ground },
+          ]}
         >
           Simulasikan pembayaran berhasil
         </Text>

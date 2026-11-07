@@ -27,7 +27,7 @@ export const componentStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "#000000",
+    backgroundColor: designColors.overlay,
     opacity: 0.25,
   },
   elementPosition1: {
@@ -36,7 +36,7 @@ export const componentStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: designColors.inkMuted, // #666666 - per Design Palette Guide
+    backgroundColor: designColors.inkMuted,
     opacity: 0.65,
   },
   elementPosition2: {
@@ -278,7 +278,7 @@ export function styleForPulsingDotAnimatedView5(): DynamicStyle {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#ff0000", // --danger
+    backgroundColor: designColors.accent,
   } as DynamicStyle;
 }
 

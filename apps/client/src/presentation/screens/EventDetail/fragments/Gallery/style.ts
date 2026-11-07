@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
+import { withAlpha } from "@presentation/theme";
 import { designColors } from "@presentation/theme/event-design-tokens";
 
 export const galleryStyles = StyleSheet.create({
@@ -25,7 +26,7 @@ export const galleryStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: withAlpha(designColors.overlay, 0.5),
     alignItems: "center",
     justifyContent: "center",
   },

@@ -2,7 +2,7 @@
  * RBT-092 —  Brutalist Mono Checkout Screen Styles
  *
  * PROTOTYPE 03-checkout.html EXACT COPY:
- * - White background (var(--white)), black ink (var(--black))
+ * - Shared ground and ink color tokens
  * - 2px solid borders everywhere
  * - Plus Jakarta Sans font family
  * - Progress steps bar at top
@@ -14,6 +14,7 @@ import {
   designColors,
   designBorders,
   designSpacingSemantic,
+  withAlpha,
 } from "@presentation/theme";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -48,7 +49,7 @@ export const checkoutProgressLine: ViewStyle = {
   left: "10%",
   right: "10%",
   height: 2,
-  backgroundColor: designColors.field, // #f5f5f5 - Use field per Design Palette Guide (no arbitrary grays)
+  backgroundColor: designColors.field,
 };
 
 export const checkoutStep: ViewStyle = {
@@ -173,7 +174,7 @@ export const checkoutInputFocus: ViewStyle = {
 
 export const checkoutInputError: ViewStyle = {
   ...checkoutInput,
-  borderColor: designColors.danger, // #ff0000 per Design Palette Guide
+  borderColor: designColors.danger,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -270,7 +271,7 @@ export const checkoutSummaryTotal: ViewStyle = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const checkoutTimerBar: ViewStyle = {
-  backgroundColor: designColors.danger, // #ff0000 per Design Palette Guide
+  backgroundColor: designColors.danger,
   paddingVertical: 12,
   paddingHorizontal: 24,
   flexDirection: "row",
@@ -313,7 +314,7 @@ export const checkoutStyles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: withAlpha(designColors.overlay, 0.4),
   },
   heroPad: { padding: 22 },
 };

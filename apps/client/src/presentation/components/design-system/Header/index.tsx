@@ -6,7 +6,7 @@
  * - Fixed top, height 60px (desktop) / 56px (mobile)
  * - Logo: fontSize 18, fontWeight 800, uppercase
  * - Slide in from top on mount (translateY -100% → 0)
- * - border: 2px solid #000 (bottom only)
+ * - border: 2px solid the shared ink token (bottom only)
  * - Pure black/white, no shadows, no rounding
  *
  * Mobile differences (v2-mobile/01-home.html):
@@ -39,6 +39,7 @@ import {
   pointerEventsBoxNone,
   pointerEventsNone,
 } from "@presentation/utils/style";
+import { BrandMark } from "@presentation/components/BrandMark";
 import { IconButton } from "./IconButton";
 import { NavLink } from "./NavLink";
 import { LoginModal } from "@presentation/components/auth/LoginModal";
@@ -176,7 +177,7 @@ export function Header({
             onPress={onLogoPress}
             testID="header-logo"
           >
-            <Text style={componentStyles.elementColor2}>Rusuh Tiket</Text>
+            <BrandMark size={32} color={designColors.ink} />
           </Pressable>
 
           {/* Center nav links (desktop only) */}

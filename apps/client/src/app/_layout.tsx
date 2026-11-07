@@ -8,6 +8,7 @@ import { ActivityIndicator, Platform, View } from "react-native";
 import { NotificationBridge } from "@presentation/bridges/NotificationBridge";
 import { AccountSessionBridge } from "@presentation/bridges/AccountSessionBridge";
 import { usePlusJakartaSansFonts } from "@presentation/theme/fonts";
+import { brand } from "@presentation/theme";
 import { AppProviders } from "@providers/providers";
 import { NativeLaunchSplash } from "@presentation/components/NativeLaunchSplash";
 import { rootLayoutStyles } from "@presentation/layout/RootLayout/style";
@@ -32,7 +33,7 @@ export default function RootLayout() {
         </AppProviders>
       ) : (
         <View style={rootLayoutStyles.loading}>
-          <ActivityIndicator size="large" color="#000000" />
+          <ActivityIndicator size="large" color={brand.purple} />
         </View>
       )}
       <StatusBar style={showSplash ? "light" : "auto"} />

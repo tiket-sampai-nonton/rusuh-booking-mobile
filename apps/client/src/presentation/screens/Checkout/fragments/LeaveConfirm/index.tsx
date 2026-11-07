@@ -2,7 +2,7 @@
  * RBT-092 —  Brutalist Mono Leave Confirm Modal
  *
  * PROTOTYPE 03-checkout.html .modal EXACT COPY:
- * - Dark overlay (rgba(0,0,0,0.8))
+ * - Token-based overlay color with alpha
  * - 2px solid border, no rounded corners
  * - Uppercase button labels
  * - Black/white color scheme

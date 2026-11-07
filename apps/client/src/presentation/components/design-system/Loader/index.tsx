@@ -3,7 +3,7 @@
  *
  * MASTER-SPEC §2.3:
  * - position: absolute, inset: 0
- * - background: #000
+ * - background: shared ink token
  * - display: flex, center
  *
  * TEXT: white, fontSize 24-48, fontWeight 800, uppercase

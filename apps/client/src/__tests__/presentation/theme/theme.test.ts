@@ -60,7 +60,7 @@ describe("RBT-003 semantic theme", () => {
       cardForeground: neutral.ink,
       muted: neutral.muted,
       line: neutral.line,
-      brand: brand.red,
+      brand: brand.purple,
       ok: status.ok,
       warn: status.warn,
       error: status.error,
@@ -68,9 +68,9 @@ describe("RBT-003 semantic theme", () => {
   });
 
   it("dark scheme inverts surfaces and uses dark-context status hues", () => {
-    expect(darkColors.background).toBe(neutral.ink);
-    expect(darkColors.foreground).toBe(neutral.paper);
-    expect(darkColors.card).toBe(neutral.ink2);
+    expect(darkColors.background).toBe(neutral.darkBackground);
+    expect(darkColors.foreground).toBe(neutral.darkForeground);
+    expect(darkColors.card).toBe(neutral.darkCard);
     expect(darkColors.muted).toBe(neutral.mutedDark);
     expect(darkColors.ok).toBe(status.okDark);
     expect(darkColors.warn).toBe(status.warnDark);

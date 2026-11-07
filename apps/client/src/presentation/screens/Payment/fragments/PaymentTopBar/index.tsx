@@ -47,10 +47,15 @@ export function PaymentTopBar({
         className="flex-row items-center gap-2.25 px-3.5 py-2"
         style={styleForPaymentTopBarView1(danger)}
       >
-        <View style={paymentStyles.timerDot} className="bg-white" />
+        <View
+          style={[
+            paymentStyles.timerDot,
+            { backgroundColor: designColors.ground },
+          ]}
+        />
         <Text
-          className="text-md font-extrabold text-white"
-          style={paymentStyles.tabularNum}
+          className="text-md font-extrabold"
+          style={[paymentStyles.tabularNum, { color: designColors.ground }]}
           accessibilityLabel={`Sisa waktu pembayaran ${formatCountdown(remainingMs)}`}
           accessibilityLiveRegion="polite"
           testID="payment-timer"

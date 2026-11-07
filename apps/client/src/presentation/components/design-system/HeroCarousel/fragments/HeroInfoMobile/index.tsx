@@ -16,7 +16,7 @@ import Animated, {
 
 import type { EventSummary } from "@domain/repositories/event.repository";
 import { formatDateID } from "@domain/services/date-format";
-import { designColors } from "@presentation/theme";
+import { designColors, withAlpha } from "@presentation/theme";
 
 import { EASE, INFO_FADE_DELAY_MS } from "../../constants";
 import { componentStyles, styleForHeroInfoMobileText6 } from "../../style";
@@ -171,30 +171,30 @@ export function HeroInfoMobile({
 
 const mobileWebStyles = StyleSheet.create({
   badge: {
-    backgroundColor: "#fff",
+    backgroundColor: designColors.ground,
     paddingVertical: 4,
     paddingHorizontal: 8,
     marginBottom: 8,
   },
-  badgeText: { color: "#d71920", fontSize: 10, letterSpacing: 0.5 },
-  meta: { color: "rgba(255,255,255,0.82)", fontSize: 12 },
+  badgeText: { color: designColors.accent, fontSize: 10, letterSpacing: 0.5 },
+  meta: { color: withAlpha(designColors.ground, 0.82), fontSize: 12 },
   actions: { flexDirection: "row", alignItems: "center", gap: 16 },
   primary: {
     minHeight: 40,
     paddingHorizontal: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: designColors.accent,
   },
   primaryText: {
-    color: "#090909",
+    color: designColors.ground,
     fontSize: 12,
     fontWeight: "800",
     textTransform: "uppercase",
   },
   secondary: { minHeight: 40, justifyContent: "center" },
   secondaryText: {
-    color: "#fff",
+    color: designColors.ground,
     fontSize: 12,
     fontWeight: "700",
     textDecorationLine: "underline",

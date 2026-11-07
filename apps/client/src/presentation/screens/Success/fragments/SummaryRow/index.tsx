@@ -17,7 +17,7 @@ export function SummaryRow({
         className={
           isMobileWeb
             ? "text-xs text-muted-foreground"
-            : "text-xs text-white/60"
+            : "text-xs text-v2-ground/60"
         }
       >
         {label}
@@ -26,7 +26,7 @@ export function SummaryRow({
         className={
           isMobileWeb
             ? "flex-1 text-right text-sm font-bold text-foreground"
-            : "flex-1 text-right text-sm font-bold text-white"
+            : "flex-1 text-right text-sm font-bold text-v2-ground"
         }
       >
         {value}

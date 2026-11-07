@@ -4,9 +4,9 @@
  * MATCHES: `.genesis/prototype/v2-mobile/02-event-detail.html` .categories-preview
  *
  * Availability states (native only, per Design Palette Guide):
- * - "Tersedia" (available ≥50) → success green (#00aa00)
- * - "Sisa X" (0 < available <50) → warning orange (#ff6600)
- * - "Habis" (available = 0) → danger red (#ff0000) + strikethrough
+ * - "Tersedia" uses the shared success token
+ * - "Sisa X" uses the shared warning token
+ * - "Habis" uses the shared danger token and strikethrough
  *
  * Features:
  * - 2px bordered rows with hover translateX(4px)

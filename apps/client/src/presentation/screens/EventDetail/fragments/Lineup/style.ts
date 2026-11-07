@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
+import { withAlpha } from "@presentation/theme";
 import {
   designBorders,
   designColors,
@@ -55,11 +56,11 @@ export const lineupStyles = StyleSheet.create({
   },
   grayscaleDark: {
     borderRadius: 40,
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    backgroundColor: withAlpha(designColors.overlay, 0.25),
   },
   grayscaleGray: {
     borderRadius: 40,
-    backgroundColor: "rgba(128, 128, 128, 0.65)",
+    backgroundColor: withAlpha(designColors.inkMuted, 0.65),
   },
   name: {
     fontFamily: plusJakartaSansFonts.bold,

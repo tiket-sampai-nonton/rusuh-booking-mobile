@@ -1,18 +1,8 @@
-/**
- * LoginModal  Brutalist Mono styles
- *
- * MATCHES: `.genesis/prototype/v2/01-home.html` lines ~1359-1520
- *
- *  Design Rules:
- * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000
- * - Borders: 2px solid black (NO border-radius)
- * - Shadows: hard offset, NO blur (4px 4px 0 #000)
- * - Fonts: Plus Jakarta Sans (weight 800 for titles, 700 for labels)
- * - Spacing: 48px modal padding (--space-l), 24px (--space-m) for fields
- */
+/** Login modal layout and behavior styles. Colors come from shared theme tokens. */
 import { Platform, StyleSheet, type TextStyle } from "react-native";
 
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
+import { withAlpha } from "@presentation/theme";
 import { hardShadowStyle } from "@presentation/utils/style";
 import {
   designBorders,
@@ -23,16 +13,15 @@ import {
 } from "@presentation/theme/event-design-tokens";
 
 /**
- * Modal overlay — prototype rgba(0,0,0,0.8) + backdrop-filter blur(4px).
- * Note: blur is web-only; native uses plain dark overlay.
+ * Modal overlay color is derived from the shared deep-violet overlay token.
  */
 import type { DynamicStyle } from "@presentation/utils/style";
 import { Animated } from "react-native";
 
-export const SCRIM = "rgba(0,0,0,0.8)";
+export const SCRIM = withAlpha(designColors.overlay, 0.8);
 
 /**
- * Success green - use designColors.success (#00aa00) per Design Palette Guide.
+ * Success state uses the shared semantic success token.
  */
 export const DONE_GREEN = designColors.success;
 
@@ -124,7 +113,7 @@ export const loginStyles = StyleSheet.create({
   sub: {
     fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.s, // 14px (--text-s)
-    color: designColors.inkMuted, // #666
+    color: designColors.inkMuted,
     lineHeight: designFontSizes.s * 1.5, // 21px
     marginBottom: designSpacingSemantic.m, // 24px
   },
@@ -161,7 +150,7 @@ export const loginStyles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: designBorders.standard, // 2px
     borderColor: designColors.ink,
-    backgroundColor: designColors.field, // #f5f5f5
+    backgroundColor: designColors.field,
     borderRadius: 0, // Brutalist: NO border-radius
     // RN Web inherits the browser's blue focus ring unless explicitly reset.
     outlineWidth: 0,
@@ -178,7 +167,7 @@ export const loginStyles = StyleSheet.create({
     color: designColors.inkMuted,
   },
   inputError: {
-    borderColor: designColors.danger, // #ff0000
+    borderColor: designColors.danger,
   },
   inputValid: {
     borderColor: DONE_GREEN,
@@ -190,14 +179,14 @@ export const loginStyles = StyleSheet.create({
   err: {
     fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: designFontSizes.xs, // 12px
-    color: designColors.danger, // #ff0000
+    color: designColors.danger,
     marginTop: designSpacingSemantic.xs, // 8px
     minHeight: 16,
   },
   hint: {
     fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.xs, // 12px
-    color: designColors.inkMuted, // #666
+    color: designColors.inkMuted,
     marginTop: designSpacingSemantic.xs, // 8px
   },
 

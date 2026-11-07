@@ -3,12 +3,11 @@
  *
  * MASTER-SPEC §2.4:
  * OVERLAY:
- * - background: rgba(0,0,0,0.8)
+ * - background: shared overlay token with alpha
  * - backdropFilter: blur(4px)
  *
  * MODAL:
- * - background: #fff
- * - border: 2px solid #000
+ * - background and border use the shared ground and ink tokens
  * - padding: 48px
  * - maxWidth: 400
  *

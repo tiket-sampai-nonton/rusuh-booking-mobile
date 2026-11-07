@@ -1,19 +1,14 @@
 /**
  * SINGLE design-token source of truth (NativeWind) — RBT-003.
  *
- * Tokens are ported verbatim from the prototype V5 design system
- * (`.genesis/prototype/Final/*.html` `:root` blocks). See ARCHITECTURE.md §6.5.
+ * Layout and typography follow the prototype V5 design system. The color palette
+ * is temporarily overridden with cyberpunk colors for the EAS OTA test.
  * `src/presentation/theme/` re-exports the SAME raw values for contexts
  * NativeWind cannot style (SVG / Canvas / QR / Reanimated) — it mirrors this
  * file and is never an independent source.
  *
- * Light values come straight from the prototype. The prototype ships NO full
- * dark palette (it is a light design), so dark values are DERIVED:
- *   - brand/status hues reuse the prototype's dark-context tweaks found in
- *     `waiting.html` (`--muted:rgba(255,255,255,.62)`, `--ok:#4ade80`,
- *     `--amber:#f5b301`) where they exist;
- *   - surface/ink/line dark values are a sensible inversion of the light set.
- * Every DERIVED (non-prototype) value is marked `DERIVED (flag)` below.
+ * The raw color values are mirrored in `src/presentation/theme/` for drawing
+ * surfaces that NativeWind cannot style; token tests verify that mirror.
  *
  * @type {import('tailwindcss').Config}
  */
@@ -26,91 +21,88 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // ---- Brand (prototype: --red / --red-deep / --ember) ----
+        // ---- Cyberpunk OTA test palette ----
         brand: {
-          DEFAULT: "#EC1C24", // --red
-          deep: "#a8111b", //    --red-deep
-          ember: "#ff5a2d", //   --ember
+          DEFAULT: "#7C3AED", // electric purple
+          deep: "#5B21B6", //    deep violet
+          ember: "#FF32C8", //   neon magenta
+          cyan: "#007F9E", //    accessible cyan accent
+          "neon-cyan": "#49E8FF",
         },
 
         // ---- Semantic surface PAIRS (AC2: bg+text always paired) ----
-        // light = prototype --paper/--ink/--card/--muted/--line
-        // dark  = DERIVED (flag): prototype has no dark surfaces.
+        // Light surfaces use a lavender tint; dark surfaces use deep violet.
         background: {
-          DEFAULT: "#fbfbfd", //          --paper
-          dark: "#0a0a0c", //             DERIVED (flag): = light --ink
+          DEFAULT: "#F7F2FF",
+          dark: "#0B0614",
         },
         foreground: {
-          DEFAULT: "#0a0a0c", //          --ink
-          dark: "#fbfbfd", //             DERIVED (flag): = light --paper
+          DEFAULT: "#1B1026",
+          dark: "#F7F2FF",
         },
         card: {
-          DEFAULT: "#ffffff", //          --card
-          foreground: "#0a0a0c", //       pairs with card (--ink)
-          dark: "#121217", //             DERIVED (flag): = --ink-2
-          "dark-foreground": "#fbfbfd", // DERIVED (flag)
+          DEFAULT: "#FFFCFF",
+          foreground: "#1B1026",
+          dark: "#170D24",
+          "dark-foreground": "#F7F2FF",
         },
         muted: {
-          DEFAULT: "#6b6b76", //          --muted (used as muted-foreground text)
-          foreground: "#6b6b76", //       --muted
-          dark: "rgba(255,255,255,0.62)", // prototype waiting.html dark --muted
+          DEFAULT: "#665873",
+          foreground: "#665873",
+          dark: "#C7B8D8",
         },
         line: {
-          DEFAULT: "rgba(10,10,12,0.08)", // --line
-          dark: "rgba(255,255,255,0.12)", // DERIVED (flag)
+          DEFAULT: "rgba(43,19,67,0.14)",
+          dark: "rgba(220,190,255,0.18)",
         },
         ink: {
-          DEFAULT: "#0a0a0c", //          --ink
-          2: "#121217", //                --ink-2
+          DEFAULT: "#1B1026",
+          2: "#28113D",
         },
-        paper: "#fbfbfd", //              --paper (raw alias)
+        paper: "#F7F2FF",
 
         // ---- Status (prototype --ok / --warn, + dark-context hues) ----
         ok: {
-          DEFAULT: "#17a34a", //          --ok
-          dark: "#4ade80", //             waiting.html dark --ok
+          DEFAULT: "#087F68",
+          dark: "#5EEAD4",
         },
         warn: {
-          DEFAULT: "#e8830c", //          --warn (index); detail/payment use #e8830c
-          dark: "#f5b301", //             waiting.html --amber
+          DEFAULT: "#9A5B00",
+          dark: "#FFD166",
         },
-        // No explicit --err token in the prototype; error reuses brand red.
-        // DERIVED (flag): dedicated error hue mapped to brand for clarity.
         error: {
-          DEFAULT: "#EC1C24", //          DERIVED (flag): = --red
-          dark: "#ff6a4c", //             DERIVED (flag): lightened red for dark bg
+          DEFAULT: "#C02677",
+          dark: "#FF7AB6",
         },
 
         // ============================================================
-        // V2 "Brutalist Mono" palette (RBT-086) — the redesign token set.
-        // Unifies the prototype's TWO systems into ONE:
-        //   home/event-detail  --ground/--ink/--ink-muted/--field/--accent/--danger
-        //   flow screens       --black/--white/--gray/--red/--green
-        // Resolution: pure #000/#fff base; one muted gray; one accent red; one
-        // success green; danger = the accent red. Prototype-specific accents
-        // (live-dot, warn/amber, info blue) kept as named tokens, not literals.
+        // Cyberpunk palette for the OTA visual test. Keep these semantic
+        // aliases aligned with event-design-tokens.ts.
         // ============================================================
         v2: {
-          ink: "#000000", //        --ink / --black  (pure black)
-          ground: "#ffffff", //     --ground / --white (pure white)
-          muted: "#666666", //      --ink-muted (home) — the readable gray
-          gray: "#888888", //       --gray (flow screens) — secondary gray
-          field: "#f5f5f5", //      --field (input/elevated surface)
-          accent: "#ff0000", //     --red (flow) brutalist accent / live red
-          danger: "#dc2626", //     --danger (home) destructive
-          success: "#00aa00", //    --green (flow success); draw-check uses it
-          warn: "#ff6600", //       offline/warning (waiting status badge)
-          info: "#3b82f6", //       --info (browse b-soon blue), prototype accent
-          // Waiting-room zone banner tints (prototype 06 .zone.*)
-          "zone-ok": "#e8f5e9",
-          "zone-ok-border": "#2e7d32",
-          "zone-ok-text": "#1b5e20",
-          "zone-warn": "#fff3e0",
-          "zone-warn-border": "#f57c00",
-          "zone-warn-text": "#e65100",
-          "zone-bad": "#ffebee",
-          "zone-bad-border": "#c62828",
-          "zone-bad-text": "#b71c1c",
+          ink: "#1B1026",
+          ground: "#F7F2FF",
+          overlay: "#0B0614",
+          muted: "#665873",
+          gray: "#756686",
+          field: "#EEE5FA",
+          accent: "#7C3AED",
+          magenta: "#FF32C8",
+          cyan: "#007F9E",
+          "neon-cyan": "#49E8FF",
+          danger: "#C02677",
+          success: "#087F68",
+          warn: "#9A5B00",
+          info: "#007F9E",
+          "zone-ok": "#E5F8F2",
+          "zone-ok-border": "#087F68",
+          "zone-ok-text": "#075B4B",
+          "zone-warn": "#FFF5D9",
+          "zone-warn-border": "#9A5B00",
+          "zone-warn-text": "#744400",
+          "zone-bad": "#FCE7F3",
+          "zone-bad-border": "#C02677",
+          "zone-bad-text": "#8F1D5A",
         },
       },
 
@@ -210,10 +202,10 @@ module.exports = {
 
       // ---- Shadows (prototype box-shadows on cards/buttons) ----
       boxShadow: {
-        brand: "0 4px 12px -2px rgba(236,28,36,0.5)", //  brand mark
-        button: "0 14px 40px -12px rgba(0,0,0,0.5)", //   primary button
-        filter: "0 12px 30px -24px rgba(10,10,12,0.5)", // filter/ghost
-        ok: "0 16px 40px -14px rgba(23,163,74,0.7)", //   success check
+        brand: "0 4px 16px -2px rgba(124,58,237,0.48)",
+        button: "0 14px 40px -12px rgba(27,16,38,0.42)",
+        filter: "0 12px 30px -24px rgba(43,19,67,0.5)",
+        ok: "0 16px 40px -14px rgba(8,127,104,0.45)",
       },
     },
   },

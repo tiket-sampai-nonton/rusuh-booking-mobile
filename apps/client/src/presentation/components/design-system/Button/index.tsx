@@ -7,13 +7,13 @@
  * - fontWeight: 700
  * - textTransform: uppercase
  * - letterSpacing: 0.04em
- * - border: 2px solid #000
+ * - border: 2px solid the shared deep-violet ink token
  *
- * GHOST: bg transparent, text #000
- * GHOST hover: bg #000, text #fff (fill animation from bottom)
+ * GHOST: lavender surface, deep-violet text
+ * GHOST hover: electric-violet fill from the bottom
  *
- * PRIMARY: bg #000, text #fff
- * PRIMARY hover: bg #fff, text #000 (reveal animation from top)
+ * PRIMARY: electric-violet background with lavender text
+ * PRIMARY hover: lavender reveal with deep-violet text
  */
 import { useCallback } from "react";
 import type { ReactNode } from "react";
@@ -51,7 +51,7 @@ export interface ButtonProps {
   readonly label: string;
   /** Press handler */
   readonly onPress?: () => void;
-  /** Visual variant: primary (black bg), ghost (transparent bg), danger (red bg) */
+  /** Visual variant: primary (violet bg), ghost (outlined), danger (rose bg) */
   readonly variant?: ButtonVariant;
   /** Disabled state */
   readonly disabled?: boolean;
@@ -70,11 +70,11 @@ export interface ButtonProps {
 function getPalette(variant: ButtonVariant) {
   switch (variant) {
     case "ghost":
-      // Ghost: transparent → ink fill from bottom
+      // Ghost: lavender surface → electric violet fill from bottom
       return {
         bg: designColors.ground,
         fg: designColors.ink,
-        fill: designColors.ink,
+        fill: designColors.accent,
         filledFg: designColors.ground,
       };
     case "danger":
@@ -87,9 +87,9 @@ function getPalette(variant: ButtonVariant) {
       };
     case "primary":
     default:
-      // Primary: ink bg → ground reveal from top
+      // Primary: electric violet bg → lavender reveal from top
       return {
-        bg: designColors.ink,
+        bg: designColors.accent,
         fg: designColors.ground,
         fill: designColors.ground,
         filledFg: designColors.ink,

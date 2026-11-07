@@ -29,7 +29,7 @@ export const componentStyles = StyleSheet.create({
     left: "10%",
     right: "10%",
     height: 2,
-    backgroundColor: designColors.field, // #f5f5f5 per Design Palette Guide
+    backgroundColor: designColors.field,
     zIndex: 1,
   },
   elementAlignItems4: {

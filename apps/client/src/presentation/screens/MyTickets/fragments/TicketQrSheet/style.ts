@@ -3,6 +3,7 @@ import {
   designBorders,
   designColors,
   plusJakartaSansFonts,
+  withAlpha,
 } from "@presentation/theme";
 import { hardShadowStyle } from "@presentation/utils/style";
 
@@ -12,7 +13,7 @@ import { Platform } from "react-native";
 export const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.72)",
+    backgroundColor: withAlpha(designColors.overlay, 0.72),
     alignItems: "center",
   },
   sheet: {
@@ -32,7 +33,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
   message: { marginTop: 24 },
-  error: { marginTop: 24, color: "#b91c1c" },
+  error: { marginTop: 24, color: designColors.danger },
   ticketQr: {
     marginTop: 20,
     padding: 16,
@@ -75,7 +76,7 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: "uppercase",
   },
-  errorText: { marginTop: 8, color: "#b91c1c", fontSize: 12 },
+  errorText: { marginTop: 8, color: designColors.danger, fontSize: 12 },
   close: {
     marginTop: 20,
     minHeight: 44,

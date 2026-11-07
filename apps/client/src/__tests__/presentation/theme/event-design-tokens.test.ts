@@ -23,23 +23,26 @@ const tw = (
 ).theme?.extend?.colors?.v2 as Record<string, string> | undefined;
 
 describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
-  describe("designColors (new API)", () => {
-    it("exposes the core palette per MASTER-SPEC §1", () => {
+  describe("designColors", () => {
+    it("exposes the shared cyberpunk palette", () => {
       expect(designColors).toMatchObject({
-        ground: "#ffffff",
-        ink: "#000000",
-        inkMuted: "#666666",
-        field: "#f5f5f5",
-        danger: "#ff0000",
-        success: "#00aa00",
-        warning: "#ff6600",
+        ground: "#F7F2FF",
+        ink: "#1B1026",
+        overlay: "#0B0614",
+        inkMuted: "#665873",
+        field: "#EEE5FA",
+        danger: "#C02677",
+        success: "#087F68",
+        warning: "#9A5B00",
       });
     });
 
     it("includes legacy aliases for backwards compatibility", () => {
-      expect(designColors.muted).toBe("#666666");
-      expect(designColors.warn).toBe("#ff6600");
-      expect(designColors.accent).toBe("#000000");
+      expect(designColors.muted).toBe("#665873");
+      expect(designColors.warn).toBe("#9A5B00");
+      expect(designColors.accent).toBe("#7C3AED");
+      expect(designColors.magenta).toBe("#FF32C8");
+      expect(designColors.cyan).toBe("#007F9E");
     });
   });
 
@@ -96,19 +99,19 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
   describe("designZoneBanners (new API)", () => {
     it("defines waiting room zone banner colors per MASTER-SPEC §3.3", () => {
       expect(designZoneBanners.guaranteed).toEqual({
-        bg: "#e8f5e9",
-        border: "#2e7d32",
-        text: "#1b5e20",
+        bg: "#E5F8F2",
+        border: "#087F68",
+        text: "#075B4B",
       });
       expect(designZoneBanners.possible).toEqual({
-        bg: "#fff3e0",
-        border: "#f57c00",
-        text: "#e65100",
+        bg: "#FFF5D9",
+        border: "#9A5B00",
+        text: "#744400",
       });
       expect(designZoneBanners.notEnough).toEqual({
-        bg: "#ffebee",
-        border: "#c62828",
-        text: "#b71c1c",
+        bg: "#FCE7F3",
+        border: "#C02677",
+        text: "#8F1D5A",
       });
     });
   });
@@ -137,7 +140,9 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
     describe("Tailwind sync", () => {
       it("MIRRORS the tailwind.config.js v2 namespace for core colors", () => {
         // Every core raw token equals its tailwind counterpart — no drift.
-        (["ink", "ground", "field"] as const).forEach((k) => {
+        (
+          ["ink", "ground", "field", "overlay", "magenta", "cyan"] as const
+        ).forEach((k) => {
           if (tw[k]) {
             expect(designColors[k]).toBe(tw[k]);
           }

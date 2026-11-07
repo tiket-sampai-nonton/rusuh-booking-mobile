@@ -1,41 +1,48 @@
 /**
- * RBT-003 — Raw design-token VALUES (prototype V5).
+ * Shared color and layout values mirrored by `apps/client/tailwind.config.js`.
  *
  * These mirror `apps/client/tailwind.config.js` exactly. NativeWind cannot style
  * raw drawing surfaces (react-native-svg, Canvas, QR code `color`/`backgroundColor`,
  * Reanimated easing), so those call sites import the value from here instead of a
  * className. `tailwind.config.js` stays the source of truth; this file mirrors it.
  *
- * Every DERIVED (non-prototype) value is marked `DERIVED (flag)`.
+ * Tailwind remains the color-token source of truth; this file mirrors colors
+ * for SVG, QR, Canvas, and other raw drawing surfaces.
  */
 
-/** Brand hues — prototype `--red` / `--red-deep` / `--ember`. */
+/** Cyberpunk brand hues used by the OTA theme test. */
 export const brand = {
-  red: "#EC1C24", //      --red
-  redDeep: "#a8111b", //  --red-deep
-  ember: "#ff5a2d", //    --ember
+  purple: "#7C3AED",
+  purpleDeep: "#5B21B6",
+  magenta: "#FF32C8",
+  cyan: "#007F9E",
+  neonCyan: "#49E8FF",
 } as const;
 
-/** Status hues — prototype `--ok` / `--warn` (+ dark-context from waiting.html). */
+/** Status hues adapted for readable contrast on the cyberpunk surfaces. */
 export const status = {
-  ok: "#17a34a", //       --ok
-  okDark: "#4ade80", //   waiting.html dark --ok
-  warn: "#e8830c", //     --warn
-  warnDark: "#f5b301", // waiting.html --amber
-  error: "#EC1C24", //    DERIVED (flag): no --err token; reuses --red
-  errorDark: "#ff6a4c", // DERIVED (flag): lightened red for dark surfaces
+  ok: "#087F68",
+  okDark: "#5EEAD4",
+  warn: "#9A5B00",
+  warnDark: "#FFD166",
+  error: "#C02677",
+  errorDark: "#FF7AB6",
 } as const;
 
-/** Neutral / surface hues — prototype `--ink*` / `--paper` / `--card` / `--muted` / `--line`. */
+/** Lavender and deep-violet surfaces for light and dark color schemes. */
 export const neutral = {
-  ink: "#0a0a0c", //      --ink
-  ink2: "#121217", //     --ink-2
-  paper: "#fbfbfd", //    --paper
-  card: "#ffffff", //     --card
-  muted: "#6b6b76", //    --muted
-  line: "rgba(10,10,12,0.08)", // --line
-  mutedDark: "rgba(255,255,255,0.62)", // waiting.html dark --muted
-  lineDark: "rgba(255,255,255,0.12)", // DERIVED (flag)
+  ink: "#1B1026",
+  ink2: "#28113D",
+  paper: "#F7F2FF",
+  card: "#FFFCFF",
+  darkBackground: "#0B0614",
+  darkCard: "#170D24",
+  darkForeground: "#F7F2FF",
+  overlay: "#0B0614",
+  muted: "#665873",
+  line: "rgba(43,19,67,0.14)",
+  mutedDark: "#C7B8D8",
+  lineDark: "rgba(220,190,255,0.18)",
 } as const;
 
 /** Border radii in px — prototype `border-radius` values. */
@@ -117,10 +124,10 @@ export const motion = {
 
 /** Elevation shadows — prototype `box-shadow` values (CSS strings). */
 export const shadow = {
-  brand: "0 4px 12px -2px rgba(236,28,36,0.5)",
-  button: "0 14px 40px -12px rgba(0,0,0,0.5)",
-  filter: "0 12px 30px -24px rgba(10,10,12,0.5)",
-  ok: "0 16px 40px -14px rgba(23,163,74,0.7)",
+  brand: "0 4px 16px -2px rgba(124,58,237,0.48)",
+  button: "0 14px 40px -12px rgba(27,16,38,0.42)",
+  filter: "0 12px 30px -24px rgba(43,19,67,0.5)",
+  ok: "0 16px 40px -14px rgba(8,127,104,0.45)",
 } as const;
 
 /** The complete raw token bag — single object for ergonomic import. */
