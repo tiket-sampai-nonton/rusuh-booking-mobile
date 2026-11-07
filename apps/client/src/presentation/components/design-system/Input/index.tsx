@@ -3,16 +3,15 @@
  *
  * MASTER-SPEC §2.2:
  * - padding: 16px
- * - border: 2px solid #000
+ * - border: 2px solid the shared ink token
  * - fontSize: 16
  * - fontWeight: 500
  *
  * FOCUS STATE:
- * - boxShadow: 4px 4px 0 #000
+ * - boxShadow: 4px 4px 0 using the shared ink token
  * - transform: translate(-2px, -2px)
  *
- * VALID STATE: borderColor: #00aa00
- * ERROR STATE: borderColor: #ff0000
+ * VALID and error states use semantic success and danger tokens.
  */
 import { forwardRef, useState, useCallback } from "react";
 import type { TextInputProps } from "react-native";

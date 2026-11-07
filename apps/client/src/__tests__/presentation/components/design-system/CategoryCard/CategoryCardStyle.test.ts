@@ -7,6 +7,7 @@ import {
   styleForCategoryCardAnimatedView2,
   styleForCategoryCardAnimatedView3,
 } from "@presentation/components/design-system/CategoryCard/style";
+import { designColors } from "@presentation/theme";
 
 describe("CategoryCard style helpers", () => {
   it("keeps native images full color and gives web images both hover filters", () => {
@@ -29,7 +30,7 @@ describe("CategoryCard style helpers", () => {
       position: "absolute",
     });
     expect(styleForCategoryCardAnimatedView1()).toMatchObject({
-      backgroundColor: "#808080",
+      backgroundColor: designColors.inkMuted,
     });
     expect(styleForCategoryCardAnimatedView2()).toMatchObject({
       position: "absolute",

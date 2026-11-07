@@ -34,7 +34,7 @@ export const screenStyles = StyleSheet.create({
     fontSize: 14,
   },
   error: {
-    color: "#b91c1c",
+    color: designColors.danger,
     fontFamily: plusJakartaSansFonts.medium,
     fontSize: 13,
   },
@@ -59,7 +59,7 @@ export const screenStyles = StyleSheet.create({
   },
   downloadError: {
     marginTop: 12,
-    color: "#b91c1c",
+    color: designColors.danger,
     fontFamily: plusJakartaSansFonts.medium,
     fontSize: 12,
   },

@@ -11,6 +11,7 @@ import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment
 import type { Container } from "@providers/container";
 import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
+import { designColors } from "@presentation/theme";
 import { SnapSimulatorScreen } from "@presentation/screens/Snap";
 import { useSessionStore } from "@presentation/stores/session-store";
 
@@ -50,11 +51,11 @@ describe("SnapSimulatorScreen (RBT-065)", () => {
     const screen = renderScreen("bk-1");
     expect(screen.getByTestId("snap-screen")).toBeTruthy();
     expect(screen.getByTestId("snap-screen").props.style.backgroundColor).toBe(
-      "#ffffff",
+      designColors.ground,
     );
     expect(screen.getByTestId("snap-content").props.style[1]).toMatchObject({
       borderWidth: 2,
-      borderColor: "#000000",
+      borderColor: designColors.ink,
       padding: 16,
     });
     expect(screen.getByTestId("snap-success")).toBeTruthy();

@@ -12,7 +12,10 @@ export function PaymentHoldBanner() {
       style={paymentSummaryStyles.holdBanner}
     >
       <LockIcon color={designColors.ground} size={16} />
-      <Text className="flex-1 text-xs font-semibold text-white">
+      <Text
+        className="flex-1 text-xs font-semibold"
+        style={{ color: designColors.ground }}
+      >
         Tiket sudah disimpan sementara. Selesaikan pembayaran sebelum waktu
         habis.
       </Text>

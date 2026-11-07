@@ -6,11 +6,15 @@ import {
   plusJakartaSansFonts,
 } from "@presentation/theme";
 
+interface ButtonColorSet {
+  bg: string;
+  fg: string;
+  fill: string;
+  filledFg: string;
+}
+
 export function styleForButtonPressable0(
-  arg0:
-    | { bg: "#ffffff"; fg: "#000000"; fill: "#000000"; filledFg: "#ffffff" }
-    | { bg: "#ff0000"; fg: "#ffffff"; fill: "#000000"; filledFg: "#ffffff" }
-    | { bg: "#000000"; fg: "#ffffff"; fill: "#ffffff"; filledFg: "#000000" },
+  arg0: ButtonColorSet,
   arg1: 10 | 16,
   arg2: 20 | 32,
   arg3: boolean,
@@ -31,10 +35,7 @@ export function styleForButtonPressable0(
 }
 
 export function styleForButtonAnimatedView1(
-  arg0:
-    | { bg: "#ffffff"; fg: "#000000"; fill: "#000000"; filledFg: "#ffffff" }
-    | { bg: "#ff0000"; fg: "#ffffff"; fill: "#000000"; filledFg: "#ffffff" }
-    | { bg: "#000000"; fg: "#ffffff"; fill: "#ffffff"; filledFg: "#000000" },
+  arg0: ButtonColorSet,
 ): DynamicStyle {
   return {
     position: "absolute",
@@ -60,10 +61,7 @@ export function styleForButtonAnimatedText2(
 }
 
 export function styleForButtonText3(
-  arg0:
-    | { bg: "#ffffff"; fg: "#000000"; fill: "#000000"; filledFg: "#ffffff" }
-    | { bg: "#ff0000"; fg: "#ffffff"; fill: "#000000"; filledFg: "#ffffff" }
-    | { bg: "#000000"; fg: "#ffffff"; fill: "#ffffff"; filledFg: "#000000" },
+  arg0: ButtonColorSet,
   arg1: 16 | 14,
 ): DynamicStyle {
   return {

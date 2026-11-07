@@ -30,7 +30,7 @@ export const componentStyles = StyleSheet.create({
 
 export function styleForComponentAnimatedView0(arg0: boolean): DynamicStyle {
   return {
-    // Shadow only when focused (4px 4px 0 #000)
+    // Shadow only when focused (4px 4px 0 using the shared ink token)
     ...hardShadowStyle(
       arg0 ? 4 : 0,
       arg0 ? 4 : 0,

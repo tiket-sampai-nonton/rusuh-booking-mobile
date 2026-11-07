@@ -32,7 +32,7 @@ export interface ThemeColors {
   error: string;
 }
 
-/** Light scheme — prototype V5 light values. */
+/** Light scheme — cyberpunk lavender surfaces with electric-violet accents. */
 export const lightColors: ThemeColors = {
   background: neutral.paper,
   foreground: neutral.ink,
@@ -40,27 +40,26 @@ export const lightColors: ThemeColors = {
   cardForeground: neutral.ink,
   muted: neutral.muted,
   line: neutral.line,
-  brand: brand.red,
+  brand: brand.purple,
   ok: status.ok,
   warn: status.warn,
   error: status.error,
 };
 
 /**
- * Dark scheme — DERIVED (flag): prototype ships no full dark palette, so surfaces
- * invert the light set and status hues reuse the prototype's dark-context values.
+ * Dark scheme — deep-violet surfaces with high-contrast neon accents.
  */
 export const darkColors: ThemeColors = {
-  background: neutral.ink, //   DERIVED (flag)
-  foreground: neutral.paper, // DERIVED (flag)
-  card: neutral.ink2, //        DERIVED (flag)
-  cardForeground: neutral.paper, // DERIVED (flag)
-  muted: neutral.mutedDark, //  prototype waiting.html
-  line: neutral.lineDark, //    DERIVED (flag)
-  brand: brand.red,
-  ok: status.okDark, //         prototype waiting.html
-  warn: status.warnDark, //     prototype waiting.html --amber
-  error: status.errorDark, //   DERIVED (flag)
+  background: neutral.darkBackground,
+  foreground: neutral.darkForeground,
+  card: neutral.darkCard,
+  cardForeground: neutral.darkForeground,
+  muted: neutral.mutedDark,
+  line: neutral.lineDark,
+  brand: brand.purple,
+  ok: status.okDark,
+  warn: status.warnDark,
+  error: status.errorDark,
 };
 
 /** The two color schemes keyed by name. */

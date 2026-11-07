@@ -5,9 +5,7 @@
  * ~2100-2250 (HTML), ~2700-2900 (JS).
  *
  *  Design Rules:
- * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000
- * - Borders: 2px solid black (NO border-radius)
- * - Shadows: hard offset, NO blur (4px 4px 0 #000)
+ * - Colors and surfaces come from the shared cyberpunk theme tokens.
  * - Fonts: Plus Jakarta Sans (weight 800 for titles, 700 for labels/buttons)
  * - Animation: modalIn (translateY 20→0, scale 0.95→1, opacity 0→1, 400ms)
  *

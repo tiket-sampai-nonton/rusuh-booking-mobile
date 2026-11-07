@@ -1,8 +1,7 @@
 /**
- * RBT-091 — Waiting-room styles (Light variant).
+ * RBT-091 — Waiting-room styles, using the shared cyberpunk palette.
  *
- * Matches the  prototype `06-waiting.html`:
- * - WHITE background, BLACK text/borders
+ * Follows the waiting-room layout from prototype `06-waiting.html`:
  * - Plus Jakarta Sans throughout
  * - 3px solid black borders
  * - SVG ring progress indicator (220px)
@@ -32,26 +31,26 @@ import {
   designZoneBanners,
 } from "@presentation/theme/event-design-tokens";
 import { plusJakartaSansFontForWeight } from "@presentation/theme/fonts";
+import { withAlpha } from "@presentation/theme";
 
 import type { ZoneTone } from "./display";
 
 /**
- *  Brutalist Mono palette (06-waiting.html). WHITE background, BLACK text.
- * DESIGN PALETTE GUIDE: NO GRAYS in main UI — only use inkMuted (#666666).
+ * Waiting-room color aliases read from the shared theme tokens.
  */
 export const palette = {
   // Core
-  ground: designColors.ground, // #fff - background
-  ink: designColors.ink, // #000 - text/borders
-  gray: designColors.inkMuted, // #666666 - the only allowed gray per Design Palette Guide
-  muted: designColors.inkMuted, // #666666 - same
-  field: designColors.field, // #f5f5f5 - subtle background (estimated time block)
-  ringBg: designColors.field, // #f5f5f5 - ring track background (use field, not arbitrary gray)
+  ground: designColors.ground,
+  ink: designColors.ink,
+  gray: designColors.inkMuted,
+  muted: designColors.inkMuted,
+  field: designColors.field,
+  ringBg: designColors.field,
 
   // Functional
-  red: designColors.danger, // #ff0000 - accent/danger
-  green: designColors.success, // #00aa00 - success
-  orange: designColors.warning, // #ff6600 - warning/offline
+  red: designColors.danger,
+  green: designColors.success,
+  orange: designColors.warning,
 
   // Legacy aliases for compatibility
   white: designColors.ground,
@@ -62,7 +61,7 @@ export const palette = {
   ok: designZoneBanners.guaranteed.border,
   amber: designZoneBanners.possible.border,
   amberText: designZoneBanners.possible.text,
-  faint: designColors.inkMuted, // #666666 - the only allowed gray
+  faint: designColors.inkMuted,
 } as const;
 
 /**
@@ -149,17 +148,6 @@ export const styles = StyleSheet.create({
       web: { position: "sticky" as unknown as undefined, top: 0, zIndex: 100 },
       default: {},
     }),
-  },
-  logo: {
-    fontSize: 14,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: -1,
-    color: palette.ink,
-    fontFamily: plusJakartaSansFontForWeight("800"),
-  },
-  logoAccent: {
-    color: palette.red,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -390,7 +378,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: B,
     borderColor: palette.orange,
-    backgroundColor: "#fff3e0",
+    backgroundColor: designZoneBanners.possible.bg,
     marginBottom: 32,
     width: "100%",
   },
@@ -415,7 +403,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: B,
     borderColor: palette.red,
-    backgroundColor: "#ffe0e0",
+    backgroundColor: designZoneBanners.notEnough.bg,
     marginBottom: 32,
     width: "100%",
     alignItems: "center",
@@ -523,7 +511,7 @@ export const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.8)",
+    backgroundColor: withAlpha(designColors.overlay, 0.8),
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 32,
@@ -768,7 +756,7 @@ export const styles = StyleSheet.create({
     gap: 12,
     borderWidth: B,
     borderColor: palette.green,
-    backgroundColor: "#e8f5e9",
+    backgroundColor: designZoneBanners.guaranteed.bg,
     paddingVertical: 16,
     paddingHorizontal: 24,
     width: "100%",
@@ -794,7 +782,7 @@ export const styles = StyleSheet.create({
     width: "100%",
     borderWidth: B,
     borderColor: palette.red,
-    backgroundColor: "#ffebee",
+    backgroundColor: designZoneBanners.notEnough.bg,
     paddingVertical: 16,
     paddingHorizontal: 16,
   },
@@ -855,9 +843,6 @@ export const styles = StyleSheet.create({
     minHeight: 42,
     paddingTop: 0,
     paddingBottom: 10,
-  },
-  logoDesktop: {
-    fontSize: 16,
   },
   headerMeta: {
     fontSize: 9,

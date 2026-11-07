@@ -4,7 +4,7 @@ import { designColors, designBorder } from "@presentation/theme";
 
 export const snapSummaryStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: designColors.field,
     borderWidth: designBorder.base,
     borderColor: designColors.ink,
   },

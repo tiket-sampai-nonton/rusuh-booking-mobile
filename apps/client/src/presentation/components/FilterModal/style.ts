@@ -3,6 +3,7 @@ import {
   plusJakartaSansFonts,
   designBorders,
   designColors,
+  withAlpha,
 } from "@presentation/theme";
 
 import type { EdgeInsets } from "react-native-safe-area-context";
@@ -15,7 +16,7 @@ export const componentStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: Platform.OS === "web" ? "center" : "flex-end",
     padding: Platform.OS === "web" ? 24 : 0,
-    backgroundColor: "rgba(0,0,0,0.72)",
+    backgroundColor: withAlpha(designColors.overlay, 0.72),
   },
   mobileWebOverlay: { justifyContent: "flex-end", padding: 0 },
   elementFlexDirection1: {

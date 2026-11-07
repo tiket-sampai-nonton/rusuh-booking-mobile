@@ -1,3 +1,5 @@
+import tailwind from "../../../../tailwind.config.js";
+
 import {
   brand,
   fontFamily,
@@ -12,33 +14,59 @@ import {
   tokens,
 } from "../../../presentation/theme/tokens";
 
+const tailwindBrand = (
+  tailwind as {
+    theme?: {
+      extend?: { colors?: { brand?: Record<string, string> } };
+    };
+  }
+).theme?.extend?.colors?.brand;
+
 describe("RBT-003 raw tokens", () => {
-  it("exposes the exact prototype brand hues", () => {
-    expect(brand.red).toBe("#EC1C24");
-    expect(brand.redDeep).toBe("#a8111b");
-    expect(brand.ember).toBe("#ff5a2d");
+  it("exposes the cyberpunk brand hues", () => {
+    expect(brand.purple).toBe("#7C3AED");
+    expect(brand.purpleDeep).toBe("#5B21B6");
+    expect(brand.magenta).toBe("#FF32C8");
+    expect(brand.cyan).toBe("#007F9E");
+    expect(brand.neonCyan).toBe("#49E8FF");
+  });
+
+  it("mirrors the Tailwind brand palette as the canonical token source", () => {
+    if (!tailwindBrand) {
+      throw new Error("Tailwind brand color tokens are unavailable");
+    }
+
+    expect(brand.purple).toBe(tailwindBrand.DEFAULT);
+    expect(brand.purpleDeep).toBe(tailwindBrand.deep);
+    expect(brand.magenta).toBe(tailwindBrand.ember);
+    expect(brand.cyan).toBe(tailwindBrand.cyan);
+    expect(brand.neonCyan).toBe(tailwindBrand["neon-cyan"]);
   });
 
   it("exposes light + dark status hues", () => {
     expect(status).toMatchObject({
-      ok: "#17a34a",
-      okDark: "#4ade80",
-      warn: "#e8830c",
-      warnDark: "#f5b301",
-      error: "#EC1C24",
-      errorDark: "#ff6a4c",
+      ok: "#087F68",
+      okDark: "#5EEAD4",
+      warn: "#9A5B00",
+      warnDark: "#FFD166",
+      error: "#C02677",
+      errorDark: "#FF7AB6",
     });
   });
 
   it("exposes prototype neutral/surface hues", () => {
-    expect(neutral.ink).toBe("#0a0a0c");
-    expect(neutral.ink2).toBe("#121217");
-    expect(neutral.paper).toBe("#fbfbfd");
-    expect(neutral.card).toBe("#ffffff");
-    expect(neutral.muted).toBe("#6b6b76");
-    expect(neutral.line).toBe("rgba(10,10,12,0.08)");
-    expect(neutral.mutedDark).toBe("rgba(255,255,255,0.62)");
-    expect(neutral.lineDark).toBe("rgba(255,255,255,0.12)");
+    expect(neutral.ink).toBe("#1B1026");
+    expect(neutral.ink2).toBe("#28113D");
+    expect(neutral.paper).toBe("#F7F2FF");
+    expect(neutral.card).toBe("#FFFCFF");
+    expect(neutral.darkBackground).toBe("#0B0614");
+    expect(neutral.darkCard).toBe("#170D24");
+    expect(neutral.darkForeground).toBe("#F7F2FF");
+    expect(neutral.overlay).toBe("#0B0614");
+    expect(neutral.muted).toBe("#665873");
+    expect(neutral.line).toBe("rgba(43,19,67,0.14)");
+    expect(neutral.mutedDark).toBe("#C7B8D8");
+    expect(neutral.lineDark).toBe("rgba(220,190,255,0.18)");
   });
 
   it("radius set has every prototype step and the pill", () => {
@@ -94,10 +122,10 @@ describe("RBT-003 raw tokens", () => {
   });
 
   it("shadow strings are present for the four prototype elevations", () => {
-    expect(shadow.brand).toContain("rgba(236,28,36,0.5)");
-    expect(shadow.button).toContain("rgba(0,0,0,0.5)");
-    expect(shadow.filter).toContain("rgba(10,10,12,0.5)");
-    expect(shadow.ok).toContain("rgba(23,163,74,0.7)");
+    expect(shadow.brand).toContain("rgba(124,58,237,0.48)");
+    expect(shadow.button).toContain("rgba(27,16,38,0.42)");
+    expect(shadow.filter).toContain("rgba(43,19,67,0.5)");
+    expect(shadow.ok).toContain("rgba(8,127,104,0.45)");
   });
 
   it("the tokens bag re-exports every group by reference", () => {

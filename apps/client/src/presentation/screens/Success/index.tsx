@@ -37,7 +37,7 @@ import { useEventDetail } from "@presentation/hooks/useEventDetail";
 import { ArrowIcon } from "@presentation/components/ArrowIcon";
 import { useSessionStore } from "@presentation/stores/session-store";
 import { useResponsive } from "@presentation/hooks/useResponsive";
-import { designColors } from "@presentation/theme";
+import { designColors, withAlpha } from "@presentation/theme";
 import { successStyles, componentStyles } from "./style";
 import { styleForSuccessScreenView0 } from "./style";
 
@@ -134,7 +134,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
             className={
               isMobileWeb
                 ? "text-center text-base text-foreground"
-                : "text-center text-base text-white"
+                : "text-center text-base text-v2-ground"
             }
           >
             {verificationMessage}
@@ -178,7 +178,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               className={
                 isMobileWeb
                   ? "mt-2 text-center text-2xl font-extrabold uppercase text-foreground"
-                  : "mt-2 text-center text-2xl font-extrabold uppercase text-white"
+                  : "mt-2 text-center text-2xl font-extrabold uppercase text-v2-ground"
               }
               style={[
                 componentStyles.elementLetterSpacing3,
@@ -192,7 +192,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               className={
                 isMobileWeb
                   ? "mt-1.5 text-center text-xs leading-5 text-muted-foreground"
-                  : "mt-2.5 text-center text-xs leading-5 text-white/70"
+                  : "mt-2.5 text-center text-xs leading-5 text-v2-ground/70"
               }
             >
               Simpan e-tiket ini. Tunjukkan QR di pintu masuk.
@@ -293,7 +293,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
                   className={
                     isMobileWeb
                       ? "text-sm font-bold uppercase text-foreground"
-                      : "text-sm font-bold uppercase text-white"
+                      : "text-sm font-bold uppercase text-v2-ground"
                   }
                   style={[
                     componentStyles.elementLetterSpacing8,
@@ -317,7 +317,9 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
             <View className="mt-4 flex-row items-center justify-center gap-2">
               <MailIcon
                 color={
-                  isMobileWeb ? designColors.gray : "rgba(255,255,255,0.6)"
+                  isMobileWeb
+                    ? designColors.gray
+                    : withAlpha(designColors.ground, 0.6)
                 }
                 size={16}
               />

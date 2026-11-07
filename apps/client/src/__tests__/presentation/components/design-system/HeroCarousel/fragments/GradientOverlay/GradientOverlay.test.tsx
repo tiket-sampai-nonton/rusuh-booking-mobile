@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Platform, View } from "react-native";
+import { designColors, withAlpha } from "@presentation/theme";
 
 import { GradientOverlay } from "../../../../../../../presentation/components/design-system/HeroCarousel/fragments/GradientOverlay/index";
 
@@ -23,7 +24,9 @@ describe("GradientOverlay", () => {
     expect(overlay.props.style).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          background: expect.stringContaining("rgba(255,255,255,0.7) 30%"),
+          background: expect.stringContaining(
+            `${withAlpha(designColors.ground, 0.7)} 30%`,
+          ),
         }),
       ]),
     );
@@ -38,7 +41,9 @@ describe("GradientOverlay", () => {
     expect(overlay.props.style).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          background: expect.stringContaining("rgba(255,255,255,0.95) 30%"),
+          background: expect.stringContaining(
+            `${withAlpha(designColors.ground, 0.95)} 30%`,
+          ),
         }),
       ]),
     );

@@ -1,4 +1,5 @@
 const androidVersionCode = Number(process.env.ANDROID_VERSION_CODE || "1");
+const designTokens = require("./tailwind.config.js").theme.extend.colors;
 const appVersion = "0.1.0";
 const expoProjectId = process.env.EXPO_PROJECT_ID;
 const easChannel = process.env.EAS_CHANNEL;
@@ -41,7 +42,7 @@ const config = {
   splash: {
     image: "./assets/brand-mark.png",
     resizeMode: "contain",
-    backgroundColor: "#000000",
+    backgroundColor: designTokens.background.dark,
   },
   newArchEnabled: true,
   // SDK 53 uses Hermes; validated with an iOS simulator smoke run after fixing
@@ -56,12 +57,12 @@ const config = {
     versionCode: androidVersionCode,
     adaptiveIcon: {
       foregroundImage: "./assets/brand-mark.png",
-      backgroundColor: "#ff5a2d",
+      backgroundColor: designTokens.background.dark,
     },
   },
   web: {
     bundler: "metro",
-    favicon: "./assets/app-icon.png",
+    favicon: "./assets/favicon.png",
     // RBT-033: static rendering so public routes (/, /browse, /events/[id],
     // /history) emit indexable HTML per route (D6.2 — never ship a public
     // route as "single"). Transactional routes are marked noindex via Head.

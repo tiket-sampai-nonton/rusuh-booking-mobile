@@ -26,7 +26,7 @@ export const componentStyles = StyleSheet.create({
   elementFontSize3: {
     fontSize: 12,
     fontFamily: plusJakartaSansFonts.bold,
-    color: "#ff0000",
+    color: designColors.danger,
     textTransform: "uppercase",
   },
   elementMarginTop4: {

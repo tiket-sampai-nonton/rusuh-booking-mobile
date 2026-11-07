@@ -9,13 +9,6 @@ import type { ViewStyle } from "react-native";
 import type { DynamicStyle } from "@presentation/utils/style";
 
 export const componentStyles = StyleSheet.create({
-  elementColor2: {
-    color: designColors.ink,
-    fontSize: 18,
-    fontFamily: plusJakartaSansFonts.extraBold, // weight 800
-    textTransform: "uppercase",
-    letterSpacing: 0.36, // 0.02em * 18
-  },
   elementFlexDirection3: { flexDirection: "row", gap: 24 },
   elementFlexDirection4: { flexDirection: "row", gap: 8 },
   elementPosition5: { position: "relative" },

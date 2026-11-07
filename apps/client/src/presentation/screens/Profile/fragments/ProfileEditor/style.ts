@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
     color: designColors.ink,
     fontFamily: plusJakartaSansFonts.regular,
   },
-  error: { color: "#b00020", fontSize: 13 },
+  error: { color: designColors.danger, fontSize: 13 },
   button: {
     minHeight: 48,
     alignItems: "center",

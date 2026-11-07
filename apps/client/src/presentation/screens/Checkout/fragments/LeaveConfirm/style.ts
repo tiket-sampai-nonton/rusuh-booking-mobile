@@ -3,6 +3,7 @@ import {
   designColors,
   designBorders,
   plusJakartaSansFonts,
+  withAlpha,
 } from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -12,7 +13,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.8)",
+    backgroundColor: withAlpha(designColors.overlay, 0.8),
     padding: 32,
   },
   modal: {

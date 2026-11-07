@@ -58,7 +58,7 @@ export function ETicketCard({
         style={componentStyles.elementBackgroundColor1}
       >
         <Text
-          className="text-sm font-extrabold uppercase text-white"
+          className="text-sm font-extrabold uppercase text-v2-ground"
           style={componentStyles.elementLetterSpacing2}
         >
           E-Tiket {index + 1} / {total}

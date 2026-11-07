@@ -11,6 +11,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { pointerEventsNone } from "@presentation/utils/style";
+import { BrandSymbol } from "@presentation/components/BrandSymbol";
 import { SplashLetter } from "./SplashLetter";
 import { componentStyles } from "./style";
 import {
@@ -91,7 +92,7 @@ export function NativeLaunchSplash({
         <Animated.View
           style={[styleForNativeLaunchSplashAnimatedView2(), markStyle]}
         >
-          <Text style={componentStyles.elementColor6}>R</Text>
+          <BrandSymbol size={88} />
         </Animated.View>
         <View style={componentStyles.elementFlexDirection7}>
           <View style={componentStyles.elementFlexDirection8}>

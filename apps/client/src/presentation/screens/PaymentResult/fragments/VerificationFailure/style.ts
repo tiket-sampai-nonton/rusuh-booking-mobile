@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { designColors } from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   returnButton: {
@@ -6,10 +7,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#000000",
+    backgroundColor: designColors.accent,
   },
   returnText: {
-    color: "#ffffff",
+    color: designColors.ground,
     fontWeight: "700",
     textTransform: "uppercase",
   },

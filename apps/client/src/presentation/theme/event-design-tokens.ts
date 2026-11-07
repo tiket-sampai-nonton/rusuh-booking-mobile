@@ -1,13 +1,9 @@
 /**
- * RBT-096 —  "Brutalist Mono" Design Tokens (Re-implementation)
+ * Cyberpunk color tokens for the OTA visual test.
  *
- * Single source of truth: `.genesis/prototype/v2/MASTER-SPEC.md` + `design-tokens.json`
+ * Tailwind's `v2` color namespace is the source for these runtime mirrors.
  *
- * RULES (MASTER-SPEC §1 + §7):
- * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000, #00aa00, #ff6600
- * - Borders: 2px solid black (3px for waiting room ONLY)
- * - Shadows: hard offset, NO blur (e.g. 4px 4px 0 #000)
- * - Fonts: Plus Jakarta Sans across the app
+ * Tailwind's `v2` namespace is the source of truth for the matching palette.
  */
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -16,27 +12,30 @@
 
 export const designColors = {
   // Core palette (semantic naming)
-  ground: "#ffffff", // Page background - WHITE ONLY
-  ink: "#000000", // Primary text/borders - BLACK ONLY
-  inkMuted: "#666666", // Secondary text - THIS GRAY ONLY
-  field: "#f5f5f5", // Input backgrounds, subtle surfaces
+  ground: "#F7F2FF", // Lavender page background
+  ink: "#1B1026", // Deep-violet text and borders
+  overlay: "#0B0614", // Deep-violet overlays and image scrims
+  inkMuted: "#665873", // Muted purple-gray text
+  field: "#EEE5FA", // Lavender input and subtle surfaces
 
   // Functional colors
-  danger: "#ff0000", // Errors, warnings, urgent states - PURE RED
-  success: "#00aa00", // Success states, confirmations
-  warning: "#ff6600", // Warnings, caution states
+  danger: "#C02677", // Neon rose for errors and urgent states
+  success: "#087F68", // Teal success state
+  warning: "#9A5B00", // Amber warning state
 
   // Legacy aliases (for backwards compatibility in components)
-  black: "#000000",
-  white: "#ffffff",
-  gray: "#666666", // Legacy alias - uses inkMuted per Design Palette Guide (NO arbitrary grays)
-  red: "#ff0000",
-  green: "#00aa00",
-  accent: "#000000", // CTAs same as ink for brutalist
+  black: "#1B1026",
+  white: "#F7F2FF",
+  gray: "#665873",
+  red: "#C02677",
+  green: "#087F68",
+  accent: "#7C3AED", // Electric violet CTA
+  magenta: "#FF32C8",
+  cyan: "#007F9E",
 
   // Additional aliases for backwards compatibility
-  muted: "#666666", // Alias for inkMuted
-  warn: "#ff6600", // Alias for warning
+  muted: "#665873",
+  warn: "#9A5B00",
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -126,18 +125,18 @@ export const designBorders = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const designShadows = {
-  sm: { x: 2, y: 2, blur: 0, color: "#000000" },
-  md: { x: 4, y: 4, blur: 0, color: "#000000" },
-  lg: { x: 6, y: 6, blur: 0, color: "#000000" },
-  xl: { x: 8, y: 8, blur: 0, color: "#000000" },
+  sm: { x: 2, y: 2, blur: 0, color: "#5B21B6" },
+  md: { x: 4, y: 4, blur: 0, color: "#5B21B6" },
+  lg: { x: 6, y: 6, blur: 0, color: "#5B21B6" },
+  xl: { x: 8, y: 8, blur: 0, color: "#5B21B6" },
 } as const;
 
 // Shadow as CSS string helper
 export const designShadowCSS = {
-  sm: "2px 2px 0 #000000",
-  md: "4px 4px 0 #000000",
-  lg: "6px 6px 0 #000000",
-  xl: "8px 8px 0 #000000",
+  sm: "2px 2px 0 #5B21B6",
+  md: "4px 4px 0 #5B21B6",
+  lg: "6px 6px 0 #5B21B6",
+  xl: "8px 8px 0 #5B21B6",
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -269,19 +268,19 @@ export const designModal = {
 
 export const designZoneBanners = {
   guaranteed: {
-    bg: "#e8f5e9",
-    border: "#2e7d32",
-    text: "#1b5e20",
+    bg: "#E5F8F2",
+    border: "#087F68",
+    text: "#075B4B",
   },
   possible: {
-    bg: "#fff3e0",
-    border: "#f57c00",
-    text: "#e65100",
+    bg: "#FFF5D9",
+    border: "#9A5B00",
+    text: "#744400",
   },
   notEnough: {
-    bg: "#ffebee",
-    border: "#c62828",
-    text: "#b71c1c",
+    bg: "#FCE7F3",
+    border: "#C02677",
+    text: "#8F1D5A",
   },
 } as const;
 

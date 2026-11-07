@@ -48,7 +48,7 @@ export function styleForCategoryCardAnimatedView1(): DynamicStyle {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "#808080",
+    backgroundColor: designColors.inkMuted,
   } as DynamicStyle;
 }
 

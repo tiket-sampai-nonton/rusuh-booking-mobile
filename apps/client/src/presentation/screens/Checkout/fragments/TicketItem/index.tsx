@@ -23,7 +23,10 @@ import {
 const STATUS_TEXT: Record<string, { label: string; color: string }> = {
   checking: { label: "Mengecek ketersediaan NIK…", color: designColors.gray },
   available: { label: "NIK tersedia", color: designColors.success },
-  blocked: { label: "NIK sudah terdaftar untuk event ini.", color: "#ff0000" },
+  blocked: {
+    label: "NIK sudah terdaftar untuk event ini.",
+    color: designColors.danger,
+  },
   warning: {
     label: "Batas pengecekan tercapai — lanjut, server memvalidasi.",
     color: designColors.warning,
