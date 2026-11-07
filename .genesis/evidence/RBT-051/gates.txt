@@ -1,0 +1,85 @@
+RBT-051 — Checkout ticket item list + category/quantity rules
+Branch: feature/RBT-051-ticket-item-list
+Date: 2026-11-02
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---
+npx tsc --noEmit -p tsconfig.json
+RESULT: exit 0 (no type errors)
+
+--- eslint (incl. clean-arch boundary rules) ---
+npx eslint <changed checkout + test files>
+RESULT: exit 0 (clean — no boundary violations; domain/rules stays
+framework-free, presentation imports domain only, no infrastructure import)
+
+--- jest coverage (RBT-051 scope) ---
+Files: src/domain/rules/checkout.ts
+       src/presentation/screens/Checkout/**/*.{ts,tsx}
+Excluded: interface.ts (type-only declarations — non-executable, 0 runtime lines)
+
+File                                     | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------------------|---------|----------|---------|--------
+All files                                |   98.14 |    98.83 |   96.49 |   98.76
+ domain/rules/checkout.ts                |   97.77 |    97.22 |     100 |     100
+ presentation/screens/Checkout           |         |          |         |
+   categories.ts                         |     100 |      100 |     100 |     100
+   index.tsx                             |   97.36 |     100  |      90 |   96.77
+   style.ts                              |     100 |      100 |     100 |     100
+   fragments/CheckoutBar.tsx             |     100 |      100 |     100 |     100
+   fragments/CheckoutHero.tsx            |     100 |      100 |     100 |     100
+   fragments/CheckoutTopBar.tsx          |     100 |      100 |     100 |     100
+   fragments/LeaveConfirm.tsx            |     100 |      100 |     100 |     100
+   fragments/TicketItem.tsx              |     100 |      100 |     100 |     100
+   fragments/common.tsx                  |     100 |      100 |     100 |     100
+
+ALL FOUR METRICS >= 90% on every RBT-051 file. ✓
+Full suite: 68 suites, 536 tests — all pass.
+
+================================================================
+ACCEPTANCE CRITERIA
+================================================================
+AC1 item list: one row min, add rows up to effectiveCap (<= 3 per buyer-NIK),
+    remove down to 1, per-row category (Reguler/VIP) + attendee name + NIK. ✓
+AC2 quantity rules (domain, pure): isQuantityValid (min1/max), effectiveCap
+    (clamp <= MAX_TICKETS 3), appendRow/removeRowAt/patchRowAt. ✓
+AC3 single-use "Gunakan NIK pembeli": setBuyerUseAt turns the switch on for one
+    row and off for the others; buyerNikUsedOnce enforces at-most-one. ✓
+AC4 cap warning "Batas 3 tiket per NIK divalidasi server". ✓
+AC5 server-authoritative countdown via useServerCountdown (RBT-050, ServerClock);
+    onExpire -> router.replace('/expired/<id>'). ✓
+AC6 noindex on the transactional /checkout route (Seo). ✓
+
+SECURITY: NIK never logged/stored raw; masked on handoff. No infrastructure
+import in domain/application; TanStack only in presentation hooks.
+
+================================================================
+DESIGN NOTE (reconcile, not blind-copy)
+================================================================
+The add/remove/patch/single-use logic was moved OUT of inline screen guards
+INTO pure domain helpers (appendRow/removeRowAt/patchRowAt/setBuyerUseAt in
+domain/rules/checkout.ts). This puts the cap/min-1/single-use CORRECTNESS in the
+testable domain layer (per the AC emphasis on "domain quantity rules"), and
+eliminates defensive inline branches the disabled/absent UI controls made
+unreachable — lifting index.tsx branch coverage from 66% to 100%.
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web -> exit 0;
+          /checkout/[sessionId].html produced (static output).
+iOS     : iPhone 16 Pro (booted), Expo Go deep-link
+          exp://127.0.0.1:8081/--/checkout/demo-sess
+          -> ios-checkout-itemlist.png (full item-list rendered).
+          NOTE: first deep-link landed on a stale prior route (register modal);
+          re-launched fresh after terminating Expo Go — second shot is the
+          real Checkout screen.
+Android : emulator-5554, Expo Go deep-link (adb reverse tcp:8081)
+          -> android-checkout-itemlist.png (identical render to iOS).
+Both native shots show: Data Pembeli (NIK+email), Tiket #1 card
+(Reguler/VIP toggle, Nama/NIK Penonton, single-use switch), + Tambah tiket,
+cap warning, dark Total bar (Rp 450.000 REG) + disabled Lanjut Bayar, and the
+server-countdown pill. Countdown reads 00:00 because demo-sess has no live
+mock session (no deadline) — the wiring renders; a real funnel session feeds it.

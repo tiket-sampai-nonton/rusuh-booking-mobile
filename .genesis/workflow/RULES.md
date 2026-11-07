@@ -170,30 +170,30 @@
 - id: R022
   category: tracking
   imperative: MUST
-  rule: "Transition issue to In Review when PR opens"
-  verify: "Issue state is In Review"
-  example: "Open PR → move to In Review"
+  rule: "Transition issue to QA when REVIEW passed + gates green + live evidence captured to .genesis/evidence/<KEY>/ (before any PR)"
+  verify: "Issue state is QA, evidence present in .genesis/evidence/<KEY>/"
+  example: "Capture screenshots to .genesis/evidence/RBT-001/ → move to QA → await G3"
 
 - id: R023
   category: tracking
   imperative: MUST
-  rule: "Transition issue to QA when evidence is attached"
-  verify: "Issue state is QA, evidence attached"
-  example: "Attach screenshots → move to QA"
+  rule: "Transition issue to In Review only after G3 (evidence approved) when the PR is opened"
+  verify: "Issue state is In Review, PR exists, G3 approved"
+  example: "G3 approved → open PR → move to In Review"
 
 - id: R024
   category: tracking
   imperative: MUST
-  rule: "Transition issue to Done only on merge + CI green + evidence"
+  rule: "Transition issue to Done only on PR merge"
   verify: "Issue state is Done, PR merged"
   example: "Merge to base branch → move to Done"
 
 - id: R025
   category: tracking
   imperative: NEVER
-  rule: "Skip issue states"
-  verify: "Transitions follow defined order"
-  example: "Cannot jump from To Do directly to Done"
+  rule: "Skip issue states, or open a PR before G3 evidence approval"
+  verify: "Transitions follow defined order; no PR exists before QA→In Review"
+  example: "Cannot jump from To Do directly to Done; cannot open a PR while in QA"
 ```
 
 ---

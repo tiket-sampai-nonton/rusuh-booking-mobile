@@ -1,0 +1,33 @@
+RBT-003 Design tokens — green-gate capture
+worktree: /Users/rizkyrachmawan/.kiro/crew/scratch/runtime-db08cb04/wt/rbt-003/apps/client
+date: 2026-10-30T10:41:12Z
+
+===== GATE 1: tsc --noEmit =====
+EXIT 0 — TSC OK
+
+===== GATE 2: ESLINT_USE_FLAT_CONFIG=false eslint src/**/*.{ts,tsx} =====
+EXIT 0 — ESLINT OK (clean, 0 warnings)
+
+===== GATE 3: jest --coverage --watchman=false --ci =====
+PASS src/presentation/theme/theme.test.ts
+PASS src/__tests__/app/index.test.tsx
+PASS src/__tests__/app/_layout.test.tsx
+--------------------|---------|----------|---------|---------|-------------------
+File                | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+--------------------|---------|----------|---------|---------|-------------------
+All files           |     100 |      100 |     100 |     100 |                   
+ app                |     100 |      100 |     100 |     100 |                   
+  _layout.tsx       |     100 |      100 |     100 |     100 |                   
+  index.tsx         |     100 |      100 |     100 |     100 |                   
+ presentation/theme |     100 |      100 |     100 |     100 |                   
+  theme.ts          |     100 |      100 |     100 |     100 |                   
+  tokens.ts         |     100 |      100 |     100 |     100 |                   
+ shared/utils       |     100 |      100 |     100 |     100 |                   
+  clamp.ts          |     100 |      100 |     100 |     100 |                   
+--------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 5 passed, 5 total
+Tests:       34 passed, 34 total
+Snapshots:   0 total
+Time:        0.914 s, estimated 3 s
+Ran all test suites.

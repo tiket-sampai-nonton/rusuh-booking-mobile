@@ -1,0 +1,640 @@
+PASS src/__tests__/presentation/screens/WaitingRoom.test.tsx
+PASS src/__tests__/infrastructure/api/http-repositories.test.ts
+PASS src/__tests__/presentation/auth/LoginModal.test.tsx
+  ● Console
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+PASS src/__tests__/presentation/screens/browse-filter.test.ts
+PASS src/__tests__/presentation/home-components.test.tsx
+PASS src/__tests__/presentation/hooks/useQueuePolling.test.tsx
+  ● Console
+
+    console.error
+      Warning: An update to Harness inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at repo (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/__tests__/presentation/hooks/useQueuePolling.test.tsx:93:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+PASS src/__tests__/presentation/screens/BrowseScreen.test.tsx
+  ● Console
+
+    console.error
+      Warning: An update to BrowseScreen inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at BrowseScreen (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/screens/Browse/index.tsx:45:51)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+          at children (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native-css-interop/src/runtime/third-party-libs/react-native-safe-area-context.native.tsx:32:26)
+          at children (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/jest.setup.js:12:26)
+          at children (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native-css-interop/src/runtime/third-party-libs/react-native-safe-area-context.native.tsx:86:5)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/providers.tsx:35:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+PASS src/__tests__/domain/queue-state-machine.test.ts
+PASS src/__tests__/presentation/HomeScreen.test.tsx
+PASS src/__tests__/infrastructure/mock-adapters.test.ts
+PASS src/__tests__/presentation/HomeScreen.desktop.test.tsx
+  ● Console
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at View
+          at View (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native/jest/mockComponent.js:33:18)
+          at View
+          at View (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native/jest/mockComponent.js:33:18)
+          at AnimatedComponent (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native-reanimated/src/createAnimatedComponent/createAnimatedComponent.tsx:141:71)
+          at children (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/ScreenFade.tsx:32:30)
+          at HomeScreen (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/screens/Home/index.tsx:30:56)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+          at children (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native-css-interop/src/runtime/third-party-libs/react-native-safe-area-context.native.tsx:32:26)
+          at children (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/jest.setup.js:12:26)
+          at children (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native-css-interop/src/runtime/third-party-libs/react-native-safe-area-context.native.tsx:86:5)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/providers.tsx:35:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at View
+          at View (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native/jest/mockComponent.js:33:18)
+          at View
+          at View (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native/jest/mockComponent.js:33:18)
+          at AnimatedComponent (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native-reanimated/src/createAnimatedComponent/createAnimatedComponent.tsx:141:71)
+          at children (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/ScreenFade.tsx:32:30)
+          at HomeScreen (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/screens/Home/index.tsx:30:56)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+          at children (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native-css-interop/src/runtime/third-party-libs/react-native-safe-area-context.native.tsx:32:26)
+          at children (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/jest.setup.js:12:26)
+          at children (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native-css-interop/src/runtime/third-party-libs/react-native-safe-area-context.native.tsx:86:5)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/providers.tsx:35:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to HomeScreen inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at HomeScreen (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/screens/Home/index.tsx:30:56)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+          at children (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native-css-interop/src/runtime/third-party-libs/react-native-safe-area-context.native.tsx:32:26)
+          at children (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/jest.setup.js:12:26)
+          at children (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-native-css-interop/src/runtime/third-party-libs/react-native-safe-area-context.native.tsx:86:5)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/providers.tsx:35:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+PASS src/__tests__/domain/errors.test.ts
+PASS src/__tests__/presentation/screens/waiting-display.test.ts
+PASS src/__tests__/domain/event-display.test.ts
+PASS src/__tests__/domain/server-clock.test.ts
+PASS src/__tests__/infrastructure/api/envelope.test.ts
+PASS src/presentation/theme/tokens.test.ts
+PASS src/__tests__/presentation/screens/browse-fragments.test.tsx
+PASS src/presentation/theme/theme.test.ts
+PASS src/__tests__/domain/event-description.test.ts
+PASS src/__tests__/domain/rules/queue-polling.test.ts
+PASS src/__tests__/application/auth/otp-use-cases.test.ts
+PASS src/__tests__/application/auth/session-use-cases.test.ts
+PASS src/__tests__/infrastructure/mock-booking-user.test.ts
+PASS src/__tests__/app/public-routes.test.tsx
+PASS src/__tests__/domain/idempotency.test.ts
+PASS src/__tests__/app/booking-routes.test.tsx
+PASS src/__tests__/shared/test-fixtures.test.ts
+PASS src/__tests__/presentation/hooks/useEventDetail.test.tsx
+PASS src/__tests__/infrastructure/http/fetch-http-client.test.ts
+PASS src/__tests__/providers/query-client.test.ts
+PASS src/__tests__/providers/providers.test.tsx
+PASS src/__tests__/infrastructure/auth/secure-store-token-storage.test.ts
+PASS src/__tests__/application/list-events.test.ts
+PASS src/__tests__/presentation/auth/LoginButton.test.tsx
+  ● Console
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at testID (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginButton.tsx:21:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+    console.error
+      Warning: An update to LoginModal inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at visible (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginModal.tsx:65:3)
+          at testID (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/presentation/components/auth/LoginButton.tsx:21:3)
+          at container (/Users/rizkyrachmawan/.hermes/cache/scratch/wt-rbt041/apps/client/src/providers/service-context.tsx:21:3)
+          at QueryClientProvider (/Users/rizkyrachmawan/MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/react-query/src/QueryClientProvider.tsx:70:3)
+
+      at printWarning (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:72:30)
+      at error (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:46:7)
+      at warnIfUpdatesNotWrappedWithActDEV (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16716:9)
+      at scheduleUpdateOnFiber (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14916:5)
+      at forceStoreRerender (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6251:5)
+      at handleStoreChange (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6227:7)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:92:11
+      at notifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:30:5)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:53:13
+          at Array.forEach (<anonymous>)
+      at ../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:52:25
+      at batchNotifyFn (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:33:5)
+      at Timeout._onTimeout (../../../../../../MyProject/telkomsel/assessment/ticketing/apps/client/node_modules/@tanstack/query-core/src/notifyManager.ts:51:9)
+
+PASS src/__tests__/application/get-event-detail.test.ts
+PASS src/__tests__/domain/event-detail-cta.test.ts
+PASS src/__tests__/providers/service-context.test.tsx
+PASS src/__tests__/domain/date-format.test.ts
+PASS src/__tests__/domain/money.test.ts
+PASS src/__tests__/domain/event-image.test.ts
+PASS src/__tests__/app/expired-route.test.tsx
+PASS src/shared/utils/clamp.test.ts
+PASS src/__tests__/app/_layout.test.tsx
+PASS src/__tests__/infrastructure/system-clock.test.ts
+PASS src/__tests__/presentation/EventDetailScreen.test.tsx
+PASS src/__tests__/presentation/queue/useAutoClaim.test.tsx
+PASS src/__tests__/providers/container.test.ts
+PASS src/__tests__/application/queue/claim-admission.test.ts
+PASS src/__tests__/application/queue/observe-queue.use-case.test.ts
+PASS src/__tests__/presentation/queue/useRestoreMembership.test.tsx
+PASS src/__tests__/presentation/queue/useJoinQueue.test.tsx
+PASS src/__tests__/application/queue/join-persistence.test.ts
+PASS src/__tests__/infrastructure/queue/queue-membership-storage.test.ts
+--------------------------------------------|---------|----------|---------|---------|-------------------
+File                                        | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+--------------------------------------------|---------|----------|---------|---------|-------------------
+All files                                   |   98.06 |    91.95 |    98.4 |    98.6 |                   
+ app                                        |     100 |      100 |     100 |     100 |                   
+  _layout.tsx                               |     100 |      100 |     100 |     100 |                   
+ app/(booking)                              |     100 |      100 |     100 |     100 |                   
+  _layout.tsx                               |     100 |      100 |     100 |     100 |                   
+ app/(booking)/checkout                     |     100 |      100 |     100 |     100 |                   
+  [sessionId].tsx                           |     100 |      100 |     100 |     100 |                   
+ app/(booking)/payment                      |     100 |      100 |     100 |     100 |                   
+  [bookingId].tsx                           |     100 |      100 |     100 |     100 |                   
+ app/(booking)/success                      |     100 |      100 |     100 |     100 |                   
+  [bookingId].tsx                           |     100 |      100 |     100 |     100 |                   
+ app/(booking)/waiting                      |     100 |      100 |     100 |     100 |                   
+  [eventId].tsx                             |     100 |      100 |     100 |     100 |                   
+ app/(public)                               |     100 |      100 |     100 |     100 |                   
+  browse.tsx                                |     100 |      100 |     100 |     100 |                   
+  history.tsx                               |     100 |      100 |     100 |     100 |                   
+  index.tsx                                 |     100 |      100 |     100 |     100 |                   
+ app/(public)/events                        |     100 |       50 |     100 |     100 |                   
+  [eventId].tsx                             |     100 |       50 |     100 |     100 | 13                
+ app/expired                                |     100 |      100 |     100 |     100 |                   
+  [resourceId].tsx                          |     100 |      100 |     100 |     100 |                   
+ application/auth                           |     100 |      100 |     100 |     100 |                   
+  clear-session.use-case.ts                 |     100 |      100 |     100 |     100 |                   
+  persist-session.use-case.ts               |     100 |      100 |     100 |     100 |                   
+  request-otp.use-case.ts                   |     100 |      100 |     100 |     100 |                   
+  restore-session.use-case.ts               |     100 |      100 |     100 |     100 |                   
+  verify-otp.use-case.ts                    |     100 |      100 |     100 |     100 |                   
+ application/events                         |     100 |      100 |     100 |     100 |                   
+  get-event-detail.use-case.ts              |     100 |      100 |     100 |     100 |                   
+  list-events.use-case.ts                   |     100 |      100 |     100 |     100 |                   
+ application/queue                          |     100 |      100 |     100 |     100 |                   
+  claim-admission.use-case.ts               |     100 |      100 |     100 |     100 |                   
+  join-queue.use-case.ts                    |     100 |      100 |     100 |     100 |                   
+  leave-queue.use-case.ts                   |     100 |      100 |     100 |     100 |                   
+  observe-queue.use-case.ts                 |     100 |      100 |     100 |     100 |                   
+  restore-membership.use-case.ts            |     100 |      100 |     100 |     100 |                   
+ domain/errors                              |     100 |      100 |     100 |     100 |                   
+  domain-error.ts                           |     100 |      100 |     100 |     100 |                   
+  error-mapper.ts                           |     100 |      100 |     100 |     100 |                   
+  messages.id.ts                            |     100 |      100 |     100 |     100 |                   
+ domain/idempotency                         |     100 |      100 |     100 |     100 |                   
+  idempotency-key.ts                        |     100 |      100 |     100 |     100 |                   
+ domain/rules                               |     100 |    97.43 |     100 |     100 |                   
+  event-description.ts                      |     100 |    94.28 |     100 |     100 | 63,82             
+  event-detail-cta.ts                       |     100 |      100 |     100 |     100 |                   
+  event-display.ts                          |     100 |      100 |     100 |     100 |                   
+  event-image.ts                            |     100 |      100 |     100 |     100 |                   
+  queue-polling.ts                          |     100 |      100 |     100 |     100 |                   
+ domain/services                            |     100 |      100 |     100 |     100 |                   
+  date-format.ts                            |     100 |      100 |     100 |     100 |                   
+  money.ts                                  |     100 |      100 |     100 |     100 |                   
+  server-clock.ts                           |     100 |      100 |     100 |     100 |                   
+ domain/state-machines                      |     100 |      100 |     100 |     100 |                   
+  queue-state-machine.ts                    |     100 |      100 |     100 |     100 |                   
+ infrastructure/__fixtures__                |     100 |      100 |     100 |     100 |                   
+  in-memory-idempotency-store.ts            |     100 |      100 |     100 |     100 |                   
+  in-memory-queue-membership.ts             |     100 |      100 |     100 |     100 |                   
+  in-memory-token-storage.ts                |     100 |      100 |     100 |     100 |                   
+  mock-booking.repository.ts                |     100 |      100 |     100 |     100 |                   
+  mock-event.repository.ts                  |     100 |      100 |     100 |     100 |                   
+  mock-file-share.adapter.ts                |     100 |      100 |     100 |     100 |                   
+  mock-http-client.ts                       |     100 |      100 |     100 |     100 |                   
+  mock-notification.adapter.ts              |     100 |      100 |     100 |     100 |                   
+  mock-payment.repository.ts                |     100 |      100 |     100 |     100 |                   
+  mock-queue.repository.ts                  |     100 |      100 |     100 |     100 |                   
+  mock-user.repository.ts                   |     100 |      100 |     100 |     100 |                   
+ infrastructure/api                         |   98.73 |    97.43 |     100 |     100 |                   
+  dto-mappers.ts                            |     100 |      100 |     100 |     100 |                   
+  envelope.ts                               |     100 |      100 |     100 |     100 |                   
+  http-booking.repository.ts                |   92.85 |    83.33 |     100 |     100 | 48                
+  http-event.repository.ts                  |     100 |      100 |     100 |     100 |                   
+  http-payment.repository.ts                |     100 |      100 |     100 |     100 |                   
+  http-queue.repository.ts                  |     100 |      100 |     100 |     100 |                   
+  http-user.repository.ts                   |     100 |      100 |     100 |     100 |                   
+ infrastructure/auth                        |     100 |      100 |     100 |     100 |                   
+  secure-store-token-storage.ts             |     100 |      100 |     100 |     100 |                   
+ infrastructure/http                        |     100 |      100 |     100 |     100 |                   
+  fetch-http-client.ts                      |     100 |      100 |     100 |     100 |                   
+ infrastructure/queue                       |     100 |      100 |     100 |     100 |                   
+  secure-store-queue-membership.ts          |     100 |      100 |     100 |     100 |                   
+ infrastructure/time                        |     100 |      100 |     100 |     100 |                   
+  system-clock.ts                           |     100 |      100 |     100 |     100 |                   
+ presentation/components                    |   91.66 |    81.25 |    92.3 |   91.42 |                   
+  BrandMark.tsx                             |     100 |      100 |     100 |     100 |                   
+  EventCard.tsx                             |     100 |     82.6 |     100 |     100 | 53-58,105-110     
+  FilterModal.tsx                           |   93.33 |      100 |   85.71 |   93.33 | 60                
+  ScreenFade.tsx                            |   81.81 |       50 |     100 |      80 | 38-39             
+ presentation/components/auth               |   93.84 |    79.62 |      95 |   96.61 |                   
+  LoginButton.tsx                           |     100 |      100 |     100 |     100 |                   
+  LoginModal.tsx                            |   92.72 |    78.43 |   92.85 |   96.07 | 55,164            
+  auth.schema.ts                            |     100 |      100 |     100 |     100 |                   
+ presentation/components/home               |     100 |    94.44 |     100 |     100 |                   
+  HeroCarousel.tsx                          |     100 |     92.5 |     100 |     100 | 63                
+  HomeFooter.tsx                            |     100 |      100 |     100 |     100 |                   
+  Reveal.tsx                                |     100 |      100 |     100 |     100 |                   
+  SectionHead.tsx                           |     100 |      100 |     100 |     100 |                   
+  TrustStrip.tsx                            |     100 |      100 |     100 |     100 |                   
+ presentation/hooks                         |   95.04 |    81.39 |     100 |   96.84 |                   
+  useAuth.ts                                |   95.23 |      100 |     100 |   95.23 | 95                
+  useAutoClaim.ts                           |   96.42 |    85.71 |     100 |     100 | 65,108            
+  useEventDetail.ts                         |     100 |      100 |     100 |     100 |                   
+  useEvents.ts                              |     100 |      100 |     100 |     100 |                   
+  useJoinQueue.ts                           |     100 |      100 |     100 |     100 |                   
+  useQueuePolling.ts                        |     100 |      100 |     100 |     100 |                   
+  useResponsive.ts                          |   66.66 |    16.66 |     100 |   66.66 | 38-39             
+  useRestoreMembership.ts                   |   94.11 |    85.71 |     100 |     100 | 71                
+ presentation/screens/Browse                |   97.18 |    92.15 |      95 |   96.49 |                   
+  filter.ts                                 |   97.36 |    92.68 |     100 |   96.55 | 79                
+  index.tsx                                 |   95.83 |      100 |    87.5 |   95.45 | 134               
+  interface.ts                              |       0 |        0 |       0 |       0 |                   
+  style.ts                                  |     100 |       50 |     100 |     100 | 17                
+ presentation/screens/Browse/fragments      |     100 |      100 |     100 |     100 |                   
+  BrowseChips.tsx                           |     100 |      100 |     100 |     100 |                   
+  BrowseGrid.tsx                            |     100 |      100 |     100 |     100 |                   
+  BrowseStates.tsx                          |     100 |      100 |     100 |     100 |                   
+  BrowseTopBar.tsx                          |     100 |      100 |     100 |     100 |                   
+ presentation/screens/EventDetail           |   89.47 |    86.66 |    87.5 |   93.75 |                   
+  index.tsx                                 |   87.87 |    88.46 |   83.33 |    93.1 | 47-49             
+  interface.ts                              |       0 |        0 |       0 |       0 |                   
+  style.ts                                  |     100 |       75 |     100 |     100 | 209               
+ presentation/screens/EventDetail/fragments |     100 |    83.33 |     100 |     100 |                   
+  Block.tsx                                 |     100 |       75 |     100 |     100 | 24                
+  BuyBox.tsx                                |     100 |       80 |     100 |     100 | 34-35             
+  Categories.tsx                            |     100 |    91.66 |     100 |     100 | 41                
+  DetailChrome.tsx                          |     100 |      100 |     100 |     100 |                   
+  DetailHero.tsx                            |     100 |      100 |     100 |     100 |                   
+  DetailStates.tsx                          |     100 |       50 |     100 |     100 | 32                
+  Fact.tsx                                  |     100 |      100 |     100 |     100 |                   
+  TrustBox.tsx                              |     100 |      100 |     100 |     100 |                   
+ presentation/screens/Home                  |   95.34 |      100 |   88.23 |   94.73 |                   
+  index.tsx                                 |   93.33 |      100 |   83.33 |    93.1 | 115-116           
+  interface.ts                              |       0 |        0 |       0 |       0 |                   
+  style.ts                                  |     100 |      100 |     100 |     100 |                   
+ presentation/screens/Home/fragments        |     100 |       90 |     100 |     100 |                   
+  CardGrid.tsx                              |     100 |    83.33 |     100 |     100 | 14                
+  HomeNav.tsx                               |     100 |      100 |     100 |     100 |                   
+  HomeSections.tsx                          |     100 |      100 |     100 |     100 |                   
+  HomeStates.tsx                            |     100 |      100 |     100 |     100 |                   
+ presentation/screens/Waiting               |     100 |    93.75 |     100 |     100 |                   
+  display.ts                                |     100 |      100 |     100 |     100 |                   
+  index.tsx                                 |     100 |       90 |     100 |     100 | 152-182,240       
+  interface.ts                              |       0 |        0 |       0 |       0 |                   
+  style.ts                                  |     100 |      100 |     100 |     100 |                   
+ presentation/theme                         |     100 |      100 |     100 |     100 |                   
+  theme.ts                                  |     100 |      100 |     100 |     100 |                   
+  tokens.ts                                 |     100 |      100 |     100 |     100 |                   
+ providers                                  |     100 |    92.59 |     100 |     100 |                   
+  container.ts                              |     100 |    89.47 |     100 |     100 | 186               
+  providers.tsx                             |     100 |      100 |     100 |     100 |                   
+  query-client.ts                           |     100 |      100 |     100 |     100 |                   
+  service-context.tsx                       |     100 |      100 |     100 |     100 |                   
+ shared/test-fixtures                       |     100 |      100 |     100 |     100 |                   
+  events.fixture.ts                         |     100 |      100 |     100 |     100 |                   
+  render-with-providers.tsx                 |     100 |      100 |     100 |     100 |                   
+ shared/utils                               |     100 |      100 |     100 |     100 |                   
+  clamp.ts                                  |     100 |      100 |     100 |     100 |                   
+--------------------------------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 54 passed, 54 total
+Tests:       427 passed, 427 total
+Snapshots:   0 total
+Time:        13.811 s, estimated 15 s
+Ran all test suites.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

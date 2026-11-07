@@ -1,0 +1,73 @@
+RBT-065 — Mock PaymentRepository adapter + SNAP simulator
+Branch: feature/RBT-065-mock-payment-snap-simulator
+Date: 2026-11-02
+Evidence path: .genesis/evidence/RBT-065/ (canonical repo-root, per WORKFLOW.md)
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-065 scope) ---
+File                                | % Stmts | % Branch | % Funcs | % Lines
+------------------------------------|---------|----------|---------|--------
+ presentation/screens/Snap/index    |   100   |   100    |   100   |   100
+ presentation/screens/Snap/fragments|   100   |   100    |   100   |   100  (SnapLogo/Summary/Actions)
+ presentation/hooks/useSnapSimulator|   100   |   100    |   100   |   100
+ infrastructure/api/http-payment.repo|  100   |   100    |   100   |   100
+ mock-payment.repository.ts (snapCallback + return URLs) — covered by the
+   mock-adapters suite (PAID/FAILED/UNKNOWN + unknown-attempt + return URLs).
+
+ALL RBT-065 NEW code >= 90% all four. 63 targeted tests pass; the broader
+payment+snap+expired+routes set (19 suites / 110 tests) stays green.
+Note: in the scoped run the mock file shows a dip ONLY on lines 137-146, which
+are RBT-062's createPageToken/exchangePageToken (covered by the RBT-062 suite,
+not in this scope) — NOT RBT-065 code. usePayment branch arms likewise covered
+by the full RBT-061 suite. Snap/interface.ts is pure types (zero executable JS).
+
+================================================================
+ACCEPTANCE CRITERIA
+================================================================
+AC1 — full PaymentRepository port, contract-shaped, Liskov-substitutable:
+  - port now has getPaymentPage, createAttempt, getStatus, createPageToken,
+    exchangePageToken, AND snapCallback(attemptId, outcome). PaymentAttempt gains
+    successReturnUrl / failedReturnUrl (contract return URLs). amountMinor,
+    paymentExpiresAt+serverTime, redirectUrl, currentAttempt already present.
+  - mock + HTTP BOTH implement snapCallback (mock flips status; HTTP POSTs
+    payments/attempts/{id}/snap-callback) — same port, swappable. ✓
+AC2 — local SNAP simulator page (prototype snap.html 1:1):
+  - /snap/[bookingId] route + Snap screen (SnapLogo/SnapSummary/SnapActions).
+  - success / fail / UNKNOWN(verifying) buttons drive snapCallback via
+    useSnapSimulator, then route: success/UNKNOWN -> /payment-result (the verify
+    gate keeps polling on UNKNOWN, never trusts the callback), fail -> /expired
+    ?reason=payment. Server-authoritative timer honored across the handoff
+    (unchanged; the result gate reconciles from serverTime). ✓
+AC3 — composition-root swap:
+  - container.ts binds MockPaymentRepository (useMocks) <-> HttpPaymentRepository
+    via EXPO_PUBLIC_USE_MOCKS; snapCallback rides the whole-port binding.
+    Integrating the BE changes ONLY this binding — no UI/domain/use-case change. ✓
+  - the mock redirectUrl now points at the in-app /snap/<id> route, so the
+    RBT-061 handoff opens the simulator (openSnapHandoff routes a relative path
+    via the router, an absolute SNAP URL via window.location / Linking).
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web -> exit 0; /snap/[bookingId] builds (29.2 kB).
+iOS     : iPhone 16 Pro, deep-link exp://…/snap/bk-1 -> ios-snap-simulator.png —
+          the full prototype SNAP page: "SNAP Payment" mark, THIRD-PARTY PAYMENT
+          GATEWAY eyebrow, "Selesaikan pembayaranmu", Order ID/Metode/Total card,
+          and all three simulate actions + the "halaman hasil tetap memverifikasi
+          status dari backend" note.
+Android : emulator-5554 (Pixel 7 Pro), same deep-link -> android-snap-simulator.png
+          — identical render.
+
+HONEST NOTE: Total shows "Rp 0" because the shots are a DIRECT deep-link with no
+seeded booking amount in the session store; the real flow (payment page ->
+createAttempt -> handoff) seeds amountMinor first. The summary binding to
+amountMinor is covered by the screen/fragment tests. Fresh Expo Go bundles were
+forced (terminate + relaunch) to avoid the stale-bundle trap seen in RBT-063/064.
+The settle navigations are press-driven, proven by RNTL + the mock snapCallback
+tests; native confirms the simulator renders with the right actions.

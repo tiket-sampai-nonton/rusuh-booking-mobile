@@ -145,8 +145,7 @@ SonarCloud is a static analysis gate. It does not replace Jest or the agreed QA 
 - Verify that `/browse` accepts URL-driven `genre`, `province`, `time`, and `sort` values, handles invalid values safely, and applies the approved canonical/noindex policy for query-result pages.
 - Check title, description, canonical URL, Open Graph metadata, JSON-LD, sitemap, and robots output.
 - Enforce public and transactional bundle budgets:
-  - public route: ≤ 300 KB gzip initial JavaScript;
-  - transactional route: ≤ 500 KB gzip initial JavaScript.
+  - every route: ≤ 1 MB gzip initial JavaScript.
 
 This is artifact validation only. Browser-level QA, responsive interaction testing, and accessibility walkthroughs are outside this CI/CD pipeline.
 

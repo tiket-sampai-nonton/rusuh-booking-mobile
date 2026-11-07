@@ -3,12 +3,12 @@
 Diagram alur dari sudut pandang **Front-End (FE)** untuk disepakati bersama **Back-End (BE)**.
 Semua diagram memakai **Mermaid** (render otomatis di GitHub/editor yang mendukung).
 
-Acuan: prototype **V5** (`../../../prototype/Final/`) + API contract (`../api-contract/`) + canonical FE-BE contract (`./FE-BE-align-contract.md`).
+Acuan: prototype **Final** (`../prototype/Final/`, internal version "V5") + API contract (`../api-contract/`) + canonical FE-BE contract (`./FE-BE-align-contract.md`).
 Catatan konvensi lintas-API (envelope `{meta,data}`, harga `*Minor`, `serverTime` untuk clock-skew,
 cookie `rb_visitor` / header `X-Visitor-Token`, `Idempotency-Key`, `errorCode`) lihat
 `./FE-BE-align-contract.md` §2.
 
-**Implementasi FE yang dikunci:** Expo + React Native untuk Android/iOS dan React Native Web untuk web, dengan Clean Architecture, shared TypeScript domain/use cases, Zustand, dan platform adapters. Nama HTML di bawah adalah label logis yang dipertahankan dari V5; pemetaan route production adalah:
+**Implementasi FE yang dikunci:** Expo + React Native untuk Android/iOS dan React Native Web untuk web, dengan Clean Architecture, shared TypeScript domain/use cases, Zustand, dan platform adapters. Nama HTML di bawah adalah label logis yang dipertahankan dari prototype `Final/` (V5); pemetaan route production adalah:
 
 ```text
 index.html   → /

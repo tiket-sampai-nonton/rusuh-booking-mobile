@@ -1,0 +1,31 @@
+RBT-022 — Profile store + checkout auto-fill source — gate evidence
+Captured: 2026-11-02T03:23:19Z  Branch: feature/RBT-022-profile-store
+
+Files:
+  src/presentation/stores/account-store.ts  (Zustand store, MASKED profile only + selectCheckoutPrefill)
+  src/__tests__/presentation/account-store.test.ts
+  package.json  (+ zustand@5.0.16 — locked stack, user-approved 2026-11-02)
+
+=== GATE 1: tsc --noEmit ===  exit=0
+=== GATE 2: eslint src/**/*.{ts,tsx} ===  clean
+=== GATE 3: jest --coverage ===
+PASS src/__tests__/presentation/account-store.test.ts
+  account-store.ts                          |     100 |      100 |     100 |     100 |                   
+Test Suites: 59 passed, 59 total
+Tests:       475 passed, 475 total
+  account-store.ts: 100/100/100/100 (all four metrics)
+
+=== SECURITY reconciliation (IMPORTANT) ===
+The feat/full-mock-integration ref branch stored a RAW 16-digit nik in the account store.
+That VIOLATES SECURITY.md §3 (never store raw NIK in a non-authoritative client store) and
+RBT-022 AC1 (fullName/nikMasked/emailMasked). This build stores ONLY the masked UserProfile
+(emailMasked/fullName/nikMasked/hasHik) — fed from UserRepository.getMe(). Test asserts no 'nik' key.
+
+=== 3-platform verification note (HONEST) ===
+RBT-022 is a pure Zustand STATE store + selector — it has NO screen of its own to render.
+A per-device screenshot would show an unchanged screen (meaningless/stale). Verification here:
+  - web: npx expo export --platform web  -> exit 0 (bundles with the new store).
+  - full test suite: 475 tests pass (store logic + selector proven).
+The 3-platform SCREEN verification applies when this store is consumed by the Checkout buyer box
+('Terisi dari akun' prefill) in RBT-053 — captured there against web+iOS+Android.
+Toolchain confirmed available on this machine: iOS sim (iPhone 16 Pro booted) + Android SDK present.

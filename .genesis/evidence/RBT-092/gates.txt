@@ -1,0 +1,44 @@
+RBT-092 — V2 Brutalist Mono: Ticket selection (07-ticket-selection → Checkout screen)
+Branch: feature/RBT-092-v2-ticket-selection
+Date: 2026-11-03
+
+SCOPE
+  Re-skin the ticket-selection (Checkout) screen to the V2 prototype
+  (.genesis/prototype/v2/07-ticket-selection.html), presentation-layer only.
+  All domain rules + the SERVER-DRIVEN timer are untouched.
+
+DOMAIN RULES + SERVER TIMER PRESERVED (the key constraints)
+  Not touched — all live in domain/hooks and remain as built:
+    - 16-digit NIK validation (isValidNik), 3-per-NIK cap (effectiveCap),
+      single-use buyer NIK (setBuyerUseAt), buyer vs attendee NIK (useBuyerNik per row).
+    - Masked NIK on handoff (maskNik, D7.1/D7.5) — raw NIK never logged/stored.
+    - Timer is SERVER-DRIVEN: useServerCountdown(serverClock, session.expiresAt,
+      session.serverTime) — NOT the prototype's 10-min client constant. The topbar
+      only DISPLAYS remainingMs; expiry routes to /expired.
+
+CHANGES (style only)
+  Checkout/fragments/common.tsx       Section → brutalist uppercase label + hard red rule;
+                                      Field → hard 2px border, red invalid/placeholder, Inter
+  Checkout/fragments/CheckoutTopBar.tsx  bar → hard-bordered; timer badge → square, inverts to
+                                      red on warn/expired, JetBrains Mono digits
+  Checkout/index.tsx                  add-ticket button (dashed 2px), cap warning (hard border),
+                                      prefill badge (bordered) → V2 tokens
+
+PROTOTYPE FIDELITY (07)
+  - Hard-bordered form sections + inputs, uppercase labels, red focus/invalid. (.form-section/.form-input)
+  - Square timer badge that inverts to red as the (server) countdown runs low. (.timer)
+  - Add-ticket dashed button + cap warning banner, pure black/white + 2px borders.
+
+GATES
+  tsc --noEmit            : PASS (0 errors)
+  eslint (Checkout/)      : PASS (0 errors, 0 warnings)
+  jest CheckoutScreen + CheckoutFragments + CheckoutScreen.flows : PASS (36/36)
+
+COVERAGE (touched files, scoped)
+  Checkout/index.tsx            : stmts 100% / branch 100% / funcs 100% / lines 100%
+  Checkout/fragments/common.tsx : 100% / 100% / 100% / 100%
+  Checkout/fragments/CheckoutTopBar.tsx : 100% / 100% / 100% / 100%
+
+NOTE
+  Pure presentation restyle preserving every domain rule + the server-driven timer.
+  Screenshots (web/iOS/Android) deferred (host memory TIGHT ~3.6GB); gate evidence captured now.

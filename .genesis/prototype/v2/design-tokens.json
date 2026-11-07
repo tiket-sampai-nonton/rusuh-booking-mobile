@@ -1,0 +1,227 @@
+{
+  "$schema": "https://design-tokens.org/schema.json",
+  "name": "Rusuh Tiket V2 Brutalist Mono",
+  "version": "1.0.0",
+  "description": "Design tokens for the V2 Brutalist Mono theme — Bauhaus meets punk zine",
+  
+  "color": {
+    "core": {
+      "ground": { "value": "#ffffff", "description": "Page background" },
+      "ink": { "value": "#000000", "description": "Primary text, borders, UI elements" },
+      "inkMuted": { "value": "#666666", "description": "Secondary text, placeholders" },
+      "field": { "value": "#f5f5f5", "description": "Input backgrounds, subtle surfaces" }
+    },
+    "legacy": {
+      "black": { "value": "#000000", "alias": "color.core.ink" },
+      "white": { "value": "#ffffff", "alias": "color.core.ground" },
+      "gray": { "value": "#888888" }
+    },
+    "functional": {
+      "accent": { "value": "#000000", "description": "CTAs, highlights" },
+      "danger": { "value": "#ff0000", "description": "Errors, warnings, urgent states" },
+      "success": { "value": "#00aa00", "description": "Success states" },
+      "warning": { "value": "#ff6600", "description": "Warnings, caution states" }
+    },
+    "legacyFunctional": {
+      "red": { "value": "#ff0000", "alias": "color.functional.danger" },
+      "green": { "value": "#00aa00", "alias": "color.functional.success" }
+    }
+  },
+  
+  "typography": {
+    "fontFamily": {
+      "sans": { "value": "'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif" },
+      "mono": { "value": "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace" }
+    },
+    "fontWeight": {
+      "regular": { "value": 400 },
+      "medium": { "value": 500 },
+      "semibold": { "value": 600 },
+      "bold": { "value": 700 },
+      "black": { "value": 900 }
+    },
+    "fontSize": {
+      "2xs": { "value": "0.625rem", "description": "10px — micro labels" },
+      "xs": { "value": "0.75rem", "description": "12px — captions, badges" },
+      "s": { "value": "0.875rem", "description": "14px — body small, buttons" },
+      "m": { "value": "1rem", "description": "16px — body default" },
+      "l": { "value": "1.125rem", "description": "18px — body large" },
+      "xl": { "value": "1.25rem", "description": "20px — subheadings" },
+      "2xl": { "value": "clamp(1.5rem, 3vw, 2rem)", "description": "24-32px — section titles" },
+      "3xl": { "value": "clamp(2rem, 5vw, 3rem)", "description": "32-48px — page titles" },
+      "hero": { "value": "clamp(3rem, 12vw, 10rem)", "description": "48-160px — hero headlines" }
+    },
+    "lineHeight": {
+      "tight": { "value": 1.1 },
+      "snug": { "value": 1.25 },
+      "normal": { "value": 1.5 },
+      "relaxed": { "value": 1.625 }
+    },
+    "letterSpacing": {
+      "tight": { "value": "-0.02em" },
+      "normal": { "value": "0" },
+      "wide": { "value": "0.05em" },
+      "wider": { "value": "0.1em" },
+      "widest": { "value": "0.15em" }
+    }
+  },
+  
+  "spacing": {
+    "scale": {
+      "0": { "value": "0" },
+      "1": { "value": "0.25rem", "description": "4px" },
+      "2": { "value": "0.5rem", "description": "8px" },
+      "3": { "value": "0.75rem", "description": "12px" },
+      "4": { "value": "1rem", "description": "16px" },
+      "5": { "value": "1.25rem", "description": "20px" },
+      "6": { "value": "1.5rem", "description": "24px" },
+      "8": { "value": "2rem", "description": "32px" },
+      "10": { "value": "2.5rem", "description": "40px" },
+      "12": { "value": "3rem", "description": "48px" },
+      "16": { "value": "4rem", "description": "64px" },
+      "20": { "value": "5rem", "description": "80px" },
+      "24": { "value": "6rem", "description": "96px" }
+    },
+    "semantic": {
+      "xs": { "value": "0.5rem", "alias": "spacing.scale.2" },
+      "s": { "value": "1rem", "alias": "spacing.scale.4" },
+      "m": { "value": "1.5rem", "alias": "spacing.scale.6" },
+      "l": { "value": "3rem", "alias": "spacing.scale.12" },
+      "xl": { "value": "5rem", "alias": "spacing.scale.20" }
+    },
+    "frame": { "value": "clamp(1rem, 4vw, 3rem)", "description": "Page margin responsive" }
+  },
+  
+  "border": {
+    "width": {
+      "thin": { "value": "1px" },
+      "default": { "value": "2px" },
+      "thick": { "value": "3px" }
+    },
+    "style": {
+      "default": { "value": "2px solid #000000" },
+      "thick": { "value": "3px solid #000000" },
+      "thin": { "value": "1px solid #000000" },
+      "muted": { "value": "1px solid #666666" },
+      "light": { "value": "2px solid #ffffff" }
+    }
+  },
+  
+  "radius": {
+    "none": { "value": "0" },
+    "sm": { "value": "2px" },
+    "md": { "value": "4px" },
+    "lg": { "value": "8px" },
+    "full": { "value": "9999px" }
+  },
+  
+  "shadow": {
+    "brutalist": {
+      "sm": { "value": "2px 2px 0 #000000" },
+      "md": { "value": "4px 4px 0 #000000" },
+      "lg": { "value": "6px 6px 0 #000000" },
+      "xl": { "value": "8px 8px 0 #000000" }
+    },
+    "brutalistLight": {
+      "sm": { "value": "2px 2px 0 #ffffff" },
+      "md": { "value": "4px 4px 0 #ffffff" }
+    },
+    "soft": {
+      "default": { "value": "0 4px 12px rgba(0, 0, 0, 0.1)" },
+      "lg": { "value": "0 8px 24px rgba(0, 0, 0, 0.15)" }
+    }
+  },
+  
+  "animation": {
+    "duration": {
+      "instant": { "value": "0ms" },
+      "fast": { "value": "150ms" },
+      "normal": { "value": "300ms" },
+      "slow": { "value": "500ms" },
+      "slower": { "value": "800ms" }
+    },
+    "easing": {
+      "default": { "value": "cubic-bezier(0.16, 1, 0.3, 1)", "description": "Smooth deceleration" },
+      "out": { "value": "cubic-bezier(0.33, 1, 0.68, 1)", "description": "Gentle ease out" },
+      "in": { "value": "cubic-bezier(0.32, 0, 0.67, 0)", "description": "Gentle ease in" },
+      "inOut": { "value": "cubic-bezier(0.65, 0, 0.35, 1)", "description": "Symmetric" },
+      "elastic": { "value": "cubic-bezier(0.68, -0.6, 0.32, 1.6)", "description": "Playful bounce" },
+      "bounce": { "value": "cubic-bezier(0.34, 1.56, 0.64, 1)", "description": "Subtle bounce" },
+      "spring": { "value": "cubic-bezier(0.175, 0.885, 0.32, 1.275)", "description": "Spring pop" }
+    }
+  },
+  
+  "zIndex": {
+    "behind": { "value": -1 },
+    "base": { "value": 0 },
+    "raised": { "value": 10 },
+    "dropdown": { "value": 100 },
+    "sticky": { "value": 200 },
+    "header": { "value": 300 },
+    "overlay": { "value": 400 },
+    "modal": { "value": 500 },
+    "popover": { "value": 600 },
+    "toast": { "value": 700 },
+    "tooltip": { "value": 800 },
+    "cursor": { "value": 10000 },
+    "max": { "value": 99999 }
+  },
+  
+  "layout": {
+    "maxWidth": {
+      "xs": { "value": "20rem", "description": "320px" },
+      "sm": { "value": "24rem", "description": "384px" },
+      "md": { "value": "28rem", "description": "448px" },
+      "lg": { "value": "32rem", "description": "512px" },
+      "xl": { "value": "36rem", "description": "576px" },
+      "2xl": { "value": "42rem", "description": "672px" },
+      "3xl": { "value": "48rem", "description": "768px" },
+      "4xl": { "value": "56rem", "description": "896px" },
+      "5xl": { "value": "64rem", "description": "1024px" },
+      "6xl": { "value": "72rem", "description": "1152px" },
+      "7xl": { "value": "80rem", "description": "1280px" }
+    },
+    "content": {
+      "narrow": { "value": "600px" },
+      "default": { "value": "700px" },
+      "wide": { "value": "1200px" }
+    }
+  },
+  
+  "breakpoints": {
+    "xs": { "value": "320px", "description": "Small phones" },
+    "sm": { "value": "480px", "description": "Large phones" },
+    "md": { "value": "768px", "description": "Tablets" },
+    "lg": { "value": "1024px", "description": "Small laptops" },
+    "xl": { "value": "1280px", "description": "Desktops" },
+    "2xl": { "value": "1536px", "description": "Large desktops" }
+  },
+  
+  "component": {
+    "button": {
+      "paddingY": { "value": "0.75rem" },
+      "paddingX": { "value": "1.5rem" },
+      "fontSize": { "value": "0.875rem" },
+      "fontWeight": { "value": 700 },
+      "textTransform": { "value": "uppercase" },
+      "letterSpacing": { "value": "0.05em" }
+    },
+    "input": {
+      "paddingY": { "value": "0.875rem" },
+      "paddingX": { "value": "1rem" },
+      "fontSize": { "value": "1rem" }
+    },
+    "card": {
+      "padding": { "value": "1.5rem" }
+    },
+    "header": {
+      "height": { "value": "60px" },
+      "paddingY": { "value": "1rem" },
+      "paddingX": { "value": "2rem" }
+    },
+    "timer": {
+      "fontSize": { "value": "clamp(4rem, 15vw, 12rem)" },
+      "fontWeight": { "value": 900 }
+    }
+  }
+}

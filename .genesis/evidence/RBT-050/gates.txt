@@ -1,0 +1,31 @@
+RBT-050 — Booking session create/restore + timer — gate evidence
+Captured: 2026-11-02T03:39:33Z  Branch: feature/RBT-050-booking-session
+
+Files:
+  application/booking/create-booking-session.use-case.ts   (port-only, framework-free)
+  application/booking/restore-booking-session.use-case.ts  (restore WITHOUT resetting expiresAt)
+  presentation/hooks/useBookingSession.ts                  (create + restore via TanStack seam)
+  presentation/hooks/useServerCountdown.ts                 (server-deadline countdown via ServerClock)
+  presentation/stores/session-store.ts                     (cross-screen handoff; MASKED NIK only)
+
+=== GATES (G1/G2/G3 auto-approved per authorization; G4 never) ===
+tsc 0 | eslint clean | jest 64 suites / 492 tests
+create-booking-session.use-case.ts  100/100/100/100
+restore-booking-session.use-case.ts 100/100/100/100
+useBookingSession.ts                100/100/100/100
+useServerCountdown.ts               100/100/100/100
+session-store.ts                    100/100/100/100
+overall 98.17/92.07/98.38/98.70
+web export: exit 0 (bundles)
+
+=== AC coverage (FR-17/18/19, D9.2) ===
+- create session from admitted event (CreateBookingSession → BookingRepository.createSession).
+- restore via current WITHOUT resetting expiresAt (RestoreBookingSession → getCurrentSession; test asserts expiresAt unchanged).
+- countdown from SERVER deadline via ServerClock (useServerCountdown; device-clock jump cannot extend it — tested).
+- SESSION_EXPIRED path: countdown onExpire fires once at deadline (tested); routing to /expired is wired in the Checkout screen (RBT-051/053).
+
+=== 3-platform note (HONEST) ===
+RBT-050 is session + timer LOGIC/state (use-cases, hooks, store) — no standalone screen of its own.
+Verification: web bundles (exit 0) + 492 tests (logic + timer + store proven). The 3-platform
+SCREEN capture lands when the Checkout screen consumes these in RBT-051/053 (web+iOS+Android).
+Harvested useServerCountdown + session-store from feat/full-mock-integration (reconciled: masked-NIK-safe, frozen ports).

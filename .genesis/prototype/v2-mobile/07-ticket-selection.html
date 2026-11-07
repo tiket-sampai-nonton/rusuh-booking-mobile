@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Select Tickets — Rusuh Tiket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-tokens.css">
+<style>
+/*
+  RUSUH TIKET — Ticket Selection (Mobile)
+  V2 Brutalist Mono — Strict #000/#fff, 2px borders
+*/
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #fff;
+  color: #000;
+  margin: 0;
+  padding-bottom: 120px;
+}
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 2px solid #000;
+  padding: env(safe-area-inset-top, 0px) 16px 0;
+}
+
+.header-inner {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.back-btn:active {
+  opacity: 0.7;
+}
+
+/* Timer */
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer.warning {
+  background: #ff0000;
+}
+
+.timer-dot {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  animation: blink 1s steps(2) infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0.3; }
+}
+
+/* Main */
+main {
+  padding: calc(56px + env(safe-area-inset-top, 0px) + 16px) 16px 24px;
+}
+
+/* Hero Mini */
+.hero-mini {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border: 2px solid #000;
+  margin-bottom: 16px;
+}
+
+.hero-img {
+  width: 80px;
+  height: 60px;
+  border: 2px solid #000;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.hero-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%);
+}
+
+.hero-info h1 {
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 4px;
+}
+
+.hero-info p {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #666;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title span {
+  font-size: 14px;
+  font-weight: 900;
+  color: #000;
+}
+
+/* Form Card */
+.form-card {
+  border: 2px solid #000;
+  padding: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 2px solid #000;
+  background: #fff;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.form-input:focus {
+  outline: none;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.form-input.valid {
+  border-color: #000;
+}
+
+.form-input.error {
+  border-color: #ff0000;
+}
+
+.field-msg {
+  font-size: 10px;
+  font-weight: 700;
+  margin-top: 8px;
+  min-height: 16px;
+  opacity: 0;
+}
+
+.field-msg.show {
+  opacity: 1;
+}
+
+.field-msg.ok {
+  color: #000;
+}
+
+.field-msg.err {
+  color: #ff0000;
+}
+
+.form-note {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.6;
+  padding-top: 16px;
+  border-top: 1px solid #f5f5f5;
+  margin-top: 16px;
+}
+
+.form-note strong {
+  color: #000;
+}
+
+/* Ticket Item */
+.ticket-item {
+  border: 2px solid #000;
+  margin-bottom: 12px;
+}
+
+.ticket-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  border-bottom: 2px solid #000;
+}
+
+.ticket-header h3 {
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.remove-btn {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ff0000;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.remove-btn:active:not(:disabled) {
+  opacity: 0.7;
+}
+
+.remove-btn:disabled {
+  color: #999;
+  opacity: 0.5;
+}
+
+.ticket-body {
+  padding: 16px;
+}
+
+.field-select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 40px 0 16px;
+  border: 2px solid #000;
+  background: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23000' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+.field-select:focus {
+  outline: none;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.use-buyer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.use-buyer input {
+  width: 20px;
+  height: 20px;
+  accent-color: #000;
+}
+
+/* Add Ticket Button */
+.add-ticket-btn {
+  width: 100%;
+  min-height: 44px;
+  border: 2px dashed #000;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-ticket-btn:active:not(:disabled) {
+  background: #f5f5f5;
+}
+
+.add-ticket-btn:disabled {
+  opacity: 0.5;
+}
+
+.quota-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #000;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+/* Checkout Bar */
+.checkout-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #000;
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 9999;
+}
+
+.checkout-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 48px;
+}
+
+.checkout-total {
+  flex-shrink: 0;
+}
+
+.checkout-total .label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2px;
+}
+
+.checkout-total .value {
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.checkout-btn {
+  width: 160px;
+  height: 48px;
+  background: #fff;
+  color: #000;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.checkout-btn:active:not(:disabled) {
+  background: #f5f5f5;
+}
+
+.checkout-btn:disabled {
+  opacity: 0.5;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 16px);
+  left: 16px;
+  right: 16px;
+  background: #000;
+  color: #fff;
+  padding: 16px;
+  font-weight: 700;
+  text-align: center;
+  z-index: 200;
+  transform: translateY(calc(100% + 20px));
+}
+
+.toast.show {
+  transform: translateY(0);
+}
+
+.toast.error {
+  background: #ff0000;
+}
+
+.toast.success {
+  background: #000;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal {
+  background: #fff;
+  border: 2px solid #000;
+  padding: 24px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+}
+
+.modal h3 {
+  font-size: 18px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin: 0 0 16px;
+}
+
+.modal p {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+
+.modal p strong {
+  color: #000;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-actions button {
+  flex: 1;
+  min-height: 44px;
+  border: 2px solid #000;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-actions .stay-btn {
+  background: #000;
+  color: #fff;
+}
+
+.modal-actions .stay-btn:active {
+  background: #333;
+}
+
+.modal-actions .leave-btn {
+  background: #fff;
+  color: #000;
+}
+
+.modal-actions .leave-btn:active {
+  background: #f5f5f5;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <button class="back-btn" onclick="showLeaveWarning()">← Back</button>
+    <div class="timer" id="timer">
+      <span class="timer-dot"></span>
+      <span id="timerValue">09:59</span>
+    </div>
+  </div>
+</header>
+
+<!-- Main -->
+<main>
+  <div class="hero-mini">
+    <div class="hero-img">
+      <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=200&h=150&fit=crop" alt="Event">
+    </div>
+    <div class="hero-info">
+      <h1>Midnight Echoes World Tour 2025</h1>
+      <p>Dec 28, 2025 · 19:00 WIB · GBK Jakarta</p>
+    </div>
+  </div>
+  
+  <!-- Buyer Info -->
+  <section class="section">
+    <div class="section-title">Buyer Information</div>
+    <div class="form-card">
+      <div class="form-group">
+        <label>Buyer ID (NIK)</label>
+        <input type="text" class="form-input" id="buyerNik" maxlength="16" inputmode="numeric" placeholder="16 digit ID number">
+        <div class="field-msg" id="nikMsg"></div>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" class="form-input" id="buyerEmail" placeholder="your@email.com">
+        <div class="field-msg" id="emailMsg"></div>
+      </div>
+      <p class="form-note">⚠️ Buyer NIK enforces <strong>max 3 tickets per NIK</strong>. Different from attendee NIK on each ticket.</p>
+    </div>
+  </section>
+  
+  <!-- Tickets -->
+  <section class="section">
+    <div class="section-title">Tickets & Attendees <span id="ticketCount">1 of 3</span></div>
+    <div id="ticketItems"></div>
+    <button class="add-ticket-btn" id="addTicketBtn">+ Add Ticket</button>
+    <div class="quota-warning">⚠️ Max <strong>3 tickets per NIK</strong> — validated at checkout.</div>
+  </section>
+</main>
+
+<!-- Checkout Bar -->
+<div class="checkout-bar">
+  <div class="checkout-inner">
+    <div class="checkout-total">
+      <div class="label">Total</div>
+      <div class="value" id="totalPrice">Rp 0</div>
+    </div>
+    <button class="checkout-btn" id="checkoutBtn">
+      <span>Pay</span>
+      <span>→</span>
+    </button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Leave Modal -->
+<div class="modal-overlay" id="leaveModal">
+  <div class="modal">
+    <h3>⚠️ Leave This Page?</h3>
+    <p>If you leave, your session releases and you'll <strong>re-queue from the start</strong>.</p>
+    <div class="modal-actions">
+      <button class="stay-btn" onclick="closeLeaveModal()">Stay</button>
+      <button class="leave-btn" onclick="confirmLeave()">Leave</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Data
+const categories = [
+  { code: 'VVIP', name: 'VVIP', price: 2500000, available: 50 },
+  { code: 'VIP', name: 'VIP Standing', price: 1500000, available: 200 },
+  { code: 'CAT1', name: 'Category 1', price: 1000000, available: 500 },
+  { code: 'CAT2', name: 'Category 2', price: 750000, available: 800 },
+  { code: 'FEST', name: 'Festival', price: 500000, available: 1500 }
+];
+
+let tickets = [{ id: 1, category: '', attendeeName: '', attendeeNik: '', useBuyer: false }];
+let ticketIdCounter = 1;
+const maxTickets = 3;
+
+// Elements
+const els = {
+  ticketItems: document.getElementById('ticketItems'),
+  ticketCount: document.getElementById('ticketCount'),
+  addTicketBtn: document.getElementById('addTicketBtn'),
+  totalPrice: document.getElementById('totalPrice'),
+  checkoutBtn: document.getElementById('checkoutBtn'),
+  buyerNik: document.getElementById('buyerNik'),
+  buyerEmail: document.getElementById('buyerEmail'),
+  nikMsg: document.getElementById('nikMsg'),
+  emailMsg: document.getElementById('emailMsg'),
+  timer: document.getElementById('timer'),
+  timerValue: document.getElementById('timerValue'),
+  toast: document.getElementById('toast'),
+  leaveModal: document.getElementById('leaveModal')
+};
+
+// Init
+function init() {
+  sessionStorage.setItem('waitingRoomEntry', 'true');
+  localStorage.setItem('rusuh_admitted', 'true');
+  renderTickets();
+  setupValidation();
+  startTimer();
+  setupLeaveWarning();
+}
+
+// Render Tickets
+function renderTickets() {
+  els.ticketItems.innerHTML = tickets.map((t, i) => `
+    <div class="ticket-item" data-id="${t.id}">
+      <div class="ticket-header">
+        <h3>Ticket #${i + 1}</h3>
+        <button class="remove-btn" onclick="removeTicket(${t.id})" ${tickets.length <= 1 ? 'disabled' : ''}>Remove</button>
+      </div>
+      <div class="ticket-body">
+        <div class="form-group">
+          <label>Category</label>
+          <select class="field-select" onchange="updateTicket(${t.id},'category',this.value)">
+            <option value="">Select category</option>
+            ${categories.map(c => `<option value="${c.code}" ${t.category === c.code ? 'selected' : ''}>${c.name} — Rp ${c.price.toLocaleString('id-ID')} ${c.available < 100 ? '(' + c.available + ' left)' : ''}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Attendee Name</label>
+          <input type="text" class="form-input" value="${t.attendeeName}" onchange="updateTicket(${t.id},'attendeeName',this.value)" placeholder="Full name as per ID">
+        </div>
+        <div class="form-group">
+          <label>Attendee NIK</label>
+          <input type="text" class="form-input" value="${t.attendeeNik}" maxlength="16" inputmode="numeric" onchange="updateTicket(${t.id},'attendeeNik',this.value)" placeholder="16 digit ID" ${t.useBuyer ? 'readonly' : ''}>
+          <label class="use-buyer">
+            <input type="checkbox" ${t.useBuyer ? 'checked' : ''} onchange="toggleUseBuyer(${t.id},this.checked)">
+            Same as buyer
+          </label>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  els.ticketCount.textContent = `${tickets.length} of ${maxTickets}`;
+  els.addTicketBtn.disabled = tickets.length >= maxTickets;
+  updateTotal();
+}
+
+// Ticket Handlers
+function updateTicket(id, field, value) {
+  const t = tickets.find(x => x.id === id);
+  if (t) t[field] = value;
+  updateTotal();
+  validateForm();
+}
+
+function toggleUseBuyer(id, checked) {
+  const t = tickets.find(x => x.id === id);
+  if (!t) return;
+  
+  const otherUsing = tickets.find(x => x.id !== id && x.useBuyer);
+  if (checked && otherUsing) {
+    showToast('Buyer NIK already used on Ticket #' + (tickets.indexOf(otherUsing) + 1));
+    renderTickets();
+    return;
+  }
+  
+  const buyerNik = els.buyerNik.value;
+  if (checked && buyerNik.length !== 16) {
+    showToast('Enter buyer NIK (16 digits) first');
+    renderTickets();
+    return;
+  }
+  
+  t.useBuyer = checked;
+  t.attendeeNik = checked ? buyerNik : '';
+  renderTickets();
+  validateForm();
+}
+
+function removeTicket(id) {
+  if (tickets.length <= 1) return;
+  tickets = tickets.filter(t => t.id !== id);
+  renderTickets();
+  validateForm();
+}
+
+els.addTicketBtn.addEventListener('click', () => {
+  if (tickets.length >= maxTickets) return;
+  ticketIdCounter++;
+  tickets.push({ id: ticketIdCounter, category: '', attendeeName: '', attendeeNik: '', useBuyer: false });
+  renderTickets();
+  validateForm();
+});
+
+function updateTotal() {
+  let total = 0;
+  tickets.forEach(t => {
+    const cat = categories.find(c => c.code === t.category);
+    if (cat) total += cat.price;
+  });
+  els.totalPrice.textContent = 'Rp ' + total.toLocaleString('id-ID');
+}
+
+// Validation
+function setupValidation() {
+  els.buyerNik.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g, '');
+    validateNik();
+    tickets.filter(t => t.useBuyer).forEach(t => t.attendeeNik = e.target.value);
+    validateForm();
+  });
+  
+  els.buyerEmail.addEventListener('input', () => {
+    validateEmail();
+    validateForm();
+  });
+}
+
+function validateNik() {
+  const nik = els.buyerNik.value;
+  const msg = els.nikMsg;
+  
+  if (nik.length === 16) {
+    msg.textContent = '✓ Valid NIK';
+    msg.className = 'field-msg ok show';
+    els.buyerNik.classList.add('valid');
+    els.buyerNik.classList.remove('error');
+    return true;
+  } else if (nik.length > 0) {
+    msg.textContent = 'NIK must be 16 digits';
+    msg.className = 'field-msg err show';
+    els.buyerNik.classList.add('error');
+    els.buyerNik.classList.remove('valid');
+    return false;
+  }
+  msg.className = 'field-msg';
+  els.buyerNik.classList.remove('valid', 'error');
+  return false;
+}
+
+function validateEmail() {
+  const email = els.buyerEmail.value;
+  const msg = els.emailMsg;
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  
+  if (valid) {
+    msg.textContent = '✓ Valid email';
+    msg.className = 'field-msg ok show';
+    els.buyerEmail.classList.add('valid');
+    els.buyerEmail.classList.remove('error');
+    return true;
+  } else if (email.length > 0) {
+    msg.textContent = 'Enter valid email';
+    msg.className = 'field-msg err show';
+    els.buyerEmail.classList.add('error');
+    els.buyerEmail.classList.remove('valid');
+    return false;
+  }
+  msg.className = 'field-msg';
+  els.buyerEmail.classList.remove('valid', 'error');
+  return false;
+}
+
+function validateForm() {
+  const nikValid = els.buyerNik.value.length === 16;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(els.buyerEmail.value);
+  const ticketsValid = tickets.every(t => t.category && t.attendeeName && t.attendeeNik.length === 16);
+  els.checkoutBtn.disabled = !(nikValid && emailValid && ticketsValid);
+}
+
+// Checkout
+els.checkoutBtn.addEventListener('click', () => {
+  showToast('Proceeding to payment...', 'success');
+  setTimeout(() => location.href = '08-payment.html', 800);
+});
+
+// Timer
+let timeLeft = 10 * 60;
+
+function startTimer() {
+  const interval = setInterval(() => {
+    timeLeft--;
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    els.timerValue.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    
+    if (timeLeft <= 120) els.timer.classList.add('warning');
+    
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      showToast('Session expired', 'error');
+      setTimeout(() => location.href = '09-expired.html?reason=booking', 2000);
+    }
+  }, 1000);
+}
+
+// Toast
+function showToast(msg, type = '') {
+  els.toast.textContent = msg;
+  els.toast.className = 'toast';
+  if (type) els.toast.classList.add(type);
+  els.toast.classList.add('show');
+  setTimeout(() => els.toast.classList.remove('show'), 3000);
+}
+
+// Leave Warning
+function showLeaveWarning() {
+  els.leaveModal.classList.add('show');
+}
+
+function closeLeaveModal() {
+  els.leaveModal.classList.remove('show');
+}
+
+function confirmLeave() {
+  localStorage.removeItem('rusuh_admitted');
+  sessionStorage.removeItem('waitingRoomEntry');
+  location.href = '02-event-detail.html';
+}
+
+function setupLeaveWarning() {
+  history.pushState(null, '', location.href);
+  window.addEventListener('popstate', () => {
+    history.pushState(null, '', location.href);
+    showLeaveWarning();
+  });
+  
+  window.addEventListener('beforeunload', e => {
+    e.preventDefault();
+    e.returnValue = 'You will lose your ticket selection.';
+    return e.returnValue;
+  });
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Payment Successful — Rusuh Tiket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-tokens.css">
+<style>
+/*
+  RUSUH TIKET — Payment Success (Mobile)
+  V2 Brutalist Mono — Strict #000/#fff, 2px borders
+*/
+
+body {
+  background: #000;
+  color: #fff;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 24px) 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  text-align: center;
+}
+
+/* Success Icon */
+.success-icon {
+  width: 80px;
+  height: 80px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon svg {
+  width: 40px;
+  height: 40px;
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+}
+
+/* Header */
+h1 {
+  font-size: 24px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 24px;
+}
+
+/* Summary Card */
+.summary-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-row strong {
+  color: #fff;
+}
+
+/* E-Ticket Card */
+.ticket {
+  background: #fff;
+  color: #000;
+  margin-bottom: 16px;
+}
+
+.ticket-top {
+  background: #000;
+  color: #fff;
+  padding: 16px;
+  text-align: left;
+  border: 2px solid #fff;
+  border-bottom: none;
+}
+
+.ticket-top h3 {
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.ticket-body {
+  padding: 16px;
+  border: 2px solid #000;
+  position: relative;
+}
+
+/* Perforated edge */
+.ticket-body::before,
+.ticket-body::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #000;
+  border-radius: 50%;
+  top: -8px;
+}
+
+.ticket-body::before { left: -8px; }
+.ticket-body::after { right: -8px; }
+
+.ticket-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.ticket-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.ticket-row .label {
+  color: #666;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.ticket-row .value {
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.ticket-divider {
+  border-top: 2px dashed #000;
+  margin: 16px 0;
+}
+
+/* QR Code */
+.qr-code {
+  width: 100px;
+  height: 100px;
+  background: #000;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-code svg {
+  width: 85%;
+  height: 85%;
+}
+
+.ticket-code {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  margin-top: 12px;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 2px solid #fff;
+}
+
+.btn.primary {
+  background: #fff;
+  color: #000;
+}
+
+.btn.primary:active {
+  background: transparent;
+  color: #fff;
+}
+
+.btn.secondary {
+  background: transparent;
+  color: #fff;
+}
+
+.btn.secondary:active {
+  background: #fff;
+  color: #000;
+}
+
+/* Email Note */
+.email-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Print Styles */
+@media print {
+  body { background: #fff; color: #000; }
+  .actions, .email-note { display: none; }
+  .ticket { border: 1px solid #000; }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="success-icon">
+    <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+  </div>
+  
+  <h1>Payment Successful!</h1>
+  <p class="subtitle">E-tickets issued. Show QR at venue entrance.</p>
+  
+  <!-- Order Summary -->
+  <div class="summary-card">
+    <div class="summary-row"><span>Order ID</span><strong>#RSH-2025-847291</strong></div>
+    <div class="summary-row"><span>Tickets</span><strong>3 tickets</strong></div>
+    <div class="summary-row"><span>Total Paid</span><strong>Rp 3,500,000</strong></div>
+    <div class="summary-row"><span>Buyer NIK</span><strong>3201****0001</strong></div>
+  </div>
+  
+  <!-- E-Ticket Card -->
+  <div class="ticket">
+    <div class="ticket-top">
+      <h3>Midnight Echoes World Tour 2025</h3>
+    </div>
+    <div class="ticket-body">
+      <div class="ticket-row">
+        <div><div class="label">Attendee</div><div class="value">John Doe</div></div>
+        <div style="text-align:right"><div class="label">NIK</div><div class="value">3201****0001</div></div>
+      </div>
+      <div class="ticket-row">
+        <div><div class="label">Category</div><div class="value">VIP Standing</div></div>
+        <div style="text-align:right"><div class="label">Date</div><div class="value">Dec 28, 2025</div></div>
+      </div>
+      <div class="ticket-row">
+        <div><div class="label">Time</div><div class="value">19:00 WIB</div></div>
+        <div style="text-align:right"><div class="label">Venue</div><div class="value">GBK Jakarta</div></div>
+      </div>
+      <div class="ticket-divider"></div>
+      <div class="qr-code">
+        <svg viewBox="0 0 100 100" fill="white">
+          <rect x="10" y="10" width="20" height="20"/><rect x="70" y="10" width="20" height="20"/>
+          <rect x="10" y="70" width="20" height="20"/><rect x="15" y="15" width="10" height="10" fill="black"/>
+          <rect x="75" y="15" width="10" height="10" fill="black"/><rect x="15" y="75" width="10" height="10" fill="black"/>
+          <rect x="35" y="10" width="5" height="5"/><rect x="45" y="10" width="10" height="5"/>
+          <rect x="35" y="35" width="30" height="5"/><rect x="35" y="45" width="5" height="20"/>
+          <rect x="60" y="40" width="5" height="15"/><rect x="70" y="35" width="10" height="5"/>
+          <rect x="45" y="60" width="10" height="5"/><rect x="60" y="60" width="5" height="10"/>
+          <rect x="80" y="60" width="10" height="10"/><rect x="35" y="70" width="5" height="10"/>
+          <rect x="60" y="75" width="5" height="15"/><rect x="70" y="80" width="10" height="10"/>
+        </svg>
+      </div>
+      <div class="ticket-code">TKT-VIP-001-2025</div>
+    </div>
+  </div>
+  
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn primary" onclick="downloadTickets()">⬇ Download</button>
+    <a href="01-home.html" class="btn secondary">Home</a>
+  </div>
+  
+  <div class="email-note">✉️ E-tickets also sent to your email</div>
+</div>
+
+<script>
+function downloadTickets() {
+  if (navigator.vibrate) navigator.vibrate(50);
+  
+  if (navigator.share) {
+    navigator.share({
+      title: 'Rusuh Tiket - E-Ticket',
+      text: 'My e-ticket for Midnight Echoes World Tour 2025',
+      url: window.location.href
+    }).catch(() => window.print());
+  } else {
+    window.print();
+  }
+}
+
+// Clear session markers
+localStorage.removeItem('rusuh_admitted');
+sessionStorage.removeItem('waitingRoomEntry');
+</script>
+</body>
+</html>

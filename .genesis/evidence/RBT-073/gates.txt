@@ -1,0 +1,72 @@
+RBT-073 — Web push (service worker) — v1 mandatory
+Branch: feature/RBT-073-web-push
+Date: 2026-11-02
+Evidence path: .genesis/evidence/RBT-073/ (canonical repo-root, per WORKFLOW.md)
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-073 scope) ---
+File                               | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------------|---------|----------|---------|--------
+ infrastructure/.../web-push-notification.adapter | 100 | 93.33 | 100 | 100
+
+RBT-073 adapter >= 90% all four (branch 93.33% — two defensive `??` fallbacks).
+15 scoped tests; the full notification+container+_layout set (6 suites / 56
+tests) stays green. notification-flows + useNotifications were covered in RBT-072.
+
+================================================================
+ACCEPTANCE CRITERIA (AC1 — D8.2)
+================================================================
+- service worker: public/sw.js handles `push` (showNotification from the BE
+  payload { title, body, data:{deepLink,kind} }) and `notificationclick`
+  (focus/navigate an existing tab, else openWindow — the web tap→deep-link, the
+  counterpart of RBT-072 native tap routing). Copied to the web build root
+  (served at /sw.js). ✓
+- browser Notification/Push permission: WebPushNotificationAdapter.requestPermission
+  uses the browser Notification permission (granted short-circuits, denied
+  refuses, default prompts). ✓
+- web adapter behind the shared flow: WebPushNotificationAdapter implements the
+  SAME NotificationPort as the native adapter and is driven by the SAME
+  notification-flows rule — the required flows are identical across platforms
+  (D6.1). registerForRemotePush registers /sw.js + returns the push subscription
+  endpoint. ✓
+- same required flows: unchanged — the expiry/payment/admission/event flows come
+  from the shared notification-flows domain rule (RBT-072). ✓
+- feature-detect / degrade: webPushSupported requires Notification +
+  serviceWorker + PushManager; a browser missing any of them returns no
+  permission / no token and shows nothing, never throws (D8.2). ✓
+- composition root: container binds WebPushNotificationAdapter on web,
+  ExpoNotificationAdapter on native — one platform switch, shared flow.
+  useNotifications now registers on web too (SW + push), with web taps handled
+  by the SW's notificationclick (no in-app JS listener needed on web).
+
+Clean-Arch: the adapter is the only web-side layer touching Notification/
+serviceWorker/PushManager; all global access goes through an injected WebPushEnv
+(so it is unit-testable in node) with defaultWebPushEnv guarding every global.
+
+================================================================
+3-PLATFORM VERIFICATION
+================================================================
+WEB     : npx expo export --platform web → exit 0; public/sw.js is copied to the
+          build root and SERVED at /sw.js — verified live:
+          `curl http://127.0.0.1:8100/sw.js` → HTTP 200, Content-Type
+          text/javascript, 2106 bytes (see sw-served-headers.txt). The web bundle
+          builds with the web-push adapter bound.
+NATIVE  : unaffected — native keeps the RBT-072 Expo adapter; the container
+          platform switch binds web-push only on web. (Web push is a web-only
+          capability, so there is no iOS/Android screen for it.)
+
+HONEST NOTE: end-to-end web-push DELIVERY (BE push → SW `push` event → OS
+notification → click → navigate) needs a real push service + VAPID keys (a BE
+concern, FE-NEED) and a user-gesture permission grant — it is not scriptable in
+a headless/CI browser, and playwright-cli's bundled Chromium crashes on this
+host ("Target crashed"). The adapter logic, feature-detection, graceful
+degradation, permission flow and SW registration are proven by RNTL (15 cases,
+incl. the real defaultWebPushEnv browser surface with stubbed globals), and the
+SW file itself is verified served at /sw.js. The SW's push/notificationclick
+handlers are plain DOM event code exercised by the browser at runtime.

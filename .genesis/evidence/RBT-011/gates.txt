@@ -1,0 +1,102 @@
+RBT-011 — Server-authoritative clock (ServerClock) — gate evidence
+Captured: 2026-10-30T11:50:38Z  Branch: feature/RBT-011-server-clock
+
+Files created:
+  apps/client/src/domain/services/server-clock.ts        (pure-domain ServerClock, depends on ClockPort)
+  apps/client/src/__tests__/domain/server-clock.test.ts  (unit tests, fake ClockPort)
+
+Gate command (test+coverage), run from apps/client/:
+  node -e "process.env.TMPDIR='/tmp';process.env.CI='true';require('jest-cli').run(['--watchAll=false','--watchman=false','--ci','--coverage'])"
+
+=== GATE 1: npx tsc --noEmit ===
+exit=0 (clean)
+
+=== GATE 2: ESLINT_USE_FLAT_CONFIG=false npx eslint 'src/**/*.{ts,tsx}' ===
+exit=0 (clean)
+
+=== GATE 3: jest --coverage ===
+Test Suites: 18 passed, 18 total
+Tests:       115 passed, 115 total
+exit=0
+
+New executable file for RBT-011 — all four metrics 100% (>= 90% target met):
+-------------------------------|---------|----------|---------|---------|-------------------
+File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------------------|---------|----------|---------|---------|-------------------
+ domain/services               |     100 |      100 |     100 |     100 |
+  server-clock.ts              |     100 |      100 |     100 |     100 |
+-------------------------------|---------|----------|---------|---------|-------------------
+
+Full coverage table (whole src/ tree):
+-------------------------------|---------|----------|---------|---------|-------------------
+File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------------------|---------|----------|---------|---------|-------------------
+All files                      |   99.59 |    97.05 |     100 |     100 |
+ app                           |     100 |      100 |     100 |     100 |
+  _layout.tsx                  |     100 |      100 |     100 |     100 |
+ app/(booking)                 |     100 |      100 |     100 |     100 |
+  _layout.tsx                  |     100 |      100 |     100 |     100 |
+ app/(booking)/checkout        |     100 |      100 |     100 |     100 |
+  [sessionId].tsx              |     100 |      100 |     100 |     100 |
+ app/(booking)/payment         |     100 |      100 |     100 |     100 |
+  [bookingId].tsx              |     100 |      100 |     100 |     100 |
+ app/(booking)/success         |     100 |      100 |     100 |     100 |
+  [bookingId].tsx              |     100 |      100 |     100 |     100 |
+ app/(booking)/waiting         |     100 |      100 |     100 |     100 |
+  [eventId].tsx                |     100 |      100 |     100 |     100 |
+ app/(public)                  |     100 |      100 |     100 |     100 |
+  browse.tsx                   |     100 |      100 |     100 |     100 |
+  history.tsx                  |     100 |      100 |     100 |     100 |
+  index.tsx                    |     100 |      100 |     100 |     100 |
+ app/(public)/events           |     100 |      100 |     100 |     100 |
+  [eventId].tsx                |     100 |      100 |     100 |     100 |
+ app/expired                   |     100 |      100 |     100 |     100 |
+  [resourceId].tsx             |     100 |      100 |     100 |     100 |
+ domain/services               |     100 |      100 |     100 |     100 |
+  server-clock.ts              |     100 |      100 |     100 |     100 |
+ infrastructure/__fixtures__   |     100 |      100 |     100 |     100 |
+  mock-booking.repository.ts   |     100 |      100 |     100 |     100 |
+  mock-event.repository.ts     |     100 |      100 |     100 |     100 |
+  mock-file-share.adapter.ts   |     100 |      100 |     100 |     100 |
+  mock-http-client.ts          |     100 |      100 |     100 |     100 |
+  mock-notification.adapter.ts |     100 |      100 |     100 |     100 |
+  mock-payment.repository.ts   |     100 |      100 |     100 |     100 |
+  mock-queue.repository.ts     |     100 |      100 |     100 |     100 |
+  mock-user.repository.ts      |     100 |      100 |     100 |     100 |
+ infrastructure/api            |   98.73 |    97.43 |     100 |     100 |
+  dto-mappers.ts               |     100 |      100 |     100 |     100 |
+  envelope.ts                  |     100 |      100 |     100 |     100 |
+  http-booking.repository.ts   |   92.85 |    83.33 |     100 |     100 | 48
+  http-event.repository.ts     |     100 |      100 |     100 |     100 |
+  http-payment.repository.ts   |     100 |      100 |     100 |     100 |
+  http-queue.repository.ts     |     100 |      100 |     100 |     100 |
+  http-user.repository.ts      |     100 |      100 |     100 |     100 |
+ infrastructure/http           |     100 |      100 |     100 |     100 |
+  fetch-http-client.ts         |     100 |      100 |     100 |     100 |
+ infrastructure/time           |     100 |      100 |     100 |     100 |
+  system-clock.ts              |     100 |      100 |     100 |     100 |
+ presentation/theme            |     100 |      100 |     100 |     100 |
+  theme.ts                     |     100 |      100 |     100 |     100 |
+  tokens.ts                    |     100 |      100 |     100 |     100 |
+ providers                     |     100 |    89.47 |     100 |     100 |
+  container.ts                 |     100 |    84.61 |     100 |     100 | 117
+  providers.tsx                |     100 |      100 |     100 |     100 |
+  query-client.ts              |     100 |      100 |     100 |     100 |
+  service-context.tsx          |     100 |      100 |     100 |     100 |
+ shared/utils                  |     100 |      100 |     100 |     100 |
+  clamp.ts                     |     100 |      100 |     100 |     100 |
+-------------------------------|---------|----------|---------|---------|-------------------
+
+Notes:
+- The two sub-100% files (infrastructure/api/http-booking.repository.ts, providers/container.ts)
+  are pre-existing and NOT touched by RBT-011. The new executable file for this ticket
+  (domain/services/server-clock.ts) is 100% on all four metrics.
+- Domain PORTS (*.port.ts, incl. clock.port.ts) are pure interfaces (zero executable JS),
+  excluded in jest.config.js collectCoverageFrom per the project's documented rule.
+
+Acceptance coverage (all unit-tested in server-clock.test.ts):
+- offset applied after sync (serverNow reflects synced server time, holds as device advances)
+- remaining() never negative (future -> positive, exact -> 0, past -> 0)
+- device-clock jump (backward & forward) does NOT reset offset (only re-sync changes it)
+- re-sync updates the offset (positive -> negative offset, new offset persists)
+- unsynced ServerClock behaves as zero offset

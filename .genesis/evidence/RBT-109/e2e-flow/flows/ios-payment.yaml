@@ -1,0 +1,9 @@
+appId: host.exp.Exponent
+---
+- takeScreenshot: 00-payment
+- tapOn:
+    id: method-QRIS
+- takeScreenshot: 01-select-qris
+- tapOn:
+    id: pay-now
+- takeScreenshot: 02-snap-handoff

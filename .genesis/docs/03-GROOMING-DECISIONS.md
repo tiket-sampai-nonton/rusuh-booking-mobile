@@ -85,7 +85,7 @@
 | # | Decision |
 |---|----------|
 | D6.1 | Merge-blocking gates: TS strict typecheck · ESLint + Prettier · Jest + RNTL · `npm audit --omit=dev --audit-level=high` · SonarCloud quality gate. |
-| D6.2 | Web-release-only gates: Expo export SEO-output check (`single` rejected for public routes) · bundle budget **public ≤300KB gzip / transactional ≤500KB gzip**. |
+| D6.2 | Web-release-only gates: Expo export SEO-output check (`single` rejected for public routes) · bundle budget **≤1 MB gzip initial JavaScript per route** (updated 2026-11-06; replaces the initial 300KB public / 500KB transactional budgets). |
 | D6.3 | **Coverage: ≥90% shared domain/application** (SonarCloud new-code gate) unless explicitly waived. |
 | D6.4 | **Contract validation is intentionally OUT of cloud CI merge/OTA gates** — run locally / separate integration process. |
 | D6.5 | **E2E tooling local/manual only, NOT in cloud CI:** Playwright (web), Maestro (native). |

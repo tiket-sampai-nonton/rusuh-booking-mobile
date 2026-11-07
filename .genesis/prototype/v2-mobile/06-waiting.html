@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Waiting Room — Rusuh Tiket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-tokens.css">
+<style>
+/*
+  RUSUH TIKET — Waiting Room (Mobile)
+  V2 Brutalist Mono — Strict #000/#fff, 2px borders
+  JetBrains Mono for queue terminal feel
+*/
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background: #fff;
+  color: #000;
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 2px solid #000;
+  padding: env(safe-area-inset-top, 0px) 16px 0;
+}
+
+.header-inner {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  text-decoration: none;
+  color: #000;
+}
+
+.logo span {
+  color: #ff0000;
+}
+
+/* Main */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(56px + env(safe-area-inset-top, 0px) + 24px) 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  text-align: center;
+}
+
+.waiting-container {
+  max-width: 400px;
+  width: 100%;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 2px solid #000;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+}
+
+.status-badge.your-turn {
+  background: #ff0000;
+  border-color: #ff0000;
+  animation: pulse 0.5s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Event Info */
+.event-info {
+  margin-bottom: 32px;
+}
+
+.event-info h1 {
+  font-size: 24px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+.event-info p {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+/* Ring Progress */
+.ring-progress {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 24px;
+}
+
+.ring-progress svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.ring-progress circle {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: square;
+}
+
+.ring-bg {
+  stroke: #f5f5f5;
+}
+
+.ring-fg {
+  stroke: #000;
+  stroke-dasharray: 565;
+  stroke-dashoffset: 565;
+}
+
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pos-value {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pos-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #666;
+  margin-top: 8px;
+}
+
+/* Zone Banner */
+.zone-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #000;
+  margin-bottom: 24px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.zone-banner.hidden {
+  display: none;
+}
+
+.zone-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.zone-text b {
+  display: block;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+/* Estimated Time */
+.estimated-time {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  padding: 20px;
+  border: 2px solid #000;
+  background: #f5f5f5;
+  margin-bottom: 24px;
+}
+
+.time-block {
+  text-align: center;
+}
+
+.time-value {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.time-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #666;
+}
+
+/* Redirect Countdown */
+.redirect-countdown {
+  display: none;
+  padding: 20px;
+  border: 2px solid #ff0000;
+  background: #ff0000;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.redirect-countdown.active {
+  display: block;
+}
+
+.redirect-countdown h3 {
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+.redirect-countdown .countdown-number {
+  font-size: 40px;
+  font-weight: 800;
+}
+
+.redirect-countdown p {
+  font-size: 12px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Info Text */
+.info-text {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* Leave Button */
+.leave-btn {
+  min-height: 44px;
+  padding: 0 24px;
+  border: 2px solid #000;
+  background: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.leave-btn:active {
+  background: #000;
+  color: #fff;
+}
+
+/* Error States */
+.error-state {
+  display: none;
+}
+
+.error-state.active {
+  display: block;
+}
+
+.error-state h2 {
+  font-size: 32px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0 0 16px;
+}
+
+.error-state p {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 24px;
+}
+
+.error-state .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 24px;
+  border: 2px solid #000;
+  background: #000;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+}
+
+.error-state .btn:active {
+  background: #333;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal {
+  background: #fff;
+  border: 2px solid #000;
+  padding: 24px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+}
+
+.modal h3 {
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0 0 16px;
+}
+
+.modal p {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-actions button {
+  flex: 1;
+  min-height: 44px;
+  border: 2px solid #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.modal-actions .stay-btn {
+  background: #000;
+  color: #fff;
+}
+
+.modal-actions .stay-btn:active {
+  background: #333;
+}
+
+.modal-actions .leave-confirm-btn {
+  background: #fff;
+  color: #000;
+}
+
+.modal-actions .leave-confirm-btn:active {
+  background: #f5f5f5;
+}
+
+/* Network Status */
+.network-status {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: #000;
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 999;
+  transform: translateY(100%);
+}
+
+.network-status.active {
+  transform: translateY(0);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Network Status -->
+<div class="network-status" id="networkStatus">
+  <span id="networkMessage">Connection lost. Reconnecting...</span>
+</div>
+
+<!-- Leave Modal -->
+<div class="modal-overlay" id="leaveModal">
+  <div class="modal">
+    <h3>⚠️ Leave Queue?</h3>
+    <p>If you leave now, you will lose your position and need to rejoin from the back.</p>
+    <div class="modal-actions">
+      <button class="stay-btn" onclick="closeLeaveModal()">Stay</button>
+      <button class="leave-confirm-btn" onclick="confirmLeave()">Leave</button>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <a href="01-home.html" class="logo" onclick="return handleNavigation(event, '01-home.html')">Rusuh<span>Tiket</span></a>
+  </div>
+</header>
+
+<!-- Main -->
+<main>
+  <div class="waiting-container">
+    <!-- Normal State -->
+    <div id="normalState">
+      <div class="status-badge" id="statusBadge">In Queue</div>
+      
+      <div class="event-info">
+        <h1 id="eventName">Midnight Echoes World Tour 2025</h1>
+        <p id="eventDate">Dec 28, 2025 · 19:00 WIB · GBK Jakarta</p>
+      </div>
+      
+      <!-- Redirect Countdown -->
+      <div class="redirect-countdown" id="redirectCountdown">
+        <h3>🎉 It's Your Turn!</h3>
+        <div class="countdown-number" id="countdownNumber">5</div>
+        <p>Redirecting to ticket selection...</p>
+      </div>
+      
+      <!-- Ring Progress -->
+      <div class="ring-progress" id="ringProgress">
+        <svg viewBox="0 0 200 200">
+          <circle class="ring-bg" cx="100" cy="100" r="90"/>
+          <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="90"/>
+        </svg>
+        <div class="ring-center">
+          <div class="pos-value" id="ringPosition">---</div>
+          <div class="pos-label">Your Position</div>
+        </div>
+      </div>
+      
+      <!-- Zone Banner -->
+      <div class="zone-banner hidden" id="zoneBanner">
+        <span class="zone-icon" id="zoneIcon">🔒</span>
+        <div class="zone-text" id="zoneText">
+          <b>Safe Zone</b>
+          <span>Your ticket is guaranteed.</span>
+        </div>
+      </div>
+      
+      <!-- Estimated Time -->
+      <div class="estimated-time">
+        <div class="time-block">
+          <div class="time-value" id="estMinutes">--</div>
+          <div class="time-label">Minutes</div>
+        </div>
+        <div class="time-block">
+          <div class="time-value" id="estSeconds">--</div>
+          <div class="time-label">Seconds</div>
+        </div>
+      </div>
+      
+      <p class="info-text">
+        Keep this screen open. Your position updates automatically. 
+        Do not close or you will lose your spot.
+      </p>
+      
+      <button class="leave-btn" onclick="showLeaveModal()">Leave Queue</button>
+    </div>
+    
+    <!-- Sold Out State -->
+    <div class="error-state" id="soldOutState">
+      <h2>😔 Sold Out</h2>
+      <p>All tickets have been sold while you were in queue.</p>
+      <a href="01-home.html" class="btn">Browse Events</a>
+    </div>
+    
+    <!-- Session Expired State -->
+    <div class="error-state" id="sessionExpiredState">
+      <h2>⌛ Session Expired</h2>
+      <p>Your queue session has expired due to inactivity.</p>
+      <a href="02-event-detail.html" class="btn">Rejoin Queue</a>
+    </div>
+    
+    <!-- Turn Expired State -->
+    <div class="error-state" id="turnExpiredState">
+      <h2>⏱️ Turn Expired</h2>
+      <p>You didn't proceed to ticket selection in time.</p>
+      <a href="02-event-detail.html" class="btn">Rejoin Queue</a>
+    </div>
+  </div>
+</main>
+
+<script>
+const CONFIG = {
+  REDIRECT_COUNTDOWN: 5,
+  POSITION_UPDATE_INTERVAL: 3000,
+  INITIAL_POSITION: 247
+};
+
+let state = {
+  position: CONFIG.INITIAL_POSITION,
+  initialPosition: CONFIG.INITIAL_POSITION,
+  isMyTurn: false,
+  isOnline: navigator.onLine
+};
+
+const els = {
+  networkStatus: document.getElementById('networkStatus'),
+  networkMessage: document.getElementById('networkMessage'),
+  leaveModal: document.getElementById('leaveModal'),
+  statusBadge: document.getElementById('statusBadge'),
+  ringPosition: document.getElementById('ringPosition'),
+  ringFg: document.getElementById('ringFg'),
+  zoneBanner: document.getElementById('zoneBanner'),
+  zoneIcon: document.getElementById('zoneIcon'),
+  zoneText: document.getElementById('zoneText'),
+  estMinutes: document.getElementById('estMinutes'),
+  estSeconds: document.getElementById('estSeconds'),
+  redirectCountdown: document.getElementById('redirectCountdown'),
+  countdownNumber: document.getElementById('countdownNumber')
+};
+
+// Init
+function init() {
+  sessionStorage.setItem('waitingRoomEntry', 'true');
+  startQueueSimulation();
+  setupNetworkMonitoring();
+}
+
+// Queue Simulation
+function startQueueSimulation() {
+  updateUI();
+  
+  const interval = setInterval(() => {
+    const decrease = Math.floor(Math.random() * 15) + 5;
+    state.position = Math.max(0, state.position - decrease);
+    updateUI();
+    
+    if (state.position <= 0 && !state.isMyTurn) {
+      clearInterval(interval);
+      handleTurnReached();
+    }
+  }, CONFIG.POSITION_UPDATE_INTERVAL);
+}
+
+function updateUI() {
+  els.ringPosition.textContent = state.position;
+  
+  // Ring progress
+  const progress = 1 - (state.position / state.initialPosition);
+  const circumference = 2 * Math.PI * 90;
+  const offset = circumference * (1 - progress);
+  els.ringFg.style.strokeDashoffset = offset;
+  
+  // Estimated time
+  const totalSeconds = state.position * 3;
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  els.estMinutes.textContent = mins.toString().padStart(2, '0');
+  els.estSeconds.textContent = secs.toString().padStart(2, '0');
+  
+  updateZoneBanner();
+}
+
+function updateZoneBanner() {
+  const banner = els.zoneBanner;
+  const icon = els.zoneIcon;
+  const text = els.zoneText;
+  const stock = 300;
+  
+  banner.classList.remove('hidden');
+  
+  if (state.position < stock * 0.5) {
+    icon.textContent = '✓';
+    text.innerHTML = '<b>Guaranteed Zone</b><span>Your ticket is secured when your turn arrives.</span>';
+  } else if (state.position < stock) {
+    icon.textContent = '⚡';
+    text.innerHTML = '<b>Possible Zone</b><span>Tickets may be available. Stay in queue.</span>';
+  } else {
+    icon.textContent = '⚠️';
+    text.innerHTML = '<b>High Demand</b><span>Limited stock remaining. Keep waiting.</span>';
+  }
+}
+
+// Turn Reached
+function handleTurnReached() {
+  state.isMyTurn = true;
+  
+  els.statusBadge.textContent = "It's Your Turn!";
+  els.statusBadge.classList.add('your-turn');
+  els.redirectCountdown.classList.add('active');
+  els.ringPosition.textContent = '0';
+  
+  localStorage.setItem('rusuh_admitted', JSON.stringify({
+    timestamp: Date.now(),
+    eventId: 'prototype'
+  }));
+  
+  let countdown = CONFIG.REDIRECT_COUNTDOWN;
+  els.countdownNumber.textContent = countdown;
+  
+  const interval = setInterval(() => {
+    countdown--;
+    els.countdownNumber.textContent = countdown;
+    
+    if (countdown <= 0) {
+      clearInterval(interval);
+      location.href = '07-ticket-selection.html';
+    }
+  }, 1000);
+}
+
+// Network Monitoring
+function setupNetworkMonitoring() {
+  window.addEventListener('online', () => {
+    state.isOnline = true;
+    els.networkMessage.textContent = 'Connection restored';
+    setTimeout(() => {
+      els.networkStatus.classList.remove('active');
+    }, 2000);
+  });
+  
+  window.addEventListener('offline', () => {
+    state.isOnline = false;
+    els.networkStatus.classList.add('active');
+    els.networkMessage.textContent = 'Connection lost. Reconnecting...';
+  });
+}
+
+// Leave Modal
+function showLeaveModal() {
+  els.leaveModal.classList.add('active');
+}
+
+function closeLeaveModal() {
+  els.leaveModal.classList.remove('active');
+}
+
+function confirmLeave() {
+  sessionStorage.removeItem('waitingRoomEntry');
+  location.href = '02-event-detail.html';
+}
+
+function handleNavigation(event, url) {
+  event.preventDefault();
+  showLeaveModal();
+  return false;
+}
+
+init();
+</script>
+</body>
+</html>

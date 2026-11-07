@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /browse
+Allow: /events/
+Allow: /history
+# Transactional pages are noindex via per-page robots meta; also disallowed here.
+Disallow: /waiting/
+Disallow: /checkout/
+Disallow: /payment/
+Disallow: /success/
+Disallow: /expired/

@@ -1,0 +1,4 @@
+→ No staged files match any configured task.
+✖ commit-msg: must be Conventional Commits 'type(scope): subject'
+  type ∈ {feat|fix|refactor|test|docs|chore|style|perf|build|ci|revert}
+  got: bad message no convention

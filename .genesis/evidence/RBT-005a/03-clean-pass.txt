@@ -1,0 +1,30 @@
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (fbca796)
+[STARTED] Running tasks for staged files...
+[STARTED] package.json — 1 file
+[STARTED] src/**/*.{ts,tsx} — 1 file
+[STARTED] sh -c 'ESLINT_USE_FLAT_CONFIG=false eslint --max-warnings=0 "$@"' --
+[COMPLETED] sh -c 'ESLINT_USE_FLAT_CONFIG=false eslint --max-warnings=0 "$@"' --
+[COMPLETED] src/**/*.{ts,tsx} — 1 file
+[COMPLETED] package.json — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+PASS src/__tests__/app/index.test.tsx
+PASS src/shared/utils/clamp.test.ts
+----------|---------|----------|---------|---------|-------------------
+File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------|---------|----------|---------|---------|-------------------
+All files |     100 |      100 |     100 |     100 |                   
+ clamp.ts |     100 |      100 |     100 |     100 |                   
+----------|---------|----------|---------|---------|-------------------
+
+Test Suites: 2 passed, 2 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        3.888 s
+Ran all test suites related to files matching /src\/shared\/utils\/clamp.ts/i.
+[feature/RBT-005a-husky-commit-guard 924df2e] docs(RBT-005a): document clamp return value (exercise full commit guard on a src file)
+ 1 file changed, 1 insertion(+)

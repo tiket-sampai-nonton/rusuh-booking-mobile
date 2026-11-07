@@ -1,0 +1,51 @@
+RBT-033 — Public SEO rendering (static) — gate evidence
+Captured: 2026-11-02T03:30:54Z  Branch: feature/RBT-033-seo-static
+
+=== AC1: web.output=static -> indexable HTML per route ===
+web.output: 
+HTML files emitted (NOT a single SPA file):
+dist/browse.html
+dist/checkout/[sessionId].html
+dist/events/[eventId].html
+dist/expired/[resourceId].html
+dist/history.html
+dist/index.html
+dist/payment/[bookingId].html
+dist/success/[bookingId].html
+dist/waiting/[eventId].html
+
+=== AC2: metadata / canonical / OG / JSON-LD / noindex ===
+-- HOME / (indexable):
+<title data-rh="true">Rusuh Booking Tiket — Tiket Konser &amp; Event</title>
+name="description" content="Pesan tiket konser dan event favoritmu dengan antrean adil dan pembayaran aman. Tanpa calo, tanpa PHP."/
+name="robots" content="index,follow"
+rel="canonical" href="https://rusuh-booking.example/"
+-- EVENT /events/[eventId] (JSON-LD):
+application/ld+json
+"@type":"Event"
+-- PAYMENT (transactional, noindex):
+name="robots" content="noindex,nofollow"
+-- SUCCESS (noindex):
+name="robots" content="noindex,nofollow"
+-- WAITING (noindex):
+name="robots" content="noindex,nofollow"
+-- EXPIRED (noindex):
+name="robots" content="noindex,nofollow"
+
+robots.txt served at web root:
+User-agent: *
+Allow: /
+Allow: /browse
+Allow: /events/
+Allow: /history
+# Transactional pages are noindex via per-page robots meta; also disallowed here.
+
+=== GATES ===
+tsc 0 | eslint clean | jest 60 suites / 478 tests | Seo.tsx 100/100/100/100 | overall 98.09/91.93/98.28/98.65
+
+=== 3-platform note (HONEST) ===
+RBT-033 is WEB-ONLY SEO: static rendering + <head> meta/robots/canonical/OG/JSON-LD.
+expo-router Head is a NO-OP on native (no DOM <head>), so there is no native-visible SEO
+behavior to screenshot. Meaningful verification = the web static-export HTML above (asserted).
+Native (iOS sim booted, Android SDK present) still renders the app unchanged — SEO wrapping
+is a Fragment around the existing screens; full suite green confirms no native regression.

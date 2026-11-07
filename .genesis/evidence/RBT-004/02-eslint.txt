@@ -1,0 +1,1 @@
+eslint exit 0 (0=clean) -> ../../.genesis/evidence/RBT-004/02-eslint.txt

@@ -1,0 +1,18 @@
+RBT-014 — Mock adapter + test fixtures — gate evidence
+Captured: 2026-10-30T12:24:41Z  Branch: feature/RBT-014-fixtures
+
+Files: src/shared/test-fixtures/events.fixture.ts (6 events) + mock-event.repository.ts now
+serves them + __tests__/shared/test-fixtures.test.ts. Updated RBT-010's stale length assertion.
+
+=== GATE 1: tsc --noEmit ===  exit=0
+=== GATE 2: eslint src/**/*.{ts,tsx} ===  exit=0
+=== GATE 3: jest --coverage ===
+  mock-event.repository.ts       |     100 |      100 |     100 |     100 |                   
+  events.fixture.ts              |     100 |      100 |     100 |     100 |                   
+Test Suites: 21 passed, 21 total
+Tests:       140 passed, 140 total
+
+AC: 6 events (≥5) incl. SOLD_OUT (evt-4), NOT_STARTED (evt-3), CLOSED (evt-5), AVAILABLE;
+FE-NEED O1 fields present (remainingTickets + description JSON); fixtures typed against the
+EventDetail port (shape drift fails tsc); mock repo serves them (list strips description,
+detail includes it). EXPO_PUBLIC_USE_MOCKS toggle unchanged (RBT-010). Full suite 140 tests green.

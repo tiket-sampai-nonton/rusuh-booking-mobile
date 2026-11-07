@@ -236,7 +236,7 @@ The following were discussed but are explicitly NOT in this release:
 ### States
 
 ```
-Backlog → To Do → In Progress → In Review → QA → Done
+Backlog → To Do → In Progress → QA → In Review → Done
 ```
 
 ### Labels

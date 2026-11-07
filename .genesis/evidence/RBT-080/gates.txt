@@ -1,0 +1,66 @@
+RBT-080 — Accessibility (WCAG 2.1 AA, web + native)
+Branch: feature/RBT-080-accessibility
+Date: 2026-11-02
+Evidence path: .genesis/evidence/RBT-080/ (canonical repo-root, per WORKFLOW.md)
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+--- jest (a11y + touched screens) --- 7 suites / 33 tests pass; husky suites green
+
+================================================================
+ACCEPTANCE CRITERIA
+================================================================
+AC1 — WCAG 2.1 AA on web:
+  - Live regions (accessibilityLiveRegion="polite" → aria-live on web) on the
+    status-change surfaces: queue status/position (Waiting), countdown timers
+    (Checkout/Payment TopBar), error banners (Home/Checkout/Payment), AND — added
+    here — the verify/processing status on PaymentResult + Success. ✓
+  - Status never color-only (WCAG 1.4.1): LIVE/SEDANG-BERLANGSUNG labels, payment
+    states carry text, e-ticket has a text ref. The a11y test asserts the
+    ExpiredRecovery status is conveyed by a text header, not color. ✓
+  - Contrast / focus order / keyboard nav: theme tokens + button roles are in
+    place; measured contrast + web tab-order are MANUAL items in the checklist. ✓(built-in) / manual
+AC2 — native screen-reader + reduced motion:
+  - Interactive controls expose accessibilityRole + accessibilityLabel
+    (buttons, QR card, back/pay/retry/re-queue/snap actions) — enforced by the
+    new a11y test. Headers use role="header". ✓
+  - Reduced motion honored via useReducedMotion() across HeroCarousel, Reveal,
+    ScreenFade, TrustStrip, Waiting, + the poll-cadence floor. ✓
+  - Masked NIK / safe QR ref only — no raw PII in the a11y tree (D7.1). ✓
+AC3 — automated + manual:
+  - Automated (CI-feasible): src/__tests__/a11y/accessibility.test.tsx asserts
+    roles + labels + live regions + no-color-only status; runs in the jest gate. ✓
+  - axe: N/A to React Native (no DOM) — documented; a one-off axe run on the web
+    export is the recommended supplement (kept out of the cloud CI gate per
+    WORKFLOW.md "no e2e/browser checks in the cloud gate"). ✓(documented)
+  - Manual checklist for the rest (measured contrast, web keyboard order,
+    VoiceOver/TalkBack pass): wcag-checklist.md, to run before release (RBT-084). ✓
+
+Note: full WCAG 2.1 AA conformance requires manual AT testing + expert review —
+this ticket ships + enforces the structural contract and documents the manual
+items, it does not assert a conformance certificate.
+
+================================================================
+CHANGES
+================================================================
+- PaymentResult + Success: wrapped the processing/verify status in a polite live
+  region (announce verifying→result without re-focus).
+- Added src/__tests__/a11y/accessibility.test.tsx (roles/labels/live-region/
+  no-color-only assertions on the session's screens).
+- Added .genesis/evidence/RBT-080/wcag-checklist.md (the AC3 manual checklist).
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0 (live-region props compile to
+          aria-live on RN-Web; no bundle break).
+iOS     : iPhone 16 Pro, /payment-result → ios-payment-result-live-region.png —
+          the status surface (now a polite live region) renders unchanged
+          (a11y props are structural, not visual).
+NATIVE AT: VoiceOver/TalkBack output is a MANUAL pass (wcag-checklist.md) — a
+          screen reader cannot be scripted/asserted on simctl/adb; the structural
+          contract (roles/labels/live regions/reduced-motion) is test-enforced.

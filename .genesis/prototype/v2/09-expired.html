@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Expired — RUSUH TIKET</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--black:#000;--white:#fff;--gray:#888;--border:2px solid var(--black)}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--black);color:var(--white);cursor:none;overflow-x:hidden;min-height:100vh;display:flex;align-items:center;justify-content:center}
+    
+    .cursor{position:fixed;width:20px;height:20px;border:2px solid var(--white);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .15s ease}
+    .cursor.hover{transform:scale(2);background:var(--white)}
+    .cursor-dot{position:fixed;width:4px;height:4px;background:var(--white);border-radius:50%;pointer-events:none;z-index:10001}
+    
+    .noise{position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");opacity:.03;pointer-events:none}
+    
+    .container{position:relative;z-index:10;text-align:center;padding:2rem;max-width:500px}
+    
+    .icon{width:100px;height:100px;border:var(--border);border-color:var(--white);border-radius:50%;margin:0 auto 2rem;display:flex;align-items:center;justify-content:center;font-size:3rem;animation:fadeIn .6s ease}
+    @keyframes fadeIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+    
+    h1{font-size:clamp(2rem,6vw,3rem);font-weight:900;text-transform:uppercase;letter-spacing:-.04em;margin-bottom:1rem;opacity:0;animation:slideUp .6s ease .2s forwards}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    
+    .subtitle{font-size:1rem;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:2rem;opacity:0;animation:slideUp .6s ease .3s forwards}
+    
+    .info-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:1.5rem;margin-bottom:2rem;text-align:left;opacity:0;animation:slideUp .6s ease .4s forwards}
+    .info-card p{font-size:.875rem;color:rgba(255,255,255,.8);line-height:1.7}
+    .info-card strong{color:var(--white)}
+    
+    .actions{display:flex;flex-direction:column;gap:1rem;opacity:0;animation:slideUp .6s ease .5s forwards}
+    
+    .btn{display:flex;align-items:center;justify-content:center;gap:.75rem;padding:1.25rem 2rem;font-family:inherit;font-size:1rem;font-weight:700;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden}
+    .btn.primary{background:var(--white);color:var(--black);border:var(--border);border-color:var(--white)}
+    .btn.primary::before{content:'';position:absolute;inset:0;background:var(--black);transform:translateY(101%);transition:transform .3s cubic-bezier(.76,0,.24,1)}
+    .btn.primary:hover::before{transform:translateY(0)}
+    .btn.primary:hover{color:var(--white)}
+    .btn.primary span{position:relative;z-index:1}
+    .btn.secondary{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,.3)}
+    .btn.secondary:hover{border-color:var(--white);background:rgba(255,255,255,.05)}
+    
+    @media(max-width:640px){
+      .container{padding:1.5rem}
+      .actions{flex-direction:column}
+    }
+    
+    @media(pointer:coarse){.cursor,.cursor-dot{display:none}body{cursor:auto}}
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="cursor"></div>
+  <div class="cursor-dot"></div>
+  
+  <div class="container">
+    <div class="icon" id="icon">⏱️</div>
+    <h1 id="title">Time's Up</h1>
+    <p class="subtitle" id="subtitle">Your ticket selection session has expired. The tickets you held have been released back to the pool.</p>
+    
+    <div class="info-card" id="infoCard">
+      <p>The stock you held has been <strong>automatically returned</strong> to the pool. You'll need to <strong>join the queue again</strong> to try — as long as tickets are still available.</p>
+    </div>
+    
+    <div class="actions">
+      <a href="02-event-detail.html" class="btn primary" id="primaryBtn"><span>Join Queue Again</span><span>→</span></a>
+      <a href="01-home.html" class="btn secondary">Back to Home</a>
+    </div>
+  </div>
+  
+  <script>
+    const cursor=document.querySelector('.cursor'),cursorDot=document.querySelector('.cursor-dot');
+    let mouseX=0,mouseY=0,cursorX=0,cursorY=0;
+    document.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;cursorDot.style.left=mouseX-2+'px';cursorDot.style.top=mouseY-2+'px'});
+    function animateCursor(){cursorX+=(mouseX-cursorX)*.15;cursorY+=(mouseY-cursorY)*.15;cursor.style.left=cursorX-10+'px';cursor.style.top=cursorY-10+'px';requestAnimationFrame(animateCursor)}
+    animateCursor();
+    document.querySelectorAll('a,button').forEach(el=>{el.addEventListener('mouseenter',()=>cursor.classList.add('hover'));el.addEventListener('mouseleave',()=>cursor.classList.remove('hover'))});
+    
+    // Handle different expiry reasons
+    const params=new URLSearchParams(location.search);
+    const reason=params.get('reason')||'booking';
+    
+    const content={
+      booking:{
+        icon:'⏱️',
+        title:"Time's Up",
+        subtitle:'Your ticket selection session has expired. The tickets you held have been released back to the pool.',
+        info:'The stock you held has been <strong>automatically returned</strong> to the pool. You\'ll need to <strong>join the queue again</strong> to try — as long as tickets are still available.',
+        btn:'Join Queue Again',
+        href:'02-event-detail.html'
+      },
+      payment:{
+        icon:'💳',
+        title:'Payment Expired',
+        subtitle:'The payment deadline has passed. Your order has been automatically cancelled. No charges were made.',
+        info:'We sent a <strong>"booking expired"</strong> notification to your email. The stock has been returned to the pool — you can try again from the queue if tickets are still available.',
+        btn:'Try Again',
+        href:'02-event-detail.html'
+      },
+      'payment-failed':{
+        icon:'↻',
+        title:'Payment Failed',
+        subtitle:'The payment gateway returned a failed status. Your order is still pending and can be retried.',
+        info:'Choose a different payment method to try again. If the booking deadline has passed, the stock will be automatically released.',
+        btn:'Try Different Method',
+        href:'08-payment.html'
+      }
+    };
+    
+    const c=content[reason]||content.booking;
+    document.title=c.title+' — RUSUH TIKET';
+    document.getElementById('icon').textContent=c.icon;
+    document.getElementById('title').textContent=c.title;
+    document.getElementById('subtitle').textContent=c.subtitle;
+    document.getElementById('infoCard').innerHTML='<p>'+c.info+'</p>';
+    document.getElementById('primaryBtn').innerHTML='<span>'+c.btn+'</span><span>→</span>';
+    document.getElementById('primaryBtn').href=c.href;
+  </script>
+</body>
+</html>

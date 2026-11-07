@@ -1,0 +1,70 @@
+RBT-070 — Success page + order summary
+Branch: feature/RBT-070-success-order-summary
+Date: 2026-11-02
+Evidence path: .genesis/evidence/RBT-070/ (canonical repo-root, per WORKFLOW.md)
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-070 scope) ---
+File                               | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------------|---------|----------|---------|--------
+ presentation/screens/Success/index|   100   |   100    |   100   |   100
+
+ALL FOUR METRICS = 100% on the Success screen. 11 scoped tests pass; the broader
+checkout+success set (6 suites / 69 tests) stays green (the Checkout onSubmit
+change that records setOrderDetail caused no regression).
+
+================================================================
+ACCEPTANCE CRITERIA (AC1 — FR-22)
+================================================================
+- The Success screen RE-VERIFIES the authoritative status (useVerifyPayment →
+  getStatus) and renders the order summary ONLY when the status is PAID — it
+  never trusts navigation alone (D10.2). A non-PAID (FAILED) status routes to the
+  recovery screen (/expired?reason=payment). ✓
+- Order summary shows: Order ID (bookingId), Jumlah tiket (ticketCount),
+  Total dibayar (minorToIDR(amountMinor)), NIK pembeli (MASKED). ✓
+- SECURITY: the buyer NIK is shown MASKED only (maskNik → first 2 + last 2,
+  D7.1/D7.5). A test asserts NO 16-digit run renders; the raw NIK never reaches
+  this screen (it is recorded masked at hold time via setOrderDetail). ✓
+- The order detail is captured at the successful hold (Checkout onSubmit):
+  setOrderDetail(maskNik(buyerNik), rows.length) — this wired up the previously
+  unused session-store action so the summary has real data. ✓
+
+Clean-Arch: the screen reads the session store (UI handoff state) + re-verifies
+through the frozen PaymentRepository port via useVerifyPayment; maskNik is a pure
+domain rule; no infrastructure import. The e-ticket QR + download/share is RBT-071.
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0; /success/[bookingId] builds (27.8 kB).
+iOS     : iPhone 16 Pro, deep-link exp://…/success/bk-1 → ios-success-verify-gate.png.
+Android : emulator-5554 (Pixel 7 Pro), same → android-success-verify-gate.png.
+
+HONEST NOTE: both native shots show the VERIFYING state ("Menyiapkan tiket…"),
+NOT the PAID summary. This is correct and intended: a COLD deep-link carries no
+funnel state (no attemptId in the store), so useVerifyPayment cannot confirm PAID
+and the screen refuses to reveal any order/ticket/NIK — exactly the security
+guarantee (never show ticket details without authoritative verification). The
+PAID summary content (orderId / qty / amount / masked NIK, and the FAILED→recovery
+redirect) is proven by RNTL (SuccessScreen.test.tsx, 5 cases); simctl/adb expose
+no scripted taps to drive the full funnel to a verified PAID state on device.
+
+
+================================================================
+ADDENDUM (2026-11-02) — verified-PAID summary captured on device
+================================================================
+screenshots/ios-success-summary-paid.png + android-success-summary-paid.png show
+the REAL verified-PAID order summary rendered on both platforms: "PEMBAYARAN
+BERHASIL / Tiket kamu sudah aktif", Order ID bk-9, Jumlah tiket 2 tiket, Total
+dibayar Rp 450.000, NIK pembeli 31****89 (MASKED). To reach the verified-PAID
+state on a device without scripted funnel taps, a THROWAWAY evidence route seeded
+a real mock attempt (createAttempt → getStatus×2 → PAID) + the order detail, then
+rendered the unmodified SuccessScreen; the route was DELETED after capture and
+never committed. The production gate is unchanged — the summary still renders
+only on an authoritative PAID verdict.

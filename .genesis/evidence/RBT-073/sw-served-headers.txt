@@ -1,0 +1,28 @@
+HTTP/1.0 200 OK
+Server: SimpleHTTP/0.6 Python/3.14.4
+Date: Mon, 02 Nov 2026 15:23:18 GMT
+Content-type: text/javascript
+Content-Length: 2106
+Last-Modified: Mon, 02 Nov 2026 15:07:12 GMT
+
+--- also record the dist listing + first lines of served sw.js ---
+/* Rusuh Booking Tiket — web push service worker (RBT-073, E8, D8.2).
+ *
+ * Served at /sw.js (Expo copies public/ to the web build root). Handles:
+ *  - push:            show the notification the BE pushed (title/body/data).
+ *  - notificationclick: focus an existing tab or open the notification's
+ *                       deepLink (the web counterpart of RBT-072's tap→route).
+ *
+ * The payload shape matches the shared notification flow: { title, body,
+ * data: { deepLink, kind } } — a safe reference, never PII (D7.1).
+ */
+/* global self, clients */
+
+self.addEventListener("install", () => {
+  // Activate immediately so the first page load is covered.
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});

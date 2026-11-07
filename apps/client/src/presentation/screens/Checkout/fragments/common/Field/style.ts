@@ -1,0 +1,56 @@
+import { Platform, StyleSheet } from "react-native";
+
+import { designColors, plusJakartaSansFonts } from "@presentation/theme";
+import type { DynamicStyle } from "@presentation/utils/style";
+
+export const checkoutFieldStyles = StyleSheet.create({
+  container: { marginTop: 16 },
+  mobileWebContainer: { marginTop: 12 },
+  label: {
+    color: designColors.ink,
+    fontSize: 12,
+    fontFamily: plusJakartaSansFonts.bold,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginBottom: 8,
+  },
+  mobileWebLabel: { fontSize: 11, marginBottom: 5, letterSpacing: 0.4 },
+  mobileWebInput: { minHeight: 46, paddingVertical: 11, paddingHorizontal: 12 },
+  error: {
+    color: designColors.danger,
+    fontSize: 12,
+    fontFamily: plusJakartaSansFonts.medium,
+    marginTop: 4,
+  },
+});
+
+export function fieldInputStyle(
+  invalid: boolean,
+  editable: boolean,
+): DynamicStyle {
+  return {
+    borderWidth: 2,
+    borderColor: invalid ? designColors.danger : designColors.ink,
+    backgroundColor: editable ? designColors.ground : designColors.field,
+    color: designColors.ink,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontFamily: plusJakartaSansFonts.regular,
+    fontSize: 16,
+  } as DynamicStyle;
+}
+
+export function fieldFocusStyle(isFocused: boolean): DynamicStyle {
+  if (!isFocused) return {};
+  return Platform.select({
+    web: {
+      boxShadow: "4px 4px 0 #000",
+      transform: [{ translateX: -2 }, { translateY: -2 }],
+    } as object,
+    default: {
+      marginLeft: -2,
+      marginTop: -2,
+      borderWidth: 3,
+    },
+  }) as DynamicStyle;
+}

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Session Expired — Rusuh Tiket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-tokens.css">
+<style>
+/*
+  RUSUH TIKET — Session Expired (Mobile)
+  V2 Brutalist Mono — Strict #000/#fff, 2px borders
+*/
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #fff;
+  color: #000;
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(env(safe-area-inset-top, 0px) + 24px) 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  text-align: center;
+}
+
+/* Expired Icon */
+.expired-icon {
+  width: 100px;
+  height: 100px;
+  border: 2px solid #ff0000;
+  border-radius: 50%;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+
+/* Content */
+h1 {
+  font-size: 28px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+
+.reason {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 32px;
+  line-height: 1.6;
+  max-width: 280px;
+}
+
+/* Info Box */
+.info-box {
+  background: #f5f5f5;
+  border: 2px solid #000;
+  padding: 16px;
+  margin-bottom: 24px;
+  text-align: left;
+  max-width: 320px;
+  width: 100%;
+}
+
+.info-box h3 {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 8px;
+}
+
+.info-box p {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.info-box ul {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.info-box li {
+  font-size: 12px;
+  color: #666;
+  padding: 4px 0 4px 16px;
+  position: relative;
+}
+
+.info-box li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: #000;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 2px solid #000;
+}
+
+.btn.primary {
+  background: #000;
+  color: #fff;
+}
+
+.btn.primary:active {
+  background: #333;
+}
+
+.btn.secondary {
+  background: #fff;
+  color: #000;
+}
+
+.btn.secondary:active {
+  background: #f5f5f5;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="expired-icon" id="icon">⏱️</div>
+
+<h1 id="title">Session Expired</h1>
+<p class="reason" id="reason">Your booking session has timed out. Please start again.</p>
+
+<div class="info-box">
+  <h3>What happened?</h3>
+  <p id="infoText">Your 10-minute booking window has ended.</p>
+  <ul id="infoList">
+    <li>Tickets were released back to inventory</li>
+    <li>No payment was processed</li>
+    <li>You can try again immediately</li>
+  </ul>
+</div>
+
+<div class="actions">
+  <a href="02-event-detail.html" class="btn primary" id="primaryBtn">Try Again</a>
+  <a href="01-home.html" class="btn secondary">Browse Events</a>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const reason = params.get('reason');
+
+const content = {
+  booking: {
+    icon: '⏱️',
+    title: 'Booking Expired',
+    reason: 'Your 10-minute booking window has ended. Tickets have been released.',
+    infoText: 'Booking sessions are limited to ensure fair access for all users.',
+    infoList: [
+      'Selected tickets released to inventory',
+      'No payment was processed',
+      'You can rejoin the queue now'
+    ],
+    primaryText: 'Rejoin Queue',
+    primaryLink: '06-waiting.html'
+  },
+  payment: {
+    icon: '💳',
+    title: 'Payment Timeout',
+    reason: 'The payment window has closed. Please try again.',
+    infoText: 'Payment must be completed within 15 minutes of checkout.',
+    infoList: [
+      'No charges were made',
+      'Tickets returned to inventory',
+      'Your NIK quota is restored'
+    ],
+    primaryText: 'Try Again',
+    primaryLink: '02-event-detail.html'
+  },
+  queue: {
+    icon: '👋',
+    title: 'Queue Session Ended',
+    reason: 'You left the queue or your session was interrupted.',
+    infoText: 'Leaving the queue page releases your position.',
+    infoList: [
+      'Your position was given to the next person',
+      'No tickets were reserved',
+      'Rejoin at any time'
+    ],
+    primaryText: 'Rejoin Queue',
+    primaryLink: '06-waiting.html'
+  },
+  turn: {
+    icon: '⚡',
+    title: 'Turn Missed',
+    reason: "It was your turn but you didn't proceed in time.",
+    infoText: 'When your turn arrives, you have 60 seconds to proceed.',
+    infoList: [
+      'Your turn was skipped',
+      'Position given to next in queue',
+      'You must rejoin from the back'
+    ],
+    primaryText: 'Rejoin Queue',
+    primaryLink: '06-waiting.html'
+  }
+};
+
+const data = content[reason] || content.booking;
+
+document.getElementById('icon').textContent = data.icon;
+document.getElementById('title').textContent = data.title;
+document.getElementById('reason').textContent = data.reason;
+document.getElementById('infoText').textContent = data.infoText;
+document.getElementById('infoList').innerHTML = data.infoList.map(item => `<li>${item}</li>`).join('');
+document.getElementById('primaryBtn').textContent = data.primaryText;
+document.getElementById('primaryBtn').href = data.primaryLink;
+
+// Clear session
+localStorage.removeItem('rusuh_admitted');
+sessionStorage.removeItem('waitingRoomEntry');
+</script>
+</body>
+</html>

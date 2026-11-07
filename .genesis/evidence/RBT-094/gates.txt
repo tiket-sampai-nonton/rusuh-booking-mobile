@@ -1,0 +1,60 @@
+RBT-094 — V2 Brutalist Mono: Success + e-tickets (10-success)
+Branch: feature/RBT-094-v2-success
+Date: 2026-11-03
+
+SCOPE
+  Re-skin the Success screen (.genesis/prototype/v2/10-success.html) and its
+  e-ticket card to the V2 "Brutalist Mono" dark treatment, presentation-layer
+  only. The PAID-gate, the authoritative re-verify, the masked NIK, and the
+  no-PII QR payload are untouched.
+
+SECURITY + GATE CONSTRAINTS PRESERVED (the key ones)
+  Not touched — all remain as built:
+    - PAID-GATE: the confirmed summary renders ONLY when useVerifyPayment reports
+      verdict==="paid". Until then the screen shows the verifying/processing
+      state (testID success-verifying). A cold deep-link therefore shows the
+      verifying gate, NEVER a false confirmed summary (the security property).
+    - Authoritative RE-VERIFY (D10.2): never trusts navigation; a "failed"
+      verdict routes to /expired?reason=payment.
+    - MASKED NIK ONLY (D7.1/D7.5): buyerNikMasked (e.g. "31****89") — the raw
+      16-digit NIK never reaches the FE; test asserts no /\d{16}/ renders.
+    - QR payload is a SAFE reference ticketRef = "RBT|{bookingId}|{n}" — NEVER a
+      NIK/token/PII (D7.1). QR still rendered via react-native-qrcode-svg
+      (react-native-svg), works on web + native.
+    - noindex (transactional, SECURITY §6.5) kept.
+
+CHANGES (style only)
+  presentation/screens/Success/index.tsx     dark ground; green success ring; white
+                                              uppercase title; translucent summary card
+                                              (rgba white .05 / .1 border); white-primary +
+                                              outline-secondary square action buttons
+  presentation/components/ETicketCard.tsx     white ticket card w/ 2px black border; black
+                                              top strip w/ "E-Tiket n / total"; dashed
+                                              perforation divider; QR in a black box (black
+                                              bg, white modules); uppercase code
+  presentation/components/ETicketCard.style.ts (new) dashed divider StyleSheet (borderStyle
+                                              "dashed" needs a StyleSheet, not a className)
+
+PROTOTYPE FIDELITY (10)
+  - Dark container, animated green success ring. (.success-icon)
+  - White ticket cards with a black top strip + dashed divider + black QR box. (.ticket)
+  - Translucent summary card on the dark ground. (.summary-card)
+  - White-primary / transparent-outline actions, uppercase. (.btn.primary / .btn.secondary)
+
+GATES
+  tsc --noEmit                : PASS (0 errors)
+  eslint (Success/ + ETicketCard) : PASS (0 errors, 0 warnings)
+  jest SuccessScreen + ETicketCard + a11y/accessibility : PASS (13/13)
+
+COVERAGE (touched files, scoped)
+  screens/Success/index.tsx          : stmts 100% / branch 100% / funcs 100% / lines 100%
+  components/ETicketCard.tsx         : 100% / 100% / 100% / 100%
+  components/ETicketCard.style.ts    : 100% / 100% / 100% / 100%
+  All touched files 100% on ALL FOUR metrics — no residuals.
+
+NOTE
+  Pure presentation restyle. The PAID-gate / verify-never-trust / masked-NIK /
+  no-PII-QR properties are all preserved; a cold deep-link still shows the
+  verifying gate rather than a false confirmed summary.
+  Screenshots (web/iOS/Android) deferred (host memory tight earlier in the run);
+  gate evidence (tsc/eslint/jest/coverage) captured now.

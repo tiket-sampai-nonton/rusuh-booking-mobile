@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Tickets — RUSUH TIKET</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--black:#000;--white:#fff;--gray:#888;--red:#ff0000;--green:#00aa00;--border:2px solid var(--black)}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--white);color:var(--black);cursor:none;overflow-x:hidden}
+    
+    /* FIXED: Cursor with outline for visibility on any background */
+    .cursor{position:fixed;width:20px;height:20px;border:2px solid var(--black);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .15s ease;box-shadow:0 0 0 1px var(--white)}
+    .cursor.hover{transform:scale(2);background:var(--black)}
+    .cursor-dot{position:fixed;width:4px;height:4px;background:var(--black);border-radius:50%;pointer-events:none;z-index:10001;box-shadow:0 0 0 1px var(--white)}
+    
+    .loader{position:fixed;inset:0;background:var(--black);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem}
+    .loader-text{font-size:clamp(1.5rem,4vw,3rem);font-weight:900;color:var(--white);letter-spacing:-.02em}
+    .loader-bar{width:200px;height:4px;background:rgba(255,255,255,.2);overflow:hidden}
+    .loader-progress{height:100%;background:var(--white);width:0%;transition:width .3s ease}
+    .loader.done{animation:loaderExit .8s cubic-bezier(.76,0,.24,1) forwards}
+    @keyframes loaderExit{0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 100% 0)}}
+    
+    .topbar{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:var(--border);display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem}
+    .topbar-inner{max-width:900px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between}
+    .back-btn{font-size:.875rem;font-weight:700;text-transform:uppercase;background:none;border:none;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:.5rem}
+    .timer{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:var(--black);color:var(--white);font-size:1rem;font-weight:900;font-variant-numeric:tabular-nums}
+    .timer.warning{background:var(--red);animation:timerPulse 1s ease infinite}
+    @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.7}}
+    .timer-dot{width:8px;height:8px;background:var(--white);border-radius:50%;animation:blink 1s steps(2) infinite}
+    @keyframes blink{50%{opacity:.3}}
+    
+    main{max-width:900px;margin:0 auto;padding:2rem;padding-bottom:180px}
+    
+    .hero-mini{display:flex;gap:1.5rem;align-items:center;padding:1.5rem;border:var(--border);margin-bottom:2rem;opacity:0;transform:translateY(20px);transition:all .6s ease}
+    .hero-mini.visible{opacity:1;transform:translateY(0)}
+    .hero-img{width:120px;height:80px;border:var(--border);overflow:hidden;flex-shrink:0}
+    .hero-img img{width:100%;height:100%;object-fit:cover;filter:grayscale(100%)}
+    .hero-info h1{font-size:1.25rem;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;margin-bottom:.25rem}
+    .hero-info p{font-size:.75rem;color:var(--gray)}
+    
+    .section-title{font-size:.625rem;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:var(--gray);margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+    .section-title span{font-size:.875rem;font-weight:900;color:var(--black)}
+    
+    /* Buyer Info */
+    .buyer-section{border:var(--border);padding:1.5rem;margin-bottom:2rem;opacity:0;transform:translateY(20px);transition:all .6s ease .1s}
+    .buyer-section.visible{opacity:1;transform:translateY(0)}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+    .form-group{position:relative}
+    .form-group.full{grid-column:1/-1}
+    .form-group label{display:block;font-size:.625rem;font-weight:900;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem}
+    .form-group input{width:100%;padding:1rem;border:var(--border);background:var(--white);font-family:inherit;font-size:1rem;font-weight:500;transition:all .3s ease}
+    .form-group input:focus{outline:none;box-shadow:4px 4px 0 var(--black);transform:translate(-2px,-2px)}
+    .form-group input.valid{border-color:var(--green)}
+    .form-group input.error{border-color:var(--red)}
+    .field-msg{font-size:.625rem;font-weight:700;margin-top:.5rem;min-height:1rem}
+    .field-msg.ok{color:var(--green)}
+    .field-msg.err{color:var(--red)}
+    .buyer-note{font-size:.75rem;color:var(--gray);line-height:1.6;padding-top:1rem;border-top:1px solid #e0e0e0}
+    
+    /* Ticket Items */
+    .tickets-section{margin-bottom:2rem}
+    .ticket-item{border:var(--border);margin-bottom:1rem;opacity:0;transform:translateY(20px);transition:all .6s ease}
+    .ticket-item.visible{opacity:1;transform:translateY(0)}
+    .ticket-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:#f9f9f9;border-bottom:var(--border)}
+    .ticket-header h3{font-size:.875rem;font-weight:900;text-transform:uppercase}
+    .remove-btn{font-size:.75rem;font-weight:700;color:var(--red);background:none;border:none;cursor:pointer;font-family:inherit;text-transform:uppercase}
+    .remove-btn:disabled{color:var(--gray);cursor:not-allowed}
+    .ticket-body{padding:1.5rem}
+    .ticket-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+    .ticket-row:last-child{margin-bottom:0}
+    .field-select{width:100%;padding:1rem;border:var(--border);background:var(--white);font-family:inherit;font-size:1rem;font-weight:500;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23000' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+    .field-select:focus{outline:none;box-shadow:4px 4px 0 var(--black);transform:translate(-2px,-2px)}
+    .use-buyer{display:flex;align-items:center;gap:.5rem;font-size:.75rem;font-weight:600;cursor:pointer;margin-top:.5rem}
+    .use-buyer input{width:16px;height:16px;accent-color:var(--black)}
+    
+    .add-ticket-btn{width:100%;padding:1.25rem;border:var(--border);border-style:dashed;background:var(--white);font-family:inherit;font-size:.875rem;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;justify-content:center;gap:.5rem}
+    .add-ticket-btn:hover:not(:disabled){background:#f5f5f5}
+    .add-ticket-btn:disabled{opacity:.5;cursor:not-allowed}
+    
+    .quota-warning{display:flex;align-items:center;gap:.75rem;padding:1rem;border:var(--border);background:#fffbe6;font-size:.75rem;font-weight:600;margin-top:1rem}
+    
+    /* Checkout Bar */
+    .checkout-bar{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:var(--border);padding:1rem 2rem;z-index:100}
+    .checkout-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    .checkout-total{text-align:left}
+    .checkout-total .label{font-size:.625rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray)}
+    .checkout-total .value{font-size:1.5rem;font-weight:900;letter-spacing:-.02em}
+    .checkout-btn{padding:1rem 2.5rem;background:var(--black);color:var(--white);border:var(--border);font-family:inherit;font-size:1rem;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;display:flex;align-items:center;gap:.75rem}
+    .checkout-btn::before{content:'';position:absolute;inset:0;background:var(--white);transform:translateY(101%);transition:transform .3s cubic-bezier(.76,0,.24,1)}
+    .checkout-btn:hover:not(:disabled)::before{transform:translateY(0)}
+    .checkout-btn:hover:not(:disabled){color:var(--black)}
+    .checkout-btn:disabled{opacity:.5;cursor:not-allowed}
+    .checkout-btn span{position:relative;z-index:1}
+    
+    .toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--black);color:var(--white);padding:1rem 2rem;font-weight:700;z-index:2000;opacity:0;transition:all .4s cubic-bezier(.76,0,.24,1)}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+    
+    /* Confirm Leave Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:3000;display:none;align-items:center;justify-content:center;padding:2rem}
+    .modal-overlay.show{display:flex}
+    .modal{background:var(--white);border:var(--border);padding:2rem;max-width:400px;width:100%;text-align:center}
+    .modal h3{font-size:1.25rem;font-weight:900;text-transform:uppercase;margin-bottom:1rem}
+    .modal p{font-size:.875rem;color:var(--gray);margin-bottom:2rem;line-height:1.6}
+    .modal p strong{color:var(--black)}
+    .modal-actions{display:flex;gap:1rem}
+    .modal-actions button{flex:1;padding:1rem;border:var(--border);font-family:inherit;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:all .3s ease}
+    .modal-actions .stay-btn{background:var(--black);color:var(--white)}
+    .modal-actions .leave-btn{background:var(--white);color:var(--black)}
+    .modal-actions .leave-btn:hover{background:#f5f5f5}
+    
+    /* Use buyer checkbox disabled state */
+    .use-buyer.disabled{opacity:.5;cursor:not-allowed}
+    .use-buyer.disabled input{cursor:not-allowed}
+    .toast.error{background:var(--red)}
+    .toast.success{background:var(--green)}
+    
+    @media(max-width:768px){
+      .form-row,.ticket-row{grid-template-columns:1fr}
+      .topbar{padding:1rem}
+      main{padding:1rem;padding-bottom:160px}
+      .hero-mini{flex-direction:column;text-align:center}
+      .hero-img{width:100%;height:150px}
+    }
+    
+    @media(pointer:coarse){.cursor,.cursor-dot{display:none}body{cursor:auto}}
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="loader-text">SELECT TICKETS</div>
+    <div class="loader-bar"><div class="loader-progress"></div></div>
+  </div>
+  
+  <div class="cursor"></div>
+  <div class="cursor-dot"></div>
+  
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="back-btn" onclick="history.back()">← Back</button>
+      <div class="timer" id="timer"><span class="timer-dot"></span><span id="timerValue">09:59</span></div>
+    </div>
+  </div>
+  
+  <main>
+    <div class="hero-mini" id="heroMini">
+      <div class="hero-img">
+        <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=300&h=200&fit=crop" alt="Event">
+      </div>
+      <div class="hero-info">
+        <h1>Midnight Echoes World Tour 2025</h1>
+        <p>Dec 28, 2025 · 19:00 WIB · Gelora Bung Karno, Jakarta</p>
+      </div>
+    </div>
+    
+    <section class="buyer-section" id="buyerSection">
+      <div class="section-title">Buyer Information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Buyer ID (NIK)</label>
+          <input type="text" id="buyerNik" maxlength="16" inputmode="numeric" placeholder="16 digit ID number">
+          <div class="field-msg" id="nikMsg"></div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="buyerEmail" placeholder="your@email.com">
+          <div class="field-msg" id="emailMsg"></div>
+        </div>
+      </div>
+      <p class="buyer-note">⚠️ Buyer NIK is used for the <strong>3 tickets per NIK</strong> limit and validated by server. This is different from attendee NIK on each ticket.</p>
+    </section>
+    
+    <section class="tickets-section">
+      <div class="section-title">Tickets & Attendees <span id="ticketCount">1 of 3</span></div>
+      <div id="ticketItems"></div>
+      <button class="add-ticket-btn" id="addTicketBtn">+ Add Another Ticket</button>
+      <div class="quota-warning">⚠️ Maximum <strong>3 tickets per NIK</strong> validated by server at checkout. Each ticket requires 1 attendee NIK.</div>
+    </section>
+  </main>
+  
+  <div class="checkout-bar">
+    <div class="checkout-inner">
+      <div class="checkout-total">
+        <div class="label">Total</div>
+        <div class="value" id="totalPrice">Rp 0</div>
+      </div>
+      <button class="checkout-btn" id="checkoutBtn" disabled>
+        <span>Continue to Payment</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+  
+  <!-- Confirm Leave Modal -->
+  <div class="modal-overlay" id="leaveModal">
+    <div class="modal">
+      <h3>⚠️ Leave This Page?</h3>
+      <p>If you leave now, your session will be released and <strong>you'll have to re-queue from the beginning</strong>. Are you sure?</p>
+      <div class="modal-actions">
+        <button class="stay-btn" onclick="closeLeaveModal()">Stay Here</button>
+        <button class="leave-btn" onclick="confirmLeave()">Yes, Leave</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const loader=document.querySelector('.loader'),loaderProgress=document.querySelector('.loader-progress');
+    let progress=0;
+    const loadInterval=setInterval(()=>{
+      progress+=Math.random()*15;
+      if(progress>=100){progress=100;clearInterval(loadInterval);setTimeout(()=>{loader.classList.add('done');initPage()},200)}
+      loaderProgress.style.width=progress+'%';
+    },100);
+    
+    const cursor=document.querySelector('.cursor'),cursorDot=document.querySelector('.cursor-dot');
+    let mouseX=0,mouseY=0,cursorX=0,cursorY=0;
+    document.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;cursorDot.style.left=mouseX-2+'px';cursorDot.style.top=mouseY-2+'px'});
+    function animateCursor(){cursorX+=(mouseX-cursorX)*.15;cursorY+=(mouseY-cursorY)*.15;cursor.style.left=cursorX-10+'px';cursor.style.top=cursorY-10+'px';requestAnimationFrame(animateCursor)}
+    animateCursor();
+    
+    const categories=[
+      {code:'VVIP',name:'VVIP',price:2500000,available:50},
+      {code:'VIP',name:'VIP Standing',price:1500000,available:200},
+      {code:'CAT1',name:'Category 1',price:1000000,available:500},
+      {code:'CAT2',name:'Category 2',price:750000,available:800},
+      {code:'FEST',name:'Festival',price:500000,available:1500}
+    ];
+    
+    let tickets=[{id:1,category:'',attendeeName:'',attendeeNik:'',useBuyer:false}];
+    let ticketIdCounter=1;
+    const maxTickets=3;
+    
+    function initPage(){
+      // EDGE CASE #25: Validate queue completion - prevent skipping waiting room
+      if (!validateQueueEntry()) {
+        window.location.href = '06-waiting.html';
+        return;
+      }
+      
+      document.getElementById('heroMini').classList.add('visible');
+      document.getElementById('buyerSection').classList.add('visible');
+      renderTickets();
+      startTimer();
+      setupValidation();
+    }
+    
+    // Validate that user came through the waiting room legitimately
+    function validateQueueEntry() {
+      const admitted = localStorage.getItem('rusuh_admitted');
+      
+      // For prototype: also check sessionStorage entry marker
+      const hasWaitingEntry = sessionStorage.getItem('waitingRoomEntry');
+      
+      if (admitted) {
+        const admittedData = JSON.parse(admitted);
+        // Check if admission is still valid (within 5 minutes)
+        if (Date.now() - admittedData.timestamp < 300000) {
+          return true;
+        }
+      }
+      
+      // For prototype purposes: allow if they have waiting room entry (simulating valid flow)
+      // In production this would be a server-validated token
+      if (hasWaitingEntry) {
+        // Mark as admitted for this session
+        localStorage.setItem('rusuh_admitted', JSON.stringify({
+          timestamp: Date.now(),
+          eventId: 'prototype'
+        }));
+        return true;
+      }
+      
+      // No valid entry - redirect to waiting room
+      console.warn('Invalid ticket selection entry - no queue completion found');
+      return false;
+    }
+    
+    function renderTickets(){
+      const container=document.getElementById('ticketItems');
+      container.innerHTML=tickets.map((t,i)=>`
+        <div class="ticket-item" data-id="${t.id}" style="transition-delay:${i*0.1}s">
+          <div class="ticket-header">
+            <h3>Ticket #${i+1}</h3>
+            <button class="remove-btn" onclick="removeTicket(${t.id})" ${tickets.length<=1?'disabled':''}>Remove</button>
+          </div>
+          <div class="ticket-body">
+            <div class="ticket-row">
+              <div class="form-group">
+                <label>Category</label>
+                <select class="field-select" onchange="updateTicket(${t.id},'category',this.value)">
+                  <option value="">Select category</option>
+                  ${categories.map(c=>`<option value="${c.code}" ${t.category===c.code?'selected':''}>${c.name} — Rp ${c.price.toLocaleString('id-ID')} ${c.available<100?'('+c.available+' left)':''}</option>`).join('')}
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Attendee Name</label>
+                <input type="text" value="${t.attendeeName}" onchange="updateTicket(${t.id},'attendeeName',this.value)" placeholder="Full name as per ID">
+              </div>
+            </div>
+            <div class="ticket-row">
+              <div class="form-group">
+                <label>Attendee NIK</label>
+                <input type="text" value="${t.attendeeNik}" maxlength="16" inputmode="numeric" onchange="updateTicket(${t.id},'attendeeNik',this.value)" placeholder="16 digit ID number" ${t.useBuyer?'readonly':''}>
+                <label class="use-buyer">
+                  <input type="checkbox" ${t.useBuyer?'checked':''} onchange="toggleUseBuyer(${t.id},this.checked)">
+                  Same as buyer
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      
+      setTimeout(()=>{
+        document.querySelectorAll('.ticket-item').forEach(el=>el.classList.add('visible'));
+        document.querySelectorAll('.ticket-item button,.ticket-item input,.ticket-item select').forEach(el=>{
+          el.addEventListener('mouseenter',()=>cursor.classList.add('hover'));
+          el.addEventListener('mouseleave',()=>cursor.classList.remove('hover'));
+        });
+      },50);
+      
+      document.getElementById('ticketCount').textContent=`${tickets.length} of ${maxTickets}`;
+      document.getElementById('addTicketBtn').disabled=tickets.length>=maxTickets;
+      updateTotal();
+    }
+    
+    function updateTicket(id,field,value){
+      const t=tickets.find(x=>x.id===id);
+      if(t)t[field]=value;
+      updateTotal();
+      validateForm();
+    }
+    
+    function toggleUseBuyer(id,checked){
+      const t=tickets.find(x=>x.id===id);
+      if(t){
+        // Check if another ticket already uses buyer NIK (single-use rule)
+        const otherUsing = tickets.find(x => x.id !== id && x.useBuyer);
+        if (checked && otherUsing) {
+          showToast('Buyer NIK already used on Ticket #' + (tickets.indexOf(otherUsing) + 1));
+          renderTickets(); // Re-render to uncheck
+          return;
+        }
+        
+        const buyerNik = document.getElementById('buyerNik').value;
+        if (checked && buyerNik.length !== 16) {
+          showToast('Enter buyer NIK (16 digits) first');
+          renderTickets();
+          return;
+        }
+        
+        t.useBuyer=checked;
+        if(checked)t.attendeeNik=buyerNik;
+        else t.attendeeNik = '';
+      }
+      renderTickets();
+      validateForm();
+    }
+    
+    function removeTicket(id){
+      if(tickets.length<=1)return;
+      tickets=tickets.filter(t=>t.id!==id);
+      renderTickets();
+      validateForm();
+    }
+    
+    document.getElementById('addTicketBtn').addEventListener('click',()=>{
+      if(tickets.length>=maxTickets)return;
+      ticketIdCounter++;
+      tickets.push({id:ticketIdCounter,category:'',attendeeName:'',attendeeNik:'',useBuyer:false});
+      renderTickets();
+      validateForm();
+    });
+    
+    function updateTotal(){
+      let total=0;
+      tickets.forEach(t=>{
+        const cat=categories.find(c=>c.code===t.category);
+        if(cat)total+=cat.price;
+      });
+      document.getElementById('totalPrice').textContent='Rp '+total.toLocaleString('id-ID');
+    }
+    
+    function setupValidation(){
+      const nikInput=document.getElementById('buyerNik');
+      const emailInput=document.getElementById('buyerEmail');
+      
+      nikInput.addEventListener('input',e=>{
+        e.target.value=e.target.value.replace(/\D/g,'');
+        validateNik();
+        tickets.filter(t=>t.useBuyer).forEach(t=>t.attendeeNik=e.target.value);
+        validateForm();
+      });
+      
+      emailInput.addEventListener('input',()=>{validateEmail();validateForm()});
+    }
+    
+    function validateNik(){
+      const nik=document.getElementById('buyerNik').value;
+      const msg=document.getElementById('nikMsg');
+      if(nik.length===16){
+        msg.textContent='✓ Valid NIK format';
+        msg.className='field-msg ok';
+        document.getElementById('buyerNik').classList.add('valid');
+        document.getElementById('buyerNik').classList.remove('error');
+        return true;
+      }else if(nik.length>0){
+        msg.textContent='NIK must be 16 digits';
+        msg.className='field-msg err';
+        document.getElementById('buyerNik').classList.add('error');
+        document.getElementById('buyerNik').classList.remove('valid');
+        return false;
+      }
+      msg.textContent='';
+      return false;
+    }
+    
+    function validateEmail(){
+      const email=document.getElementById('buyerEmail').value;
+      const msg=document.getElementById('emailMsg');
+      const valid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if(valid){
+        msg.textContent='✓ Valid email';
+        msg.className='field-msg ok';
+        document.getElementById('buyerEmail').classList.add('valid');
+        document.getElementById('buyerEmail').classList.remove('error');
+        return true;
+      }else if(email.length>0){
+        msg.textContent='Enter a valid email';
+        msg.className='field-msg err';
+        document.getElementById('buyerEmail').classList.add('error');
+        document.getElementById('buyerEmail').classList.remove('valid');
+        return false;
+      }
+      msg.textContent='';
+      return false;
+    }
+    
+    function validateForm(){
+      const nikValid=document.getElementById('buyerNik').value.length===16;
+      const emailValid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('buyerEmail').value);
+      const ticketsValid=tickets.every(t=>t.category&&t.attendeeName&&t.attendeeNik.length===16);
+      document.getElementById('checkoutBtn').disabled=!(nikValid&&emailValid&&ticketsValid);
+    }
+    
+    document.getElementById('checkoutBtn').addEventListener('click',()=>{
+      showToast('Proceeding to payment...','success');
+      setTimeout(()=>location.href='08-payment.html',1500);
+    });
+    
+    // Timer
+    let timeLeft=10*60;
+    function startTimer(){
+      const timerEl=document.getElementById('timer');
+      const timerVal=document.getElementById('timerValue');
+      const interval=setInterval(()=>{
+        timeLeft--;
+        const mins=Math.floor(timeLeft/60);
+        const secs=timeLeft%60;
+        timerVal.textContent=`${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        if(timeLeft<=120)timerEl.classList.add('warning');
+        if(timeLeft<=0){
+          clearInterval(interval);
+          showToast('Session expired','error');
+          setTimeout(()=>location.href='09-expired.html?reason=booking',2000);
+        }
+      },1000);
+    }
+    
+    const toast=document.getElementById('toast');
+    function showToast(msg,type=''){
+      toast.textContent=msg;
+      toast.className='toast';
+      if(type)toast.classList.add(type);
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'),3000);
+    }
+    
+    // ========================================
+    // CONFIRM LEAVE MODAL
+    // ========================================
+    let pendingNavigation = null;
+    
+    function showLeaveModal(targetUrl = null) {
+      pendingNavigation = targetUrl;
+      document.getElementById('leaveModal').classList.add('show');
+    }
+    
+    function closeLeaveModal() {
+      document.getElementById('leaveModal').classList.remove('show');
+      pendingNavigation = null;
+    }
+    
+    function confirmLeave() {
+      // Clear session markers
+      localStorage.removeItem('rusuh_admitted');
+      sessionStorage.removeItem('waitingRoomEntry');
+      
+      if (pendingNavigation) {
+        window.location.href = pendingNavigation;
+      } else {
+        window.location.href = '02-event-detail.html';
+      }
+    }
+    
+    // Back button handler
+    function setupLeaveWarning() {
+      // Push state to intercept back button
+      history.pushState(null, '', location.href);
+      
+      window.addEventListener('popstate', (e) => {
+        history.pushState(null, '', location.href);
+        showLeaveModal();
+      });
+      
+      // Beforeunload for tab close/refresh
+      window.addEventListener('beforeunload', (e) => {
+        e.preventDefault();
+        e.returnValue = 'You will lose your ticket selection. Are you sure?';
+        return e.returnValue;
+      });
+    }
+    
+    // Initialize leave warning
+    setupLeaveWarning();
+    
+    // ========================================
+    // SINGLE-USE BUYER CHECKBOX IMPROVEMENT
+    // ========================================
+    function toggleUseBuyerImproved(id, checked) {
+      const t = tickets.find(x => x.id === id);
+      if (!t) return;
+      
+      // Check if another ticket already uses buyer NIK
+      const otherUsing = tickets.find(x => x.id !== id && x.useBuyer);
+      if (checked && otherUsing) {
+        showToast('Buyer NIK already used on Ticket #' + (tickets.indexOf(otherUsing) + 1));
+        return;
+      }
+      
+      t.useBuyer = checked;
+      if (checked) {
+        const buyerNik = document.getElementById('buyerNik').value;
+        if (buyerNik.length !== 16) {
+          showToast('Enter buyer NIK first');
+          t.useBuyer = false;
+          return;
+        }
+        t.attendeeNik = buyerNik;
+        // Also copy buyer name if attendee name is empty
+        const buyerName = document.getElementById('buyerNik').closest('.buyer-section')?.querySelector('input[placeholder*="name"]')?.value || '';
+      }
+      renderTickets();
+      validateForm();
+    }
+  </script>
+</body>
+</html>

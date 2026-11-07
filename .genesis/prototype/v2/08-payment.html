@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment — RUSUH TIKET</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--black:#000;--white:#fff;--gray:#888;--red:#ff0000;--green:#00aa00;--border:2px solid var(--black)}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:#f5f5f5;color:var(--black);cursor:none;overflow-x:hidden}
+    
+    .cursor{position:fixed;width:20px;height:20px;border:2px solid var(--black);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .15s ease,background .15s ease;box-shadow:0 0 0 1px var(--white)}
+    .cursor.hover{transform:scale(2);background:var(--black)}
+    .cursor-dot{position:fixed;width:4px;height:4px;background:var(--black);border-radius:50%;pointer-events:none;z-index:10001;box-shadow:0 0 0 1px var(--white)}
+    
+    .loader{position:fixed;inset:0;background:var(--black);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem}
+    .loader-text{font-size:clamp(1.5rem,4vw,3rem);font-weight:900;color:var(--white);letter-spacing:-.02em}
+    .loader-bar{width:200px;height:4px;background:rgba(255,255,255,.2);overflow:hidden}
+    .loader-progress{height:100%;background:var(--white);width:0%;transition:width .3s ease}
+    .loader.done{animation:loaderExit .8s cubic-bezier(.76,0,.24,1) forwards}
+    @keyframes loaderExit{0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 100% 0)}}
+    
+    .topbar{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:var(--border);padding:1rem 2rem}
+    .topbar-inner{max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    .back-btn{font-size:.875rem;font-weight:700;text-transform:uppercase;background:none;border:none;cursor:pointer;font-family:inherit}
+    .timer{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:var(--black);color:var(--white);font-size:1rem;font-weight:900;font-variant-numeric:tabular-nums}
+    .timer.warning{background:var(--red);animation:timerPulse 1s ease infinite}
+    @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.7}}
+    .timer-dot{width:8px;height:8px;background:var(--white);border-radius:50%;animation:blink 1s steps(2) infinite}
+    @keyframes blink{50%{opacity:.3}}
+    
+    main{max-width:700px;margin:0 auto;padding:2rem;padding-bottom:180px}
+    
+    .status-banner{display:flex;align-items:center;gap:.75rem;padding:1rem;background:var(--black);color:var(--white);margin-bottom:1.5rem;font-size:.875rem;font-weight:600}
+    .status-banner svg{width:20px;height:20px}
+    
+    .panel{background:var(--white);border:var(--border);margin-bottom:1rem;opacity:0;transform:translateY(20px);transition:all .6s ease}
+    .panel.visible{opacity:1;transform:translateY(0)}
+    .panel-header{padding:1rem 1.5rem;border-bottom:var(--border);font-size:.625rem;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:var(--gray)}
+    .panel-body{padding:1.5rem}
+    
+    .order-name{font-size:1.125rem;font-weight:900;text-transform:uppercase;letter-spacing:-.02em}
+    .order-meta{font-size:.75rem;color:var(--gray);margin-top:.25rem}
+    .order-lines{margin-top:1rem;border-top:1px solid #e0e0e0}
+    .order-line{display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid #e0e0e0;font-size:.875rem}
+    .order-line.total{font-weight:900;font-size:1.25rem;border-bottom:none;padding-top:1rem}
+    .order-line.total .value{color:var(--black)}
+    
+    .payment-methods{display:grid;gap:.75rem}
+    .pm{display:flex;align-items:center;gap:1rem;padding:1rem;border:var(--border);background:var(--white);cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden}
+    .pm::before{content:'';position:absolute;inset:0;background:var(--black);transform:translateX(-101%);transition:transform .3s cubic-bezier(.76,0,.24,1)}
+    .pm:hover::before,.pm.selected::before{transform:translateX(0)}
+    .pm:hover,.pm.selected{color:var(--white)}
+    .pm>*{position:relative;z-index:1}
+    .pm-icon{width:48px;height:32px;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:.625rem;font-weight:900;text-transform:uppercase;flex-shrink:0}
+    .pm-info{flex:1}
+    .pm-info strong{display:block;font-size:.875rem;font-weight:700}
+    .pm-info span{display:block;font-size:.75rem;opacity:.7;margin-top:.125rem}
+    .pm-radio{width:20px;height:20px;border:2px solid currentColor;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .pm-radio::after{content:'';width:10px;height:10px;background:currentColor;border-radius:50%;transform:scale(0);transition:transform .2s ease}
+    .pm.selected .pm-radio::after{transform:scale(1)}
+    
+    .instructions{display:none;margin-top:1rem;padding:1.5rem;border:var(--border);background:#f9f9f9;animation:slideDown .3s ease}
+    .instructions.show{display:block}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    .va-box{text-align:center;padding:1rem;background:var(--white);border:var(--border)}
+    .va-label{font-size:.625rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray)}
+    .va-number{font-size:1.5rem;font-weight:900;letter-spacing:.1em;margin-top:.5rem;font-variant-numeric:tabular-nums}
+    .va-bank{font-size:.75rem;color:var(--gray);margin-top:.25rem}
+    .copy-btn{margin-top:1rem;padding:.75rem 1.5rem;background:var(--black);color:var(--white);border:var(--border);font-family:inherit;font-size:.75rem;font-weight:700;text-transform:uppercase;cursor:pointer}
+    .qr-box{text-align:center}
+    .qr-image{width:180px;height:180px;background:var(--black);margin:0 auto;display:flex;align-items:center;justify-content:center}
+    .qr-image svg{width:85%;height:85%}
+    .qr-string{font-size:.625rem;color:var(--gray);word-break:break-all;margin-top:.75rem;font-family:monospace}
+    .deeplink-btn{display:inline-flex;align-items:center;gap:.5rem;margin-top:1rem;padding:1rem 2rem;background:var(--green);color:var(--white);border:none;font-family:inherit;font-size:.875rem;font-weight:700;text-transform:uppercase;cursor:pointer;text-decoration:none}
+    .poll-note{display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:.75rem;color:var(--gray);margin-top:1rem}
+    .poll-note .spinner{width:14px;height:14px;border:2px solid #e0e0e0;border-top-color:var(--black);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    
+    .checkout-bar{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:var(--border);padding:1rem 2rem;z-index:100}
+    .checkout-inner{max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    .checkout-total .label{font-size:.625rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray)}
+    .checkout-total .value{font-size:1.5rem;font-weight:900}
+    .pay-btn{padding:1rem 2.5rem;background:var(--black);color:var(--white);border:var(--border);font-family:inherit;font-size:1rem;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;display:flex;align-items:center;gap:.75rem}
+    .pay-btn::before{content:'';position:absolute;inset:0;background:var(--white);transform:translateY(101%);transition:transform .3s cubic-bezier(.76,0,.24,1)}
+    .pay-btn:hover:not(:disabled)::before{transform:translateY(0)}
+    .pay-btn:hover:not(:disabled){color:var(--black)}
+    .pay-btn:disabled{opacity:.5;cursor:not-allowed}
+    .pay-btn span{position:relative;z-index:1}
+    
+    .toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--black);color:var(--white);padding:1rem 2rem;font-weight:700;z-index:2000;opacity:0;transition:all .4s cubic-bezier(.76,0,.24,1)}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+    
+    @media(max-width:640px){
+      main{padding:1rem;padding-bottom:160px}
+      .topbar{padding:1rem}
+    }
+    
+    @media(pointer:coarse){.cursor,.cursor-dot{display:none}body{cursor:auto}}
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="loader-text">PAYMENT</div>
+    <div class="loader-bar"><div class="loader-progress"></div></div>
+  </div>
+  
+  <div class="cursor"></div>
+  <div class="cursor-dot"></div>
+  
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="back-btn" onclick="history.back()">← Back</button>
+      <div class="timer" id="timer"><span class="timer-dot"></span><span id="timerValue">14:59</span></div>
+    </div>
+  </div>
+  
+  <main>
+    <div class="status-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Your tickets are held. Complete payment before time runs out.
+    </div>
+    
+    <div class="panel" id="orderPanel">
+      <div class="panel-header">Order Summary</div>
+      <div class="panel-body">
+        <div class="order-name">Midnight Echoes World Tour 2025</div>
+        <div class="order-meta">Dec 28, 2025 · Gelora Bung Karno</div>
+        <div class="order-lines">
+          <div class="order-line"><span>VIP Standing × 2</span><span>Rp 3,000,000</span></div>
+          <div class="order-line"><span>Festival × 1</span><span>Rp 500,000</span></div>
+          <div class="order-line total"><span>Total</span><span class="value">Rp 3,500,000</span></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="panel" id="paymentPanel">
+      <div class="panel-header">Payment Method</div>
+      <div class="panel-body">
+        <div class="payment-methods">
+          <div class="pm" data-method="VA_BCA">
+            <div class="pm-icon">BCA</div>
+            <div class="pm-info"><strong>Virtual Account BCA</strong><span>Transfer via ATM / m-banking</span></div>
+            <div class="pm-radio"></div>
+          </div>
+          <div class="pm" data-method="VA_BNI">
+            <div class="pm-icon">BNI</div>
+            <div class="pm-info"><strong>Virtual Account BNI</strong><span>Transfer via ATM / m-banking</span></div>
+            <div class="pm-radio"></div>
+          </div>
+          <div class="pm" data-method="QRIS">
+            <div class="pm-icon">QR</div>
+            <div class="pm-info"><strong>QRIS</strong><span>Scan with any e-wallet or m-banking</span></div>
+            <div class="pm-radio"></div>
+          </div>
+          <div class="pm" data-method="GOPAY">
+            <div class="pm-icon">GP</div>
+            <div class="pm-info"><strong>GoPay</strong><span>Pay via Gojek app</span></div>
+            <div class="pm-radio"></div>
+          </div>
+          <div class="pm" data-method="SNAP">
+            <div class="pm-icon">📱</div>
+            <div class="pm-info"><strong>SNAP Payment</strong><span>Redirect to secure payment page</span></div>
+            <div class="pm-radio"></div>
+          </div>
+        </div>
+        
+        <div class="instructions" id="vaInstructions">
+          <div class="va-box">
+            <div class="va-label">Virtual Account Number</div>
+            <div class="va-number" id="vaNumber">8077 0812 3456 7890</div>
+            <div class="va-bank" id="vaBank">Bank BCA</div>
+          </div>
+          <button class="copy-btn" onclick="copyVA()">Copy Number</button>
+          <div class="poll-note"><div class="spinner"></div>Waiting for payment confirmation...</div>
+        </div>
+        
+        <div class="instructions" id="qrisInstructions">
+          <div class="qr-box">
+            <div class="qr-image">
+              <svg viewBox="0 0 100 100" fill="white">
+                <rect x="10" y="10" width="20" height="20"/><rect x="70" y="10" width="20" height="20"/>
+                <rect x="10" y="70" width="20" height="20"/><rect x="15" y="15" width="10" height="10" fill="black"/>
+                <rect x="75" y="15" width="10" height="10" fill="black"/><rect x="15" y="75" width="10" height="10" fill="black"/>
+                <rect x="35" y="10" width="5" height="5"/><rect x="45" y="10" width="10" height="5"/>
+                <rect x="35" y="20" width="5" height="10"/><rect x="50" y="20" width="5" height="5"/>
+                <rect x="35" y="35" width="30" height="5"/><rect x="35" y="45" width="5" height="20"/>
+                <rect x="50" y="45" width="5" height="10"/><rect x="60" y="40" width="5" height="15"/>
+                <rect x="70" y="35" width="10" height="5"/><rect x="80" y="40" width="10" height="5"/>
+                <rect x="45" y="60" width="10" height="5"/><rect x="60" y="60" width="5" height="10"/>
+                <rect x="70" y="55" width="5" height="5"/><rect x="80" y="60" width="10" height="10"/>
+                <rect x="35" y="70" width="5" height="10"/><rect x="45" y="75" width="10" height="5"/>
+                <rect x="60" y="75" width="5" height="15"/><rect x="70" y="80" width="10" height="10"/>
+              </svg>
+            </div>
+            <div class="qr-string">00020101021226670016ID.CO.SHOPEE.WWW01189360091800123456789...</div>
+          </div>
+          <div class="poll-note"><div class="spinner"></div>Waiting for payment confirmation...</div>
+        </div>
+        
+        <div class="instructions" id="gopayInstructions">
+          <a href="#" class="deeplink-btn" onclick="openGoPay()">Open GoPay App →</a>
+          <div class="poll-note"><div class="spinner"></div>Waiting for payment confirmation...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <div class="checkout-bar">
+    <div class="checkout-inner">
+      <div class="checkout-total">
+        <div class="label">Total Payment</div>
+        <div class="value">Rp 3,500,000</div>
+      </div>
+      <button class="pay-btn" id="payBtn" disabled>
+        <span>Pay Now</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+  
+  <script>
+    const loader=document.querySelector('.loader'),loaderProgress=document.querySelector('.loader-progress');
+    let progress=0;
+    const loadInterval=setInterval(()=>{
+      progress+=Math.random()*15;
+      if(progress>=100){progress=100;clearInterval(loadInterval);setTimeout(()=>{loader.classList.add('done');initPage()},200)}
+      loaderProgress.style.width=progress+'%';
+    },100);
+    
+    const cursor=document.querySelector('.cursor'),cursorDot=document.querySelector('.cursor-dot');
+    let mouseX=0,mouseY=0,cursorX=0,cursorY=0;
+    document.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;cursorDot.style.left=mouseX-2+'px';cursorDot.style.top=mouseY-2+'px'});
+    function animateCursor(){cursorX+=(mouseX-cursorX)*.15;cursorY+=(mouseY-cursorY)*.15;cursor.style.left=cursorX-10+'px';cursor.style.top=cursorY-10+'px';requestAnimationFrame(animateCursor)}
+    animateCursor();
+    document.querySelectorAll('button,a,.pm').forEach(el=>{el.addEventListener('mouseenter',()=>cursor.classList.add('hover'));el.addEventListener('mouseleave',()=>cursor.classList.remove('hover'))});
+    
+    let selectedMethod=null;
+    const payBtn=document.getElementById('payBtn');
+    
+    function initPage(){
+      document.getElementById('orderPanel').classList.add('visible');
+      setTimeout(()=>document.getElementById('paymentPanel').classList.add('visible'),200);
+      startTimer();
+    }
+    
+    document.querySelectorAll('.pm').forEach(pm=>{
+      pm.addEventListener('click',()=>{
+        document.querySelectorAll('.pm').forEach(p=>p.classList.remove('selected'));
+        pm.classList.add('selected');
+        selectedMethod=pm.dataset.method;
+        payBtn.disabled=false;
+        
+        document.querySelectorAll('.instructions').forEach(i=>i.classList.remove('show'));
+      });
+    });
+    
+    payBtn.addEventListener('click',()=>{
+      if(!selectedMethod)return;
+      
+      payBtn.disabled=true;
+      payBtn.innerHTML='<span>Processing...</span>';
+      
+      setTimeout(()=>{
+        if(selectedMethod.startsWith('VA_')){
+          const bank=selectedMethod.replace('VA_','');
+          document.getElementById('vaNumber').textContent='8077 0812 3456 7890';
+          document.getElementById('vaBank').textContent='Bank '+bank;
+          document.getElementById('vaInstructions').classList.add('show');
+          startPolling();
+        }else if(selectedMethod==='QRIS'){
+          document.getElementById('qrisInstructions').classList.add('show');
+          startPolling();
+        }else if(selectedMethod==='GOPAY'){
+          document.getElementById('gopayInstructions').classList.add('show');
+          startPolling();
+        }else if(selectedMethod==='SNAP'){
+          // Redirect to SNAP simulation page
+          showToast('Redirecting to SNAP payment...');
+          setTimeout(()=>{
+            // Store booking info for SNAP page to retrieve
+            sessionStorage.setItem('snapPayment', JSON.stringify({
+              orderId: 'ORD-' + Date.now(),
+              eventName: 'Midnight Echoes World Tour 2025',
+              amount: 3500000,
+              timestamp: Date.now()
+            }));
+            location.href = '08a-snap.html';
+          }, 1500);
+          return;
+        }
+        payBtn.innerHTML='<span>Waiting...</span>';
+      },1500);
+    });
+    
+    function copyVA(){
+      navigator.clipboard.writeText('807708123456789');
+      showToast('Copied to clipboard');
+    }
+    
+    function openGoPay(){
+      showToast('Opening GoPay app...');
+    }
+    
+    let pollCount=0;
+    function startPolling(){
+      const interval=setInterval(()=>{
+        pollCount++;
+        if(pollCount>=5){
+          clearInterval(interval);
+          showToast('Payment confirmed!');
+          setTimeout(()=>location.href='10-success.html',1500);
+        }
+      },2000);
+    }
+    
+    let timeLeft=15*60;
+    function startTimer(){
+      const timerEl=document.getElementById('timer');
+      const timerVal=document.getElementById('timerValue');
+      const interval=setInterval(()=>{
+        timeLeft--;
+        const mins=Math.floor(timeLeft/60);
+        const secs=timeLeft%60;
+        timerVal.textContent=`${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        if(timeLeft<=120)timerEl.classList.add('warning');
+        if(timeLeft<=0){
+          clearInterval(interval);
+          showToast('Payment time expired');
+          setTimeout(()=>location.href='09-expired.html?reason=payment',2000);
+        }
+      },1000);
+    }
+    
+    const toast=document.getElementById('toast');
+    function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),3000)}
+  </script>
+</body>
+</html>

@@ -27,7 +27,7 @@
   - CI: **GitHub Actions**; static quality: **SonarCloud** (new-code gate, **≥90% shared domain/application coverage**); package manager **npm** with committed `package-lock.json`.
   - Two environments: **`develop`** (EAS `development` channel + dev web host) and **`main`** (EAS `production` channel + prod web host/CDN). Feature branches → PR to `develop`; `develop` → PR to `main` (approval required).
   - **OTA vs native-build routing**: JS/asset-only changes ship via **EAS Update OTA**; native-affecting changes (native dep, Expo config/plugin, permissions, icons/splash, SDK/RN bump, WebView/payment/camera/biometric config) force a **native build**, never OTA.
-  - Gates blocking merge: typecheck (TS strict), ESLint+Prettier, Jest+RNTL, `npm audit` (high/critical prod), SonarCloud. Web release adds SEO-output + bundle-budget checks (**public ≤300KB gzip, transactional ≤500KB gzip**).
+  - Gates blocking merge: typecheck (TS strict), ESLint+Prettier, Jest+RNTL, `npm audit` (high/critical prod), SonarCloud. Web release adds SEO-output + bundle-budget checks (**≤1MB gzip initial JavaScript per route; updated 2026-11-06**).
   - **Contract validation is intentionally OUT of CI merge/OTA gates** (run locally/separate integration process).
   - Secrets: `SONAR_*`, `EXPO_TOKEN`, `EXPO_PROJECT_ID`, `EXPO_PUBLIC_API_URL`, signing creds, web-host creds. **Never** put NIK/payment/secrets/signing keys in the repo or in client-exposed `EXPO_PUBLIC_*`.
 - ✅ **STACK + ARCHITECTURE = per Grand Architecture doc. RESOLVED & LOCKED (user, 2026-10-29).** The following grooming items are now **answered by `ARCHITECTURE.md`** (no longer open):
@@ -37,7 +37,7 @@
   - **API conventions / idempotency / error / server-clock** (Q3.1/3.3/3.4/3.5): `{meta,data}` + `ErrorEnvelope`, OpenAPI-generated types, `Idempotency-Key` per-action reuse, `Retry-After`, `ServerClock` offset (code given). Confirmed server-authoritative.
   - **Security/PII** (Q7.1/7.2/7.4): never log full NIK/tokens/QR; native tokens in `expo-secure-store`, web secure cookie; treat client state as tamperable; mask NIK; clear checkout state on terminal; keep card entry on the provider page (stays out of PCI scope). *(Note: an explicit UU PDP retention/encryption-at-rest policy is still mostly a BE concern; FE side is covered.)*
   - **Testing/quality** (Q9.1/9.2/9.3): Jest+RNTL (cloud CI, ≥90% shared domain/app coverage via SonarCloud), MSW/fixtures for adapters, **Playwright (web) + Maestro (native) local/manual only — NOT in cloud CI**. WCAG 2.1 AA for web. 8 minimum acceptance scenarios defined.
-  - **Scale numbers** (Q1.2): **FE load-test baseline = 50,000 concurrent public browsers / 10,000 waiting-room / 1,000 checkout**; web perf budgets p75 LCP ≤2.5s, INP ≤200ms, CLS ≤0.1; bundle ≤300KB/≤500KB gzip. (BE confirms final launch capacity/SLOs.)
+  - **Scale numbers** (Q1.2): **FE load-test baseline = 50,000 concurrent public browsers / 10,000 waiting-room / 1,000 checkout**; web perf budgets p75 LCP ≤2.5s, INP ≤200ms, CLS ≤0.1; initial JS ≤1MB gzip per route (updated 2026-11-06). (BE confirms final launch capacity/SLOs.)
   - **SEO** (new): public catalog/event pages **static or server-rendered** (`web.output: "static"` locked, `single` rejected); transactional screens client-rendered + `noindex`.
   - **Notifications scope**: native local/remote in scope (`expo-notifications`); **web push deferred from v1**.
   - **Delivery roadmap**: P0-P7 defined — useful seed for Phase 3 task decomposition.

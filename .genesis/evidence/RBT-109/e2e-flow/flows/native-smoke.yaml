@@ -1,0 +1,26 @@
+appId: host.exp.exponent
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd
+- takeScreenshot: 00-expo-go
+- tapOn:
+    text: Rusuh Booking
+- waitForAnimationToEnd
+- takeScreenshot: 01-home
+- tapOn:
+    text: BROWSE
+- waitForAnimationToEnd
+- takeScreenshot: 02-browse
+- tapOn:
+    text: TIKET
+- waitForAnimationToEnd
+- takeScreenshot: 03-my-tickets
+- tapOn:
+    text: AKUN
+- waitForAnimationToEnd
+- takeScreenshot: 04-profile
+- tapOn:
+    text: HOME
+- waitForAnimationToEnd
+- takeScreenshot: 05-home-return

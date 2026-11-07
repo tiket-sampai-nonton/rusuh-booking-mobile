@@ -1,0 +1,79 @@
+/** Checkout screen prop + fragment types. */
+import type { ReactNode } from "react";
+
+import type { TicketRow } from "@domain/rules/checkout";
+import type { BookingCategory } from "@domain/repositories/booking.repository";
+
+export interface CheckoutScreenProps {
+  readonly sessionId: string;
+}
+
+export interface SectionProps {
+  readonly title: string;
+  readonly number?: number;
+  readonly children: ReactNode;
+}
+
+export interface FieldProps {
+  readonly label: string;
+  readonly value: string;
+  readonly onChangeText: (t: string) => void;
+  readonly placeholder?: string;
+  readonly keyboardType?: "number-pad" | "email-address" | "default";
+  readonly testID?: string;
+  readonly invalid?: boolean;
+  readonly editable?: boolean;
+}
+
+export interface CheckoutTopBarProps {
+  readonly remainingMs: number;
+  readonly warn: boolean;
+  readonly expired: boolean;
+  readonly onBack: () => void;
+}
+
+export interface CheckoutHeroProps {
+  readonly eventId: string;
+  readonly isMobileWeb?: boolean;
+}
+
+/** Per-row attendee-check status for the ticket row (RBT-052). */
+export type RowCheckStatus =
+  | "idle"
+  | "checking"
+  | "available"
+  | "blocked"
+  | "warning";
+
+export interface TicketItemProps {
+  readonly index: number;
+  readonly row: TicketRow;
+  readonly canRemove: boolean;
+  readonly onRemove: () => void;
+  readonly onPatch: (p: Partial<TicketRow>) => void;
+  readonly onUseBuyer: (on: boolean) => void;
+  /** Attendee-NIK availability status for this row (RBT-052 AC2). */
+  readonly status?: RowCheckStatus;
+  readonly categories: readonly BookingCategory[];
+}
+
+export interface ConsentGateProps {
+  readonly checked: boolean;
+  readonly onToggle: (on: boolean) => void;
+}
+
+export interface CheckoutBarProps {
+  readonly totalMinor: number;
+  readonly ready: boolean;
+  readonly pending: boolean;
+  readonly expired: boolean;
+  readonly errorMessage?: string;
+  readonly onSubmit: () => void;
+  readonly bottomInset: number;
+}
+
+export interface LeaveConfirmProps {
+  readonly visible: boolean;
+  readonly onStay: () => void;
+  readonly onLeave: () => void;
+}

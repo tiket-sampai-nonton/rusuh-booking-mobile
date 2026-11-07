@@ -1,0 +1,83 @@
+RBT-052 — NIK validation + attendee checks + single-use buyer-NIK
+Branch: feature/RBT-052-nik-attendee-checks
+Date: 2026-11-02
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---
+npx tsc --noEmit -p tsconfig.json
+RESULT: exit 0 (no type errors)
+
+--- eslint (incl. clean-arch boundary rules) ---
+RESULT: exit 0 (clean — domain/application framework-free; the debounce +
+state live in the presentation hook; no infrastructure import in domain)
+
+--- jest coverage (RBT-052 scope) ---
+Files: domain/rules/checkout.ts, application/booking/check-attendee.use-case.ts,
+       presentation/hooks/useAttendeeCheck.ts, presentation/screens/Checkout/**,
+       infrastructure/__fixtures__/mock-booking.repository.ts
+Excluded: Checkout/interface.ts (type-only declarations — non-executable)
+
+File                                     | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------------------|---------|----------|---------|--------
+ application/booking/check-attendee      |     100 |      100 |     100 |     100
+ domain/rules/checkout.ts                |   98.07 |    97.72 |     100 |     100
+ infrastructure/.../mock-booking.repo    |     100 |      100 |     100 |     100
+ presentation/hooks/useAttendeeCheck.ts  |     100 |      100 |     100 |     100
+ presentation/screens/Checkout/index.tsx |   98.27 |     100  |    91.3 |   97.77
+   (all other Checkout files)            |     100 |      100 |     100 |     100
+
+ALL FOUR METRICS >= 90% on every RBT-052 file. ✓
+Full suite: 69 suites, 557 tests — all pass.
+
+================================================================
+ACCEPTANCE CRITERIA
+================================================================
+AC1 NIK mandatory 16-digit per attendee; buyer NIK usable on exactly ONE row
+    (single-use switch clears the others) — setBuyerUseAt / buyerNikUsedOnce. ✓
+AC2 debounced attendee-checks (useAttendeeCheck, 500ms, de-duped, latest-wins):
+    ALREADY_REGISTERED BLOCKS readiness (isAttendeeBlocked), CHECK_LIMIT_REACHED
+    only WARNS (isAttendeeWarning) and still allows submit. Per-row status UX in
+    TicketItem (checking / available / blocked / warning). ✓
+AC3 guest path — inline consent gate (ConsentGate) rendered at checkout for a
+    guest (no account profile); a logged-in user (consented at registration)
+    skips it. Readiness blocks until a guest ticks it. ✓
+
+SECURITY: NIK never logged/stored raw; checkAttendee returns nikMasked only.
+Clean-Arch: CheckAttendee use case is framework-free; TanStack/debounce confined
+to the presentation hook; mock adapter swappable at the composition root.
+
+================================================================
+MOCK ENHANCEMENT (not a port change)
+================================================================
+MockBookingRepository.checkAttendee is now deterministic by NIK suffix so the FE
+can exercise every verdict without the BE: `...00` -> ALREADY_REGISTERED,
+`...99` -> CHECK_LIMIT_REACHED, else AVAILABLE. The frozen BookingRepository port
+signature is unchanged.
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web -> exit 0; /checkout/[sessionId].html
+          produced (static output, noindex intact).
+iOS     : iPhone 16 Pro (booted), Expo Go deep-link checkout/demo-sess
+          -> ios-checkout-guest-consent.png (screen mounts; buyer data + Tiket
+          card render).
+Android : emulator-5554, Expo Go deep-link
+          -> android-checkout-persetujuan.png (screen mounts; the guest-only
+          "PERSETUJUAN" consent section header is visible at the bottom — proving
+          the inline consent gate renders for a guest, AC3).
+
+INTERACTIVE STATES (typed-NIK attendee status, consent-tick -> submit enabled,
+ALREADY_REGISTERED blocks, CHECK_LIMIT_REACHED allows): proven by the RNTL
+integration tests that render the REAL RN components (CheckoutScreen.test.tsx:
+"a guest sees the inline consent gate and cannot submit until it is ticked",
+"a logged-in user skips the inline consent gate",
+"an ALREADY_REGISTERED attendee NIK blocks submit and shows the status",
+"CHECK_LIMIT_REACHED warns but still allows submit"). simctl/adb expose NO
+scripted-input primitive, so these text-entry-dependent states cannot be
+captured as a native screenshot; the harness render is the authoritative proof.
+Countdown reads 00:00 on demo-sess (no live mock session -> no deadline); the
+wiring renders and a real funnel session feeds it.

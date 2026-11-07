@@ -1,0 +1,16 @@
+
+> rusuh-booking-client@0.1.0 test
+> jest --runInBand src/__tests__/presentation/screens/browse-filter.test.ts src/__tests__/presentation/screens/PaymentScreen.test.tsx src/__tests__/presentation/screens/SnapSimulatorScreen.test.tsx
+
+PASS src/__tests__/presentation/screens/PaymentScreen.test.tsx
+PASS src/__tests__/presentation/screens/SnapSimulatorScreen.test.tsx
+PASS src/__tests__/presentation/screens/browse-filter.test.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       51 passed, 51 total
+Snapshots:   0 total
+Time:        1.832 s, estimated 5 s
+Ran all test suites matching /src\/__tests__\/presentation\/screens\/browse-filter.test.ts|src\/__tests__\/presentation\/screens\/PaymentScreen.test.tsx|src\/__tests__\/presentation\/screens\/SnapSimulatorScreen.test.tsx/i.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.

@@ -1,0 +1,23 @@
+RBT-012 — Idempotency-Key handling — gate evidence
+Captured: 2026-10-30T12:12:58Z  Branch: feature/RBT-012-idempotency
+
+Files:
+  src/domain/idempotency/idempotency-store.port.ts  (persistence PORT, type-only)
+  src/domain/idempotency/idempotency-key.ts         (mint/peek/clear + generateKey)
+  src/infrastructure/__fixtures__/in-memory-idempotency-store.ts (adapter)
+  src/__tests__/domain/idempotency.test.ts          (8 cases)
+
+=== GATE 1: tsc --noEmit ===  exit=0
+=== GATE 2: eslint src/**/*.{ts,tsx} ===  exit=0
+=== GATE 3: jest --coverage ===
+PASS src/__tests__/domain/idempotency.test.ts
+ domain/idempotency              |     100 |      100 |     100 |     100 |                   
+  idempotency-key.ts             |     100 |      100 |     100 |     100 |                   
+  in-memory-idempotency-store.ts |     100 |      100 |     100 |     100 |                   
+Test Suites: 19 passed, 19 total
+Tests:       123 passed, 123 total
+
+AC coverage: key minted per action + persisted; reused on retry/refresh (same key);
+double-submit uses ONE key (generator called once); cleared on terminal; peek; distinct
+actions distinct keys. idempotency-key.ts + in-memory store: 100/100/100/100.
+Store PORT is type-only -> excluded in jest.config.js (documented, consistent with other ports).

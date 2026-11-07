@@ -1,0 +1,84 @@
+RBT-071 — E-ticket QR + download/share
+Branch: feature/RBT-071-eticket-qr
+Date: 2026-11-02
+Evidence path: .genesis/evidence/RBT-071/ (canonical repo-root, per WORKFLOW.md)
+
+================================================================
+PHASE 4 — VERIFY / QA GATES
+================================================================
+
+--- tsc (strict) ---  exit 0
+--- eslint (max-warnings 0, incl. boundaries) ---  clean
+
+--- jest coverage (RBT-071 scope) ---
+File                               | % Stmts | % Branch | % Funcs | % Lines
+-----------------------------------|---------|----------|---------|--------
+ presentation/components/ETicketCard|   100   |   100    |   100   |   100
+ presentation/hooks/useETicketShare |  96.42  |  91.66   |   100   |   100
+ presentation/screens/Success/index |   100   |   100    |   100   |   100
+
+ALL FOUR METRICS >= 90% on every RBT-071 file. 17 scoped tests pass.
+(useETicketShare line 72 = a defensive `win?.document` falsy arm on the web
+print default — branch still 91.66% >= 90%.)
+
+================================================================
+DEPENDENCIES ADDED (planned stack / architecture-named capabilities)
+================================================================
+- react-native-svg@15.8.0        — locked stack (AGENTS.md "QR | react-native-svg")
+- react-native-qrcode-svg@^6.3.49 — QR encoder over react-native-svg (web+native)
+- expo-sharing@~13.0.1            — native share sheet (ARCHITECTURE §2.1 "file sharing")
+- expo-file-system@~18.0.12       — native cache write for the shared file
+All via `expo install` (SDK-pinned). Web export still succeeds (the native deps
+do NOT break the web bundle). npm-reported vulns are pre-existing transitive.
+
+================================================================
+ACCEPTANCE CRITERIA (AC1)
+================================================================
+- getTickets → one card per ticket: the Success screen renders N ETicketCards
+  from the confirmed ticketCount (one card + QR each). The QR payload is a SAFE
+  reference `RBT|<bookingId>|<n>` (ticketRef) — NEVER a raw NIK/token/PII (D7.1);
+  a test asserts no 16-digit NIK renders. QR drawn with react-native-svg via
+  react-native-qrcode-svg (web + native). ✓
+- native file-system + share: useETicketShare on native writes a text manifest
+  (safe refs only) to the cache dir and hands it to expo-sharing's share sheet. ✓
+- web Blob/print: on web it opens a print window with the manifest (save-as-PDF). ✓
+- The e-tickets show ONLY under the RBT-070 verified-PAID branch (never on an
+  unverified deep-link). ✓
+
+Clean-Arch: ETicketCard + useETicketShare live in presentation; ticketRef is a
+pure helper; platform modules (expo-file-system/expo-sharing) are required
+LAZILY inside the native default so importing the hook loads nothing on web/test.
+
+================================================================
+3-PLATFORM VERIFICATION (screenshots/)
+================================================================
+WEB     : npx expo export --platform web → exit 0 WITH the QR/share deps added;
+          /success/[bookingId] builds (27.8 kB) — the native-only deps do not
+          break the web bundle (the key risk when adding react-native-svg).
+iOS     : iPhone 16 Pro, deep-link exp://…/success/bk-1 →
+          ios-success-route-with-qr-deps.png — the success route still mounts
+          cleanly after adding react-native-svg/qrcode (regression check).
+
+HONEST NOTE: the shot shows the verify GATE, not the rendered QR cards: a cold
+deep-link carries no funnel state (no verified PAID attempt), so the PAID branch
+that holds the e-ticket cards does not render — the same security gate as RBT-070.
+The QR rendering, the one-card-per-ticket list, the safe (no-PII) QR payload, and
+the web-print / native-share actions are ALL proven by RNTL
+(ETicketCard.test.tsx, useETicketShare.test.tsx, SuccessScreen.test.tsx — incl.
+assertions that no 16-digit NIK ever renders). simctl/adb expose no scripted-tap
+primitive to drive the full funnel to a verified PAID state on device, so the
+QR cards cannot be deep-linked into view; they are test- + web-export-verified.
+
+
+================================================================
+ADDENDUM (2026-11-02) — real e-ticket QR captured on device
+================================================================
+screenshots/ios-eticket-qr-cards.png + android-eticket-qr-cards.png now show the
+REAL rendered e-tickets on both platforms: TWO ETicketCards (E-TIKET 1/2 and 2/2)
+each with a scannable QR drawn by react-native-qrcode-svg, the safe payloads
+"RBT|bk-9|1" and "RBT|bk-9|2" printed below (no PII), plus the "Unduh E-Tiket" /
+"Ke Beranda" actions. This supersedes the earlier verify-gate-only shot
+(ios-success-route-with-qr-deps.png, kept for the security-gate story).
+To reach the verified-PAID state on a device without scripted funnel taps, a
+THROWAWAY evidence route seeded a real mock attempt + order detail then rendered
+the unmodified SuccessScreen; it was DELETED after capture and never committed.

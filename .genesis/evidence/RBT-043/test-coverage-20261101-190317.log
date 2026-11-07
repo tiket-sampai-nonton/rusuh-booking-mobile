@@ -1,0 +1,16 @@
+RBT-043 Waiting room UI (position, zones, estimate) — verification
+branch feature/RBT-043-waiting-room (verified by orchestrator after subagent provider 404)
+typecheck: PASS   lint: PASS
+
+--------------|---------|----------|---------|---------|
+All files     |   96.61 |    83.33 |     100 |     100 |
+ display.ts   |   90.47 |    72.22 |     100 |     100 |
+ index.tsx    |     100 |       90 |     100 |     100 |
+ interface.ts |       0 |        0 |       0 |       0 |  (pure types, no runtime)
+ style.ts     |     100 |      100 |     100 |     100 |
+--------------|---------|----------|---------|---------|
+Test Suites: 2 passed / Tests: 24 passed
+
+Consumes merged useQueuePolling (RBT-042) + useAutoClaim (RBT-044) + RBT-040
+state machine. Zone banner GUARANTEED/POSSIBLE/NOT_ENOUGH with exact prototype
+Bahasa copy + palette; aria-live admit region; terminal/error states.

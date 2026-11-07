@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+# RBT-005a — local commit guard (pre-commit).
+# The git root is the repo root, but the app + its tooling live in apps/client,
+# so cd there before running the staged-file gate. lint-staged runs ESLint
+# (incl. Clean-Arch layer boundaries), then this hook runs tsc + related tests
+# with a changed-code coverage floor. Never bypass with --no-verify (project RULES R008/R009/R017).
+
+cd apps/client || exit 1
+
+# 1. Staged-file lint (ESLint incl. import/no-restricted-paths boundaries) + format
+npx lint-staged || exit 1
+
+# 2. Project-wide strict type-check
+npx tsc --noEmit || exit 1
+
+# 3. Related tests for staged source, with changed-code coverage >= 80%
+#    (only runs when staged .ts/.tsx under src/ exist)
+STAGED_SRC=$(git -C "$(git rev-parse --show-toplevel)" diff --cached --name-only --diff-filter=ACM \
+  | grep -E '^apps/client/src/.*\.(ts|tsx)$' \
+  | sed 's#^apps/client/##' || true)
+
+if [ -n "$STAGED_SRC" ]; then
+  # shellcheck disable=SC2086
+  TMPDIR=/tmp npx jest --bail --watchman=false --findRelatedTests $STAGED_SRC \
+    --coverage --collectCoverageFrom="$(echo $STAGED_SRC | tr ' ' ',')" \
+    --coverageThreshold='{"global":{"branches":80,"functions":80,"lines":80,"statements":80}}' \
+    --passWithNoTests || exit 1
+fi

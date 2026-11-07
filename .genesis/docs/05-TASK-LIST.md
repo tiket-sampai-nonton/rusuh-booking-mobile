@@ -189,7 +189,7 @@ Type: Story · P0 · L · Deps: RBT-001
 - AC2: Branch model `develop`/`main` with the PIPELINE.md gates wired; branch protection on `main`/`develop` (require PR + checks, no direct push); secrets referenced (not committed).
 - AC3: Bundle-size + SEO-output checks stubbed for web release.
 - AC4: **Husky commit guard** installed (`.husky/pre-commit`): lint (staged) → type-check → related tests → changed-code coverage ≥80%; `.husky/commit-msg` enforces `type(scope): [RBT-xxx]` Conventional Commits. Never `--no-verify` (project RULES).
-- AC5: **Issue-state automation** (per TRACKING.md §Issue States + Automation Hooks): a status mechanism exists (status labels `status:in-progress|in-review|qa|done|blocked`, or a GitHub Projects board with those columns) AND a GitHub Actions workflow moves the linked issue automatically — **PR opened → In Review**, **CI green + evidence → QA**, **PR merged → Done** — so transitions are enforced by the repo, not by an agent remembering. Branch/PR must reference the issue (`RBT-xxx` / `Closes #N`) so the Action can resolve it. `In Progress` is set when the feature branch is first pushed (or by the agent at task start per PLAYBOOK).
+- AC5: **Issue-state automation** (per TRACKING.md §Issue States + Automation Hooks): a status mechanism exists (status labels `status:in-progress|qa|in-review|done|blocked`, or a GitHub Projects board with those columns) AND a GitHub Actions workflow moves the linked issue automatically — **PR opened → In Review**, **PR merged → Done** (the **→ QA** transition is set pre-PR by the agent on evidence capture, since QA precedes the PR in the evidence-first flow) — so transitions are enforced by the repo where a PR event exists. Branch/PR must reference the issue (`RBT-xxx` / `Closes #N`) so the Action can resolve it. `In Progress` is set when the feature branch is first pushed (or by the agent at task start per PLAYBOOK).
 - Skills: GitHub Actions, SonarCloud, EAS config, husky/lint-staged.
 
 ---
@@ -435,7 +435,7 @@ Type: Story · P0 · M · Deps: all feature epics
 
 #### RBT-081: Performance + bundle budgets
 Type: Story · P0 · M · Deps: RBT-033, all feature epics
-- AC1: web budgets met — p75 LCP ≤2.5s, INP ≤200ms, CLS ≤0.1 (mobile 4G profile); bundle **public ≤300KB / transactional ≤500KB gzip** enforced by CI.
+- AC1: web budgets met — p75 LCP ≤2.5s, INP ≤200ms, CLS ≤0.1 (mobile 4G profile); initial JavaScript **≤1MB gzip per route** enforced by CI.
 - AC2: code-split transactional routes; lazy-load heavy deps; image/QR render without layout shift.
 - AC3: debounced NIK checks + one-poller-per-session verified (no request storm).
 - Skills: perf profiling, bundling, Web Vitals.
@@ -459,6 +459,23 @@ Type: Story · P0/P1 · M · Deps: RBT-005, RBT-081, RBT-082, RBT-083
 - AC1: EAS Update channels (`development`/`production`) + OTA-vs-native routing rehearsed; rollback path tested (per PIPELINE.md + D5.3).
 - AC2: release summary/checklist wired; SEO output + bundle gates green on web release; go/no-go evidence collected for H5.
 - Skills: EAS, GitHub Actions, release management.
+
+#### RBT-119: Research and refactor the Expo client for clean code and separation of concerns
+Type: Chore · P1 · XL · Scope: `apps/client` (web, iOS, Android)
+
+> Post-H3 cross-cutting task. Execution authorized on 2026-11-04; G1/G2/G3 explicitly bypassed by the user. Do not invent or change BE contract assumptions.
+
+- **AC1 — Research and analysis:** Research screen orchestration, screen-specific fragments, reusable components, styling, testing, SOLID, and Clean Architecture. Here, `fragments` means screen-local components, not React's `<Fragment>`. Record sources, structural/coverage/log baseline, risks, and verification plan.
+- **AC2 — Preservation and branch:** Preserve unrelated work and use an isolated feature branch based on `develop`.
+- **AC3 — Naming and folders:** Inventory filenames under `apps/client`, remove V2 filename prefixes and update imports/references. Give each component its own file/folder; screen-only UI belongs under its screen's `fragments`; reusable UI belongs under shared `components`.
+- **AC4 — Screen responsibility:** Screens orchestrate data, state, actions, and composition. Fragments render screen-specific UI and may consume shared components. Put reusable UI logic in appropriate utilities without violating layer boundaries.
+- **AC5 — Styling:** Remove inline styling. Prefer NativeWind; use named styles, factories, or animation styles for dynamic/platform-specific cases. Preserve output across platforms.
+- **AC6 — Architecture and data:** Improve clean code/SOLID while maintaining inward-only Clean Architecture dependencies. Replace hardcoded dynamic values with authoritative data/config; preserve server-authoritative timers, guest access, payment boundaries, and current API behavior.
+- **AC7 — Errors and warnings:** Resolve actionable errors/warnings; document remaining environment/external limitations with evidence, without suppressing logs.
+- **AC8 — Coverage:** Target at least 90% coverage for each applicable file; report per-file metrics and scope. Identify generated/unmeasurable files and state their treatment explicitly.
+- **AC9 — Behavior and visual verification:** Preserve behavior/output; retest screens, actions, and available happy/edge flows on web, iOS, and Android. Run typecheck, lint, relevant tests, and capture before/after evidence under `.genesis/evidence/RBT-119/`.
+- **Organization interpretation:** “More than 1 component per file” means each screen composes multiple fragment components; each component declaration remains in its own file/folder.
+- Skills: React, React Native, frontend design, testing/evidence, architecture, performance.
 
 ---
 
@@ -496,7 +513,7 @@ Type: Story · P0/P1 · M · Deps: RBT-005, RBT-081, RBT-082, RBT-083
 | Admin/back-office | Out of scope (requirement §2) |
 
 ## Tracking
-States: Backlog → To Do → In Progress → In Review → QA → Done. Labels: `blocked`, `needs-spec`, `needs-review`, `tech-debt`.
+States: Backlog → To Do → In Progress → QA → In Review → Done. Labels: `blocked`, `needs-spec`, `needs-review`, `tech-debt`.
 
 ---
 

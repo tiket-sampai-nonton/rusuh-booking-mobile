@@ -26,8 +26,8 @@
 
 ## Run Next
 
-**Current wave:** `Wave 1 — Foundations (E1)`
-**Run next:** `RBT-001` (then the rest of Wave 1 in listed order; RBT-002/003/004 after RBT-001).
+**Current wave:** `Wave 3 — Feature epics (E3/E4/E5)` — Wave 2 Core API COMPLETE, ports FROZEN.
+**Run next:** `E3 Auth (Ray) · E4 Events (Ray) · E5 Queue (Eld)` — unblocked now the domain ports are frozen; disjoint feature areas, parallel across owners. (Wave 1 ✅; Wave 2 ✅ RBT-010/011/012/013/014; RBT-005b CI deferred post-E2E.)
 
 ---
 
@@ -55,11 +55,12 @@
 
 | Task | Owner | Domain | Depends On | Files (disjoint) | Parallel | Status | Delivered |
 |------|-------|--------|-----------|------------------|----------|--------|-----------|
-| RBT-001 | Riz | Platform | — | scaffold: `apps/client/**`, `src/*` folders, `tailwind.config.js` | ❌ first | To Do | ☐ |
-| RBT-002 | Riz | Platform | 001 | `src/app/**` (Expo Router route tree) | ✅ | To Do | ☐ |
-| RBT-003 | Riz | Platform | 001 | `tailwind.config.js`, `src/presentation/theme/**` | ✅ | To Do | ☐ |
-| RBT-004 | Riz | Platform | 001 | `src/providers/**` (DI container + ports wiring) | ✅ | To Do | ☐ |
-| RBT-005 | Riz | Platform | 001 | `.github/workflows/**`, `sonar-project.properties`, `.husky/**` | ✅ | To Do | ☐ |
+| RBT-001 | Riz | Platform | — | scaffold: `apps/client/**`, `src/*` folders, `tailwind.config.js` | ❌ first | Done | ✅ |
+| RBT-002 | Riz | Platform | 001 | `src/app/**` (Expo Router route tree) | ✅ | Done | ☑ |
+| RBT-003 | Riz | Platform | 001 | `tailwind.config.js`, `src/presentation/theme/**` | ✅ | Done | ☑ |
+| RBT-004 | Riz | Platform | 001 | `src/providers/**` (DI container + ports wiring) | ✅ | Done | ☑ |
+| RBT-005a | Riz | Platform | 001 | `.husky/**`, `apps/client/package.json` (lint-staged) | ✅ | Done | ✅ |
+| RBT-005b | Riz | Platform | 001, 005a | `.github/workflows/**`, `sonar-project.properties` | ✅ | Deferred (post-E2E) | ☐ |
 
 **Wave 1 gate:** all `Done` → start Wave 2. (Also satisfies most of Gate **H6** Project-Setup, verified via `10-PROJECT-SETUP.md`.)
 
@@ -67,11 +68,11 @@
 
 | Task | Owner | Domain | Depends On | Files (disjoint) | Parallel | Status | Delivered |
 |------|-------|--------|-----------|------------------|----------|--------|-----------|
-| RBT-010 | Riz | Core/API | 004 | `src/infrastructure/{http,api}/**`, generated types | ❌ first | Blocked | ☐ |
-| RBT-011 | Riz | Core/API | 010 | `src/domain/services/server-clock.ts` | ✅ | Blocked | ☐ |
-| RBT-012 | Riz | Core/API | 010 | idempotency util in `src/domain`/`src/application` | ✅ | Blocked | ☐ |
-| RBT-013 | Riz | Core/API | 010 | `src/domain/errors/**`, error mapping | ✅ | Blocked | ☐ |
-| RBT-014 | Riz | Core/API | 010 | `src/infrastructure/__fixtures__/**`, `src/shared/test-fixtures/**` | ✅ | Blocked | ☐ |
+| RBT-010 | Riz | Core/API | 004 | `src/infrastructure/{http,api}/**`, generated types | ❌ first | Done ✅ | ☑ |
+| RBT-011 | Riz | Core/API | 010 ✅ | `src/domain/services/server-clock.ts` | ✅ | Done ✅ | ☑ |
+| RBT-012 | Riz | Core/API | 010 ✅ | idempotency util in `src/domain`/`src/application` | ✅ | Done ✅ | ☑ |
+| RBT-013 | Riz | Core/API | 010 ✅ | `src/domain/errors/**`, error mapping | ✅ | Done ✅ | ☑ |
+| RBT-014 | Riz | Core/API | 010 ✅ | `src/infrastructure/__fixtures__/**`, `src/shared/test-fixtures/**` | ✅ | Done ✅ | ☑ |
 
 **Wave 2 gate:** all `Done` + `src/domain` ports/interfaces frozen (owned by Eld/Ray) → start Wave 3.
 
@@ -81,9 +82,9 @@
 
 | Task group | Owner | Domain | Depends On | Files (disjoint) | Parallel | Status | Delivered |
 |------|-------|--------|-----------|------------------|----------|--------|-----------|
-| E3 (RBT-020…023) | Ray | Auth | E2 | `presentation/screens/Auth*` + auth use-cases | ✅ | Backlog | ☐ |
-| E4 (RBT-030…034) | Ray | Events | E2 | `presentation/screens/Events*` + events use-cases | ✅ | Backlog | ☐ |
-| E5 (RBT-040…044) | Eld | Queue | E2 | `presentation/screens/Waiting*` + queue state machine | ✅ | Backlog | ☐ |
+| E3 (RBT-020…023) | Ray | Auth | E2 | `presentation/screens/Auth*` + auth use-cases | ✅ | 020 ✅ 021 ✅ 023 ✅ merged; 022 chains behind 021 (Wave 4+) | ☐ |
+| E4 (RBT-030…034) | Ray | Events | E2 | `presentation/screens/Events*` + events use-cases | ✅ | 030/031/032/034 ✅ merged; 033 BLOCKED on deferred 005b | ☐ |
+| E5 (RBT-040…044) | Eld | Queue | E2 | `presentation/screens/Waiting*` + queue state machine | ✅ | 040/041/042/043/044 ✅ merged | ☐ |
 
 **Shared-file note:** RBT-002 froze the route tree; any Wave-3 task adding a route edits `src/app` → serialize those edits.
 **Wave 3 gate:** E3 + E5 `Done` (E4 may trail) → start Wave 4.
@@ -118,6 +119,7 @@
 | RBT-082 load test | Ray | Hardening | RBT-042/050/054 | flash-crowd on queue+booking | ❌ serialize | Backlog | ☐ |
 | RBT-083 QA suites | Ray | Hardening | features | Playwright + Maestro across flows | ❌ serialize | Backlog | ☐ |
 | RBT-084 release readiness | Ray | Hardening | RBT-005/081/082/083 | OTA/rollback/summary | ❌ serialize | Backlog | ☐ |
+| RBT-119 client refactor | Riz | Hardening | E2 + existing feature flows | `apps/client/**` | ❌ serialize | Done | ☑ |
 
 ---
 
