@@ -143,8 +143,8 @@ jobs:
       ${{
         github.event_name == 'push' &&
         (
-          (github.ref_name == 'develop' && vars.EAS_OTA_DEVELOPMENT_ENABLED == 'true') ||
-          (github.ref_name == 'main' && vars.EAS_OTA_PRODUCTION_ENABLED == 'true')
+          github.ref_name == 'develop' ||
+          github.ref_name == 'main'
         )
       }}
     needs: [quality_gates, web_release]
@@ -158,20 +158,35 @@ jobs:
       EXPO_PROJECT_ID: ${{ vars.EXPO_PROJECT_ID }}
       EAS_CHANNEL: ${{ github.ref_name == 'main' && 'production' || 'development' }}
       EAS_ENVIRONMENT: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+      OTA_ENABLED: ${{ (github.ref_name == 'main' && vars.EAS_OTA_PRODUCTION_ENABLED) || (github.ref_name == 'develop' && vars.EAS_OTA_DEVELOPMENT_ENABLED) || 'false' }}
     outputs:
-      decision: ${{ steps.fingerprint.outputs.decision }}
+      decision: ${{ steps.fingerprint.outputs.decision || steps.ota_gate.outputs.decision }}
     steps:
+      - name: Check environment OTA toggle
+        id: ota_gate
+        run: |
+          if [ "$OTA_ENABLED" = 'true' ]; then
+            echo 'decision=enabled' >> "$GITHUB_OUTPUT"
+            echo "EAS OTA is enabled for $GITHUB_REF_NAME."
+          else
+            echo 'decision=ota-disabled' >> "$GITHUB_OUTPUT"
+            echo "EAS OTA is disabled for $GITHUB_REF_NAME; skipping publication."
+          fi
       - uses: actions/checkout@v4
+        if: ${{ steps.ota_gate.outputs.decision == 'enabled' }}
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
+        if: ${{ steps.ota_gate.outputs.decision == 'enabled' }}
         with:
           node-version: "22"
           cache: npm
           cache-dependency-path: apps/client/package-lock.json
       - run: npm ci
+        if: ${{ steps.ota_gate.outputs.decision == 'enabled' }}
       - name: Detect native-affecting changes
         id: fingerprint
+        if: ${{ steps.ota_gate.outputs.decision == 'enabled' }}
         env:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
@@ -188,7 +203,7 @@ jobs:
             echo 'decision=ota-publish' >> "$GITHUB_OUTPUT"
           fi
       - name: Validate EAS Update setup
-        if: ${{ steps.fingerprint.outputs.decision == 'ota-publish' }}
+        if: ${{ steps.ota_gate.outputs.decision == 'enabled' && steps.fingerprint.outputs.decision == 'ota-publish' }}
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EXPO_PROJECT_ID: ${{ vars.EXPO_PROJECT_ID }}
@@ -219,7 +234,7 @@ jobs:
             }
           " "$RUNNER_TEMP/expo-config.json"
       - name: Publish OTA to the branch channel
-        if: ${{ steps.fingerprint.outputs.decision == 'ota-publish' }}
+        if: ${{ steps.ota_gate.outputs.decision == 'enabled' && steps.fingerprint.outputs.decision == 'ota-publish' }}
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           UPDATE_MESSAGE: ${{ github.event.head_commit.message }}
@@ -267,7 +282,7 @@ jobs:
             [ "$OTA_DECISION" = 'native-change-ota-skipped' ]; then
             STATUS='PARTIAL — native build required; OTA skipped'
           elif [ "$GITHUB_EVENT_NAME" = 'push' ] && \
-            [ "$(printf '%s' "$JOB_RESULTS" | jq -r '.publish_ota.result')" = 'skipped' ]; then
+            [ "$OTA_DECISION" = 'ota-disabled' ]; then
             STATUS='PARTIAL — EAS OTA is not enabled'
           else
             STATUS="SUCCESS"
