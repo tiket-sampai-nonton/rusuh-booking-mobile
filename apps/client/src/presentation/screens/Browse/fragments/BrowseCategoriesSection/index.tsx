@@ -16,7 +16,7 @@ import {
 } from "../../style";
 
 interface BrowseCategoriesSectionProps {
-  readonly activeCategory: BrowseCategoryKey;
+  readonly activeCategory: BrowseCategoryKey | null;
   readonly isDesktop: boolean;
   readonly isMobileWeb?: boolean;
   readonly onSelect: (category: BrowseCategoryKey) => void;
@@ -76,6 +76,8 @@ export function BrowseCategoriesSection({
                   style={isActive ? browseCategoryBtnActive : browseCategoryBtn}
                   onPress={() => onSelect(category.key)}
                   testID={`category-${category.key}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isActive }}
                 >
                   <Text style={browseCategoryLabel(isActive)}>
                     {category.label}

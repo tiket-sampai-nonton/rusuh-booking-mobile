@@ -11,7 +11,7 @@ import {
 
 interface BrowseNativeCategoryBarProps {
   readonly top: number;
-  readonly activeCategory: BrowseCategoryKey;
+  readonly activeCategory: BrowseCategoryKey | null;
   readonly onSelect: (category: BrowseCategoryKey) => void;
 }
 
@@ -37,6 +37,8 @@ export function BrowseNativeCategoryBar({
               onPress={() => onSelect(category.key)}
               style={browseNativeCategoryButton(active)}
               testID={`category-${category.key}`}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
             >
               <Text style={browseNativeCategoryLabel(active)}>
                 {category.label}

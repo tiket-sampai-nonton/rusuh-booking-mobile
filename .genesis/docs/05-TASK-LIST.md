@@ -261,7 +261,7 @@ Type: Story · P0 · M · Deps: RBT-020
 
 #### RBT-030: Home — event list + status + nearby/history
 Type: Story · P0 · L · Deps: RBT-010
-- AC1: `listEvents()`; status enum → badge (Tersedia/Stok Menipis/Sold Out, disabled when sold out); price-from `minorToIDR`; date `DD-MMM-YYYY`. (FR-01/02/03)
+- AC1: `listEvents()`; status enum → badge (Tersedia/Stok Menipis/Sold Out, disabled when sold out); price-from `minorToIDR`; date `DD MMM YYYY`. (FR-01/02/03)
 - AC2: skeletons + empty state; defensive null-checks.
 - Skills: RN lists, design system.
 

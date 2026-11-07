@@ -38,7 +38,7 @@ Each is a shared RN primitive with accessible labels, loading/empty/error/disabl
 | Component | Used on | Notes |
 |---|---|---|
 | `Button` / `IconButton` | all | variants: primary, secondary, ghost, danger; pressed + disabled + loading states |
-| `EventCard` | Home, Browse | status badge (Tersedia / Stok Menipis / Sold Out), price-from (`minorToIDR`), date `DD-MMM-YYYY`, disabled when sold out |
+| `EventCard` | Home, Browse | status badge (Tersedia / Stok Menipis / Sold Out), price-from (`minorToIDR`), date `DD MMM YYYY`, disabled when sold out |
 | `StatusBadge` | Home, Event | icon+label+color triad, never color-only |
 | `Countdown` | Checkout, Payment | renders from `ServerClock.remaining()`; `aria-live="polite"`; reduced-motion safe; never drives logic |
 | `QueuePositionCard` | Waiting | "orang di depan" + "estimasi"; zone color + label; polite live region on change |

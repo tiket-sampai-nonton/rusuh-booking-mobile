@@ -69,7 +69,7 @@ Arti status: ✅ sudah ada di contract · ⚠️ ada tapi belum lengkap · ❌ b
 | Screen | Data diminta `requirement.md` | Field/Endpoint Contract yang memenuhi | Status | Catatan |
 |---|---|---|---|---|
 | **1. Landing** | Card banner image | — | ❌ **FE NEED THIS** | `EventSummary` **tidak** punya field gambar/banner. Usulan: tambah `bannerUrl`/`thumbnailUrl` ke `EventSummary`. Di prototype dipakai asset mock. |
-| **1. Landing** | Card: tanggal format **DD-MMM-YYYY** | `EventSummary.startsAt` (`GET /api/v1/events`) | ✅ | Format DD-MMM-YYYY **diderivasi FE** dari `startsAt` (ISO-8601). Tidak butuh perubahan contract. |
+| **1. Landing** | Card: tanggal format **DD MMM YYYY** | `EventSummary.startsAt` (`GET /api/v1/events`) | ✅ | Format DD MMM YYYY **diderivasi FE** dari `startsAt` (ISO-8601). Tidak butuh perubahan contract. |
 | **1. Landing** | Card: place | `EventSummary.venue` | ⚠️ | Hanya `venue` (string bebas). Tidak ada field kota/alamat terstruktur. |
 | **1. Landing** | Card: **jumlah tiket tersedia** (remainingTickets) | — (di level list) | ❌ **FE NEED THIS** | Di level list `EventSummary` hanya beri `status` + `minPriceMinor`; **tidak ada** jumlah sisa. Usulan: tambah `remainingTickets` (integer) ke `EventSummary`. Di prototype dipakai mock `remainingTickets`. |
 | **1. Landing** | Badge **"Tersedia"** / **"Stok Menipis"** | `EventSummary.status` (hanya kasar); ambang menipis dari `remainingTickets` | ❌ **FE NEED THIS** | "Tersedia" kasar dari `status=AVAILABLE`. "Stok Menipis" perlu **ambang** atas angka sisa yang resmi → bergantung pada `remainingTickets` (lihat baris di atas). Badge "Segera"/`NOT_STARTED` lama tidak lagi jadi fokus. |
@@ -155,7 +155,7 @@ Login bersifat **opsional**: guest tetap bisa menyelesaikan pembelian dengan men
 **NOTE (gap):**
 - Navbar menyediakan tombol **"Masuk / Daftar"** → modal OTP (langkah auth/registrasi, lihat §4.0). Login opsional; tidak memblok alur beli.
 - Seksi **"Konser Terdekat"** = event mendatang di-sort **ascending** by `startsAt`; **"History Event"** = event lampau (`status CLOSED` / `startsAt < serverTime`) di-sort **desc**. `GET /events` tak punya `sort`/`limit`/`near`/`filter=past` → V5 menurunkan semuanya **client-side** dari response katalog penuh. Production perlu keputusan server-side sort/pagination dan endpoint arsip.
-- Card wajib menampilkan tanggal **DD-MMM-YYYY** (derivasi FE dari `startsAt`, OK) dan **jumlah tiket tersedia**. **FE NEED THIS**: tambah `remainingTickets` (integer) ke `EventSummary` (level list tidak punya angka sisa). Prototype memakai mock `remainingTickets`.
+- Card wajib menampilkan tanggal **DD MMM YYYY** (derivasi FE dari `startsAt`, OK) dan **jumlah tiket tersedia**. **FE NEED THIS**: tambah `remainingTickets` (integer) ke `EventSummary` (level list tidak punya angka sisa). Prototype memakai mock `remainingTickets`.
 - Badge **"Tersedia"**/**"Stok Menipis"**: "Stok Menipis" butuh ambang atas `remainingTickets` → **FE NEED THIS** (sama seperti di atas). Badge "Segera"/`NOT_STARTED` tidak lagi jadi fokus.
 - Tombol **Filter Event** tidak memfilter di halaman Home. V5 membuka modal dengan **Genre Musik, Lokasi (Provinsi), Waktu, Urutkan** lalu mengarah ke `browse.html`.
 - **Filter production gap:** `GET /events` belum punya field genre/province terstruktur atau query `genre`, `province`, `time`, `sort`, pagination. V5 memfilter client-side dari katalog yang sudah di-fetch; untuk production, BE perlu menambah dukungan server-side atau menyetujui batas katalog yang aman.
@@ -283,7 +283,7 @@ Prioritas: **P0** = memblok alur inti / keputusan produk mendesak · **P1** = pe
 | **P2** | **Subtitle kategori** tidak ada (hanya `name`, `code`). | "Subtitle" di `requirement.md` tak punya sumber. | Derivasi/konten statis FE, atau tambah field `description` pada kategori. |
 | **P2** | **Status "LIVE"** tidak ada di enum `EventSummary.status`. | Label "live/upcoming" harus diturunkan. | Turunkan di FE dari `salesStartsAt`/`startsAt` vs `serverTime`; tidak perlu perubahan contract. |
 | **P2** | **Nama pemesan untuk guest** tidak dikumpulkan terpisah. | Checkout guest tak punya "nama pemesan" selain nama penumpang. | Gunakan nama salah satu penumpang, atau prefill dari profil bila login (fast-track); tidak perlu field baru. |
-| **Resolved (desain)** | Tanggal **DD-MMM-YYYY** di card. | — | Diderivasi FE dari `EventSummary.startsAt`; **tidak** butuh perubahan contract. |
+| **Resolved (desain)** | Tanggal **DD MMM YYYY** di card. | — | Diderivasi FE dari `EventSummary.startsAt`; **tidak** butuh perubahan contract. |
 | **Resolved (desain)** | **Fast-track auto-fill** nama/NIK/email saat login + **registrasi eksplisit** (nama+NIK). | — | Didukung User Service (`/auth/otp/*`, `GET /me`, `PATCH /me`). Registrasi akun baru = verify OTP + `PATCH /me {fullName, nik}` (pop-up sukses). Auto-fill di `detail.html`; login tetap opsional, entri di landing. |
 
 ---

@@ -87,8 +87,12 @@ export const componentStyles = StyleSheet.create({
     color: "#ffffff66",
     fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: 10,
-    letterSpacing: 2,
-    textTransform: "uppercase",
+    lineHeight: 16,
+    letterSpacing: 0.5,
+    textAlign: "center",
+    width: 84,
+    flexShrink: 0,
+    paddingHorizontal: 8,
   },
 });
 

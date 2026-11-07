@@ -3,7 +3,7 @@
  * regions are composed from fragments in this directory.
  */
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -29,7 +29,10 @@ import { BrowseHero } from "./fragments/BrowseHero";
 import { BrowseLoadMore } from "./fragments/BrowseLoadMore";
 import { BrowseNativeCategoryBar } from "./fragments/BrowseNativeCategoryBar";
 import { BrowseResultsToolbar } from "./fragments/BrowseResultsToolbar";
-import type { BrowseCategoryKey } from "./fragments/categories";
+import {
+  readBrowseCategory,
+  type BrowseCategoryKey,
+} from "./fragments/categories";
 import {
   filterEvents,
   matchesCategory,
@@ -61,14 +64,16 @@ export function BrowseScreen() {
   const { serverClock, eventRepository } = useServices();
   const showNavLinks = isWeb && width > 768;
 
-  const [activeCategory, setActiveCategory] = useState<string>(() =>
-    params.genre === "Semua" ? "all" : (params.genre ?? "all"),
-  );
+  const [activeCategory, setActiveCategory] =
+    useState<BrowseCategoryKey | null>(() => readBrowseCategory(params.genre));
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [loadMoreDisabled, setLoadMoreDisabled] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
   const genre = readGenre(params.genre);
+  useEffect(() => {
+    setActiveCategory(readBrowseCategory(params.genre));
+  }, [params.genre]);
   const time = readParam(params.time, TIMES, "all");
   const sort = readParam(params.sort, SORTS, "closest");
   const eventQuery = {
@@ -107,7 +112,7 @@ export function BrowseScreen() {
     ],
   );
   const results = useMemo(() => {
-    if (activeCategory === "all") return allResults;
+    if (!activeCategory || activeCategory === "all") return allResults;
     return allResults.filter((event) => matchesCategory(event, activeCategory));
   }, [activeCategory, allResults]);
 
@@ -116,6 +121,7 @@ export function BrowseScreen() {
   const goHome = (): void => router.push("/" as Href);
   const applyFilter = (value: FilterValue): void => {
     setFilterOpen(false);
+    setActiveCategory(readBrowseCategory(value.genre));
     const query = new URLSearchParams({
       genre: value.genre,
       time: value.time,
@@ -151,7 +157,7 @@ export function BrowseScreen() {
           )}
           {!isNative && (
             <BrowseCategoriesSection
-              activeCategory={activeCategory as BrowseCategoryKey}
+              activeCategory={activeCategory}
               isDesktop={isDesktop}
               isMobileWeb={isMobileWeb}
               onSelect={setActiveCategory}
@@ -243,7 +249,7 @@ export function BrowseScreen() {
         {isNative && (
           <BrowseNativeCategoryBar
             top={insets.top + 56}
-            activeCategory={activeCategory as BrowseCategoryKey}
+            activeCategory={activeCategory}
             onSelect={setActiveCategory}
           />
         )}

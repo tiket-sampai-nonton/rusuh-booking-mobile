@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import { BrowseNativeCategoryBar } from "../../../../../../presentation/screens/Browse/fragments/BrowseNativeCategoryBar/index";
 
 describe("BrowseNativeCategoryBar", () => {
-  it("renders all category choices and forwards the selected key", () => {
+  it("renders only the requested categories and forwards the selected key", () => {
     const onSelect = jest.fn();
     render(
       <BrowseNativeCategoryBar
@@ -17,7 +17,7 @@ describe("BrowseNativeCategoryBar", () => {
     expect(screen.getByText("Konser")).toBeTruthy();
     expect(screen.getByText("Festival")).toBeTruthy();
     expect(screen.getByText("Olahraga")).toBeTruthy();
-    expect(screen.getByText("Teater")).toBeTruthy();
+    expect(screen.getAllByRole("button")).toHaveLength(4);
     fireEvent.press(screen.getByTestId("category-festival"));
     expect(onSelect).toHaveBeenCalledWith("festival");
   });
