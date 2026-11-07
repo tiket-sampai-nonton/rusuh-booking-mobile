@@ -1,4 +1,4 @@
-/** Compact app wordmark with the cyberpunk violet-to-magenta brand gradient. */
+/** Compact app wordmark with the green-to-yellow brand gradient. */
 import { Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { neutral } from "@presentation/theme";

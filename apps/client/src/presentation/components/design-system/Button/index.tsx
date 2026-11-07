@@ -7,13 +7,13 @@
  * - fontWeight: 700
  * - textTransform: uppercase
  * - letterSpacing: 0.04em
- * - border: 2px solid the shared deep-violet ink token
+ * - border: 2px solid the shared deep-green ink token
  *
- * GHOST: lavender surface, deep-violet text
- * GHOST hover: electric-violet fill from the bottom
+ * GHOST: pale-green surface, deep-green text
+ * GHOST hover: yellow fill from the bottom
  *
- * PRIMARY: electric-violet background with lavender text
- * PRIMARY hover: lavender reveal with deep-violet text
+ * PRIMARY: green background with light text
+ * PRIMARY hover: yellow reveal with deep-green text
  */
 import { useCallback } from "react";
 import type { ReactNode } from "react";
@@ -51,7 +51,7 @@ export interface ButtonProps {
   readonly label: string;
   /** Press handler */
   readonly onPress?: () => void;
-  /** Visual variant: primary (violet bg), ghost (outlined), danger (rose bg) */
+  /** Visual variant: primary (green bg), ghost (outlined), danger (red bg) */
   readonly variant?: ButtonVariant;
   /** Disabled state */
   readonly disabled?: boolean;
@@ -70,12 +70,12 @@ export interface ButtonProps {
 function getPalette(variant: ButtonVariant) {
   switch (variant) {
     case "ghost":
-      // Ghost: lavender surface → electric violet fill from bottom
+      // Ghost: pale-green surface → yellow fill from bottom
       return {
         bg: designColors.ground,
         fg: designColors.ink,
-        fill: designColors.accent,
-        filledFg: designColors.ground,
+        fill: designColors.yellow,
+        filledFg: designColors.ink,
       };
     case "danger":
       // Danger: red bg → ink fill
@@ -87,11 +87,11 @@ function getPalette(variant: ButtonVariant) {
       };
     case "primary":
     default:
-      // Primary: electric violet bg → lavender reveal from top
+      // Primary: green bg → yellow reveal from top
       return {
         bg: designColors.accent,
         fg: designColors.ground,
-        fill: designColors.ground,
+        fill: designColors.yellow,
         filledFg: designColors.ink,
       };
   }

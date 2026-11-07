@@ -13,7 +13,7 @@ import {
 } from "@presentation/theme/event-design-tokens";
 
 /**
- * Modal overlay color is derived from the shared deep-violet overlay token.
+ * Modal overlay color is derived from the shared deep-green overlay token.
  */
 import type { DynamicStyle } from "@presentation/utils/style";
 import { Animated } from "react-native";

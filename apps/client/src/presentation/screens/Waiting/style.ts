@@ -1,5 +1,5 @@
 /**
- * RBT-091 — Waiting-room styles, using the shared cyberpunk palette.
+ * RBT-091 — Waiting-room styles, using the shared green-and-yellow palette.
  *
  * Follows the waiting-room layout from prototype `06-waiting.html`:
  * - Plus Jakarta Sans throughout
