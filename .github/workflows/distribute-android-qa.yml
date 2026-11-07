@@ -18,7 +18,7 @@ permissions:
 jobs:
   build_apk:
     name: Build signed Android APK
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: ${{ inputs.target_environment }}
     defaults:
       run:
@@ -40,14 +40,14 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platform-tools
-            platforms;android-35
-            build-tools;35.0.0
-            ndk;27.1.12297006
-            cmake;3.22.1
+      - uses: android-actions/setup-android@v4
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --install \
+            'platforms;android-35' \
+            'build-tools;35.0.0' \
+            'ndk;27.1.12297006' \
+            'cmake;3.22.1'
       - run: npm ci
       - name: Validate branch and build configuration
         run: |
