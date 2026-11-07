@@ -39,6 +39,11 @@ export function TicketItem({
   onUseBuyer,
   status = "idle",
   categories,
+  buyerName = "",
+  buyerNik = "",
+  categoryError,
+  attendeeNameError,
+  attendeeNikError,
 }: TicketItemProps) {
   const statusInfo = STATUS_TEXT[status];
   return (
@@ -81,17 +86,25 @@ export function TicketItem({
           );
         })}
       </View>
+      {categoryError ? (
+        <Text style={componentStyles.validationError} accessibilityRole="alert">
+          {categoryError}
+        </Text>
+      ) : null}
 
       <Field
         label="Nama Penonton"
-        value={row.attendeeName}
+        value={row.useBuyerNik ? buyerName : row.attendeeName}
         onChangeText={(t) => onPatch({ attendeeName: t })}
         placeholder="Nama sesuai KTP"
+        editable={!row.useBuyerNik}
+        invalid={Boolean(attendeeNameError)}
+        errorMessage={attendeeNameError}
         testID={`attendee-name-${index}`}
       />
       <Field
         label="NIK Penonton (16 digit)"
-        value={row.useBuyerNik ? "" : row.attendeeNik}
+        value={row.useBuyerNik ? buyerNik : row.attendeeNik}
         onChangeText={(t) =>
           onPatch({ attendeeNik: t.replace(/\D/g, "").slice(0, 16) })
         }
@@ -99,10 +112,12 @@ export function TicketItem({
         keyboardType="number-pad"
         editable={!row.useBuyerNik}
         invalid={
-          !row.useBuyerNik &&
-          row.attendeeNik.length > 0 &&
-          !isValidNik(row.attendeeNik)
+          Boolean(attendeeNikError) ||
+          (!row.useBuyerNik &&
+            row.attendeeNik.length > 0 &&
+            !isValidNik(row.attendeeNik))
         }
+        errorMessage={attendeeNikError}
         testID={`attendee-nik-${index}`}
       />
 
@@ -118,10 +133,10 @@ export function TicketItem({
 
       <View style={componentStyles.elementMarginTop6}>
         <Text style={componentStyles.elementFlex7}>
-          Gunakan NIK pembeli (pembeli ikut nonton)
+          Gunakan data pembeli (pembeli ikut nonton)
         </Text>
         <Switch
-          accessibilityLabel={`Gunakan NIK pembeli untuk tiket ${index + 1}`}
+          accessibilityLabel={`Gunakan data pembeli untuk tiket ${index + 1}`}
           value={row.useBuyerNik}
           onValueChange={onUseBuyer}
           trackColor={{ false: designColors.field, true: designColors.ink }} // Use field per Design Palette Guide

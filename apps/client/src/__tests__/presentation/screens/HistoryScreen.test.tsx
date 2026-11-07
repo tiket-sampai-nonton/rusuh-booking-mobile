@@ -187,9 +187,9 @@ describe("HistoryScreen", () => {
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
     expect(screen.getByTestId("history-grid")).toBeTruthy();
     expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("history-nav-browse"));
+    fireEvent.press(screen.getByTestId("nav-browse"));
     expect(mockRouter.push).toHaveBeenCalledWith("/browse");
-    fireEvent.press(screen.getByTestId("history-nav-tickets"));
+    expect(screen.queryByTestId("nav-tickets")).toBeNull();
     expect(mockRouter.push).toHaveBeenCalledTimes(1);
   });
 });

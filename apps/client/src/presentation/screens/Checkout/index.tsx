@@ -19,10 +19,12 @@ import { DomainError } from "@domain/errors/domain-error";
 
 import {
   appendRow,
+  attendeeNiksUnique,
   effectiveCap,
   isAttendeeBlocked,
   isAttendeeWarning,
   isCheckoutReady,
+  isValidEmail,
   isValidNik,
   maskNik,
   patchRowAt,
@@ -93,14 +95,24 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   // Logged-in users consented at registration; guests consent inline (AC3).
   const isGuest = !prefill.fromAccount;
 
+  const [buyerName, setBuyerName] = useState(prefill.fullName ?? "");
   const [buyerNik, setBuyerNik] = useState("");
-  // Prefill the email from the account on first render when logged in (AC1).
+  // The account API returns only a masked email, so the user enters the
+  // complete address needed for booking and confirmation.
   const [buyerEmail, setBuyerEmail] = useState("");
   const [emailConfirmation, setEmailConfirmation] = useState("");
   const [leaveError, setLeaveError] = useState("");
   const [rows, setRows] = useState<TicketRow[]>([emptyRow("")]);
   const [consent, setConsent] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  // Profile names may arrive after the checkout screen mounts. Fill an empty
+  // buyer name field once, without overwriting anything the user entered.
+  useEffect(() => {
+    if (!prefill.fromAccount || !prefill.fullName?.trim()) return;
+    setBuyerName((current) => current || prefill.fullName || "");
+  }, [prefill.fromAccount, prefill.fullName]);
 
   useEffect(() => {
     const booking = session?.booking;
@@ -170,19 +182,69 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     });
   }, [session?.categories]);
 
+  // A ticket using buyer identity resolves to the current buyer name + NIK.
+  // Keep the attendee's own fields untouched so switching the option off
+  // restores the identity they had entered for that ticket.
+  const resolvedRows = useMemo(
+    () =>
+      rows.map((row) =>
+        row.useBuyerNik
+          ? { ...row, attendeeName: buyerName, attendeeNik: buyerNik }
+          : row,
+      ),
+    [rows, buyerName, buyerNik],
+  );
+
   const ready = useMemo(
     () =>
       buyerEmail.trim() === emailConfirmation.trim() &&
       isCheckoutReady({
         buyerNik,
         buyerEmail,
-        rows,
+        rows: resolvedRows,
         maxSelectable: cap,
         attendeeChecks: checks,
         consentGiven,
       }),
-    [buyerNik, buyerEmail, emailConfirmation, rows, cap, checks, consentGiven],
+    [
+      buyerNik,
+      buyerEmail,
+      emailConfirmation,
+      resolvedRows,
+      cap,
+      checks,
+      consentGiven,
+    ],
   );
+
+  const buyerNameRequired = rows.some((row) => row.useBuyerNik);
+  const buyerNameError =
+    submitAttempted && buyerNameRequired && !buyerName.trim()
+      ? "Nama pembeli wajib diisi untuk menggunakan data pembeli."
+      : undefined;
+  const buyerNikError =
+    (submitAttempted && !buyerNik.trim()) ||
+    (buyerNik.length > 0 && !isValidNik(buyerNik))
+      ? buyerNik.length > 0
+        ? "NIK pembeli harus terdiri dari 16 digit."
+        : "NIK pembeli wajib diisi (16 digit)."
+      : undefined;
+  const buyerEmailError =
+    (submitAttempted && !buyerEmail.trim()) ||
+    (buyerEmail.length > 0 && !isValidEmail(buyerEmail))
+      ? buyerEmail.trim()
+        ? "Masukkan alamat email yang valid."
+        : "Email wajib diisi."
+      : undefined;
+  const emailConfirmationError =
+    (submitAttempted && !emailConfirmation.trim()) ||
+    (emailConfirmation.length > 0 &&
+      emailConfirmation.trim() !== buyerEmail.trim())
+      ? emailConfirmation.trim()
+        ? "Konfirmasi email harus sama dengan email pembeli."
+        : "Konfirmasi email wajib diisi."
+      : undefined;
+  const attendeeNiksAreUnique = attendeeNiksUnique(resolvedRows, buyerNik);
 
   const totalMinor = useMemo(
     () =>
@@ -279,6 +341,15 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               </View>
             ) : null}
             <Field
+              label="Nama Pembeli"
+              value={buyerName}
+              onChangeText={setBuyerName}
+              placeholder="Nama sesuai KTP"
+              testID="buyer-name"
+              invalid={Boolean(buyerNameError)}
+              errorMessage={buyerNameError}
+            />
+            <Field
               label="NIK Pembeli (16 digit)"
               value={buyerNik}
               onChangeText={(t) =>
@@ -287,7 +358,15 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               placeholder="16 digit KTP pembeli"
               keyboardType="number-pad"
               testID="buyer-nik"
-              invalid={buyerNik.length > 0 && !isValidNik(buyerNik)}
+              invalid={Boolean(buyerNikError)}
+              errorMessage={buyerNikError}
+              helperText={
+                prefill.fromAccount
+                  ? prefill.nikMasked
+                    ? `NIK akun tersimpan sebagai ${prefill.nikMasked}. Masukkan ulang 16 digit untuk checkout.`
+                    : "NIK akun hanya tersedia dalam bentuk tersamarkan. Masukkan ulang 16 digit NIK untuk checkout."
+                  : undefined
+              }
             />
             <Field
               label="Email"
@@ -296,6 +375,15 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               placeholder="kamu@email.com"
               keyboardType="email-address"
               testID="buyer-email"
+              invalid={Boolean(buyerEmailError)}
+              errorMessage={buyerEmailError}
+              helperText={
+                prefill.fromAccount
+                  ? prefill.emailMasked
+                    ? `Email akun tersimpan sebagai ${prefill.emailMasked}. Masukkan email lengkap untuk checkout.`
+                    : "Email akun hanya tersedia dalam bentuk tersamarkan. Masukkan email lengkap untuk checkout."
+                  : undefined
+              }
             />
             <Field
               label="Konfirmasi email"
@@ -304,6 +392,8 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               placeholder="Masukkan kembali email"
               keyboardType="email-address"
               testID="buyer-email-confirmation"
+              invalid={Boolean(emailConfirmationError)}
+              errorMessage={emailConfirmationError}
             />
           </Section>
 
@@ -318,6 +408,31 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
                   key={row.rowId}
                   index={i}
                   row={row}
+                  buyerName={buyerName}
+                  buyerNik={buyerNik}
+                  categoryError={
+                    submitAttempted && !row.categoryId
+                      ? "Pilih kategori tiket."
+                      : undefined
+                  }
+                  attendeeNameError={
+                    submitAttempted &&
+                    !row.useBuyerNik &&
+                    !row.attendeeName.trim()
+                      ? "Nama penonton wajib diisi."
+                      : undefined
+                  }
+                  attendeeNikError={
+                    submitAttempted && !isValidNik(nik)
+                      ? row.useBuyerNik
+                        ? "Masukkan NIK pembeli yang valid pada bagian Data Pembeli."
+                        : "NIK penonton wajib diisi (16 digit)."
+                      : !isValidNik(nik) && nik.length > 0
+                        ? "NIK penonton harus terdiri dari 16 digit."
+                        : submitAttempted && !attendeeNiksAreUnique
+                          ? "NIK ini sudah digunakan pada tiket lain."
+                          : undefined
+                  }
                   canRemove={rows.length > 1}
                   onRemove={() => removeRow(i)}
                   onPatch={(p) => patchRow(i, p)}
@@ -360,25 +475,34 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
 
           {isGuest ? (
             <Section title="Persetujuan" number={3}>
-              <ConsentGate checked={consent} onToggle={setConsent} />
+              <ConsentGate
+                checked={consent}
+                onToggle={setConsent}
+                errorMessage={
+                  submitAttempted && !consent
+                    ? "Persetujuan diperlukan sebelum melanjutkan."
+                    : undefined
+                }
+              />
             </Section>
           ) : null}
         </ScrollView>
 
         <CheckoutBar
           totalMinor={totalMinor}
-          ready={ready}
           pending={isHolding}
           expired={expired}
           errorMessage={holdError?.userMessage ?? (leaveError || undefined)}
           onSubmit={() => {
+            setSubmitAttempted(true);
+            if (!ready) return;
             // Submit buyer and attendees atomically with the idempotent booking
             // request. A typed conflict surfaces in CheckoutBar.
             void (async () => {
               try {
                 const booking = await hold({
                   sessionId,
-                  rows,
+                  rows: resolvedRows,
                   buyerNik,
                   buyer: {
                     nik: buyerNik,

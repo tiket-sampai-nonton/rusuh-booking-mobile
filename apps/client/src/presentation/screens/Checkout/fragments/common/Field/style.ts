@@ -22,6 +22,12 @@ export const checkoutFieldStyles = StyleSheet.create({
     fontFamily: plusJakartaSansFonts.medium,
     marginTop: 4,
   },
+  helper: {
+    color: designColors.gray,
+    fontSize: 12,
+    fontFamily: plusJakartaSansFonts.regular,
+    marginTop: 4,
+  },
 });
 
 export function fieldInputStyle(

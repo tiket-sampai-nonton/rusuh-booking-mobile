@@ -25,6 +25,12 @@ export const componentStyles = StyleSheet.create({
     fontFamily: plusJakartaSansFonts.bold,
     textDecorationLine: "underline",
   },
+  validationError: {
+    color: designColors.danger,
+    marginTop: 6,
+    fontSize: 12,
+    fontFamily: plusJakartaSansFonts.medium,
+  },
 });
 
 export function styleForConsentGateView0(arg0: boolean): DynamicStyle {

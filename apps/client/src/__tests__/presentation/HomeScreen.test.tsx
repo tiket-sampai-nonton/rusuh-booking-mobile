@@ -257,13 +257,13 @@ describe("HomeScreen", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    await waitFor(() => screen.getByRole("tab", { name: "Tiket" }));
+    await waitFor(() => screen.getByRole("tab", { name: "Ticket" }));
 
-    fireEvent.press(screen.getByRole("tab", { name: "Jelajahi" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Jelajah" }));
     expect(mockRouter.push).toHaveBeenLastCalledWith("/browse");
-    fireEvent.press(screen.getByRole("tab", { name: "Tiket" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Ticket" }));
     expect(mockRouter.push).toHaveBeenLastCalledWith("/my-tickets");
-    fireEvent.press(screen.getByRole("tab", { name: "Akun" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Profil" }));
     expect(mockRouter.push).toHaveBeenLastCalledWith("/profile");
   });
 
