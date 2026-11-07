@@ -20,7 +20,7 @@ if (expoProjectId && !["development", "production"].includes(easChannel)) {
 const config = {
   name: "Rusuh Booking",
   owner: "chelseacry",
-  slug: "rusuh-booking-mobile",
+  slug: "rusuh-booking",
   scheme: "rusuhbooking",
   version: appVersion,
   // Native directories are generated with Expo Prebuild. Keep this runtime

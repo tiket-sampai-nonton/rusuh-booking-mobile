@@ -194,8 +194,26 @@ jobs:
           fi
           CHANGED_FILES="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA")"
           printf '%s\n' "$CHANGED_FILES"
+          NATIVE_CHANGE=false
           if printf '%s\n' "$CHANGED_FILES" | grep -Eq \
-            '^(apps/client/(app\.config\.js|app\.json|eas\.json|package\.json|package-lock\.json|plugins/|android/|ios/|assets/|google-services\.json|GoogleService-Info\.plist)|.*\.(entitlements|podspec)$)'; then
+            '^(apps/client/(app\.json|eas\.json|package\.json|package-lock\.json|plugins/|android/|ios/|assets/|google-services\.json|GoogleService-Info\.plist)|.*\.(entitlements|podspec)$)'; then
+            NATIVE_CHANGE=true
+          fi
+
+          if printf '%s\n' "$CHANGED_FILES" | grep -Fxq 'apps/client/app.config.js'; then
+            APP_CONFIG_DIFF="$(git diff --unified=0 "$BEFORE_SHA" "$GITHUB_SHA" -- apps/client/app.config.js \
+              | grep -E '^[+-][^+-]' \
+              | sed -E 's/^[+-][[:space:]]*//; s/[[:space:]]+$//' \
+              | sort)"
+            SLUG_ONLY_DIFF="$(printf '%s\n' 'slug: "rusuh-booking",' 'slug: "rusuh-booking-mobile",' | sort)"
+            if [ "$APP_CONFIG_DIFF" != "$SLUG_ONLY_DIFF" ]; then
+              NATIVE_CHANGE=true
+            else
+              echo 'Expo slug-only project-link correction is OTA-compatible; it does not change the native runtime configuration.'
+            fi
+          fi
+
+          if [ "$NATIVE_CHANGE" = 'true' ]; then
             echo 'decision=native-change-ota-skipped' >> "$GITHUB_OUTPUT"
             echo 'Native-affecting change detected. OTA is skipped; a new native APK/build is required.'
           else
