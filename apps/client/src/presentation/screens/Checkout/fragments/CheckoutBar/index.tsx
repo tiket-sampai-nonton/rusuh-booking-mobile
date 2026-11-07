@@ -17,7 +17,6 @@ import { styleForCheckoutBarView0, styleForCheckoutBarButton0 } from "./style";
 
 export function CheckoutBar({
   totalMinor,
-  ready,
   pending,
   expired,
   errorMessage,
@@ -25,7 +24,9 @@ export function CheckoutBar({
   bottomInset,
 }: CheckoutBarProps) {
   const { isMobileWeb } = useResponsive();
-  const canSubmit = ready && !pending && !expired;
+  // Keep the button actionable when fields are invalid so a tap can reveal
+  // field-level validation messages instead of silently doing nothing.
+  const canSubmit = !pending && !expired;
 
   return (
     <View

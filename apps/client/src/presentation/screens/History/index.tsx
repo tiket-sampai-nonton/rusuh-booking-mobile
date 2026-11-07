@@ -13,10 +13,12 @@ import { useRouter, type Href } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Header } from "@presentation/components/design-system/Header";
+import { BottomNav, Header } from "@presentation/components/design-system";
+import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
+import { useAccountStore } from "@presentation/stores/account-store";
 
 import { HistoryGrid } from "./fragments/HistoryGrid";
 import {
@@ -29,7 +31,9 @@ import { historyStyles, historyScrollContent } from "./style";
 export function HistoryScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isDesktop, isMobileWeb, gridColumns } = useResponsive();
+  const { isDesktop, isMobileWeb, isNative, bottomBarHeight, gridColumns } =
+    useResponsive();
+  const profile = useAccountStore((state) => state.profile);
   const { data, isLoading, isError, error } = useEvents();
 
   const history = data?.history ?? [];
@@ -48,14 +52,13 @@ export function HistoryScreen() {
   }
   const goHome = (): void => router.push("/" as Href);
   const goBrowse = (): void => router.push("/browse" as Href);
-
-  // Nav links for desktop header
-  const navLinks = [
-    { label: "Beranda", onPress: goHome, testID: "history-nav-home" },
-    { label: "Jelajahi", onPress: goBrowse, testID: "history-nav-browse" },
-    { label: "Tiket Saya", onPress: noop, testID: "history-nav-tickets" },
-    { label: "Arsip Event", onPress: noop, testID: "history-nav-archive" },
-  ];
+  const navLinks = createPrimaryNavLinks({
+    onHome: goHome,
+    onBrowse: goBrowse,
+    onTickets: () => router.push("/my-tickets" as Href),
+    onProfile: () => router.push("/profile" as Href),
+    isLoggedIn: Boolean(profile),
+  });
 
   return (
     <ScreenFade>
@@ -65,27 +68,17 @@ export function HistoryScreen() {
           topInset={insets.top}
           showLinks={isDesktop}
           links={navLinks}
-          mobileMenuLinks={[
-            { label: "Beranda", onPress: goHome, testID: "nav-home" },
-            { label: "Cari Event", onPress: goBrowse, testID: "nav-browse" },
-            {
-              label: "Tiket Saya",
-              onPress: () => router.push("/my-tickets" as Href),
-              testID: "nav-tickets",
-            },
-            { label: "Arsip Event", onPress: () => {}, testID: "nav-history" },
-            {
-              label: "Profil",
-              onPress: () => router.push("/profile" as Href),
-              testID: "nav-profile",
-            },
-          ]}
+          mobileMenuLinks={navLinks}
           onLogoPress={goHome}
           ctaLabel="Masuk / Daftar"
+          isLoggedIn={Boolean(profile)}
         />
 
         <ScrollView
-          contentContainerStyle={historyScrollContent(insets.bottom, isDesktop)}
+          contentContainerStyle={historyScrollContent(
+            insets.bottom + (isNative ? bottomBarHeight : 0),
+            isDesktop,
+          )}
           testID="history-scroll"
         >
           {/*  Hero section — black bg with title */}
@@ -128,6 +121,19 @@ export function HistoryScreen() {
             {historyContent}
           </View>
         </ScrollView>
+        <BottomNav
+          activeRoute={null}
+          isLoggedIn={Boolean(profile)}
+          onNavigate={(route) => {
+            if (route === "home") goHome();
+            else if (route === "browse") goBrowse();
+            else if (route === "tickets") {
+              router.push("/my-tickets" as Href);
+            } else if (route === "profile") {
+              router.push("/profile" as Href);
+            }
+          }}
+        />
       </View>
     </ScreenFade>
   );

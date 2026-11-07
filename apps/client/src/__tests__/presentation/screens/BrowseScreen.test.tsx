@@ -250,8 +250,8 @@ describe("BrowseScreen — URL-driven filters", () => {
     await waitFor(() => screen.getByRole("tab", { name: "Beranda" }));
 
     fireEvent.press(screen.getByRole("tab", { name: "Beranda" }));
-    fireEvent.press(screen.getByRole("tab", { name: "Tiket" }));
-    fireEvent.press(screen.getByRole("tab", { name: "Akun" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Ticket" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Profil" }));
 
     expect(mockRouter.push).toHaveBeenCalledWith("/");
     expect(mockRouter.push).toHaveBeenCalledWith("/my-tickets");

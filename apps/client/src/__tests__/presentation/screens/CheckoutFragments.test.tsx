@@ -68,7 +68,7 @@ describe("CheckoutBar (RBT-051)", () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  it("disables submit and shows the error message when provided", () => {
+  it("keeps submit actionable and shows the error message when provided", () => {
     const onSubmit = jest.fn();
     render(
       <CheckoutBar
@@ -85,9 +85,9 @@ describe("CheckoutBar (RBT-051)", () => {
     expect(screen.getByText("Lanjut Bayar")).toBeTruthy();
     expect(
       screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
-    ).toBe(true);
+    ).toBe(false);
     fireEvent.press(screen.getByTestId("checkout-submit"));
-    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
   it("shows 'Memproses…' while pending and does not fire submit", () => {

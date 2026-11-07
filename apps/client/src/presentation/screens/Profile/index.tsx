@@ -8,6 +8,7 @@ import { ClearSession } from "@application/auth/clear-session.use-case";
 import { DomainError } from "@domain/errors/domain-error";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { BottomNav, Header } from "@presentation/components/design-system";
+import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
 
@@ -31,6 +32,13 @@ export function ProfileScreen() {
   const [nik, setNik] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const navLinks = createPrimaryNavLinks({
+    onHome: () => router.push("/" as Href),
+    onBrowse: () => router.push("/browse" as Href),
+    onTickets: () => router.push("/my-tickets" as Href),
+    onProfile: () => undefined,
+    isLoggedIn: Boolean(profile),
+  });
 
   const saveProfile = async () => {
     if (!fullName.trim() || !/^\d{16}$/.test(nik)) {
@@ -72,51 +80,8 @@ export function ProfileScreen() {
         <Header
           topInset={insets.top}
           showLinks={isWeb && width > 768}
-          links={[
-            {
-              label: "Beranda",
-              onPress: () => router.push("/" as Href),
-              testID: "nav-home",
-            },
-            {
-              label: "Jelajahi",
-              onPress: () => router.push("/browse" as Href),
-              testID: "nav-browse",
-            },
-            ...(profile
-              ? [
-                  {
-                    label: "Tiket Saya",
-                    onPress: () => router.push("/my-tickets" as Href),
-                    testID: "nav-tickets",
-                  },
-                  { label: "Profil", onPress: () => {}, testID: "nav-profile" },
-                ]
-              : []),
-          ]}
-          mobileMenuLinks={[
-            {
-              label: "Beranda",
-              onPress: () => router.push("/" as Href),
-              testID: "nav-home",
-            },
-            {
-              label: "Cari Event",
-              onPress: () => router.push("/browse" as Href),
-              testID: "nav-browse",
-            },
-            {
-              label: "Tiket Saya",
-              onPress: () => router.push("/my-tickets" as Href),
-              testID: "nav-tickets",
-            },
-            {
-              label: "Arsip Event",
-              onPress: () => router.push("/history" as Href),
-              testID: "nav-history",
-            },
-            { label: "Profil", onPress: () => {}, testID: "nav-profile" },
-          ]}
+          links={navLinks}
+          mobileMenuLinks={navLinks}
           onLogoPress={() => router.push("/" as Href)}
           onCtaPress={() => setLoginOpen(true)}
           isLoggedIn={Boolean(profile)}

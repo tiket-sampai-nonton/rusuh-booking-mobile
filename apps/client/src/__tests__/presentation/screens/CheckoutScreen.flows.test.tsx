@@ -120,9 +120,15 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
 
   // ---- RBT-052: attendee checks + inline consent ----
 
-  it("a guest sees the inline consent gate and cannot submit until it is ticked", async () => {
+  it("a guest sees the missing-consent error when submitting before ticking it", async () => {
+    const hold = jest.fn(async () => ({
+      bookingId: "b1",
+      sessionId: "sess-1",
+      status: "HELD" as const,
+      amountMinor: 1,
+    }));
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
-      container: { bookingRepository: verdictRepo(SESSION) },
+      container: { bookingRepository: { ...verdictRepo(SESSION), hold } },
     });
     await waitFor(() =>
       expect(screen.getByTestId("checkout-consent")).toBeTruthy(),
@@ -148,17 +154,19 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
         ),
       { timeout: 3000 },
     );
-    await waitFor(() =>
-      expect(
-        screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
-      ).toBe(true),
+    expect(
+      screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
+    ).toBe(false);
+    fireEvent.press(screen.getByTestId("checkout-submit"));
+    expect(screen.getByTestId("checkout-consent-error").props.children).toMatch(
+      /persetujuan diperlukan/i,
     );
+    expect(hold).not.toHaveBeenCalled();
     fireEvent.press(screen.getByTestId("checkout-consent")); // give consent
-    await waitFor(() =>
-      expect(
-        screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
-      ).toBe(false),
-    );
+    expect(screen.queryByTestId("checkout-consent-error")).toBeNull();
+    expect(
+      screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
+    ).toBe(false);
     expect(screen.getByText("Lanjut Bayar")).toBeTruthy();
   });
 
@@ -173,10 +181,16 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     expect(screen.queryByTestId("checkout-consent")).toBeNull();
   });
 
-  it("an ALREADY_REGISTERED attendee NIK blocks submit and shows the status", async () => {
+  it("an ALREADY_REGISTERED attendee shows its status and does not hold", async () => {
+    const hold = jest.fn(async () => ({
+      bookingId: "b1",
+      sessionId: "sess-1",
+      status: "HELD" as const,
+      amountMinor: 1,
+    }));
     useAccountStore.getState().setProfile(LOGGED_IN);
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
-      container: { bookingRepository: verdictRepo(SESSION) },
+      container: { bookingRepository: { ...verdictRepo(SESSION), hold } },
     });
     await waitFor(() =>
       expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
@@ -204,7 +218,9 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     );
     expect(
       screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
-    ).toBe(true);
+    ).toBe(false);
+    fireEvent.press(screen.getByTestId("checkout-submit"));
+    expect(hold).not.toHaveBeenCalled();
   });
 
   it("CHECK_LIMIT_REACHED warns but still allows submit", async () => {

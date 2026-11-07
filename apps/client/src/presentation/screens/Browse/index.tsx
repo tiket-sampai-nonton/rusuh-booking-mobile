@@ -13,6 +13,7 @@ import {
   Header,
   ToastProvider,
 } from "@presentation/components/design-system";
+import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import {
   FilterModal,
   type FilterValue,
@@ -119,6 +120,13 @@ export function BrowseScreen() {
   const goToEvent = (eventId: string): void =>
     router.push(`/events/${eventId}` as Href);
   const goHome = (): void => router.push("/" as Href);
+  const navLinks = createPrimaryNavLinks({
+    onHome: goHome,
+    onBrowse: () => undefined,
+    onTickets: () => router.push("/my-tickets" as Href),
+    onProfile: () => router.push("/profile" as Href),
+    isLoggedIn: Boolean(profile),
+  });
   const applyFilter = (value: FilterValue): void => {
     setFilterOpen(false);
     setActiveCategory(readBrowseCategory(value.genre));
@@ -206,43 +214,8 @@ export function BrowseScreen() {
           topInset={insets.top}
           showLinks={showNavLinks}
           isLoggedIn={Boolean(profile)}
-          links={[
-            { label: "Beranda", onPress: goHome, testID: "nav-home" },
-            { label: "Jelajahi", onPress: () => {}, testID: "nav-browse" },
-            ...(profile
-              ? [
-                  {
-                    label: "Tiket Saya",
-                    onPress: () => router.push("/my-tickets" as Href),
-                    testID: "nav-tickets",
-                  },
-                  {
-                    label: "Profil",
-                    onPress: () => router.push("/profile" as Href),
-                    testID: "nav-profile",
-                  },
-                ]
-              : []),
-          ]}
-          mobileMenuLinks={[
-            { label: "Beranda", onPress: goHome, testID: "nav-home" },
-            { label: "Cari Event", onPress: () => {}, testID: "nav-browse" },
-            {
-              label: "Tiket Saya",
-              onPress: () => router.push("/my-tickets" as Href),
-              testID: "nav-tickets",
-            },
-            {
-              label: "Arsip Event",
-              onPress: () => router.push("/history" as Href),
-              testID: "nav-history",
-            },
-            {
-              label: "Profil",
-              onPress: () => router.push("/profile" as Href),
-              testID: "nav-profile",
-            },
-          ]}
+          links={navLinks}
+          mobileMenuLinks={navLinks}
           onLogoPress={goHome}
           actions={[]}
         />

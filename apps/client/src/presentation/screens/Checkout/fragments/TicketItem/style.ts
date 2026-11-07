@@ -56,6 +56,12 @@ export const componentStyles = StyleSheet.create({
     fontFamily: plusJakartaSansFonts.regular,
     color: designColors.ink,
   },
+  validationError: {
+    color: designColors.danger,
+    marginTop: 6,
+    fontSize: 12,
+    fontFamily: plusJakartaSansFonts.medium,
+  },
 });
 
 export function styleForTicketItemPressable0(arg0: boolean): DynamicStyle {

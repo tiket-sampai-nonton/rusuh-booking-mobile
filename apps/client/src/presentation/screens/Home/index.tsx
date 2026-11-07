@@ -35,6 +35,7 @@ import {
   HeroCarousel,
   BottomNav,
 } from "@presentation/components/design-system";
+import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
@@ -87,6 +88,13 @@ export function HomeScreen() {
   const goToEvent = (eventId: string): void =>
     router.push(`/events/${eventId}` as Href);
   const goBrowse = (): void => router.push("/browse" as Href);
+  const navLinks = createPrimaryNavLinks({
+    onHome: () => scrollRef.current?.scrollTo({ y: 0, animated: true }),
+    onBrowse: goBrowse,
+    onTickets: () => router.push("/my-tickets" as Href),
+    onProfile: () => router.push("/profile" as Href),
+    isLoggedIn: Boolean(profile),
+  });
 
   // Filter "Terapkan" → /browse with the chosen params.
   const applyFilter = (f: FilterValue): void => {
@@ -153,53 +161,8 @@ export function HomeScreen() {
         <Header
           topInset={insets.top}
           showLinks={showNavLinks}
-          links={[
-            {
-              label: "Beranda",
-              onPress: () =>
-                scrollRef.current?.scrollTo({ y: 0, animated: true }),
-              testID: "nav-home",
-            },
-            { label: "Jelajahi", onPress: goBrowse, testID: "nav-browse" },
-            ...(profile
-              ? [
-                  {
-                    label: "Tiket Saya",
-                    onPress: () => router.push("/my-tickets" as Href),
-                    testID: "nav-tickets",
-                  },
-                  {
-                    label: "Profil",
-                    onPress: () => router.push("/profile" as Href),
-                    testID: "nav-profile",
-                  },
-                ]
-              : []),
-          ]}
-          mobileMenuLinks={[
-            {
-              label: "Beranda",
-              onPress: () =>
-                scrollRef.current?.scrollTo({ y: 0, animated: true }),
-              testID: "nav-home",
-            },
-            { label: "Cari Event", onPress: goBrowse, testID: "nav-browse" },
-            {
-              label: "Tiket Saya",
-              onPress: () => router.push("/my-tickets" as Href),
-              testID: "nav-tickets",
-            },
-            {
-              label: "Arsip Event",
-              onPress: () => router.push("/history" as Href),
-              testID: "nav-history",
-            },
-            {
-              label: "Profil",
-              onPress: () => router.push("/profile" as Href),
-              testID: "nav-profile",
-            },
-          ]}
+          links={navLinks}
+          mobileMenuLinks={navLinks}
           isLoggedIn={Boolean(profile)}
           onCtaPress={() => setLoginOpen(true)}
           onLogoPress={() =>

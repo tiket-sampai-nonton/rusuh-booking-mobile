@@ -21,6 +21,7 @@ import { ticketsScrollContent, screenStyles } from "./style";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BottomNav, Header } from "@presentation/components/design-system";
+import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import { LoginModal } from "@presentation/components/auth/LoginModal";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
@@ -59,6 +60,13 @@ export function MyTicketsScreen() {
   const [selectedBooking, setSelectedBooking] =
     useState<MyBookingSummary | null>(null);
   const [downloadError, setDownloadError] = useState("");
+  const navLinks = createPrimaryNavLinks({
+    onHome: () => router.push("/" as Href),
+    onBrowse: () => router.push("/browse" as Href),
+    onTickets: () => undefined,
+    onProfile: () => router.push("/profile" as Href),
+    isLoggedIn: Boolean(profile),
+  });
   const paymentStatus = useQuery({
     queryKey: ["my-ticket-payment-status", bookingId],
     queryFn: () => paymentRepository.getStatus(bookingId!, bookingId!),
@@ -258,55 +266,8 @@ export function MyTicketsScreen() {
           topInset={insets.top}
           showLinks={isWeb && width > 768}
           isLoggedIn={Boolean(profile)}
-          links={[
-            {
-              label: "Beranda",
-              onPress: () => router.push("/" as Href),
-              testID: "nav-home",
-            },
-            {
-              label: "Jelajahi",
-              onPress: () => router.push("/browse" as Href),
-              testID: "nav-browse",
-            },
-            ...(profile
-              ? [
-                  {
-                    label: "Tiket Saya",
-                    onPress: () => {},
-                    testID: "nav-tickets",
-                  },
-                  {
-                    label: "Profil",
-                    onPress: () => router.push("/profile" as Href),
-                    testID: "nav-profile",
-                  },
-                ]
-              : []),
-          ]}
-          mobileMenuLinks={[
-            {
-              label: "Beranda",
-              onPress: () => router.push("/" as Href),
-              testID: "nav-home",
-            },
-            {
-              label: "Cari Event",
-              onPress: () => router.push("/browse" as Href),
-              testID: "nav-browse",
-            },
-            { label: "Tiket Saya", onPress: () => {}, testID: "nav-tickets" },
-            {
-              label: "Arsip Event",
-              onPress: () => router.push("/history" as Href),
-              testID: "nav-history",
-            },
-            {
-              label: "Profil",
-              onPress: () => router.push("/profile" as Href),
-              testID: "nav-profile",
-            },
-          ]}
+          links={navLinks}
+          mobileMenuLinks={navLinks}
           onLogoPress={() => router.push("/" as Href)}
           onCtaPress={() => setLoginOpen(true)}
           actions={[]}

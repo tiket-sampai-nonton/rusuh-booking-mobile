@@ -197,8 +197,8 @@ describe("ProfileScreen", () => {
     const { getByRole } = renderProfile();
 
     fireEvent.press(getByRole("tab", { name: "Beranda" }));
-    fireEvent.press(getByRole("tab", { name: "Jelajahi" }));
-    fireEvent.press(getByRole("tab", { name: "Tiket" }));
+    fireEvent.press(getByRole("tab", { name: "Jelajah" }));
+    fireEvent.press(getByRole("tab", { name: "Ticket" }));
 
     expect(mockRouter.push).toHaveBeenNthCalledWith(1, "/");
     expect(mockRouter.push).toHaveBeenNthCalledWith(2, "/browse");
