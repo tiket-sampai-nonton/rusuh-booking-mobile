@@ -201,15 +201,11 @@ jobs:
           fi
 
           if printf '%s\n' "$CHANGED_FILES" | grep -Fxq 'apps/client/app.config.js'; then
-            APP_CONFIG_DIFF="$(git diff --unified=0 "$BEFORE_SHA" "$GITHUB_SHA" -- apps/client/app.config.js \
-              | grep -E '^[+-][^+-]' \
-              | sed -E 's/^[+-][[:space:]]*//; s/[[:space:]]+$//' \
-              | sort)"
-            SLUG_ONLY_DIFF="$(printf '%s\n' 'slug: "rusuh-booking",' 'slug: "rusuh-booking-mobile",' | sort)"
-            if [ "$APP_CONFIG_DIFF" != "$SLUG_ONLY_DIFF" ]; then
-              NATIVE_CHANGE=true
-            else
+            if git diff --quiet -I '^[[:space:]]*slug:' \
+              "$BEFORE_SHA" "$GITHUB_SHA" -- apps/client/app.config.js; then
               echo 'Expo slug-only project-link correction is OTA-compatible; it does not change the native runtime configuration.'
+            else
+              NATIVE_CHANGE=true
             fi
           fi
 
