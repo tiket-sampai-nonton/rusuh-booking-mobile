@@ -2,7 +2,7 @@
  * SINGLE design-token source of truth (NativeWind) — RBT-003.
  *
  * Layout and typography follow the prototype V5 design system. The color palette
- * is temporarily overridden with cyberpunk colors for the EAS OTA test.
+ * is temporarily set to green and yellow for the EAS OTA test.
  * `src/presentation/theme/` re-exports the SAME raw values for contexts
  * NativeWind cannot style (SVG / Canvas / QR / Reanimated) — it mirrors this
  * file and is never an independent source.
@@ -21,88 +21,86 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // ---- Cyberpunk OTA test palette ----
+        // ---- Green + yellow OTA test palette ----
         brand: {
-          DEFAULT: "#7C3AED", // electric purple
-          deep: "#5B21B6", //    deep violet
-          ember: "#FF32C8", //   neon magenta
-          cyan: "#007F9E", //    accessible cyan accent
-          "neon-cyan": "#49E8FF",
+          DEFAULT: "#15803D", // accessible leaf green for primary actions
+          deep: "#166534", //    forest green
+          yellow: "#FACC15", //  bright yellow accent
+          "yellow-deep": "#A16207", // readable amber for labels and borders
+          "yellow-light": "#FEF08A", // pale yellow highlight
         },
 
         // ---- Semantic surface PAIRS (AC2: bg+text always paired) ----
-        // Light surfaces use a lavender tint; dark surfaces use deep violet.
+        // Light surfaces use a soft green tint; dark surfaces use deep green.
         background: {
-          DEFAULT: "#F7F2FF",
-          dark: "#0B0614",
+          DEFAULT: "#F6F9F4",
+          dark: "#0B1710",
         },
         foreground: {
-          DEFAULT: "#1B1026",
-          dark: "#F7F2FF",
+          DEFAULT: "#142519",
+          dark: "#F1F8F1",
         },
         card: {
-          DEFAULT: "#FFFCFF",
-          foreground: "#1B1026",
-          dark: "#170D24",
-          "dark-foreground": "#F7F2FF",
+          DEFAULT: "#FFFFFF",
+          foreground: "#142519",
+          dark: "#13251A",
+          "dark-foreground": "#F1F8F1",
         },
         muted: {
-          DEFAULT: "#665873",
-          foreground: "#665873",
-          dark: "#C7B8D8",
+          DEFAULT: "#58665A",
+          foreground: "#58665A",
+          dark: "#B7C8BA",
         },
         line: {
-          DEFAULT: "rgba(43,19,67,0.14)",
-          dark: "rgba(220,190,255,0.18)",
+          DEFAULT: "rgba(20,37,25,0.14)",
+          dark: "rgba(213,237,219,0.18)",
         },
         ink: {
-          DEFAULT: "#1B1026",
-          2: "#28113D",
+          DEFAULT: "#142519",
+          2: "#24452E",
         },
-        paper: "#F7F2FF",
+        paper: "#F6F9F4",
 
         // ---- Status (prototype --ok / --warn, + dark-context hues) ----
         ok: {
-          DEFAULT: "#087F68",
-          dark: "#5EEAD4",
+          DEFAULT: "#15803D",
+          dark: "#86EFAC",
         },
         warn: {
-          DEFAULT: "#9A5B00",
-          dark: "#FFD166",
+          DEFAULT: "#A16207",
+          dark: "#FDE047",
         },
         error: {
-          DEFAULT: "#C02677",
-          dark: "#FF7AB6",
+          DEFAULT: "#B42318",
+          dark: "#FDA29B",
         },
 
         // ============================================================
-        // Cyberpunk palette for the OTA visual test. Keep these semantic
-        // aliases aligned with event-design-tokens.ts.
+        // Raw drawing surfaces and aliases mirrored by runtime color tokens.
         // ============================================================
         v2: {
-          ink: "#1B1026",
-          ground: "#F7F2FF",
-          overlay: "#0B0614",
-          muted: "#665873",
-          gray: "#756686",
-          field: "#EEE5FA",
-          accent: "#7C3AED",
-          magenta: "#FF32C8",
-          cyan: "#007F9E",
-          "neon-cyan": "#49E8FF",
-          danger: "#C02677",
-          success: "#087F68",
-          warn: "#9A5B00",
-          info: "#007F9E",
-          "zone-ok": "#E5F8F2",
-          "zone-ok-border": "#087F68",
-          "zone-ok-text": "#075B4B",
-          "zone-warn": "#FFF5D9",
-          "zone-warn-border": "#9A5B00",
-          "zone-warn-text": "#744400",
-          "zone-bad": "#FCE7F3",
-          "zone-bad-border": "#C02677",
-          "zone-bad-text": "#8F1D5A",
+          ink: "#142519",
+          ground: "#F6F9F4",
+          overlay: "#0B1710",
+          muted: "#58665A",
+          gray: "#687A6B",
+          field: "#EAF2E7",
+          accent: "#15803D",
+          yellow: "#FACC15",
+          "yellow-deep": "#A16207",
+          danger: "#B42318",
+          success: "#15803D",
+          warn: "#A16207",
+          info: "#2F7A49",
+          "zone-ok": "#E9F6EC",
+          "zone-ok-border": "#15803D",
+          "zone-ok-text": "#14532D",
+          "zone-warn": "#FEF9C3",
+          "zone-warn-border": "#A16207",
+          "zone-warn-text": "#713F12",
+          "zone-bad": "#FEF2F2",
+          "zone-bad-border": "#B42318",
+          "zone-bad-text": "#991B1B",
         },
       },
 
@@ -202,10 +200,10 @@ module.exports = {
 
       // ---- Shadows (prototype box-shadows on cards/buttons) ----
       boxShadow: {
-        brand: "0 4px 16px -2px rgba(124,58,237,0.48)",
-        button: "0 14px 40px -12px rgba(27,16,38,0.42)",
-        filter: "0 12px 30px -24px rgba(43,19,67,0.5)",
-        ok: "0 16px 40px -14px rgba(8,127,104,0.45)",
+        brand: "0 4px 16px -2px rgba(21,128,61,0.28)",
+        button: "0 14px 40px -12px rgba(20,37,25,0.42)",
+        filter: "0 12px 30px -24px rgba(36,69,46,0.5)",
+        ok: "0 16px 40px -14px rgba(21,128,61,0.36)",
       },
     },
   },

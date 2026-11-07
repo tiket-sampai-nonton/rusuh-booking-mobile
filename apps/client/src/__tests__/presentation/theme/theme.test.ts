@@ -60,7 +60,7 @@ describe("RBT-003 semantic theme", () => {
       cardForeground: neutral.ink,
       muted: neutral.muted,
       line: neutral.line,
-      brand: brand.purple,
+      brand: brand.primary,
       ok: status.ok,
       warn: status.warn,
       error: status.error,

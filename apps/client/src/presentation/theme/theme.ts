@@ -32,7 +32,7 @@ export interface ThemeColors {
   error: string;
 }
 
-/** Light scheme — cyberpunk lavender surfaces with electric-violet accents. */
+/** Light scheme — soft green surfaces with green and yellow brand accents. */
 export const lightColors: ThemeColors = {
   background: neutral.paper,
   foreground: neutral.ink,
@@ -40,14 +40,14 @@ export const lightColors: ThemeColors = {
   cardForeground: neutral.ink,
   muted: neutral.muted,
   line: neutral.line,
-  brand: brand.purple,
+  brand: brand.primary,
   ok: status.ok,
   warn: status.warn,
   error: status.error,
 };
 
 /**
- * Dark scheme — deep-violet surfaces with high-contrast neon accents.
+ * Dark scheme — deep-green surfaces with high-contrast green and yellow accents.
  */
 export const darkColors: ThemeColors = {
   background: neutral.darkBackground,
@@ -56,7 +56,7 @@ export const darkColors: ThemeColors = {
   cardForeground: neutral.darkForeground,
   muted: neutral.mutedDark,
   line: neutral.lineDark,
-  brand: brand.purple,
+  brand: brand.primary,
   ok: status.okDark,
   warn: status.warnDark,
   error: status.errorDark,

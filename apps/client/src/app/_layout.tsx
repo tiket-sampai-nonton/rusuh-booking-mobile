@@ -33,7 +33,7 @@ export default function RootLayout() {
         </AppProviders>
       ) : (
         <View style={rootLayoutStyles.loading}>
-          <ActivityIndicator size="large" color={brand.purple} />
+          <ActivityIndicator size="large" color={brand.primary} />
         </View>
       )}
       <StatusBar style={showSplash ? "light" : "auto"} />

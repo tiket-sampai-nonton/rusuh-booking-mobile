@@ -27,7 +27,7 @@ export function BrandSymbol({ size = 36, testID }: BrandSymbolProps) {
       testID={testID}
     >
       <LinearGradient
-        colors={[brand.purpleDeep, brand.purple, brand.magenta]}
+        colors={[brand.deep, brand.primary, brand.yellow]}
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 0 }}
         style={StyleSheet.absoluteFill}
@@ -36,22 +36,22 @@ export function BrandSymbol({ size = 36, testID }: BrandSymbolProps) {
         <Path
           d={ticketPath}
           fill={neutral.paper}
-          stroke={brand.neonCyan}
+          stroke={brand.yellowLight}
           strokeLinejoin="round"
           strokeWidth={0.7}
         />
         <Path
           d="M27 10v20"
           fill="none"
-          stroke={brand.purpleDeep}
+          stroke={brand.deep}
           strokeDasharray="1 1"
           strokeLinecap="round"
           strokeWidth={1.2}
         />
         <Path
           d={boltPath}
-          fill={brand.magenta}
-          stroke={brand.purpleDeep}
+          fill={brand.yellow}
+          stroke={brand.deep}
           strokeWidth={0.35}
         />
       </Svg>

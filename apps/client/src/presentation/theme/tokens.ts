@@ -10,39 +10,63 @@
  * for SVG, QR, Canvas, and other raw drawing surfaces.
  */
 
-/** Cyberpunk brand hues used by the OTA theme test. */
+const tailwind = require("../../../tailwind.config.js");
+const colors = tailwind.theme.extend.colors;
+const shadows = tailwind.theme.extend.boxShadow;
+
+/** Green and yellow brand hues mirrored from Tailwind's canonical tokens. */
 export const brand = {
-  purple: "#7C3AED",
-  purpleDeep: "#5B21B6",
-  magenta: "#FF32C8",
-  cyan: "#007F9E",
-  neonCyan: "#49E8FF",
+  primary: colors.brand.DEFAULT,
+  deep: colors.brand.deep,
+  yellow: colors.brand.yellow,
+  yellowDeep: colors.brand["yellow-deep"],
+  yellowLight: colors.brand["yellow-light"],
 } as const;
 
-/** Status hues adapted for readable contrast on the cyberpunk surfaces. */
+/** Status hues mirrored from Tailwind's semantic tokens. */
 export const status = {
-  ok: "#087F68",
-  okDark: "#5EEAD4",
-  warn: "#9A5B00",
-  warnDark: "#FFD166",
-  error: "#C02677",
-  errorDark: "#FF7AB6",
+  ok: colors.ok.DEFAULT,
+  okDark: colors.ok.dark,
+  warn: colors.warn.DEFAULT,
+  warnDark: colors.warn.dark,
+  error: colors.error.DEFAULT,
+  errorDark: colors.error.dark,
 } as const;
 
-/** Lavender and deep-violet surfaces for light and dark color schemes. */
+/** Neutral and field surfaces mirrored from Tailwind's semantic tokens. */
 export const neutral = {
-  ink: "#1B1026",
-  ink2: "#28113D",
-  paper: "#F7F2FF",
-  card: "#FFFCFF",
-  darkBackground: "#0B0614",
-  darkCard: "#170D24",
-  darkForeground: "#F7F2FF",
-  overlay: "#0B0614",
-  muted: "#665873",
-  line: "rgba(43,19,67,0.14)",
-  mutedDark: "#C7B8D8",
-  lineDark: "rgba(220,190,255,0.18)",
+  ink: colors.ink.DEFAULT,
+  ink2: colors.ink[2],
+  paper: colors.paper,
+  card: colors.card.DEFAULT,
+  darkBackground: colors.background.dark,
+  darkCard: colors.card.dark,
+  darkForeground: colors.foreground.dark,
+  overlay: colors.v2.overlay,
+  muted: colors.muted.DEFAULT,
+  line: colors.line.DEFAULT,
+  mutedDark: colors.muted.dark,
+  lineDark: colors.line.dark,
+  field: colors.v2.field,
+} as const;
+
+/** Waiting-room status surfaces mirrored from Tailwind's `v2` tokens. */
+export const zone = {
+  ok: {
+    bg: colors.v2["zone-ok"],
+    border: colors.v2["zone-ok-border"],
+    text: colors.v2["zone-ok-text"],
+  },
+  warn: {
+    bg: colors.v2["zone-warn"],
+    border: colors.v2["zone-warn-border"],
+    text: colors.v2["zone-warn-text"],
+  },
+  bad: {
+    bg: colors.v2["zone-bad"],
+    border: colors.v2["zone-bad-border"],
+    text: colors.v2["zone-bad-text"],
+  },
 } as const;
 
 /** Border radii in px — prototype `border-radius` values. */
@@ -124,10 +148,10 @@ export const motion = {
 
 /** Elevation shadows — prototype `box-shadow` values (CSS strings). */
 export const shadow = {
-  brand: "0 4px 16px -2px rgba(124,58,237,0.48)",
-  button: "0 14px 40px -12px rgba(27,16,38,0.42)",
-  filter: "0 12px 30px -24px rgba(43,19,67,0.5)",
-  ok: "0 16px 40px -14px rgba(8,127,104,0.45)",
+  brand: shadows.brand,
+  button: shadows.button,
+  filter: shadows.filter,
+  ok: shadows.ok,
 } as const;
 
 /** The complete raw token bag — single object for ergonomic import. */
@@ -135,6 +159,7 @@ export const tokens = {
   brand,
   status,
   neutral,
+  zone,
   radius,
   spacing,
   fontSize,

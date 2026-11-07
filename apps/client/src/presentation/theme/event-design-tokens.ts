@@ -1,10 +1,8 @@
 /**
- * Cyberpunk color tokens for the OTA visual test.
- *
- * Tailwind's `v2` color namespace is the source for these runtime mirrors.
- *
- * Tailwind's `v2` namespace is the source of truth for the matching palette.
+ * Event design tokens. Color values mirror the canonical Tailwind palette
+ * through the shared runtime tokens in `tokens.ts`.
  */
+import { brand, neutral, status, zone } from "./tokens";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // COLORS
@@ -12,30 +10,30 @@
 
 export const designColors = {
   // Core palette (semantic naming)
-  ground: "#F7F2FF", // Lavender page background
-  ink: "#1B1026", // Deep-violet text and borders
-  overlay: "#0B0614", // Deep-violet overlays and image scrims
-  inkMuted: "#665873", // Muted purple-gray text
-  field: "#EEE5FA", // Lavender input and subtle surfaces
+  ground: neutral.paper,
+  ink: neutral.ink,
+  overlay: neutral.overlay,
+  inkMuted: neutral.muted,
+  field: neutral.field,
 
   // Functional colors
-  danger: "#C02677", // Neon rose for errors and urgent states
-  success: "#087F68", // Teal success state
-  warning: "#9A5B00", // Amber warning state
+  danger: status.error,
+  success: status.ok,
+  warning: status.warn,
 
   // Legacy aliases (for backwards compatibility in components)
-  black: "#1B1026",
-  white: "#F7F2FF",
-  gray: "#665873",
-  red: "#C02677",
-  green: "#087F68",
-  accent: "#7C3AED", // Electric violet CTA
-  magenta: "#FF32C8",
-  cyan: "#007F9E",
+  black: neutral.ink,
+  white: neutral.paper,
+  gray: neutral.muted,
+  red: status.error,
+  green: status.ok,
+  accent: brand.primary,
+  yellow: brand.yellow,
+  yellowDeep: brand.yellowDeep,
 
   // Additional aliases for backwards compatibility
-  muted: "#665873",
-  warn: "#9A5B00",
+  muted: neutral.muted,
+  warn: status.warn,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -125,18 +123,18 @@ export const designBorders = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const designShadows = {
-  sm: { x: 2, y: 2, blur: 0, color: "#5B21B6" },
-  md: { x: 4, y: 4, blur: 0, color: "#5B21B6" },
-  lg: { x: 6, y: 6, blur: 0, color: "#5B21B6" },
-  xl: { x: 8, y: 8, blur: 0, color: "#5B21B6" },
+  sm: { x: 2, y: 2, blur: 0, color: brand.deep },
+  md: { x: 4, y: 4, blur: 0, color: brand.deep },
+  lg: { x: 6, y: 6, blur: 0, color: brand.deep },
+  xl: { x: 8, y: 8, blur: 0, color: brand.deep },
 } as const;
 
 // Shadow as CSS string helper
 export const designShadowCSS = {
-  sm: "2px 2px 0 #5B21B6",
-  md: "4px 4px 0 #5B21B6",
-  lg: "6px 6px 0 #5B21B6",
-  xl: "8px 8px 0 #5B21B6",
+  sm: `2px 2px 0 ${brand.deep}`,
+  md: `4px 4px 0 ${brand.deep}`,
+  lg: `6px 6px 0 ${brand.deep}`,
+  xl: `8px 8px 0 ${brand.deep}`,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -267,21 +265,9 @@ export const designModal = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const designZoneBanners = {
-  guaranteed: {
-    bg: "#E5F8F2",
-    border: "#087F68",
-    text: "#075B4B",
-  },
-  possible: {
-    bg: "#FFF5D9",
-    border: "#9A5B00",
-    text: "#744400",
-  },
-  notEnough: {
-    bg: "#FCE7F3",
-    border: "#C02677",
-    text: "#8F1D5A",
-  },
+  guaranteed: zone.ok,
+  possible: zone.warn,
+  notEnough: zone.bad,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
