@@ -42,11 +42,7 @@ export function CheckoutTopBar({
         >
           <View style={componentStyles.elementFlexDirection0}>
             <ArrowIcon direction="left" />
-            <Text
-              style={[styles.backText, isMobileWeb && styles.mobileWebBackText]}
-            >
-              Kembali
-            </Text>
+            {!isMobileWeb && <Text style={styles.backText}>Kembali</Text>}
           </View>
         </Pressable>
 

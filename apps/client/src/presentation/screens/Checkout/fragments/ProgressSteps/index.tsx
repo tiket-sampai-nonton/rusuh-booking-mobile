@@ -8,7 +8,7 @@
  * - Uppercase labels below each step
  */
 import { useEffect } from "react";
-import { Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -25,25 +25,23 @@ import {
 
 interface ProgressStepsProps {
   /**
-   * Current step (1-4):
-   * 1 = Select (completed by entering checkout)
-   * 2 = Details (active on checkout screen)
-   * 3 = Payment (active on payment screen)
-   * 4 = Confirm (active on success screen)
+   * Current step in the shared five-step event journey.
    */
-  readonly currentStep: 1 | 2 | 3 | 4;
+  readonly currentStep: 1 | 2 | 3 | 4 | 5;
 }
 
 const STEPS = [
-  { id: 1, label: "Pilih" },
-  { id: 2, label: "Detail" },
-  { id: 3, label: "Bayar" },
-  { id: 4, label: "Selesai" },
+  { id: 1, label: "Detail" },
+  { id: 2, label: "Antre" },
+  { id: 3, label: "Pilih" },
+  { id: 4, label: "Bayar" },
+  { id: 5, label: "Selesai" },
 ] as const;
 
 export function ProgressSteps({ currentStep }: ProgressStepsProps) {
   const { isMobileWeb } = useResponsive();
-  // Calculate progress line fill percentage (0%, 33%, 66%, 100%)
+  const isCompact = isMobileWeb || Platform.OS !== "web";
+  // Calculate progress line fill percentage across the five journey steps.
   const progressPercent = ((currentStep - 1) / (STEPS.length - 1)) * 100;
 
   // Animated progress width (prototype: transition: width 0.5s cubic-bezier(0.76, 0, 0.24, 1))
@@ -64,20 +62,20 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
     <View
       style={[
         componentStyles.elementBackgroundColor0,
-        isMobileWeb && componentStyles.mobileWebContainer,
+        isCompact && componentStyles.mobileWebContainer,
       ]}
     >
       <View
         style={[
           componentStyles.elementMaxWidth1,
-          isMobileWeb && componentStyles.mobileWebMaxWidth,
+          isCompact && componentStyles.mobileWebMaxWidth,
         ]}
       >
         <View style={componentStyles.elementFlexDirection2}>
           {/* Background line */}
-          {!isMobileWeb && <View style={componentStyles.elementPosition3} />}
+          {!isCompact && <View style={componentStyles.elementPosition3} />}
           {/* Progress line fill (animated) */}
-          {!isMobileWeb && (
+          {!isCompact && (
             <Animated.View
               style={[styleForProgressStepsAnimatedView2(), animatedLineStyle]}
             />
@@ -94,12 +92,12 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
                   number={step.id}
                   isActive={isActive}
                   isCompleted={isCompleted}
-                  compact={isMobileWeb}
+                  compact={isCompact}
                 />
                 <Text
                   style={[
                     styleForProgressStepsText3(isActive, isCompleted),
-                    isMobileWeb && componentStyles.mobileWebLabel,
+                    isCompact && componentStyles.mobileWebLabel,
                   ]}
                 >
                   {step.label}

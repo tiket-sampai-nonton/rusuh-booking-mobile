@@ -23,13 +23,11 @@ import { componentStyles, styleForHeroInfoMobileText6 } from "../../style";
 import { useTextScramble } from "../../hooks/useTextScramble";
 import { CalendarIcon } from "../CalendarIcon";
 import { MapPinIcon } from "../MapPinIcon";
-import { PulsingDot } from "../PulsingDot";
 import { ArrowIcon } from "../ArrowIcon";
 
 export function HeroInfoMobile({
   event,
   onBook,
-  onSeeAll,
   isMobileWeb = false,
 }: {
   readonly event: EventSummary;
@@ -75,24 +73,6 @@ export function HeroInfoMobile({
 
   return (
     <Animated.View key={event.id} style={animatedStyle}>
-      {/* Badge: "ON SALE NOW" with pulsing red dot */}
-      <View
-        style={[
-          componentStyles.elementFlexDirection20,
-          isMobileWeb && mobileWebStyles.badge,
-        ]}
-      >
-        <PulsingDot />
-        <Text
-          style={[
-            componentStyles.elementColor21,
-            isMobileWeb && mobileWebStyles.badgeText,
-          ]}
-        >
-          Penjualan dibuka
-        </Text>
-      </View>
-
       {/* Title: Large brutalist text */}
       <Text
         accessibilityRole="header"
@@ -130,28 +110,7 @@ export function HeroInfoMobile({
         )}
       </View>
 
-      {isMobileWeb ? (
-        <View style={mobileWebStyles.actions}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Lihat detail ${event.name}`}
-            testID="hero-book"
-            onPress={() => onBook(event.id)}
-            style={mobileWebStyles.primary}
-          >
-            <Text style={mobileWebStyles.primaryText}>Lihat Detail</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Lihat semua event"
-            testID="hero-see-all"
-            onPress={onSeeAll}
-            style={mobileWebStyles.secondary}
-          >
-            <Text style={mobileWebStyles.secondaryText}>Semua event →</Text>
-          </Pressable>
-        </View>
-      ) : (
+      {!isMobileWeb && (
         <View style={componentStyles.elementAlignSelf27}>
           <Pressable
             accessibilityRole="button"

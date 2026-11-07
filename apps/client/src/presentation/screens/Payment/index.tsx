@@ -11,9 +11,9 @@
  * Sekarang" enables on selection. The create-attempt → SNAP handoff is RBT-061;
  * RBT-060 lands the page. No infrastructure import — ports via hooks only.
  */
-import { useRouter, type Href } from "expo-router";
+import { useNavigation, useRouter, type Href } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { BackHandler, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { PaymentMethod } from "@domain/repositories/payment.repository";
@@ -31,15 +31,44 @@ import { PaymentHoldBanner, PaymentSummary } from "./fragments/PaymentSummary";
 import { PaymentTopBar } from "./fragments/PaymentTopBar";
 import type { PaymentScreenProps } from "./interface";
 import { paymentScrollContent } from "./style";
+import { LeaveConfirm } from "../Checkout/fragments/LeaveConfirm";
 
 export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   const router = useRouter();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { isDesktop, isMobileWeb } = useResponsive();
   const { serverClock } = useServices();
   const { page, isLoading } = usePaymentPage(bookingId);
   const { createAttempt, resumeHandoff } = usePayment();
   const setBooking = useSessionStore((s) => s.setBooking);
+  const [confirmLeave, setConfirmLeave] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (event) => {
+      const actionType = event.data.action.type;
+      if (
+        actionType === "GO_BACK" ||
+        actionType === "POP" ||
+        actionType === "POP_TO_TOP"
+      ) {
+        event.preventDefault();
+        setConfirmLeave(true);
+      }
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        setConfirmLeave(true);
+        return true;
+      },
+    );
+    return () => subscription.remove();
+  }, []);
 
   const [method, setMethod] = useState<PaymentMethod | null>(null);
 
@@ -65,7 +94,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
     clock: serverClock,
     expiresAtIso: page?.paymentExpiresAt,
     serverTimeIso: page?.serverTime,
-    onExpire: () => router.replace(`/expired/${bookingId}` as Href),
+    onExpire: () => router.replace(`/failed/${bookingId}` as Href),
   });
 
   const warnTimer = remainingMs <= 60_000;
@@ -90,7 +119,8 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
           remainingMs={remainingMs}
           warn={warnTimer}
           expired={expired}
-          onBack={() => router.replace("/" as Href)}
+          isMobileWeb={isMobileWeb}
+          onBack={() => setConfirmLeave(true)}
         />
 
         <ScrollView
@@ -135,6 +165,15 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
             }
           }}
           bottomInset={insets.bottom}
+        />
+        <LeaveConfirm
+          visible={confirmLeave}
+          variant="payment"
+          onStay={() => setConfirmLeave(false)}
+          onLeave={() => {
+            setConfirmLeave(false);
+            router.replace("/" as Href);
+          }}
         />
       </View>
     </ScreenFade>

@@ -4,8 +4,7 @@
  */
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { ScrollView, View } from "react-native";
+import { FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -25,7 +24,6 @@ import { useServices } from "@providers/service-context";
 
 import { BrowseCategoriesSection } from "./fragments/BrowseCategoriesSection";
 import { BrowseEmpty, BrowseLoading } from "./fragments/BrowseStates";
-import { BrowseGrid } from "./fragments/BrowseGrid";
 import { BrowseHero } from "./fragments/BrowseHero";
 import { BrowseLoadMore } from "./fragments/BrowseLoadMore";
 import { BrowseNativeCategoryBar } from "./fragments/BrowseNativeCategoryBar";
@@ -47,9 +45,12 @@ import {
   browseNativeMain,
   browseNativeScrollContent,
   browseRoot,
-  browseScroll,
   browseScrollContent,
+  browseGridCell,
+  browseGridList,
+  browseGridRow,
 } from "./style";
+import { EventCard } from "@presentation/components/design-system";
 
 export function BrowseScreen() {
   const router = useRouter();
@@ -57,6 +58,7 @@ export function BrowseScreen() {
   const { isWeb, isDesktop, isNative, isMobileWeb, width, gridColumns } =
     useResponsive();
   const params = useLocalSearchParams<{
+    category?: string;
     genre?: string;
     time?: string;
     sort?: string;
@@ -66,15 +68,20 @@ export function BrowseScreen() {
   const showNavLinks = isWeb && width > 768;
 
   const [activeCategory, setActiveCategory] =
-    useState<BrowseCategoryKey | null>(() => readBrowseCategory(params.genre));
+    useState<BrowseCategoryKey | null>(
+      () =>
+        readBrowseCategory(params.category) ?? readBrowseCategory(params.genre),
+    );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [loadMoreDisabled, setLoadMoreDisabled] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
   const genre = readGenre(params.genre);
   useEffect(() => {
-    setActiveCategory(readBrowseCategory(params.genre));
-  }, [params.genre]);
+    setActiveCategory(
+      readBrowseCategory(params.category) ?? readBrowseCategory(params.genre),
+    );
+  }, [params.category, params.genre]);
   const time = readParam(params.time, TIMES, "all");
   const sort = readParam(params.sort, SORTS, "closest");
   const eventQuery = {
@@ -87,11 +94,6 @@ export function BrowseScreen() {
     sort: sort === "furthest" ? ("DATE_DESC" as const) : ("DATE_ASC" as const),
   };
   const { data, isLoading } = useEvents(eventQuery);
-  const facets = useQuery({
-    queryKey: ["event-facets", eventQuery],
-    queryFn: () => eventRepository.getFacets!(eventQuery),
-    enabled: filterOpen && Boolean(eventRepository.getFacets),
-  });
   const allResults = useMemo(
     () =>
       filterEvents(
@@ -129,9 +131,9 @@ export function BrowseScreen() {
   });
   const applyFilter = (value: FilterValue): void => {
     setFilterOpen(false);
-    setActiveCategory(readBrowseCategory(value.genre));
+    setActiveCategory(readBrowseCategory(value.category));
     const query = new URLSearchParams({
-      genre: value.genre,
+      category: value.category,
       time: value.time,
       sort: value.sort,
     }).toString();
@@ -139,76 +141,109 @@ export function BrowseScreen() {
   };
 
   const changeSort = (value: string): void => {
-    const query = new URLSearchParams({ genre, time, sort: value }).toString();
+    const query = new URLSearchParams({
+      ...(activeCategory ? { category: activeCategory } : {}),
+      ...(genre !== "Semua" ? { genre } : {}),
+      time,
+      sort: value,
+    }).toString();
     router.push(`/browse?${query}` as Href);
   };
 
   if (isLoading) return <BrowseLoading />;
 
+  const columns = browseGridColumnCount(
+    viewMode,
+    isNative,
+    gridColumns,
+    isMobileWeb,
+  );
+  const header = (
+    <>
+      {!isNative && (
+        <BrowseHero
+          topInset={insets.top}
+          isDesktop={isDesktop}
+          isMobileWeb={isMobileWeb}
+        />
+      )}
+      {!isNative && (
+        <BrowseCategoriesSection
+          activeCategory={activeCategory}
+          isDesktop={isDesktop}
+          isMobileWeb={isMobileWeb}
+          onSelect={setActiveCategory}
+        />
+      )}
+      <View
+        style={isNative ? browseNativeMain : browseMain(isDesktop, isMobileWeb)}
+      >
+        <BrowseResultsToolbar
+          count={results.length}
+          isNative={isNative}
+          sortBy={sort}
+          viewMode={viewMode}
+          isMobileWeb={isMobileWeb}
+          onFilterPress={() => setFilterOpen(true)}
+          onSortChange={changeSort}
+          onViewModeChange={setViewMode}
+        />
+      </View>
+    </>
+  );
+
   return (
     <ToastProvider>
       <View style={browseRoot}>
-        <ScrollView
-          style={browseScroll}
+        <FlatList
+          key={`browse-grid-${columns}`}
+          data={results}
+          keyExtractor={(event) => event.id}
+          numColumns={columns}
+          columnWrapperStyle={columns > 1 ? browseGridRow(isNative) : undefined}
           contentContainerStyle={[
             browseScrollContent(insets.bottom, isDesktop, isMobileWeb),
             isNative && browseNativeScrollContent(insets.top + 56 + 52 + 12),
+            results.length === 0 && { flexGrow: 1 },
           ]}
-          testID="browse-scroll"
-        >
-          {!isNative && (
-            <BrowseHero
-              topInset={insets.top}
-              isDesktop={isDesktop}
-              isMobileWeb={isMobileWeb}
-            />
-          )}
-          {!isNative && (
-            <BrowseCategoriesSection
-              activeCategory={activeCategory}
-              isDesktop={isDesktop}
-              isMobileWeb={isMobileWeb}
-              onSelect={setActiveCategory}
-            />
-          )}
-
-          <View
-            style={
-              isNative ? browseNativeMain : browseMain(isDesktop, isMobileWeb)
-            }
-          >
-            <BrowseResultsToolbar
-              count={results.length}
-              isNative={isNative}
-              sortBy={sort}
-              viewMode={viewMode}
-              isMobileWeb={isMobileWeb}
-              onFilterPress={() => setFilterOpen(true)}
-              onSortChange={changeSort}
-              onViewModeChange={setViewMode}
-            />
-            {results.length === 0 ? (
+          ListHeaderComponent={header}
+          ListEmptyComponent={
+            <View
+              style={
+                isNative ? browseNativeMain : browseMain(isDesktop, isMobileWeb)
+              }
+            >
               <BrowseEmpty />
-            ) : (
-              <BrowseGrid
-                events={results}
-                onPress={goToEvent}
-                columns={browseGridColumnCount(
-                  viewMode,
-                  isNative,
-                  gridColumns,
-                  isMobileWeb,
-                )}
-              />
-            )}
-            {!isNative && results.length > 0 && (
+            </View>
+          }
+          ListFooterComponent={
+            !isNative && results.length > 0 ? (
               <BrowseLoadMore
                 disabled={loadMoreDisabled}
                 onPress={() => setLoadMoreDisabled(true)}
               />
-            )}
-          </View>
-        </ScrollView>
+            ) : null
+          }
+          renderItem={({ item }) => (
+            <View
+              style={
+                columns === 1
+                  ? [
+                      browseGridList(isNative, isMobileWeb),
+                      { width: "100%", marginBottom: isMobileWeb ? 8 : 16 },
+                    ]
+                  : browseGridCell(columns, isNative)
+              }
+            >
+              <EventCard
+                event={item}
+                onPress={goToEvent}
+                listMode={columns === 1}
+              />
+            </View>
+          )}
+          testID="browse-scroll"
+        />
 
         <Header
           topInset={insets.top}
@@ -239,7 +274,6 @@ export function BrowseScreen() {
           visible={filterOpen}
           onClose={() => setFilterOpen(false)}
           onApply={applyFilter}
-          genres={facets.data?.genres}
         />
       </View>
     </ToastProvider>

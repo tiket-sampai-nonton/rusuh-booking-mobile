@@ -28,6 +28,10 @@ export function BrowseCategoriesSection({
   isMobileWeb = false,
   onSelect,
 }: BrowseCategoriesSectionProps) {
+  const visibleCategories = BROWSE_CATEGORIES.filter(
+    (category) =>
+      category.key === "all" || category.key === (activeCategory ?? "all"),
+  );
   return (
     <View
       style={[browseCategories, isMobileWeb && browseCategoriesCompactStyle]}
@@ -45,7 +49,7 @@ export function BrowseCategoriesSection({
             contentContainerStyle={browseCategoryGridCompactStyle}
             testID="browse-categories-scroll"
           >
-            {BROWSE_CATEGORIES.map((category) => {
+            {visibleCategories.map((category) => {
               const isActive = activeCategory === category.key;
               return (
                 <Pressable
@@ -68,7 +72,7 @@ export function BrowseCategoriesSection({
           </ScrollView>
         ) : (
           <View style={browseCategoryGrid}>
-            {BROWSE_CATEGORIES.map((category) => {
+            {visibleCategories.map((category) => {
               const isActive = activeCategory === category.key;
               return (
                 <Pressable

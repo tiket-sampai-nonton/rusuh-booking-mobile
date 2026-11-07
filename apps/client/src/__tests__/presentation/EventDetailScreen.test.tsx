@@ -207,7 +207,9 @@ describe("EventDetailScreen", () => {
       container: { eventRepository: repo(bare) },
     });
     await waitFor(() => screen.getByTestId("join-cta"));
-    expect(screen.getByText("Deskripsi event belum tersedia.")).toBeTruthy();
+    expect(
+      screen.getByText("Informasi tentang acara ini belum tersedia."),
+    ).toBeTruthy();
     //  shows "Menyusul" for price in FloatingCTA when minPriceMinor is present
     // but categories have no price data - since this test has available which has
     // minPriceMinor, we should see the price formatted
@@ -237,7 +239,9 @@ describe("EventDetailScreen", () => {
     await waitFor(() => screen.getByTestId("join-cta"));
     expect(screen.getByText("Sisa 12")).toBeTruthy();
     expect(screen.getByText("Menyusul")).toBeTruthy();
-    expect(screen.getByText("Lokasi akan diumumkan.")).toBeTruthy();
+    expect(
+      screen.getByText("Informasi lokasi akan diumumkan penyelenggara."),
+    ).toBeTruthy();
     expect(screen.queryByText(/Jakarta International Stadium/)).toBeNull();
   });
 

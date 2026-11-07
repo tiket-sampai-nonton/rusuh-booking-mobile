@@ -68,7 +68,7 @@ export class MockPaymentRepository implements PaymentRepository {
       paymentExpiresAt: new Date(Date.now() + 600_000).toISOString(),
       serverTime: new Date().toISOString(),
       successReturnUrl: `/payment-result/${bookingId}`,
-      failedReturnUrl: `/expired/${bookingId}?reason=payment&bookingId=${bookingId}`,
+      failedReturnUrl: `/failed/${bookingId}?reason=payment&bookingId=${bookingId}`,
     };
     this.attemptsByKey.set(idempotencyKey, attempt);
     this.attemptsById.set(attempt.attemptId, attempt);

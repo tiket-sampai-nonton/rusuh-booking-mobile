@@ -6,7 +6,7 @@ describe("TrustBox", () => {
   it("renders the ticket purchase guarantees", () => {
     render(<TrustBox />);
     expect(screen.getByText("Tiket resmi & terverifikasi")).toBeTruthy();
-    expect(screen.getByText("Antrean adil (FCFS)")).toBeTruthy();
+    expect(screen.getByText("Antrean mengikuti urutan bergabung")).toBeTruthy();
     expect(
       screen.getByText("Tiket elektronik langsung ke pintu masuk"),
     ).toBeTruthy();

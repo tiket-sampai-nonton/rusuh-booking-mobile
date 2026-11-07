@@ -87,27 +87,27 @@ describe("terminal + claim-error copy", () => {
     expect(terminalTitle("MISSED")).toBe("Penjualan Berakhir");
   });
   it("describes sold-out and ended states in Indonesian", () => {
-    expect(terminalBody("SOLD_OUT")).toMatch(/semua tiket/i);
+    expect(terminalBody("SOLD_OUT")).toMatch(/tiket.*habis/i);
     expect(terminalBody("ENDED")).toMatch(/masa penjualan/i);
   });
   it("maps claim-error state to Indonesian title and body", () => {
     expect(claimErrorTitle("EVENT_SOLD_OUT")).toBe("Tiket Habis");
     expect(claimErrorTitle("TURN_MISSED")).toBe("Giliran Berakhir");
     expect(claimErrorTitle("UNKNOWN")).toBe("Gagal menghubungkan");
-    expect(claimErrorBody("EVENT_SOLD_OUT")).toMatch(/tiket habis/i);
-    expect(claimErrorBody("TURN_MISSED")).toMatch(/belum memilih tiket/i);
+    expect(claimErrorBody("EVENT_SOLD_OUT")).toMatch(/tiketnya habis/i);
+    expect(claimErrorBody("TURN_MISSED")).toMatch(/waktu.*memilih tiket/i);
     expect(claimErrorBody("UNKNOWN")).toMatch(/periksa koneksi/i);
   });
 });
 
 describe("COPY constants use Indonesian wording", () => {
   it("uses Indonesian queue labels and explains persisted positions", () => {
-    expect(COPY.positionLabel).toBe("Posisi Anda");
+    expect(COPY.positionLabel).toBe("Posisimu");
     expect(COPY.persistenceSub).toBe(
-      "Posisi Anda tersimpan dengan aman di server. Memuat ulang atau menutup halaman tidak akan menghapus antrean Anda.",
+      "Posisimu tersimpan. Kalau halaman tertutup, buka lagi tautan antrean ini untuk melanjutkan.",
     );
     expect(COPY.footnote).toBe(
-      "Antrean dilayani sesuai urutan kedatangan. Token antrean diterbitkan dan divalidasi server. Pembaruan mengikuti jadwal dari server.",
+      "Antrean berjalan sesuai urutan bergabung. Posisi diperbarui otomatis.",
     );
     expect(COPY.longWaitWarningText).not.toMatch(/10 menit/i);
   });

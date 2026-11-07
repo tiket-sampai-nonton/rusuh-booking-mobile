@@ -13,8 +13,10 @@ import { renderWithProviders } from "@shared/test-fixtures/render-with-providers
 import { BOOKING_CATEGORY_FIXTURE } from "@shared/test-fixtures/booking-categories.fixture";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockNavigation = { addListener: jest.fn(() => jest.fn()) };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
+  useNavigation: () => mockNavigation,
 }));
 jest.mock("@presentation/hooks/useServerCountdown", () => {
   const { useEffect, useRef } = jest.requireActual("react");
@@ -438,7 +440,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     });
     await waitFor(() =>
       expect(mockRouter.replace).toHaveBeenCalledWith(
-        "/expired/sess-expired?reason=hold",
+        "/failed/sess-expired?reason=hold",
       ),
     );
   });
@@ -456,7 +458,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     );
   });
 
-  it("redirects to /expired when the server countdown elapses", async () => {
+  it("redirects to /failed when the server countdown elapses", async () => {
     const past: BookingSession = {
       ...SESSION,
       expiresAt: "2026-12-01T00:00:00.000Z",
@@ -467,7 +469,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     });
     await waitFor(() =>
       expect(mockRouter.replace).toHaveBeenCalledWith(
-        "/expired/sess-1?reason=hold&eventId=evt-1",
+        "/failed/sess-1?reason=hold&eventId=evt-1",
       ),
     );
   });

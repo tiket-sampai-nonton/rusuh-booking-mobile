@@ -233,7 +233,7 @@ function paymentResultRoute(
   attemptId?: string,
 ): string {
   if (outcome === "FAILED") {
-    return `/expired/${bookingId}?reason=payment&bookingId=${bookingId}`;
+    return `/failed/${bookingId}?reason=payment&bookingId=${bookingId}`;
   }
   if (attemptId) return `/payment-result/${bookingId}?attemptId=${attemptId}`;
   return `/payment-result/${bookingId}`;

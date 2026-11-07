@@ -10,8 +10,10 @@ import { Platform } from "react-native";
 import { ExpiredRecoveryScreen } from "@presentation/screens/ExpiredRecovery";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
+const mockNavigation = { addListener: jest.fn(() => jest.fn()) };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
+  useNavigation: () => mockNavigation,
 }));
 
 beforeEach(() => mockRouter.replace.mockReset());

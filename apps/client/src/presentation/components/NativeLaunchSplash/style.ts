@@ -58,8 +58,8 @@ export const componentStyles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 1,
   },
-  elementAlignItems5: { alignItems: "center", gap: 16 },
-  elementFlexDirection7: { flexDirection: "row", gap: 12 },
+  elementAlignItems5: { alignItems: "center", gap: 12, maxWidth: "100%" },
+  elementFlexDirection7: { flexDirection: "column", alignItems: "center" },
   elementFlexDirection8: { flexDirection: "row" },
   elementFlexDirection9: { flexDirection: "row" },
   elementColor10: {
@@ -89,9 +89,9 @@ export const componentStyles = StyleSheet.create({
     lineHeight: 16,
     letterSpacing: 0.5,
     textAlign: "center",
-    width: 84,
-    flexShrink: 0,
-    paddingHorizontal: 8,
+    minWidth: 84,
+    flexShrink: 1,
+    paddingHorizontal: 4,
   },
 });
 

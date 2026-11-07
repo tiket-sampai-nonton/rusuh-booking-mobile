@@ -12,8 +12,6 @@
  * - All animations exactly as prototype
  */
 import { useRouter, type Href } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { useServices } from "@providers/service-context";
 import { useRef, useState } from "react";
 import { View } from "react-native";
 import Animated, {
@@ -78,12 +76,6 @@ export function HomeScreen() {
   // Modals (prototype: CTA → login modal; Filter → filter popup).
   const [loginOpen, setLoginOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const { eventRepository } = useServices();
-  const facets = useQuery({
-    queryKey: ["event-facets", "home"],
-    queryFn: () => eventRepository.getFacets!(),
-    enabled: filterOpen && Boolean(eventRepository.getFacets),
-  });
 
   const goToEvent = (eventId: string): void =>
     router.push(`/events/${eventId}` as Href);
@@ -100,7 +92,7 @@ export function HomeScreen() {
   const applyFilter = (f: FilterValue): void => {
     setFilterOpen(false);
     const qs = new URLSearchParams({
-      genre: f.genre,
+      category: f.category,
       time: f.time,
       sort: f.sort,
     }).toString();
@@ -177,7 +169,6 @@ export function HomeScreen() {
           visible={filterOpen}
           onClose={() => setFilterOpen(false)}
           onApply={applyFilter}
-          genres={facets.data?.genres}
         />
 
         {/* Bottom Navigation (native only, handled internally by BottomNav) */}

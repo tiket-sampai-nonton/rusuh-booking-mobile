@@ -13,7 +13,7 @@
  *  look (prototype 10-success): dark ground, green success ring, white
  * success card with a dark summary, white-primary / outline-secondary actions.
  */
-import { useRouter, type Href } from "expo-router";
+import { useNavigation, useRouter, type Href } from "expo-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -36,6 +36,7 @@ import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
 import { ArrowIcon } from "@presentation/components/ArrowIcon";
 import { useSessionStore } from "@presentation/stores/session-store";
+import { useAccountStore } from "@presentation/stores/account-store";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { designColors, withAlpha } from "@presentation/theme";
 import { successStyles, componentStyles } from "./style";
@@ -47,8 +48,10 @@ export interface SuccessScreenProps {
 
 export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   const router = useRouter();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { isMobileWeb } = useResponsive();
+  const profile = useAccountStore((state) => state.profile);
   const attemptId = useSessionStore((s) => s.attemptId);
   const amountMinor = useSessionStore((s) => s.amountMinor);
   const buyerNikMasked = useSessionStore((s) => s.buyerNikMasked);
@@ -70,6 +73,20 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   const issuedTickets = ticketsQuery.data?.tickets ?? [];
   const count = issuedTickets.length;
   const [downloadError, setDownloadError] = useState("");
+
+  useEffect(() => {
+    return navigation.addListener("beforeRemove", (event) => {
+      const actionType = event.data.action.type;
+      if (
+        actionType === "GO_BACK" ||
+        actionType === "POP" ||
+        actionType === "POP_TO_TOP"
+      ) {
+        event.preventDefault();
+        router.replace("/" as Href);
+      }
+    });
+  }, [navigation, profile, router]);
 
   const handleDownload = async () => {
     setDownloadError("");
@@ -93,7 +110,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   useEffect(() => {
     if (verdict === "failed") {
       router.replace(
-        `/expired/${bookingId}?reason=payment&bookingId=${bookingId}` as Href,
+        `/failed/${bookingId}?reason=payment&bookingId=${bookingId}` as Href,
       );
     }
   }, [verdict, bookingId, router]);
@@ -280,9 +297,11 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               </Pressable>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Ke Beranda"
+                accessibilityLabel={profile ? "Tiket Saya" : "Ke Beranda"}
                 testID="success-home"
-                onPress={() => router.replace("/" as Href)}
+                onPress={() =>
+                  router.replace((profile ? "/my-tickets" : "/") as Href)
+                }
                 className="flex-1 items-center py-4"
                 style={[
                   componentStyles.elementBorderWidth7,
@@ -300,7 +319,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
                     isMobileWeb && componentStyles.mobileWebText,
                   ]}
                 >
-                  Ke Beranda
+                  {profile ? "Lihat Tiket" : "Ke Beranda"}
                 </Text>
               </Pressable>
             </View>

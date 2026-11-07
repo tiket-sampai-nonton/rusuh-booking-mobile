@@ -18,6 +18,7 @@ export function PaymentTopBar({
   remainingMs,
   warn,
   expired,
+  isMobileWeb = false,
   onBack,
 }: PaymentTopBarProps) {
   const insets = useSafeAreaInsets();
@@ -35,12 +36,14 @@ export function PaymentTopBar({
       >
         <View className="flex-row items-center gap-1.5">
           <ArrowIcon direction="left" color={designColors.ink} />
-          <Text
-            className="text-sm font-bold uppercase tracking-tag"
-            style={componentStyles.elementColor0}
-          >
-            Kembali
-          </Text>
+          {!isMobileWeb && (
+            <Text
+              className="text-sm font-bold uppercase tracking-tag"
+              style={componentStyles.elementColor0}
+            >
+              Kembali
+            </Text>
+          )}
         </View>
       </Pressable>
       <View

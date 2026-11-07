@@ -79,7 +79,7 @@ export function BrowseResultsToolbar({
         >
           <FilterIcon />
         </Pressable>
-        {Platform.OS === "web" ? (
+        {Platform.OS === "web" && isMobileWeb ? (
           <View
             style={[
               browseSortSelect,

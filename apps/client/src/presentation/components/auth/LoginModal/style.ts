@@ -29,8 +29,9 @@ export const DONE_GREEN = designColors.success;
  * OTP input box dimensions (prototype: 48x56px).
  */
 export const OTP_BOX = {
-  width: 48,
-  height: 56,
+  // Six boxes plus gaps must fit inside the desktop modal's 300px content area.
+  width: 40,
+  height: 48,
 };
 
 export const loginStyles = StyleSheet.create({

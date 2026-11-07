@@ -88,10 +88,10 @@ export function WaitingActive({
             isDesktop && styles.waitingFootnoteDesktop,
           ]}
         >
-          Posisi tersimpan dan diperbarui otomatis dari server. Tetap di halaman
-          ini sampai giliranmu tiba.
+          Posisimu diperbarui otomatis. Tetap di halaman ini sampai giliranmu
+          tiba.
         </Text>
-        <LeaveButton onPress={onLeavePress} isDesktop={isDesktop} />
+        {isDesktop && <LeaveButton onPress={onLeavePress} isDesktop />}
       </View>
     </>
   );

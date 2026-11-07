@@ -1,40 +1,31 @@
-import { useLocalSearchParams } from "expo-router";
+import { Redirect, useLocalSearchParams, type Href } from "expo-router";
+import { Seo } from "@presentation/components/Seo";
 
-import type { PaymentStatus } from "@domain/repositories/payment.repository";
-import type { ExpiryReason } from "@domain/rules/payment-recovery";
-import { ExpiredRecoveryScreen } from "@presentation/screens/ExpiredRecovery";
-
-// Top-level route `/expired/[resourceId]` — RBT-064 failure/expiry recovery
-// (queue session / booking hold / payment). The screen decides retry vs
-// re-queue from the reason + authoritative state. noindex is set by the
-// screen's own <Seo> (transactional state, SECURITY §6.5).
-export default function ExpiredRoute() {
-  const params = useLocalSearchParams<{
-    resourceId: string;
-    reason?: string;
-    bookingId?: string;
-    eventId?: string;
-    status?: string;
-    errorCode?: string;
-    remainingMs?: string;
-  }>();
-  const reason = (
-    ["payment", "hold", "queue", "turn"].includes(params.reason ?? "")
-      ? params.reason
-      : undefined
-  ) as ExpiryReason | undefined;
-  const remainingMs = params.remainingMs
-    ? Number(params.remainingMs)
-    : undefined;
+/** Keep old links working while new failure links use `/failed`. */
+export default function LegacyExpiredRoute() {
+  const params = useLocalSearchParams();
+  const resourceId =
+    typeof params.resourceId === "string" ? params.resourceId : "";
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (key === "resourceId") continue;
+    if (Array.isArray(value)) value.forEach((item) => query.append(key, item));
+    else if (typeof value === "string" && value.length > 0)
+      query.set(key, value);
+  }
+  const queryString = query.toString();
+  const suffix = queryString ? `?${queryString}` : "";
   return (
-    <ExpiredRecoveryScreen
-      resourceId={params.resourceId ?? ""}
-      reason={reason}
-      bookingId={params.bookingId}
-      eventId={params.eventId}
-      status={params.status as PaymentStatus | undefined}
-      errorCode={params.errorCode}
-      remainingMs={remainingMs}
-    />
+    <>
+      <Seo
+        title="Pemesanan gagal"
+        description="Pemesanan tidak berhasil diselesaikan."
+        path={`/expired/${encodeURIComponent(resourceId)}`}
+        noindex
+      />
+      <Redirect
+        href={`/failed/${encodeURIComponent(resourceId)}${suffix}` as Href}
+      />
+    </>
   );
 }

@@ -43,7 +43,7 @@ export function resolveWebViewNav(
     return `/payment-result/${bookingId}${q}`;
   }
   if (url.includes("/failed") || url.includes("/expired")) {
-    return `/expired/${bookingId}`;
+    return `/failed/${bookingId}`;
   }
   return null;
 }

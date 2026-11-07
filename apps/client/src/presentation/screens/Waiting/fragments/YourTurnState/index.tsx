@@ -64,10 +64,9 @@ export function YourTurnState({
             isDesktop && styles.waitingFootnoteDesktop,
           ]}
         >
-          Posisi tersimpan dan diperbarui otomatis dari server. Giliranmu sedang
-          diproses.
+          Giliranmu sedang disiapkan. Sebentar lagi kamu bisa memilih tiket.
         </Text>
-        <LeaveButton onPress={onLeavePress} isDesktop={isDesktop} />
+        {isDesktop && <LeaveButton onPress={onLeavePress} isDesktop />}
       </View>
     </>
   );

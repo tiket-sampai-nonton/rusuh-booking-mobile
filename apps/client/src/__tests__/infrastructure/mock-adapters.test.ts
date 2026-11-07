@@ -117,7 +117,7 @@ describe("MockPaymentRepository", () => {
     const a = await repo.createAttempt("book-7", "QRIS", "k7");
     expect(a.redirectUrl).toBe("/snap/book-7");
     expect(a.successReturnUrl).toBe("/payment-result/book-7");
-    expect(a.failedReturnUrl).toContain("/expired/book-7");
+    expect(a.failedReturnUrl).toContain("/failed/book-7");
   });
 
   it("snapCallback PAID/FAILED set terminal status; UNKNOWN stays pending (RBT-065)", async () => {
