@@ -51,4 +51,12 @@ export class MockQueueRepository implements QueueRepository {
     this.positions.delete(queueId);
     this.events.delete(queueId);
   }
+
+  async claim(_queueId: string, eventId: string): Promise<string> {
+    return `mock-admission:${eventId}`;
+  }
+
+  async heartbeat(_eventId: string): Promise<number | undefined> {
+    return undefined;
+  }
 }

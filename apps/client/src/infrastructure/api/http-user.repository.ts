@@ -21,6 +21,7 @@ export class HttpUserRepository implements UserRepository {
   constructor(
     private readonly http: HttpClient,
     private readonly tokenStorage?: TokenStorage,
+    private readonly refreshTokenStorage?: TokenStorage,
   ) {}
 
   private async authHeaders(): Promise<
@@ -45,7 +46,12 @@ export class HttpUserRepository implements UserRepository {
       url: "auth/otp/verify",
       body: { email, code },
     });
-    return toAuthSession(unwrap<Parameters<typeof toAuthSession>[0]>(res));
+    const data = unwrap<
+      Parameters<typeof toAuthSession>[0] & { refreshToken: string }
+    >(res);
+    if (data.refreshToken)
+      await this.refreshTokenStorage?.save(data.refreshToken);
+    return toAuthSession(data);
   }
 
   async completeRegistration(input: {
@@ -68,5 +74,19 @@ export class HttpUserRepository implements UserRepository {
       headers: await this.authHeaders(),
     });
     return toUserProfile(unwrap<Parameters<typeof toUserProfile>[0]>(res));
+  }
+
+  async logout(): Promise<void> {
+    const refreshToken = await this.refreshTokenStorage?.load();
+    if (refreshToken) {
+      const res = await this.http.request({
+        method: "POST",
+        url: "auth/logout",
+        body: { refreshToken },
+      });
+      assertOk(res);
+    }
+    await this.refreshTokenStorage?.clear();
+    await this.tokenStorage?.clear();
   }
 }

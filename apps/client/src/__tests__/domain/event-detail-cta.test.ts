@@ -30,6 +30,14 @@ describe("ctaFor — status-driven event-detail CTA", () => {
     expect(cta.intent).toBe("closed");
   });
 
+  it("CANCELLED → disabled 'Event Dibatalkan'", () => {
+    expect(ctaFor("CANCELLED")).toEqual({
+      enabled: false,
+      label: "Event Dibatalkan",
+      intent: "closed",
+    });
+  });
+
   it("treats an unknown status defensively as disabled", () => {
     const cta = ctaFor("WAT" as EventStatus);
     expect(cta.enabled).toBe(false);
@@ -42,6 +50,7 @@ describe("ctaFor — status-driven event-detail CTA", () => {
       "SOLD_OUT",
       "NOT_STARTED",
       "CLOSED",
+      "CANCELLED",
     ];
     for (const s of statuses) {
       expect(ctaFor(s).label.length).toBeGreaterThan(0);

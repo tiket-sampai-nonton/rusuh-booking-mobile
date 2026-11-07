@@ -25,7 +25,7 @@ import { HttpQueueRepository } from "@infrastructure/api/http-queue.repository";
 import { HttpBookingRepository } from "@infrastructure/api/http-booking.repository";
 import { HttpPaymentRepository } from "@infrastructure/api/http-payment.repository";
 import { HttpUserRepository } from "@infrastructure/api/http-user.repository";
-import { FetchHttpClient } from "@infrastructure/http/fetch-http-client";
+import { RefreshingHttpClient } from "@infrastructure/http/refreshing-http-client";
 import { SystemClock } from "@infrastructure/time/system-clock";
 
 describe("providers/container — readUseMocksFlag", () => {
@@ -177,7 +177,7 @@ describe("providers/container — createContainer (real mode, RBT-010 wired)", (
     expect(c.ticketHistoryRepository).toBeInstanceOf(
       HttpTicketHistoryRepository,
     );
-    expect(c.httpClient).toBeInstanceOf(FetchHttpClient);
+    expect(c.httpClient).toBeInstanceOf(RefreshingHttpClient);
   });
 
   it("throws a clear error when the base URL is missing in real mode", () => {

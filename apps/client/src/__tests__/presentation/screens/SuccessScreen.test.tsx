@@ -74,6 +74,28 @@ function renderScreen(status: PaymentStatus, bookingId = "bk-1") {
   const container: Container = {
     ...base,
     paymentRepository: new StatusRepo({ attemptId: "a1", bookingId, status }),
+    ticketHistoryRepository: {
+      ...base.ticketHistoryRepository,
+      getBookingTickets: async (id) => {
+        const state = useSessionStore.getState();
+        const count = state.ticketCount ?? 1;
+        return {
+          bookingId: id,
+          orderId: id,
+          publicRef: id,
+          amountMinor: state.amountMinor ?? 0,
+          ticketQuantity: count,
+          buyerNikMasked: state.buyerNikMasked ?? "••••",
+          tickets: Array.from({ length: count }, (_, i) => ({
+            ticketCode: `TKT-${i + 1}`,
+            categoryCode: "REG",
+            attendeeName: "Penonton",
+            attendeeNikMasked: "••••",
+            qrPayload: `ISSUED-${i + 1}`,
+          })),
+        };
+      },
+    },
   };
   const qc = new QueryClient({
     defaultOptions: {
@@ -159,9 +181,7 @@ describe("SuccessScreen (RBT-070)", () => {
   it("downloads ticket references without reading the rendered native QR (RBT-071)", async () => {
     useSessionStore.getState().setOrderDetail("31****89", 1);
     const screen = renderScreen("PAID");
-    await waitFor(() =>
-      expect(screen.getByTestId("success-download")).toBeTruthy(),
-    );
+    await waitFor(() => expect(screen.getByTestId("eticket-0")).toBeTruthy());
     expect(() =>
       fireEvent.press(screen.getByTestId("success-download")),
     ).not.toThrow();
@@ -169,8 +189,9 @@ describe("SuccessScreen (RBT-070)", () => {
       expect(mockDownloadTickets).toHaveBeenCalledWith(
         "bk-1",
         1,
-        ["RBT|bk-1|1"],
+        ["ISSUED-1"],
         undefined,
+        ["TKT-1"],
       ),
     );
   });
@@ -178,16 +199,15 @@ describe("SuccessScreen (RBT-070)", () => {
   it("generates one safe ticket reference per ticket", async () => {
     useSessionStore.getState().setOrderDetail("31****89", 2);
     const screen = renderScreen("PAID");
-    await waitFor(() =>
-      expect(screen.getByTestId("success-download")).toBeTruthy(),
-    );
+    await waitFor(() => expect(screen.getByTestId("eticket-0")).toBeTruthy());
     fireEvent.press(screen.getByTestId("success-download"));
     await waitFor(() =>
       expect(mockDownloadTickets).toHaveBeenCalledWith(
         "bk-1",
         2,
-        ["RBT|bk-1|1", "RBT|bk-1|2"],
+        ["ISSUED-1", "ISSUED-2"],
         undefined,
+        ["TKT-1", "TKT-2"],
       ),
     );
   });
@@ -195,9 +215,7 @@ describe("SuccessScreen (RBT-070)", () => {
   it("uses the generic message for non-Error download failures", async () => {
     mockDownloadTickets.mockRejectedValueOnce("disk unavailable");
     const screen = renderScreen("PAID");
-    await waitFor(() =>
-      expect(screen.getByTestId("success-download")).toBeTruthy(),
-    );
+    await waitFor(() => expect(screen.getByTestId("eticket-0")).toBeTruthy());
     fireEvent.press(screen.getByTestId("success-download"));
     await waitFor(() =>
       expect(

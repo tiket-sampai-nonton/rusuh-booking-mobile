@@ -17,6 +17,7 @@ import { useMemo } from "react";
 
 import { HoldBooking } from "@application/booking/hold-booking.use-case";
 import type { Booking } from "@domain/repositories/booking.repository";
+import type { BookingBuyerInput } from "@domain/repositories/booking.repository";
 import type { DomainError } from "@domain/errors/domain-error";
 import type { TicketRow } from "@domain/rules/checkout";
 import { useServices } from "@providers/service-context";
@@ -26,6 +27,7 @@ export interface HoldInput {
   readonly sessionId: string;
   readonly rows: readonly TicketRow[];
   readonly buyerNik: string;
+  readonly buyer: BookingBuyerInput;
 }
 
 export function useHoldBooking(): {
@@ -40,8 +42,8 @@ export function useHoldBooking(): {
     [bookingRepository, idempotencyKeys],
   );
   const mutation = useMutation<Booking, DomainError, HoldInput>({
-    mutationFn: ({ sessionId, rows, buyerNik }) =>
-      usecase.execute(sessionId, rows, buyerNik),
+    mutationFn: ({ sessionId, rows, buyerNik, buyer }) =>
+      usecase.execute(sessionId, rows, buyerNik, buyer),
     onSuccess: (booking) => setBooking(booking.bookingId, booking.amountMinor),
   });
   return {

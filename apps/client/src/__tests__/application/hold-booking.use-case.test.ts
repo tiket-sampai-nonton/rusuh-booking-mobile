@@ -12,6 +12,13 @@ import type {
 import { InMemoryIdempotencyStore } from "@infrastructure/__fixtures__/in-memory-idempotency-store";
 import type { TicketRow } from "@domain/rules/checkout";
 
+const BUYER = {
+  nik: "3171999999999999",
+  email: "buyer@mail.com",
+  emailConfirmation: "buyer@mail.com",
+  consent: true,
+};
+
 let rowSeq = 0;
 const row = (over: Partial<TicketRow> = {}): TicketRow => ({
   rowId: `row-${++rowSeq}`,
@@ -41,11 +48,11 @@ class FakeRepo implements BookingRepository {
   async checkAttendee(_s: string, _n: string): Promise<AttendeeCheck> {
     return { nikMasked: "3***", result: "AVAILABLE" };
   }
-  async setBuyer(): Promise<void> {}
   async hold(
     _s: string,
     items: readonly BookingItemInput[],
     key: string,
+    _buyer: NonNullable<Parameters<BookingRepository["hold"]>[3]>,
   ): Promise<Booking> {
     if (this.throwOnHold) throw this.throwOnHold;
     this.held.push({ items, key });
@@ -71,21 +78,26 @@ describe("HoldBooking (RBT-054)", () => {
       "sess-1",
       [
         row({ attendeeNik: "3171010101010001" }),
-        row({ useBuyerNik: true, attendeeName: "", attendeeNik: "" }),
+        row({
+          useBuyerNik: true,
+          attendeeName: "Nama Pembeli",
+          attendeeNik: "",
+        }),
       ],
       "3171999999999999",
+      BUYER,
     );
     expect(booking.bookingId).toBe("bk-1");
     const items = repo.held[0].items;
     expect(items[0].attendeeNik).toBe("3171010101010001");
     expect(items[1].attendeeNik).toBe("3171999999999999"); // resolved buyer NIK
-    expect(items[1].attendeeName).toBe("Pembeli");
+    expect(items[1].attendeeName).toBe("Nama Pembeli");
   });
 
   it("reuses the SAME idempotency key across a retry, clears it on success", async () => {
     const { repo, keys, uc } = build();
     const actionId = HoldBooking.actionId("sess-1");
-    await uc.execute("sess-1", [row()], "3171999999999999");
+    await uc.execute("sess-1", [row()], "3171999999999999", BUYER);
     const firstKey = repo.held[0].key;
     expect(firstKey).toMatch(/^idem_/);
     // After success the key is cleared → a NEW attempt mints a fresh one.
@@ -97,14 +109,14 @@ describe("HoldBooking (RBT-054)", () => {
     const actionId = HoldBooking.actionId("sess-1");
     repo.throwOnHold = mapError({ code: "DEPENDENCY_UNAVAILABLE" });
     await expect(
-      uc.execute("sess-1", [row()], "3171999999999999"),
+      uc.execute("sess-1", [row()], "3171999999999999", BUYER),
     ).rejects.toBeInstanceOf(DomainError);
     const keptKey = keys.peek(actionId);
     expect(keptKey).toMatch(/^idem_/); // retained for an idempotent retry
 
     // A retry reuses the SAME key.
     repo.throwOnHold = null;
-    await uc.execute("sess-1", [row()], "3171999999999999");
+    await uc.execute("sess-1", [row()], "3171999999999999", BUYER);
     expect(repo.held[0].key).toBe(keptKey);
   });
 
@@ -112,7 +124,7 @@ describe("HoldBooking (RBT-054)", () => {
     const { repo, uc } = build();
     repo.throwOnHold = mapError({ code: "CATEGORY_UNAVAILABLE" });
     await expect(
-      uc.execute("sess-1", [row()], "3171999999999999"),
+      uc.execute("sess-1", [row()], "3171999999999999", BUYER),
     ).rejects.toMatchObject({ code: "CATEGORY_UNAVAILABLE", kind: "sold_out" });
   });
 
@@ -120,7 +132,7 @@ describe("HoldBooking (RBT-054)", () => {
     const { repo, uc } = build();
     repo.throwOnHold = new Error("socket hang up");
     await expect(
-      uc.execute("sess-1", [row()], "3171999999999999"),
+      uc.execute("sess-1", [row()], "3171999999999999", BUYER),
     ).rejects.toMatchObject({
       code: "DEPENDENCY_UNAVAILABLE",
       kind: "dependency",

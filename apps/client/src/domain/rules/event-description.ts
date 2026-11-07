@@ -1,9 +1,9 @@
 /**
  * Event rich-description parsing — pure domain (framework-free).
  *
- * The frozen `EventDetail.description` is an OPAQUE `Record<string, unknown>`
- * (FE-NEED O1: the BE `EventDetail.description` / pricing categories are not yet
- * typed on the wire). The detail screen must read it DEFENSIVELY — never assume
+ * The optional `EventDetail.description` is an OPAQUE `Record<string, unknown>`
+ * used by local fixtures; the supplied public contract does not include rich
+ * description fields. The detail screen must read it DEFENSIVELY — never assume
  * a field exists or has a given type — and tolerate both the fixture shape
  * (`lineup: string[]`, `terms: string`) and the prototype shape
  * (`lineup: {stage,acts}[]`, `terms: string[]`). This module normalises the bag

@@ -108,6 +108,12 @@ describe("RBT-119 connection error classification", () => {
 // -- 2. One-poller / port-only render test ----------------------------------
 
 class CountingQueueRepository implements QueueRepository {
+  async claim(_queueId: string, eventId: string): Promise<string> {
+    return eventId;
+  }
+  async heartbeat(_eventId: string): Promise<number | undefined> {
+    return undefined;
+  }
   getStatusCalls = 0;
   getQueueStatusCalls = 0;
   failQueueStatus = false;
@@ -137,7 +143,10 @@ class CountingQueueRepository implements QueueRepository {
 
 function makeContainer(repo: QueueRepository): Container {
   // Only queueRepository is exercised; the rest are never touched by the hook.
-  return { queueRepository: repo } as unknown as Container;
+  return {
+    queueRepository: repo,
+    pushSubscription: { remove: async () => {} },
+  } as unknown as Container;
 }
 
 function Harness({

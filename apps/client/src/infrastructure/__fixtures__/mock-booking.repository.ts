@@ -10,17 +10,27 @@ import type {
   AttendeeCheck,
   Booking,
   BookingItemInput,
+  BookingBuyerInput,
   BookingRepository,
   BookingSession,
 } from "@domain/repositories/booking.repository";
 import { BOOKING_CATEGORY_FIXTURE } from "@shared/test-fixtures/booking-categories.fixture";
+import type { BookingTickets } from "@domain/repositories/ticket-history.repository";
 
 export class MockBookingRepository implements BookingRepository {
   private current: BookingSession | null = null;
   private readonly bookingsByKey = new Map<string, Booking>();
   private seq = 0;
+  private readonly tickets = new Map<string, BookingTickets>();
 
-  async createSession(eventId: string): Promise<BookingSession> {
+  getIssuedTickets(bookingId: string): BookingTickets | undefined {
+    return this.tickets.get(bookingId);
+  }
+
+  async createSession(admissionToken: string): Promise<BookingSession> {
+    const eventId = admissionToken.startsWith("mock-admission:")
+      ? admissionToken.slice("mock-admission:".length)
+      : admissionToken;
     this.seq += 1;
     this.current = {
       sessionId: `sess-${eventId}-${this.seq}`,
@@ -51,31 +61,11 @@ export class MockBookingRepository implements BookingRepository {
     };
   }
 
-  /**
-   * FE-NEED (O1) mock: record ONLY that a buyer was set, with the MASKED NIK —
-   * never the raw NIK (SECURITY §3). Deterministic + framework-free.
-   */
-  private buyerSet: { nikMasked: string; email: string } | null = null;
-  async setBuyer(
-    _sessionId: string,
-    buyerNik: string,
-    email: string,
-  ): Promise<void> {
-    this.buyerSet = {
-      nikMasked: `${buyerNik.slice(0, 2)}****${buyerNik.slice(-2)}`,
-      email,
-    };
-  }
-
-  /** Test/diagnostic read of the last set buyer (masked). */
-  getBuyerSet(): { nikMasked: string; email: string } | null {
-    return this.buyerSet;
-  }
-
   async hold(
     sessionId: string,
     items: readonly BookingItemInput[],
     idempotencyKey: string,
+    buyer: BookingBuyerInput,
   ): Promise<Booking> {
     const existing = this.bookingsByKey.get(idempotencyKey);
     if (existing) return existing; // idempotent: same key → same booking
@@ -114,6 +104,26 @@ export class MockBookingRepository implements BookingRepository {
       serverTime: new Date().toISOString(),
     };
     this.bookingsByKey.set(idempotencyKey, booking);
+    this.tickets.set(booking.bookingId, {
+      bookingId: booking.bookingId,
+      orderId: booking.bookingId,
+      publicRef: booking.bookingId,
+      amountMinor,
+      ticketQuantity: items.length,
+      buyerNikMasked: buyer
+        ? `${buyer.nik.slice(0, 2)}****${buyer.nik.slice(-2)}`
+        : "••••",
+      tickets: items.map((item, index) => ({
+        ticketCode: `MOCK-${booking.bookingId}-${index + 1}`,
+        categoryCode:
+          bookingCategories.find(
+            (category) => category.categoryId === item.categoryId,
+          )?.code ?? item.categoryId,
+        attendeeName: item.attendeeName,
+        attendeeNikMasked: `${item.attendeeNik.slice(0, 2)}****${item.attendeeNik.slice(-2)}`,
+        qrPayload: `MOCK|${booking.bookingId}|${index + 1}`,
+      })),
+    });
     return booking;
   }
 }

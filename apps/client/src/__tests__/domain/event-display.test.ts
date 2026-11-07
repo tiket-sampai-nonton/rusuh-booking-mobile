@@ -26,6 +26,14 @@ describe("badgeFor", () => {
     });
   });
 
+  it("CANCELLED → disabled Dibatalkan", () => {
+    expect(badgeFor({ status: "CANCELLED" })).toEqual({
+      tone: "done",
+      label: "Dibatalkan",
+      disabled: true,
+    });
+  });
+
   it("NOT_STARTED → Segera (enterable)", () => {
     expect(badgeFor({ status: "NOT_STARTED" }).label).toBe("Segera");
   });

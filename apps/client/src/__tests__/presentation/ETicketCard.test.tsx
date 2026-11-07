@@ -17,10 +17,18 @@ describe("ticketRef (RBT-071)", () => {
 
 describe("ETicketCard (RBT-071)", () => {
   it("renders the card + QR whose value is the safe ticket ref", () => {
-    const screen = render(<ETicketCard bookingId="bk-1" index={0} total={3} />);
+    const screen = render(
+      <ETicketCard
+        bookingId="bk-1"
+        index={0}
+        total={3}
+        qrPayload="issued-payload"
+        ticketCode="TKT-1"
+      />,
+    );
     expect(screen.getByTestId("eticket-0")).toBeTruthy();
     // QR mock carries the encoded value as accessibilityLabel
-    expect(screen.getByLabelText("RBT|bk-1|1")).toBeTruthy();
+    expect(screen.getByLabelText("issued-payload")).toBeTruthy();
     expect(screen.getByText("E-Tiket 1 / 3")).toBeTruthy();
   });
 

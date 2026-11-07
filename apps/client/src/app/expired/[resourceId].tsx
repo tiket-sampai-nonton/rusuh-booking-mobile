@@ -19,7 +19,7 @@ export default function ExpiredRoute() {
     remainingMs?: string;
   }>();
   const reason = (
-    ["payment", "hold", "queue"].includes(params.reason ?? "")
+    ["payment", "hold", "queue", "turn"].includes(params.reason ?? "")
       ? params.reason
       : undefined
   ) as ExpiryReason | undefined;

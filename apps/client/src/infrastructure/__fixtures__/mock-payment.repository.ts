@@ -85,19 +85,24 @@ export class MockPaymentRepository implements PaymentRepository {
    * to PAID after 2 polls so the verify backoff poll deterministically
    * resolves; a terminal attempt stays terminal.
    */
-  async getStatus(attemptId: string): Promise<PaymentAttempt> {
-    const found = this.attemptsById.get(attemptId);
+  async getStatus(
+    attemptId: string,
+    bookingId?: string,
+  ): Promise<PaymentAttempt> {
+    const found =
+      this.attemptsById.get(attemptId) ??
+      (bookingId ? this.attemptByBooking.get(bookingId) : undefined);
     if (!found) {
       throw new Error(`MockPaymentRepository: unknown attempt ${attemptId}`);
     }
     if (found.status !== "AWAITING_PAYMENT" && found.status !== "READY") {
       return found;
     }
-    const polls = (this.statusPolls.get(attemptId) ?? 0) + 1;
-    this.statusPolls.set(attemptId, polls);
+    const polls = (this.statusPolls.get(found.attemptId) ?? 0) + 1;
+    this.statusPolls.set(found.attemptId, polls);
     if (polls < 2) return found;
     const paid: PaymentAttempt = { ...found, status: "PAID" };
-    this.attemptsById.set(attemptId, paid);
+    this.attemptsById.set(found.attemptId, paid);
     this.attemptByBooking.set(paid.bookingId, paid);
     return paid;
   }

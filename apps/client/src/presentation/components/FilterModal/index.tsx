@@ -4,9 +4,8 @@
  * The "Filter Event" button opens this dialog (it does NOT navigate directly).
  * The user picks genre / waktu / urutan, then "Terapkan Filter" navigates to
  * /browse with the chosen params (prototype: submit → browse.html?<params>);
- * "Batal" (or a backdrop tap) closes it with no navigation. Filtering is
- * client-side (O4 open blocker — GET /events has no server filter param), so
- * /browse reads these params and filters the already-fetched list.
+ * "Batal" (or a backdrop tap) closes it with no navigation. /browse reads
+ * these params and sends supported filters/sort to the event catalog API.
  *
  * RN has no native <select>; each field is a row of selectable pills (the
  * faithful RN equivalent of the prototype's dropdowns).
@@ -45,6 +44,7 @@ export interface FilterModalProps {
   readonly onClose: () => void;
   /** Apply — receives the chosen filter (the screen navigates to /browse). */
   readonly onApply: (value: FilterValue) => void;
+  readonly genres?: readonly string[];
 }
 
 const GENRES = [
@@ -67,7 +67,12 @@ const SORTS = [
   { v: "furthest", l: "Terjauh" },
 ];
 
-export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
+export function FilterModal({
+  visible,
+  onClose,
+  onApply,
+  genres,
+}: FilterModalProps) {
   const insets = useSafeAreaInsets();
   const { isMobileWeb } = useResponsive();
   const [genre, setGenre] = useState("Semua");
@@ -141,7 +146,10 @@ export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
         >
           <PillGroup
             label="Kategori Musik"
-            options={GENRES.map((g) => ({ v: g, l: g }))}
+            options={(genres
+              ? ["Semua", ...genres.filter((g) => g.toLowerCase() !== "semua")]
+              : GENRES
+            ).map((g) => ({ v: g, l: g }))}
             value={genre}
             onPick={setGenre}
             testPrefix="filter-genre"

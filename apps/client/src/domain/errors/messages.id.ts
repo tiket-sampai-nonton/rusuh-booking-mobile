@@ -34,6 +34,18 @@ export const ERROR_SPECS: Readonly<Record<string, ErrorSpec>> = {
     kind: "auth",
     message: "Kode OTP salah atau kedaluwarsa. Coba lagi.",
   },
+  OTP_EXPIRED: {
+    kind: "auth",
+    message: "Kode OTP sudah kedaluwarsa. Minta kode baru.",
+  },
+  BUYER_NIK_LIMIT_REACHED: {
+    kind: "quota",
+    message: "NIK pembeli telah mencapai batas tiket.",
+  },
+  BUYER_NIK_THROTTLED: {
+    kind: "rate_limited",
+    message: "Terlalu banyak percobaan. Coba lagi sebentar.",
+  },
   OTP_LOCKED: {
     kind: "auth",
     message: "Terlalu banyak percobaan OTP. Coba beberapa saat lagi.",

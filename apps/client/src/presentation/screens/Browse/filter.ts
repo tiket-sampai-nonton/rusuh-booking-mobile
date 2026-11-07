@@ -1,14 +1,11 @@
 /**
  * Browse filter logic — pure, framework-free (RBT-031).
  *
- * The URL query string (genre/time/sort) is the single source of truth for the
- * Browse results. This module reads + normalizes those user-controlled params
- * and filters/sorts the already-fetched catalog client-side (O4 open blocker:
- * GET /events has no server filter param yet). No React / RN / Expo imports.
- *
- * genre is an O1 FE-NEED gap — `EventSummary` carries no genre field — so it is
- * a best-effort name/venue match with known category aliases until the field
- * lands; time + sort work fully off `startsAt`.
+ * URL query values are normalized here and sent to the server by Browse. This
+ * module keeps the small category-chip filtering and mock fallback pure. No
+ * React / RN / Expo imports. The public contract now supplies genres, although
+ * category labels in the UI are mapped to backend genre values by the screen
+ * and refined client-side for category chips.
  */
 import type { EventSummary } from "@domain/repositories/event.repository";
 
@@ -62,14 +59,19 @@ const CATEGORY_TERMS: Readonly<Record<string, readonly string[]>> = {
 
 /** Best-effort category match until EventSummary receives a typed genre field. */
 export function matchesCategory(
-  event: Pick<EventSummary, "name" | "venue">,
+  event: Pick<EventSummary, "name" | "venue"> &
+    Partial<Pick<EventSummary, "genres">>,
   category: string,
 ): boolean {
   const terms = CATEGORY_TERMS[category.toLowerCase()] ?? [
     category.toLowerCase(),
   ];
   const searchable = `${event.name} ${event.venue ?? ""}`.toLowerCase();
-  return terms.some((term) => searchable.includes(term));
+  return terms.some(
+    (term) =>
+      searchable.includes(term) ||
+      event.genres?.some((genre) => genre.toLowerCase() === term),
+  );
 }
 
 /**
@@ -95,7 +97,7 @@ export function readGenre(v: string | string[] | undefined): string {
   const s = Array.isArray(v) ? v[0] : v;
   if (!s) return "Semua";
   const hit = GENRES.find((g) => g.toLowerCase() === s.toLowerCase());
-  return hit ?? "Semua";
+  return hit ?? s;
 }
 
 /** True when `ev` starts inside the selected time window (from `now`). */

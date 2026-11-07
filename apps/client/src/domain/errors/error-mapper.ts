@@ -33,6 +33,23 @@ export function mapError(failure: TransportFailure): DomainError {
   });
 }
 
+/** Read the documented `CODE: message` envelope without depending on transport. */
+export function mapFailure(cause: unknown, fallback: string): DomainError {
+  if (cause instanceof DomainError) return cause;
+  const failure = cause as { message?: unknown; retryAfterMs?: unknown } | null;
+  const match =
+    typeof failure?.message === "string"
+      ? /^([A-Z][A-Z0-9_]+):/.exec(failure.message)
+      : null;
+  return mapError({
+    code: match?.[1] ?? fallback,
+    retryAfterMs:
+      typeof failure?.retryAfterMs === "number"
+        ? failure.retryAfterMs
+        : undefined,
+  });
+}
+
 /**
  * Collapse identical concurrent reads. Given a key and a factory producing the
  * read promise, returns the SAME in-flight promise for concurrent callers with

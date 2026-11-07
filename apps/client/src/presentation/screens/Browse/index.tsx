@@ -4,6 +4,7 @@
  */
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -57,8 +58,7 @@ export function BrowseScreen() {
     sort?: string;
   }>();
   const profile = useAccountStore((state) => state.profile);
-  const { serverClock } = useServices();
-  const { data, isLoading } = useEvents();
+  const { serverClock, eventRepository } = useServices();
   const showNavLinks = isWeb && width > 768;
 
   const [activeCategory, setActiveCategory] = useState<string>(() =>
@@ -71,16 +71,40 @@ export function BrowseScreen() {
   const genre = readGenre(params.genre);
   const time = readParam(params.time, TIMES, "all");
   const sort = readParam(params.sort, SORTS, "closest");
+  const eventQuery = {
+    ...(genre !== "Semua" ? { genres: [genre] } : {}),
+    ...(time === "week"
+      ? { timeframe: "THIS_WEEK" as const }
+      : time === "month"
+        ? { timeframe: "THIS_MONTH" as const }
+        : {}),
+    sort: sort === "furthest" ? ("DATE_DESC" as const) : ("DATE_ASC" as const),
+  };
+  const { data, isLoading } = useEvents(eventQuery);
+  const facets = useQuery({
+    queryKey: ["event-facets", eventQuery],
+    queryFn: () => eventRepository.getFacets!(eventQuery),
+    enabled: filterOpen && Boolean(eventRepository.getFacets),
+  });
   const allResults = useMemo(
     () =>
       filterEvents(
         data?.upcoming ?? [],
-        genre,
-        time,
+        eventRepository.supportsServerFilters ? "Semua" : genre,
+        eventRepository.supportsServerFilters && time !== "quarter"
+          ? "all"
+          : time,
         sort,
         serverClock.serverNow(),
       ),
-    [data, genre, time, sort, serverClock],
+    [
+      data,
+      genre,
+      time,
+      sort,
+      serverClock,
+      eventRepository.supportsServerFilters,
+    ],
   );
   const results = useMemo(() => {
     if (activeCategory === "all") return allResults;
@@ -236,6 +260,7 @@ export function BrowseScreen() {
           visible={filterOpen}
           onClose={() => setFilterOpen(false)}
           onApply={applyFilter}
+          genres={facets.data?.genres}
         />
       </View>
     </ToastProvider>

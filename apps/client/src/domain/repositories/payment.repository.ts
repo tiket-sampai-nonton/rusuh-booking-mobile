@@ -36,6 +36,7 @@ export interface PaymentAttempt {
   readonly attemptId: string;
   readonly bookingId: string;
   readonly status: PaymentStatus;
+  readonly method?: PaymentMethod;
   /** SNAP redirect URL (web) / WebView URL (mobile). Absent until created. */
   readonly redirectUrl?: string;
   /** Server-authoritative payment deadline (ISO-8601). */
@@ -104,7 +105,7 @@ export interface PaymentRepository {
     idempotencyKey: string,
   ): Promise<PaymentAttempt>;
   /** Verify the authoritative payment status for an attempt. */
-  getStatus(attemptId: string): Promise<PaymentAttempt>;
+  getStatus(attemptId: string, bookingId?: string): Promise<PaymentAttempt>;
   /**
    * The SNAP callback the gateway (or the local simulator, RBT-065) invokes when
    * the hosted page settles: the BE webhook sets the authoritative status, then

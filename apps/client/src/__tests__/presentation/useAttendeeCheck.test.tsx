@@ -42,11 +42,11 @@ class FakeRepo implements BookingRepository {
     const result = attendeeVerdict(nik);
     return { nikMasked: "3***", result };
   }
-  async setBuyer(): Promise<void> {}
   async hold(
     _s: string,
     _i: readonly BookingItemInput[],
     _k: string,
+    _buyer: NonNullable<Parameters<BookingRepository["hold"]>[3]>,
   ): Promise<Booking> {
     return { bookingId: "b", sessionId: "s", status: "HELD", amountMinor: 1 };
   }

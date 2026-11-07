@@ -41,7 +41,6 @@ import { eventImage } from "@domain/rules/event-image";
 import { formatDateID, formatTimeID } from "@domain/services/date-format";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
-import { MAX_TICKETS } from "@domain/rules/checkout";
 import { useJoinQueue } from "@presentation/hooks/useJoinQueue";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
@@ -178,7 +177,13 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
       `${event.remainingTickets.toLocaleString("id-ID")} tiket tersedia`,
     );
   }
-  chips.push(`Maks ${MAX_TICKETS} tiket / NIK`);
+  const purchaseLimits = [
+    event.maxTicketsPerOrder && `${event.maxTicketsPerOrder} tiket / pesanan`,
+    event.maxTicketsPerBuyerNik && `${event.maxTicketsPerBuyerNik} tiket / NIK`,
+  ].filter((value): value is string => Boolean(value));
+  if (purchaseLimits.length > 0) {
+    chips.push(`Maks ${purchaseLimits.join(" · ")}`);
+  }
 
   const galleryImages = desc.gallery ?? [];
 
@@ -238,7 +243,9 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
                   Maks. pembelian
                 </Text>
                 <Text style={styles.mobileWebTicketStatValue}>
-                  {MAX_TICKETS} tiket / NIK
+                  {purchaseLimits.length > 0
+                    ? purchaseLimits.join(" · ")
+                    : "Sesuai ketentuan event"}
                 </Text>
               </View>
             </View>

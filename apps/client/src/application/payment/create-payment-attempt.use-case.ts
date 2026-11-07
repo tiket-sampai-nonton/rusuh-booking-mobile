@@ -37,7 +37,7 @@ export class CreatePaymentAttempt {
 export class VerifyPayment {
   constructor(private readonly payment: PaymentRepository) {}
 
-  execute(attemptId: string): Promise<PaymentAttempt> {
-    return this.payment.getStatus(attemptId);
+  execute(attemptId: string, bookingId?: string): Promise<PaymentAttempt> {
+    return this.payment.getStatus(attemptId, bookingId);
   }
 }

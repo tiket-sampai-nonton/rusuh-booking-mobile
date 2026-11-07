@@ -18,7 +18,9 @@ export class ObserveQueue {
   constructor(private readonly queue: QueueRepository) {}
 
   /** Fetch the current status for `queueId`. Resolves with the latest entry. */
-  async execute(queueId: string): Promise<QueueEntry> {
-    return this.queue.getStatus(queueId);
+  async execute(queueId: string, eventId?: string): Promise<QueueEntry> {
+    return eventId === undefined
+      ? this.queue.getStatus(queueId)
+      : this.queue.getStatus(queueId, eventId);
   }
 }

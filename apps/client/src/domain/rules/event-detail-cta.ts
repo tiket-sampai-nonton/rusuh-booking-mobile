@@ -38,6 +38,8 @@ export function ctaFor(status: EventStatus): EventCta {
       return { enabled: false, label: "Belum Dibuka", intent: "soon" };
     case "CLOSED":
       return { enabled: false, label: "Penjualan Ditutup", intent: "closed" };
+    case "CANCELLED":
+      return { enabled: false, label: "Event Dibatalkan", intent: "closed" };
     default:
       return { enabled: false, label: "Penjualan Ditutup", intent: "closed" };
   }

@@ -51,10 +51,10 @@ export class RestoreMembership {
 
     let entry: QueueEntry;
     try {
-      entry = await this.queue.getStatus(stored.queueId);
-    } catch {
-      // A dead pointer (offline / entry gone) must not trap the user — clear it.
-      await this.membership.clear();
+      entry = await this.queue.getStatus(stored.queueId, stored.eventId);
+    } catch (error) {
+      const status = (error as { httpStatus?: number } | null)?.httpStatus;
+      if (status === 404 || status === 410) await this.membership.clear();
       return null;
     }
 

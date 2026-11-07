@@ -8,7 +8,10 @@
  *
  * No React / RN / Expo imports (ARCHITECTURE dependency rule).
  */
-import type { EventRepository } from "@domain/repositories/event.repository";
+import type {
+  EventQuery,
+  EventRepository,
+} from "@domain/repositories/event.repository";
 import { splitCatalog, type CatalogSplit } from "@domain/rules/event-display";
 import type { ServerClock } from "@domain/services/server-clock";
 
@@ -23,8 +26,10 @@ export class ListEvents {
    * recent first). The split is taken on the server-authoritative clock so a
    * skewed device clock never miscategorises an event.
    */
-  async execute(): Promise<CatalogSplit> {
-    const list = await this.events.listEvents();
+  async execute(query?: EventQuery): Promise<CatalogSplit> {
+    const list = query
+      ? await this.events.listEvents(query)
+      : await this.events.listEvents();
     return splitCatalog(list, this.clock.serverNow());
   }
 }

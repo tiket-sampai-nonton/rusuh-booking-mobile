@@ -35,6 +35,7 @@ export type ClaimErrorState = "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN";
 export interface UseAutoClaimParams {
   /** The event whose admitted slot is being claimed. */
   readonly eventId: string;
+  readonly queueId: string;
   /** The current queue status (from RBT-042's poller). */
   readonly status?: QueueStatus;
   /**
@@ -75,14 +76,15 @@ function toErrorState(error: Error | null): ClaimErrorState | null {
  */
 export function useAutoClaim({
   eventId,
+  queueId,
   status,
   onClaimed,
 }: UseAutoClaimParams): UseAutoClaimResult {
-  const { bookingRepository } = useServices();
+  const { bookingRepository, queueRepository } = useServices();
 
   const claim = useMemo(
-    () => new ClaimAdmission(bookingRepository),
-    [bookingRepository],
+    () => new ClaimAdmission(bookingRepository, queueRepository),
+    [bookingRepository, queueRepository],
   );
 
   const [claimedSessionId, setClaimedSessionId] = useState<
@@ -96,7 +98,8 @@ export function useAutoClaim({
   onClaimedRef.current = onClaimed;
 
   const mutation = useMutation<BookingSession, Error, QueueStatus>({
-    mutationFn: (admitted: QueueStatus) => claim.execute(eventId, admitted),
+    mutationFn: (admitted: QueueStatus) =>
+      claim.execute(eventId, admitted, queueId),
     onSuccess: (session) => {
       setClaimedSessionId(session.sessionId);
       onClaimedRef.current?.(session.sessionId);

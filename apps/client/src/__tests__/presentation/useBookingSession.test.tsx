@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react-native";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
 import React from "react";
 
 import type {
@@ -27,7 +27,8 @@ const SESSION: BookingSession = {
 
 class FakeBookingRepo implements BookingRepository {
   current: BookingSession | null = SESSION;
-  async createSession(eventId: string): Promise<BookingSession> {
+  async createSession(admissionToken: string): Promise<BookingSession> {
+    const eventId = admissionToken.replace(/^mock-admission:/, "");
     return { ...SESSION, eventId };
   }
   async getCurrentSession(): Promise<BookingSession | null> {
@@ -36,11 +37,11 @@ class FakeBookingRepo implements BookingRepository {
   async checkAttendee(_s: string, _n: string): Promise<AttendeeCheck> {
     return { nikMasked: "3***", result: "AVAILABLE" };
   }
-  async setBuyer(): Promise<void> {}
   async hold(
     _s: string,
     _i: readonly BookingItemInput[],
     _k: string,
+    _buyer: NonNullable<Parameters<BookingRepository["hold"]>[3]>,
   ): Promise<Booking> {
     return {
       bookingId: "b1",
@@ -80,7 +81,7 @@ describe("useCreateBookingSession", () => {
     const { result } = renderHook(() => useCreateBookingSession(), {
       wrapper: wrapper(new FakeBookingRepo()),
     });
-    const session = await result.current.create("evt-7");
+    const session = await result.current.create("mock-admission:evt-7");
     expect(session.eventId).toBe("evt-7");
     await waitFor(() =>
       expect(useSessionStore.getState().sessionId).toBe("sess-1"),
@@ -126,5 +127,28 @@ describe("useRestoreBookingSession", () => {
     await waitFor(() =>
       expect(result.current.session?.sessionId).toBe("sess-1"),
     );
+  });
+
+  it("refreshes the session on an availability event and closes the stream", async () => {
+    let notify = () => {};
+    const close = jest.fn();
+    class StreamingRepo extends FakeBookingRepo {
+      getSession = jest.fn(async () => SESSION);
+      subscribeAvailability = jest.fn((_id: string, onChange: () => void) => {
+        notify = onChange;
+        return close;
+      });
+    }
+    const repo = new StreamingRepo();
+    const view = renderHook(() => useRestoreBookingSession(true, "sess-1"), {
+      wrapper: wrapper(repo),
+    });
+    await waitFor(() =>
+      expect(repo.subscribeAvailability).toHaveBeenCalledTimes(1),
+    );
+    act(() => notify());
+    await waitFor(() => expect(repo.getSession).toHaveBeenCalledTimes(2));
+    view.unmount();
+    expect(close).toHaveBeenCalledTimes(1);
   });
 });

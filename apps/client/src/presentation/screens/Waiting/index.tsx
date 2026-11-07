@@ -83,6 +83,7 @@ export function WaitingRoomScreen({
   const admitted = entry !== undefined && isAdmitted(entry.status);
   const { claiming, claimedSessionId, errorState } = useAutoClaim({
     eventId,
+    queueId,
     status: admitted ? entry.status : undefined,
   });
 
@@ -101,10 +102,16 @@ export function WaitingRoomScreen({
   }, []);
 
   const handleConfirmLeave = useCallback(() => {
-    setShowLeaveModal(false);
-    void leave();
-    router.replace("/" as Href);
-  }, [leave, router]);
+    void leave()
+      .then(() => {
+        setShowLeaveModal(false);
+        router.replace("/" as Href);
+      })
+      .catch(() => {
+        setShowLeaveModal(false);
+        void refetch();
+      });
+  }, [leave, refetch, router]);
 
   const handleBrowseEvents = useCallback(() => {
     router.replace("/browse" as Href);
@@ -266,14 +273,24 @@ export function WaitingRoomScreen({
             <View style={styles.waitingContainer}>
               <StatusBadge
                 variant={isSoldOut ? "soldOut" : "expired"}
-                label={isSoldOut ? "Tiket Habis" : "Giliran Berakhir"}
+                label={
+                  isSoldOut
+                    ? "Tiket Habis"
+                    : errorState === "UNKNOWN"
+                      ? "Koneksi Bermasalah"
+                      : "Giliran Berakhir"
+                }
               />
               <ErrorState
                 icon={isSoldOut ? "ticket" : "clock"}
                 title={claimErrorTitle(errorState)}
                 message={claimErrorBody(errorState)}
                 buttonText={
-                  isSoldOut ? "Jelajahi Event Lain" : "Bergabung Kembali"
+                  isSoldOut
+                    ? "Jelajahi Event Lain"
+                    : errorState === "UNKNOWN"
+                      ? "Kembali ke Event"
+                      : "Bergabung Kembali"
                 }
                 onPress={isSoldOut ? handleBrowseEvents : handleRejoinQueue}
                 testID="waiting-claim-error-state"

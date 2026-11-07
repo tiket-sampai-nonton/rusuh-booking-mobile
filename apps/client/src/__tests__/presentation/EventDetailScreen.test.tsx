@@ -34,6 +34,7 @@ const available: EventDetail = {
   salesEndsAt: "2026-11-30T23:59:59.000Z",
   status: "AVAILABLE",
   minPriceMinor: 45000000,
+  maxTicketsPerBuyerNik: 3,
   remainingTickets: 120,
   description: {
     longDesc: "Festival musik tahunan.",

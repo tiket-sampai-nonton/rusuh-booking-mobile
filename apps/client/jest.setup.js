@@ -42,7 +42,18 @@ jest.mock("expo-router/head", () => {
 jest.mock("react-native-webview", () => {
   const ReactMock = require("react");
   const RNMock = require("react-native");
-  function WebViewMock(props) {
+  let exchangeResult = "rb-pay-exchanged";
+  const injections = [];
+  const WebViewMock = ReactMock.forwardRef((props, ref) => {
+    ReactMock.useImperativeHandle(ref, () => ({
+      injectJavaScript: (script) => {
+        injections.push(script);
+        Promise.resolve().then(() =>
+          props.onMessage?.({ nativeEvent: { data: exchangeResult } }),
+        );
+      },
+      reload: () => {},
+    }));
     ReactMock.useEffect(() => {
       if (typeof props.onLoadEnd === "function") props.onLoadEnd();
       // Drive a navigation event when the test asks for one via a magic uri
@@ -58,8 +69,16 @@ jest.mock("react-native-webview", () => {
       testID: props.testID,
       accessibilityLabel: props.source ? props.source.uri : undefined,
     });
-  }
-  return { __esModule: true, WebView: WebViewMock, default: WebViewMock };
+  });
+  return {
+    __esModule: true,
+    WebView: WebViewMock,
+    default: WebViewMock,
+    __setExchangeResult: (value) => {
+      exchangeResult = value;
+    },
+    __injections: injections,
+  };
 });
 
 // react-native-qrcode-svg renders an SVG QR via react-native-svg; in the unit
@@ -85,7 +104,11 @@ jest.mock("react-native-qrcode-svg", () => {
 jest.mock("expo-notifications", () => ({
   getPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
   requestPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
-  getExpoPushTokenAsync: jest.fn().mockResolvedValue({ data: "ExpoPushToken[xyz]" }),
+  getExpoPushTokenAsync: jest
+    .fn()
+    .mockResolvedValue({ data: "ExpoPushToken[xyz]" }),
   scheduleNotificationAsync: jest.fn().mockResolvedValue("notif-id"),
-  addNotificationResponseReceivedListener: jest.fn().mockReturnValue({ remove: jest.fn() }),
+  addNotificationResponseReceivedListener: jest
+    .fn()
+    .mockReturnValue({ remove: jest.fn() }),
 }));

@@ -127,7 +127,7 @@ export function EventCard({
   const badge = badgeFor(event);
   const disabled = badge.disabled || history;
   const dateTxt = formatDateID(event.startsAt);
-  const image = eventImage(event.id);
+  const image = eventImage(event.id, event.thumbnailUrl ?? event.imageUrl);
   const grayscaleImage = grayscaleImageUrl(image);
 
   useEffect(() => {

@@ -31,6 +31,12 @@ function entry(overrides: Partial<QueueEntry> = {}): QueueEntry {
 }
 
 class FakeQueueRepository implements QueueRepository {
+  async claim(_queueId: string, eventId: string): Promise<string> {
+    return eventId;
+  }
+  async heartbeat(_eventId: string): Promise<number | undefined> {
+    return undefined;
+  }
   public joinCalls: string[] = [];
   public getStatusCalls: string[] = [];
   public joinError: Error | null = null;
@@ -134,11 +140,14 @@ describe("RBT-041 RestoreMembership", () => {
     expect(await storage.load()).toBeNull();
   });
 
-  it("clears a dead pointer and returns null when the status fetch throws", async () => {
+  it("preserves membership when the status fetch fails offline", async () => {
     await storage.save({ eventId: "evt-1", queueId: "q-evt-1" });
     repo.getStatusError = new Error("offline / entry gone");
     const resumed = await new RestoreMembership(repo, storage).execute();
     expect(resumed).toBeNull();
-    expect(await storage.load()).toBeNull();
+    expect(await storage.load()).toEqual({
+      eventId: "evt-1",
+      queueId: "q-evt-1",
+    });
   });
 });

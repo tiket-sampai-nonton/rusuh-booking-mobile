@@ -12,7 +12,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { ticketRef } from "@presentation/components/ETicketCard";
 import { TicketCard } from "./fragments/TicketCard";
 import { AccountBookingCard } from "./fragments/AccountBookingCard";
 import { EmptyTicketsState } from "./fragments/EmptyTicketsState";
@@ -46,11 +45,10 @@ export function MyTicketsScreen() {
   const amountMinor = useSessionStore((s) => s.amountMinor) ?? 0;
   const ticketCount = useSessionStore((s) => s.ticketCount) ?? 1;
   const profile = useAccountStore((s) => s.profile);
-  const { ticketHistoryRepository, serverClock } = useServices();
+  const { ticketHistoryRepository, paymentRepository, serverClock } =
+    useServices();
   const activeEvent = useMemo(
-    () =>
-      (data?.upcoming ?? []).find((event) => event.id === eventId) ??
-      data?.upcoming[0],
+    () => (data?.upcoming ?? []).find((event) => event.id === eventId),
     [data?.upcoming, eventId],
   );
   const { shareTickets } = useETicketShare();
@@ -61,7 +59,19 @@ export function MyTicketsScreen() {
   const [selectedBooking, setSelectedBooking] =
     useState<MyBookingSummary | null>(null);
   const [downloadError, setDownloadError] = useState("");
-  const showTicket = Boolean(bookingId && activeEvent && tab === "upcoming");
+  const paymentStatus = useQuery({
+    queryKey: ["my-ticket-payment-status", bookingId],
+    queryFn: () => paymentRepository.getStatus(bookingId!, bookingId!),
+    enabled: Boolean(bookingId),
+  });
+  const localTickets = useQuery({
+    queryKey: ["booking-tickets", bookingId],
+    queryFn: () => ticketHistoryRepository.getBookingTickets(bookingId!),
+    enabled: Boolean(bookingId && paymentStatus.data?.status === "PAID"),
+  });
+  const showTicket = Boolean(
+    bookingId && activeEvent && localTickets.data && tab === "upcoming",
+  );
   const {
     data: history,
     isLoading: historyLoading,
@@ -118,14 +128,15 @@ export function MyTicketsScreen() {
     if (!bookingId || !activeEvent) return;
     setDownloadError("");
     try {
-      const qrPayloads = Array.from({ length: ticketCount }, (_, index) =>
-        ticketRef(bookingId, index),
-      );
+      const tickets = localTickets.data?.tickets ?? [];
+      if (!tickets.length) throw new Error("Tiket belum tersedia.");
+      const qrPayloads = tickets.map((ticket) => ticket.qrPayload);
       await downloadTickets(
         bookingId,
-        ticketCount,
+        tickets.length,
         qrPayloads,
         activeEvent.name,
+        tickets.map((ticket) => ticket.ticketCode),
       );
     } catch (error) {
       setDownloadError(
@@ -181,12 +192,16 @@ export function MyTicketsScreen() {
       eventName={selectedBooking?.eventName ?? "QR Tiket Anda"}
       bookingId={bookingId ?? "booking"}
       bookingTickets={
-        selectedBooking ? (selectedTickets?.tickets ?? []) : undefined
+        selectedBooking
+          ? (selectedTickets?.tickets ?? [])
+          : (localTickets.data?.tickets ?? [])
       }
       isLoading={Boolean(selectedBooking && ticketsLoading)}
       isError={Boolean(selectedBooking && ticketsError)}
       downloadError={downloadError}
-      onDownload={() => void downloadSelectedBooking()}
+      onDownload={() =>
+        void (selectedBooking ? downloadSelectedBooking() : handleDownload())
+      }
       onClose={closeQr}
     />
   );
@@ -197,11 +212,17 @@ export function MyTicketsScreen() {
       <TicketCard
         event={activeEvent}
         bookingId={bookingId ?? "booking"}
-        amountMinor={amountMinor}
-        ticketCount={ticketCount}
+        amountMinor={localTickets.data?.amountMinor ?? amountMinor}
+        ticketCount={localTickets.data?.tickets.length ?? ticketCount}
         onOpenQr={() => setQrOpen(true)}
         onDownload={() => void handleDownload()}
-        onShare={() => void shareTickets(bookingId ?? "booking", ticketCount)}
+        onShare={() =>
+          void shareTickets(
+            bookingId ?? "booking",
+            localTickets.data?.tickets.length ?? 0,
+            localTickets.data?.tickets.map((ticket) => ticket.ticketCode),
+          )
+        }
       />
     );
   } else if (!historyLoading && accountBookings.length === 0 && !showTicket) {

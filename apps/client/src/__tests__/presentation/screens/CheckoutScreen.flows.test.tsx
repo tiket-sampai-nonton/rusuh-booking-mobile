@@ -66,7 +66,6 @@ function bookingRepo(session: BookingSession | null): BookingRepository {
       nikMasked: "31****01",
       result: "AVAILABLE",
     }),
-    setBuyer: async (): Promise<void> => {},
     hold: async (
       _s: string,
       _i: readonly BookingItemInput[],
@@ -131,6 +130,10 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
     fireEvent.changeText(
+      screen.getByTestId("buyer-email-confirmation"),
+      "buyer@mail.com",
+    );
+    fireEvent.changeText(
       screen.getByTestId("attendee-name-0"),
       "Penonton Satu",
     );
@@ -181,6 +184,10 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
     fireEvent.changeText(
+      screen.getByTestId("buyer-email-confirmation"),
+      "buyer@mail.com",
+    );
+    fireEvent.changeText(
       screen.getByTestId("attendee-name-0"),
       "Penonton Satu",
     );
@@ -211,6 +218,10 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
     fireEvent.changeText(
+      screen.getByTestId("buyer-email-confirmation"),
+      "buyer@mail.com",
+    );
+    fireEvent.changeText(
       screen.getByTestId("attendee-name-0"),
       "Penonton Satu",
     );
@@ -235,9 +246,9 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     );
   });
 
-  // ---- RBT-053: buyer prefill + set-buyer + confirm-leave ----
+  // ---- Checkout buyer details + confirm-leave ----
 
-  it("shows the 'Terisi dari akun' badge and prefills email for a logged-in user", async () => {
+  it("shows an account badge and asks for an unmasked email", async () => {
     useAccountStore.getState().setProfile(LOGGED_IN);
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
@@ -245,9 +256,7 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     await waitFor(() =>
       expect(screen.getByTestId("prefill-badge")).toBeTruthy(),
     );
-    expect(screen.getByTestId("buyer-email").props.value).toBe(
-      "ri****@mail.com",
-    );
+    expect(screen.getByTestId("buyer-email").props.value).toBe("");
   });
 
   it("back opens the confirm-leave dialog; leaving re-queues to home", async () => {
@@ -273,13 +282,19 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/"));
   });
 
-  it("submit persists the buyer via setBuyer (RBT-053)", async () => {
+  it("submit includes buyer details in the booking hold", async () => {
     useAccountStore.getState().setProfile(LOGGED_IN);
     const calls: [string, string, string][] = [];
     const repo: BookingRepository = {
       ...verdictRepo(SESSION),
-      setBuyer: async (s, nik, email) => {
-        calls.push([s, nik, email]);
+      hold: async (s, _items, _key, buyer) => {
+        calls.push([s, buyer?.nik ?? "", buyer?.email ?? ""]);
+        return {
+          bookingId: "b1",
+          sessionId: s,
+          status: "HELD",
+          amountMinor: 0,
+        };
       },
     };
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
@@ -290,6 +305,10 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     );
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
+    fireEvent.changeText(
+      screen.getByTestId("buyer-email-confirmation"),
+      "buyer@mail.com",
+    );
     fireEvent.changeText(
       screen.getByTestId("attendee-name-0"),
       "Penonton Satu",
@@ -324,6 +343,10 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     );
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
+    fireEvent.changeText(
+      screen.getByTestId("buyer-email-confirmation"),
+      "buyer@mail.com",
+    );
     fireEvent.changeText(
       screen.getByTestId("attendee-name-0"),
       "Penonton Satu",
@@ -362,6 +385,10 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     );
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
+    fireEvent.changeText(
+      screen.getByTestId("buyer-email-confirmation"),
+      "buyer@mail.com",
+    );
     fireEvent.changeText(
       screen.getByTestId("attendee-name-0"),
       "Penonton Satu",

@@ -15,6 +15,7 @@
  */
 import { useRouter, type Href } from "expo-router";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   ActivityIndicator,
   Pressable,
@@ -26,7 +27,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { minorToIDR } from "@domain/services/money";
 import { SummaryRow } from "./fragments/SummaryRow";
-import { ETicketCard, ticketRef } from "@presentation/components/ETicketCard";
+import { ETicketCard } from "@presentation/components/ETicketCard";
+import { useServices } from "@providers/service-context";
 import { Seo } from "@presentation/components/Seo";
 import { useETicketDownload } from "@presentation/hooks/useETicketDownload";
 import { CheckIcon, MailIcon } from "@presentation/components/ArrowIcon";
@@ -58,17 +60,27 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   // pending verdict stays on the processing state (the gate routes here on
   // PAID, so this is a safety re-check, not the primary poll).
   const { verdict, isLoading } = useVerifyPayment(attemptId, bookingId);
+  const { ticketHistoryRepository } = useServices();
+  const ticketsQuery = useQuery({
+    queryKey: ["booking-tickets", bookingId],
+    queryFn: () => ticketHistoryRepository.getBookingTickets(bookingId),
+    enabled: verdict === "paid" && Boolean(bookingId),
+  });
   const { downloadTickets } = useETicketDownload();
-  const count = ticketCount ?? 1;
+  const issuedTickets = ticketsQuery.data?.tickets ?? [];
+  const count = issuedTickets.length;
   const [downloadError, setDownloadError] = useState("");
 
   const handleDownload = async () => {
     setDownloadError("");
     try {
-      const qrPayloads = Array.from({ length: count }, (_, index) =>
-        ticketRef(bookingId, index),
+      await downloadTickets(
+        bookingId,
+        count,
+        issuedTickets.map((ticket) => ticket.qrPayload),
+        event?.name,
+        issuedTickets.map((ticket) => ticket.ticketCode),
       );
-      await downloadTickets(bookingId, count, qrPayloads, event?.name);
     } catch (error) {
       setDownloadError(
         error instanceof Error
@@ -201,17 +213,21 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
               />
               <SummaryRow
                 label="Jumlah tiket"
-                value={`${ticketCount ?? 1} tiket`}
+                value={`${ticketsQuery.data?.ticketQuantity ?? ticketCount ?? 0} tiket`}
                 isMobileWeb={isMobileWeb}
               />
               <SummaryRow
                 label="Total dibayar"
-                value={minorToIDR(amountMinor)}
+                value={minorToIDR(
+                  ticketsQuery.data?.amountMinor ?? amountMinor,
+                )}
                 isMobileWeb={isMobileWeb}
               />
               <SummaryRow
                 label="NIK pembeli"
-                value={buyerNikMasked ?? "••••"}
+                value={
+                  ticketsQuery.data?.buyerNikMasked ?? buyerNikMasked ?? "••••"
+                }
                 isMobileWeb={isMobileWeb}
               />
             </View>
@@ -219,7 +235,11 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
             {/* One e-ticket card + QR per ticket (RBT-071). QR encodes a safe
               reference, never PII. */}
             <View className="gap-6" testID="eticket-list">
-              {Array.from({ length: count }, (_, i) => (
+              {ticketsQuery.isLoading ? <Text>Memuat e-tiket…</Text> : null}
+              {ticketsQuery.isError ? (
+                <Text>Gagal memuat e-tiket. Silakan coba lagi.</Text>
+              ) : null}
+              {issuedTickets.map((ticket, i) => (
                 // Static derived list (fixed length, never reordered): the
                 // booking id + ticket index IS the stable identity.
                 <ETicketCard
@@ -231,6 +251,9 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
                   venue={event?.venue}
                   startsAt={event?.startsAt}
                   attendeeNikMasked={buyerNikMasked}
+                  attendeeName={ticket.attendeeName}
+                  qrPayload={ticket.qrPayload}
+                  ticketCode={ticket.ticketCode}
                 />
               ))}
             </View>
@@ -240,6 +263,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
                 accessibilityRole="button"
                 accessibilityLabel="Unduh e-tiket"
                 testID="success-download"
+                disabled={issuedTickets.length === 0}
                 onPress={() => void handleDownload()}
                 className="flex-1 items-center py-4"
                 style={componentStyles.elementBackgroundColor5}

@@ -29,6 +29,12 @@ jest.mock("expo-router", () => ({
 }));
 
 class FakeQueueRepository implements QueueRepository {
+  async claim(_queueId: string, eventId: string): Promise<string> {
+    return eventId;
+  }
+  async heartbeat(_eventId: string): Promise<number | undefined> {
+    return undefined;
+  }
   public joinCalls: string[] = [];
   public joinError: Error | null = null;
   async join(eventId: string): Promise<QueueEntry> {

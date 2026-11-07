@@ -182,7 +182,7 @@ export function isCheckoutReady(state: CheckoutState): boolean {
   for (const r of state.rows) {
     if (r.categoryId.length === 0) return false;
     const nik = r.useBuyerNik ? state.buyerNik : r.attendeeNik;
-    const name = r.useBuyerNik ? "buyer" : r.attendeeName;
+    const name = r.attendeeName;
     if (!isValidNik(nik)) return false;
     if (name.trim().length === 0) return false;
     // A NIK the BE already flagged ALREADY_REGISTERED cannot be held.

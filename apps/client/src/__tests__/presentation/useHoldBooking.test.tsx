@@ -27,7 +27,8 @@ const ROW = {
 class FakeRepo implements BookingRepository {
   throwOnHold: Error | null = null;
   holds = 0;
-  async createSession(eventId: string): Promise<BookingSession> {
+  async createSession(admissionToken: string): Promise<BookingSession> {
+    const eventId = admissionToken.replace(/^mock-admission:/, "");
     return {
       sessionId: "s",
       eventId,
@@ -42,11 +43,11 @@ class FakeRepo implements BookingRepository {
   async checkAttendee(_s: string, _n: string): Promise<AttendeeCheck> {
     return { nikMasked: "3***", result: "AVAILABLE" };
   }
-  async setBuyer(): Promise<void> {}
   async hold(
     _s: string,
     _i: readonly BookingItemInput[],
     _k: string,
+    _buyer: NonNullable<Parameters<BookingRepository["hold"]>[3]>,
   ): Promise<Booking> {
     this.holds += 1;
     if (this.throwOnHold) throw this.throwOnHold;
@@ -93,6 +94,12 @@ describe("useHoldBooking (RBT-054)", () => {
       sessionId: "sess-1",
       rows: [ROW],
       buyerNik: "3171999999999999",
+      buyer: {
+        nik: "3171999999999999",
+        email: "a@example.com",
+        emailConfirmation: "a@example.com",
+        consent: true,
+      },
     });
     expect(booking.bookingId).toBe("bk-9");
     await waitFor(() =>
@@ -112,6 +119,12 @@ describe("useHoldBooking (RBT-054)", () => {
         sessionId: "sess-1",
         rows: [ROW],
         buyerNik: "3171999999999999",
+        buyer: {
+          nik: "3171999999999999",
+          email: "a@example.com",
+          emailConfirmation: "a@example.com",
+          consent: true,
+        },
       }),
     ).rejects.toMatchObject({ code: "CATEGORY_UNAVAILABLE" });
     await waitFor(() =>

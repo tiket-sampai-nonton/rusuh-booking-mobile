@@ -10,10 +10,11 @@ import type {
   AttendeeCheck,
   Booking,
   BookingItemInput,
+  BookingBuyerInput,
   BookingRepository,
   BookingSession,
 } from "@domain/repositories/booking.repository";
-import { TransportError, unwrap } from "@infrastructure/api/envelope";
+import { TransportError, unwrap, assertOk } from "@infrastructure/api/envelope";
 import {
   toAttendeeCheck,
   toBooking,
@@ -22,13 +23,19 @@ import {
 import type { HttpClient } from "@infrastructure/http/http-client";
 
 export class HttpBookingRepository implements BookingRepository {
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly openAvailabilityStream?: (
+      sessionId: string,
+      onChange: () => void,
+    ) => () => void,
+  ) {}
 
-  async createSession(eventId: string): Promise<BookingSession> {
+  async createSession(admissionToken: string): Promise<BookingSession> {
     const res = await this.http.request({
       method: "POST",
       url: "booking-sessions",
-      body: { eventId },
+      body: { admissionToken },
     });
     return toBookingSession(
       unwrap<Parameters<typeof toBookingSession>[0]>(res),
@@ -61,31 +68,83 @@ export class HttpBookingRepository implements BookingRepository {
     return toAttendeeCheck(unwrap<Parameters<typeof toAttendeeCheck>[0]>(res));
   }
 
-  async setBuyer(
-    sessionId: string,
-    buyerNik: string,
-    email: string,
-  ): Promise<void> {
-    // FE-NEED (O1): proposed endpoint; harmless no-op path until the BE
-    // delivers it (the hold body can also carry the buyer). We still POST so
-    // the real adapter is wired the day the route exists.
-    await this.http.request({
-      method: "POST",
-      url: `booking-sessions/${encodeURIComponent(sessionId)}/buyer`,
-      body: { buyerNik, email },
-    });
-  }
-
   async hold(
     sessionId: string,
     items: readonly BookingItemInput[],
     idempotencyKey: string,
+    buyer: BookingBuyerInput,
   ): Promise<Booking> {
     const res = await this.http.request({
       method: "POST",
-      url: `booking-sessions/${encodeURIComponent(sessionId)}/holds`,
+      url: "bookings",
       headers: { "idempotency-key": idempotencyKey },
-      body: { items },
+      body: {
+        sessionId,
+        buyer,
+        items: items.map((item) => ({
+          categoryId: item.categoryId,
+          attendee: { nik: item.attendeeNik, fullName: item.attendeeName },
+        })),
+      },
+    });
+    return toBooking(unwrap<Parameters<typeof toBooking>[0]>(res), sessionId);
+  }
+
+  async cancelSession(sessionId: string): Promise<void> {
+    const res = await this.http.request({
+      method: "POST",
+      url: `booking-sessions/${encodeURIComponent(sessionId)}/cancel`,
+    });
+    assertOk(res);
+  }
+
+  async getSession(sessionId: string): Promise<BookingSession> {
+    const res = await this.http.request({
+      method: "GET",
+      url: `booking-sessions/${encodeURIComponent(sessionId)}`,
+    });
+    return toBookingSession(
+      unwrap<Parameters<typeof toBookingSession>[0]>(res),
+    );
+  }
+
+  subscribeAvailability(sessionId: string, onChange: () => void): () => void {
+    return this.openAvailabilityStream?.(sessionId, onChange) ?? (() => {});
+  }
+
+  async getBooking(bookingId: string): Promise<Booking> {
+    const res = await this.http.request({
+      method: "GET",
+      url: `bookings/${encodeURIComponent(bookingId)}`,
+    });
+    return toBooking(unwrap<Parameters<typeof toBooking>[0]>(res));
+  }
+
+  async cancelBooking(bookingId: string): Promise<Booking> {
+    const res = await this.http.request({
+      method: "POST",
+      url: `bookings/${encodeURIComponent(bookingId)}/cancel`,
+    });
+    return toBooking(unwrap<Parameters<typeof toBooking>[0]>(res));
+  }
+
+  async replaceItems(
+    bookingId: string,
+    version: number,
+    items: readonly BookingItemInput[],
+    idempotencyKey: string,
+  ): Promise<Booking> {
+    const res = await this.http.request({
+      method: "PUT",
+      url: `bookings/${encodeURIComponent(bookingId)}/items`,
+      headers: { "idempotency-key": idempotencyKey },
+      body: {
+        version,
+        items: items.map((item) => ({
+          categoryId: item.categoryId,
+          attendee: { nik: item.attendeeNik, fullName: item.attendeeName },
+        })),
+      },
     });
     return toBooking(unwrap<Parameters<typeof toBooking>[0]>(res));
   }

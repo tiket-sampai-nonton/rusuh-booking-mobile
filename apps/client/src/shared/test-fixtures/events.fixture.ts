@@ -3,8 +3,8 @@
  *
  * ≥5 events covering every lifecycle status the UI must render, INCLUDING the
  * three special cases the AC calls out: SOLD_OUT, NOT_STARTED, CLOSED (plus
- * AVAILABLE). Also carries the FE-NEED O1 fields (remainingTickets, description
- * JSON) as mock data until the BE delivers them. Pure data, framework-free;
+ * AVAILABLE). Also carries mock-only stock and rich description values. Pure
+ * data, framework-free;
  * typed against the domain `EventDetail` port so a shape drift fails tsc.
  */
 import type { EventDetail } from "@domain/repositories/event.repository";

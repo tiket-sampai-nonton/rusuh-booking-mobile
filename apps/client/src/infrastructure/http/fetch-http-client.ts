@@ -24,17 +24,20 @@ export interface FetchHttpClientOptions {
   readonly defaultHeaders?: Readonly<Record<string, string>>;
   /** Injectable fetch (defaults to global) — lets tests pass a fake. */
   readonly fetchFn?: typeof fetch;
+  readonly getHeaders?: () => Promise<Readonly<Record<string, string>>>;
 }
 
 export class FetchHttpClient implements HttpClient {
   private readonly baseUrl: string;
   private readonly defaultHeaders: Readonly<Record<string, string>>;
   private readonly fetchFn: typeof fetch;
+  private readonly getHeaders?: FetchHttpClientOptions["getHeaders"];
 
   constructor(options: FetchHttpClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");
     this.defaultHeaders = options.defaultHeaders ?? {};
     this.fetchFn = options.fetchFn ?? globalThis.fetch;
+    this.getHeaders = options.getHeaders;
   }
 
   async request<T = unknown>(req: HttpRequest): Promise<HttpResponse<T>> {
@@ -45,6 +48,7 @@ export class FetchHttpClient implements HttpClient {
     const headers: Record<string, string> = {
       "content-type": "application/json",
       ...this.defaultHeaders,
+      ...(!req.url.startsWith("http") ? await this.getHeaders?.() : {}),
       ...(req.headers ?? {}),
     };
 

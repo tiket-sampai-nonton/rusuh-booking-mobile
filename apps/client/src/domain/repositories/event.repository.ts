@@ -12,7 +12,12 @@
  */
 
 /** Lifecycle status of an event (contract enum). */
-export type EventStatus = "NOT_STARTED" | "AVAILABLE" | "SOLD_OUT" | "CLOSED";
+export type EventStatus =
+  | "NOT_STARTED"
+  | "AVAILABLE"
+  | "SOLD_OUT"
+  | "CLOSED"
+  | "CANCELLED";
 
 /** Event as shown in the catalog/list. */
 export interface EventSummary {
@@ -27,22 +32,45 @@ export interface EventSummary {
   readonly status: EventStatus;
   /** Minor-unit IDR (integer). Undefined when not yet priced. */
   readonly minPriceMinor?: number;
-  /** FE-NEED (O1): mocked until BE delivers on the list summary. */
+  readonly imageUrl?: string;
+  readonly bannerUrl?: string;
+  readonly thumbnailUrl?: string;
+  readonly genres?: readonly string[];
+  /** Mock-only availability hint. The public catalog summary does not include stock. */
   readonly remainingTickets?: number;
 }
 
 /** Full event detail (adds rich description + pricing categories). */
 export interface EventDetail extends EventSummary {
+  readonly maxTicketsPerOrder?: number;
+  readonly maxTicketsPerBuyerNik?: number;
+  readonly allowMixedCategories?: boolean;
+  readonly published?: boolean;
   /**
-   * FE-NEED (O1): rich description JSON (longDesc, lineup, terms, bannerImage).
-   * Modeled as an opaque record until the BE `EventDetail.description` lands.
+   * Mock-only rich event content (long description, lineup, terms and gallery).
+   * These fields are not part of the supplied public EventDetail contract.
    */
   readonly description?: Readonly<Record<string, unknown>>;
 }
 
+export interface EventQuery {
+  readonly timeframe?: "ALL" | "THIS_WEEK" | "THIS_MONTH" | "UPCOMING";
+  readonly genres?: readonly string[];
+  readonly city?: string;
+  readonly startDate?: string;
+  readonly endDate?: string;
+  readonly status?: string;
+  readonly sort?: "DATE_ASC" | "DATE_DESC" | "PRICE_ASC" | "PRICE_DESC";
+}
+
 export interface EventRepository {
+  readonly supportsServerFilters?: boolean;
   /** List the event catalog (upcoming + history derived by the caller). */
-  listEvents(): Promise<readonly EventSummary[]>;
+  listEvents(query?: EventQuery): Promise<readonly EventSummary[]>;
+  getFacets?(query?: EventQuery): Promise<{
+    readonly cities: readonly string[];
+    readonly genres: readonly string[];
+  }>;
   /** Fetch one event's detail by id. */
   getEventDetail(eventId: string): Promise<EventDetail>;
 }

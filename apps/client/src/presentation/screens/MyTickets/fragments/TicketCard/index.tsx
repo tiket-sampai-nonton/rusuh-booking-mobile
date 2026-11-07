@@ -11,6 +11,8 @@ interface TicketCardProps {
     name: string;
     venue?: string;
     startsAt?: string;
+    thumbnailUrl?: string;
+    imageUrl?: string;
   };
   readonly bookingId: string;
   readonly amountMinor: number;
@@ -37,7 +39,9 @@ export function TicketCard({
       testID={`ticket-card-${bookingId}`}
     >
       <Image
-        source={{ uri: eventImage(event.id) }}
+        source={{
+          uri: eventImage(event.id, event.thumbnailUrl ?? event.imageUrl),
+        }}
         resizeMode="cover"
         style={styles.image}
       />

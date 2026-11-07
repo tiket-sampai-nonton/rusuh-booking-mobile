@@ -9,10 +9,11 @@
  * imports (ARCHITECTURE dependency rule); error mapping is the caller's hook.
  */
 import { DomainError } from "@domain/errors/domain-error";
-import { mapError } from "@domain/errors/error-mapper";
+import { mapFailure } from "@domain/errors/error-mapper";
 import type {
   Booking,
   BookingItemInput,
+  BookingBuyerInput,
   BookingRepository,
 } from "@domain/repositories/booking.repository";
 import type { IdempotencyKeys } from "@domain/idempotency/idempotency-key";
@@ -33,11 +34,12 @@ export class HoldBooking {
     sessionId: string,
     rows: readonly TicketRow[],
     buyerNik: string,
+    buyer: BookingBuyerInput,
   ): Promise<Booking> {
     const resolved = resolveAttendeeNiks(rows, buyerNik);
     const items: BookingItemInput[] = rows.map((r, i) => ({
       categoryId: r.categoryId,
-      attendeeName: r.useBuyerNik ? "Pembeli" : r.attendeeName,
+      attendeeName: r.attendeeName,
       attendeeNik: resolved[i],
     }));
     const actionId = HoldBooking.actionId(sessionId);
@@ -45,7 +47,7 @@ export class HoldBooking {
     // retry of the same action reuses it — FR-25). Cleared only on success.
     const key = this.keys.mint(actionId);
     try {
-      const booking = await this.booking.hold(sessionId, items, key);
+      const booking = await this.booking.hold(sessionId, items, key, buyer);
       this.keys.clear(actionId); // terminal → a NEW attempt gets a fresh key
       return booking;
     } catch (cause) {
@@ -54,8 +56,12 @@ export class HoldBooking {
       // ATTENDEE_NIK_DUPLICATE_IN_ORDER …) carry the code the UI needs — pass
       // through so the mapped Bahasa message surfaces (FR-16). The key is kept
       // so an honest retry is still idempotent.
-      if (cause instanceof DomainError) throw cause;
-      throw mapError({ code: "DEPENDENCY_UNAVAILABLE" });
+      const error =
+        cause instanceof DomainError
+          ? cause
+          : mapFailure(cause, "DEPENDENCY_UNAVAILABLE");
+      if (error.code === "IDEMPOTENCY_KEY_REUSED") this.keys.clear(actionId);
+      throw error;
     }
   }
 }

@@ -12,7 +12,7 @@
  * `kind`/`userMessage` instead of a transport-specific Error.
  */
 import { DomainError } from "@domain/errors/domain-error";
-import { mapError } from "@domain/errors/error-mapper";
+import { mapFailure } from "@domain/errors/error-mapper";
 import type {
   AuthSession,
   UserRepository,
@@ -36,7 +36,7 @@ export class VerifyOtp {
       }
       // Any non-typed failure (incl. the mock's "invalid OTP") becomes a
       // domain-meaningful auth error. The raw code/token never appear here.
-      throw mapError({ code: "OTP_INVALID" });
+      throw mapFailure(cause, "OTP_INVALID");
     }
   }
 }

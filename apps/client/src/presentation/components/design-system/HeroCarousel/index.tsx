@@ -155,7 +155,7 @@ export function HeroCarousel({
         {top.map((ev, i) => (
           <HeroSlide
             key={ev.id}
-            uri={eventImage(ev.id)}
+            uri={eventImage(ev.id, ev.bannerUrl ?? ev.imageUrl)}
             active={i === currentIndex}
             isPrev={i === prevIndex}
             isGlitching={i === glitchIndex}

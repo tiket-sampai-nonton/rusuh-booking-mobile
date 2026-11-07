@@ -9,10 +9,7 @@
  * PURE TS: constructor-injected {@link BookingRepository} port, domain-only
  * imports — no React / RN / Expo / TanStack / infrastructure (ARCHITECTURE §3).
  *
- * The real claim method is `BookingRepository.createSession(eventId)` — its
- * contract docstring is literally "Create a booking session from an admission
- * token". No separate claim endpoint exists on the booking or queue port, so
- * this is the method the admission flow uses (no invented API).
+ * Claim the queue entry first, then exchange the admission token for a session.
  *
  * SAFETY (FR-08 authorization invariant): the claim proceeds ONLY when the
  * supplied queue status `authorizes(...)` it — i.e. the entry is `ADMITTED`.
@@ -23,20 +20,23 @@
  * ERROR MAPPING: a typed `DomainError` from the adapter (e.g. TURN_MISSED,
  * EVENT_SOLD_OUT, ADMISSION_TOKEN_INVALID) is passed through untouched so the UI
  * can discriminate on `code`/`kind`. Any other rejection is mapped to a typed
- * TURN_MISSED error (the admission window is the thing that just failed) with a
- * Bahasa user message, so callers never see a transport-specific Error.
+ * dependency error, so callers do not mistake a network failure for a missed turn.
  */
 import { DomainError } from "@domain/errors/domain-error";
-import { mapError } from "@domain/errors/error-mapper";
+import { mapFailure } from "@domain/errors/error-mapper";
 import type {
   BookingRepository,
   BookingSession,
 } from "@domain/repositories/booking.repository";
 import type { QueueStatus } from "@domain/repositories/queue.repository";
+import type { QueueRepository } from "@domain/repositories/queue.repository";
 import { authorizes } from "@domain/state-machines/queue-state-machine";
 
 export class ClaimAdmission {
-  constructor(private readonly bookings: BookingRepository) {}
+  constructor(
+    private readonly bookings: BookingRepository,
+    private readonly queue: QueueRepository,
+  ) {}
 
   /**
    * Claim the admitted slot for `eventId`, creating the booking session.
@@ -49,7 +49,11 @@ export class ClaimAdmission {
    * @throws DomainError when `status` does not authorize the claim, or when the
    *   port rejects (typed errors passed through; others mapped to TURN_MISSED).
    */
-  async execute(eventId: string, status: QueueStatus): Promise<BookingSession> {
+  async execute(
+    eventId: string,
+    status: QueueStatus,
+    queueId?: string,
+  ): Promise<BookingSession> {
     if (!authorizes(status)) {
       // Not ADMITTED → not authorized to claim. Fail closed before any I/O.
       throw new DomainError({
@@ -59,7 +63,9 @@ export class ClaimAdmission {
       });
     }
     try {
-      return await this.bookings.createSession(eventId);
+      if (!queueId) throw new Error("Queue entry is required");
+      const admissionToken = await this.queue.claim(queueId, eventId);
+      return await this.bookings.createSession(admissionToken);
     } catch (cause) {
       // Already-typed domain errors (TURN_MISSED / EVENT_SOLD_OUT / token
       // invalid …) carry the discriminable code the UI needs — pass through.
@@ -68,7 +74,7 @@ export class ClaimAdmission {
       }
       // Any untyped failure during the admission claim becomes a typed
       // TURN_MISSED (the admission window is what just lapsed).
-      throw mapError({ code: "TURN_MISSED" });
+      throw mapFailure(cause, "DEPENDENCY_UNAVAILABLE");
     }
   }
 }

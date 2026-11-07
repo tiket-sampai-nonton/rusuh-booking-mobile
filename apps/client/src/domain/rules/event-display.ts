@@ -1,7 +1,7 @@
 /**
  * Event display rules — pure domain (framework-free).
  *
- * Maps a contract `EventStatus` (+ remainingTickets) to the badge the catalog
+ * Maps a contract `EventStatus` (+ optional mock stock hint) to the badge the catalog
  * renders, and derives the "upcoming vs history" split. Mirrors the prototype's
  * badge logic (index.html): AVAILABLE + plenty → "Tersedia"; AVAILABLE + low
  * stock → "Stok Menipis"; SOLD_OUT → disabled "Sold Out"; NOT_STARTED →
@@ -31,8 +31,9 @@ export interface EventBadge {
 }
 
 /**
- * Resolve the display badge for an event. `remainingTickets` is FE-NEED (O1),
- * optional — when absent an AVAILABLE event defaults to "Tersedia".
+ * Resolve the display badge for an event. The public catalog does not include
+ * remaining stock, so real AVAILABLE events default to "Tersedia" until stock
+ * is checked by the queue/session APIs.
  */
 export function badgeFor(event: {
   status: EventStatus;
@@ -43,6 +44,8 @@ export function badgeFor(event: {
       return { tone: "soldout", label: "Sold Out", disabled: true };
     case "CLOSED":
       return { tone: "done", label: "Selesai", disabled: true };
+    case "CANCELLED":
+      return { tone: "done", label: "Dibatalkan", disabled: true };
     case "NOT_STARTED":
       return { tone: "soon", label: "Segera", disabled: false };
     case "AVAILABLE": {
@@ -81,8 +84,8 @@ export interface CatalogSplit {
 
 /**
  * Split a flat catalog into "Konser Terdekat" (upcoming asc) and "History Event"
- * (past desc), using the server clock (never the device clock). Client-side
- * derivation until the BE archive endpoint (O4) lands.
+ * (past desc), using the server clock (never the device clock). The supplied
+ * API has no separate archive endpoint, so history is derived from the catalog.
  */
 export function splitCatalog(
   events: readonly EventSummary[],

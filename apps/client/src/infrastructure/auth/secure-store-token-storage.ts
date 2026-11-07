@@ -22,15 +22,16 @@ import type { TokenStorage } from "@domain/auth/token-storage.port";
 export const AUTH_TOKEN_KEY = "rusuh.auth.token";
 
 export class SecureStoreTokenStorage implements TokenStorage {
+  constructor(private readonly key = AUTH_TOKEN_KEY) {}
   async save(token: string): Promise<void> {
-    await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
+    await SecureStore.setItemAsync(this.key, token);
   }
 
   async load(): Promise<string | null> {
-    return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+    return SecureStore.getItemAsync(this.key);
   }
 
   async clear(): Promise<void> {
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    await SecureStore.deleteItemAsync(this.key);
   }
 }

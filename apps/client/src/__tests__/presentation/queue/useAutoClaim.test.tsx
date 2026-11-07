@@ -32,10 +32,11 @@ class FakeBookingRepository implements BookingRepository {
   public createSessionError: Error | null = null;
   public seq = 0;
 
-  async createSession(eventId: string): Promise<BookingSession> {
-    this.createSessionCalls.push(eventId);
+  async createSession(admissionToken: string): Promise<BookingSession> {
+    this.createSessionCalls.push(admissionToken);
     if (this.createSessionError) throw this.createSessionError;
     this.seq += 1;
+    const eventId = admissionToken.replace(/^mock-admission:/, "");
     return {
       sessionId: `sess-${this.seq}`,
       eventId,
@@ -49,11 +50,11 @@ class FakeBookingRepository implements BookingRepository {
   async checkAttendee(_sessionId: string, nik: string): Promise<AttendeeCheck> {
     return { nikMasked: nik, result: "AVAILABLE" };
   }
-  async setBuyer(): Promise<void> {}
   async hold(
     sessionId: string,
     _items: readonly BookingItemInput[],
     _idempotencyKey: string,
+    _buyer: NonNullable<Parameters<BookingRepository["hold"]>[3]>,
   ): Promise<Booking> {
     return { bookingId: "bk-1", sessionId, status: "HELD", amountMinor: 0 };
   }
@@ -84,9 +85,12 @@ function makeWrapper(repo: BookingRepository) {
 describe("useAutoClaim", () => {
   it("waits for an authoritative queue status before claiming", async () => {
     const repo = new FakeBookingRepository();
-    const { result } = renderHook(() => useAutoClaim({ eventId: "evt-1" }), {
-      wrapper: makeWrapper(repo),
-    });
+    const { result } = renderHook(
+      () => useAutoClaim({ eventId: "evt-1", queueId: "q-1" }),
+      {
+        wrapper: makeWrapper(repo),
+      },
+    );
 
     await waitFor(() => expect(result.current.claiming).toBe(false));
     expect(repo.createSessionCalls).toEqual([]);
@@ -96,12 +100,18 @@ describe("useAutoClaim", () => {
     const repo = new FakeBookingRepository();
     const onClaimed = jest.fn();
     const { result } = renderHook(
-      () => useAutoClaim({ eventId: "evt-1", status: "ADMITTED", onClaimed }),
+      () =>
+        useAutoClaim({
+          eventId: "evt-1",
+          queueId: "q-1",
+          status: "ADMITTED",
+          onClaimed,
+        }),
       { wrapper: makeWrapper(repo) },
     );
 
     await waitFor(() => expect(result.current.claimedSessionId).toBe("sess-1"));
-    expect(repo.createSessionCalls).toEqual(["evt-1"]);
+    expect(repo.createSessionCalls).toEqual(["mock-admission:evt-1"]);
     expect(onClaimed).toHaveBeenCalledTimes(1);
     expect(onClaimed).toHaveBeenCalledWith("sess-1");
     expect(result.current.claiming).toBe(false);
@@ -112,7 +122,7 @@ describe("useAutoClaim", () => {
     const repo = new FakeBookingRepository();
     const { result, rerender } = renderHook(
       ({ status }: { status: QueueStatus }) =>
-        useAutoClaim({ eventId: "evt-1", status }),
+        useAutoClaim({ eventId: "evt-1", queueId: "q-1", status }),
       {
         wrapper: makeWrapper(repo),
         initialProps: { status: "ADMITTED" as QueueStatus },
@@ -124,13 +134,14 @@ describe("useAutoClaim", () => {
     act(() => rerender({ status: "ADMITTED" }));
     act(() => rerender({ status: "ADMITTED" }));
     await waitFor(() => expect(repo.createSessionCalls.length).toBe(1));
-    expect(repo.createSessionCalls).toEqual(["evt-1"]);
+    expect(repo.createSessionCalls).toEqual(["mock-admission:evt-1"]);
   });
 
   it("does NOT claim for a non-admitted status", async () => {
     const repo = new FakeBookingRepository();
     const { result } = renderHook(
-      () => useAutoClaim({ eventId: "evt-1", status: "WAITING" }),
+      () =>
+        useAutoClaim({ eventId: "evt-1", queueId: "q-1", status: "WAITING" }),
       { wrapper: makeWrapper(repo) },
     );
 
@@ -144,7 +155,7 @@ describe("useAutoClaim", () => {
     const repo = new FakeBookingRepository();
     const { result, rerender } = renderHook(
       ({ status }: { status: QueueStatus }) =>
-        useAutoClaim({ eventId: "evt-1", status }),
+        useAutoClaim({ eventId: "evt-1", queueId: "q-1", status }),
       {
         wrapper: makeWrapper(repo),
         initialProps: { status: "WAITING" as QueueStatus },
@@ -153,14 +164,15 @@ describe("useAutoClaim", () => {
     expect(repo.createSessionCalls).toEqual([]);
     act(() => rerender({ status: "ADMITTED" }));
     await waitFor(() => expect(result.current.claimedSessionId).toBe("sess-1"));
-    expect(repo.createSessionCalls).toEqual(["evt-1"]);
+    expect(repo.createSessionCalls).toEqual(["mock-admission:evt-1"]);
   });
 
   it("surfaces TURN_MISSED as an error state", async () => {
     const repo = new FakeBookingRepository();
     repo.createSessionError = mapError({ code: "TURN_MISSED" });
     const { result } = renderHook(
-      () => useAutoClaim({ eventId: "evt-1", status: "ADMITTED" }),
+      () =>
+        useAutoClaim({ eventId: "evt-1", queueId: "q-1", status: "ADMITTED" }),
       { wrapper: makeWrapper(repo) },
     );
     await waitFor(() => expect(result.current.errorState).toBe("TURN_MISSED"));
@@ -171,7 +183,8 @@ describe("useAutoClaim", () => {
     const repo = new FakeBookingRepository();
     repo.createSessionError = mapError({ code: "EVENT_SOLD_OUT" });
     const { result } = renderHook(
-      () => useAutoClaim({ eventId: "evt-1", status: "ADMITTED" }),
+      () =>
+        useAutoClaim({ eventId: "evt-1", queueId: "q-1", status: "ADMITTED" }),
       { wrapper: makeWrapper(repo) },
     );
     await waitFor(() =>
@@ -185,7 +198,8 @@ describe("useAutoClaim", () => {
     // TURN_MISSED/EVENT_SOLD_OUT discrimination.
     repo.createSessionError = mapError({ code: "ADMISSION_TOKEN_INVALID" });
     const { result } = renderHook(
-      () => useAutoClaim({ eventId: "evt-1", status: "ADMITTED" }),
+      () =>
+        useAutoClaim({ eventId: "evt-1", queueId: "q-1", status: "ADMITTED" }),
       { wrapper: makeWrapper(repo) },
     );
     await waitFor(() => expect(result.current.errorState).toBe("UNKNOWN"));
