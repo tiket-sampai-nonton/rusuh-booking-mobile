@@ -39,6 +39,8 @@ export interface HeroCarouselProps {
   readonly onSeeAll: () => void;
   /** Mobile Home prototype uses one static featured hero. */
   readonly autoPlay?: boolean;
+  /** Pause visual work while its route is covered by another screen. */
+  readonly isActive?: boolean;
 }
 
 export function HeroCarousel({
@@ -46,6 +48,7 @@ export function HeroCarousel({
   onBook,
   onSeeAll,
   autoPlay = true,
+  isActive = true,
 }: HeroCarouselProps) {
   const { serverClock } = useServices();
   const reducedMotion = useReducedMotion();
@@ -75,7 +78,7 @@ export function HeroCarousel({
 
   // Ken Burns zoom loop (20s): scale 1 → 1.05 → 1
   useEffect(() => {
-    if (reducedMotion) return;
+    if (reducedMotion || !isActive) return;
     zoom.value = withRepeat(
       withTiming(1, {
         duration: ZOOM_DURATION_MS,
@@ -85,7 +88,7 @@ export function HeroCarousel({
       true,
     );
     return () => cancelAnimation(zoom);
-  }, [reducedMotion, zoom]);
+  }, [isActive, reducedMotion, zoom]);
 
   // Show slide with glitch effect
   const showSlide = (index: number) => {
@@ -102,7 +105,7 @@ export function HeroCarousel({
 
   // Auto-advance slides (6s interval)
   useEffect(() => {
-    if (!autoPlay || top.length <= 1) return;
+    if (!autoPlay || !isActive || top.length <= 1) return;
     intervalRef.current = setInterval(() => {
       setCurrentIndex((prev) => {
         const next = (prev + 1) % top.length;
@@ -121,7 +124,7 @@ export function HeroCarousel({
       clearInterval(intervalRef.current as ReturnType<typeof setInterval>);
       intervalRef.current = null;
     };
-  }, [autoPlay, reducedMotion, top.length]);
+  }, [autoPlay, isActive, reducedMotion, top.length]);
 
   const handleDotPress = (index: number) => {
     showSlide(index);
@@ -226,7 +229,7 @@ export function HeroCarousel({
       )}
 
       {/* Scroll indicator (prototype .scroll-indicator) - bottom left, desktop only */}
-      {!isNarrow && <ScrollIndicator />}
+      {!isNarrow && isActive && <ScrollIndicator />}
     </View>
   );
 }

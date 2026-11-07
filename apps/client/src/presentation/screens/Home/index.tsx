@@ -11,8 +11,8 @@
  * - Header: slides in from top, fixed position
  * - All animations exactly as prototype
  */
-import { useRouter, type Href } from "expo-router";
-import { useRef, useState } from "react";
+import { useFocusEffect, useRouter, type Href } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import { View } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
@@ -76,15 +76,23 @@ export function HomeScreen() {
   // Modals (prototype: CTA → login modal; Filter → filter popup).
   const [loginOpen, setLoginOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [isScreenFocused, setIsScreenFocused] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsScreenFocused(true);
+      return () => setIsScreenFocused(false);
+    }, []),
+  );
 
   const goToEvent = (eventId: string): void =>
     router.push(`/events/${eventId}` as Href);
-  const goBrowse = (): void => router.push("/browse" as Href);
+  const goBrowse = (): void => router.navigate("/browse" as Href);
   const navLinks = createPrimaryNavLinks({
     onHome: () => scrollRef.current?.scrollTo({ y: 0, animated: true }),
     onBrowse: goBrowse,
-    onTickets: () => router.push("/my-tickets" as Href),
-    onProfile: () => router.push("/profile" as Href),
+    onTickets: () => router.navigate("/my-tickets" as Href),
+    onProfile: () => router.navigate("/profile" as Href),
     isLoggedIn: Boolean(profile),
   });
 
@@ -96,7 +104,7 @@ export function HomeScreen() {
       time: f.time,
       sort: f.sort,
     }).toString();
-    router.push(`/browse?${qs}` as Href);
+    router.navigate(`/browse?${qs}` as Href);
   };
 
   // Show loading screen (prototype loader with bouncing letters)
@@ -129,7 +137,8 @@ export function HomeScreen() {
               events={data.upcoming.slice(0, 3)}
               onBook={goToEvent}
               onSeeAll={goBrowse}
-              autoPlay
+              autoPlay={isScreenFocused}
+              isActive={isScreenFocused}
             />
           )}
 
@@ -144,7 +153,7 @@ export function HomeScreen() {
               onSeeAll={goBrowse}
               onFeaturedLayout={() => undefined}
               onHistoryLayout={() => undefined}
-              onNavigate={(href) => router.push(href as Href)}
+              onNavigate={(href) => router.navigate(href as Href)}
             />
           )}
         </Animated.ScrollView>
@@ -176,9 +185,10 @@ export function HomeScreen() {
           activeRoute="home"
           isLoggedIn={Boolean(profile)}
           onNavigate={(route) => {
-            if (route === "browse") router.push("/browse" as Href);
-            else if (route === "tickets") router.push("/my-tickets" as Href);
-            else if (route === "profile") router.push("/profile" as Href);
+            if (route === "browse") router.navigate("/browse" as Href);
+            else if (route === "tickets")
+              router.navigate("/my-tickets" as Href);
+            else if (route === "profile") router.navigate("/profile" as Href);
             // home = current screen, no-op
           }}
         />

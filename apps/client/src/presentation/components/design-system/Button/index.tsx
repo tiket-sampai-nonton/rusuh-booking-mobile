@@ -10,10 +10,10 @@
  * - border: 2px solid the shared ink token
  *
  * GHOST: white surface, ink text
- * GHOST hover: red fill from the bottom
+ * GHOST hover: pink fill from the bottom
  *
- * PRIMARY: red background with light text
- * PRIMARY hover: ember reveal with ink text
+ * PRIMARY: pink background with light text
+ * PRIMARY hover: lighter-pink reveal with ink text
  */
 import { useCallback } from "react";
 import type { ReactNode } from "react";
@@ -51,7 +51,7 @@ export interface ButtonProps {
   readonly label: string;
   /** Press handler */
   readonly onPress?: () => void;
-  /** Visual variant: primary (red bg), ghost (outlined), danger (red bg) */
+  /** Visual variant: primary (pink bg), ghost (outlined), danger (pink bg) */
   readonly variant?: ButtonVariant;
   /** Disabled state */
   readonly disabled?: boolean;
@@ -70,15 +70,15 @@ export interface ButtonProps {
 function getPalette(variant: ButtonVariant) {
   switch (variant) {
     case "ghost":
-      // Ghost: white surface → red fill from bottom
+      // Ghost: white surface → pink fill from bottom
       return {
         bg: designColors.ground,
         fg: designColors.ink,
-        fill: designColors.ember,
+        fill: designColors.pink,
         filledFg: designColors.ink,
       };
     case "danger":
-      // Danger: red bg → ink fill
+      // Danger: pink bg → ink fill
       return {
         bg: designColors.danger,
         fg: designColors.ground,
@@ -87,11 +87,11 @@ function getPalette(variant: ButtonVariant) {
       };
     case "primary":
     default:
-      // Primary: red bg → ember reveal from top
+      // Primary: pink bg → lighter-pink reveal from top
       return {
         bg: designColors.accent,
         fg: designColors.ground,
-        fill: designColors.ember,
+        fill: designColors.pink,
         filledFg: designColors.ink,
       };
   }

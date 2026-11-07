@@ -9,7 +9,12 @@ import { renderWithProviders } from "@shared/test-fixtures/render-with-providers
 // stub both.
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => ({ eventId: "evt-1" }),
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    navigate: jest.fn(),
+  }),
+  useFocusEffect: jest.fn(),
 }));
 
 jest.mock("react-native-reanimated", () => {

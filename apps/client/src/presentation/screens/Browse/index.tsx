@@ -121,12 +121,12 @@ export function BrowseScreen() {
 
   const goToEvent = (eventId: string): void =>
     router.push(`/events/${eventId}` as Href);
-  const goHome = (): void => router.push("/" as Href);
+  const goHome = (): void => router.navigate("/" as Href);
   const navLinks = createPrimaryNavLinks({
     onHome: goHome,
     onBrowse: () => undefined,
-    onTickets: () => router.push("/my-tickets" as Href),
-    onProfile: () => router.push("/profile" as Href),
+    onTickets: () => router.navigate("/my-tickets" as Href),
+    onProfile: () => router.navigate("/profile" as Href),
     isLoggedIn: Boolean(profile),
   });
   const applyFilter = (value: FilterValue): void => {
@@ -137,7 +137,7 @@ export function BrowseScreen() {
       time: value.time,
       sort: value.sort,
     }).toString();
-    router.push(`/browse?${query}` as Href);
+    router.replace(`/browse?${query}` as Href);
   };
 
   const changeSort = (value: string): void => {
@@ -147,7 +147,7 @@ export function BrowseScreen() {
       time,
       sort: value,
     }).toString();
-    router.push(`/browse?${query}` as Href);
+    router.replace(`/browse?${query}` as Href);
   };
 
   if (isLoading) return <BrowseLoading />;
@@ -265,9 +265,10 @@ export function BrowseScreen() {
           activeRoute="browse"
           isLoggedIn={Boolean(profile)}
           onNavigate={(route) => {
-            if (route === "home") router.push("/" as Href);
-            else if (route === "tickets") router.push("/my-tickets" as Href);
-            else if (route === "profile") router.push("/profile" as Href);
+            if (route === "home") router.navigate("/" as Href);
+            else if (route === "tickets")
+              router.navigate("/my-tickets" as Href);
+            else if (route === "profile") router.navigate("/profile" as Href);
           }}
         />
         <FilterModal

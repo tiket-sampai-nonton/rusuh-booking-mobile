@@ -13,7 +13,7 @@ import { ServiceProvider } from "@providers/service-context";
 import { ProfileScreen } from "@presentation/screens/Profile";
 import { useAccountStore } from "@presentation/stores/account-store";
 
-const mockRouter = { push: jest.fn() };
+const mockRouter = { push: jest.fn(), navigate: jest.fn() };
 const mockResponsive = { isWeb: false, isNative: true, width: 393 };
 jest.mock("expo-router", () => ({ useRouter: () => mockRouter }));
 jest.mock("@presentation/hooks/useResponsive", () => ({
@@ -71,6 +71,7 @@ describe("ProfileScreen", () => {
   beforeEach(() => {
     useAccountStore.getState().clearProfile();
     mockRouter.push.mockReset();
+    mockRouter.navigate.mockReset();
     mockResponsive.isWeb = false;
     mockResponsive.isNative = true;
     mockResponsive.width = 393;
@@ -185,10 +186,10 @@ describe("ProfileScreen", () => {
     fireEvent.changeText(getByTestId("profile-nik-input"), "123456");
     fireEvent.press(getByTestId("profile-cancel"));
 
-    expect(mockRouter.push).toHaveBeenNthCalledWith(1, "/");
-    expect(mockRouter.push).toHaveBeenNthCalledWith(2, "/");
-    expect(mockRouter.push).toHaveBeenNthCalledWith(3, "/browse");
-    expect(mockRouter.push).toHaveBeenNthCalledWith(4, "/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(1, "/");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(2, "/");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(3, "/browse");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(4, "/my-tickets");
     expect(queryByTestId("profile-nik-input")).toBeNull();
   });
 
@@ -200,9 +201,9 @@ describe("ProfileScreen", () => {
     fireEvent.press(getByRole("tab", { name: "Jelajah" }));
     fireEvent.press(getByRole("tab", { name: "Ticket" }));
 
-    expect(mockRouter.push).toHaveBeenNthCalledWith(1, "/");
-    expect(mockRouter.push).toHaveBeenNthCalledWith(2, "/browse");
-    expect(mockRouter.push).toHaveBeenNthCalledWith(3, "/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(1, "/");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(2, "/browse");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(3, "/my-tickets");
   });
 
   it("opens sign-in from the guest desktop header action", () => {

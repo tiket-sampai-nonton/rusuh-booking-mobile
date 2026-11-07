@@ -1,0 +1,136 @@
+- generic [ref=e26]:
+  - generic [ref=e28]:
+    - generic [ref=e29]:
+      - generic [ref=e43]:
+        - heading "Rusuh Fest 2026" [level=1] [ref=e45]
+        - generic [ref=e47]:
+          - generic [ref=e48]: Pengalaman konser tak terlupakan.
+          - generic [ref=e49]:
+            - generic [ref=e50]:
+              - generic [ref=e51]: "23"
+              - generic [ref=e52]: Hari
+            - generic [ref=e53]:
+              - generic [ref=e54]: "18"
+              - generic [ref=e55]: Jam
+            - generic [ref=e56]:
+              - generic [ref=e57]: "19"
+              - generic [ref=e58]: Menit
+            - generic [ref=e59]:
+              - generic [ref=e60]: "40"
+              - generic [ref=e61]: Detik
+          - generic [ref=e62]:
+            - generic [ref=e63]: 01 Des 2026
+            - generic [ref=e68]: Gelora Bung Karno, Jakarta
+          - generic [ref=e73]:
+            - text: Mulai
+            - generic [ref=e74]: Rp 450.000
+          - generic [ref=e75]:
+            - button "Beli tiket Rusuh Fest 2026" [ref=e76] [cursor=pointer]:
+              - generic [ref=e77]: Beli Tiket
+            - button "Lihat detail event" [ref=e78] [cursor=pointer]:
+              - generic [ref=e79]: Lihat Detail
+      - tablist [ref=e80]:
+        - tab "Slide 1" [ref=e81] [cursor=pointer]
+        - tab "Slide 2" [ref=e83] [cursor=pointer]
+        - tab "Slide 3" [ref=e85] [cursor=pointer]
+    - generic [ref=e89]:
+      - generic [ref=e90]:
+        - generic [ref=e92]:
+          - heading "Daftar Event" [level=1] [ref=e93]
+          - generic [ref=e94]:
+            - button "Saring Event" [ref=e95] [cursor=pointer]
+            - link "Lihat Semua" [ref=e98] [cursor=pointer]
+        - generic [ref=e102]:
+          - button "Stadium Tour Jakarta, Stadion Utama GBK, 28 Nov 2026" [ref=e107] [cursor=pointer]:
+            - generic [ref=e108]: Habis Terjual
+            - generic [ref=e114]:
+              - generic [ref=e115]:
+                - generic [ref=e116]: 28 Nov 2026
+                - generic [ref=e117]: Stadium Tour Jakarta
+                - generic [ref=e118]: Stadion Utama GBK
+              - generic [ref=e120]:
+                - generic [ref=e121]: Rp 750rb
+                - generic [ref=e123]: Habis
+          - button "Rusuh Fest 2026, Gelora Bung Karno, Jakarta, 01 Des 2026" [ref=e129] [cursor=pointer]:
+            - generic [ref=e130]: Stok Menipis
+            - generic [ref=e136]:
+              - generic [ref=e137]:
+                - generic [ref=e138]: 01 Des 2026
+                - generic [ref=e139]: Rusuh Fest 2026
+                - generic [ref=e140]: Gelora Bung Karno, Jakarta
+              - generic [ref=e142]:
+                - generic [ref=e143]: Rp 450rb
+                - generic [ref=e145]: Beli
+          - button "Nonton Bareng Finale, ICE BSD, Tangerang, 20 Des 2026" [ref=e151] [cursor=pointer]:
+            - generic [ref=e152]: Stok Menipis
+            - generic [ref=e158]:
+              - generic [ref=e159]:
+                - generic [ref=e160]: 20 Des 2026
+                - generic [ref=e161]: Nonton Bareng Finale
+                - generic [ref=e162]: ICE BSD, Tangerang
+              - generic [ref=e164]:
+                - generic [ref=e165]: Rp 300rb
+                - generic [ref=e167]: Beli
+          - button "Indie Night Vol. 9, Senayan Park, Jakarta, 10 Jan 2027" [ref=e173] [cursor=pointer]:
+            - generic [ref=e174]: Segera
+            - generic [ref=e180]:
+              - generic [ref=e181]:
+                - generic [ref=e182]: 10 Jan 2027
+                - generic [ref=e183]: Indie Night Vol. 9
+                - generic [ref=e184]: Senayan Park, Jakarta
+              - generic [ref=e186]:
+                - generic [ref=e187]: Rp 200rb
+                - generic [ref=e189]: Beli
+          - button "Electronic Waves, JIExpo Kemayoran, 14 Feb 2027" [ref=e195] [cursor=pointer]:
+            - generic [ref=e196]: Tersedia
+            - generic [ref=e202]:
+              - generic [ref=e203]:
+                - generic [ref=e204]: 14 Feb 2027
+                - generic [ref=e205]: Electronic Waves
+                - generic [ref=e206]: JIExpo Kemayoran
+              - generic [ref=e208]:
+                - generic [ref=e209]: Rp 350rb
+                - generic [ref=e211]: Beli
+      - generic [ref=e213]:
+        - heading "Event Sebelumnya" [level=1] [ref=e216]
+        - generic [ref=e221]:
+          - button "Jazz in the Park 2025, Taman Mini, Jakarta, 15 Agu 2025" [disabled]:
+            - generic [ref=e222]: Selesai
+            - generic [ref=e228]:
+              - generic [ref=e229]:
+                - generic [ref=e230]: 15 Agu 2025
+                - generic [ref=e231]: Jazz in the Park 2025
+                - generic [ref=e232]: Taman Mini, Jakarta
+              - generic [ref=e234]:
+                - generic [ref=e235]: Rp 250rb
+                - generic [ref=e237]: Habis
+      - generic [ref=e239]:
+        - generic [ref=e240]:
+          - generic [ref=e242]:
+            - generic [ref=e243]: Rusuh Tiket
+            - generic [ref=e250]: Temukan acara favoritmu dan pesan tiket dengan mudah.
+          - generic [ref=e252]:
+            - generic [ref=e253]: Bantuan
+            - link "Pusat Bantuan" [ref=e254] [cursor=pointer]
+        - generic [ref=e257]:
+          - generic [ref=e258]: © 2025 Rusuh Tiket. Hak cipta dilindungi.
+          - generic [ref=e259]:
+            - 'link "Instagram: @rusuhtiket" [ref=e260] [cursor=pointer]':
+              - generic [ref=e261]: IG
+            - 'link "Twitter: @rusuhtiket" [ref=e263] [cursor=pointer]':
+              - generic [ref=e264]: TW
+            - 'link "Facebook: Rusuh Tiket" [ref=e266] [cursor=pointer]':
+              - generic [ref=e267]: FB
+            - 'link "YouTube: Rusuh Tiket Official" [ref=e269] [cursor=pointer]':
+              - generic [ref=e270]: YT
+  - generic [ref=e274]:
+    - button "Beranda Rusuh Tiket" [ref=e275] [cursor=pointer]:
+      - generic [ref=e276]: Rusuh Tiket
+    - generic [ref=e283]:
+      - button "Beranda event" [ref=e284] [cursor=pointer]:
+        - generic [ref=e285]: Beranda
+      - button "Jelajah event" [ref=e286] [cursor=pointer]:
+        - generic [ref=e287]: Jelajah
+      - button "Profil event" [ref=e288] [cursor=pointer]:
+        - generic [ref=e289]: Profil
+    - button "Masuk / Daftar" [ref=e290] [cursor=pointer]

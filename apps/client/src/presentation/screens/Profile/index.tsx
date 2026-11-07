@@ -33,9 +33,9 @@ export function ProfileScreen() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const navLinks = createPrimaryNavLinks({
-    onHome: () => router.push("/" as Href),
-    onBrowse: () => router.push("/browse" as Href),
-    onTickets: () => router.push("/my-tickets" as Href),
+    onHome: () => router.navigate("/" as Href),
+    onBrowse: () => router.navigate("/browse" as Href),
+    onTickets: () => router.navigate("/my-tickets" as Href),
     onProfile: () => undefined,
     isLoggedIn: Boolean(profile),
   });
@@ -82,7 +82,7 @@ export function ProfileScreen() {
           showLinks={isWeb && width > 768}
           links={navLinks}
           mobileMenuLinks={navLinks}
-          onLogoPress={() => router.push("/" as Href)}
+          onLogoPress={() => router.navigate("/" as Href)}
           onCtaPress={() => setLoginOpen(true)}
           isLoggedIn={Boolean(profile)}
         />
@@ -160,9 +160,9 @@ export function ProfileScreen() {
           activeRoute="profile"
           isLoggedIn={Boolean(profile)}
           onNavigate={(route) => {
-            if (route === "home") router.push("/" as Href);
-            if (route === "browse") router.push("/browse" as Href);
-            if (route === "tickets") router.push("/my-tickets" as Href);
+            if (route === "home") router.navigate("/" as Href);
+            if (route === "browse") router.navigate("/browse" as Href);
+            if (route === "tickets") router.navigate("/my-tickets" as Href);
           }}
         />
         <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />

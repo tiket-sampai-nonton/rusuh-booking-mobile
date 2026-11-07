@@ -40,6 +40,7 @@ interface FloatingCTAProps {
   readonly ctaLabel: string;
   readonly onJoin: () => void;
   readonly isMobileWeb?: boolean;
+  readonly isActive?: boolean;
 }
 
 export function FloatingCTA({
@@ -48,6 +49,7 @@ export function FloatingCTA({
   ctaLabel,
   onJoin,
   isMobileWeb = false,
+  isActive = true,
 }: FloatingCTAProps) {
   const isNative = Platform.OS !== "web";
 
@@ -57,32 +59,43 @@ export function FloatingCTA({
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Slide up entrance
-    Animated.timing(slideAnim, {
+    const entrance = Animated.timing(slideAnim, {
       toValue: 0,
       duration: designDuration.slow,
       delay: 800,
       useNativeDriver: nativeDriverSupported(),
-    }).start();
+    });
+    entrance.start();
+    return () => entrance.stop();
+  }, [slideAnim]);
 
-    // Pulse animation loop (only when enabled)
-    if (canJoin) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: isNative, // Native can use scale, web uses shadow
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 0,
-            duration: 1000,
-            useNativeDriver: isNative,
-          }),
-        ]),
-      ).start();
+  useEffect(() => {
+    if (!canJoin || !isActive) {
+      pulseAnim.stopAnimation();
+      pulseAnim.setValue(0);
+      return;
     }
-  }, [slideAnim, pulseAnim, canJoin, isNative]);
+
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: isNative,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: isNative,
+        }),
+      ]),
+    );
+    pulse.start();
+    return () => {
+      pulse.stop();
+      pulseAnim.stopAnimation();
+    };
+  }, [canJoin, isActive, isNative, pulseAnim]);
 
   const priceText =
     typeof event.minPriceMinor === "number"

@@ -61,10 +61,10 @@ export function MyTicketsScreen() {
     useState<MyBookingSummary | null>(null);
   const [downloadError, setDownloadError] = useState("");
   const navLinks = createPrimaryNavLinks({
-    onHome: () => router.push("/" as Href),
-    onBrowse: () => router.push("/browse" as Href),
+    onHome: () => router.navigate("/" as Href),
+    onBrowse: () => router.navigate("/browse" as Href),
     onTickets: () => undefined,
-    onProfile: () => router.push("/profile" as Href),
+    onProfile: () => router.navigate("/profile" as Href),
     isLoggedIn: Boolean(profile),
   });
   const paymentStatus = useQuery({
@@ -237,7 +237,7 @@ export function MyTicketsScreen() {
     ticketListState = (
       <EmptyTicketsState
         activeTab={tab}
-        onBrowse={() => router.push("/browse" as Href)}
+        onBrowse={() => router.navigate("/browse" as Href)}
       />
     );
   } else if (historyLoading && !showTicket) {
@@ -268,7 +268,7 @@ export function MyTicketsScreen() {
           isLoggedIn={Boolean(profile)}
           links={navLinks}
           mobileMenuLinks={navLinks}
-          onLogoPress={() => router.push("/" as Href)}
+          onLogoPress={() => router.navigate("/" as Href)}
           onCtaPress={() => setLoginOpen(true)}
           actions={[]}
         />
@@ -350,9 +350,9 @@ export function MyTicketsScreen() {
           activeRoute="tickets"
           isLoggedIn={Boolean(profile)}
           onNavigate={(route) => {
-            if (route === "home") router.push("/" as Href);
-            if (route === "browse") router.push("/browse" as Href);
-            if (route === "profile") router.push("/profile" as Href);
+            if (route === "home") router.navigate("/" as Href);
+            if (route === "browse") router.navigate("/browse" as Href);
+            if (route === "profile") router.navigate("/profile" as Href);
           }}
         />
       </View>

@@ -17,7 +17,7 @@
  * - Title: 16px, weight 700, NOT uppercase, line-height 1.3
  * - Venue: 12px with icon
  * - Footer: 1px dashed border (not 2px solid), 32x32 icon btn
- * - Badge: 10px, red bg (danger)
+ * - Badge: 10px, pink bg (sold out)
  */
 import { useCallback, useEffect, useState } from "react";
 import { Image, Platform, Pressable, Text, View } from "react-native";

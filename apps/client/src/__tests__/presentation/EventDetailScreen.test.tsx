@@ -7,7 +7,7 @@ import type {
 } from "@domain/repositories/event.repository";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
-const mockRouter = { push: jest.fn() };
+const mockRouter = { push: jest.fn(), navigate: jest.fn() };
 const originalNavigator = globalThis.navigator;
 const originalWindow = globalThis.window;
 const originalPlatform = Platform.OS;
@@ -19,6 +19,7 @@ const completedAnimation = {
 };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
+  useFocusEffect: jest.fn(),
 }));
 
 // eslint-disable-next-line import/first
@@ -63,6 +64,7 @@ function repo(detail: EventDetail): EventRepository {
 describe("EventDetailScreen", () => {
   beforeEach(() => {
     mockRouter.push.mockReset();
+    mockRouter.navigate.mockReset();
     jest
       .spyOn(Animated, "timing")
       .mockReturnValue(
@@ -273,7 +275,7 @@ describe("EventDetailScreen", () => {
     await waitFor(() => screen.getByTestId("join-cta"));
     //  back button uses "Kembali" label instead of "Kembali ke beranda"
     fireEvent.press(screen.getByLabelText("Kembali"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
   });
 
   it("updates the native header on scroll and opens, navigates, and closes the gallery", async () => {

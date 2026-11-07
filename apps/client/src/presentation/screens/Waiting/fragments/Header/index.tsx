@@ -23,7 +23,7 @@ export function Header({ status = "MENUNGGU" }: { readonly status?: string }) {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Beranda Rusuh Tiket"
-        onPress={() => router.push("/" as Href)}
+        onPress={() => router.replace("/" as Href)}
       >
         <BrandMark size={isDesktop ? 32 : 28} />
       </Pressable>

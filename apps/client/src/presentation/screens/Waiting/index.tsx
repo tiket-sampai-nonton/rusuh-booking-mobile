@@ -17,7 +17,7 @@
  * no infrastructure import, no TanStack here (it lives in the hooks). Status is
  * never color-only: every zone/state carries an icon + text label (RBT-080 a11y).
  */
-import { useRouter, type Href } from "expo-router";
+import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
@@ -69,6 +69,14 @@ export function WaitingRoomScreen({
 
   // Modal state
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [isScreenFocused, setIsScreenFocused] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsScreenFocused(true);
+      return () => setIsScreenFocused(false);
+    }, []),
+  );
 
   const {
     entry,
@@ -80,7 +88,7 @@ export function WaitingRoomScreen({
     error,
     leave,
     refetch,
-  } = useQueuePolling(queueId, reducedMotion, eventId);
+  } = useQueuePolling(queueId, reducedMotion, eventId, isScreenFocused);
 
   // Only ADMITTED authorizes the claim (RBT-040). The hook fires it once.
   const admitted = entry !== undefined && isAdmitted(entry.status);

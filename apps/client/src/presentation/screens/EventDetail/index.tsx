@@ -25,7 +25,7 @@
  * Flow: Event Detail → Waiting Room → Ticket Selection → Payment → Success
  */
 import { useCallback, useState } from "react";
-import { useRouter, type Href } from "expo-router";
+import { useFocusEffect, useRouter, type Href } from "expo-router";
 import {
   Platform,
   ScrollView,
@@ -103,10 +103,18 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
 
   // Scroll state for header (native only)
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isScreenFocused, setIsScreenFocused] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsScreenFocused(true);
+      return () => setIsScreenFocused(false);
+    }, []),
+  );
 
   // Navigation handlers
   const goHome = useCallback((): void => {
-    router.push("/" as Href);
+    router.navigate("/" as Href);
   }, [router]);
 
   const handleShare = useCallback(() => {
@@ -242,6 +250,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
             chips={chips}
             subtitle={desc.subtitle}
             isMobileWeb={isMobileWeb}
+            isActive={isScreenFocused}
           />
 
           {isMobileWeb ? (
@@ -352,6 +361,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
           ctaLabel={cta.label}
           onJoin={onJoin}
           isMobileWeb={isMobileWeb}
+          isActive={isScreenFocused}
         />
 
         {/* Lightbox Modal */}

@@ -11,6 +11,7 @@ import { usePlusJakartaSansFonts } from "@presentation/theme/fonts";
 import { brand } from "@presentation/theme";
 import { AppProviders } from "@providers/providers";
 import { NativeLaunchSplash } from "@presentation/components/NativeLaunchSplash";
+import { StartupUpdateBridge } from "@presentation/bridges/StartupUpdateBridge";
 import { rootLayoutStyles } from "@presentation/layout/RootLayout/style";
 
 // RBT-001 shipped the router root; RBT-004 wraps this tree with the
@@ -19,13 +20,27 @@ import { rootLayoutStyles } from "@presentation/layout/RootLayout/style";
 export default function RootLayout() {
   const { fontsLoaded, fontError } = usePlusJakartaSansFonts();
   const [showSplash, setShowSplash] = useState(Platform.OS !== "web");
+  const [startupUpdateComplete, setStartupUpdateComplete] = useState(
+    Platform.OS === "web",
+  );
+  const [startupUpdateStatus, setStartupUpdateStatus] = useState("Memuat");
   const finishSplash = useCallback(() => setShowSplash(false), []);
+  const finishStartupUpdate = useCallback(
+    () => setStartupUpdateComplete(true),
+    [],
+  );
 
   return (
     <View style={rootLayoutStyles.root}>
       {fontsLoaded || fontError ? (
         <AppProviders>
           <Fragment>
+            {Platform.OS !== "web" ? (
+              <StartupUpdateBridge
+                onComplete={finishStartupUpdate}
+                onStatusChange={setStartupUpdateStatus}
+              />
+            ) : null}
             <NotificationBridge />
             <AccountSessionBridge />
             <Stack screenOptions={{ headerShown: false }} />
@@ -38,7 +53,13 @@ export default function RootLayout() {
       )}
       <StatusBar style={showSplash ? "light" : "auto"} />
       {showSplash && Platform.OS !== "web" ? (
-        <NativeLaunchSplash onFinish={finishSplash} />
+        <NativeLaunchSplash
+          onFinish={finishSplash}
+          isReadyToExit={
+            Boolean(fontsLoaded || fontError) && startupUpdateComplete
+          }
+          statusText={startupUpdateStatus}
+        />
       ) : null}
     </View>
   );

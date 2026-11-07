@@ -30,7 +30,7 @@ import type { QueueEntry } from "@domain/repositories/queue.repository";
 // --- Mock the two merged hooks: the screen must CONSUME, not rebuild them. ---
 const mockUseQueuePolling = jest.fn<
   QueuePollingView,
-  [string, boolean?, string?]
+  [string, boolean?, string?, boolean?]
 >();
 const mockUseAutoClaim = jest.fn<UseAutoClaimResult, [unknown]>();
 const mockUseEventDetail = jest.fn();
@@ -57,6 +57,7 @@ jest.mock("react-native-reanimated", () => {
 const mockReplace = jest.fn();
 jest.mock("expo-router", () => ({
   useRouter: () => ({ replace: mockReplace }),
+  useFocusEffect: jest.fn(),
 }));
 
 // eslint-disable-next-line import/first

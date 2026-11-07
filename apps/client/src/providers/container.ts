@@ -22,6 +22,7 @@ import { InMemoryIdempotencyStore } from "@infrastructure/__fixtures__/in-memory
 import { DurableIdempotencyStore } from "@infrastructure/idempotency/durable-idempotency-store";
 import type { ClockPort } from "@domain/services/clock.port";
 import type { FileSharePort } from "@domain/services/file-share.port";
+import type { AppUpdatePort } from "@domain/services/app-update.port";
 import type { NotificationPort } from "@domain/services/notification.port";
 import type { PushSubscriptionPort } from "@domain/services/push-subscription.port";
 import { HttpPushSubscriptionAdapter } from "@infrastructure/notifications/http-push-subscription.adapter";
@@ -53,6 +54,7 @@ import { FetchHttpClient } from "@infrastructure/http/fetch-http-client";
 import { RefreshingHttpClient } from "@infrastructure/http/refreshing-http-client";
 import type { HttpClient } from "@infrastructure/http/http-client";
 import { SystemClock } from "@infrastructure/time/system-clock";
+import { ExpoAppUpdateAdapter } from "@infrastructure/updates/expo-app-update.adapter";
 
 /**
  * The container: every domain port bound to one concrete adapter. Hooks read
@@ -76,6 +78,7 @@ export interface Container {
   readonly notification: NotificationPort;
   readonly pushSubscription: PushSubscriptionPort;
   readonly fileShare: FileSharePort;
+  readonly appUpdate: AppUpdatePort;
   readonly tokenStorage: TokenStorage;
   /**
    * Anonymous waiting-room membership persistence (RBT-041). Like
@@ -222,6 +225,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
       notification: new MockNotificationAdapter(),
       pushSubscription: { register: async () => {}, remove: async () => {} },
       fileShare: fileShareAdapter,
+      appUpdate: new ExpoAppUpdateAdapter(),
     };
   }
 
@@ -298,5 +302,6 @@ export function createContainer(options: ContainerOptions = {}): Container {
     notification: notificationAdapter,
     pushSubscription: new HttpPushSubscriptionAdapter(httpClient),
     fileShare: fileShareAdapter,
+    appUpdate: new ExpoAppUpdateAdapter(),
   };
 }
