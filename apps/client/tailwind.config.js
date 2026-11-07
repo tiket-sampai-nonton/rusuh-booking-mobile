@@ -1,31 +1,30 @@
 const palette = {
-  brandPrimary: "#BE185D",
-  brandDeep: "#831843",
-  brandPink: "#F472B6",
-  brandPinkLight: "#FBCFE8",
-  ground: "#FFF7FA",
-  darkBackground: "#1C0E16",
-  ink: "#2D1B25",
-  inkSoft: "#4D2A3C",
+  brandPrimary: "#EC1C24",
+  brandDeep: "#A8111B",
+  brandEmber: "#FF5A2D",
+  ground: "#FFFFFF",
+  darkBackground: "#0A0A0C",
+  ink: "#000000",
+  inkSoft: "#121217",
   card: "#FFFFFF",
-  darkCard: "#2A1722",
-  darkForeground: "#FCEAF2",
-  muted: "#705A67",
-  mutedDark: "#D6BBC8",
-  gray: "#897481",
-  field: "#FCEAF2",
-  success: "#15803D",
-  successDark: "#86EFAC",
-  warning: "#A16207",
-  warningDark: "#FDE047",
-  error: "#B42318",
-  errorDark: "#FDA29B",
-  zoneOk: "#E9F6EC",
-  zoneOkText: "#14532D",
-  zoneWarn: "#FEF9C3",
-  zoneWarnText: "#713F12",
-  zoneBad: "#FEF2F2",
-  zoneBadText: "#991B1B",
+  darkCard: "#121217",
+  darkForeground: "#FFFFFF",
+  muted: "#666666",
+  mutedDark: "rgba(255,255,255,0.62)",
+  gray: "#888888",
+  field: "#F5F5F5",
+  success: "#00AA00",
+  successDark: "#4ADE80",
+  warning: "#FF6600",
+  warningDark: "#F5B301",
+  error: "#EC1C24",
+  errorDark: "#FF6A4C",
+  zoneOk: "#E8F5E9",
+  zoneOkText: "#1B5E20",
+  zoneWarn: "#FFF3E0",
+  zoneWarnText: "#E65100",
+  zoneBad: "#FFEBEE",
+  zoneBadText: "#B71C1C",
 };
 
 function withAlpha(hex, alpha) {
@@ -40,8 +39,7 @@ const colorTokens = {
   brand: {
     DEFAULT: palette.brandPrimary,
     deep: palette.brandDeep,
-    pink: palette.brandPink,
-    "pink-light": palette.brandPinkLight,
+    ember: palette.brandEmber,
   },
   background: { DEFAULT: palette.ground, dark: palette.darkBackground },
   foreground: { DEFAULT: palette.ink, dark: palette.darkForeground },
@@ -73,8 +71,7 @@ const colorTokens = {
     gray: palette.gray,
     field: palette.field,
     accent: palette.brandPrimary,
-    pink: palette.brandPink,
-    "pink-light": palette.brandPinkLight,
+    ember: palette.brandEmber,
     danger: palette.error,
     success: palette.success,
     warn: palette.warning,
@@ -95,7 +92,7 @@ const colorTokens = {
  * SINGLE design-token source of truth (NativeWind) — RBT-003.
  *
  * Layout and typography follow the prototype V5 design system. The color palette
- * uses pink brand accents over soft blush surfaces, with semantic status colors.
+ * uses black and white surfaces with red brand accents and semantic status colors.
  * `src/presentation/theme/` derives values from this palette for contexts
  * NativeWind cannot style (SVG / Canvas / QR / Reanimated) — it mirrors this
  * file and is never an independent source.

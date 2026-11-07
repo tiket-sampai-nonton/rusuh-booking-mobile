@@ -1,5 +1,5 @@
 /**
- * RBT-091 — Waiting-room styles, using the shared pink and semantic status tokens.
+ * RBT-091 — Waiting-room styles, using shared brand and semantic status tokens.
  *
  * Follows the waiting-room layout from prototype `06-waiting.html`:
  * - Plus Jakarta Sans throughout
