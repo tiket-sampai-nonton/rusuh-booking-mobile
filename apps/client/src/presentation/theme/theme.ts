@@ -32,7 +32,7 @@ export interface ThemeColors {
   error: string;
 }
 
-/** Light scheme — soft green surfaces with green and yellow brand accents. */
+/** Light scheme — blush surfaces with berry-pink brand accents. */
 export const lightColors: ThemeColors = {
   background: neutral.paper,
   foreground: neutral.ink,
@@ -47,7 +47,7 @@ export const lightColors: ThemeColors = {
 };
 
 /**
- * Dark scheme — deep-green surfaces with high-contrast green and yellow accents.
+ * Dark scheme — deep plum surfaces with high-contrast pink accents.
  */
 export const darkColors: ThemeColors = {
   background: neutral.darkBackground,

@@ -7,13 +7,13 @@
  * - fontWeight: 700
  * - textTransform: uppercase
  * - letterSpacing: 0.04em
- * - border: 2px solid the shared deep-green ink token
+ * - border: 2px solid the shared ink token
  *
- * GHOST: pale-green surface, deep-green text
- * GHOST hover: yellow fill from the bottom
+ * GHOST: blush surface, ink text
+ * GHOST hover: pink fill from the bottom
  *
- * PRIMARY: green background with light text
- * PRIMARY hover: yellow reveal with deep-green text
+ * PRIMARY: berry-pink background with light text
+ * PRIMARY hover: pink reveal with ink text
  */
 import { useCallback } from "react";
 import type { ReactNode } from "react";
@@ -51,7 +51,7 @@ export interface ButtonProps {
   readonly label: string;
   /** Press handler */
   readonly onPress?: () => void;
-  /** Visual variant: primary (green bg), ghost (outlined), danger (red bg) */
+  /** Visual variant: primary (pink bg), ghost (outlined), danger (red bg) */
   readonly variant?: ButtonVariant;
   /** Disabled state */
   readonly disabled?: boolean;
@@ -70,11 +70,11 @@ export interface ButtonProps {
 function getPalette(variant: ButtonVariant) {
   switch (variant) {
     case "ghost":
-      // Ghost: pale-green surface → yellow fill from bottom
+      // Ghost: blush surface → pink fill from bottom
       return {
         bg: designColors.ground,
         fg: designColors.ink,
-        fill: designColors.yellow,
+        fill: designColors.pink,
         filledFg: designColors.ink,
       };
     case "danger":
@@ -87,11 +87,11 @@ function getPalette(variant: ButtonVariant) {
       };
     case "primary":
     default:
-      // Primary: green bg → yellow reveal from top
+      // Primary: berry bg → pink reveal from top
       return {
         bg: designColors.accent,
         fg: designColors.ground,
-        fill: designColors.yellow,
+        fill: designColors.pink,
         filledFg: designColors.ink,
       };
   }

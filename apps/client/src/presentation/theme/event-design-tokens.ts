@@ -28,8 +28,8 @@ export const designColors = {
   red: status.error,
   green: status.ok,
   accent: brand.primary,
-  yellow: brand.yellow,
-  yellowDeep: brand.yellowDeep,
+  pink: brand.pink,
+  pinkLight: brand.pinkLight,
 
   // Additional aliases for backwards compatibility
   muted: neutral.muted,

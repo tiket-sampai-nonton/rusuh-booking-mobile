@@ -1,14 +1,107 @@
+const palette = {
+  brandPrimary: "#BE185D",
+  brandDeep: "#831843",
+  brandPink: "#F472B6",
+  brandPinkLight: "#FBCFE8",
+  ground: "#FFF7FA",
+  darkBackground: "#1C0E16",
+  ink: "#2D1B25",
+  inkSoft: "#4D2A3C",
+  card: "#FFFFFF",
+  darkCard: "#2A1722",
+  darkForeground: "#FCEAF2",
+  muted: "#705A67",
+  mutedDark: "#D6BBC8",
+  gray: "#897481",
+  field: "#FCEAF2",
+  success: "#15803D",
+  successDark: "#86EFAC",
+  warning: "#A16207",
+  warningDark: "#FDE047",
+  error: "#B42318",
+  errorDark: "#FDA29B",
+  zoneOk: "#E9F6EC",
+  zoneOkText: "#14532D",
+  zoneWarn: "#FEF9C3",
+  zoneWarnText: "#713F12",
+  zoneBad: "#FEF2F2",
+  zoneBadText: "#991B1B",
+};
+
+function withAlpha(hex, alpha) {
+  const value = hex.replace("#", "");
+  const red = Number.parseInt(value.slice(0, 2), 16);
+  const green = Number.parseInt(value.slice(2, 4), 16);
+  const blue = Number.parseInt(value.slice(4, 6), 16);
+  return `rgba(${red},${green},${blue},${alpha})`;
+}
+
+const colorTokens = {
+  brand: {
+    DEFAULT: palette.brandPrimary,
+    deep: palette.brandDeep,
+    pink: palette.brandPink,
+    "pink-light": palette.brandPinkLight,
+  },
+  background: { DEFAULT: palette.ground, dark: palette.darkBackground },
+  foreground: { DEFAULT: palette.ink, dark: palette.darkForeground },
+  card: {
+    DEFAULT: palette.card,
+    foreground: palette.ink,
+    dark: palette.darkCard,
+    "dark-foreground": palette.darkForeground,
+  },
+  muted: {
+    DEFAULT: palette.muted,
+    foreground: palette.muted,
+    dark: palette.mutedDark,
+  },
+  line: {
+    DEFAULT: withAlpha(palette.ink, 0.14),
+    dark: withAlpha(palette.darkForeground, 0.18),
+  },
+  ink: { DEFAULT: palette.ink, 2: palette.inkSoft },
+  paper: palette.ground,
+  ok: { DEFAULT: palette.success, dark: palette.successDark },
+  warn: { DEFAULT: palette.warning, dark: palette.warningDark },
+  error: { DEFAULT: palette.error, dark: palette.errorDark },
+  v2: {
+    ink: palette.ink,
+    ground: palette.ground,
+    overlay: palette.darkBackground,
+    muted: palette.muted,
+    gray: palette.gray,
+    field: palette.field,
+    accent: palette.brandPrimary,
+    pink: palette.brandPink,
+    "pink-light": palette.brandPinkLight,
+    danger: palette.error,
+    success: palette.success,
+    warn: palette.warning,
+    info: palette.brandDeep,
+    "zone-ok": palette.zoneOk,
+    "zone-ok-border": palette.success,
+    "zone-ok-text": palette.zoneOkText,
+    "zone-warn": palette.zoneWarn,
+    "zone-warn-border": palette.warning,
+    "zone-warn-text": palette.zoneWarnText,
+    "zone-bad": palette.zoneBad,
+    "zone-bad-border": palette.error,
+    "zone-bad-text": palette.zoneBadText,
+  },
+};
+
 /**
  * SINGLE design-token source of truth (NativeWind) — RBT-003.
  *
  * Layout and typography follow the prototype V5 design system. The color palette
- * is temporarily set to green and yellow for the EAS OTA test.
- * `src/presentation/theme/` re-exports the SAME raw values for contexts
+ * uses pink brand accents over soft blush surfaces, with semantic status colors.
+ * `src/presentation/theme/` derives values from this palette for contexts
  * NativeWind cannot style (SVG / Canvas / QR / Reanimated) — it mirrors this
  * file and is never an independent source.
  *
- * The raw color values are mirrored in `src/presentation/theme/` for drawing
- * surfaces that NativeWind cannot style; token tests verify that mirror.
+ * The `palette` object below is the only place raw color values are declared.
+ * Runtime tokens and Tailwind aliases derive from it; token tests verify parity.
  *
  * @type {import('tailwindcss').Config}
  */
@@ -20,89 +113,7 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
-      colors: {
-        // ---- Green + yellow OTA test palette ----
-        brand: {
-          DEFAULT: "#15803D", // accessible leaf green for primary actions
-          deep: "#166534", //    forest green
-          yellow: "#FACC15", //  bright yellow accent
-          "yellow-deep": "#A16207", // readable amber for labels and borders
-          "yellow-light": "#FEF08A", // pale yellow highlight
-        },
-
-        // ---- Semantic surface PAIRS (AC2: bg+text always paired) ----
-        // Light surfaces use a soft green tint; dark surfaces use deep green.
-        background: {
-          DEFAULT: "#F6F9F4",
-          dark: "#0B1710",
-        },
-        foreground: {
-          DEFAULT: "#142519",
-          dark: "#F1F8F1",
-        },
-        card: {
-          DEFAULT: "#FFFFFF",
-          foreground: "#142519",
-          dark: "#13251A",
-          "dark-foreground": "#F1F8F1",
-        },
-        muted: {
-          DEFAULT: "#58665A",
-          foreground: "#58665A",
-          dark: "#B7C8BA",
-        },
-        line: {
-          DEFAULT: "rgba(20,37,25,0.14)",
-          dark: "rgba(213,237,219,0.18)",
-        },
-        ink: {
-          DEFAULT: "#142519",
-          2: "#24452E",
-        },
-        paper: "#F6F9F4",
-
-        // ---- Status (prototype --ok / --warn, + dark-context hues) ----
-        ok: {
-          DEFAULT: "#15803D",
-          dark: "#86EFAC",
-        },
-        warn: {
-          DEFAULT: "#A16207",
-          dark: "#FDE047",
-        },
-        error: {
-          DEFAULT: "#B42318",
-          dark: "#FDA29B",
-        },
-
-        // ============================================================
-        // Raw drawing surfaces and aliases mirrored by runtime color tokens.
-        // ============================================================
-        v2: {
-          ink: "#142519",
-          ground: "#F6F9F4",
-          overlay: "#0B1710",
-          muted: "#58665A",
-          gray: "#687A6B",
-          field: "#EAF2E7",
-          accent: "#15803D",
-          yellow: "#FACC15",
-          "yellow-deep": "#A16207",
-          danger: "#B42318",
-          success: "#15803D",
-          warn: "#A16207",
-          info: "#2F7A49",
-          "zone-ok": "#E9F6EC",
-          "zone-ok-border": "#15803D",
-          "zone-ok-text": "#14532D",
-          "zone-warn": "#FEF9C3",
-          "zone-warn-border": "#A16207",
-          "zone-warn-text": "#713F12",
-          "zone-bad": "#FEF2F2",
-          "zone-bad-border": "#B42318",
-          "zone-bad-text": "#991B1B",
-        },
-      },
+      colors: colorTokens,
 
       // ---- Typography (prototype font-size scale, px → rem @16) ----
       fontFamily: {
@@ -200,10 +211,10 @@ module.exports = {
 
       // ---- Shadows (prototype box-shadows on cards/buttons) ----
       boxShadow: {
-        brand: "0 4px 16px -2px rgba(21,128,61,0.28)",
-        button: "0 14px 40px -12px rgba(20,37,25,0.42)",
-        filter: "0 12px 30px -24px rgba(36,69,46,0.5)",
-        ok: "0 16px 40px -14px rgba(21,128,61,0.36)",
+        brand: `0 4px 16px -2px ${withAlpha(palette.brandPrimary, 0.28)}`,
+        button: `0 14px 40px -12px ${withAlpha(palette.ink, 0.42)}`,
+        filter: `0 12px 30px -24px ${withAlpha(palette.inkSoft, 0.5)}`,
+        ok: `0 16px 40px -14px ${withAlpha(palette.success, 0.36)}`,
       },
     },
   },
