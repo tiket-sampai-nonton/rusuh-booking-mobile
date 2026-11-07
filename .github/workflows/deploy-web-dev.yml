@@ -253,7 +253,7 @@ jobs:
             exit 1
           }
           RESULTS=$(printf '%s' "$JOB_RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"')
-          FAILED_JOBS=$(printf '%s' "$JOB_RESULTS" | jq -r '[to_entries[] | select(.value.result == "failure" || .value.result == "cancelled") | .key] | join(", ")')
+          FAILED_JOBS=$(printf '%s' "$JOB_RESULTS" | jq -r '[to_entries[] | select(.value.result == "failure" or .value.result == "cancelled") | .key] | join(", ")')
           if [ -n "$FAILED_JOBS" ]; then
             STATUS="FAILED — $FAILED_JOBS"
           elif [ "$GITHUB_EVENT_NAME" = 'push' ] && \
