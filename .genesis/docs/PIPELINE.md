@@ -109,10 +109,10 @@ flowchart LR
 
 ### Meaning of `native-affecting change?`
 
-This is a release-routing decision, not a separate test. The pipeline checks whether the commit changes anything that is compiled into, configured for, or required by the Android/iOS binary:
+This is a release-routing decision, not a separate test. The pipeline checks whether the commit changes anything that is compiled into, configured for, or required by the Android/iOS binary. A change that only corrects the Expo project `slug` to match the already-linked EAS project is treated as OTA-compatible metadata; it does not change the update URL, runtime version, or native binary configuration.
 
 - native Android/iOS code or a new/changed native dependency;
-- Expo config, config plugins, app identity, URL schemes, entitlements, permissions, icons, or splash assets;
+- Expo config (other than the slug-only EAS project-link correction described above), config plugins, app identity, URL schemes, entitlements, permissions, icons, or splash assets;
 - push-notification, payment, camera, biometric, file-system, WebView, or other native capability configuration;
 - Expo SDK or React Native version changes.
 
