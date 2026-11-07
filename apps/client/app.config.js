@@ -16,6 +16,12 @@ const config = {
   version: "0.1.0",
   orientation: "portrait",
   userInterfaceStyle: "automatic",
+  icon: "./assets/app-icon.png",
+  splash: {
+    image: "./assets/brand-mark.png",
+    resizeMode: "contain",
+    backgroundColor: "#000000",
+  },
   newArchEnabled: true,
   // SDK 53 uses Hermes; validated with an iOS simulator smoke run after fixing
   // the required QueryClient provider wiring.
@@ -27,10 +33,14 @@ const config = {
   android: {
     package: "com.tiketsampainonton.rusuhbooking",
     versionCode: androidVersionCode,
+    adaptiveIcon: {
+      foregroundImage: "./assets/brand-mark.png",
+      backgroundColor: "#ff5a2d",
+    },
   },
   web: {
     bundler: "metro",
-    favicon: "./assets/favicon.png",
+    favicon: "./assets/app-icon.png",
     // RBT-033: static rendering so public routes (/, /browse, /events/[id],
     // /history) emit indexable HTML per route (D6.2 — never ship a public
     // route as "single"). Transactional routes are marked noindex via Head.

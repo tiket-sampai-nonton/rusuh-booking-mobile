@@ -1,6 +1,6 @@
 import { useRouter, type Href } from "expo-router";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Image, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CompleteRegistration } from "@application/auth/complete-registration.use-case";
@@ -129,12 +129,37 @@ export function ProfileScreen() {
             isMobileWeb,
           )}
         >
-          <Text
-            accessibilityRole="header"
-            style={[styles.heading, isMobileWeb && styles.mobileWebHeading]}
-          >
-            Profil
-          </Text>
+          <View style={[styles.hero, isMobileWeb && styles.mobileWebHero]}>
+            <Image
+              source={require("../../../../assets/brand-mark.png")}
+              resizeMode="contain"
+              style={styles.heroWatermark}
+              accessible={false}
+            />
+            <View style={styles.heroContent}>
+              <Text style={styles.heroEyebrow}>RUSUH BOOKING</Text>
+              <Text
+                accessibilityRole="header"
+                style={[
+                  styles.heroHeading,
+                  isMobileWeb && styles.mobileWebHeading,
+                ]}
+              >
+                Profil
+              </Text>
+              <Text style={styles.heroDescription}>
+                {profile
+                  ? "Kelola informasi akun dan akses tiketmu di sini."
+                  : "Masuk untuk mengelola profil dan melihat tiket di berbagai perangkat."}
+              </Text>
+              <View style={styles.heroStatus}>
+                <View style={styles.heroStatusDot} />
+                <Text style={styles.heroStatusText}>
+                  {profile ? "Akun aktif" : "Akun tamu"}
+                </Text>
+              </View>
+            </View>
+          </View>
           {profile ? (
             <SignedInProfile
               profile={profile}

@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
-import { Animated, Platform } from "react-native";
+import { Animated, Platform, Share } from "react-native";
 
 import type {
   EventDetail,
@@ -348,15 +348,9 @@ describe("EventDetailScreen", () => {
 
   it("uses a safe label for unknown status, supports native sharing, and handles scrolling", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "ios" });
-    const share = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(globalThis, "navigator", {
-      configurable: true,
-      value: { share },
-    });
-    Object.defineProperty(globalThis, "window", {
-      configurable: true,
-      value: { location: { href: "https://example.test/events/evt-1" } },
-    });
+    const share = jest
+      .spyOn(Share, "share")
+      .mockResolvedValue({ action: Share.sharedAction });
     const unknown = {
       ...available,
       status: "MYSTERY" as unknown as EventDetail["status"],
@@ -370,7 +364,8 @@ describe("EventDetailScreen", () => {
     fireEvent.press(screen.getByRole("button", { name: "Bagikan" }));
     expect(share).toHaveBeenCalledWith({
       title: "Rusuh Fest 2026",
-      url: "https://example.test/events/evt-1",
+      message:
+        "Rusuh Fest 2026\nhttps://rusuh-booking.pages.dev/events/evt-1",
     });
     const scrollHandler = screen.getByTestId("detail-scroll").props.onScroll as
       | ((event: { nativeEvent: { contentOffset: { y: number } } }) => void)
@@ -380,15 +375,23 @@ describe("EventDetailScreen", () => {
 
   it("keeps the web header static on scroll and safely skips an unavailable share API", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    const writeText = jest.fn().mockResolvedValue(undefined);
     Object.defineProperty(globalThis, "navigator", {
       configurable: true,
-      value: {},
+      value: { clipboard: { writeText } },
+    });
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { location: { href: "https://example.test/events/evt-1" } },
     });
     renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
       container: { eventRepository: repo(available) },
     });
     await waitFor(() => expect(screen.getByTestId("join-cta")).toBeTruthy());
     fireEvent.press(screen.getByRole("button", { name: "Bagikan" }));
+    expect(writeText).toHaveBeenCalledWith(
+      "https://example.test/events/evt-1",
+    );
     const scrollHandler = screen.getByTestId("detail-scroll").props.onScroll as
       | ((event: { nativeEvent: { contentOffset: { y: number } } }) => void)
       | undefined;

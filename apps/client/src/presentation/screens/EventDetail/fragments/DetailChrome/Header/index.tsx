@@ -1,5 +1,5 @@
 import { Animated, Platform, Pressable, Text, View } from "react-native";
-import Svg, { Line, Path, Polyline } from "react-native-svg";
+import Svg, { Circle, Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArrowIcon } from "@presentation/components/ArrowIcon";
@@ -76,6 +76,7 @@ export function Header({
                 accessibilityRole="button"
                 accessibilityLabel="Bagikan"
                 onPress={onShare}
+                testID="event-detail-share"
                 style={({ pressed }) => [
                   styles.iconBtn,
                   detailHeaderStyles.iconButton,
@@ -83,18 +84,7 @@ export function Header({
                 ]}
               >
                 {({ pressed }) => (
-                  <Svg
-                    width={20}
-                    height={20}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={detailHeaderIconColor(pressed)}
-                    strokeWidth={2}
-                  >
-                    <Path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                    <Polyline points="16,6 12,2 8,6" />
-                    <Line x1="12" y1="2" x2="12" y2="15" />
-                  </Svg>
+                  <ShareIcon color={detailHeaderIconColor(pressed)} />
                 )}
               </Pressable>
             )}
@@ -124,22 +114,34 @@ export function Header({
                 accessibilityLabel="Bagikan"
                 onPress={onShare}
                 style={styles.iconBtn}
+                testID="event-detail-share"
               >
-                <Svg
-                  width={20}
-                  height={20}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={designColors.ink}
-                  strokeWidth={2}
-                >
-                  <Path d="M12 16V3m0 0L7 8m5-5 5 5M5 13v7h14v-7" />
-                </Svg>
+                <ShareIcon color={designColors.ink} />
               </Pressable>
             )}
           </View>
         </>
       )}
     </Animated.View>
+  );
+}
+
+function ShareIcon({ color }: { readonly color: string }) {
+  return (
+    <Svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="m8.7 10.7 6.6-3.4M8.7 13.3l6.6 3.4" />
+      <Circle cx={6} cy={12} r={3} />
+      <Circle cx={18} cy={5} r={3} />
+      <Circle cx={18} cy={19} r={3} />
+    </Svg>
   );
 }

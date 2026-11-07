@@ -1,7 +1,7 @@
 /**
  * Date formatting — pure domain service (framework-free).
  *
- * Indonesian short-date `DD-MMM-YYYY` (e.g. `01-Des-2026`), mirroring the
+ * Indonesian short-date `DD MMM YYYY` (e.g. `01 Des 2026`), mirroring the
  * prototype's `fmtDateID`. No `Intl`/locale dependency so the output is
  * deterministic across web + native and in tests.
  */
@@ -23,7 +23,7 @@ export const ID_MONTHS = [
 ] as const;
 
 /**
- * Format an ISO-8601 timestamp as `DD-MMM-YYYY` in Indonesian month names.
+ * Format an ISO-8601 timestamp as `DD MMM YYYY` in Indonesian month names.
  * Returns `""` for a missing/invalid date so a caller can render a dash.
  */
 export function formatDateID(iso: string | null | undefined): string {
@@ -34,7 +34,7 @@ export function formatDateID(iso: string | null | undefined): string {
   const dd = d.getUTCDate().toString().padStart(2, "0");
   const mmm = ID_MONTHS[d.getUTCMonth()];
   const yyyy = d.getUTCFullYear();
-  return `${dd}-${mmm}-${yyyy}`;
+  return `${dd} ${mmm} ${yyyy}`;
 }
 
 /** Format the clock part as `HH:MM WIB` (UTC-based, deterministic). "" if invalid. */

@@ -31,7 +31,7 @@ import {
   designColors,
   designZoneBanners,
 } from "@presentation/theme/event-design-tokens";
-import { plusJakartaSansFonts } from "@presentation/theme/fonts";
+import { plusJakartaSansFontForWeight } from "@presentation/theme/fonts";
 
 import type { ZoneTone } from "./display";
 
@@ -110,7 +110,6 @@ export const RING_STROKE = 6;
 export const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ~628
 
 const B = designBorders.thick; // 3px for waiting room
-const APP_FONT = plusJakartaSansFonts.regular;
 
 export const styles = StyleSheet.create({
   // ═══════════════════════════════════════════════════════════════════════════
@@ -157,7 +156,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: -1,
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   logoAccent: {
     color: palette.red,
@@ -180,7 +179,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 2,
     color: palette.ground,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
   statusBadgeYourTurn: {
     backgroundColor: palette.red,
@@ -219,12 +218,12 @@ export const styles = StyleSheet.create({
     color: palette.ink,
     textAlign: "center",
     marginBottom: 8,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   eventDate: {
     fontSize: 14,
     color: palette.gray,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -250,7 +249,7 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     lineHeight: 56,
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
     fontVariant: ["tabular-nums"],
   },
   positionLabel: {
@@ -260,7 +259,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 2,
     color: palette.gray,
     marginTop: 8,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -289,13 +288,13 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: 4,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   zoneBody: {
     fontSize: 12,
     fontWeight: "600",
     lineHeight: 18,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("600"),
   },
   // Legacy zone text (single line)
   zoneText: {
@@ -303,7 +302,7 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     lineHeight: 18,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("600"),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -328,7 +327,7 @@ export const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "800",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
     fontVariant: ["tabular-nums"],
   },
   timeLabel: {
@@ -338,7 +337,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1,
     color: palette.gray,
     marginTop: 4,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
   etaUnavailable: {
     color: palette.gray,
@@ -366,13 +365,13 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: palette.ground,
     marginBottom: 8,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   redirectNumber: {
     fontSize: 48,
     fontWeight: "800",
     color: palette.ground,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
     fontVariant: ["tabular-nums"],
   },
   redirectText: {
@@ -380,7 +379,7 @@ export const styles = StyleSheet.create({
     color: palette.ground,
     opacity: 0.9,
     marginTop: 8,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -401,13 +400,13 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: palette.orange,
     marginBottom: 8,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
   warningText: {
     fontSize: 12,
     color: palette.ink,
     lineHeight: 18,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
 
   // Turn expiry warning (red variant)
@@ -427,13 +426,13 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: palette.red,
     marginBottom: 8,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
   turnExpiryTime: {
     fontSize: 24,
     fontWeight: "800",
     color: palette.red,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
     fontVariant: ["tabular-nums"],
   },
 
@@ -447,7 +446,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 19,
     marginBottom: 32,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -469,7 +468,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.4,
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -489,7 +488,7 @@ export const styles = StyleSheet.create({
     color: palette.ink,
     marginBottom: 16,
     textAlign: "center",
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   errorText: {
     fontSize: 14,
@@ -497,7 +496,7 @@ export const styles = StyleSheet.create({
     marginBottom: 32,
     textAlign: "center",
     maxWidth: 400,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
   errorBtn: {
     paddingVertical: 16,
@@ -512,7 +511,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
     color: palette.ground,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -555,7 +554,7 @@ export const styles = StyleSheet.create({
     color: palette.ink,
     marginBottom: 16,
     textAlign: "center",
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   modalText: {
     fontSize: 14,
@@ -563,7 +562,7 @@ export const styles = StyleSheet.create({
     marginBottom: 32,
     textAlign: "center",
     lineHeight: 22,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
   modalActions: {
     flexDirection: "row",
@@ -584,7 +583,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
     color: palette.ground,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
   modalBtnLeave: {
     flex: 1,
@@ -600,7 +599,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
     color: palette.ground,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -625,7 +624,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
     color: palette.ground,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -667,7 +666,7 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     color: palette.ground,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
     letterSpacing: 2,
     textTransform: "uppercase",
   },
@@ -713,7 +712,7 @@ export const styles = StyleSheet.create({
     color: palette.ink,
     textAlign: "center",
     marginBottom: 16,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   sub: {
     fontSize: 14,
@@ -721,7 +720,7 @@ export const styles = StyleSheet.create({
     color: palette.gray,
     maxWidth: 400,
     textAlign: "center",
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
 
   // Legacy stats (now using estimatedTime blocks)
@@ -744,7 +743,7 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "800",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
     fontVariant: ["tabular-nums"],
   },
   statLabel: {
@@ -753,7 +752,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: palette.gray,
     marginTop: 4,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
 
   // Legacy admit styles
@@ -778,7 +777,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: designZoneBanners.guaranteed.text,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
   admitTitle: {
     fontSize: 24,
@@ -786,7 +785,7 @@ export const styles = StyleSheet.create({
     color: palette.ink,
     marginBottom: 16,
     textAlign: "center",
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
 
   // Legacy error box
@@ -805,14 +804,14 @@ export const styles = StyleSheet.create({
     color: palette.red,
     textAlign: "center",
     marginBottom: 8,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   errBody: {
     fontSize: 13,
     lineHeight: 20,
     color: palette.red,
     textAlign: "center",
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
 
   // Legacy leave link
@@ -830,7 +829,7 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 2,
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
   footnote: {
     fontSize: 11,
@@ -838,7 +837,7 @@ export const styles = StyleSheet.create({
     marginTop: 24,
     textAlign: "center",
     maxWidth: 440,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -866,7 +865,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.1,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
   headerMetaDesktop: {
     fontSize: 11,
@@ -927,7 +926,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.2,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
   eventTitle: {
     marginTop: 5,
@@ -937,7 +936,7 @@ export const styles = StyleSheet.create({
     letterSpacing: -1.4,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   eventTitleDesktop: {
     marginTop: 13,
@@ -949,7 +948,7 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 16,
     color: palette.gray,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
   eventDetailsDesktop: {
     maxWidth: 280,
@@ -1020,7 +1019,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.1,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   positionHeadLabelDesktop: {
     fontSize: 11,
@@ -1032,7 +1031,7 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: -8,
     color: palette.red,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
     fontVariant: ["tabular-nums"],
   },
   positionNumberMobileLong: {
@@ -1049,7 +1048,7 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: -24,
     color: palette.red,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
     fontVariant: ["tabular-nums"],
   },
   positionNumberDesktopLong: {
@@ -1075,7 +1074,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.1,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   positionFootTextDesktop: {
     fontSize: 11,
@@ -1098,7 +1097,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.2,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   summaryHeadingDesktop: {
     fontSize: 11,
@@ -1143,7 +1142,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.9,
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("700"),
   },
   ledgerStatLabelDesktop: {
     fontSize: 11,
@@ -1153,7 +1152,7 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
     fontWeight: "800",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
     fontVariant: ["tabular-nums"],
   },
   ledgerStatValueDesktop: {
@@ -1198,7 +1197,7 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   zoneTitleLedgerDesktop: {
     fontSize: 14,
@@ -1209,7 +1208,7 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 14,
     color: palette.gray,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
   zoneBodyLedgerDesktop: {
     fontSize: 12,
@@ -1239,7 +1238,7 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
     color: palette.gray,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
   waitingFootnoteDesktop: {
     maxWidth: 420,
@@ -1273,12 +1272,12 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     textTransform: "uppercase",
     color: palette.ink,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("800"),
   },
   yourTurnText: {
     fontSize: 11,
     lineHeight: 16,
     color: palette.gray,
-    fontFamily: APP_FONT,
+    fontFamily: plusJakartaSansFontForWeight("400"),
   },
 });

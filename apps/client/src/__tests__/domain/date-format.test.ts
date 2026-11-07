@@ -5,10 +5,10 @@ import {
 } from "@domain/services/date-format";
 
 describe("formatDateID", () => {
-  it("formats an ISO timestamp as DD-MMM-YYYY with Indonesian months", () => {
-    expect(formatDateID("2026-12-01T12:00:00.000Z")).toBe("01-Des-2026");
-    expect(formatDateID("2025-08-15T16:00:00.000Z")).toBe("15-Agu-2025");
-    expect(formatDateID("2027-01-10T13:00:00.000Z")).toBe("10-Jan-2027");
+  it("formats an ISO timestamp as DD MMM YYYY with Indonesian months", () => {
+    expect(formatDateID("2026-12-01T12:00:00.000Z")).toBe("01 Des 2026");
+    expect(formatDateID("2025-08-15T16:00:00.000Z")).toBe("15 Agu 2025");
+    expect(formatDateID("2027-01-10T13:00:00.000Z")).toBe("10 Jan 2027");
   });
 
   it("returns an empty string for missing or invalid input", () => {

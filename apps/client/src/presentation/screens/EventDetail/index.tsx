@@ -29,6 +29,7 @@ import { useRouter, type Href } from "expo-router";
 import {
   Platform,
   ScrollView,
+  Share,
   Text,
   View,
   type NativeSyntheticEvent,
@@ -109,14 +110,31 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   }, [router]);
 
   const handleShare = useCallback(() => {
-    // TODO: Implement native share sheet
-    if (typeof navigator !== "undefined" && navigator.share) {
-      navigator.share({
-        title: event?.name ?? "Event",
-        url: window.location.href,
-      });
+    const title = event?.name ?? "Rusuh Booking";
+    const siteUrl = (
+      process.env.EXPO_PUBLIC_SITE_URL ?? "https://rusuh-booking.pages.dev"
+    ).replace(/\/+$/, "");
+    const url =
+      Platform.OS === "web" && typeof window !== "undefined"
+        ? window.location.href
+        : `${siteUrl}/events/${encodeURIComponent(eventId)}`;
+
+    if (Platform.OS === "web") {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        void navigator.share({ title, text: title, url }).catch(() => {
+          void navigator.clipboard?.writeText(url);
+        });
+      } else if (typeof navigator !== "undefined") {
+        void navigator.clipboard?.writeText(url);
+      }
+      return;
     }
-  }, [event?.name]);
+
+    void Share.share({
+      title,
+      message: `${title}\n${url}`,
+    }).catch(() => undefined);
+  }, [event?.name, eventId]);
 
   // Scroll handler for header visibility (native only)
   const handleScroll = useCallback(
