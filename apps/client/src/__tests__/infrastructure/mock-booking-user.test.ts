@@ -1,12 +1,19 @@
 import { MockBookingRepository } from "@infrastructure/__fixtures__/mock-booking.repository";
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
 
+const BUYER = {
+  nik: "3171999999999999",
+  email: "buyer@mail.com",
+  emailConfirmation: "buyer@mail.com",
+  consent: true,
+};
+
 describe("MockBookingRepository", () => {
   it("creates + restores a session and holds idempotently", async () => {
     const repo = new MockBookingRepository();
     expect(await repo.getCurrentSession()).toBeNull();
 
-    const session = await repo.createSession("evt-1");
+    const session = await repo.createSession("mock-admission:evt-1");
     expect(session.eventId).toBe("evt-1");
     expect(await repo.getCurrentSession()).toEqual(session);
 
@@ -30,35 +37,23 @@ describe("MockBookingRepository", () => {
     expect(limited.result).toBe("CHECK_LIMIT_REACHED");
     expect(limited.checksRemaining).toBe(0);
 
-    // setBuyer records the MASKED NIK only (SECURITY — never the raw NIK).
-    expect(repo.getBuyerSet()).toBeNull();
-    await repo.setBuyer(
-      session.sessionId,
-      "3171999999999999",
-      "buyer@mail.com",
-    );
-    const set = repo.getBuyerSet();
-    expect(set?.email).toBe("buyer@mail.com");
-    expect(set?.nikMasked).toBe("31****99");
-    expect(set?.nikMasked).not.toContain("3171999999999999"); // no raw NIK
-
     const items = [
       { categoryId: "REG", attendeeName: "A", attendeeNik: "3171010101010001" },
     ];
-    const b1 = await repo.hold(session.sessionId, items, "idem-1");
-    const b2 = await repo.hold(session.sessionId, items, "idem-1");
+    const b1 = await repo.hold(session.sessionId, items, "idem-1", BUYER);
+    const b2 = await repo.hold(session.sessionId, items, "idem-1", BUYER);
     expect(b2.bookingId).toBe(b1.bookingId); // idempotent
-    const b3 = await repo.hold(session.sessionId, items, "idem-2");
+    const b3 = await repo.hold(session.sessionId, items, "idem-2", BUYER);
     expect(b3.bookingId).not.toBe(b1.bookingId);
   });
 
   it("hold throws deterministic domain conflicts (RBT-054, FR-16)", async () => {
     const repo = new MockBookingRepository();
-    const s = await repo.createSession("evt-1");
+    const s = await repo.createSession("mock-admission:evt-1");
     const base = { attendeeName: "A", attendeeNik: "3171010101010001" };
 
     await expect(
-      repo.hold(s.sessionId, [{ ...base, categoryId: "SOLD" }], "k1"),
+      repo.hold(s.sessionId, [{ ...base, categoryId: "SOLD" }], "k1", BUYER),
     ).rejects.toMatchObject({ code: "CATEGORY_UNAVAILABLE" });
 
     await expect(
@@ -73,6 +68,7 @@ describe("MockBookingRepository", () => {
           },
         ],
         "k2",
+        BUYER,
       ),
     ).rejects.toMatchObject({ code: "MIXED_CATEGORIES_NOT_ALLOWED" });
 
@@ -92,6 +88,7 @@ describe("MockBookingRepository", () => {
           },
         ],
         "k3",
+        BUYER,
       ),
     ).rejects.toMatchObject({ code: "ATTENDEE_NIK_DUPLICATE_IN_ORDER" });
 
@@ -100,7 +97,9 @@ describe("MockBookingRepository", () => {
       attendeeName: `A${n}`,
       attendeeNik: `317101010101000${n}`,
     }));
-    await expect(repo.hold(s.sessionId, four, "k4")).rejects.toMatchObject({
+    await expect(
+      repo.hold(s.sessionId, four, "k4", BUYER),
+    ).rejects.toMatchObject({
       code: "QUANTITY_EXCEEDS_LIMIT",
     });
   });

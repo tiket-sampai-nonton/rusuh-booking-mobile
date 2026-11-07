@@ -13,12 +13,21 @@ import type {
   BookingRepository,
   BookingSession,
 } from "@domain/repositories/booking.repository";
+import { mapFailure } from "@domain/errors/error-mapper";
 
 export class RestoreBookingSession {
   constructor(private readonly booking: BookingRepository) {}
 
   /** Restore the active session, or null if none. */
-  async execute(): Promise<BookingSession | null> {
-    return this.booking.getCurrentSession();
+  async execute(sessionId?: string): Promise<BookingSession | null> {
+    try {
+      return sessionId && this.booking.getSession
+        ? await this.booking.getSession(sessionId)
+        : await this.booking.getCurrentSession();
+    } catch (cause) {
+      // Preserve contract codes such as SESSION_EXPIRED so presentation can
+      // route an expired hold to recovery instead of retrying it forever.
+      throw mapFailure(cause, "DEPENDENCY_UNAVAILABLE");
+    }
   }
 }

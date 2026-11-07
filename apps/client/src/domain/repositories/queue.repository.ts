@@ -42,15 +42,18 @@ export interface QueueEntry {
 export interface QueueStatusSnapshot {
   /** Server-configured throughput; absent when the estimate is unavailable. */
   readonly admissionRatePerMin?: number;
+  readonly nextPollAfterMs?: number;
 }
 
 export interface QueueRepository {
   /** Join the waiting room anonymously; returns the issued entry. */
   join(eventId: string): Promise<QueueEntry>;
   /** Observe the latest status for a previously-issued entry. */
-  getStatus(queueId: string): Promise<QueueEntry>;
+  getStatus(queueId: string, eventId?: string): Promise<QueueEntry>;
   /** Read public queue configuration for an event (cached by the server/CDN). */
   getQueueStatus(eventId: string): Promise<QueueStatusSnapshot>;
   /** Leave the waiting room. */
-  leave(queueId: string): Promise<void>;
+  leave(queueId: string, eventId?: string): Promise<void>;
+  claim(queueId: string, eventId: string): Promise<string>;
+  heartbeat(eventId: string): Promise<number | undefined>;
 }

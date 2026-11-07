@@ -56,9 +56,14 @@ export function ProfileScreen() {
   };
 
   const signOut = async () => {
-    await new ClearSession(tokenStorage).execute();
-    clearProfile();
-    setEditing(false);
+    try {
+      await userRepository.logout?.();
+      await new ClearSession(tokenStorage).execute();
+      clearProfile();
+      setEditing(false);
+    } catch {
+      setError("Gagal keluar. Silakan coba lagi.");
+    }
   };
 
   return (

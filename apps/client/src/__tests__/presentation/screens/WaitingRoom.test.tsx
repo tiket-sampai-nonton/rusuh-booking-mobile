@@ -15,7 +15,12 @@
  *  - no-queueId guard;
  *  - reduced-motion path renders without animation.
  */
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react-native";
 import React from "react";
 
 import type { QueuePollingView } from "@presentation/hooks/useQueuePolling";
@@ -372,7 +377,7 @@ describe("WaitingRoomScreen — terminal + error states", () => {
 });
 
 describe("WaitingRoomScreen — leave action", () => {
-  it("opens leave confirmation modal when leave button is pressed, then calls leave() on confirm", () => {
+  it("opens leave confirmation modal when leave button is pressed, then calls leave() on confirm", async () => {
     const leave = jest.fn(async () => undefined);
     mockUseQueuePolling.mockReturnValue(polling({ leave }));
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
@@ -393,7 +398,7 @@ describe("WaitingRoomScreen — leave action", () => {
     fireEvent.press(confirmLeaveBtn);
 
     expect(leave).toHaveBeenCalledTimes(1);
-    expect(mockReplace).toHaveBeenCalledWith("/");
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/"));
   });
 
   it("closes the leave dialog when the user chooses to stay in the queue", () => {

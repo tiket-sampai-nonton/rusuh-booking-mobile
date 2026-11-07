@@ -25,6 +25,8 @@ export interface ETicketCardProps {
   readonly startsAt?: string;
   readonly attendeeName?: string;
   readonly attendeeNikMasked?: string;
+  readonly qrPayload?: string;
+  readonly ticketCode?: string;
 }
 
 /** The QR payload — a safe, verifiable reference, no PII (D7.1). */
@@ -33,7 +35,6 @@ export function ticketRef(bookingId: string, index: number): string {
 }
 
 export function ETicketCard({
-  bookingId,
   index,
   total,
   eventName,
@@ -41,8 +42,10 @@ export function ETicketCard({
   startsAt,
   attendeeName,
   attendeeNikMasked,
+  qrPayload,
+  ticketCode,
 }: ETicketCardProps) {
-  const value = ticketRef(bookingId, index);
+  const value = qrPayload;
   return (
     <View
       style={componentStyles.elementBorderWidth0}
@@ -69,19 +72,21 @@ export function ETicketCard({
           style={componentStyles.elementBackgroundColor3}
         >
           <View accessibilityLabel="Kode QR tiket">
-            <QRCode
-              value={value}
-              size={120}
-              color={designColors.ground}
-              backgroundColor={designColors.ink}
-            />
+            {value ? (
+              <QRCode
+                value={value}
+                size={120}
+                color={designColors.ground}
+                backgroundColor={designColors.ink}
+              />
+            ) : null}
           </View>
         </View>
         <Text
           className="mt-3 text-xs font-extrabold"
           style={componentStyles.elementColor4}
         >
-          {value}
+          {ticketCode ?? "Tiket belum tersedia"}
         </Text>
         {eventName ? (
           <View
@@ -104,7 +109,7 @@ export function ETicketCard({
               className="text-xs font-bold uppercase"
               style={componentStyles.elementColor9}
             >
-              Tiket Umum · Kode tiket {value}
+              Tiket Umum · Kode tiket {ticketCode ?? "—"}
             </Text>
           </View>
         ) : null}

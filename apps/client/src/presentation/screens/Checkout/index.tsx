@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PlusIcon } from "@presentation/components/ArrowIcon";
+import { DomainError } from "@domain/errors/domain-error";
 
 import {
   appendRow,
@@ -38,7 +39,6 @@ import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
 import { useHoldBooking } from "@presentation/hooks/useHoldBooking";
-import { useSetBuyer } from "@presentation/hooks/useSetBuyer";
 import {
   prefillFromProfile,
   useAccountStore,
@@ -56,6 +56,7 @@ import { LeaveConfirm } from "./fragments/LeaveConfirm";
 import { ProgressSteps } from "./fragments/ProgressSteps";
 import { TicketItem } from "./fragments/TicketItem";
 import type { CheckoutScreenProps, RowCheckStatus } from "./interface";
+import { CheckoutSessionUnavailable } from "./fragments/CheckoutSessionUnavailable";
 import { checkoutScrollContent, componentStyles } from "./style";
 import { addTicketButtonStyle } from "./style";
 
@@ -75,10 +76,14 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isDesktop, isMobileWeb } = useResponsive();
-  const { serverClock } = useServices();
-  const { session, isLoading } = useRestoreBookingSession();
+  const { serverClock, bookingRepository } = useServices();
+  const {
+    session,
+    isLoading,
+    error: sessionError,
+    retry,
+  } = useRestoreBookingSession(true, sessionId);
   const { checks, pending, request } = useAttendeeCheck(sessionId);
-  const { setBuyer } = useSetBuyer();
   const { hold, isHolding, error: holdError } = useHoldBooking();
   const setOrderDetail = useSessionStore((s) => s.setOrderDetail);
   // Select the STABLE profile reference (not a fresh object) so zustand does not
@@ -90,10 +95,30 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
 
   const [buyerNik, setBuyerNik] = useState("");
   // Prefill the email from the account on first render when logged in (AC1).
-  const [buyerEmail, setBuyerEmail] = useState(prefill.emailMasked ?? "");
+  const [buyerEmail, setBuyerEmail] = useState("");
+  const [emailConfirmation, setEmailConfirmation] = useState("");
+  const [leaveError, setLeaveError] = useState("");
   const [rows, setRows] = useState<TicketRow[]>([emptyRow("")]);
   const [consent, setConsent] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
+
+  useEffect(() => {
+    const booking = session?.booking;
+    if (!booking || session?.sessionId !== sessionId) return;
+    if (booking.status === "PENDING_PAYMENT") {
+      router.replace(`/payment/${booking.bookingId}` as Href);
+    } else if (
+      booking.status === "PAID" ||
+      booking.status === "VERIFYING" ||
+      booking.status === "REVIEW"
+    ) {
+      router.replace(`/payment-result/${booking.bookingId}` as Href);
+    } else if (booking.status === "EXPIRED" || booking.status === "CANCELLED") {
+      router.replace(
+        `/expired/${booking.bookingId}?reason=payment&bookingId=${booking.bookingId}` as Href,
+      );
+    }
+  }, [router, session, sessionId]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener(
@@ -118,6 +143,16 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
       ),
   });
 
+  useEffect(() => {
+    if (
+      sessionError instanceof DomainError &&
+      (sessionError.code === "SESSION_EXPIRED" ||
+        sessionError.code === "SESSION_INVALID")
+    ) {
+      router.replace(`/expired/${sessionId}?reason=hold` as Href);
+    }
+  }, [router, sessionError, sessionId]);
+
   // Guests must tick the inline consent; logged-in users already consented.
   const consentGiven = isGuest ? consent : true;
 
@@ -137,6 +172,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
 
   const ready = useMemo(
     () =>
+      buyerEmail.trim() === emailConfirmation.trim() &&
       isCheckoutReady({
         buyerNik,
         buyerEmail,
@@ -145,7 +181,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
         attendeeChecks: checks,
         consentGiven,
       }),
-    [buyerNik, buyerEmail, rows, cap, checks, consentGiven],
+    [buyerNik, buyerEmail, emailConfirmation, rows, cap, checks, consentGiven],
   );
 
   const totalMinor = useMemo(
@@ -197,6 +233,16 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     );
   }
 
+  if (!session || session.sessionId !== sessionId) {
+    return (
+      <CheckoutSessionUnavailable
+        hasError={Boolean(sessionError)}
+        onRetry={() => void retry()}
+        onBrowse={() => router.replace("/browse" as Href)}
+      />
+    );
+  }
+
   return (
     <ScreenFade>
       <View className="flex-1 bg-background">
@@ -228,7 +274,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
                   style={componentStyles.buyerPrefillBadgeText}
                   className="text-2xs font-sans font-bold uppercase"
                 >
-                  Terisi dari akun
+                  Akun terhubung
                 </Text>
               </View>
             ) : null}
@@ -250,6 +296,14 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               placeholder="kamu@email.com"
               keyboardType="email-address"
               testID="buyer-email"
+            />
+            <Field
+              label="Konfirmasi email"
+              value={emailConfirmation}
+              onChangeText={setEmailConfirmation}
+              placeholder="Masukkan kembali email"
+              keyboardType="email-address"
+              testID="buyer-email-confirmation"
             />
           </Section>
 
@@ -316,14 +370,23 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           ready={ready}
           pending={isHolding}
           expired={expired}
-          errorMessage={holdError?.userMessage}
+          errorMessage={holdError?.userMessage ?? (leaveError || undefined)}
           onSubmit={() => {
-            // RBT-053 set-buyer (O1 mock), then RBT-054 idempotent hold →
-            // redirect to payment. A typed conflict surfaces in CheckoutBar.
+            // Submit buyer and attendees atomically with the idempotent booking
+            // request. A typed conflict surfaces in CheckoutBar.
             void (async () => {
-              await setBuyer({ sessionId, buyerNik, email: buyerEmail });
               try {
-                const booking = await hold({ sessionId, rows, buyerNik });
+                const booking = await hold({
+                  sessionId,
+                  rows,
+                  buyerNik,
+                  buyer: {
+                    nik: buyerNik,
+                    email: buyerEmail.trim(),
+                    emailConfirmation: emailConfirmation.trim(),
+                    consent: consentGiven,
+                  },
+                });
                 // RBT-070: record the order detail the success summary shows —
                 // MASKED buyer NIK (never the raw NIK, D7.1/D7.5) + ticket qty.
                 setOrderDetail(maskNik(buyerNik), rows.length);
@@ -342,8 +405,18 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           onStay={() => setConfirmLeave(false)}
           onLeave={() => {
             // Leaving releases the selection session → re-queue from home.
-            setConfirmLeave(false);
-            router.replace("/" as Href);
+            void (async () => {
+              try {
+                await bookingRepository.cancelSession?.(sessionId);
+                setConfirmLeave(false);
+                router.replace("/" as Href);
+              } catch {
+                setConfirmLeave(false);
+                setLeaveError(
+                  "Tidak dapat keluar dari sesi. Silakan coba lagi.",
+                );
+              }
+            })();
           }}
         />
       </View>

@@ -120,8 +120,9 @@ export function useQueuePolling(
   reducedMotion = false,
   eventId?: string,
 ): QueuePollingView {
-  const { queueRepository } = useServices();
+  const { queueRepository, pushSubscription } = useServices();
   const hadConnectionError = useRef(false);
+  const nextHeartbeatAt = useRef(0);
   const [isReconnected, setIsReconnected] = useState(false);
 
   // One use-case instance per repository binding (stable across re-renders).
@@ -137,12 +138,23 @@ export function useQueuePolling(
   const query = useQuery<QueuePollData, Error>({
     queryKey: ["queue", queueId, eventId],
     queryFn: async () => {
-      const entry = await observe.execute(queueId);
+      const entry = await observe.execute(queueId, eventId);
       if (!eventId) return { entry };
+
+      if (entry.status === "WAITING" && Date.now() >= nextHeartbeatAt.current) {
+        const nextMs = await queueRepository.heartbeat(eventId);
+        nextHeartbeatAt.current =
+          typeof nextMs === "number" && nextMs > 0
+            ? Date.now() + nextMs
+            : Number.POSITIVE_INFINITY;
+      }
 
       try {
         const status = await observeStatus.execute(eventId);
-        return { entry, admissionRatePerMin: status.admissionRatePerMin };
+        return {
+          entry: { ...entry, nextPollAfterMs: status.nextPollAfterMs },
+          admissionRatePerMin: status.admissionRatePerMin,
+        };
       } catch {
         // The estimate is optional; preserve the live queue state if its public
         // status document is temporarily unavailable.
@@ -152,8 +164,17 @@ export function useQueuePolling(
     enabled: queueId.length > 0,
     // The SINGLE adaptive poller. Stop on terminal/admitted; else the jittered
     // server-honoured wait. TanStack cancels this interval on unmount.
-    refetchInterval: (query: Query<QueuePollData, Error>) =>
-      computeRefetchInterval(query.state.data?.entry, reducedMotion),
+    refetchInterval: (query: Query<QueuePollData, Error>) => {
+      const interval = computeRefetchInterval(
+        query.state.data?.entry,
+        reducedMotion,
+      );
+      if (interval === false || nextHeartbeatAt.current <= 0) return interval;
+      return Math.min(
+        interval,
+        Math.max(1, nextHeartbeatAt.current - Date.now()),
+      );
+    },
     // Web can immediately resume after an `online` event. Native keeps the
     // server-paced interval active and catches up on the next successful poll.
     refetchOnReconnect: true,
@@ -193,7 +214,10 @@ export function useQueuePolling(
     isReconnected,
     error: query.error,
     isSettled,
-    leave: () => leaveQueue.execute(queueId),
+    leave: async () => {
+      await leaveQueue.execute(queueId, eventId);
+      if (eventId) await pushSubscription.remove(eventId).catch(() => {});
+    },
     refetch: query.refetch,
   };
 }

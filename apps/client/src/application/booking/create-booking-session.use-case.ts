@@ -18,8 +18,8 @@ import type {
 export class CreateBookingSession {
   constructor(private readonly booking: BookingRepository) {}
 
-  /** Create a session for the admitted event. */
-  async execute(eventId: string): Promise<BookingSession> {
-    return this.booking.createSession(eventId);
+  /** Exchange the one-use queue admission token for a booking session. */
+  async execute(admissionToken: string): Promise<BookingSession> {
+    return this.booking.createSession(admissionToken);
   }
 }

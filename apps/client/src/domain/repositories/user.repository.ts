@@ -39,4 +39,5 @@ export interface UserRepository {
   }): Promise<UserProfile>;
   /** Fetch the current profile (powers checkout auto-fill). */
   getMe(): Promise<UserProfile>;
+  logout?(): Promise<void>;
 }

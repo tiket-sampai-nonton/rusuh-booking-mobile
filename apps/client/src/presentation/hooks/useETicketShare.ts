@@ -11,16 +11,16 @@
  */
 import { Platform } from "react-native";
 
-import { ticketRef } from "@presentation/components/ETicketCard";
-
 /** Build the plain-text manifest shared/printed (safe refs only, no PII). */
 export function buildTicketManifest(
   bookingId: string,
   ticketCount: number,
+  ticketCodes: readonly string[] = [],
 ): string {
   const lines = [`Rusuh Tiket — E-Tiket`, `Nomor Pesanan: ${bookingId}`, ""];
   for (let i = 0; i < ticketCount; i += 1) {
-    lines.push(`Tiket ${i + 1}/${ticketCount}: ${ticketRef(bookingId, i)}`);
+    if (ticketCodes[i])
+      lines.push(`Tiket ${i + 1}/${ticketCount}: ${ticketCodes[i]}`);
   }
   lines.push("", "Tunjukkan QR di aplikasi pada gerbang masuk.");
   return lines.join("\n");
@@ -30,6 +30,7 @@ export interface ETicketShare {
   readonly shareTickets: (
     bookingId: string,
     ticketCount: number,
+    ticketCodes?: readonly string[],
   ) => Promise<void>;
 }
 
@@ -47,8 +48,9 @@ export function useETicketShare(
   const shareTickets = async (
     bookingId: string,
     ticketCount: number,
+    ticketCodes: readonly string[] = [],
   ): Promise<void> => {
-    const manifest = buildTicketManifest(bookingId, ticketCount);
+    const manifest = buildTicketManifest(bookingId, ticketCount, ticketCodes);
     if (Platform.OS === "web") {
       openPrint(
         `<pre style="font:14px/1.6 monospace;padding:24px">${escapeHtml(manifest)}</pre>`,

@@ -67,7 +67,6 @@ function bookingRepo(session: BookingSession | null): BookingRepository {
       nikMasked: "31****01",
       result: "AVAILABLE",
     }),
-    setBuyer: async (): Promise<void> => {},
     hold: async (
       _s: string,
       _i: readonly BookingItemInput[],
@@ -162,7 +161,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false, gcTime: Infinity } },
     });
-    queryClient.setQueryData(["booking-session", "current"], SESSION);
+    queryClient.setQueryData(["booking-session", "current", "sess-1"], SESSION);
     const refreshedView = renderWithProviders(
       <CheckoutScreen sessionId="sess-1" />,
       {
@@ -176,7 +175,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
       ).toBe(true),
     );
     act(() =>
-      queryClient.setQueryData(["booking-session", "current"], {
+      queryClient.setQueryData(["booking-session", "current", "sess-1"], {
         ...SESSION,
         categories: [...SESSION.categories],
       }),
@@ -186,7 +185,11 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     ).toBe(true);
     refreshedView.unmount();
 
-    const emptySession = { ...SESSION, categories: [] };
+    const emptySession = {
+      ...SESSION,
+      sessionId: "sess-empty",
+      categories: [],
+    };
     renderWithProviders(<CheckoutScreen sessionId="sess-empty" />, {
       container: { bookingRepository: bookingRepo(emptySession) },
     });
@@ -246,6 +249,10 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
 
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
+    fireEvent.changeText(
+      screen.getByTestId("buyer-email-confirmation"),
+      "buyer@mail.com",
+    );
     fireEvent.press(screen.getByTestId("cat-0-VIP")); // pick VIP category
     await waitFor(() =>
       expect(screen.getByTestId("checkout-total").props.children).toBe(
@@ -276,7 +283,12 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     await waitFor(() => expect(screen.getByTestId("use-buyer-0")).toBeTruthy());
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
+    fireEvent.changeText(
+      screen.getByTestId("buyer-email-confirmation"),
+      "buyer@mail.com",
+    );
     fireEvent(screen.getByTestId("use-buyer-0"), "valueChange", true);
+    fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Nama Pembeli");
     fireEvent.press(screen.getByTestId("checkout-consent")); // guest consent (RBT-052)
     // With the buyer attending row-0, the order is ready (buyer NIK valid).
     await waitFor(() =>
@@ -372,16 +384,63 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     await waitFor(() => expect(screen.getByText("Pilih Tiketmu")).toBeTruthy());
   });
 
-  it("renders without the hero when no session is restored", async () => {
+  it("offers recovery when no session is restored", async () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(null) },
     });
     // Loading clears → the add-ticket control appears (post-restore render),
     // and the session-dependent hero stays absent (false arm of the ternary).
-    await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
-    // : CheckoutHero shows "Pilih Tiketmu" (uppercase T)
-    expect(screen.queryByText("Pilih Tiketmu")).toBeNull();
-    expect(screen.getByTestId("ticket-row-0")).toBeTruthy();
+    await waitFor(() =>
+      expect(screen.getByText("Sesi Tidak Tersedia")).toBeTruthy(),
+    );
+    expect(screen.queryByTestId("add-ticket")).toBeNull();
+    expect(screen.getByTestId("expired-retry")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("expired-requeue"));
+    expect(mockRouter.replace).toHaveBeenCalledWith("/browse");
+  });
+
+  it("offers retry when the session cannot be loaded and restores it on retry", async () => {
+    const getCurrentSession = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(SESSION);
+    renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
+      container: {
+        bookingRepository: { ...bookingRepo(SESSION), getCurrentSession },
+      },
+      queryClient: new QueryClient({
+        defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+      }),
+    });
+    await waitFor(() =>
+      expect(screen.getByText("Sesi Gagal Dimuat")).toBeTruthy(),
+    );
+    fireEvent.press(screen.getByTestId("expired-retry"));
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
+    expect(getCurrentSession).toHaveBeenCalledTimes(2);
+  });
+
+  it("routes an expired server session to the expired recovery screen", async () => {
+    renderWithProviders(<CheckoutScreen sessionId="sess-expired" />, {
+      container: {
+        bookingRepository: {
+          ...bookingRepo(null),
+          getSession: async () => {
+            throw new Error("SESSION_EXPIRED: selection expired");
+          },
+        },
+      },
+      queryClient: new QueryClient({
+        defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+      }),
+    });
+    await waitFor(() =>
+      expect(mockRouter.replace).toHaveBeenCalledWith(
+        "/expired/sess-expired?reason=hold",
+      ),
+    );
   });
 
   it("shows the NIK-format error when the buyer NIK is too short", async () => {

@@ -3,10 +3,9 @@
  * §11.7 D2). NO DI library: a plain factory constructs adapters and binds them
  * to domain ports. This is the ONLY place concrete adapters are wired.
  *
- * `EXPO_PUBLIC_USE_MOCKS` selects mock vs real adapters. Real adapters do not
- * exist yet (RBT-010 builds the HTTP repositories, RBT-014 the fixtures, the
- * E8 tasks the platform adapters); the non-mock branch is a clearly-marked TODO
- * until then.
+ * `EXPO_PUBLIC_USE_MOCKS` selects in-memory fixtures or HTTP adapters wired to
+ * the 07-11 contract. Real-mode availability still depends on a configured API
+ * base URL and backend behavior for the documented integration gaps.
  */
 import { Platform } from "react-native";
 
@@ -20,9 +19,12 @@ import type { UserRepository } from "@domain/repositories/user.repository";
 import type { TicketHistoryRepository } from "@domain/repositories/ticket-history.repository";
 import { IdempotencyKeys } from "@domain/idempotency/idempotency-key";
 import { InMemoryIdempotencyStore } from "@infrastructure/__fixtures__/in-memory-idempotency-store";
+import { DurableIdempotencyStore } from "@infrastructure/idempotency/durable-idempotency-store";
 import type { ClockPort } from "@domain/services/clock.port";
 import type { FileSharePort } from "@domain/services/file-share.port";
 import type { NotificationPort } from "@domain/services/notification.port";
+import type { PushSubscriptionPort } from "@domain/services/push-subscription.port";
+import { HttpPushSubscriptionAdapter } from "@infrastructure/notifications/http-push-subscription.adapter";
 import { ServerClock } from "@domain/services/server-clock";
 import { HttpBookingRepository } from "@infrastructure/api/http-booking.repository";
 import { HttpEventRepository } from "@infrastructure/api/http-event.repository";
@@ -44,9 +46,11 @@ import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-tok
 import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
 import { SecureStoreQueueMembership } from "@infrastructure/queue/secure-store-queue-membership";
+import { WebQueueMembership } from "@infrastructure/queue/web-queue-membership";
 import { ExpoFileShareAdapter } from "@infrastructure/files/expo-file-share.adapter";
 import { WebFileShareAdapter } from "@infrastructure/files/web-file-share.adapter";
 import { FetchHttpClient } from "@infrastructure/http/fetch-http-client";
+import { RefreshingHttpClient } from "@infrastructure/http/refreshing-http-client";
 import type { HttpClient } from "@infrastructure/http/http-client";
 import { SystemClock } from "@infrastructure/time/system-clock";
 
@@ -70,6 +74,7 @@ export interface Container {
   readonly userRepository: UserRepository;
   readonly ticketHistoryRepository: TicketHistoryRepository;
   readonly notification: NotificationPort;
+  readonly pushSubscription: PushSubscriptionPort;
   readonly fileShare: FileSharePort;
   readonly tokenStorage: TokenStorage;
   /**
@@ -137,11 +142,8 @@ export interface ContainerOptions {
 /**
  * Whether to use mock wiring, from `EXPO_PUBLIC_USE_MOCKS`.
  *
- * `"false"`/`"0"` → real; anything else (incl. UNSET) → mocks. RBT-004 defaults
- * UNSET to mocks because the real adapters do not exist yet and the
- * `__fixtures__` adapters are the documented dev/demo default (ARCHITECTURE §3).
- * TODO(RBT-010): once the real HTTP repositories land, flip the default so an
- * unset flag resolves to REAL and only `EXPO_PUBLIC_USE_MOCKS=true` picks mocks.
+ * `"false"`/`"0"` → real; anything else (incl. UNSET) → mocks. Mock mode is
+ * the dev/demo default; real mode is opt-in and requires an API base URL.
  */
 export function readUseMocksFlag(
   env: Record<string, string | undefined> = process.env,
@@ -154,7 +156,7 @@ export function readUseMocksFlag(
  * Build the application container.
  *
  * Mock mode binds the in-memory fixtures so the app boots and the funnel is
- * demoable with no backend. Real mode is not wired yet — see the TODO.
+ * demoable with no backend. Real mode binds the HTTP and platform adapters.
  */
 export function createContainer(options: ContainerOptions = {}): Container {
   const useMocks = options.useMocks ?? readUseMocksFlag();
@@ -162,9 +164,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // ClockPort is a platform primitive (not a backend capability): the real
   // system clock is bound in both modes. Tests inject a fake ClockPort directly.
   const clock: ClockPort = new SystemClock();
-  // Notification adapter is a platform primitive (like the clock): native uses
-  // expo-notifications (RBT-072); web uses the mock until web-push (RBT-073)
-  // lands; the dev/test mock is used when mocks are on. Bound in both modes.
+  // Notification delivery is platform-specific; mock mode replaces it below.
   const notificationAdapter: NotificationPort =
     Platform.OS === "web"
       ? new WebPushNotificationAdapter()
@@ -185,12 +185,20 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // Queue membership persistence is also a platform primitive (native secure
   // store vs web in-memory, driven by Platform.OS) → bound in BOTH modes (RBT-041).
   const queueMembership: QueueMembershipStorage =
-    createQueueMembershipStorage();
+    !useMocks && Platform.OS === "web"
+      ? new WebQueueMembership()
+      : createQueueMembershipStorage();
   // Idempotency keys are a client-side primitive over an in-memory store →
   // bound in BOTH modes (RBT-012/054).
-  const idempotencyKeys = new IdempotencyKeys(new InMemoryIdempotencyStore());
+  const idempotencyKeys = new IdempotencyKeys(
+    useMocks
+      ? new InMemoryIdempotencyStore()
+      : new DurableIdempotencyStore(Platform.OS),
+  );
 
   if (useMocks) {
+    const mockBooking = new MockBookingRepository();
+    const mockPayment = new MockPaymentRepository();
     return {
       clock,
       serverClock,
@@ -200,21 +208,25 @@ export function createContainer(options: ContainerOptions = {}): Container {
       httpClient: new MockHttpClient(),
       eventRepository: new MockEventRepository(),
       queueRepository: new MockQueueRepository(),
-      bookingRepository: new MockBookingRepository(),
-      paymentRepository: new MockPaymentRepository(),
+      bookingRepository: mockBooking,
+      paymentRepository: mockPayment,
       userRepository: new MockUserRepository(),
-      ticketHistoryRepository: new MockTicketHistoryRepository(),
+      ticketHistoryRepository: new MockTicketHistoryRepository(
+        async (bookingId) => {
+          const status = await mockPayment.getStatus(bookingId, bookingId);
+          return status.status === "PAID"
+            ? mockBooking.getIssuedTickets(bookingId)
+            : undefined;
+        },
+      ),
       notification: new MockNotificationAdapter(),
+      pushSubscription: { register: async () => {}, remove: async () => {} },
       fileShare: fileShareAdapter,
     };
   }
 
-  // REAL wiring (RBT-010): HTTP repositories over the fetch transport. Note the
-  // app still DEFAULTS to mocks (unset EXPO_PUBLIC_USE_MOCKS → mocks) because the
-  // real BE is not reachable and the FE-NEED gaps (O1) aren't delivered; this
-  // branch runs only when EXPO_PUBLIC_USE_MOCKS is explicitly "false"/"0".
-  // Platform adapters (notification/fileShare) still come from E8/E6 — until
-  // then they fall back to the mock adapters here.
+  // Real wiring: HTTP repositories over fetch. It runs only when
+  // EXPO_PUBLIC_USE_MOCKS is explicitly "false"/"0".
   const baseUrl = options.baseUrl ?? process.env.EXPO_PUBLIC_API_BASE_URL ?? "";
   if (baseUrl.length === 0) {
     throw new Error(
@@ -222,7 +234,34 @@ export function createContainer(options: ContainerOptions = {}): Container {
         "(or set EXPO_PUBLIC_USE_MOCKS=true for mock wiring).",
     );
   }
-  const httpClient: HttpClient = new FetchHttpClient({ baseUrl });
+  const visitorTokenStorage =
+    Platform.OS === "web"
+      ? new InMemoryTokenStorage()
+      : new SecureStoreTokenStorage("rusuh.visitor.token");
+  const refreshTokenStorage =
+    Platform.OS === "web"
+      ? new InMemoryTokenStorage()
+      : new SecureStoreTokenStorage("rusuh.auth.refresh");
+  const transport: HttpClient = new FetchHttpClient({
+    baseUrl,
+    getHeaders: async () => {
+      const [accessToken, visitorToken] = await Promise.all([
+        tokenStorage.load(),
+        visitorTokenStorage.load(),
+      ]);
+      return {
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...(Platform.OS !== "web" && visitorToken
+          ? { "X-Visitor-Token": visitorToken }
+          : {}),
+      };
+    },
+  });
+  const httpClient: HttpClient = new RefreshingHttpClient(
+    transport,
+    tokenStorage,
+    refreshTokenStorage,
+  );
   return {
     clock,
     serverClock,
@@ -231,17 +270,33 @@ export function createContainer(options: ContainerOptions = {}): Container {
     idempotencyKeys,
     httpClient,
     eventRepository: new HttpEventRepository(httpClient, serverClock),
-    queueRepository: new HttpQueueRepository(httpClient),
-    bookingRepository: new HttpBookingRepository(httpClient),
+    queueRepository: new HttpQueueRepository(httpClient, visitorTokenStorage),
+    bookingRepository: new HttpBookingRepository(
+      httpClient,
+      Platform.OS === "web" && typeof globalThis.EventSource !== "undefined"
+        ? (sessionId, onChange) => {
+            const stream = new EventSource(
+              `${baseUrl.replace(/\/+$/, "")}/booking-sessions/${encodeURIComponent(sessionId)}/stream`,
+              { withCredentials: true },
+            );
+            stream.addEventListener("availability", onChange);
+            return () => stream.close();
+          }
+        : undefined,
+    ),
     paymentRepository: new HttpPaymentRepository(httpClient),
-    userRepository: new HttpUserRepository(httpClient, tokenStorage),
+    userRepository: new HttpUserRepository(
+      httpClient,
+      tokenStorage,
+      refreshTokenStorage,
+    ),
     ticketHistoryRepository: new HttpTicketHistoryRepository(
       httpClient,
       tokenStorage,
     ),
-    // RBT-072: native uses expo-notifications; web falls back to the mock until
-    // web-push (RBT-073). fileShare is bound in E6.
+    // Notification delivery and file sharing use platform adapters.
     notification: notificationAdapter,
+    pushSubscription: new HttpPushSubscriptionAdapter(httpClient),
     fileShare: fileShareAdapter,
   };
 }

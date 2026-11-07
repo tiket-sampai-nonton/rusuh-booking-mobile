@@ -10,6 +10,7 @@ import { EVENT_FIXTURES } from "@shared/test-fixtures/events.fixture";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 import { useAccountStore } from "@presentation/stores/account-store";
 import { useSessionStore } from "@presentation/stores/session-store";
+import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
 const mockDownloadTickets = jest.fn(async () => undefined);
@@ -188,8 +189,38 @@ describe("MyTicketsScreen", () => {
     useSessionStore.getState().setQueue("evt-1", "queue-1", "WAITING");
     useSessionStore.getState().setBooking("booking-session", 45000000);
     useSessionStore.getState().setOrderDetail("31****89", 1);
+    const paymentRepository = new MockPaymentRepository();
+    jest.spyOn(paymentRepository, "getStatus").mockResolvedValue({
+      attemptId: "1",
+      bookingId: "booking-session",
+      status: "PAID",
+    });
+    const ticketHistoryRepository: TicketHistoryRepository = {
+      listMyBookings: async () => ({ bookings: [] }),
+      getBookingTickets: async () => ({
+        bookingId: "booking-session",
+        orderId: "order-1",
+        publicRef: "ref-1",
+        amountMinor: 45000000,
+        ticketQuantity: 1,
+        buyerNikMasked: "31****89",
+        tickets: [
+          {
+            ticketCode: "TKT-1",
+            categoryCode: "REG",
+            attendeeName: "Penonton",
+            attendeeNikMasked: "31****89",
+            qrPayload: "issued-qr",
+          },
+        ],
+      }),
+    };
     renderWithProviders(<MyTicketsScreen />, {
-      container: { eventRepository },
+      container: {
+        eventRepository,
+        paymentRepository,
+        ticketHistoryRepository,
+      },
       queryClient: makeQueryClient(),
     });
 
@@ -199,7 +230,7 @@ describe("MyTicketsScreen", () => {
     fireEvent.press(screen.getByTestId("ticket-qr-booking-session"));
     expect(await screen.findByTestId("ticket-qr-sheet")).toBeTruthy();
     expect(screen.getByTestId("qr-code").props.accessibilityLabel).toBe(
-      "RBT|booking-session|1",
+      "issued-qr",
     );
     fireEvent.press(screen.getByTestId("ticket-qr-close"));
     await waitFor(() =>
@@ -211,8 +242,9 @@ describe("MyTicketsScreen", () => {
       expect(mockDownloadTickets).toHaveBeenCalledWith(
         "booking-session",
         1,
-        ["RBT|booking-session|1"],
+        ["issued-qr"],
         expect.any(String),
+        ["TKT-1"],
       ),
     );
     mockDownloadTickets.mockRejectedValueOnce("disk unavailable");
@@ -221,7 +253,9 @@ describe("MyTicketsScreen", () => {
       await screen.findByText("E-tiket gagal disimpan. Coba lagi."),
     ).toBeTruthy();
     fireEvent.press(screen.getByTestId("ticket-share-booking-session"));
-    expect(mockShareTickets).toHaveBeenCalledWith("booking-session", 1);
+    expect(mockShareTickets).toHaveBeenCalledWith("booking-session", 1, [
+      "TKT-1",
+    ]);
   });
 
   it("filters past booking states and requests another page", async () => {

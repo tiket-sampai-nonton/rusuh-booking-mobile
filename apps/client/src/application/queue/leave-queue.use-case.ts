@@ -13,7 +13,8 @@ export class LeaveQueue {
   constructor(private readonly queue: QueueRepository) {}
 
   /** Leave the waiting room for `queueId`. Resolves when the leave is accepted. */
-  async execute(queueId: string): Promise<void> {
-    await this.queue.leave(queueId);
+  async execute(queueId: string, eventId?: string): Promise<void> {
+    if (eventId === undefined) await this.queue.leave(queueId);
+    else await this.queue.leave(queueId, eventId);
   }
 }

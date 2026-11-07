@@ -30,6 +30,12 @@ export interface BookingSession {
   readonly maxSelectable?: number;
   /** Ticket categories and current prices supplied by the Booking contract. */
   readonly categories: readonly BookingCategory[];
+  readonly phase?: "SELECTING" | "EDITABLE" | "LOCKED" | "ENDED";
+  readonly booking?: {
+    readonly bookingId: string;
+    readonly status: string;
+    readonly amountMinor: number;
+  } | null;
 }
 
 /** Result of an attendee-NIK availability check (quota enforcement). */
@@ -42,10 +48,21 @@ export interface AttendeeCheck {
 /** A confirmed booking (post-hold), payable until its deadline. */
 export interface Booking {
   readonly bookingId: string;
-  readonly sessionId: string;
-  readonly status: "HELD" | "CONFIRMED" | "PAID" | "EXPIRED" | "CANCELLED";
+  readonly sessionId?: string;
+  readonly status:
+    | "HELD"
+    | "CONFIRMED"
+    | "PENDING_PAYMENT"
+    | "VERIFYING"
+    | "REVIEW"
+    | "PAID"
+    | "EXPIRED"
+    | "CANCELLED";
   readonly amountMinor: number;
   readonly serverTime?: string;
+  readonly version?: number;
+  readonly canEdit?: boolean;
+  readonly paymentExpiresAt?: string;
 }
 
 /** One selection row: category + attendee identity (NIK carried per ticket). */
@@ -55,29 +72,38 @@ export interface BookingItemInput {
   readonly attendeeNik: string;
 }
 
+export interface BookingBuyerInput {
+  readonly nik: string;
+  readonly email: string;
+  readonly emailConfirmation: string;
+  readonly consent: boolean;
+}
+
 export interface BookingRepository {
   /** Create a booking session from an admission token. */
-  createSession(eventId: string): Promise<BookingSession>;
+  createSession(admissionToken: string): Promise<BookingSession>;
   /** Restore the current session (survives refresh). */
   getCurrentSession(): Promise<BookingSession | null>;
   /** Check an attendee NIK's availability for this event. */
   checkAttendee(sessionId: string, nik: string): Promise<AttendeeCheck>;
-  /**
-   * Set the buyer (NIK + email) on the session before the hold (RBT-053 AC1).
-   *
-   * FE-NEED (O1): the proposed `POST /booking-sessions/{sessionId}/buyer` is not
-   * in the contract yet; mocked until BE delivers (the alternative is carrying
-   * `buyerNik`+`email` in the `POST /bookings` body). The BE remains
-   * authoritative — this persists the buyer for the session so a refresh keeps
-   * it. Raw NIK is sent to the BE over TLS but never stored/logged on the FE.
-   */
-  setBuyer(sessionId: string, buyerNik: string, email: string): Promise<void>;
   /**
    * Hold the selected items (idempotent).
    * @param idempotencyKey minted in the use case, reused on retry (§4.3).
    */
   hold(
     sessionId: string,
+    items: readonly BookingItemInput[],
+    idempotencyKey: string,
+    buyer: BookingBuyerInput,
+  ): Promise<Booking>;
+  cancelSession?(sessionId: string): Promise<void>;
+  getSession?(sessionId: string): Promise<BookingSession>;
+  subscribeAvailability?(sessionId: string, onChange: () => void): () => void;
+  getBooking?(bookingId: string): Promise<Booking>;
+  cancelBooking?(bookingId: string): Promise<Booking>;
+  replaceItems?(
+    bookingId: string,
+    version: number,
     items: readonly BookingItemInput[],
     idempotencyKey: string,
   ): Promise<Booking>;

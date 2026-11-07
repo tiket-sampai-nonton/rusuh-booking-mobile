@@ -1,7 +1,7 @@
 import { CheckAttendee } from "@application/booking/check-attendee.use-case";
 import { CreateBookingSession } from "@application/booking/create-booking-session.use-case";
 import { RestoreBookingSession } from "@application/booking/restore-booking-session.use-case";
-import { SetBuyer } from "@application/booking/set-buyer.use-case";
+import { DomainError } from "@domain/errors/domain-error";
 import type {
   AttendeeCheck,
   Booking,
@@ -21,27 +21,30 @@ const SESSION: BookingSession = {
 
 class FakeBookingRepo implements BookingRepository {
   current: BookingSession | null = SESSION;
+  getSessionError: Error | null = null;
   createdFor: string[] = [];
-  async createSession(eventId: string): Promise<BookingSession> {
-    this.createdFor.push(eventId);
+  async createSession(admissionToken: string): Promise<BookingSession> {
+    this.createdFor.push(admissionToken);
+    const eventId = admissionToken.replace(/^admission:/, "");
     return { ...SESSION, eventId };
   }
   async getCurrentSession(): Promise<BookingSession | null> {
     return this.current;
+  }
+  async getSession(): Promise<BookingSession> {
+    if (this.getSessionError) throw this.getSessionError;
+    return SESSION;
   }
   checkedWith: [string, string][] = [];
   async checkAttendee(sessionId: string, nik: string): Promise<AttendeeCheck> {
     this.checkedWith.push([sessionId, nik]);
     return { nikMasked: "3***", result: "AVAILABLE" };
   }
-  buyerCalls: [string, string, string][] = [];
-  async setBuyer(sessionId: string, nik: string, email: string): Promise<void> {
-    this.buyerCalls.push([sessionId, nik, email]);
-  }
   async hold(
     _s: string,
     _i: readonly BookingItemInput[],
     _k: string,
+    _buyer: NonNullable<Parameters<BookingRepository["hold"]>[3]>,
   ): Promise<Booking> {
     return {
       bookingId: "b1",
@@ -55,8 +58,8 @@ class FakeBookingRepo implements BookingRepository {
 describe("CreateBookingSession", () => {
   it("creates a session via the port for the admitted event", async () => {
     const repo = new FakeBookingRepo();
-    const out = await new CreateBookingSession(repo).execute("evt-9");
-    expect(repo.createdFor).toEqual(["evt-9"]);
+    const out = await new CreateBookingSession(repo).execute("admission:evt-9");
+    expect(repo.createdFor).toEqual(["admission:evt-9"]);
     expect(out.eventId).toBe("evt-9");
     expect(out.expiresAt).toBe(SESSION.expiresAt);
   });
@@ -75,6 +78,19 @@ describe("RestoreBookingSession", () => {
     repo.current = null;
     expect(await new RestoreBookingSession(repo).execute()).toBeNull();
   });
+
+  it("preserves the contract session-expired error for recovery routing", async () => {
+    const repo = new FakeBookingRepo();
+    repo.getSessionError = new Error("SESSION_EXPIRED: selection expired");
+    const error = await new RestoreBookingSession(repo)
+      .execute("sess-expired")
+      .catch((cause: unknown) => cause);
+    expect(error).toBeInstanceOf(DomainError);
+    expect(error).toMatchObject({
+      code: "SESSION_EXPIRED",
+      kind: "session_expired",
+    });
+  });
 });
 
 describe("CheckAttendee (RBT-052)", () => {
@@ -86,19 +102,5 @@ describe("CheckAttendee (RBT-052)", () => {
     );
     expect(repo.checkedWith).toEqual([["sess-1", "3171010101010001"]]);
     expect(out.result).toBe("AVAILABLE");
-  });
-});
-
-describe("SetBuyer (RBT-053)", () => {
-  it("delegates to the port with the session, NIK, and email", async () => {
-    const repo = new FakeBookingRepo();
-    await new SetBuyer(repo).execute(
-      "sess-1",
-      "3171999999999999",
-      "b@mail.com",
-    );
-    expect(repo.buyerCalls).toEqual([
-      ["sess-1", "3171999999999999", "b@mail.com"],
-    ]);
   });
 });

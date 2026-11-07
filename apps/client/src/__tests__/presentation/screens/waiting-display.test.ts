@@ -19,7 +19,7 @@ describe("formatCount", () => {
     expect(formatCount(0)).toBe("0");
     expect(formatCount(1234)).toMatch(/1.234/); // id-ID uses "." as thousands sep
     expect(formatCount(-5)).toBe("0");
-    expect(formatCount(Number.NaN)).toBe("0");
+    expect(formatCount(Number.NaN)).toBe("—");
   });
 });
 
@@ -68,7 +68,7 @@ describe("zoneCopy", () => {
     expect(zoneCopy("GUARANTEED")).toBe(ZONE_COPY.GUARANTEED);
     expect(zoneCopy("POSSIBLE").label).toBe("Zona kemungkinan");
     expect(zoneCopy("NOT_ENOUGH").icon).toBe("alert");
-    expect(zoneCopy(undefined)).toBe(ZONE_COPY.GUARANTEED);
+    expect(zoneCopy(undefined).label).toBe("Status tiket belum tersedia");
   });
   it("carries an icon + label + body for every zone (never color-only)", () => {
     for (const z of ["GUARANTEED", "POSSIBLE", "NOT_ENOUGH"] as const) {
@@ -93,10 +93,10 @@ describe("terminal + claim-error copy", () => {
   it("maps claim-error state to Indonesian title and body", () => {
     expect(claimErrorTitle("EVENT_SOLD_OUT")).toBe("Tiket Habis");
     expect(claimErrorTitle("TURN_MISSED")).toBe("Giliran Berakhir");
-    expect(claimErrorTitle("UNKNOWN")).toBe("Giliran Berakhir");
+    expect(claimErrorTitle("UNKNOWN")).toBe("Gagal menghubungkan");
     expect(claimErrorBody("EVENT_SOLD_OUT")).toMatch(/tiket habis/i);
     expect(claimErrorBody("TURN_MISSED")).toMatch(/belum memilih tiket/i);
-    expect(claimErrorBody("UNKNOWN")).toMatch(/belum memilih tiket/i);
+    expect(claimErrorBody("UNKNOWN")).toMatch(/periksa koneksi/i);
   });
 });
 

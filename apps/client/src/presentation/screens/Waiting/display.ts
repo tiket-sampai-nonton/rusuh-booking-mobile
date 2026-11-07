@@ -13,7 +13,8 @@ import type {
 
 /** id-ID grouped number, mirroring the prototype's `toLocaleString('id-ID')`. */
 export function formatCount(n: number): string {
-  const safe = Number.isFinite(n) ? Math.max(0, Math.trunc(n)) : 0;
+  if (!Number.isFinite(n)) return "—";
+  const safe = Math.max(0, Math.trunc(n));
   return safe.toLocaleString("id-ID");
 }
 
@@ -27,6 +28,7 @@ export function etaText(
   position: number,
   admissionRatePerMin?: number,
 ): string {
+  if (!Number.isFinite(position)) return "Belum tersedia";
   if (position <= 0) return "Siap!";
   if (!isValidAdmissionRate(admissionRatePerMin)) return "Belum tersedia";
   const mins = Math.max(1, Math.ceil(position / admissionRatePerMin));
@@ -41,6 +43,7 @@ export function etaMinutesSeconds(
   position: number,
   admissionRatePerMin?: number,
 ): { minutes: number; seconds: number } | undefined {
+  if (!Number.isFinite(position)) return undefined;
   if (position <= 0) return { minutes: 0, seconds: 0 };
   if (!isValidAdmissionRate(admissionRatePerMin)) return undefined;
   const totalSeconds = Math.ceil((position / admissionRatePerMin) * 60);
@@ -94,7 +97,14 @@ export const ZONE_COPY: Readonly<Record<QueueZone, ZoneCopy>> = {
 };
 
 export function zoneCopy(zone: QueueZone | undefined): ZoneCopy {
-  return ZONE_COPY[zone ?? "GUARANTEED"];
+  return zone
+    ? ZONE_COPY[zone]
+    : {
+        tone: "warn",
+        icon: "warning",
+        label: "Status tiket belum tersedia",
+        body: "Ketersediaan akan diperbarui saat informasi antrean tersedia.",
+      };
 }
 
 /** Terminal-state titles shown to the user. */
@@ -113,7 +123,9 @@ export function terminalBody(status: QueueStatus): string {
 export function claimErrorTitle(
   errorState: "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN",
 ): string {
-  return errorState === "EVENT_SOLD_OUT" ? "Tiket Habis" : "Giliran Berakhir";
+  if (errorState === "EVENT_SOLD_OUT") return "Tiket Habis";
+  if (errorState === "UNKNOWN") return "Gagal menghubungkan";
+  return "Giliran Berakhir";
 }
 
 /** Claim-error body copy. */
@@ -123,6 +135,8 @@ export function claimErrorBody(
   if (errorState === "EVENT_SOLD_OUT") {
     return "Semua tiket habis saat giliran Anda. Jelajahi event lainnya.";
   }
+  if (errorState === "UNKNOWN")
+    return "Tidak dapat menyiapkan sesi. Periksa koneksi, lalu kembali ke event.";
   return "Anda belum memilih tiket tepat waktu. Giliran diberikan kepada orang berikutnya dalam antrean.";
 }
 

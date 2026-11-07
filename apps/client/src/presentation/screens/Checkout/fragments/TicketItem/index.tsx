@@ -84,10 +84,9 @@ export function TicketItem({
 
       <Field
         label="Nama Penonton"
-        value={row.useBuyerNik ? "Pembeli" : row.attendeeName}
+        value={row.attendeeName}
         onChangeText={(t) => onPatch({ attendeeName: t })}
         placeholder="Nama sesuai KTP"
-        editable={!row.useBuyerNik}
         testID={`attendee-name-${index}`}
       />
       <Field

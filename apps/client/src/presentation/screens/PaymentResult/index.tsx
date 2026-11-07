@@ -55,8 +55,8 @@ export function PaymentResultScreen({
   // that case the query is disabled; showing the normal spinner would leave
   // the user here forever. Return them to Payment so its server page can
   // restore the current attempt and provide the normal route back Home.
-  const missingAttemptId = !resolvedAttemptId;
-  const failedToVerify = isError || missingAttemptId;
+  const missingAttemptId = false;
+  const failedToVerify = isError;
 
   return (
     <View

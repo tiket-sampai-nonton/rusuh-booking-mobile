@@ -226,7 +226,13 @@ describe("isCheckoutReady end-to-end", () => {
     expect(
       isCheckoutReady({
         ...base,
-        rows: [row({ useBuyerNik: true, attendeeName: "", attendeeNik: "" })],
+        rows: [
+          row({
+            useBuyerNik: true,
+            attendeeName: "Nama Pembeli",
+            attendeeNik: "",
+          }),
+        ],
       }),
     ).toBe(true);
   });

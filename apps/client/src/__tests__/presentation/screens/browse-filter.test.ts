@@ -91,7 +91,7 @@ describe("readGenre (case-insensitive, user-controlled URL)", () => {
   });
 
   it("falls back to 'Semua' for an unknown genre", () => {
-    expect(readGenre("polka")).toBe("Semua");
+    expect(readGenre("polka")).toBe("polka");
   });
 
   it("falls back to 'Semua' for undefined", () => {

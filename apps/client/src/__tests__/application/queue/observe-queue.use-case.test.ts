@@ -23,6 +23,12 @@ function makeEntry(over: Partial<QueueEntry> = {}): QueueEntry {
 }
 
 class FakeQueueRepository implements QueueRepository {
+  async claim(_queueId: string, eventId: string): Promise<string> {
+    return eventId;
+  }
+  async heartbeat(_eventId: string): Promise<number | undefined> {
+    return undefined;
+  }
   getStatusCalls: string[] = [];
   getQueueStatusCalls: string[] = [];
   leaveCalls: string[] = [];

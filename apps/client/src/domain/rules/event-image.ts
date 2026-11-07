@@ -1,13 +1,10 @@
 /**
  * Event image resolution — pure domain (framework-free).
  *
- * The catalog + hero show a concert photo per event (prototype V5). The frozen
- * `EventSummary` port carries no image field (FE-NEED O1 — the BE event summary
- * has no banner yet), and the mock strips `description` from the list, so the
- * image is resolved here: a stable per-event photo keyed by event id, with a
- * deterministic fallback so every event always has a thumbnail. The URLs mirror
- * the prototype's Unsplash set; swapping to a BE banner field later changes
- * only this resolver.
+ * The catalog + hero use contract image URLs when available, with a stable
+ * per-event photo as the deterministic fallback. The URLs mirror the
+ * prototype's Unsplash set; no remote image is invented when a contract URL
+ * exists.
  */
 
 /** The prototype's Unsplash concert-photo set (public URLs). */
@@ -31,8 +28,8 @@ function hashId(id: string): number {
 }
 
 /**
- * Resolve the image URL for an event. Prefers an explicit `bannerImage` (from
- * the detail's description bag), else a stable photo chosen by event id.
+ * Resolve the image URL for an event. Prefers a supplied contract image URL,
+ * else a stable photo chosen by event id.
  */
 export function eventImage(
   eventId: string,

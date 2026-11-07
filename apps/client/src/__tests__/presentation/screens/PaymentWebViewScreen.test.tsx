@@ -61,15 +61,30 @@ function repo(over: Partial<PaymentRepository> = {}): PaymentRepository {
 
 describe("PaymentWebViewScreen (RBT-062)", () => {
   const origOS = RN.Platform.OS;
+  const originalMocks = process.env.EXPO_PUBLIC_USE_MOCKS;
+  const originalBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+  const webViewMock = require("react-native-webview") as {
+    __setExchangeResult: (value: string) => void;
+    __injections: string[];
+  };
   afterEach(() => {
     Object.defineProperty(RN.Platform, "OS", {
       value: origOS,
       configurable: true,
     });
     mockRouter.replace.mockReset();
+    if (originalMocks === undefined) delete process.env.EXPO_PUBLIC_USE_MOCKS;
+    else process.env.EXPO_PUBLIC_USE_MOCKS = originalMocks;
+    if (originalBaseUrl === undefined)
+      delete process.env.EXPO_PUBLIC_API_BASE_URL;
+    else process.env.EXPO_PUBLIC_API_BASE_URL = originalBaseUrl;
+    webViewMock.__setExchangeResult("rb-pay-exchanged");
+    webViewMock.__injections.length = 0;
   });
 
   it("native: mints a token, mounts the WebView, exchanges on load", async () => {
+    process.env.EXPO_PUBLIC_USE_MOCKS = "false";
+    process.env.EXPO_PUBLIC_API_BASE_URL = "https://api.example.com/api/v1";
     Object.defineProperty(RN.Platform, "OS", {
       value: "ios",
       configurable: true,
@@ -87,8 +102,10 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
     await waitFor(() =>
       expect(screen.getByTestId("paywv-webview")).toBeTruthy(),
     );
-    // The mocked WebView fires onLoadEnd once → token exchanged.
-    await waitFor(() => expect(exchanged).toEqual(["pgt_1"]));
+    await waitFor(() => expect(webViewMock.__injections.length).toBe(1));
+    expect(webViewMock.__injections[0]).toContain("payment-page-sessions");
+    expect(webViewMock.__injections[0]).toContain("pgt_1");
+    expect(exchanged).toEqual([]);
   });
 
   it("native: shows an error when the token mint fails", async () => {
@@ -187,6 +204,9 @@ describe("PaymentWebViewScreen (RBT-062)", () => {
   });
 
   it("native: an exchange failure surfaces the error state", async () => {
+    process.env.EXPO_PUBLIC_USE_MOCKS = "false";
+    process.env.EXPO_PUBLIC_API_BASE_URL = "https://api.example.com/api/v1";
+    webViewMock.__setExchangeResult("rb-pay-error");
     Object.defineProperty(RN.Platform, "OS", {
       value: "ios",
       configurable: true,

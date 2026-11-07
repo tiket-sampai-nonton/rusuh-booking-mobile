@@ -15,7 +15,7 @@ describe("shared/test-fixtures — events", () => {
     expect(statuses.has("AVAILABLE")).toBe(true);
   });
 
-  it("carries the FE-NEED O1 fields (remainingTickets + description JSON)", () => {
+  it("carries mock-only stock and rich description values", () => {
     for (const e of EVENT_FIXTURES) {
       expect(typeof e.remainingTickets).toBe("number");
       expect(e.description).toBeDefined();

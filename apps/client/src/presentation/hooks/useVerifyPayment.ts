@@ -17,10 +17,14 @@
  * the `VerifyPayment` use case → the frozen `PaymentRepository` port read from
  * the DI container via `useServices()`. No infrastructure import.
  */
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery, type Query } from "@tanstack/react-query";
 
-import { VerifyPayment } from "@application/payment/create-payment-attempt.use-case";
+import {
+  VerifyPayment,
+  CreatePaymentAttempt,
+} from "@application/payment/create-payment-attempt.use-case";
+import { useSessionStore } from "@presentation/stores/session-store";
 import type { PaymentAttempt } from "@domain/repositories/payment.repository";
 import {
   classifyPayment,
@@ -63,7 +67,9 @@ export function useVerifyPayment(
   bookingId: string,
   reducedMotion = false,
 ): VerifyPaymentView {
-  const { paymentRepository, serverClock } = useServices();
+  const { paymentRepository, serverClock, idempotencyKeys } = useServices();
+  const paymentMethod = useSessionStore((state) => state.paymentMethod);
+  const storedBookingId = useSessionStore((state) => state.bookingId);
 
   const verify = useMemo(
     () => new VerifyPayment(paymentRepository),
@@ -71,9 +77,9 @@ export function useVerifyPayment(
   );
 
   const query = useQuery<PaymentAttempt, Error>({
-    queryKey: ["payment", "verify", attemptId],
-    queryFn: () => verify.execute(attemptId as string),
-    enabled: !!attemptId && attemptId.length > 0,
+    queryKey: ["payment", "verify", bookingId, attemptId],
+    queryFn: () => verify.execute(attemptId ?? bookingId, bookingId),
+    enabled: bookingId.length > 0,
     // The SINGLE backoff verify poller. Stop on terminal; else the backoff step
     // for the current poll count. TanStack cancels the interval on unmount.
     refetchInterval: (q: Query<PaymentAttempt, Error>) =>
@@ -87,6 +93,21 @@ export function useVerifyPayment(
   const attempt = query.data;
   const verdict = attempt ? classifyPayment(attempt.status) : undefined;
   const isSettled = attempt !== undefined && isPaymentTerminal(attempt.status);
+
+  useEffect(() => {
+    const method =
+      attempt?.method ??
+      (storedBookingId === bookingId ? paymentMethod : undefined);
+    if (isSettled && method)
+      idempotencyKeys.clear(CreatePaymentAttempt.actionId(bookingId, method));
+  }, [
+    attempt?.method,
+    bookingId,
+    idempotencyKeys,
+    isSettled,
+    paymentMethod,
+    storedBookingId,
+  ]);
 
   // Server-authoritative remaining time for the pending deadline reconcile.
   let remainingMs = Number.POSITIVE_INFINITY;

@@ -17,6 +17,7 @@
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { useRouter, type Href } from "expo-router";
 import { useMemo } from "react";
+import { Platform } from "react-native";
 
 import { JoinQueue } from "@application/queue/join-queue.use-case";
 import type { QueueEntry } from "@domain/repositories/queue.repository";
@@ -30,7 +31,8 @@ import { useServices } from "@providers/service-context";
  * screen resumes polling the exact entry.
  */
 export function useJoinQueue(): UseMutationResult<QueueEntry, Error, string> {
-  const { queueRepository, queueMembership } = useServices();
+  const { queueRepository, queueMembership, notification, pushSubscription } =
+    useServices();
   const router = useRouter();
 
   const join = useMemo(
@@ -41,6 +43,19 @@ export function useJoinQueue(): UseMutationResult<QueueEntry, Error, string> {
   return useMutation<QueueEntry, Error, string>({
     mutationFn: (eventId: string) => join.execute(eventId),
     onSuccess: (entry) => {
+      if (Platform.OS === "android" || Platform.OS === "ios") {
+        void notification
+          .registerForRemotePush()
+          .then((token) => {
+            if (token)
+              return pushSubscription.register(
+                entry.eventId,
+                Platform.OS === "android" ? "ANDROID" : "IOS",
+                token,
+              );
+          })
+          .catch(() => {});
+      }
       router.push(`/waiting/${entry.eventId}?queueId=${entry.queueId}` as Href);
     },
   });

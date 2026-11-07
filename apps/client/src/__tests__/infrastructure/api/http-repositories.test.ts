@@ -69,13 +69,28 @@ describe("HttpEventRepository", () => {
     const http = new FakeHttpClient();
     http.queueResponse(
       ok({
-        eventId: "e 2",
-        slug: "s2",
-        name: "N2",
-        salesStartsAt: "x",
-        salesEndsAt: "y",
-        status: "SOLD_OUT",
-        description: { longDesc: "d" },
+        event: {
+          eventId: "e 2",
+          slug: "s2",
+          name: "N2",
+          salesStartsAt: "x",
+          salesEndsAt: "y",
+          status: "SOLD_OUT",
+          bannerUrl: "https://example.com/banner.jpg",
+        },
+        maxTicketsPerOrder: 4,
+        maxTicketsPerBuyerNik: 2,
+        allowMixedCategories: false,
+        published: true,
+        categories: [
+          {
+            categoryId: "c1",
+            code: "REG",
+            name: "Regular",
+            priceMinor: 1000,
+            available: 2,
+          },
+        ],
       }),
     );
     const repo = new HttpEventRepository(
@@ -84,7 +99,18 @@ describe("HttpEventRepository", () => {
     );
     const out = await repo.getEventDetail("e 2");
     expect(http.calls[0].url).toBe("events/e%202");
-    expect(out.description).toEqual({ longDesc: "d" });
+    expect(out).toMatchObject({
+      id: "e 2",
+      bannerUrl: "https://example.com/banner.jpg",
+      maxTicketsPerOrder: 4,
+      maxTicketsPerBuyerNik: 2,
+      allowMixedCategories: false,
+      published: true,
+      description: {
+        bannerImage: "https://example.com/banner.jpg",
+        categories: [{ code: "REG", available: 2 }],
+      },
+    });
   });
 });
 
@@ -92,13 +118,12 @@ describe("HttpQueueRepository", () => {
   it("joins, reads status, and leaves", async () => {
     const http = new FakeHttpClient();
     const entry = {
-      queueId: "q1",
-      eventId: "e1",
-      position: 3,
+      entryId: "q1",
+      rank: 3,
       status: "WAITING",
     };
     http.queueResponse(ok(entry));
-    http.queueResponse(ok({ ...entry, position: 2 }));
+    http.queueResponse(ok({ ...entry, exactPosition: 2 }));
     http.queueResponse({
       status: 200,
       headers: {},
@@ -108,10 +133,13 @@ describe("HttpQueueRepository", () => {
     const repo = new HttpQueueRepository(http);
 
     const joined = await repo.join("e1");
-    expect(http.calls[0]).toMatchObject({ method: "POST", url: "queue" });
-    expect(joined.position).toBe(3);
+    expect(http.calls[0]).toMatchObject({
+      method: "POST",
+      url: "events/e1/queue-entries",
+    });
+    expect(Number.isNaN(joined.position)).toBe(true);
 
-    const status = await repo.getStatus("q1");
+    const status = await repo.getStatus("q1", "e1");
     expect(status.position).toBe(2);
 
     const queueStatus = await repo.getQueueStatus("event 1");
@@ -121,8 +149,11 @@ describe("HttpQueueRepository", () => {
     });
     expect(queueStatus.admissionRatePerMin).toBe(875);
 
-    await expect(repo.leave("q1")).resolves.toBeUndefined();
-    expect(http.calls[3]).toMatchObject({ method: "DELETE", url: "queue/q1" });
+    await expect(repo.leave("q1", "e1")).resolves.toBeUndefined();
+    expect(http.calls[3]).toMatchObject({
+      method: "DELETE",
+      url: "queue-entries/q1?eventId=e1",
+    });
   });
 });
 
@@ -171,40 +202,35 @@ describe("HttpPaymentRepository", () => {
 
   it("creates an attempt forwarding the idempotency key as a header", async () => {
     const http = new FakeHttpClient();
-    http.queueResponse(
-      ok({ attemptId: "a1", bookingId: "b1", status: "AWAITING_PAYMENT" }),
-    );
+    http.queueResponse(ok({ attemptNo: 1, status: "PENDING" }));
     const repo = new HttpPaymentRepository(http);
     const out = await repo.createAttempt("b1", "QRIS", "idem-1");
     expect(http.calls[0].headers).toMatchObject({
       "idempotency-key": "idem-1",
     });
     expect(http.calls[0].body).toEqual({ method: "QRIS" });
-    expect(out.attemptId).toBe("a1");
+    expect(out.attemptId).toBe("1");
+    expect(http.calls[0].url).toBe("payments/b1/attempts");
   });
 
   it("reads attempt status", async () => {
     const http = new FakeHttpClient();
     http.queueResponse(
-      ok({ attemptId: "a1", bookingId: "b1", status: "PAID" }),
+      ok({
+        bookingId: "b1",
+        bookingStatus: "PAID",
+        attempt: { attemptNo: 1, status: "SUCCEEDED" },
+      }),
     );
     const repo = new HttpPaymentRepository(http);
-    expect((await repo.getStatus("a1")).status).toBe("PAID");
+    expect((await repo.getStatus("1", "b1")).status).toBe("PAID");
   });
 
-  it("POSTs the SNAP callback and maps the attempt (RBT-065)", async () => {
+  it("does not expose the provider webhook as a client callback", async () => {
     const http = new FakeHttpClient();
-    http.queueResponse(
-      ok({ attemptId: "a1", bookingId: "b1", status: "PAID" }),
-    );
     const repo = new HttpPaymentRepository(http);
-    const out = await repo.snapCallback("a1", "PAID");
-    expect(http.calls[0]).toMatchObject({
-      method: "POST",
-      url: "payments/attempts/a1/snap-callback",
-      body: { outcome: "PAID" },
-    });
-    expect(out.status).toBe("PAID");
+    await expect(repo.snapCallback("a1", "PAID")).rejects.toThrow();
+    expect(http.calls).toHaveLength(0);
   });
 });
 
@@ -238,22 +264,31 @@ describe("HttpBookingRepository", () => {
       "s1",
       [{ categoryId: "c1", attendeeName: "A", attendeeNik: "n" }],
       "idem-9",
+      {
+        nik: "n",
+        email: "buyer@example.com",
+        emailConfirmation: "buyer@example.com",
+        consent: true,
+      },
     );
     expect(booking.bookingId).toBe("b1");
     const holdCall = http.calls[3];
     expect(holdCall.headers).toMatchObject({ "idempotency-key": "idem-9" });
-  });
-
-  it("setBuyer POSTs buyerNik + email to the session buyer endpoint (RBT-053)", async () => {
-    const http = new FakeHttpClient();
-    http.queueResponse({ status: 204, headers: {}, data: null });
-    const repo = new HttpBookingRepository(http);
-    await repo.setBuyer("s1", "3171999999999999", "buyer@mail.com");
-    expect(http.calls[0]).toMatchObject({
+    expect(holdCall).toMatchObject({
       method: "POST",
-      url: "booking-sessions/s1/buyer",
-      body: { buyerNik: "3171999999999999", email: "buyer@mail.com" },
+      url: "bookings",
+      body: {
+        sessionId: "s1",
+        buyer: {
+          nik: "n",
+          email: "buyer@example.com",
+          emailConfirmation: "buyer@example.com",
+          consent: true,
+        },
+        items: [{ categoryId: "c1", attendee: { nik: "n", fullName: "A" } }],
+      },
     });
+    expect(http.calls[0].body).toEqual({ admissionToken: "e1" });
   });
 
   it("returns null for current session on a 404 status", async () => {
@@ -310,7 +345,12 @@ describe("HttpUserRepository", () => {
   it("requests OTP, verifies, completes registration, reads profile", async () => {
     const http = new FakeHttpClient();
     http.queueResponse({ status: 204, headers: {}, data: null }); // requestOtp
-    http.queueResponse(ok({ token: "t1", isNew: true })); // verify
+    http.queueResponse(
+      ok({
+        accessToken: "t1",
+        account: { emailMasked: "a***@x.io", hasNik: false },
+      }),
+    ); // verify
     http.queueResponse(
       ok({
         emailMasked: "a***@x.io",

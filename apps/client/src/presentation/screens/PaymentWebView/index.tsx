@@ -12,7 +12,7 @@
  * endpoints mocked until the BE delivers.
  */
 import { useRouter, type Href } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Platform, View } from "react-native";
 import { WebView } from "react-native-webview";
 
@@ -50,7 +50,10 @@ export function resolveWebViewNav(
 
 export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
   const router = useRouter();
-  const { createToken, exchange } = usePaymentWebView();
+  const { createToken } = usePaymentWebView();
+  const webView = useRef<WebView>(null);
+  const exchanging = useRef(false);
+  const exchanged = useRef(false);
   const [pageUrl, setPageUrl] = useState<string | null>(null);
   const [pageToken, setPageToken] = useState<string | null>(null);
   const [error, setError] = useState(false);
@@ -90,12 +93,46 @@ export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
   return (
     <View className="flex-1 bg-background" testID="paywv-container">
       <WebView
+        ref={webView}
         testID="paywv-webview"
         source={{ uri: pageUrl }}
         // On load, exchange the one-time token for the rb_pay cookie so the FE
         // payment page is reused inside the WebView (D10.3).
         onLoadEnd={() => {
-          if (pageToken) void exchange(pageToken).catch(() => setError(true));
+          if (!pageToken || exchanging.current || exchanged.current) return;
+          if (
+            process.env.EXPO_PUBLIC_USE_MOCKS !== "false" &&
+            process.env.EXPO_PUBLIC_USE_MOCKS !== "0"
+          ) {
+            exchanged.current = true;
+            return;
+          }
+          const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL;
+          if (!apiBase) {
+            setError(true);
+            return;
+          }
+          exchanging.current = true;
+          const url = `${apiBase.replace(/\/+$/, "")}/payment-page-sessions`;
+          const script = `fetch(${JSON.stringify(url)}, {method:'POST',credentials:'include',headers:{'content-type':'application/json'},body:JSON.stringify({pageToken:${JSON.stringify(pageToken)}})}).then(function(r){window.ReactNativeWebView.postMessage(r.ok?'rb-pay-exchanged':'rb-pay-error')}).catch(function(){window.ReactNativeWebView.postMessage('rb-pay-error')});true;`;
+          webView.current?.injectJavaScript(script);
+        }}
+        onMessage={(event) => {
+          if (
+            event.nativeEvent.data === "rb-pay-exchanged" &&
+            exchanging.current
+          ) {
+            exchanging.current = false;
+            exchanged.current = true;
+            setPageToken(null);
+            webView.current?.reload();
+          } else if (
+            event.nativeEvent.data === "rb-pay-error" &&
+            exchanging.current
+          ) {
+            exchanging.current = false;
+            setError(true);
+          }
         }}
         // A SNAP success/failed return navigates the app to the result route.
         onNavigationStateChange={(nav: { url: string }) => {

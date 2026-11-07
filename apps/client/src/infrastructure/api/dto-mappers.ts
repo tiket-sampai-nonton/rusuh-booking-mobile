@@ -49,10 +49,18 @@ interface WireEventSummary {
   salesEndsAt: string;
   status: EventStatus;
   minPriceMinor?: number;
-  remainingTickets?: number;
+  imageUrl?: string;
+  bannerUrl?: string;
+  thumbnailUrl?: string;
+  genres?: string[];
 }
-interface WireEventDetail extends WireEventSummary {
-  description?: Record<string, unknown>;
+interface WireEventDetail {
+  event: WireEventSummary;
+  categories: BookingSession["categories"];
+  maxTicketsPerOrder?: number;
+  maxTicketsPerBuyerNik?: number;
+  allowMixedCategories?: boolean;
+  published?: boolean;
 }
 interface WireQueueEntry {
   queueId: string;
@@ -86,6 +94,8 @@ interface WireBookingSession {
   serverTime?: string;
   maxSelectable?: number;
   categories: BookingSession["categories"];
+  phase?: BookingSession["phase"];
+  booking?: BookingSession["booking"];
 }
 interface WireAttendeeCheck {
   nikMasked: string;
@@ -94,14 +104,16 @@ interface WireAttendeeCheck {
 }
 interface WireBooking {
   bookingId: string;
-  sessionId: string;
-  status: Booking["status"];
+  status: string;
   amountMinor: number;
   serverTime?: string;
+  version?: number;
+  canEdit?: boolean;
+  paymentExpiresAt?: string;
 }
 interface WireAuthSession {
-  token: string;
-  isNew: boolean;
+  accessToken: string;
+  account: WireUserProfile;
 }
 interface WireUserProfile {
   emailMasked: string;
@@ -121,12 +133,25 @@ export function toEventSummary(dto: WireEventSummary): EventSummary {
     salesEndsAt: dto.salesEndsAt,
     status: dto.status,
     minPriceMinor: dto.minPriceMinor,
-    remainingTickets: dto.remainingTickets,
+    imageUrl: dto.imageUrl,
+    bannerUrl: dto.bannerUrl,
+    thumbnailUrl: dto.thumbnailUrl,
+    genres: dto.genres,
   };
 }
 
 export function toEventDetail(dto: WireEventDetail): EventDetail {
-  return { ...toEventSummary(dto), description: dto.description };
+  return {
+    ...toEventSummary(dto.event),
+    maxTicketsPerOrder: dto.maxTicketsPerOrder,
+    maxTicketsPerBuyerNik: dto.maxTicketsPerBuyerNik,
+    allowMixedCategories: dto.allowMixedCategories,
+    published: dto.published,
+    description: {
+      categories: dto.categories,
+      bannerImage: dto.event.bannerUrl ?? dto.event.imageUrl,
+    },
+  };
 }
 
 export function toQueueEntry(dto: WireQueueEntry): QueueEntry {
@@ -181,6 +206,8 @@ export function toBookingSession(dto: WireBookingSession): BookingSession {
     serverTime: dto.serverTime,
     maxSelectable: dto.maxSelectable,
     categories: dto.categories,
+    phase: dto.phase,
+    booking: dto.booking,
   };
 }
 
@@ -192,18 +219,24 @@ export function toAttendeeCheck(dto: WireAttendeeCheck): AttendeeCheck {
   };
 }
 
-export function toBooking(dto: WireBooking): Booking {
+export function toBooking(dto: WireBooking, sessionId?: string): Booking {
   return {
     bookingId: dto.bookingId,
-    sessionId: dto.sessionId,
-    status: dto.status,
+    sessionId,
+    status: dto.status as Booking["status"],
     amountMinor: dto.amountMinor,
     serverTime: dto.serverTime,
+    version: dto.version,
+    canEdit: dto.canEdit,
+    paymentExpiresAt: dto.paymentExpiresAt,
   };
 }
 
 export function toAuthSession(dto: WireAuthSession): AuthSession {
-  return { token: dto.token, isNew: dto.isNew };
+  return {
+    token: dto.accessToken,
+    isNew: !dto.account.hasNik || !dto.account.fullName?.trim(),
+  };
 }
 
 export function toUserProfile(dto: WireUserProfile): UserProfile {
