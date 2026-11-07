@@ -119,6 +119,7 @@ export function useQueuePolling(
   queueId: string,
   reducedMotion = false,
   eventId?: string,
+  isScreenFocused = true,
 ): QueuePollingView {
   const { queueRepository, pushSubscription } = useServices();
   const hadConnectionError = useRef(false);
@@ -161,7 +162,7 @@ export function useQueuePolling(
         return { entry };
       }
     },
-    enabled: queueId.length > 0,
+    enabled: queueId.length > 0 && isScreenFocused,
     // The SINGLE adaptive poller. Stop on terminal/admitted; else the jittered
     // server-honoured wait. TanStack cancels this interval on unmount.
     refetchInterval: (query: Query<QueuePollData, Error>) => {

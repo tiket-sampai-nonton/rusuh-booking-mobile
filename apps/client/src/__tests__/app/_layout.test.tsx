@@ -19,6 +19,9 @@ jest.mock("expo-router", () => ({
   Stack: () => null,
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
 }));
+jest.mock("@presentation/bridges/StartupUpdateBridge", () => ({
+  StartupUpdateBridge: () => null,
+}));
 
 // Mock expo-font's useFonts for Plus Jakarta Sans font loading.
 jest.mock("expo-font", () => ({

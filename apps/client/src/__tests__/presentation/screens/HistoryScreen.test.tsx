@@ -15,7 +15,7 @@ import type {
 } from "@domain/repositories/event.repository";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
-const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockRouter = { push: jest.fn(), replace: jest.fn(), navigate: jest.fn() };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
@@ -80,6 +80,7 @@ describe("HistoryScreen", () => {
   beforeEach(() => {
     mockRouter.push.mockReset();
     mockRouter.replace.mockReset();
+    mockRouter.navigate.mockReset();
     mockResponsive.current = {
       isWeb: false,
       isDesktop: false,
@@ -169,7 +170,7 @@ describe("HistoryScreen", () => {
     //  uses header-logo testID for home navigation
     await waitFor(() => screen.getByTestId("header-logo"));
     fireEvent.press(screen.getByTestId("header-logo"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
   });
 
   it("renders the multi-column grid on desktop web", async () => {
@@ -188,8 +189,8 @@ describe("HistoryScreen", () => {
     expect(screen.getByTestId("history-grid")).toBeTruthy();
     expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
     fireEvent.press(screen.getByTestId("nav-browse"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/browse");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/browse");
     expect(screen.queryByTestId("nav-tickets")).toBeNull();
-    expect(mockRouter.push).toHaveBeenCalledTimes(1);
+    expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
   });
 });

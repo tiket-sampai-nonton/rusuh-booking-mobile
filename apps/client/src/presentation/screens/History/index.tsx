@@ -50,13 +50,13 @@ export function HistoryScreen() {
   } else if (history.length === 0) {
     historyContent = <HistoryEmpty />;
   }
-  const goHome = (): void => router.push("/" as Href);
-  const goBrowse = (): void => router.push("/browse" as Href);
+  const goHome = (): void => router.navigate("/" as Href);
+  const goBrowse = (): void => router.navigate("/browse" as Href);
   const navLinks = createPrimaryNavLinks({
     onHome: goHome,
     onBrowse: goBrowse,
-    onTickets: () => router.push("/my-tickets" as Href),
-    onProfile: () => router.push("/profile" as Href),
+    onTickets: () => router.navigate("/my-tickets" as Href),
+    onProfile: () => router.navigate("/profile" as Href),
     isLoggedIn: Boolean(profile),
   });
 
@@ -128,9 +128,9 @@ export function HistoryScreen() {
             if (route === "home") goHome();
             else if (route === "browse") goBrowse();
             else if (route === "tickets") {
-              router.push("/my-tickets" as Href);
+              router.navigate("/my-tickets" as Href);
             } else if (route === "profile") {
-              router.push("/profile" as Href);
+              router.navigate("/profile" as Href);
             }
           }}
         />

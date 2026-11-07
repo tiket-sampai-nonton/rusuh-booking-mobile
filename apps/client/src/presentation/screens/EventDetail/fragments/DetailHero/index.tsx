@@ -66,7 +66,8 @@ export function DetailHero({
   chips,
   subtitle,
   isMobileWeb = false,
-}: DetailHeroProps & { subtitle?: string }) {
+  isActive = true,
+}: DetailHeroProps & { subtitle?: string; isActive?: boolean }) {
   // Ken Burns zoom animation (web only)
   const scaleAnim = useRef(new Animated.Value(1.1)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -78,7 +79,7 @@ export function DetailHero({
     // Entrance animations
     const entranceDuration = isMobileWeb ? 160 : designDuration.slow;
     const entranceDelay = isMobileWeb ? 0 : 500;
-    Animated.parallel([
+    const entrance = Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: entranceDuration,
@@ -91,33 +92,39 @@ export function DetailHero({
         delay: entranceDelay,
         useNativeDriver: nativeDriverSupported(),
       }),
-    ]).start();
+    ]);
+    entrance.start();
+    return () => entrance.stop();
+  }, [fadeAnim, isMobileWeb, slideAnim]);
 
-    // Ken Burns zoom (web only, infinite)
-    if (Platform.OS === "web") {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(scaleAnim, {
-            toValue: 1,
-            duration: 20000,
+  useEffect(() => {
+    if (!isActive) return;
+
+    const motion =
+      Platform.OS === "web"
+        ? Animated.loop(
+            Animated.sequence([
+              Animated.timing(scaleAnim, {
+                toValue: 1,
+                duration: 20000,
+                useNativeDriver: nativeDriverSupported(),
+              }),
+              Animated.timing(scaleAnim, {
+                toValue: 1.1,
+                duration: 20000,
+                useNativeDriver: nativeDriverSupported(),
+              }),
+            ]),
+          )
+        : Animated.timing(scaleAnim, {
+            toValue: 1.05,
+            duration: 1200,
             useNativeDriver: nativeDriverSupported(),
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1.1,
-            duration: 20000,
-            useNativeDriver: nativeDriverSupported(),
-          }),
-        ]),
-      ).start();
-    } else {
-      // Native: settle animation (scale 1.1 → 1.05)
-      Animated.timing(scaleAnim, {
-        toValue: 1.05,
-        duration: 1200,
-        useNativeDriver: nativeDriverSupported(),
-      }).start();
-    }
-  }, [fadeAnim, isMobileWeb, scaleAnim, slideAnim]);
+          });
+
+    motion.start();
+    return () => motion.stop();
+  }, [isActive, scaleAnim]);
 
   const isLive =
     statusLabel.toLowerCase().includes("live") ||

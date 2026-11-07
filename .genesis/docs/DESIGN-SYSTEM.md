@@ -2,7 +2,7 @@
 
 > GENESIS Phase 2 output. Conforms to `GROOMING-DECISIONS.md` and `ARCHITECTURE.md`.
 > Scope: the shared cross-platform (Expo + RN + RN Web) design language in `apps/client/src/presentation/theme` (token re-exports) + `apps/client/src/presentation/components`, styled with **NativeWind**. The single token source of truth is `apps/client/tailwind.config.js` (generated from prototype V5).
-> Visual reference: prototype V5 (red/ember, glassmorphism, Plus Jakarta Sans). Platform split is presentation-only; tokens and primitives are shared.
+> Visual reference: shared black-and-white surfaces with a pink brand accent and Plus Jakarta Sans. Platform split is presentation-only; tokens and primitives are shared.
 
 ## 1. Principles
 
@@ -13,15 +13,15 @@
 
 ## 2. Design tokens (`tailwind.config.js` + `presentation/theme` re-export)
 
-Tokens are platform-neutral values defined once in `apps/client/tailwind.config.js` (the single source of truth) and consumed via NativeWind classes on RN + RN Web; `presentation/theme` re-exports the same values for SVG/Canvas/QR/Reanimated. Exact hex comes from the prototype V5 token set in `.genesis/prototype/Final` (ported, not invented — e.g. `--red:#EC1C24`, `--ember:#ff5a2d`, `--ink`, `--paper`, status `--ok`/`--warn`; radii 7/12/20/22/26/999).
+Tokens are platform-neutral values defined once in `apps/client/tailwind.config.js` (the single source of truth) and consumed via NativeWind classes on RN + RN Web; `presentation/theme` derives the same values for SVG/Canvas/QR/Reanimated. The brand palette uses black and white neutrals, deep pink `#880E4F`, pink `#D81B60`, and highlight pink `#FF5C9A`; status and queue-zone colors remain semantic tokens.
 
 | Token group | Members |
 |---|---|
-| Color — brand | `brand.primary` (ember/red), `brand.primaryPressed`, `brand.onPrimary` |
+| Color — brand | `brand.DEFAULT`, `brand.deep`, `brand.pink` |
 | Color — surface | `surface.base`, `surface.raised`, `surface.glass` (glassmorphism overlay), `surface.border` |
 | Color — text | `text.primary`, `text.secondary`, `text.onBrand`, `text.disabled` |
 | Color — status | `status.available`, `status.soldOut`, `status.warning`, `status.danger`, `status.info` |
-| Color — queue zone | `zone.guaranteed` (green), `zone.possible` (amber), `zone.notEnough` (red) |
+| Color — queue zone | `zone.guaranteed` (green), `zone.possible` (amber), `zone.notEnough` (pink) |
 | Typography | family `Plus Jakarta Sans` across the app; scale `display/h1/h2/h3/body/caption`; weights 400/500/600/700/800 |
 | Spacing | 4-pt base scale: `space.1..10` (4,8,12,16,20,24,32,40,48,64) |
 | Radius | `radius.sm/md/lg/pill` |
@@ -74,5 +74,4 @@ Each is a shared RN primitive with accessible labels, loading/empty/error/disabl
 
 ## 7. Open/deferred
 
-- Exact hex token values: port from the prototype V5 token set during P0/P2 (ARCHITECTURE roadmap); verify 1:1 against the agreed visual reference.
-- Telkomsel-inspired theme tokens: seeded in `apps/client/tailwind.config.js` and noted in ARCHITECTURE §6.5.
+- Keep color values centralized in `apps/client/tailwind.config.js`; runtime theme exports must derive from that palette.

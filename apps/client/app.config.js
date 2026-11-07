@@ -32,6 +32,9 @@ const config = {
         updates: {
           url: `https://u.expo.dev/${expoProjectId}`,
           requestHeaders: { "expo-channel-name": easChannel },
+          // The startup bridge performs a bounded manual check and reload. Keep
+          // Expo's automatic check only for recovery from a failed update.
+          checkAutomatically: "ON_ERROR_RECOVERY",
         },
         extra: { eas: { projectId: expoProjectId } },
       }

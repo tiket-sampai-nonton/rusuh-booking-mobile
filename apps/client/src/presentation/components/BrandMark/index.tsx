@@ -1,4 +1,4 @@
-/** Compact app wordmark with the black-to-red brand gradient. */
+/** Compact app wordmark with the black-to-pink brand gradient. */
 import { Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { neutral } from "@presentation/theme";

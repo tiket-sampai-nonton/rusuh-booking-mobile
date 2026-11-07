@@ -7,7 +7,6 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
-  withDelay,
   withTiming,
 } from "react-native-reanimated";
 import { pointerEventsNone } from "@presentation/utils/style";
@@ -24,8 +23,12 @@ const LETTERS = ["R", "U", "S", "U", "H", "T", "I", "K", "E", "T"];
 
 export function NativeLaunchSplash({
   onFinish,
+  isReadyToExit = true,
+  statusText = "Memuat",
 }: {
   readonly onFinish: () => void;
+  readonly isReadyToExit?: boolean;
+  readonly statusText?: string;
 }) {
   const reducedMotion = useReducedMotion();
   const { height, width } = useWindowDimensions();
@@ -35,10 +38,14 @@ export function NativeLaunchSplash({
   useEffect(() => {
     progress.value = reducedMotion
       ? 1
-      : withDelay(
-          1300,
-          withTiming(1, { duration: 1200, easing: Easing.out(Easing.cubic) }),
-        );
+      : withTiming(isReadyToExit ? 1 : 0.72, {
+          duration: isReadyToExit ? 300 : 1800,
+          easing: Easing.out(Easing.cubic),
+        });
+  }, [isReadyToExit, progress, reducedMotion]);
+
+  useEffect(() => {
+    if (!isReadyToExit) return;
     const exitTimer = setTimeout(() => {
       exit.value = withTiming(
         1,
@@ -49,7 +56,7 @@ export function NativeLaunchSplash({
       );
     }, 2500);
     return () => clearTimeout(exitTimer);
-  }, [exit, onFinish, progress, reducedMotion]);
+  }, [exit, isReadyToExit, onFinish, reducedMotion]);
 
   const screenStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: interpolate(exit.value, [0, 1], [0, -height]) }],
@@ -125,7 +132,7 @@ export function NativeLaunchSplash({
             style={[styleForNativeLaunchSplashAnimatedView3(), progressStyle]}
           />
         </View>
-        <Text style={componentStyles.elementColor13}>Memuat</Text>
+        <Text style={componentStyles.elementColor13}>{statusText}</Text>
       </View>
     </Animated.View>
   );

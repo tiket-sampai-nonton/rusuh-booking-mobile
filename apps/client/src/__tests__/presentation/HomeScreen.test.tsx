@@ -12,7 +12,7 @@ import { useAccountStore } from "@presentation/stores/account-store";
 
 // Hold the router push spy in a mock-prefixed object so the jest.mock factory
 // (hoisted above imports) may legally reference it.
-const mockRouter = { push: jest.fn() };
+const mockRouter = { push: jest.fn(), navigate: jest.fn() };
 const mockResponsive = { width: 393, height: 852 };
 function mockGridColumnsForWidth(width: number): number {
   if (width > 900) return 3;
@@ -22,6 +22,7 @@ function mockGridColumnsForWidth(width: number): number {
 
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
+  useFocusEffect: jest.fn(),
 }));
 jest.mock("@presentation/hooks/useResponsive", () => ({
   useResponsive: () => {
@@ -100,6 +101,7 @@ describe("HomeScreen", () => {
 
   beforeEach(() => {
     mockRouter.push.mockReset();
+    mockRouter.navigate.mockReset();
     mockResponsive.width = 393;
     mockResponsive.height = 852;
     act(() => useAccountStore.getState().clearProfile());
@@ -196,7 +198,7 @@ describe("HomeScreen", () => {
       expect.stringMatching(/^\/events\//),
     );
     fireEvent.press(screen.getAllByTestId("hero-see-all")[0]);
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/browse");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/browse");
   });
 
   it("handles desktop header routes, section links, and scroll events", async () => {
@@ -222,9 +224,9 @@ describe("HomeScreen", () => {
       | undefined;
     act(() => scrollHandler?.({ contentOffset: { y: 240 } }));
 
-    expect(mockRouter.push).toHaveBeenCalledWith("/browse");
-    expect(mockRouter.push).toHaveBeenCalledWith("/my-tickets");
-    expect(mockRouter.push).toHaveBeenCalledWith("/profile");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/browse");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/profile");
   });
 
   it("opens and applies the web filter sheet", async () => {
@@ -241,7 +243,7 @@ describe("HomeScreen", () => {
     fireEvent.press(screen.getByTestId("filter-genre-festival"));
     fireEvent.press(screen.getByTestId("filter-time-month"));
     fireEvent.press(screen.getByTestId("filter-apply"));
-    expect(mockRouter.push).toHaveBeenCalledWith(
+    expect(mockRouter.navigate).toHaveBeenCalledWith(
       "/browse?category=festival&time=month&sort=closest",
     );
   });
@@ -258,11 +260,11 @@ describe("HomeScreen", () => {
     await waitFor(() => screen.getByRole("tab", { name: "Ticket" }));
 
     fireEvent.press(screen.getByRole("tab", { name: "Jelajah" }));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/browse");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/browse");
     fireEvent.press(screen.getByRole("tab", { name: "Ticket" }));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/my-tickets");
     fireEvent.press(screen.getByRole("tab", { name: "Profil" }));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/profile");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/profile");
   });
 
   it("renders empty states when the catalog is empty", async () => {

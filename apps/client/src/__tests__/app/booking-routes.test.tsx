@@ -11,6 +11,7 @@ const mockUseLocalSearchParams = jest.fn(
 jest.mock("expo-router", () => ({
   Stack: () => null,
   useRouter: () => ({ replace: jest.fn() }),
+  useFocusEffect: jest.fn(),
   useLocalSearchParams: () => mockUseLocalSearchParams(),
 }));
 jest.mock("@presentation/components/Seo", () => ({ Seo: () => null }));

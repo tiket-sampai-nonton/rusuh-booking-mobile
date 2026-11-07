@@ -28,7 +28,11 @@ import { useAccountStore } from "@presentation/stores/account-store";
 // spies — held in mock-prefixed names so the hoisted jest.mock factory may
 // legally reference them.
 const mockParams: { current: Record<string, string> } = { current: {} };
-const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockRouter = {
+  push: jest.fn(),
+  replace: jest.fn(),
+  navigate: jest.fn(),
+};
 const originalPlatform = Platform.OS;
 const originalWindow = Dimensions.get("window");
 const originalScreen = Dimensions.get("screen");
@@ -77,6 +81,7 @@ describe("BrowseScreen — URL-driven filters", () => {
     mockParams.current = {};
     mockRouter.push.mockReset();
     mockRouter.replace.mockReset();
+    mockRouter.navigate.mockReset();
     useAccountStore.getState().clearProfile();
   });
 
@@ -165,7 +170,7 @@ describe("BrowseScreen — URL-driven filters", () => {
     fireEvent.press(screen.getByTestId("browse-filter"));
     fireEvent.press(screen.getByTestId("filter-sort-furthest"));
     fireEvent.press(screen.getByTestId("filter-apply"));
-    expect(mockRouter.push).toHaveBeenCalledWith(
+    expect(mockRouter.replace).toHaveBeenCalledWith(
       expect.stringMatching(/^\/browse\?/),
     );
 
@@ -230,7 +235,7 @@ describe("BrowseScreen — URL-driven filters", () => {
     //  uses Header with header-logo testID
     await waitFor(() => screen.getByTestId("header-logo"));
     fireEvent.press(screen.getByTestId("header-logo"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
   });
 
   it("keeps the guest desktop header CTA inert on Browse", async () => {
@@ -245,6 +250,7 @@ describe("BrowseScreen — URL-driven filters", () => {
     await waitFor(() => screen.getByTestId("header-cta"));
     fireEvent.press(screen.getByTestId("header-cta"));
     expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
   });
 
   it("routes logged-in native bottom navigation to Home, tickets, and profile", async () => {
@@ -262,9 +268,9 @@ describe("BrowseScreen — URL-driven filters", () => {
     fireEvent.press(screen.getByRole("tab", { name: "Ticket" }));
     fireEvent.press(screen.getByRole("tab", { name: "Profil" }));
 
-    expect(mockRouter.push).toHaveBeenCalledWith("/");
-    expect(mockRouter.push).toHaveBeenCalledWith("/my-tickets");
-    expect(mockRouter.push).toHaveBeenCalledWith("/profile");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/profile");
   });
 
   it("shows the Loader before data resolves", async () => {

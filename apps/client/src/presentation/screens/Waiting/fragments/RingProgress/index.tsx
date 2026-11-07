@@ -49,7 +49,7 @@ export function RingProgress({
   const arcProps = useAnimatedProps(() => ({
     strokeDashoffset: RING_CIRCUMFERENCE * (1 - animatedProgress.value),
   }));
-  const strokeColor = isWarning || position <= 10 ? palette.red : palette.ink;
+  const strokeColor = isWarning || position <= 10 ? palette.pink : palette.ink;
 
   return (
     <View style={styles.ringWrap} testID="waiting-ring">

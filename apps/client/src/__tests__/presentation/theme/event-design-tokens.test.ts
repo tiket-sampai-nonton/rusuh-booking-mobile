@@ -24,14 +24,14 @@ const tw = (
 
 describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
   describe("designColors", () => {
-    it("exposes monochrome surfaces and red brand accents", () => {
+    it("exposes monochrome surfaces and pink brand accents", () => {
       expect(designColors).toMatchObject({
         ground: "#FFFFFF",
         ink: "#000000",
         overlay: "#0A0A0C",
         inkMuted: "#666666",
         field: "#F5F5F5",
-        danger: "#EC1C24",
+        danger: "#D81B60",
         success: "#00AA00",
         warning: "#FF6600",
       });
@@ -40,8 +40,8 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
     it("includes legacy aliases for backwards compatibility", () => {
       expect(designColors.muted).toBe("#666666");
       expect(designColors.warn).toBe("#FF6600");
-      expect(designColors.accent).toBe("#EC1C24");
-      expect(designColors.ember).toBe("#FF5A2D");
+      expect(designColors.accent).toBe("#D81B60");
+      expect(designColors.pink).toBe("#FF5C9A");
     });
   });
 
@@ -108,9 +108,9 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
         text: "#E65100",
       });
       expect(designZoneBanners.notEnough).toEqual({
-        bg: "#FFEBEE",
-        border: "#EC1C24",
-        text: "#B71C1C",
+        bg: "#FCE4EC",
+        border: "#D81B60",
+        text: "#880E4F",
       });
     });
   });
@@ -139,7 +139,7 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
     describe("Tailwind sync", () => {
       it("MIRRORS the tailwind.config.js v2 namespace for core colors", () => {
         // Every core raw token equals its tailwind counterpart — no drift.
-        (["ink", "ground", "field", "overlay", "ember"] as const).forEach(
+        (["ink", "ground", "field", "overlay", "pink"] as const).forEach(
           (k) => {
             if (tw[k]) {
               expect(designColors[k]).toBe(tw[k]);

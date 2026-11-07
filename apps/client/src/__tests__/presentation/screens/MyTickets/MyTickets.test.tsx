@@ -12,7 +12,12 @@ import { useAccountStore } from "@presentation/stores/account-store";
 import { useSessionStore } from "@presentation/stores/session-store";
 import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 
-const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
+const mockRouter = {
+  push: jest.fn(),
+  replace: jest.fn(),
+  navigate: jest.fn(),
+  back: jest.fn(),
+};
 const mockDownloadTickets = jest.fn(async () => undefined);
 const mockShareTickets = jest.fn(async () => undefined);
 const mockResponsiveState = {
@@ -74,6 +79,7 @@ describe("MyTicketsScreen", () => {
 
   beforeEach(() => {
     mockRouter.push.mockReset();
+    mockRouter.navigate.mockReset();
     mockDownloadTickets.mockClear();
     mockShareTickets.mockClear();
     Object.assign(mockResponsiveState, {
@@ -101,7 +107,7 @@ describe("MyTicketsScreen", () => {
       expect(screen.getByTestId("my-tickets-empty")).toBeTruthy(),
     );
     fireEvent.press(screen.getByText("Jelajahi Event"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/browse");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/browse");
     fireEvent.press(screen.getByTestId("header-cta"));
     expect(screen.getByTestId("login-card")).toBeTruthy();
     fireEvent.press(screen.getByTestId("login-close"));
@@ -109,7 +115,7 @@ describe("MyTicketsScreen", () => {
     fireEvent.press(screen.getByTestId("bottom-nav-home"));
     fireEvent.press(screen.getByTestId("bottom-nav-browse"));
     fireEvent.press(screen.getByTestId("bottom-nav-profile"));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/profile");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/profile");
   });
 
   it("loads account tickets and opens the selected booking QR sheet", async () => {
@@ -367,7 +373,7 @@ describe("MyTicketsScreen", () => {
     fireEvent.press(screen.getByTestId("nav-browse"));
     fireEvent.press(screen.getByTestId("nav-tickets"));
     fireEvent.press(screen.getByTestId("nav-profile"));
-    expect(mockRouter.push.mock.calls).toEqual([
+    expect(mockRouter.navigate.mock.calls).toEqual([
       ["/"],
       ["/browse"],
       ["/profile"],

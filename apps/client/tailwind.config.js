@@ -1,7 +1,7 @@
 const palette = {
-  brandPrimary: "#EC1C24",
-  brandDeep: "#A8111B",
-  brandEmber: "#FF5A2D",
+  brandPrimary: "#D81B60",
+  brandDeep: "#880E4F",
+  brandPink: "#FF5C9A",
   ground: "#FFFFFF",
   darkBackground: "#0A0A0C",
   ink: "#000000",
@@ -17,14 +17,14 @@ const palette = {
   successDark: "#4ADE80",
   warning: "#FF6600",
   warningDark: "#F5B301",
-  error: "#EC1C24",
-  errorDark: "#FF6A4C",
+  error: "#D81B60",
+  errorDark: "#FF5C9A",
   zoneOk: "#E8F5E9",
   zoneOkText: "#1B5E20",
   zoneWarn: "#FFF3E0",
   zoneWarnText: "#E65100",
-  zoneBad: "#FFEBEE",
-  zoneBadText: "#B71C1C",
+  zoneBad: "#FCE4EC",
+  zoneBadText: "#880E4F",
 };
 
 function withAlpha(hex, alpha) {
@@ -39,7 +39,7 @@ const colorTokens = {
   brand: {
     DEFAULT: palette.brandPrimary,
     deep: palette.brandDeep,
-    ember: palette.brandEmber,
+    pink: palette.brandPink,
   },
   background: { DEFAULT: palette.ground, dark: palette.darkBackground },
   foreground: { DEFAULT: palette.ink, dark: palette.darkForeground },
@@ -71,7 +71,7 @@ const colorTokens = {
     gray: palette.gray,
     field: palette.field,
     accent: palette.brandPrimary,
-    ember: palette.brandEmber,
+    pink: palette.brandPink,
     danger: palette.error,
     success: palette.success,
     warn: palette.warning,
@@ -92,7 +92,8 @@ const colorTokens = {
  * SINGLE design-token source of truth (NativeWind) — RBT-003.
  *
  * Layout and typography follow the prototype V5 design system. The color palette
- * uses black and white surfaces with red brand accents and semantic status colors.
+ * uses black and white surfaces with pink brand accents and separate semantic
+ * status colors.
  * `src/presentation/theme/` derives values from this palette for contexts
  * NativeWind cannot style (SVG / Canvas / QR / Reanimated) — it mirrors this
  * file and is never an independent source.
