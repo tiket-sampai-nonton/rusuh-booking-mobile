@@ -1,0 +1,282 @@
+name: Distribute Android QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: Notes shown to Android QA testers
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-qa-distribution
+  cancel-in-progress: false
+
+jobs:
+  validate_ref:
+    name: Validate release branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require a manual release from develop
+        run: |
+          test "$GITHUB_EVENT_NAME" = 'workflow_dispatch' || {
+            echo 'This workflow can only be started manually.'
+            exit 1
+          }
+          test "$GITHUB_REF" = 'refs/heads/develop' || {
+            echo 'Select the develop branch for an Android QA distribution.'
+            exit 1
+          }
+
+  typecheck:
+    name: Typecheck
+    needs: validate_ref
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+
+  lint_format:
+    name: Lint and format
+    needs: validate_ref
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+
+  tests:
+    name: Jest and RNTL
+    needs: validate_ref
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - run: npm ci
+      - run: npm run test:coverage -- --runInBand --ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-qa-coverage
+          path: apps/client/coverage/lcov.info
+          if-no-files-found: error
+
+  audit:
+    name: Audit production dependencies
+    needs: validate_ref
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+
+  build_apk:
+    name: Build signed Android APK
+    needs: [validate_ref, typecheck, lint_format, tests, audit]
+    runs-on: ubuntu-latest
+    environment: development
+    defaults:
+      run:
+        working-directory: apps/client
+    env:
+      EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+      EXPO_PUBLIC_USE_MOCKS: ${{ vars.EXPO_PUBLIC_USE_MOCKS }}
+      EXPO_PUBLIC_ENV: ${{ vars.EXPO_PUBLIC_ENV }}
+      ANDROID_VERSION_CODE: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
+            ndk;27.1.12297006
+            cmake;3.22.1
+      - run: npm ci
+      - name: Validate development build settings
+        run: |
+          test "$EXPO_PUBLIC_ENV" = 'development' || {
+            echo 'EXPO_PUBLIC_ENV must be development.'
+            exit 1
+          }
+          test "$EXPO_PUBLIC_USE_MOCKS" = 'true' || {
+            echo 'This QA workflow requires mock adapters to be enabled.'
+            exit 1
+          }
+          test -n "$EXPO_PUBLIC_API_BASE_URL" || {
+            echo 'EXPO_PUBLIC_API_BASE_URL must be set, even when mocks are enabled.'
+            exit 1
+          }
+      - name: Decode Android QA signing keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$ANDROID_KEYSTORE_BASE64" || {
+            echo 'ANDROID_KEYSTORE_BASE64 is missing from the development environment.'
+            exit 1
+          }
+          KEYSTORE_PATH="$RUNNER_TEMP/rusuh-booking-qa.jks"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          test -s "$KEYSTORE_PATH" || {
+            echo 'The decoded Android keystore is empty.'
+            exit 1
+          }
+          chmod 600 "$KEYSTORE_PATH"
+          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+      - name: Generate Android project
+        run: npx expo prebuild --platform android --clean --no-install
+      - name: Build release APK
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          test -n "$ANDROID_KEYSTORE_PASSWORD" &&
+            test -n "$ANDROID_KEY_ALIAS" &&
+            test -n "$ANDROID_KEY_PASSWORD" || {
+              echo 'Android signing secrets are incomplete in the development environment.'
+              exit 1
+            }
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rusuh-booking-android-qa-apk
+          path: apps/client/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  distribute_firebase:
+    name: Distribute APK to Firebase testers
+    needs: build_apk
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: rusuh-booking-android-qa-apk
+          path: apk
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate Firebase distribution settings
+        env:
+          FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_TESTER_GROUPS: ${{ vars.FIREBASE_TESTER_GROUPS }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          test -n "$FIREBASE_ANDROID_APP_ID" || {
+            echo 'FIREBASE_ANDROID_APP_ID is missing from the development environment.'
+            exit 1
+          }
+          case "$FIREBASE_ANDROID_APP_ID" in
+            1:*:android:*) ;;
+            *) echo 'FIREBASE_ANDROID_APP_ID does not look like a Firebase Android App ID.'; exit 1 ;;
+          esac
+          test -n "$FIREBASE_TESTER_GROUPS" || {
+            echo 'FIREBASE_TESTER_GROUPS is missing from the development environment.'
+            exit 1
+          }
+          test -n "$FIREBASE_SERVICE_ACCOUNT_JSON" || {
+            echo 'FIREBASE_SERVICE_ACCOUNT_JSON is missing from the development environment.'
+            exit 1
+          }
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+      - name: Upload APK to Firebase App Distribution
+        env:
+          FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_TESTER_GROUPS: ${{ vars.FIREBASE_TESTER_GROUPS }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          RELEASE_NOTES="${RELEASE_NOTES:-Android QA build from develop (${GITHUB_SHA::7}).}"
+          npx --yes firebase-tools@latest appdistribution:distribute apk/app-release.apk \
+            --app "$FIREBASE_ANDROID_APP_ID" \
+            --groups "$FIREBASE_TESTER_GROUPS" \
+            --release-notes "$RELEASE_NOTES"
+
+  notify:
+    name: Notify Telegram
+    if: ${{ always() }}
+    needs:
+      [
+        validate_ref,
+        typecheck,
+        lint_format,
+        tests,
+        audit,
+        build_apk,
+        distribute_firebase,
+      ]
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Send job results
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          JOB_RESULTS: ${{ toJSON(needs) }}
+        run: |
+          test -n "$TELEGRAM_BOT_TOKEN" && test -n "$TELEGRAM_CHAT_ID" || {
+            echo 'Telegram credentials are missing.'
+            exit 1
+          }
+          RESULTS=$(printf '%s' "$JOB_RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"')
+          FAILED_JOBS=$(printf '%s' "$JOB_RESULTS" | jq -r '[to_entries[] | select(.value.result == "failure" || .value.result == "cancelled") | .key] | join(", ")')
+          if [ -n "$FAILED_JOBS" ]; then
+            STATUS="FAILED — $FAILED_JOBS"
+          else
+            STATUS="SUCCESS"
+          fi
+          MESSAGE=$(printf 'Android QA distribution: %s\nBranch: %s\nCommit: %s\n\n%s\n\n%s/%s/actions/runs/%s' "$STATUS" "$GITHUB_REF_NAME" "$GITHUB_SHA" "$RESULTS" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          curl --fail-with-body --silent --show-error \
+            --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+            --data-urlencode "text=$MESSAGE" > /dev/null

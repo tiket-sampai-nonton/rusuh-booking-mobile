@@ -1,3 +1,14 @@
+const androidVersionCode = Number(process.env.ANDROID_VERSION_CODE || "1");
+if (
+  !Number.isSafeInteger(androidVersionCode) ||
+  androidVersionCode < 1 ||
+  androidVersionCode > 2100000000
+) {
+  throw new Error(
+    "ANDROID_VERSION_CODE must be an integer between 1 and 2100000000.",
+  );
+}
+
 const config = {
   name: "Rusuh Booking",
   slug: "rusuh-booking-mobile",
@@ -13,7 +24,10 @@ const config = {
     supportsTablet: true,
     bundleIdentifier: "com.tiketsampainonton.rusuhbooking",
   },
-  android: { package: "com.tiketsampainonton.rusuhbooking" },
+  android: {
+    package: "com.tiketsampainonton.rusuhbooking",
+    versionCode: androidVersionCode,
+  },
   web: {
     bundler: "metro",
     favicon: "./assets/favicon.png",
@@ -36,6 +50,7 @@ const config = {
     ],
     "expo-asset",
     "expo-font",
+    "./plugins/with-android-qa-signing.cjs",
     "./plugins/with-ios-fmt-compat.cjs",
   ],
   experiments: { typedRoutes: true },

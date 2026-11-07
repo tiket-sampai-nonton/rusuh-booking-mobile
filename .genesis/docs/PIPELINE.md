@@ -3,8 +3,8 @@
 > **Status:** Locked delivery pipeline for the FE architecture
 > **Scope:** Expo + React Native + React Native Web frontend
 > **CI:** GitHub Actions
-> **Static quality:** SonarCloud
-> **Native delivery:** Expo development/preview/production builds through EAS or the approved internal Expo-compatible build service
+> **Static quality:** SonarCloud is temporarily skipped by explicit project decision
+> **Native delivery:** Android QA APKs build on GitHub Actions and distribute through Firebase App Distribution; EAS is reserved for compatible OTA updates. iOS device builds use a separate macOS runner workflow when configured.
 > **Architecture reference:** `.genesis/docs/ARCHITECTURE.md`
 > **FE-BE contract:** `.genesis/docs/FE-BE-align-contract.md`
 
@@ -20,16 +20,16 @@ feature/*
     ├── pull request → develop
     │                  └── validation gates only
     │
-    └── merged into develop → native OTA + web deployment
+    └── merged into develop → manual development web/OTA/Android QA release when requested
                               │
                               └── pull request → main
                                                   └── validation + approval
-                                                      └── native OTA + web deployment
+                                                      └── manual production web/OTA release when requested
 ```
 
 There are two runtime environments:
 
-| Environment | Branch | Android/iOS EAS channel | Web deployment | Backend target | Purpose |
+| Environment | Branch | Android/iOS OTA channel | Web deployment | Backend target | Purpose |
 |---|---|---|---|---|---|
 | Development | `develop` | `development` | Development web host | Development/mock or integration BE | Team integration and rapid validation |
 | Production | `main` | `production` | Production web host/CDN | Production BE | End-user release |
@@ -40,18 +40,18 @@ Preview builds are distribution artifacts for QA and product review, not a third
 
 | Git event | Pipeline behavior |
 |---|---|
-| Pull request opened, synchronized, reopened, or marked ready for review → `develop` | Run typecheck, lint, unit/component tests, security scan, and SonarCloud gates. Stop before web build/deployment, OTA publication, and native distribution. |
-| Successful push to `develop` after merge | Run required gates, publish a compatible native OTA update to `development`, and deploy the web artifact to the development host. |
+| Pull request opened, synchronized, reopened, or marked ready for review → `develop` | Run typecheck, lint/format, unit/component tests, and dependency audit. SonarCloud is temporarily skipped. Stop before web build/deployment, OTA publication, and native distribution. |
+| Successful push to `develop` after merge | No user-facing deployment starts automatically. The operator may manually dispatch web deployment, compatible OTA publication, or Android QA distribution. |
 | Pull request opened or synchronized → `main` | Run full release validation. Require approval before merge. |
-| Successful push to `main` after merge from `develop` | Run full gates, publish a compatible native OTA update to `production`, and deploy the web artifact to the production host/CDN. |
-| `workflow_dispatch` | Allow an authorized operator to rerun validation, publish a selected compatible update, or create a native preview/production build. |
-| Native-affecting change | Do not use OTA; route to the Expo native build pipeline. |
+| Successful push to `main` after merge from `develop` | No user-facing deployment starts automatically. An authorized operator manually dispatches a production web or compatible OTA release. |
+| `workflow_dispatch` | Manually deploy web, publish a compatible OTA update, or build and distribute an Android QA APK. |
+| Native-affecting change | Do not use OTA; route Android changes to the GitHub Actions/Firebase QA build. |
 
 An OTA is published only from the target branch after the merge has succeeded. Opening or updating a pull request never deploys user-facing code.
 
 ## 3. Job dependency graph
 
-The graph below shows the **post-merge path**. Pull requests run through the gates up to SonarCloud and stop there; they do not publish web or native artifacts.
+The graph below shows the **manual post-merge release path**. Pull requests run quality gates and stop there; they do not publish web or native artifacts. SonarCloud is temporarily omitted from the gates.
 
 ```mermaid
 flowchart LR
@@ -61,13 +61,13 @@ flowchart LR
     INSTALL --> UNIT["Jest + RNTL"]
     INSTALL --> AUDIT["npm audit"]
 
-    TYPE --> SONAR["SonarCloud quality gate"]
-    LINT --> SONAR
-    UNIT --> SONAR
-    AUDIT --> SONAR
+    TYPE --> GATES["quality gates passed"]
+    LINT --> GATES
+    UNIT --> GATES
+    AUDIT --> GATES
 
-    SONAR --> WEB["web build + SEO check"]
-    SONAR --> FINGERPRINT{"native-affecting change?"}
+    GATES --> WEB["web build + SEO check"]
+    GATES --> FINGERPRINT{"native-affecting change?"}
     FINGERPRINT -->|no| OTA["compatible Android/iOS OTA"]
     FINGERPRINT -->|yes| NATIVE["Android/iOS native build"]
     WEB --> WEBDEPLOY["web deployment"]
@@ -85,7 +85,7 @@ This is a release-routing decision, not a separate test. The pipeline checks whe
 - push-notification, payment, camera, biometric, file-system, WebView, or other native capability configuration;
 - Expo SDK or React Native version changes.
 
-If **no**, the compatible JavaScript and assets may be published through Android/iOS EAS OTA, subject to runtime-version compatibility. If **yes**, the pipeline skips OTA for that change and creates new Android/iOS native build artifacts for internal distribution or store release. React Native Web is still exported and deployed separately in both cases.
+If **no**, compatible JavaScript and assets may be published through EAS OTA after a manual release trigger, subject to runtime-version compatibility. If **yes**, the pipeline skips OTA for that change and creates a new native build artifact for internal distribution or store release. Android QA builds use GitHub Actions and Firebase App Distribution. React Native Web is still exported and deployed separately.
 
 This protects users from receiving JavaScript that expects native APIs, permissions, or configuration that do not exist in the installed binary.
 
@@ -123,6 +123,8 @@ OpenAPI remains the FE-BE source of truth, but contract validation is not a clou
 
 ### 4.6 `sonarcloud`
 
+Temporarily skipped by explicit project decision while the SonarCloud scan is unavailable in GitHub Actions. When the connection and branch-analysis configuration are ready, restore this gate with the following requirements:
+
 - Run after typecheck, lint, unit tests, and vulnerability scanning.
 - Upload Jest `lcov` coverage.
 - Enforce the SonarCloud quality gate for new code:
@@ -132,7 +134,7 @@ OpenAPI remains the FE-BE source of truth, but contract validation is not a clou
   - duplication within the approved threshold;
   - shared domain/application coverage target of **at least 90%** unless explicitly waived.
 
-SonarCloud is a static analysis gate. It does not replace Jest or the agreed QA strategy.
+When restored, SonarCloud is a static analysis gate. It does not replace Jest or the agreed QA strategy.
 
 ## 5. Web build artifacts
 
@@ -153,21 +155,21 @@ This is artifact validation only. Browser-level QA, responsive interaction testi
 
 ### 6.1 `native_build`
 
-Use Expo development, preview, or production builds to generate native artifacts. Device-level QA is outside this CI/CD pipeline. Expo Go is not a production artifact.
+Use GitHub Actions to generate native artifacts for device-level QA. Expo Go is not a distribution artifact.
 
 Build targets:
 
 | Target | Artifact | Use |
 |---|---|---|
-| Android | APK/AAB through Expo build service | Internal distribution or store release |
-| iOS | Simulator/device build through Expo build service | Internal distribution or store release |
+| Android | Signed APK through a GitHub Actions `ubuntu-latest` runner | Firebase App Distribution for QA |
+| iOS | Simulator/device build through the planned macOS GitHub Actions workflow | Internal distribution or store release; setup pending |
 | Web | Exported web artifact | Web deployment |
 
 ## 7. OTA strategy
 
 ### 7.1 Development native OTA and web deployment
 
-After a successful merge into `develop`:
+After a successful merge into `develop`, an authorized operator manually starts the development OTA workflow:
 
 1. Confirm the commit is the current `develop` head.
 2. Confirm the update contains no native-affecting changes.
@@ -179,7 +181,7 @@ After a successful merge into `develop`:
 
 ### 7.2 Production native OTA and web deployment
 
-After `develop` is merged into `main`:
+After `develop` is merged into `main`, an authorized operator manually starts the production OTA workflow:
 
 1. Run the full release pipeline and require approval.
 2. Confirm the commit is the current `main` head.
@@ -216,23 +218,23 @@ Create a new native build instead of OTA when a change includes:
 
 ### 8.1 `build_android`
 
-- Use Expo/EAS-compatible build configuration.
-- Build development, preview, or production profile according to the workflow input.
-- Never generate production signing keys inside CI.
-- Store Android signing credentials in the approved Expo/EAS credential store or enterprise secret manager.
-- Upload the artifact and build metadata.
+- Run only from a manual dispatch on `develop` for the Android QA distribution workflow.
+- Use the Expo config-prebuild project and Gradle on `ubuntu-latest`.
+- Build a signed release APK with the persistent QA keystore stored in GitHub environment secrets; never generate or commit signing keys in CI.
+- Use the `development` environment with mocks enabled and a monotonically increasing Android `versionCode`.
+- Upload the APK as a workflow artifact, then distribute it to the configured Firebase App Distribution tester group.
+- Run typecheck, lint/format, Jest/RNTL, and production dependency audit before building or distributing. SonarCloud is temporarily skipped by explicit project decision.
 
 ### 8.2 `build_ios`
 
-- Use Expo/EAS-compatible iOS build configuration.
-- Build simulator artifacts when a workflow explicitly requests a local/internal smoke-test artifact; this is an artifact, not an automated CI quality gate.
-- Build device/TestFlight artifacts for human QA and distribution.
-- Store Apple signing credentials in the approved Expo/EAS credential store or enterprise secret manager.
-- Upload the artifact and build metadata.
+- Use a macOS GitHub Actions runner for native iOS builds; this workflow is not configured yet.
+- Build simulator artifacts for smoke checks and signed device artifacts for human QA/distribution.
+- Store Apple signing credentials in GitHub environment secrets or an approved enterprise secret manager.
 
 ### 8.3 `distribute_preview`
 
-- Distribute Android and iOS preview builds through the approved internal distribution channel.
+- Distribute Android QA APKs through Firebase App Distribution after the manual workflow's gates pass.
+- Add iOS to the approved internal distribution channel when its signed build workflow is configured.
 - Publish the web preview artifact to the staging web host.
 - Include branch, commit SHA, API environment, build profile, and test summary in release notes.
 
@@ -261,11 +263,17 @@ Create a new native build instead of OTA when a change includes:
 | `SONAR_TOKEN` | SonarCloud | Authentication for analysis and quality gate |
 | `SONAR_ORGANIZATION` | SonarCloud | SonarCloud organization identifier |
 | `SONAR_PROJECT_KEY` | SonarCloud | SonarCloud project identifier |
-| `EXPO_TOKEN` | Expo/EAS | CI authentication for builds and OTA |
-| `EXPO_PROJECT_ID` | Expo/EAS | Project attribution for builds and updates |
-| `EXPO_PUBLIC_API_URL` | App build | Environment-specific API base URL; contains no secret |
-| Android signing credentials | Native build | Android release signing, managed securely |
-| Apple signing credentials | Native build | iOS build/signing, managed securely |
+| `EXPO_TOKEN` | EAS Update | CI authentication for OTA publication only |
+| `EXPO_PROJECT_ID` | EAS Update | Expo project attribution for OTA updates |
+| `EXPO_PUBLIC_API_BASE_URL` | App build | Environment-specific API base URL; contains no secret |
+| `ANDROID_KEYSTORE_BASE64` | Android GitHub Actions | Base64-encoded QA signing keystore |
+| `ANDROID_KEYSTORE_PASSWORD` | Android GitHub Actions | QA keystore password |
+| `ANDROID_KEY_ALIAS` | Android GitHub Actions | QA signing key alias |
+| `ANDROID_KEY_PASSWORD` | Android GitHub Actions | QA signing key password |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Firebase App Distribution | CI authentication for APK distribution |
+| `FIREBASE_ANDROID_APP_ID` | Firebase App Distribution | Registered Firebase Android app ID |
+| `FIREBASE_TESTER_GROUPS` | Firebase App Distribution | Comma-separated tester group aliases |
+| Apple signing credentials | iOS GitHub Actions | iOS device build signing, managed securely |
 | Web hosting credentials | Web deployment | Development/production web deployment |
 
 Never store NIK, payment data, API secrets, signing keys, or service-account JSON in the repository or in client-exposed `EXPO_PUBLIC_*` variables.
@@ -345,7 +353,7 @@ Web rollback is separate from native OTA rollback:
 | Unit/component behavior | Jest + React Native Testing Library | Yes | Yes |
 | API compatibility | OpenAPI types and FE-BE review | No | No |
 | Dependency security | npm audit + secret scan | Yes | Yes |
-| Static analysis | SonarCloud | Yes | Yes |
+| Static analysis | SonarCloud (temporarily skipped) | No, until restored | No, until restored |
 | SEO output | Expo export validation | Yes for web release | Yes for web release |
 | Web bundle budget | Bundle-size check | Yes for web release | Yes for web release |
 
