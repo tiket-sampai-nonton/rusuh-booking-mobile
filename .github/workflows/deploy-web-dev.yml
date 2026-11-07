@@ -162,6 +162,9 @@ jobs:
     outputs:
       decision: ${{ steps.fingerprint.outputs.decision || steps.ota_gate.outputs.decision }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Check environment OTA toggle
         id: ota_gate
         run: |
@@ -172,10 +175,6 @@ jobs:
             echo 'decision=ota-disabled' >> "$GITHUB_OUTPUT"
             echo "EAS OTA is disabled for $GITHUB_REF_NAME; skipping publication."
           fi
-      - uses: actions/checkout@v4
-        if: ${{ steps.ota_gate.outputs.decision == 'enabled' }}
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         if: ${{ steps.ota_gate.outputs.decision == 'enabled' }}
         with:
