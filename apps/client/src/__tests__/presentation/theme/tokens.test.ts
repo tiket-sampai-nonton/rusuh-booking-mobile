@@ -24,11 +24,10 @@ const tailwindBrand = (
 ).theme?.extend?.colors?.brand;
 
 describe("RBT-003 raw tokens", () => {
-  it("exposes the pink brand palette", () => {
-    expect(brand.primary).toBe("#BE185D");
-    expect(brand.deep).toBe("#831843");
-    expect(brand.pink).toBe("#F472B6");
-    expect(brand.pinkLight).toBe("#FBCFE8");
+  it("exposes the black, white, and red brand palette", () => {
+    expect(brand.primary).toBe("#EC1C24");
+    expect(brand.deep).toBe("#A8111B");
+    expect(brand.ember).toBe("#FF5A2D");
   });
 
   it("mirrors the Tailwind brand palette as the canonical token source", () => {
@@ -38,52 +37,51 @@ describe("RBT-003 raw tokens", () => {
 
     expect(brand.primary).toBe(tailwindBrand.DEFAULT);
     expect(brand.deep).toBe(tailwindBrand.deep);
-    expect(brand.pink).toBe(tailwindBrand.pink);
-    expect(brand.pinkLight).toBe(tailwindBrand["pink-light"]);
+    expect(brand.ember).toBe(tailwindBrand.ember);
   });
 
   it("exposes light + dark status hues", () => {
     expect(status).toMatchObject({
-      ok: "#15803D",
-      okDark: "#86EFAC",
-      warn: "#A16207",
-      warnDark: "#FDE047",
-      error: "#B42318",
-      errorDark: "#FDA29B",
+      ok: "#00AA00",
+      okDark: "#4ADE80",
+      warn: "#FF6600",
+      warnDark: "#F5B301",
+      error: "#EC1C24",
+      errorDark: "#FF6A4C",
     });
   });
 
   it("exposes prototype neutral/surface hues", () => {
-    expect(neutral.ink).toBe("#2D1B25");
-    expect(neutral.ink2).toBe("#4D2A3C");
-    expect(neutral.paper).toBe("#FFF7FA");
+    expect(neutral.ink).toBe("#000000");
+    expect(neutral.ink2).toBe("#121217");
+    expect(neutral.paper).toBe("#FFFFFF");
     expect(neutral.card).toBe("#FFFFFF");
-    expect(neutral.darkBackground).toBe("#1C0E16");
-    expect(neutral.darkCard).toBe("#2A1722");
-    expect(neutral.darkForeground).toBe("#FCEAF2");
-    expect(neutral.overlay).toBe("#1C0E16");
-    expect(neutral.muted).toBe("#705A67");
-    expect(neutral.line).toBe("rgba(45,27,37,0.14)");
-    expect(neutral.mutedDark).toBe("#D6BBC8");
-    expect(neutral.lineDark).toBe("rgba(252,234,242,0.18)");
-    expect(neutral.field).toBe("#FCEAF2");
+    expect(neutral.darkBackground).toBe("#0A0A0C");
+    expect(neutral.darkCard).toBe("#121217");
+    expect(neutral.darkForeground).toBe("#FFFFFF");
+    expect(neutral.overlay).toBe("#0A0A0C");
+    expect(neutral.muted).toBe("#666666");
+    expect(neutral.line).toBe("rgba(0,0,0,0.14)");
+    expect(neutral.mutedDark).toBe("rgba(255,255,255,0.62)");
+    expect(neutral.lineDark).toBe("rgba(255,255,255,0.18)");
+    expect(neutral.field).toBe("#F5F5F5");
   });
 
   it("mirrors waiting-room zone colors from Tailwind", () => {
     expect(zone.ok).toEqual({
-      bg: "#E9F6EC",
-      border: "#15803D",
-      text: "#14532D",
+      bg: "#E8F5E9",
+      border: "#00AA00",
+      text: "#1B5E20",
     });
     expect(zone.warn).toEqual({
-      bg: "#FEF9C3",
-      border: "#A16207",
-      text: "#713F12",
+      bg: "#FFF3E0",
+      border: "#FF6600",
+      text: "#E65100",
     });
     expect(zone.bad).toEqual({
-      bg: "#FEF2F2",
-      border: "#B42318",
-      text: "#991B1B",
+      bg: "#FFEBEE",
+      border: "#EC1C24",
+      text: "#B71C1C",
     });
   });
 
@@ -140,10 +138,10 @@ describe("RBT-003 raw tokens", () => {
   });
 
   it("shadow strings are present for the four prototype elevations", () => {
-    expect(shadow.brand).toContain("rgba(190,24,93,0.28)");
-    expect(shadow.button).toContain("rgba(45,27,37,0.42)");
-    expect(shadow.filter).toContain("rgba(77,42,60,0.5)");
-    expect(shadow.ok).toContain("rgba(21,128,61,0.36)");
+    expect(shadow.brand).toContain("rgba(236,28,36,0.28)");
+    expect(shadow.button).toContain("rgba(0,0,0,0.42)");
+    expect(shadow.filter).toContain("rgba(18,18,23,0.5)");
+    expect(shadow.ok).toContain("rgba(0,170,0,0.36)");
   });
 
   it("the tokens bag re-exports every group by reference", () => {

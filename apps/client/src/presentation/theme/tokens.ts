@@ -14,12 +14,11 @@ const tailwind = require("../../../tailwind.config.js");
 const colors = tailwind.theme.extend.colors;
 const shadows = tailwind.theme.extend.boxShadow;
 
-/** Pink brand hues derived from Tailwind's canonical palette. */
+/** Brand hues derived from Tailwind's canonical palette. */
 export const brand = {
   primary: colors.brand.DEFAULT,
   deep: colors.brand.deep,
-  pink: colors.brand.pink,
-  pinkLight: colors.brand["pink-light"],
+  ember: colors.brand.ember,
 } as const;
 
 /** Status hues mirrored from Tailwind's semantic tokens. */

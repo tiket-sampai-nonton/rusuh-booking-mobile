@@ -28,8 +28,7 @@ export const designColors = {
   red: status.error,
   green: status.ok,
   accent: brand.primary,
-  pink: brand.pink,
-  pinkLight: brand.pinkLight,
+  ember: brand.ember,
 
   // Additional aliases for backwards compatibility
   muted: neutral.muted,

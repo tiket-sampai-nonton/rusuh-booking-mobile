@@ -118,7 +118,7 @@ export function styleForNativeLaunchSplashAnimatedView2(): DynamicStyle {
     justifyContent: "center",
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: brand.pink,
+    borderColor: brand.ember,
     backgroundColor: withAlpha(brand.deep, 0.24),
   } as DynamicStyle;
 }
