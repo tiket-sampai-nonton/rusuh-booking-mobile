@@ -364,8 +364,7 @@ describe("EventDetailScreen", () => {
     fireEvent.press(screen.getByRole("button", { name: "Bagikan" }));
     expect(share).toHaveBeenCalledWith({
       title: "Rusuh Fest 2026",
-      message:
-        "Rusuh Fest 2026\nhttps://rusuh-booking.pages.dev/events/evt-1",
+      message: "Rusuh Fest 2026\nhttps://rusuh-booking.pages.dev/events/evt-1",
     });
     const scrollHandler = screen.getByTestId("detail-scroll").props.onScroll as
       | ((event: { nativeEvent: { contentOffset: { y: number } } }) => void)
@@ -389,9 +388,7 @@ describe("EventDetailScreen", () => {
     });
     await waitFor(() => expect(screen.getByTestId("join-cta")).toBeTruthy());
     fireEvent.press(screen.getByRole("button", { name: "Bagikan" }));
-    expect(writeText).toHaveBeenCalledWith(
-      "https://example.test/events/evt-1",
-    );
+    expect(writeText).toHaveBeenCalledWith("https://example.test/events/evt-1");
     const scrollHandler = screen.getByTestId("detail-scroll").props.onScroll as
       | ((event: { nativeEvent: { contentOffset: { y: number } } }) => void)
       | undefined;

@@ -65,9 +65,7 @@ export function BrowseScreen() {
   const showNavLinks = isWeb && width > 768;
 
   const [activeCategory, setActiveCategory] =
-    useState<BrowseCategoryKey | null>(() =>
-      readBrowseCategory(params.genre),
-    );
+    useState<BrowseCategoryKey | null>(() => readBrowseCategory(params.genre));
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [loadMoreDisabled, setLoadMoreDisabled] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
