@@ -71,7 +71,7 @@ for hosting this static site.
 
 ## 3. How it fits together (the flow)
 
-### Recommended flow — Cloudflare builds, stores, and serves (Git integration)
+### Recommended flow — GitHub Actions builds; Cloudflare Pages stores and serves
 
 ```
 ┌──────────────┐
@@ -83,15 +83,21 @@ for hosting this static site.
                      │    GitHub      │
                      │  source only   │
                      └───────┬────────┘
-                             │ Cloudflare pulls the repo on every push
+                             │ merge to develop or main starts one Release Pipeline
                              ▼
           ┌──────────────────────────────────────┐
-          │            CLOUDFLARE PAGES           │
-          │  1. BUILD   npx expo export → dist/   │
-          │  2. STORE   keeps dist/ as a          │
-          │             versioned "deployment"    │
-          │  3. SERVE   pushes files to the       │
-          │             global edge CDN + HTTPS    │
+          │          GITHUB ACTIONS               │
+          │  1. GATE   typecheck, lint, tests,     │
+          │            dependency audit           │
+          │  2. BUILD  Expo Web → dist/            │
+          │  3. DEPLOY Wrangler uploads artifact   │
+          └──────────────────┬────────────────────┘
+                             │ preprod or production project
+                             ▼
+          ┌──────────────────────────────────────┐
+          │          CLOUDFLARE PAGES             │
+          │  1. STORE   keeps a versioned deploy  │
+          │  2. SERVE   global edge CDN + HTTPS   │
           └──────────────────┬────────────────────┘
                              │ HTTPS
                              ▼
@@ -107,13 +113,13 @@ for hosting this static site.
   ──────────────────────────────────────────────────────────────
   Your laptop        temporary          local testing only (throwaway)
   GitHub repo        NO (.gitignored)   source code only — never commit dist/
-  Build server (CF)  built fresh here   produced during each build
+  GitHub runner      built fresh here   produced during each build
   Cloudflare CDN     YES (final)        what users actually download
   ──────────────────────────────────────────────────────────────
 ```
 
-Mental model: `source code ──build──▶ dist/ (artifact) ──store/serve──▶ users`.
-You never manually "upload" or "store" `dist/` — **deploying to Pages *is* the storing.**
+Mental model: `source code ──GitHub Actions build──▶ dist/ ──Wrangler deploy──▶ Pages CDN ──▶ users`.
+You do not commit `dist/`; the runner builds it and uploads the checked artifact to Pages.
 `dist/` is already gitignored in this repo, which is correct.
 
 ---
@@ -130,8 +136,8 @@ For a **commercial, payment-taking** production app, register a real domain (~$1
 
 | Environment | Branch | Domain | Cost |
 |---|---|---|---|
-| Development / preview | `develop` + feature branches | auto `*.pages.dev` | $0 |
-| Production | `main` | `rusuhtiket.com` (or `.id`) | ~$10/yr |
+| Preprod / development | `develop` | `rusuh-booking.pages.dev` (current project) | $0 |
+| Production | `main` | Separate Pages project; custom domain when ready | Domain ~ $10/yr |
 
 Hosting stays on the free tier throughout; the only spend is the domain.
 
@@ -172,60 +178,38 @@ Confirm the website files generate correctly on your machine *before* involving 
 
 ---
 
-## 7. Phase C — Deploy to Cloudflare Pages (free `*.pages.dev` URL)
+## 7. Phase C — Create Cloudflare Pages projects for GitHub Actions
 
-The repo is already on GitHub at `tiket-sampai-nonton/rusuh-booking-mobile`, so use Git integration.
+GitHub Actions owns the build and upload. Cloudflare Pages should use **Direct Upload**, not Git
+integration: the runner checks the code, builds `apps/client/dist`, and deploys that artifact with
+Wrangler. The preprod project `rusuh-booking` already exists. Production requires a second Pages
+project and is not configured yet.
 
-### C1. Start a new Pages project
-1. In the Cloudflare dashboard, open the left sidebar and click **Workers & Pages**.
-2. Click the **Create** button (top right).
-3. On the page that opens, choose the **Pages** tab.
-4. Click **Connect to Git**.
-   *(In the 2026 UI this whole path may read **Create application → Pages → Connect to Git**.)*
+### C1. Create a Pages project (skip for existing `rusuh-booking`)
+1. In Cloudflare, open **Workers & Pages → Create application → Pages**.
+2. Choose **Direct Upload** (sometimes labeled **Upload your static files**).
+3. Name the preprod project `rusuh-booking`, then create it.
+4. For the initial project creation only, upload a local web export if Cloudflare asks for assets.
+   Later releases are built and uploaded by GitHub Actions; do not connect the repo to Cloudflare.
 
-### C2. Authorize GitHub and pick the repo
-5. Click **Connect GitHub** (first time only) and sign in to GitHub.
-6. When GitHub asks which repositories to grant access to, select
-   **`tiket-sampai-nonton/rusuh-booking-mobile`** (or "All repositories"), then **Install & Authorize**.
-7. Back in Cloudflare, select that repository from the list, then click **Begin setup**.
+### C2. Keep build configuration in GitHub Actions
 
-### C3. Configure the build (this is the important screen)
-Enter these values exactly:
+Do not configure a Cloudflare build command or root directory. The GitHub runner builds from the
+monorepo app folder (`apps/client`) and Wrangler deploys the generated `dist/` directory. Set
+environment-specific `EXPO_PUBLIC_*` variables in the matching GitHub Environment because those
+values are embedded during the runner's build; never store secrets in `EXPO_PUBLIC_*` variables.
 
-| Field | Value | Why |
-|---|---|---|
-| **Project name** | `rusuh-booking` | Becomes `rusuh-booking.pages.dev` |
-| **Production branch** | `main` | Matches PIPELINE.md (prod = `main`) |
-| **Framework preset** | `None` | It's a plain static export |
-| **Build command** | `npx expo export --platform web` | Produces `dist/` |
-| **Build output directory** | `dist` | The folder Cloudflare serves |
-| **Root directory** *(open "Advanced" / "Build settings")* | `apps/client` | **Required** — the app lives in a subfolder, not the repo root |
+### C3. Confirm the first deployment
+1. Open **Workers & Pages → `rusuh-booking` → Deployments**.
+2. After GitHub Actions deploys to the `develop` branch, open `https://rusuh-booking.pages.dev`.
+3. Confirm the home and public routes load, then check the GitHub Actions run and Telegram summary.
 
-> If you skip **Root directory = `apps/client`**, the build fails because Cloudflare would look
-> for the app at the repo root. This is the #1 mistake for monorepos.
-
-### C4. Add environment variables
-Still on the setup screen, find **Environment variables** and add these (from `.env.example`):
-
-| Variable | Value |
-|---|---|
-| `EXPO_PUBLIC_API_BASE_URL` | your **production** backend URL |
-| `EXPO_PUBLIC_ENV` | `production` |
-| `EXPO_PUBLIC_USE_MOCKS` | `false` |
-
-Never paste real secrets here — `EXPO_PUBLIC_*` values are shipped to the browser. These are
-public config only (per SECURITY.md / PIPELINE.md §10).
-
-### C5. Deploy and verify
-8. Click **Save and Deploy**.
-9. Watch the build log stream. First build takes a few minutes.
-10. When it finishes, Cloudflare shows a live URL like **`https://rusuh-booking.pages.dev`**.
-    Open it and click through a few pages to confirm it works.
-
-### C6. Branch → environment mapping (matches PIPELINE.md)
-- Push to **`main`** → **production** deploy (your main URL / custom domain).
-- Push to **`develop`** or any feature branch → an automatic **preview URL**
-  (e.g. `develop.rusuh-booking.pages.dev`). This is your free dev environment — no extra setup.
+### C4. Branch → environment mapping (matches PIPELINE.md)
+- Merge/push to **`develop`** → automatic preprod web build and deployment to the `rusuh-booking`
+  Pages project, after shared quality and SEO/bundle gates pass.
+- Merge/push to **`main`** → automatic production web build and deployment to a separate Pages
+  project, after the same gates pass. Production project creation and configuration are pending.
+- Pull requests run validation only. Feature branches do not deploy to either user-facing project.
 
 ---
 
@@ -239,8 +223,9 @@ Skip this while testing — the `*.pages.dev` URL is fully functional. Do it for
 3. Add it to the cart and pay (~$10/yr for `.com`).
    Because it is registered **at Cloudflare**, DNS is connected automatically — no manual records.
 
-### D2. Attach the domain to the Pages project
-1. Go to **Workers & Pages** and click your **`rusuh-booking`** project.
+### D2. Attach the domain to the production Pages project
+1. Go to **Workers & Pages** and click the separate **production** Pages project (not the preprod
+   `rusuh-booking` project).
 2. Open the **Custom domains** tab.
 3. Click **Set up a custom domain**.
 4. Type your domain (e.g. `rusuhtiket.com`) → **Continue** → **Activate domain**.
@@ -254,65 +239,72 @@ Skip this while testing — the `*.pages.dev` URL is fully functional. Do it for
 
 ---
 
-## 9. Phase E — Manual GitHub Actions deployment to development
+## 9. Phase E — Configure the single GitHub Actions Release Pipeline
 
-The `rusuh-booking` Pages project was created by Direct Upload and has no Git connection. The
-GitHub Actions workflow is the single deployment path; it keeps deployment manual and runs the
-quality gates before uploading the static artifact.
+The Pages projects are Direct Upload projects with no Git connection. One top-level GitHub Actions
+Release Pipeline should handle PR checks, automatic web + compatible EAS OTA releases after merges,
+and an optional manual Firebase APK mode. It may call reusable workflows for each concern, but those
+files should not create separate user-triggered pipelines.
 
-### Configure GitHub
+### Configure GitHub Environments
 
 1. Open **Settings → Environments** in `tiket-sampai-nonton/rusuh-booking-mobile`.
-2. Create an environment named `development`.
-3. Add these **environment secrets**:
+2. Create or confirm the `development` environment and add:
 
-   | Secret | Value |
-   |---|---|
-   | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages Edit permission for this account |
-   | `TELEGRAM_BOT_TOKEN` | Token created by BotFather |
-   | `TELEGRAM_CHAT_ID` | Telegram group or chat ID where release notices should arrive |
+   | Type | Name | Development value |
+   |---|---|---|
+   | Secret | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages Edit permission |
+   | Secret | `TELEGRAM_BOT_TOKEN` | Token created by BotFather |
+   | Secret | `TELEGRAM_CHAT_ID` | Telegram group or chat ID for release notices |
+   | Variable | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID |
+   | Variable | `CLOUDFLARE_PAGES_PROJECT` | `rusuh-booking` |
+   | Variable | `EXPO_PUBLIC_API_BASE_URL` | Development API URL or safe placeholder while mocks are enabled |
+   | Variable | `EXPO_PUBLIC_USE_MOCKS` | `true` |
+   | Variable | `EXPO_PUBLIC_ENV` | `development` |
+   | Variable | `EXPO_PUBLIC_SITE_URL` | `https://rusuh-booking.pages.dev` |
 
-4. Add these **environment variables**:
+3. Create a separate protected `production` environment when the production Pages project is ready.
+   Add its own Cloudflare project name, live API URL, `EXPO_PUBLIC_ENV=production`,
+   `EXPO_PUBLIC_USE_MOCKS=false`, production site URL, and release notification credentials. Keep
+   production secrets, Android signing credentials, and Firebase settings separate from development.
+4. Store `EXPO_TOKEN` and `EXPO_PROJECT_ID` for EAS OTA in the appropriate protected GitHub
+   environment(s), and configure the matching public app variables in Expo's development and
+   production EAS environments. The app must also have the `expo-updates` package and EAS-generated
+   `runtimeVersion`, `updates.url`, and `extra.eas.projectId` configuration. Keep the repository
+   Actions variable `EAS_OTA_ENABLED` unset/false until all of that is ready; set it to `true` to
+   enable automatic compatible OTA publication on branch merges.
 
-   | Variable | Development value |
-   |---|---|
-   | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID |
-   | `CLOUDFLARE_PAGES_PROJECT` | `rusuh-booking` |
-   | `EXPO_PUBLIC_API_BASE_URL` | Development API URL; a placeholder is safe while mocks are enabled |
-   | `EXPO_PUBLIC_USE_MOCKS` | `true` |
-   | `EXPO_PUBLIC_ENV` | `development` |
-   | `EXPO_PUBLIC_SITE_URL` | `https://rusuh-booking.pages.dev` |
+Never place real secrets in `EXPO_PUBLIC_*` variables; those values are embedded in browser/mobile
+bundles. SonarCloud is temporarily skipped by project decision and is not a deployment secret
+requirement until the scan is restored.
 
-SonarCloud is temporarily disabled in this workflow, so `SONAR_TOKEN`, `SONAR_ORGANIZATION`, and
-`SONAR_PROJECT_KEY` are not currently required for deployment. Keep the SonarCloud quality gate in
-the broader repository pipeline policy; restore the scan here when the temporary exemption ends.
+### Expected trigger behavior
 
-`EXPO_PUBLIC_USE_MOCKS=true` is required for this QA deployment. It prevents the demo app from
-calling a placeholder or production API.
+- A pull request into `develop` or `main` runs the shared quality gates and does not deploy.
+- A successful merge to `develop` starts one orchestrator run that deploys to the preprod Pages
+  project and publishes an EAS development OTA only when the change is OTA-compatible.
+- A successful merge to `main` starts the same orchestrator and deploys to a separate production
+  Pages project, then publishes an EAS production OTA only when compatible.
+- Firebase APK distribution is an optional manual mode on that same orchestrator. Select `develop`
+  for the mock/preprod APK or `main` for the live production APK. Native-affecting changes require
+  this new APK path; OTA must be skipped for those changes. The artifact names are
+  `rusuh-booking.preprod.apk` for `develop` and `rusuh-booking.apk` for `main`.
+- The Telegram summary runs for success or failure and identifies failed jobs.
 
-### Run the workflow
+**Current setup is not at this end state yet:** the working branch defines the Release Pipeline but
+it has not been merged/promoted to `main`, so the active development web deployment is still manual.
+The Firebase workflow is reusable from the orchestrator but is not yet live on the default branch;
+EAS OTA remains disabled until configured, and the production Pages project is not configured. Until
+the orchestrator is merged and its environments are ready, do not expect a merge to trigger all
+automatic deliveries.
 
-1. Open a pull request into `develop`. `Deploy Web Development` runs typecheck, lint/format,
-   Jest/RNTL, and dependency audit. SonarCloud is temporarily skipped for this workflow. PR runs do
-   not deploy. If the SonarCloud GitHub App independently reports a PR check, that integration is
-   separate from this workflow and may still run.
-2. After the approved change is on `develop`, open the repository's **Actions** tab.
-3. Select **Deploy Web Development → Run workflow** and choose branch `develop`.
-4. The manual run rechecks the current `develop` head, builds Expo Web, creates the sitemap,
-   verifies SEO metadata and the public/transactional gzip budgets, and deploys the checked
-   `dist/` artifact to Cloudflare Pages.
-5. The workflow sends a Telegram message with each job's result and a link to the run logs.
+GitHub exposes **Run workflow** only when the orchestrator file is on the default branch (`main`).
+Promote the orchestrator to `main` before using its manual Firebase mode; then select the desired
+branch. The automatic web deployment remains branch-driven after that.
 
-GitHub only exposes the **Run workflow** control when the workflow file is present on the
-repository's default branch. This repository's default branch is `main`, so merging the workflow
-to `develop` alone does not make the manual button available. Promote the workflow file to `main`
-through the normal `develop` → `main` release process; the workflow still rejects a manual run
-unless the operator selects `develop`. The `main` branch is not deployed by this development
-workflow.
-
-The deploy job stays blocked unless the artifact passes the SEO checks and the bundle limits in
-PIPELINE.md §5.1: initial JavaScript must be at most 1 MB gzip per route. The workflow does not
-publish mobile OTA updates or native builds.
+The web job stays blocked unless the artifact passes SEO checks and the PIPELINE.md §5.1 budget:
+initial JavaScript must be at most 1 MB gzip per route. Cloudflare Pages receives the checked
+`dist/` artifact; it does not build the app itself.
 
 ---
 
@@ -337,7 +329,7 @@ artifact, verify public routes, record the Git SHA and deployment ID.
 ## 11. End state
 
 - **Hosting:** Cloudflare Pages free tier — unlimited bandwidth, edge CDN, survives the 300k spike.
-- **Dev:** `*.pages.dev` preview URLs per branch, free.
-- **Production:** custom domain over HTTPS, ~$10/yr domain cost only.
+- **Preprod:** `rusuh-booking.pages.dev`, deployed from `develop` by the Release Pipeline.
+- **Production:** separate Pages project deployed from `main`; custom domain over HTTPS when configured.
 - **Artifact:** `dist/` is built fresh each deploy, stored + served by Cloudflare, never committed.
 - **Rollback:** re-promote a previous successful Pages deployment from the dashboard.
