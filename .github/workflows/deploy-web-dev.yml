@@ -139,7 +139,14 @@ jobs:
 
   publish_ota:
     name: Publish compatible EAS OTA
-    if: ${{ github.event_name == 'push' && vars.EAS_OTA_ENABLED == 'true' }}
+    if: >-
+      ${{
+        github.event_name == 'push' &&
+        (
+          (github.ref_name == 'develop' && vars.EAS_OTA_DEVELOPMENT_ENABLED == 'true') ||
+          (github.ref_name == 'main' && vars.EAS_OTA_PRODUCTION_ENABLED == 'true')
+        )
+      }}
     needs: [quality_gates, web_release]
     runs-on: ubuntu-latest
     environment:

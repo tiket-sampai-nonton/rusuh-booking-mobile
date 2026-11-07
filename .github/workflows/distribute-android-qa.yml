@@ -28,6 +28,8 @@ jobs:
       EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
       EXPO_PUBLIC_USE_MOCKS: ${{ vars.EXPO_PUBLIC_USE_MOCKS }}
       EXPO_PUBLIC_ENV: ${{ vars.EXPO_PUBLIC_ENV }}
+      EXPO_PROJECT_ID: ${{ vars.EXPO_PROJECT_ID }}
+      EAS_CHANNEL: ${{ inputs.target_environment }}
       ANDROID_VERSION_CODE: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
@@ -89,6 +91,21 @@ jobs:
           echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
       - name: Generate Android project
         run: npx expo prebuild --platform android --clean --no-install
+      - name: Verify OTA settings in the generated Android project
+        run: |
+          if [ -z "$EXPO_PROJECT_ID" ]; then
+            echo '::warning::EXPO_PROJECT_ID is not configured; this APK will not receive EAS OTA updates.'
+            exit 0
+          fi
+          ANDROID_MANIFEST='android/app/src/main/AndroidManifest.xml'
+          grep -F "https://u.expo.dev/$EXPO_PROJECT_ID" "$ANDROID_MANIFEST" >/dev/null || {
+            echo 'The generated Android project is missing its EAS update URL.'
+            exit 1
+          }
+          grep -F 'expo-channel-name' "$ANDROID_MANIFEST" | grep -F "$EAS_CHANNEL" >/dev/null || {
+            echo "The generated Android project is missing the $EAS_CHANNEL update channel."
+            exit 1
+          }
       - name: Build release APK
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
