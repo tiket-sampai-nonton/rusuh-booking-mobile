@@ -24,7 +24,9 @@ describe("/expired/[resourceId] route", () => {
 
   it("redirects legacy expired links to the failed route", () => {
     render(<ExpiredScreen />);
-    expect(mockRedirect).toHaveBeenCalledWith({ href: "/failed/res-1?reason=queue" });
+    expect(mockRedirect).toHaveBeenCalledWith({
+      href: "/failed/res-1?reason=queue",
+    });
   });
 
   it("normalizes missing and unsupported expiry parameters safely", () => {
@@ -34,7 +36,9 @@ describe("/expired/[resourceId] route", () => {
       remainingMs: "0",
     });
     const unsupportedReason = ExpiredScreen();
-    expect(unsupportedReason.props.children[1].props.href).toBe("/failed/?reason=unknown&remainingMs=0");
+    expect(unsupportedReason.props.children[1].props.href).toBe(
+      "/failed/?reason=unknown&remainingMs=0",
+    );
 
     mockUseLocalSearchParams.mockReturnValue({
       resourceId: "res-2",

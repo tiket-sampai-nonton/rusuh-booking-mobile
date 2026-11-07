@@ -158,9 +158,12 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     const zone = screen.getByTestId("waiting-zone");
     expect(screen.getByTestId("waiting-icon-lock")).toBeTruthy();
     expect(zone).toHaveTextContent("Zona Aman", { exact: false });
-    expect(zone).toHaveTextContent("Tiketmu tetap tersedia sampai giliranmu tiba.", {
-      exact: false,
-    });
+    expect(zone).toHaveTextContent(
+      "Tiketmu tetap tersedia sampai giliranmu tiba.",
+      {
+        exact: false,
+      },
+    );
   });
 
   it("renders POSSIBLE (amber) copy verbatim", () => {
@@ -171,9 +174,12 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     const zone = screen.getByTestId("waiting-zone");
     expect(screen.getByTestId("waiting-icon-ledger")).toBeTruthy();
     expect(zone).toHaveTextContent("Zona kemungkinan", { exact: false });
-    expect(zone).toHaveTextContent("Kesempatan masuk bergantung pada sisa tiket.", {
-      exact: false,
-    });
+    expect(zone).toHaveTextContent(
+      "Kesempatan masuk bergantung pada sisa tiket.",
+      {
+        exact: false,
+      },
+    );
   });
 
   it("renders NOT_ENOUGH (red) copy verbatim", () => {
@@ -184,9 +190,12 @@ describe("WaitingRoomScreen — zone banner exact copy + palette", () => {
     const zone = screen.getByTestId("waiting-zone");
     expect(screen.getByTestId("waiting-icon-alert")).toBeTruthy();
     expect(zone).toHaveTextContent("Peluang Terbatas", { exact: false });
-    expect(zone).toHaveTextContent("Posisimu sudah melewati perkiraan jumlah tiket.", {
-      exact: false,
-    });
+    expect(zone).toHaveTextContent(
+      "Posisimu sudah melewati perkiraan jumlah tiket.",
+      {
+        exact: false,
+      },
+    );
   });
 
   it("status is never color-only: the zone node carries a text label (a11y)", () => {

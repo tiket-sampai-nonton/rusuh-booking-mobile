@@ -10,7 +10,8 @@ export default function LegacyExpiredRoute() {
   for (const [key, value] of Object.entries(params)) {
     if (key === "resourceId") continue;
     if (Array.isArray(value)) value.forEach((item) => query.append(key, item));
-    else if (typeof value === "string" && value.length > 0) query.set(key, value);
+    else if (typeof value === "string" && value.length > 0)
+      query.set(key, value);
   }
   const queryString = query.toString();
   const suffix = queryString ? `?${queryString}` : "";
