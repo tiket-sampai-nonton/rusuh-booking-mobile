@@ -1,4 +1,7 @@
 const androidVersionCode = Number(process.env.ANDROID_VERSION_CODE || "1");
+const appVersion = "0.1.0";
+const expoProjectId = process.env.EXPO_PROJECT_ID;
+const easChannel = process.env.EAS_CHANNEL;
 if (
   !Number.isSafeInteger(androidVersionCode) ||
   androidVersionCode < 1 ||
@@ -8,12 +11,30 @@ if (
     "ANDROID_VERSION_CODE must be an integer between 1 and 2100000000.",
   );
 }
-
+if (expoProjectId && !["development", "production"].includes(easChannel)) {
+  throw new Error(
+    "EAS_CHANNEL must be development or production when EXPO_PROJECT_ID is set.",
+  );
+}
 const config = {
   name: "Rusuh Booking",
+  owner: "chelseacry",
   slug: "rusuh-booking-mobile",
   scheme: "rusuhbooking",
-  version: "0.1.0",
+  version: appVersion,
+  // Native directories are generated with Expo Prebuild. Keep this runtime
+  // tied to the app version and increment it whenever native compatibility
+  // changes so old binaries never receive an incompatible JavaScript update.
+  runtimeVersion: appVersion,
+  ...(expoProjectId
+    ? {
+        updates: {
+          url: `https://u.expo.dev/${expoProjectId}`,
+          requestHeaders: { "expo-channel-name": easChannel },
+        },
+        extra: { eas: { projectId: expoProjectId } },
+      }
+    : {}),
   orientation: "portrait",
   userInterfaceStyle: "automatic",
   icon: "./assets/app-icon.png",
@@ -60,6 +81,7 @@ const config = {
     ],
     "expo-asset",
     "expo-font",
+    "expo-updates",
     "./plugins/with-android-qa-signing.cjs",
     "./plugins/with-ios-fmt-compat.cjs",
   ],

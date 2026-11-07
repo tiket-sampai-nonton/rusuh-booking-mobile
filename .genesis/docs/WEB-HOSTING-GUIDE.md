@@ -267,12 +267,30 @@ files should not create separate user-triggered pipelines.
    Add its own Cloudflare project name, live API URL, `EXPO_PUBLIC_ENV=production`,
    `EXPO_PUBLIC_USE_MOCKS=false`, production site URL, and release notification credentials. Keep
    production secrets, Android signing credentials, and Firebase settings separate from development.
-4. Store `EXPO_TOKEN` and `EXPO_PROJECT_ID` for EAS OTA in the appropriate protected GitHub
-   environment(s), and configure the matching public app variables in Expo's development and
-   production EAS environments. The app must also have the `expo-updates` package and EAS-generated
-   `runtimeVersion`, `updates.url`, and `extra.eas.projectId` configuration. Keep the repository
-   Actions variable `EAS_OTA_ENABLED` unset/false until all of that is ready; set it to `true` to
-   enable automatic compatible OTA publication on branch merges.
+4. Create or select the Expo project in the account that owns the app, then record its project ID;
+   this is an identifier, not a secret. The Expo project slug may differ from the app's slug because
+   the project ID is the EAS link. The current Expo project is `@chelseacry/rusuh-booking`; the app
+   config uses owner `chelseacry` and slug `rusuh-booking-mobile`. The dynamic app config uses
+   `EXPO_PROJECT_ID` to set `updates.url` and `extra.eas.projectId`, and uses `EAS_CHANNEL` to embed
+   the matching `development` or `production` channel in native builds. Create either missing EAS
+   channel with `npx eas-cli@27.5.0 channel:create development --non-interactive` and
+   `npx eas-cli@27.5.0 channel:create production --non-interactive`.
+5. In the GitHub `development` environment, add secret `EXPO_TOKEN` and variable `EXPO_PROJECT_ID`.
+   Add the same values in a protected GitHub `production` environment before enabling production
+   OTA. Use an Expo access token intended for CI rather than an Expo account password.
+6. In the Expo project's **Environment variables** settings, configure the matching public app
+   values separately for `development` and `production`: `EXPO_PUBLIC_API_BASE_URL`,
+   `EXPO_PUBLIC_ENV`, `EXPO_PUBLIC_USE_MOCKS`, and `EXPO_PUBLIC_SITE_URL`. The release workflow
+   calls `eas update --environment ...`, so these values must exist in Expo as well as GitHub.
+7. Because `expo-updates` and its channel/project settings are native build configuration, existing
+   installed APKs/iOS builds will not receive OTA. After adding the Expo project ID, use the manual
+   Firebase distribution path to build and install a fresh development APK. Its channel is set by
+   the orchestrator to `development`; the future production binary must be built with `production`.
+   Verify a harmless JavaScript-only update on a QA device before enabling automatic publishing.
+8. Keep repository variable `EAS_OTA_DEVELOPMENT_ENABLED` unset/false until development Expo,
+   GitHub, and QA binary setup is verified. Then set it to `true` to enable compatible OTA
+   publication on `develop` merges. Set `EAS_OTA_PRODUCTION_ENABLED=true` separately only after
+   production Expo and release settings are ready; enabling development OTA does not enable `main`.
 
 Never place real secrets in `EXPO_PUBLIC_*` variables; those values are embedded in browser/mobile
 bundles. SonarCloud is temporarily skipped by project decision and is not a deployment secret
@@ -291,16 +309,16 @@ requirement until the scan is restored.
   `rusuh-booking.preprod.apk` for `develop` and `rusuh-booking.apk` for `main`.
 - The Telegram summary runs for success or failure and identifies failed jobs.
 
-**Current setup is not at this end state yet:** the working branch defines the Release Pipeline but
-it has not been merged/promoted to `main`, so the active development web deployment is still manual.
-The Firebase workflow is reusable from the orchestrator but is not yet live on the default branch;
-EAS OTA remains disabled until configured, and the production Pages project is not configured. Until
-the orchestrator is merged and its environments are ready, do not expect a merge to trigger all
-automatic deliveries.
+**Current setup is partially live:** the Release Pipeline is on the default `main` branch, and a
+successful merge to `develop` starts the preprod web deployment. EAS OTA remains disabled until the
+Expo project, credentials, channel settings, EAS environment variables, and a new OTA-capable native
+build are ready. The production Cloudflare Pages environment is not configured yet, so production
+web and OTA delivery are not ready.
 
-GitHub exposes **Run workflow** only when the orchestrator file is on the default branch (`main`).
-Promote the orchestrator to `main` before using its manual Firebase mode; then select the desired
-branch. The automatic web deployment remains branch-driven after that.
+The orchestrator is on the default branch, so GitHub exposes **Run workflow** for manual Firebase
+distribution. Open **Actions → Release Pipeline → Run workflow**, select `develop` for the QA APK or
+`main` for production, and optionally enter release notes. A manual run executes quality gates and
+Firebase distribution; web deployment and OTA publication run only after a successful branch push.
 
 The web job stays blocked unless the artifact passes SEO checks and the PIPELINE.md §5.1 budget:
 initial JavaScript must be at most 1 MB gzip per route. Cloudflare Pages receives the checked

@@ -12,7 +12,7 @@ The repository package manager is **npm** and CI uses the committed `package-loc
 
 This pipeline is adapted from an internal CI/CD reference pipeline for the ticketing architecture: Android, iOS, web, native capabilities, React Native Web SEO, and OTA promotion through `develop` and `main`.
 
-**Implementation status (2026-11-07):** The current working branch now defines the single Release Pipeline in `.github/workflows/deploy-web-dev.yml`; it is not yet merged/promoted to the default branch, so the active web workflow is still manual. Android distribution is now a reusable workflow called by that orchestrator, not an independent trigger. EAS OTA is guarded until Expo Updates is configured and `EAS_OTA_ENABLED=true`; the production Cloudflare Pages project is also pending. Do not read the target trigger behavior below as proof that those automations are already live.
+**Implementation status (2026-11-07):** The single Release Pipeline in `.github/workflows/deploy-web-dev.yml` is on the default `main` branch. Merges to `develop` trigger its preprod web path; Android Firebase distribution is a manual mode on the same orchestrator, with no independent trigger. SonarCloud is temporarily skipped. EAS OTA remains guarded until the Expo project, channels, credentials, Expo environment variables, and a newly built OTA-capable native app are ready. The production Cloudflare Pages environment is also pending, so the target production behavior below is not live yet.
 
 ## 1. Delivery model
 
@@ -118,7 +118,7 @@ This is a release-routing decision, not a separate test. The pipeline checks whe
 
 If **no**, compatible JavaScript and assets are published automatically through the matching EAS channel after a successful branch push, subject to runtime-version compatibility. If **yes**, the pipeline skips OTA for that change; a new native build is required. Android APKs are built on GitHub Actions and sent to Firebase only when the operator manually selects the Firebase mode. React Native Web is still exported and deployed separately.
 
-The OTA job stays disabled until the app has `expo-updates`, `runtimeVersion`, `updates.url`, and `extra.eas.projectId`, EAS environment variables are configured for both channels, and the GitHub repository variable `EAS_OTA_ENABLED` is set to `true`. The workflow checks the app configuration before publishing. Do not set the flag before the native app configuration and EAS project are ready.
+The OTA job stays disabled until the app has `expo-updates`, a compatible `runtimeVersion`, an EAS `updates.url`/`extra.eas.projectId`, the correct update channel embedded in native builds, `EXPO_TOKEN` and `EXPO_PROJECT_ID` in the relevant GitHub environments, and matching public app variables in the Expo `development` and `production` environments. Install a newly generated OTA-aware native APK/build on QA devices and verify a JavaScript-only update before setting repository variable `EAS_OTA_DEVELOPMENT_ENABLED=true`. Set `EAS_OTA_PRODUCTION_ENABLED=true` separately only after the production environment and release path are ready. The workflow checks app/project configuration before publishing.
 
 This protects users from receiving JavaScript that expects native APIs, permissions, or configuration that do not exist in the installed binary.
 
@@ -304,7 +304,8 @@ Create a new native build instead of OTA when a change includes:
 | `SONAR_PROJECT_KEY` | SonarCloud | SonarCloud project identifier |
 | `EXPO_TOKEN` | EAS Update | CI authentication for OTA publication only |
 | `EXPO_PROJECT_ID` | EAS Update | Expo project attribution for OTA updates |
-| `EAS_OTA_ENABLED` | Release Pipeline | Repository Actions variable; keep unset/false until Expo Updates is configured for both channels, then set to `true` |
+| `EAS_OTA_DEVELOPMENT_ENABLED` | Release Pipeline | Repository Actions variable; set to `true` only after development EAS settings and an OTA-capable QA build are verified |
+| `EAS_OTA_PRODUCTION_ENABLED` | Release Pipeline | Repository Actions variable; keep unset/false until production EAS and release settings are ready |
 | `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_ENV`, `EXPO_PUBLIC_USE_MOCKS`, `EXPO_PUBLIC_SITE_URL` | Web and Android builds | Non-secret environment-specific app configuration; use development mocks only in `development` |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare Pages | Secret with Pages Edit access; configure separately in `development` and `production` Environments |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Pages | Cloudflare account identifier; configure per GitHub Environment |
