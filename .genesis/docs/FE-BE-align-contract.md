@@ -10,6 +10,10 @@ Dokumen ini memetakan kebutuhan data Front-End (FE) terhadap API Contract (Back-
 
 Dokumen ini dipakai sebagai acuan bersama FE dan BE agar implementasi layar FE hanya memanggil field/endpoint yang benar-benar ada di contract, dan agar setiap kebutuhan FE yang belum terpenuhi menjadi keputusan sadar (bukan asumsi).
 
+### Addendum — RBT-128 integration check (2026-11-09)
+
+For the current BE implementation check and remaining runtime gaps, see [`api-contract/07-11/INTEGRATION-RBT-128.md`](api-contract/07-11/INTEGRATION-RBT-128.md). It records the supplied development API root, the FE adapter fixes, and the live CORS/description gaps. This addendum supplements the earlier screen mapping below; the service OpenAPI files remain authoritative for wire details.
+
 Hierarki sumber kebenaran (urutan otoritas, atas menang atas bawah):
 
 1. **PDF "Tender Rusuh Booking Ticket"** — *source of truth* untuk **WHAT & WHY**: ruang lingkup, aturan bisnis, prinsip UX, dan prioritas MoSCoW.

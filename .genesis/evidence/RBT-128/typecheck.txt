@@ -1,0 +1,1 @@
+`npm run typecheck` from `apps/client`: passed (`tsc --noEmit`).

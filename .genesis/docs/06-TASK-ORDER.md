@@ -29,6 +29,8 @@
 **Current wave:** `Wave 3 — Feature epics (E3/E4/E5)` — Wave 2 Core API COMPLETE, ports FROZEN.
 **Run next:** `E3 Auth (Ray) · E4 Events (Ray) · E5 Queue (Eld)` — unblocked now the domain ports are frozen; disjoint feature areas, parallel across owners. (Wave 1 ✅; Wave 2 ✅ RBT-010/011/012/013/014; RBT-005b CI deferred post-E2E.)
 
+**Ad hoc task in QA:** `RBT-128 — Align FE HTTP adapters with BE API` (GitHub #165); serialized because it touches the API composition root and a domain port. The planned-wave pointer above is retained. Full purchase-flow QA remains pending an open controlled BE event and payment sandbox path.
+
 ---
 
 ## Domains
@@ -120,6 +122,7 @@
 | RBT-083 QA suites | Ray | Hardening | features | Playwright + Maestro across flows | ❌ serialize | Backlog | ☐ |
 | RBT-084 release readiness | Ray | Hardening | RBT-005/081/082/083 | OTA/rollback/summary | ❌ serialize | Backlog | ☐ |
 | RBT-119 client refactor | Riz | Hardening | E2 + existing feature flows | `apps/client/**` | ❌ serialize | Done | ☑ |
+| RBT-128 FE-BE API integration | Riz | Core API | RBT-010 + queue/booking/payment | adapters, composition root, contracts | ❌ serialize | QA | ☐ |
 
 ---
 
@@ -170,3 +173,4 @@ flowchart LR
 |------|--------|-----|
 | 2026-10-29 | Initial decomposition at Phase 3 (H3 PASSED) | agent |
 | 2026-10-30 | TASK-ORDER run reference added; docset renumbered to 01–10 to match the 6-gate PLAYBOOK | agent |
+| 2026-11-09 | Added ad hoc FE-BE integration task RBT-128 (GitHub #165) | agent |

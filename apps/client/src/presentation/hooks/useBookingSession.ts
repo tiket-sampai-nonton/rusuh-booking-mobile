@@ -18,7 +18,10 @@ import { useEffect, useMemo } from "react";
 
 import { CreateBookingSession } from "@application/booking/create-booking-session.use-case";
 import { RestoreBookingSession } from "@application/booking/restore-booking-session.use-case";
-import type { BookingSession } from "@domain/repositories/booking.repository";
+import type {
+  BookingAvailabilitySnapshot,
+  BookingSession,
+} from "@domain/repositories/booking.repository";
 import { useServices } from "@providers/service-context";
 import { useSessionStore } from "@presentation/stores/session-store";
 
@@ -53,6 +56,7 @@ export function useCreateBookingSession(): {
 export function useRestoreBookingSession(
   enabled = true,
   sessionId?: string,
+  eventId?: string,
 ): {
   session: BookingSession | null | undefined;
   isLoading: boolean;
@@ -69,13 +73,17 @@ export function useRestoreBookingSession(
   const query = useQuery<BookingSession | null, Error>({
     queryKey: sessionId
       ? ["booking-session", "current", sessionId]
-      : ["booking-session", "current"],
+      : ["booking-session", "current", eventId],
     queryFn: async () => {
-      const session = await usecase.execute(sessionId);
+      const session = await usecase.execute(sessionId, eventId);
       if (session) setSession(session.sessionId);
       return session;
     },
     enabled,
+    // Session restores should make one request per screen load. The BE's 410
+    // for an expired hold is terminal; automatic retries only repeat the same
+    // request. The checkout recovery UI already exposes an explicit retry.
+    retry: false,
   });
   useEffect(() => {
     if (
@@ -86,10 +94,11 @@ export function useRestoreBookingSession(
       !bookingRepository.subscribeAvailability
     )
       return;
-    return bookingRepository.subscribeAvailability(sessionId, () => {
-      void queryClient.invalidateQueries({
-        queryKey: ["booking-session", "current", sessionId],
-      });
+    return bookingRepository.subscribeAvailability(sessionId, (snapshot) => {
+      queryClient.setQueryData<BookingSession | null>(
+        ["booking-session", "current", sessionId],
+        (current) => applyAvailability(current, snapshot),
+      );
     });
   }, [
     bookingRepository,
@@ -105,4 +114,26 @@ export function useRestoreBookingSession(
     error: query.error,
     retry: () => query.refetch(),
   };
+}
+
+function applyAvailability(
+  current: BookingSession | null | undefined,
+  snapshot: BookingAvailabilitySnapshot,
+): BookingSession | null | undefined {
+  if (!current) return current;
+  const availableById = new Map(
+    snapshot.categories.map(({ categoryId, available }) => [
+      categoryId,
+      available,
+    ]),
+  );
+  let changed = false;
+  const categories = current.categories.map((category) => {
+    const available = availableById.get(category.categoryId);
+    if (available === undefined || available === category.available)
+      return category;
+    changed = true;
+    return { ...category, available };
+  });
+  return changed ? { ...current, categories } : current;
 }

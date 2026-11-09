@@ -36,7 +36,7 @@ export class FetchHttpClient implements HttpClient {
   constructor(options: FetchHttpClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");
     this.defaultHeaders = options.defaultHeaders ?? {};
-    this.fetchFn = options.fetchFn ?? globalThis.fetch;
+    this.fetchFn = options.fetchFn ?? globalThis.fetch.bind(globalThis);
     this.getHeaders = options.getHeaders;
   }
 

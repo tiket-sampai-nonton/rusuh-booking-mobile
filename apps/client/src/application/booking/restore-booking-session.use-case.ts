@@ -19,11 +19,14 @@ export class RestoreBookingSession {
   constructor(private readonly booking: BookingRepository) {}
 
   /** Restore the active session, or null if none. */
-  async execute(sessionId?: string): Promise<BookingSession | null> {
+  async execute(
+    sessionId?: string,
+    eventId?: string,
+  ): Promise<BookingSession | null> {
     try {
       return sessionId && this.booking.getSession
         ? await this.booking.getSession(sessionId)
-        : await this.booking.getCurrentSession();
+        : await this.booking.getCurrentSession(eventId);
     } catch (cause) {
       // Preserve contract codes such as SESSION_EXPIRED so presentation can
       // route an expired hold to recovery instead of retrying it forever.

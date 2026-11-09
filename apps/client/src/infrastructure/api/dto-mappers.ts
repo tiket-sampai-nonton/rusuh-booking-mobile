@@ -9,6 +9,7 @@
  */
 
 import type {
+  BookingAvailabilitySnapshot,
   Booking,
   BookingSession,
   AttendeeCheck,
@@ -98,7 +99,7 @@ interface WireBookingSession {
   booking?: BookingSession["booking"];
 }
 interface WireAttendeeCheck {
-  nikMasked: string;
+  nikMasked?: string;
   result: AttendeeCheck["result"];
   checksRemaining?: number;
 }
@@ -209,6 +210,34 @@ export function toBookingSession(dto: WireBookingSession): BookingSession {
     phase: dto.phase,
     booking: dto.booking,
   };
+}
+
+/** Parse the untrusted SSE availability payload into the domain port shape. */
+export function toBookingAvailability(
+  value: unknown,
+): BookingAvailabilitySnapshot | null {
+  if (typeof value !== "object" || value === null) return null;
+  const categories = (value as { categories?: unknown }).categories;
+  if (!Array.isArray(categories)) return null;
+
+  const mapped: BookingAvailabilitySnapshot["categories"][number][] = [];
+  for (const item of categories) {
+    if (typeof item !== "object" || item === null) continue;
+    const category = item as { categoryId?: unknown; available?: unknown };
+    if (
+      typeof category.categoryId === "string" &&
+      category.categoryId.length > 0 &&
+      typeof category.available === "number" &&
+      Number.isInteger(category.available) &&
+      category.available >= 0
+    ) {
+      mapped.push({
+        categoryId: category.categoryId,
+        available: category.available,
+      });
+    }
+  }
+  return { categories: mapped };
 }
 
 export function toAttendeeCheck(dto: WireAttendeeCheck): AttendeeCheck {

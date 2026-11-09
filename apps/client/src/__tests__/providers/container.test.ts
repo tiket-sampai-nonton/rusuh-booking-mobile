@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 import {
   createContainer,
+  createApiHeaders,
   createQueueMembershipStorage,
   createTokenStorage,
   readUseMocksFlag,
@@ -58,6 +59,24 @@ describe("providers/container — readUseMocksFlag", () => {
     } else {
       process.env.EXPO_PUBLIC_USE_MOCKS = prev;
     }
+  });
+});
+
+describe("providers/container — API identity headers", () => {
+  it("identifies native requests and attaches the stored visitor token", () => {
+    expect(
+      createApiHeaders("android", "access-token", "visitor-token"),
+    ).toEqual({
+      Authorization: "Bearer access-token",
+      "X-Client-Type": "mobile",
+      "X-Visitor-Token": "visitor-token",
+    });
+  });
+
+  it("uses the browser cookie for web visitor identity", () => {
+    expect(createApiHeaders("web", "access-token", "visitor-token")).toEqual({
+      Authorization: "Bearer access-token",
+    });
   });
 });
 
@@ -167,7 +186,7 @@ describe("providers/container — createContainer (real mode, RBT-010 wired)", (
   it("binds HTTP repositories when a base URL is configured", () => {
     const c = createContainer({
       useMocks: false,
-      baseUrl: "https://api.test/v1",
+      baseUrl: "https://api.test/api/v1",
     });
     expect(c.eventRepository).toBeInstanceOf(HttpEventRepository);
     expect(c.queueRepository).toBeInstanceOf(HttpQueueRepository);

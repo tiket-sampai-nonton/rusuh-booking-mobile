@@ -1,0 +1,3 @@
+Command: `npm test -- --runInBand src/__tests__/infrastructure/api/http-repositories.test.ts src/__tests__/infrastructure/api/dto-mappers.test.ts src/__tests__/providers/container.test.ts src/__tests__/application/booking-session.use-case.test.ts src/__tests__/presentation/useBookingSession.test.tsx`
+
+Result: 5 suites passed, 56 tests passed, 0 snapshots. This includes a regression test that asserts a failed session restore is attempted once even when the QueryClient default permits retries, and a regression test that asserts SSE availability updates do not refetch the session.

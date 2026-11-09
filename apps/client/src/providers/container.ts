@@ -11,7 +11,10 @@ import { Platform } from "react-native";
 
 import type { TokenStorage } from "@domain/auth/token-storage.port";
 import type { QueueMembershipStorage } from "@domain/queue/queue-membership.port";
-import type { BookingRepository } from "@domain/repositories/booking.repository";
+import type {
+  BookingAvailabilitySnapshot,
+  BookingRepository,
+} from "@domain/repositories/booking.repository";
 import type { EventRepository } from "@domain/repositories/event.repository";
 import type { PaymentRepository } from "@domain/repositories/payment.repository";
 import type { QueueRepository } from "@domain/repositories/queue.repository";
@@ -28,6 +31,7 @@ import type { PushSubscriptionPort } from "@domain/services/push-subscription.po
 import { HttpPushSubscriptionAdapter } from "@infrastructure/notifications/http-push-subscription.adapter";
 import { ServerClock } from "@domain/services/server-clock";
 import { HttpBookingRepository } from "@infrastructure/api/http-booking.repository";
+import { toBookingAvailability } from "@infrastructure/api/dto-mappers";
 import { HttpEventRepository } from "@infrastructure/api/http-event.repository";
 import { HttpPaymentRepository } from "@infrastructure/api/http-payment.repository";
 import { HttpQueueRepository } from "@infrastructure/api/http-queue.repository";
@@ -155,6 +159,21 @@ export function readUseMocksFlag(
   return raw !== "false" && raw !== "0";
 }
 
+/** Build BE identity headers without exposing the web visitor cookie to JS. */
+export function createApiHeaders(
+  platformOs: typeof Platform.OS,
+  accessToken?: string | null,
+  visitorToken?: string | null,
+): Readonly<Record<string, string>> {
+  return {
+    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    ...(platformOs !== "web" ? { "X-Client-Type": "mobile" } : {}),
+    ...(platformOs !== "web" && visitorToken
+      ? { "X-Visitor-Token": visitorToken }
+      : {}),
+  };
+}
+
 /**
  * Build the application container.
  *
@@ -253,12 +272,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
         tokenStorage.load(),
         visitorTokenStorage.load(),
       ]);
-      return {
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        ...(Platform.OS !== "web" && visitorToken
-          ? { "X-Visitor-Token": visitorToken }
-          : {}),
-      };
+      return createApiHeaders(Platform.OS, accessToken, visitorToken);
     },
   });
   const httpClient: HttpClient = new RefreshingHttpClient(
@@ -278,12 +292,24 @@ export function createContainer(options: ContainerOptions = {}): Container {
     bookingRepository: new HttpBookingRepository(
       httpClient,
       Platform.OS === "web" && typeof globalThis.EventSource !== "undefined"
-        ? (sessionId, onChange) => {
+        ? (sessionId, onAvailability) => {
             const stream = new EventSource(
               `${baseUrl.replace(/\/+$/, "")}/booking-sessions/${encodeURIComponent(sessionId)}/stream`,
               { withCredentials: true },
             );
-            stream.addEventListener("availability", onChange);
+            stream.addEventListener("availability", (event) => {
+              try {
+                const payload = JSON.parse(
+                  (event as MessageEvent<string>).data,
+                ) as unknown;
+                const snapshot: BookingAvailabilitySnapshot | null =
+                  toBookingAvailability(payload);
+                if (snapshot) onAvailability(snapshot);
+              } catch {
+                // Ignore malformed SSE frames; the session GET remains the
+                // authoritative initial snapshot.
+              }
+            });
             return () => stream.close();
           }
         : undefined,
