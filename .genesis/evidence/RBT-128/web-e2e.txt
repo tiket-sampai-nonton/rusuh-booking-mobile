@@ -43,3 +43,9 @@ Booking-session duplicate-request retest — 2026-11-09 (Asia/Jakarta)
 - The automated retry is disabled for session restore. The checkout recovery UI keeps its explicit retry action for user initiated retries.
 
 The live request count is one per checkout restore attempt. A user selecting the recovery retry will intentionally make a new attempt.
+
+Hosted Pages target and env-inlining diagnosis — 2026-11-09
+- `https://rusuh-booking.pages.dev` rendered the existing mock catalog and the browser recorded no API requests.
+- The merge-triggered `develop` deployment completed at `https://68700489.rusuh-booking.pages.dev`; the Cloudflare log showed the correct BE URL and `EXPO_PUBLIC_USE_MOCKS=false`. This is a preview deployment; the root Pages domain remains on the production branch.
+- The preview bundle contained the BE URL but still selected fixtures because Expo could not inline the mock flag through the indirect `process.env` object access. `readUseMocksFlag()` now uses direct `process.env.EXPO_PUBLIC_USE_MOCKS` access. After that source fix, the local CORS-allowlisted `http://localhost:8081` browser immediately recorded `GET /api/v1/events` with no console errors.
+- The BE must add the Cloudflare Pages origin(s) to its credentialed CORS allowlist before browser code served from Pages can consume those responses.

@@ -38,7 +38,7 @@ describe("providers/container — readUseMocksFlag", () => {
     expect(readUseMocksFlag({ EXPO_PUBLIC_USE_MOCKS: "1" })).toBe(true);
   });
 
-  it("is true when unset (fixtures are the dev default until RBT-010)", () => {
+  it("uses fixtures when unset", () => {
     expect(readUseMocksFlag({})).toBe(true);
   });
 
