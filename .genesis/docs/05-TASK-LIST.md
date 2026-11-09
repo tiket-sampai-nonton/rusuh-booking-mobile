@@ -477,6 +477,18 @@ Type: Chore · P1 · XL · Scope: `apps/client` (web, iOS, Android)
 - **Organization interpretation:** “More than 1 component per file” means each screen composes multiple fragment components; each component declaration remains in its own file/folder.
 - Skills: React, React Native, frontend design, testing/evidence, architecture, performance.
 
+#### RBT-128: Align FE HTTP adapters with BE API
+Type: Story · P0 · L · Deps: RBT-010, E5/E6/E7 ports
+
+> Post-H3 integration task, tracked in [GitHub #165](https://github.com/tiket-sampai-nonton/rusuh-booking-mobile/issues/165). FE only. The FE branch is based on `develop`; the available BE repository currently has no `develop` branch, so its `main` implementation and OpenAPI contracts are the reference.
+
+- **AC1 — Wire alignment:** FE paths, request bodies, headers, envelopes, and DTO mappings match current BE handlers/contracts across catalog, queue, booking, payment, auth, and tickets.
+- **AC2 — Visitor identity:** Native requests identify as mobile and reuse the stored visitor token; web continues to use HttpOnly cookies without exposing visitor credentials to JavaScript.
+- **AC3 — Safe composition:** Mock adapters remain the default and usable; real HTTP adapters remain selected only when `EXPO_PUBLIC_USE_MOCKS=false|0`.
+- **AC4 — No invented contract:** Unsupported rich event description shapes and environment/backend gaps are documented; no BE code or BE-consumed contract assumptions are changed.
+- **AC5 — Verification:** Targeted adapter tests, typecheck, and lint pass. Live read-only API checks and any blocked full-flow verification are recorded in `api-contract/07-11/INTEGRATION-RBT-128.md`.
+- **Skills:** No added dependencies; TypeScript/Expo integration and repository workflow.
+
 ---
 
 ## Milestones

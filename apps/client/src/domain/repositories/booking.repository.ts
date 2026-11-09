@@ -20,6 +20,14 @@ export interface BookingCategory {
   readonly available: number;
 }
 
+/** Live category counts sent by the Booking availability SSE stream. */
+export interface BookingAvailabilitySnapshot {
+  readonly categories: readonly {
+    readonly categoryId: string;
+    readonly available: number;
+  }[];
+}
+
 export interface BookingSession {
   readonly sessionId: string;
   readonly eventId: string;
@@ -40,7 +48,8 @@ export interface BookingSession {
 
 /** Result of an attendee-NIK availability check (quota enforcement). */
 export interface AttendeeCheck {
-  readonly nikMasked: string;
+  /** Optional: BE attendee-check responses intentionally omit identity data. */
+  readonly nikMasked?: string;
   readonly result: "AVAILABLE" | "ALREADY_REGISTERED" | "CHECK_LIMIT_REACHED";
   readonly checksRemaining?: number;
 }
@@ -83,7 +92,7 @@ export interface BookingRepository {
   /** Create a booking session from an admission token. */
   createSession(admissionToken: string): Promise<BookingSession>;
   /** Restore the current session (survives refresh). */
-  getCurrentSession(): Promise<BookingSession | null>;
+  getCurrentSession(eventId?: string): Promise<BookingSession | null>;
   /** Check an attendee NIK's availability for this event. */
   checkAttendee(sessionId: string, nik: string): Promise<AttendeeCheck>;
   /**
@@ -98,7 +107,10 @@ export interface BookingRepository {
   ): Promise<Booking>;
   cancelSession?(sessionId: string): Promise<void>;
   getSession?(sessionId: string): Promise<BookingSession>;
-  subscribeAvailability?(sessionId: string, onChange: () => void): () => void;
+  subscribeAvailability?(
+    sessionId: string,
+    onAvailability: (snapshot: BookingAvailabilitySnapshot) => void,
+  ): () => void;
   getBooking?(bookingId: string): Promise<Booking>;
   cancelBooking?(bookingId: string): Promise<Booking>;
   replaceItems?(

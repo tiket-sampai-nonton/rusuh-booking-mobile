@@ -1,0 +1,45 @@
+Web E2E smoke — 2026-11-09 (Asia/Jakarta)
+
+App: http://localhost:8088
+Runtime: EXPO_PUBLIC_USE_MOCKS=false; EXPO_PUBLIC_API_BASE_URL=https://dev.rusuhbooking.my.id/api/v1
+Browser: Playwright CLI / Chromium, no API route shim active during the successful reads.
+
+Observed:
+- Home loaded live GET /api/v1/events (HTTP 200) and rendered three seeded events.
+- Event detail loaded live GET /api/v1/events/a44ed78a-26b3-4e11-8451-730cae4c3f86 (HTTP 200). UI rendered E2E DEV PUBLIKASI and disabled its PENJUALAN DITUTUP button.
+- Credentialed browser fetch to GET /api/v1/queue-status/a44ed78a-26b3-4e11-8451-730cae4c3f86 returned HTTP 200, {meta,data}, saleState=CLOSED.
+- Browser GET responses included an origin-specific Access-Control-Allow-Origin and Access-Control-Allow-Credentials: true. OPTIONS returned HTTP 204 with Access-Control-Allow-Origin: *; this preflight request does not carry credentials.
+- A single anonymous queue entry was created for cookie/session smoke (POST returned 201), recovered via GET /queue-entries/me (200), then removed using DELETE /queue-entries/{entryId} (204). The UI had disabled sales for this closed event, but the direct queue endpoint still accepted the join; this is a BE state inconsistency to investigate. No queue entry remains from this test.
+- All three catalog events were CLOSED; one earlier sampled event had mismatched OPEN queue status, while the event used for detail testing reported CLOSED. No booking or payment was attempted because no event was on sale.
+- Browser initially exposed an unbound-fetch Illegal invocation; fixed by binding globalThis.fetch, covered by fetch-http-client regression test.
+
+Verification:
+- Jest focused run: 3 suites passed, 44 tests passed (fetch-http-client, HTTP repositories, container).
+- TypeScript: npm run typecheck passed.
+- ESLint: changed transport and related test files passed.
+
+Conclusion: web-to-BE catalog/detail/queue-status integration and web cookie queue-entry lifecycle were exercised. Full queue-to-booking-to-payment E2E remains unverified until BE provides an open controlled test event and payment sandbox path.
+
+Retest with CORS-allowlisted origin — 2026-11-09 (Asia/Jakarta)
+- At http://localhost:8088, live GET /events failed in Chromium with net::ERR_FAILED, confirming that origin is not allowed by the dev API.
+- Reused the running Expo app at http://localhost:8081. Live GET /events, GET /events/{eventId}, and credentialed GET /queue-status/{eventId} all succeeded (HTTP 200). The event-list response headers echoed Access-Control-Allow-Origin: http://localhost:8081 and Access-Control-Allow-Credentials: true. Browser console: zero errors.
+- Event detail still showed sales closed and the purchase button disabled. Queue status was CLOSED, admissionRatePerMin=0.
+- Repeated the queue cookie lifecycle from origin 8081: POST queue join 201, GET current entry 200, DELETE 204; cleaned successfully. The closed-event queue admission mismatch remains.
+- No booking or payment was attempted; no open event is available.
+
+Live single-event E2E — 2026-11-09 (Asia/Jakarta)
+- Disabled the Chrome Local Overrides by moving the override files out of the active host path; FE remained configured with `EXPO_PUBLIC_USE_MOCKS=false` and the dev API base URL.
+- At `http://localhost:8081`, Home rendered the current live event catalog. Opened `Senja di Kota Tua Fest` (`04daaa0d-17b6-4911-a3b4-32aa085880af`), whose detail returned two available ticket categories and an open queue.
+- Joined the event queue and was admitted to checkout. The first checkout hold expired while awaiting explicit consent; the expiry page confirmed no payment was processed and inventory was released.
+- Rejoined once, completed checkout for one Festival ticket with user-provided test details, accepted the required privacy-processing consent after explicit approval, and reached `/payment/{bookingId}`. Payment page showed the order total of Rp 2.750 and the available BE payment methods. Browser console had no errors.
+- Stopped before selecting/submitting a payment. The unpaid booking hold remains on the payment page and will expire automatically; no payment attempt was created. Sensitive identity/contact values are intentionally omitted from this evidence.
+
+Conclusion: one live Home → event detail → queue → checkout → payment-page flow completed against the dev BE from the CORS-allowlisted local origin. The first hold expired without payment; the retry reached the payment page. Payment processing was not tested.
+
+Booking-session duplicate-request retest — 2026-11-09 (Asia/Jakarta)
+- Opened `/checkout/6e8a4c21-25a4-4952-ab8f-a4f0cd211604` from `http://localhost:8081` with `EXPO_PUBLIC_USE_MOCKS=false` and the live dev BE base URL.
+- The supplied session had expired; the BE returned HTTP 410 and the FE routed to `/failed/{sessionId}?reason=hold`.
+- Before the retry-policy fix, the browser sent three identical GET requests for the expired session. After the fix, Playwright's browser request log showed exactly one GET after waiting six seconds; no repeated availability-driven reload occurred. Console output showed only the expected HTTP 410 error.
+- The automated retry is disabled for session restore. The checkout recovery UI keeps its explicit retry action for user initiated retries.
+
+The live request count is one per checkout restore attempt. A user selecting the recovery retry will intentionally make a new attempt.

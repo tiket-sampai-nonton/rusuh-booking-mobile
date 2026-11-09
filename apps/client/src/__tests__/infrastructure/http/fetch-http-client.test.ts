@@ -71,6 +71,25 @@ describe("FetchHttpClient", () => {
     expect(res.data).toBeNull();
   });
 
+  it("calls the default browser fetch with its global receiver", async () => {
+    const originalFetch = globalThis.fetch;
+    const defaultFetch = jest.fn(async function (this: typeof globalThis) {
+      expect(this).toBe(globalThis);
+      return fakeResponse(200, "{}");
+    }) as unknown as typeof fetch;
+    globalThis.fetch = defaultFetch;
+
+    try {
+      const client = new FetchHttpClient({
+        baseUrl: "https://api.test/api/v1",
+      });
+      await client.request({ method: "GET", url: "events" });
+      expect(defaultFetch).toHaveBeenCalledTimes(1);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it("omits the body for a GET and defaults to global fetch when none injected", () => {
     // Construct with no fetchFn — just assert it binds without throwing.
     const client = new FetchHttpClient({ baseUrl: "https://api.test" });

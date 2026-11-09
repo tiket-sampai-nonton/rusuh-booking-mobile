@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 import React from "react";
 
 import type {
+  BookingAvailabilitySnapshot,
   AttendeeCheck,
   Booking,
   BookingItemInput,
@@ -52,13 +53,13 @@ class FakeBookingRepo implements BookingRepository {
   }
 }
 
-function wrapper(repo: BookingRepository) {
+function wrapper(repo: BookingRepository, queryRetry: false | number = false) {
   const base = createContainer({ useMocks: true });
   const container: Container = { ...base, bookingRepository: repo };
   const qc = new QueryClient({
     defaultOptions: {
       mutations: { retry: false, gcTime: Infinity },
-      queries: { retry: false, gcTime: Infinity },
+      queries: { retry: queryRetry, gcTime: Infinity },
     },
   });
   return function Wrapper({
@@ -129,15 +130,47 @@ describe("useRestoreBookingSession", () => {
     );
   });
 
-  it("refreshes the session on an availability event and closes the stream", async () => {
-    let notify = () => {};
+  it("does not automatically repeat a failed session request", async () => {
+    class ExpiredSessionRepo extends FakeBookingRepo {
+      getSession = jest.fn(async () => {
+        throw new Error("SESSION_EXPIRED: hold expired");
+      });
+    }
+    const repo = new ExpiredSessionRepo();
+    const { result } = renderHook(
+      () => useRestoreBookingSession(true, "expired-session"),
+      { wrapper: wrapper(repo, 2) },
+    );
+
+    await waitFor(() => expect(result.current.error).not.toBeNull());
+    expect(repo.getSession).toHaveBeenCalledTimes(1);
+  });
+
+  it("updates availability from the stream without refetching the session", async () => {
+    let notify = (_snapshot: BookingAvailabilitySnapshot) => {};
     const close = jest.fn();
     class StreamingRepo extends FakeBookingRepo {
-      getSession = jest.fn(async () => SESSION);
-      subscribeAvailability = jest.fn((_id: string, onChange: () => void) => {
-        notify = onChange;
-        return close;
-      });
+      getSession = jest.fn(async () => ({
+        ...SESSION,
+        categories: [
+          {
+            categoryId: "cat-1",
+            code: "FEST",
+            name: "Festival",
+            priceMinor: 2750,
+            available: 5,
+          },
+        ],
+      }));
+      subscribeAvailability = jest.fn(
+        (
+          _id: string,
+          onAvailability: (snapshot: BookingAvailabilitySnapshot) => void,
+        ) => {
+          notify = onAvailability;
+          return close;
+        },
+      );
     }
     const repo = new StreamingRepo();
     const view = renderHook(() => useRestoreBookingSession(true, "sess-1"), {
@@ -146,8 +179,12 @@ describe("useRestoreBookingSession", () => {
     await waitFor(() =>
       expect(repo.subscribeAvailability).toHaveBeenCalledTimes(1),
     );
-    act(() => notify());
-    await waitFor(() => expect(repo.getSession).toHaveBeenCalledTimes(2));
+    expect(repo.getSession).toHaveBeenCalledTimes(1);
+    act(() => notify({ categories: [{ categoryId: "cat-1", available: 4 }] }));
+    await waitFor(() =>
+      expect(view.result.current.session?.categories[0]?.available).toBe(4),
+    );
+    expect(repo.getSession).toHaveBeenCalledTimes(1);
     view.unmount();
     expect(close).toHaveBeenCalledTimes(1);
   });

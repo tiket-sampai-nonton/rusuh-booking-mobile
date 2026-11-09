@@ -100,8 +100,8 @@ jobs:
           }
           if [ "$GITHUB_REF_NAME" = 'develop' ]; then
             test "$EXPO_PUBLIC_ENV" = 'development' &&
-              test "$EXPO_PUBLIC_USE_MOCKS" = 'true' || {
-                echo 'develop must use development configuration with mocks enabled.'
+              test "$EXPO_PUBLIC_USE_MOCKS" = 'false' || {
+                echo 'develop must use the development BE with mocks disabled.'
                 exit 1
               }
           elif [ "$GITHUB_REF_NAME" = 'main' ]; then
@@ -156,8 +156,11 @@ jobs:
         working-directory: apps/client
     env:
       EXPO_PROJECT_ID: ${{ vars.EXPO_PROJECT_ID }}
+      EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+      EXPO_PUBLIC_USE_MOCKS: ${{ vars.EXPO_PUBLIC_USE_MOCKS }}
+      EXPO_PUBLIC_ENV: ${{ vars.EXPO_PUBLIC_ENV }}
+      EXPO_PUBLIC_SITE_URL: ${{ vars.EXPO_PUBLIC_SITE_URL }}
       EAS_CHANNEL: ${{ github.ref_name == 'main' && 'production' || 'development' }}
-      EAS_ENVIRONMENT: ${{ github.ref_name == 'main' && 'production' || 'development' }}
       OTA_ENABLED: ${{ (github.ref_name == 'main' && vars.EAS_OTA_PRODUCTION_ENABLED) || (github.ref_name == 'develop' && vars.EAS_OTA_DEVELOPMENT_ENABLED) || 'false' }}
     outputs:
       decision: ${{ steps.fingerprint.outputs.decision || steps.ota_gate.outputs.decision }}
@@ -254,7 +257,6 @@ jobs:
         run: |
           npx --yes eas-cli@27.5.0 update \
             --channel "$EAS_CHANNEL" \
-            --environment "$EAS_ENVIRONMENT" \
             --message "${UPDATE_MESSAGE:-Release ${GITHUB_SHA::7}}" \
             --non-interactive
 

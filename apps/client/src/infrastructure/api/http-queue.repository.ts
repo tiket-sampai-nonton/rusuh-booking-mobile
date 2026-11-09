@@ -50,14 +50,17 @@ export class HttpQueueRepository implements QueueRepository {
   }
 
   async getQueueStatus(eventId: string): Promise<QueueStatusSnapshot> {
-    const res = await this.http.request<{
+    const res = await this.http.request({
+      method: "GET",
+      url: `queue-status/${encodeURIComponent(eventId)}`,
+    });
+    const data = unwrap<{
       admissionRatePerMin?: number;
       nextPollAfterMs?: number;
-    }>({ method: "GET", url: `queue-status/${encodeURIComponent(eventId)}` });
-    assertOk(res);
+    }>(res);
     return {
-      admissionRatePerMin: res.data.admissionRatePerMin,
-      nextPollAfterMs: res.data.nextPollAfterMs,
+      admissionRatePerMin: data.admissionRatePerMin,
+      nextPollAfterMs: data.nextPollAfterMs,
     };
   }
 

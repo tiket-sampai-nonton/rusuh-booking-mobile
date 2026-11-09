@@ -1,0 +1,6 @@
+Live API smoke — 2026-11-09 (Asia/Jakarta)
+- GET /api/v1/events: HTTP 200; {meta,data} envelope; 3 events; all catalog statuses CLOSED.
+- GET /api/v1/events/a44ed78a-26b3-4e11-8451-730cae4c3f86: HTTP 200; event status CLOSED.
+- GET /api/v1/queue-status/a44ed78a-26b3-4e11-8451-730cae4c3f86: HTTP 200; {meta,data} envelope; saleState=CLOSED; admissionRatePerMin=0.
+- Browser credentialed GETs succeeded with origin-specific ACAO and ACAC=true. Direct OPTIONS returned HTTP 204 with ACAO=*; this is the preflight response.
+- Queue-entry cookie smoke: POST 201; GET current entry 200; DELETE entry 204 (removed).
