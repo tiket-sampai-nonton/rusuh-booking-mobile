@@ -153,9 +153,15 @@ export interface ContainerOptions {
  * the dev/demo default; real mode is opt-in and requires an API base URL.
  */
 export function readUseMocksFlag(
-  env: Record<string, string | undefined> = process.env,
+  env?: Record<string, string | undefined>,
 ): boolean {
-  const raw = env.EXPO_PUBLIC_USE_MOCKS;
+  // Expo replaces EXPO_PUBLIC_ variables only when referenced directly as
+  // `process.env.NAME`; routing through the process.env object leaves the
+  // production bundle with an undefined flag, which silently selects mocks.
+  const raw =
+    env === undefined
+      ? process.env.EXPO_PUBLIC_USE_MOCKS
+      : env.EXPO_PUBLIC_USE_MOCKS;
   return raw !== "false" && raw !== "0";
 }
 
