@@ -21,6 +21,8 @@ import { PaymentWebViewNotice } from "./fragments/PaymentWebViewNotice";
 
 export interface PaymentWebViewScreenProps {
   readonly bookingId: string;
+  /** Absolute SNAP URL of the attempt; when set, loaded directly (no page token). */
+  readonly redirectUrl?: string;
 }
 
 /**
@@ -42,13 +44,20 @@ export function resolveWebViewNav(
     const q = attemptId ? `?attemptId=${encodeURIComponent(attemptId)}` : "";
     return `/payment-result/${bookingId}${q}`;
   }
+  if (url.includes("/payment-result/")) {
+    const id = /[?&]attemptId=([^&#]+)/.exec(url)?.[1];
+    return `/payment-result/${bookingId}${id ? `?attemptId=${id}` : ""}`;
+  }
   if (url.includes("/failed") || url.includes("/expired")) {
     return `/failed/${bookingId}`;
   }
   return null;
 }
 
-export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
+export function PaymentWebViewScreen({
+  bookingId,
+  redirectUrl,
+}: PaymentWebViewScreenProps) {
   const router = useRouter();
   const { createToken } = usePaymentWebView();
   const webView = useRef<WebView>(null);
@@ -59,6 +68,10 @@ export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    if (redirectUrl && /^https:\/\//.test(redirectUrl)) {
+      setPageUrl(redirectUrl);
+      return;
+    }
     let cancelled = false;
     void (async () => {
       try {

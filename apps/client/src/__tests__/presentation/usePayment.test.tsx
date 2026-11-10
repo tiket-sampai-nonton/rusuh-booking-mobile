@@ -173,7 +173,9 @@ describe("openSnapHandoff (platform branches)", () => {
 
     await openSnapHandoff("https://snap.mock/native", "bk / 123");
 
-    expect(push).toHaveBeenCalledWith("/payment-webview/bk%20%2F%20123");
+    expect(push).toHaveBeenCalledWith(
+      "/payment-webview/bk%20%2F%20123?redirectUrl=https%3A%2F%2Fsnap.mock%2Fnative",
+    );
     jest.dontMock("expo-router");
   });
 

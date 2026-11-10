@@ -60,7 +60,7 @@ export async function openSnapHandoff(
   if (bookingId) {
     const { router } = require("expo-router") as typeof import("expo-router");
     router.push(
-      `/payment-webview/${encodeURIComponent(bookingId)}` as import("expo-router").Href,
+      `/payment-webview/${encodeURIComponent(bookingId)}?redirectUrl=${encodeURIComponent(url)}` as import("expo-router").Href,
     );
     return;
   }
