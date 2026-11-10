@@ -32,6 +32,7 @@ const mockRouter = {
   push: jest.fn(),
   replace: jest.fn(),
   navigate: jest.fn(),
+  dismissTo: jest.fn(),
 };
 const originalPlatform = Platform.OS;
 const originalWindow = Dimensions.get("window");
@@ -82,6 +83,7 @@ describe("BrowseScreen — URL-driven filters", () => {
     mockRouter.push.mockReset();
     mockRouter.replace.mockReset();
     mockRouter.navigate.mockReset();
+    mockRouter.dismissTo.mockReset();
     useAccountStore.getState().clearProfile();
   });
 
@@ -174,8 +176,7 @@ describe("BrowseScreen — URL-driven filters", () => {
       expect.stringMatching(/^\/browse\?/),
     );
 
-    fireEvent.press(screen.getByTestId("load-more-btn"));
-    expect(screen.getByText("Semua Event Ditampilkan")).toBeTruthy();
+    expect(screen.queryByTestId("load-more-btn")).toBeNull();
   });
 
   it("opens filters from an icon-only accessible control", async () => {
@@ -235,7 +236,7 @@ describe("BrowseScreen — URL-driven filters", () => {
     //  uses Header with header-logo testID
     await waitFor(() => screen.getByTestId("header-logo"));
     fireEvent.press(screen.getByTestId("header-logo"));
-    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
+    expect(mockRouter.dismissTo).toHaveBeenCalledWith("/");
   });
 
   it("keeps the guest desktop header CTA inert on Browse", async () => {
@@ -268,9 +269,9 @@ describe("BrowseScreen — URL-driven filters", () => {
     fireEvent.press(screen.getByRole("tab", { name: "Ticket" }));
     fireEvent.press(screen.getByRole("tab", { name: "Profil" }));
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
-    expect(mockRouter.navigate).toHaveBeenCalledWith("/my-tickets");
-    expect(mockRouter.navigate).toHaveBeenCalledWith("/profile");
+    expect(mockRouter.dismissTo).toHaveBeenCalledWith("/");
+    expect(mockRouter.dismissTo).toHaveBeenCalledWith("/my-tickets");
+    expect(mockRouter.dismissTo).toHaveBeenCalledWith("/profile");
   });
 
   it("shows the Loader before data resolves", async () => {

@@ -1,0 +1,964 @@
+2026-11-10 06:33:29.748 xcodebuild[33139:1560829] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+2026-11-10 06:33:29.754 xcodebuild[33139:1560829] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+2026-11-10 06:33:31.119 xcodebuild[33139:1560829] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+** BUILD INTERRUPTED **
+:33.322216+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Default] Running tests...
+2026-11-10 06:33:33.408104+0700 maestro-driver-iosUITests-Runner[33156:1561254] snapshotKeyHonorModalViews configured to value: (null)
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'Selected tests' started at 2026-11-10 06:33:34.763.
+Test Suite 'maestro-driver-iosUITests.xctest' started at 2026-11-10 06:33:34.764.
+Test Suite 'maestro_driver_iosUITests' started at 2026-11-10 06:33:34.764.
+    t =      nans Suite Set Up
+Test Case '-[maestro_driver_iosUITests.maestro_driver_iosUITests testHttpServer]' started.
+    t =     0.01s Start Test at 2026-11-10 06:33:34.773
+    t =     0.07s Set Up
+2026-11-10 06:33:34.832943+0700 maestro-driver-iosUITests-Runner[33156:1561366] [maestro_driver_iosUITests] Will start HTTP server
+2026-11-10 06:33:34.909683+0700 maestro-driver-iosUITests-Runner[33156:1561361] [FlyingFox] starting server 127.0.0.1:62158
+objc[33156]: Class UIAccessibilityLoaderWebShared is implemented in both /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebCore.axbundle/WebCore (0x1099e8310) and /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebKit.axbundle/WebKit (0x1086b4398). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+2026-11-10 06:33:35.044796+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> open connection
+2026-11-10 06:33:35.049868+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /status
+2026-11-10 06:33:35.205793+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> open connection
+2026-11-10 06:33:35.206981+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     0.44s Getting device orientation
+2026-11-10 06:33:35.229079+0700 maestro-driver-iosUITests-Runner[33156:1561254] Using singleton test manager
+2026-11-10 06:33:35.237211+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     0.47s Getting device orientation
+    t =     0.48s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:35.326307+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:35.401965+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     0.64s Getting device orientation
+2026-11-10 06:33:35.405607+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     0.64s Getting device orientation
+2026-11-10 06:33:35.406771+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:35.406843+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:35.492806+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:35.496843+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:35.497363+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:35.497418+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     0.73s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:35.557117+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:35.557309+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     0.79s Checking existence of `StatusBar (First Match)`
+    t =     0.80s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     0.83s Find the StatusBar (Element at index 0)
+    t =     0.85s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:35.635028+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.07767701148986816
+2026-11-10 06:33:35.635086+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:35.636810+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0016379356384277344
+    t =     0.87s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:35.659844+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:35.705862+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     0.94s Getting device orientation
+2026-11-10 06:33:35.708712+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     0.94s Getting device orientation
+2026-11-10 06:33:35.709742+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:35.709835+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:35.711367+0700 maestro-driver-iosUITests-Runner[33156:1561361] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:35.713297+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:35.713711+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:35.713757+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     0.95s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:35.770567+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:35.770871+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     1.01s Checking existence of `StatusBar (First Match)`
+    t =     1.01s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     1.03s Find the StatusBar (Element at index 0)
+    t =     1.05s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:35.831154+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06024599075317383
+2026-11-10 06:33:35.831226+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:35.831679+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004410743713378906
+    t =     1.07s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:35.845789+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:35.858583+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:36.047004+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:36.225967+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:36.405085+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:36.581457+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:36.765067+0700 maestro-driver-iosUITests-Runner[33156:1561361] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:36.950136+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:37.131035+0700 maestro-driver-iosUITests-Runner[33156:1561361] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:37.313921+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:37.494205+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:37.674716+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:37.863478+0700 maestro-driver-iosUITests-Runner[33156:1561361] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:38.045097+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:38.228746+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:38.409756+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:38.591343+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:38.782313+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:38.982243+0700 maestro-driver-iosUITests-Runner[33156:1561361] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     4.22s Getting device orientation
+2026-11-10 06:33:38.985250+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     4.22s Getting device orientation
+2026-11-10 06:33:38.986510+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:38.986646+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:38.989116+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:38.991069+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:38.991459+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:38.991502+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     4.23s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:39.044657+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:39.044822+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     4.28s Checking existence of `StatusBar (First Match)`
+    t =     4.29s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     4.30s Find the StatusBar (Element at index 0)
+    t =     4.32s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:39.106831+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.061964988708496094
+2026-11-10 06:33:39.106904+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:39.107298+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0003789663314819336
+    t =     4.34s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:39.121962+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:39.344191+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     4.58s Getting device orientation
+2026-11-10 06:33:39.347096+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     4.58s Getting device orientation
+2026-11-10 06:33:39.348291+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:39.348408+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:39.349816+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:39.351847+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:39.352369+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:39.352420+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     4.59s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:39.419183+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:39.419338+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     4.65s Checking existence of `StatusBar (First Match)`
+    t =     4.66s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     4.68s Find the StatusBar (Element at index 0)
+    t =     4.70s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:39.481503+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.062109947204589844
+2026-11-10 06:33:39.481569+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:39.482046+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00045800209045410156
+    t =     4.72s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:39.496108+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:39.723164+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     4.96s Getting device orientation
+2026-11-10 06:33:39.727363+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     4.96s Getting device orientation
+2026-11-10 06:33:39.728830+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:39.728941+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:39.732002+0700 maestro-driver-iosUITests-Runner[33156:1561361] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:39.734044+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:39.734566+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:39.734639+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     4.97s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:39.804937+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:39.805393+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     5.04s Checking existence of `StatusBar (First Match)`
+    t =     5.05s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     5.07s Find the StatusBar (Element at index 0)
+    t =     5.08s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:39.869570+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.0641319751739502
+2026-11-10 06:33:39.869655+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:39.870096+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004189014434814453
+    t =     5.11s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:39.885124+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:40.103853+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     5.34s Getting device orientation
+2026-11-10 06:33:40.107641+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     5.34s Getting device orientation
+2026-11-10 06:33:40.109246+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:40.109386+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:40.113614+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:40.116133+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:40.116651+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:40.116702+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     5.35s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:40.185422+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:40.185590+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     5.42s Checking existence of `StatusBar (First Match)`
+    t =     5.43s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     5.45s Find the StatusBar (Element at index 0)
+    t =     5.46s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:40.250643+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06498098373413086
+2026-11-10 06:33:40.250726+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:40.251121+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0003889799118041992
+    t =     5.49s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:40.267116+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:40.486940+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     5.72s Getting device orientation
+2026-11-10 06:33:40.490761+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     5.73s Getting device orientation
+2026-11-10 06:33:40.491986+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:40.492097+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:40.496514+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:40.498487+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:40.499008+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:40.499064+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     5.73s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:40.567323+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:40.567472+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     5.80s Checking existence of `StatusBar (First Match)`
+    t =     5.81s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     5.83s Find the StatusBar (Element at index 0)
+    t =     5.85s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:40.630858+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.0633159875869751
+2026-11-10 06:33:40.630953+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:40.631402+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004379749298095703
+    t =     5.87s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:40.646709+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:40.865476+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     6.10s Getting device orientation
+2026-11-10 06:33:40.869300+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     6.10s Getting device orientation
+2026-11-10 06:33:40.871077+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:40.871298+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:40.875066+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:40.877353+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:40.877827+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:40.877880+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     6.11s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:40.940228+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:40.940385+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     6.18s Checking existence of `StatusBar (First Match)`
+    t =     6.18s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     6.20s Find the StatusBar (Element at index 0)
+    t =     6.22s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:41.005846+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06532597541809082
+2026-11-10 06:33:41.005995+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:41.006523+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0005010366439819336
+    t =     6.24s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:41.021310+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:41.235727+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     6.47s Getting device orientation
+2026-11-10 06:33:41.239796+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     6.48s Getting device orientation
+2026-11-10 06:33:41.241566+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:41.241753+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:41.245768+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:41.248346+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:41.248902+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:41.248965+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     6.48s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:41.312530+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:41.312704+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     6.55s Checking existence of `StatusBar (First Match)`
+    t =     6.55s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     6.57s Find the StatusBar (Element at index 0)
+    t =     6.59s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:41.378720+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06596601009368896
+2026-11-10 06:33:41.378797+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:41.379205+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0003809928894042969
+    t =     6.61s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:41.394513+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:41.611775+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     6.85s Getting device orientation
+2026-11-10 06:33:41.618109+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     6.85s Getting device orientation
+2026-11-10 06:33:41.619677+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:41.619850+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:41.623753+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:41.626075+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:41.626565+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:41.626617+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     6.86s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:41.695555+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:41.695685+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     6.93s Checking existence of `StatusBar (First Match)`
+    t =     6.94s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     6.96s Find the StatusBar (Element at index 0)
+    t =     6.97s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:41.761422+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06568896770477295
+2026-11-10 06:33:41.761499+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:41.762010+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00048792362213134766
+    t =     7.00s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:41.777330+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:41.997834+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     7.23s Getting device orientation
+2026-11-10 06:33:42.002629+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     7.24s Getting device orientation
+2026-11-10 06:33:42.003812+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:42.003925+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:42.005461+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:42.007546+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:42.008002+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:42.008058+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     7.24s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:42.071943+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:42.072112+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     7.31s Checking existence of `StatusBar (First Match)`
+    t =     7.31s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     7.33s Find the StatusBar (Element at index 0)
+    t =     7.35s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:42.131924+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.059783935546875
+2026-11-10 06:33:42.131986+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:42.132413+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00039899349212646484
+    t =     7.37s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:42.146831+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:42.158453+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 06:33:42.489843+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 06:33:42.496810+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =     7.73s Getting device orientation
+2026-11-10 06:33:42.498315+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+    t =     7.73s Getting device orientation
+2026-11-10 06:33:42.499141+0700 maestro-driver-iosUITests-Runner[33156:1561254] Tapping 201.0, 805.0
+    t =     7.73s Getting device orientation
+2026-11-10 06:33:42.850281+0700 maestro-driver-iosUITests-Runner[33156:1561254] Tapping took 0.34668898582458496
+2026-11-10 06:33:42.853040+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:43.120921+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:43.336287+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:43.544324+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:43.744015+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:43.942066+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:44.145966+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:44.348847+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:44.550088+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:44.749173+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:44.952232+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    10.19s Getting device orientation
+2026-11-10 06:33:44.958162+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    10.19s Getting device orientation
+2026-11-10 06:33:44.959106+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:44.959201+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:44.962629+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:44.964686+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:44.965063+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:44.965107+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    10.20s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:45.049672+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:45.049852+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    10.29s Checking existence of `StatusBar (First Match)`
+    t =    10.29s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    10.31s Find the StatusBar (Element at index 0)
+    t =    10.33s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:45.114551+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06466400623321533
+2026-11-10 06:33:45.114613+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:45.115014+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00038695335388183594
+    t =    10.35s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:45.132284+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:45.141443+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    10.38s Getting device orientation
+2026-11-10 06:33:45.144694+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    10.38s Getting device orientation
+2026-11-10 06:33:45.145777+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:45.145885+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:45.147242+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:45.149081+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:45.149535+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:45.149589+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    10.38s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:45.224264+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:45.224429+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    10.46s Checking existence of `StatusBar (First Match)`
+    t =    10.47s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    10.48s Find the StatusBar (Element at index 0)
+    t =    10.50s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:45.283407+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.058943986892700195
+2026-11-10 06:33:45.283463+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:45.283892+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00040900707244873047
+    t =    10.52s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:45.297957+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:45.304939+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:45.499627+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 06:33:45.668991+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 06:33:45.671473+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    10.91s Getting device orientation
+2026-11-10 06:33:45.672737+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+    t =    10.91s Getting device orientation
+2026-11-10 06:33:45.673708+0700 maestro-driver-iosUITests-Runner[33156:1561254] Tapping 67.0, 805.0
+    t =    10.91s Getting device orientation
+2026-11-10 06:33:46.014253+0700 maestro-driver-iosUITests-Runner[33156:1561254] Tapping took 0.33943498134613037
+2026-11-10 06:33:46.017439+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:46.232026+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:46.432190+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:46.627310+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:46.823007+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:47.020138+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:47.215340+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:47.416012+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:47.622134+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:47.821481+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:48.024550+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:48.228360+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:48.431835+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:48.636997+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:48.843232+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:49.044100+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    14.28s Getting device orientation
+2026-11-10 06:33:49.047152+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    14.28s Getting device orientation
+2026-11-10 06:33:49.048199+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:49.048340+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:49.050629+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:49.052393+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:49.052852+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:49.052901+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    14.29s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:49.110332+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:49.110473+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    14.35s Checking existence of `StatusBar (First Match)`
+    t =    14.35s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    14.37s Find the StatusBar (Element at index 0)
+    t =    14.39s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:49.171407+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06089293956756592
+2026-11-10 06:33:49.171476+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:49.171873+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00037491321563720703
+    t =    14.41s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:49.186349+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:49.193969+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    14.43s Getting device orientation
+2026-11-10 06:33:49.196651+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    14.43s Getting device orientation
+2026-11-10 06:33:49.197737+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:49.197841+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:49.200576+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:49.202323+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:49.202745+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:49.202790+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    14.44s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:49.258394+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:49.258594+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    14.49s Checking existence of `StatusBar (First Match)`
+    t =    14.50s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    14.52s Find the StatusBar (Element at index 0)
+    t =    14.54s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:49.329058+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.0704270601272583
+2026-11-10 06:33:49.329133+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:49.329529+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00037801265716552734
+    t =    14.56s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:49.343941+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:49.357530+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    14.59s Getting device orientation
+2026-11-10 06:33:49.360008+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    14.60s Getting device orientation
+2026-11-10 06:33:49.361086+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:49.361195+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:49.363592+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:49.365642+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:49.366243+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:49.366294+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    14.60s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:49.421982+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:49.422115+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    14.66s Checking existence of `StatusBar (First Match)`
+    t =    14.66s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    14.68s Find the StatusBar (Element at index 0)
+    t =    14.70s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:49.483079+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.060920000076293945
+2026-11-10 06:33:49.483148+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:49.483593+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00042498111724853516
+    t =    14.72s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:49.498261+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:49.513181+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    14.75s Getting device orientation
+2026-11-10 06:33:49.516005+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    14.75s Getting device orientation
+2026-11-10 06:33:49.517352+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:49.517470+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:49.518970+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:49.521136+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:49.521619+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:49.521686+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    14.76s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:49.580661+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:49.580846+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    14.82s Checking existence of `StatusBar (First Match)`
+    t =    14.82s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    14.84s Find the StatusBar (Element at index 0)
+    t =    14.86s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:49.645016+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06412100791931152
+2026-11-10 06:33:49.645153+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:49.645586+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004190206527709961
+    t =    14.88s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:49.661031+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:49.671110+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    14.91s Getting device orientation
+2026-11-10 06:33:49.674137+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    14.91s Getting device orientation
+2026-11-10 06:33:49.675388+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:49.675490+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:49.676896+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:49.679165+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:49.679790+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:49.679901+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    14.92s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:49.737064+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:49.737242+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    14.97s Checking existence of `StatusBar (First Match)`
+    t =    14.98s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    15.00s Find the StatusBar (Element at index 0)
+    t =    15.02s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:49.801075+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.0637969970703125
+2026-11-10 06:33:49.801143+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:49.801534+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00036597251892089844
+    t =    15.04s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:49.816631+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:49.824894+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    15.06s Getting device orientation
+2026-11-10 06:33:49.828050+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    15.06s Getting device orientation
+2026-11-10 06:33:49.829421+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:49.829543+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:49.830890+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:49.832869+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:49.833304+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:49.833343+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    15.07s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:49.889260+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:49.889406+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    15.12s Checking existence of `StatusBar (First Match)`
+    t =    15.13s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    15.15s Find the StatusBar (Element at index 0)
+    t =    15.17s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:49.951373+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.061927080154418945
+2026-11-10 06:33:49.951443+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:49.951878+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004210472106933594
+    t =    15.19s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:49.966485+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:49.971557+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    15.21s Getting device orientation
+2026-11-10 06:33:49.974623+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    15.21s Getting device orientation
+2026-11-10 06:33:49.975893+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:49.976071+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:49.977535+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:49.979918+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:49.980434+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:49.980491+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    15.22s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:50.037289+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:50.037582+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    15.27s Checking existence of `StatusBar (First Match)`
+    t =    15.28s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    15.30s Find the StatusBar (Element at index 0)
+    t =    15.31s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:50.099145+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06151902675628662
+2026-11-10 06:33:50.099216+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:50.099664+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00042700767517089844
+    t =    15.33s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:50.114342+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:50.125426+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    15.36s Getting device orientation
+2026-11-10 06:33:50.128017+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    15.36s Getting device orientation
+2026-11-10 06:33:50.129021+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:50.129114+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:50.130773+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:50.132442+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:50.132854+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:50.132899+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    15.37s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:50.188711+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:50.188864+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    15.42s Checking existence of `StatusBar (First Match)`
+    t =    15.43s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    15.45s Find the StatusBar (Element at index 0)
+    t =    15.47s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:50.250426+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.061521053314208984
+2026-11-10 06:33:50.250496+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:50.250905+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0003960132598876953
+    t =    15.49s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:50.265329+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:50.277947+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    15.51s Getting device orientation
+2026-11-10 06:33:50.280840+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    15.52s Getting device orientation
+2026-11-10 06:33:50.282223+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:50.282346+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:50.284069+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:50.286316+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:50.286795+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:50.286865+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    15.52s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:50.347233+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:50.347369+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    15.58s Checking existence of `StatusBar (First Match)`
+    t =    15.59s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    15.61s Find the StatusBar (Element at index 0)
+    t =    15.62s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:50.410763+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06334793567657471
+2026-11-10 06:33:50.410835+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:50.411288+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00043201446533203125
+    t =    15.65s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:50.426045+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:50.433020+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:50.634530+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:50.834182+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:51.028765+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:51.222787+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:51.414421+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:51.606474+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:51.801913+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:51.995686+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:52.191060+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:52.386766+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:52.588698+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:52.780806+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:52.974755+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:53.168715+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:53.370047+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:53.564401+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    18.80s Getting device orientation
+2026-11-10 06:33:53.567371+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    18.80s Getting device orientation
+2026-11-10 06:33:53.568567+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:53.568660+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:53.570554+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:53.571930+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:53.572368+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:53.572420+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    18.81s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:53.630188+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:53.630330+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    18.87s Checking existence of `StatusBar (First Match)`
+    t =    18.87s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    18.89s Find the StatusBar (Element at index 0)
+    t =    18.91s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:53.690546+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.060167908668518066
+2026-11-10 06:33:53.690615+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:53.690979+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0003490447998046875
+    t =    18.93s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:53.705464+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:53.917275+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    19.15s Getting device orientation
+2026-11-10 06:33:53.920975+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    19.16s Getting device orientation
+2026-11-10 06:33:53.922528+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:53.922766+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:53.926729+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:53.929372+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:53.929999+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:53.930059+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    19.17s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:53.994051+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:53.994214+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    19.23s Checking existence of `StatusBar (First Match)`
+    t =    19.24s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    19.25s Find the StatusBar (Element at index 0)
+    t =    19.27s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:54.060176+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.0658949613571167
+2026-11-10 06:33:54.060277+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:54.060732+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004121065139770508
+    t =    19.30s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:54.076130+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:54.293976+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    19.53s Getting device orientation
+2026-11-10 06:33:54.297372+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    19.53s Getting device orientation
+2026-11-10 06:33:54.298714+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:54.299019+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:54.301553+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:54.303719+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:54.304249+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:54.304303+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    19.54s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:54.367165+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:54.367347+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    19.60s Checking existence of `StatusBar (First Match)`
+    t =    19.61s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    19.63s Find the StatusBar (Element at index 0)
+    t =    19.65s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:54.438053+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.07061505317687988
+2026-11-10 06:33:54.438163+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:54.438712+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0005189180374145508
+    t =    19.67s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:54.455422+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:54.673719+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    19.91s Getting device orientation
+2026-11-10 06:33:54.679183+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    19.91s Getting device orientation
+2026-11-10 06:33:54.680515+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:54.680756+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:54.683405+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:54.685657+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:54.686145+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:54.686197+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    19.92s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:54.748997+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:54.749263+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    19.98s Checking existence of `StatusBar (First Match)`
+    t =    19.99s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    20.01s Find the StatusBar (Element at index 0)
+    t =    20.03s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:54.819001+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06968796253204346
+2026-11-10 06:33:54.819095+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:54.819532+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004220008850097656
+    t =    20.05s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:54.834647+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:55.052175+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    20.29s Getting device orientation
+2026-11-10 06:33:55.056712+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    20.29s Getting device orientation
+2026-11-10 06:33:55.057942+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:55.058071+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:55.060443+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:55.062461+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:55.062956+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:55.063004+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    20.30s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:55.120545+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:55.120692+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    20.36s Checking existence of `StatusBar (First Match)`
+    t =    20.36s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    20.38s Find the StatusBar (Element at index 0)
+    t =    20.40s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:55.181361+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06063103675842285
+2026-11-10 06:33:55.181429+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:55.181862+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00040793418884277344
+    t =    20.42s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:55.196189+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:55.410030+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    20.65s Getting device orientation
+2026-11-10 06:33:55.416324+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    20.65s Getting device orientation
+2026-11-10 06:33:55.417661+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:55.417765+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:55.419146+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:55.420944+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:55.421349+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:55.421391+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    20.66s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:55.477573+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:55.477723+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    20.71s Checking existence of `StatusBar (First Match)`
+    t =    20.72s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    20.74s Find the StatusBar (Element at index 0)
+    t =    20.75s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:55.539581+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06182205677032471
+2026-11-10 06:33:55.539649+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:55.540070+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004049539566040039
+    t =    20.78s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:55.554825+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:55.563953+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 06:33:55.724973+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 06:33:55.727269+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    20.96s Getting device orientation
+2026-11-10 06:33:55.728396+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+    t =    20.96s Getting device orientation
+2026-11-10 06:33:55.729137+0700 maestro-driver-iosUITests-Runner[33156:1561254] Tapping 201.0, 805.0
+    t =    20.96s Getting device orientation
+2026-11-10 06:33:56.065467+0700 maestro-driver-iosUITests-Runner[33156:1561254] Tapping took 0.3355989456176758
+2026-11-10 06:33:56.068296+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:56.299163+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:56.503217+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:56.704190+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:56.902883+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:57.107277+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:57.306767+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:57.502243+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:57.699026+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:57.893846+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:58.096165+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    23.33s Getting device orientation
+2026-11-10 06:33:58.098817+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    23.33s Getting device orientation
+2026-11-10 06:33:58.099984+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:58.100094+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:58.101837+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:58.103421+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:58.103846+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:58.103889+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    23.34s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:58.176605+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:58.176767+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    23.41s Checking existence of `StatusBar (First Match)`
+    t =    23.42s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    23.43s Find the StatusBar (Element at index 0)
+    t =    23.45s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:58.235068+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.058255910873413086
+2026-11-10 06:33:58.235137+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:58.235567+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004190206527709961
+    t =    23.47s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:58.249605+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:58.261246+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    23.50s Getting device orientation
+2026-11-10 06:33:58.263886+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    23.50s Getting device orientation
+2026-11-10 06:33:58.264979+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:33:58.265064+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:33:58.266324+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:33:58.268002+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:33:58.268394+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:33:58.268455+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    23.50s Find the Application 'host.exp.Exponent'
+2026-11-10 06:33:58.338457+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:33:58.338582+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    23.57s Checking existence of `StatusBar (First Match)`
+    t =    23.58s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    23.60s Find the StatusBar (Element at index 0)
+    t =    23.61s Find the StatusBar (Element at index 1)
+2026-11-10 06:33:58.395639+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.05696892738342285
+2026-11-10 06:33:58.395706+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:33:58.396134+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00040900707244873047
+    t =    23.63s Find the Application 'com.apple.springboard'
+2026-11-10 06:33:58.409809+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:33:58.419378+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:58.617090+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 06:33:58.785449+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 06:33:58.787421+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    24.02s Getting device orientation
+2026-11-10 06:33:58.788558+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+    t =    24.02s Getting device orientation
+2026-11-10 06:33:58.789300+0700 maestro-driver-iosUITests-Runner[33156:1561254] Tapping 67.0, 805.0
+    t =    24.02s Getting device orientation
+2026-11-10 06:33:59.125565+0700 maestro-driver-iosUITests-Runner[33156:1561254] Tapping took 0.33544790744781494
+2026-11-10 06:33:59.131579+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:59.358288+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:59.546976+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:59.737120+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:33:59.928879+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:00.122174+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:00.312954+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:00.504813+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:00.702295+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:00.898791+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:01.093967+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:01.287350+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:01.480081+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:01.680214+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:01.881350+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:02.075823+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 06:34:02.281393+0700 maestro-driver-iosUITests-Runner[33156:1561364] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    27.52s Getting device orientation
+2026-11-10 06:34:02.288187+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    27.52s Getting device orientation
+2026-11-10 06:34:02.289474+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:34:02.289642+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:34:02.292265+0700 maestro-driver-iosUITests-Runner[33156:1561499] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:34:02.294392+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:34:02.294900+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:34:02.294957+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    27.53s Find the Application 'host.exp.Exponent'
+2026-11-10 06:34:02.356156+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:34:02.356291+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    27.59s Checking existence of `StatusBar (First Match)`
+    t =    27.60s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    27.62s Find the StatusBar (Element at index 0)
+    t =    27.64s Find the StatusBar (Element at index 1)
+2026-11-10 06:34:02.421154+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06482505798339844
+2026-11-10 06:34:02.421230+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:34:02.421677+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00042510032653808594
+    t =    27.66s Find the Application 'com.apple.springboard'
+2026-11-10 06:34:02.436856+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:34:02.447144+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    27.68s Getting device orientation
+2026-11-10 06:34:02.449672+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    27.69s Getting device orientation
+2026-11-10 06:34:02.552292+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:34:02.552452+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:34:02.553771+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:34:02.555638+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:34:02.556074+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:34:02.556133+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    27.79s Find the Application 'host.exp.Exponent'
+2026-11-10 06:34:02.613627+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:34:02.613773+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    27.85s Checking existence of `StatusBar (First Match)`
+    t =    27.86s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    27.87s Find the StatusBar (Element at index 0)
+    t =    27.89s Find the StatusBar (Element at index 1)
+2026-11-10 06:34:02.678654+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06483697891235352
+2026-11-10 06:34:02.678732+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:34:02.679218+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004639625549316406
+    t =    27.91s Find the Application 'com.apple.springboard'
+2026-11-10 06:34:02.696276+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:34:02.704410+0700 maestro-driver-iosUITests-Runner[33156:1561363] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    27.94s Getting device orientation
+2026-11-10 06:34:02.707836+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    27.94s Getting device orientation
+2026-11-10 06:34:02.709953+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:34:02.710226+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:34:02.711763+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:34:02.713979+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:34:02.714559+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:34:02.714638+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    27.95s Find the Application 'host.exp.Exponent'
+2026-11-10 06:34:02.773207+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:34:02.773371+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    28.01s Checking existence of `StatusBar (First Match)`
+    t =    28.02s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    28.03s Find the StatusBar (Element at index 0)
+    t =    28.05s Find the StatusBar (Element at index 1)
+2026-11-10 06:34:02.833855+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.060446977615356445
+2026-11-10 06:34:02.833918+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:34:02.834301+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.000370025634765625
+    t =    28.07s Find the Application 'com.apple.springboard'
+2026-11-10 06:34:02.848204+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:34:02.863250+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    28.10s Getting device orientation
+2026-11-10 06:34:02.865849+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    28.10s Getting device orientation
+2026-11-10 06:34:02.867168+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:34:02.867403+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:34:02.868678+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:34:02.870490+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:34:02.870929+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:34:02.870968+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    28.11s Find the Application 'host.exp.Exponent'
+2026-11-10 06:34:02.925895+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:34:02.926037+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    28.16s Checking existence of `StatusBar (First Match)`
+    t =    28.17s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    28.18s Find the StatusBar (Element at index 0)
+    t =    28.20s Find the StatusBar (Element at index 1)
+2026-11-10 06:34:02.984349+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.05827295780181885
+2026-11-10 06:34:02.984416+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:34:02.984805+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00037097930908203125
+    t =    28.22s Find the Application 'com.apple.springboard'
+2026-11-10 06:34:02.998888+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:34:03.005422+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    28.24s Getting device orientation
+2026-11-10 06:34:03.007758+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    28.24s Getting device orientation
+2026-11-10 06:34:03.008789+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:34:03.008898+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:34:03.010907+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:34:03.012389+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:34:03.012766+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:34:03.012815+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    28.25s Find the Application 'host.exp.Exponent'
+2026-11-10 06:34:03.067578+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:34:03.067698+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    28.30s Checking existence of `StatusBar (First Match)`
+    t =    28.31s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    28.32s Find the StatusBar (Element at index 0)
+    t =    28.34s Find the StatusBar (Element at index 1)
+2026-11-10 06:34:03.131325+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.06358301639556885
+2026-11-10 06:34:03.131389+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:34:03.131803+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.00038695335388183594
+    t =    28.37s Find the Application 'com.apple.springboard'
+2026-11-10 06:34:03.145749+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:34:03.156115+0700 maestro-driver-iosUITests-Runner[33156:1561366] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    28.39s Getting device orientation
+2026-11-10 06:34:03.259806+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    28.50s Getting device orientation
+2026-11-10 06:34:03.260983+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:34:03.261096+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:34:03.263945+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:34:03.265682+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:34:03.266050+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:34:03.266085+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    28.50s Find the Application 'host.exp.Exponent'
+2026-11-10 06:34:03.321249+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:34:03.321356+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    28.56s Checking existence of `StatusBar (First Match)`
+    t =    28.56s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    28.58s Find the StatusBar (Element at index 0)
+    t =    28.60s Find the StatusBar (Element at index 1)
+2026-11-10 06:34:03.379669+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.058204054832458496
+2026-11-10 06:34:03.379737+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:34:03.380130+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0003839731216430664
+    t =    28.62s Find the Application 'com.apple.springboard'
+2026-11-10 06:34:03.394302+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:34:03.404385+0700 maestro-driver-iosUITests-Runner[33156:1561362] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    28.64s Getting device orientation
+2026-11-10 06:34:03.406634+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+    t =    28.64s Getting device orientation
+2026-11-10 06:34:03.407687+0700 maestro-driver-iosUITests-Runner[33156:1561254] Returning cached screen size
+2026-11-10 06:34:03.407786+0700 maestro-driver-iosUITests-Runner[33156:1561254] Device orientation is 1
+2026-11-10 06:34:03.409748+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 06:34:03.411501+0700 maestro-driver-iosUITests-Runner[33156:1561254] Detected running apps: ["host.exp.Exponent"]
+2026-11-10 06:34:03.411909+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Start] View hierarchy snapshot for Application 'host.exp.Exponent'
+2026-11-10 06:34:03.411951+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    28.65s Find the Application 'host.exp.Exponent'
+2026-11-10 06:34:03.467687+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 06:34:03.467825+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    28.70s Checking existence of `StatusBar (First Match)`
+    t =    28.71s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    28.73s Find the StatusBar (Element at index 0)
+    t =    28.74s Find the StatusBar (Element at index 1)
+2026-11-10 06:34:03.528629+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch status bar hierarchy - duration 0.060739994049072266
+2026-11-10 06:34:03.528721+0700 maestro-driver-iosUITests-Runner[33156:1561254] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 06:34:03.529207+0700 maestro-driver-iosUITests-Runner[33156:1561254] Fetch Safari WebView hierarchy - duration 0.0004709959030151367
+    t =    28.76s Find the Application 'com.apple.springboard'
+2026-11-10 06:34:03.543797+0700 maestro-driver-iosUITests-Runner[33156:1561254] [Done] View hierarchy snapshot for Application 'host.exp.Exponent' 
+2026-11-10 06:34:04.406002+0700 maestro-driver-iosUITests-Runner[33156:1561500] [FlyingFox] <127.0.0.1> request: GET /status

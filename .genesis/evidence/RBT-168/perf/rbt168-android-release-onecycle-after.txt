@@ -1,0 +1,57 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 25274818 Realtime: 25274818
+
+** MEMINFO in pid 2265 [com.tiketsampainonton.rusuhbooking] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   169803   169764        0    17087   170704   235296   164464    66635
+  Dalvik Heap    19664    17012       20       74    23196    25043    12650    12393
+ Dalvik Other     4758     4024        0       67     5944                           
+        Stack     1052     1052        0      312     1056                           
+       Ashmem       18        0        0        0      432                           
+    Other dev       21        0       12        0      248                           
+     .so mmap     4942      108      200      132    37132                           
+    .jar mmap     2809        0       56        0    39856                           
+    .apk mmap    25592       52    17564      624    39016                           
+    .ttf mmap      842        0      640        0     1920                           
+    .dex mmap    16140        0    16072        0    17084                           
+    .oat mmap      743        0        0        0    12460                           
+    .art mmap     3313      856       16      353    20716                           
+   Other mmap      668        4       20        0     2344                           
+      Unknown    34621    34348      260    17741    35068                           
+        TOTAL   321376   227220    34860    36390   407176   260339   177114    79028
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:    17884                          43912
+         Native Heap:   169764                         170704
+                Code:    34716                         148888
+               Stack:     1052                           1056
+            Graphics:        0                              0
+       Private Other:    38664
+              System:    59296
+             Unknown:                                   42616
+ 
+           TOTAL PSS:   321376            TOTAL RSS:   407176       TOTAL SWAP PSS:    36390
+ 
+ Objects
+               Views:      752         ViewRootImpl:        1
+         AppContexts:        7           Activities:        2
+              Assets:       23        AssetManagers:        0
+       Local Binders:       23        Proxy Binders:       57
+       Parcel memory:       10         Parcel count:       42
+    Death Recipients:        0             WebViews:        0
+ 
+ Native Allocations
+                         Count                       Total(kB)
+                        ------                         ------
+    Other (malloced):     4073                            388
+ Other (nonmalloced):       94                             67
+   Bitmap (malloced):       86                          38837
+ 
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+ 

@@ -170,16 +170,6 @@ export const browseSortControl = {
   cursor: "pointer",
   outlineWidth: 0,
 };
-export const browseLoadMorePressed: ViewStyle = {
-  backgroundColor: designColors.ink,
-};
-export const browseLoadMoreDisabled: ViewStyle = { opacity: 0.5 };
-export const browseLoadMoreLabel = (disabled: boolean): TextStyle => ({
-  color: disabled ? designColors.inkMuted : designColors.ink,
-  fontFamily: plusJakartaSansFonts.bold,
-  fontSize: 14,
-  textTransform: "uppercase",
-});
 export const browseNativeCategoryBar: ViewStyle = {
   position: "absolute",
   left: 0,
@@ -369,6 +359,15 @@ export const browseGridRow = (isNative = false): ViewStyle => {
   };
 };
 
+/** Inset native grid rows so their cards do not touch the device edge. */
+export const browseNativeGridRowInset: ViewStyle = { marginHorizontal: 8 };
+
+/** Inset native single-column cards without changing the toolbar spacing. */
+export const browseNativeListItem: ViewStyle = {
+  alignSelf: "stretch",
+  marginHorizontal: 16,
+};
+
 /** Single-column grid (list view) */
 export const browseGridList = (
   isNative = false,
@@ -389,32 +388,6 @@ export const browseGridCell = (
     marginBottom: gap,
   };
 };
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// LOAD MORE (prototype .load-more)
-// ═══════════════════════════════════════════════════════════════════════════════
-
-export const browseLoadMore: ViewStyle = {
-  alignItems: "center",
-  marginTop: 48,
-};
-
-export const browseLoadMoreBtn: ViewStyle = {
-  paddingVertical: 16,
-  paddingHorizontal: 48,
-  backgroundColor: designColors.ground,
-  borderWidth: designBorders.standard,
-  borderColor: designColors.ink,
-};
-
-export const browseLoadMoreButtonStyle = (
-  pressed: boolean,
-  disabled: boolean,
-): ViewStyle[] => [
-  browseLoadMoreBtn,
-  ...(pressed ? [browseLoadMorePressed] : []),
-  ...(disabled ? [browseLoadMoreDisabled] : []),
-];
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // EMPTY / LOADING STATES

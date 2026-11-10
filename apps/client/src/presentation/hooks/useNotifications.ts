@@ -5,13 +5,11 @@
  * side: ask permission + register for push on mount, and when the user TAPS a
  * notification, route to its `deepLink` via expo-router.
  *
- * expo-notifications is required lazily so importing this hook on web/test loads
- * nothing; the route resolution uses the pure `notificationRoute` rule.
+ * Native SDK details stay behind NotificationPort; the route resolution uses
+ * the pure `notificationRoute` rule.
  */
 import { useRouter, type Href } from "expo-router";
 import { useEffect } from "react";
-import { Platform } from "react-native";
-
 import { notificationRoute } from "@domain/rules/notification-flows";
 import { useServices } from "@providers/service-context";
 
@@ -33,33 +31,31 @@ export function useNotifications(): void {
   const { notification } = useServices();
 
   useEffect(() => {
-    let subscription: { remove: () => void } | undefined;
+    let unsubscribe: (() => void) | undefined;
 
     void (async () => {
       // Ask permission + register for remote push (token handed to the BE
       // later). On web this registers the service worker + push subscription
       // (RBT-073, degrades gracefully when unsupported); on native it is the
       // Expo push token (RBT-072).
-      await notification.registerForRemotePush();
-
-      if (Platform.OS === "web") {
-        // Web taps are handled by the service worker's `notificationclick`
-        // (clients.navigate to the deep link) — no in-app JS listener needed.
+      try {
+        await notification.registerForRemotePush();
+      } catch {
+        // Push is optional and may be unavailable in Expo Go or offline.
         return;
       }
-      const api =
-        require("expo-notifications") as typeof import("expo-notifications");
-      // Native tap handler: route to the notification's deep link.
-      subscription = api.addNotificationResponseReceivedListener((response) => {
-        const data = response.notification.request.content.data as
-          | TappedNotificationData
-          | undefined;
-        const route = routeForTap(data);
-        if (route) router.push(route as Href);
-      });
+
+      try {
+        unsubscribe = notification.subscribeToResponses((data) => {
+          const route = routeForTap(data as TappedNotificationData | undefined);
+          if (route) router.push(route as Href);
+        });
+      } catch {
+        // Notification tap routing is optional when the platform lacks support.
+      }
     })();
 
-    return () => subscription?.remove();
+    return () => unsubscribe?.();
     // notification is a stable DI binding; run once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

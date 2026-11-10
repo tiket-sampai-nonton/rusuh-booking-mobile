@@ -5,7 +5,6 @@ import {
   browseGridList,
   browseGridRow,
   browseHeroText,
-  browseLoadMoreLabel,
   browseMain,
   browseScrollContent,
 } from "@presentation/screens/Browse/style";
@@ -35,9 +34,6 @@ describe("Browse style variants", () => {
   it("covers active labels and both view modes including default flags", () => {
     expect(browseCategoryLabel(false).color).not.toBe(
       browseCategoryLabel(true).color,
-    );
-    expect(browseLoadMoreLabel(false).color).not.toBe(
-      browseLoadMoreLabel(true).color,
     );
     expect(browseGridRow().marginHorizontal).toBe(-16);
     expect(browseGridRow(true).marginHorizontal).toBe(-8);

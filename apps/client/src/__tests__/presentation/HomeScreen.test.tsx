@@ -12,7 +12,11 @@ import { useAccountStore } from "@presentation/stores/account-store";
 
 // Hold the router push spy in a mock-prefixed object so the jest.mock factory
 // (hoisted above imports) may legally reference it.
-const mockRouter = { push: jest.fn(), navigate: jest.fn() };
+const mockRouter = {
+  push: jest.fn(),
+  navigate: jest.fn(),
+  dismissTo: jest.fn(),
+};
 const mockResponsive = { width: 393, height: 852 };
 function mockGridColumnsForWidth(width: number): number {
   if (width > 900) return 3;
@@ -96,12 +100,28 @@ function repoReturning(events: readonly EventSummary[]): EventRepository {
   };
 }
 
+function catalogEvent(id: string, daysFromNow: number): EventSummary {
+  const day = 24 * 60 * 60 * 1000;
+  return {
+    id,
+    slug: id,
+    name: `Event ${id}`,
+    venue: "Jakarta",
+    startsAt: new Date(Date.now() + daysFromNow * day).toISOString(),
+    salesStartsAt: new Date(Date.now() - day).toISOString(),
+    salesEndsAt: new Date(Date.now() + day).toISOString(),
+    status: "AVAILABLE",
+    minPriceMinor: 10000000,
+  };
+}
+
 describe("HomeScreen", () => {
   const originalPlatform = Platform.OS;
 
   beforeEach(() => {
     mockRouter.push.mockReset();
     mockRouter.navigate.mockReset();
+    mockRouter.dismissTo.mockReset();
     mockResponsive.width = 393;
     mockResponsive.height = 852;
     act(() => useAccountStore.getState().clearProfile());
@@ -167,6 +187,39 @@ describe("HomeScreen", () => {
     fireEvent(screen.getByTestId("section-history"), "layout", {
       nativeEvent: { layout: { x: 0, y: 1420, width: 393, height: 420 } },
     });
+  });
+
+  it("bounds Home previews and links to the full event and history lists", async () => {
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "web",
+    });
+    const events = [
+      ...Array.from({ length: 20 }, (_, index) =>
+        catalogEvent(`upcoming-${index}`, index + 1),
+      ),
+      ...Array.from({ length: 12 }, (_, index) =>
+        catalogEvent(`history-${index}`, -(index + 1)),
+      ),
+    ];
+
+    renderWithProviders(<HomeScreen />, {
+      container: { eventRepository: repoReturning(events) },
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("v2-event-card-upcoming-0")).toBeTruthy(),
+    );
+    expect(screen.getByTestId("v2-event-card-upcoming-7")).toBeTruthy();
+    expect(screen.queryByTestId("v2-event-card-upcoming-8")).toBeNull();
+    expect(screen.getByTestId("v2-event-card-history-3")).toBeTruthy();
+    expect(screen.queryByTestId("v2-event-card-history-4")).toBeNull();
+
+    const seeAllLinks = screen.getAllByRole("link", { name: "Lihat Semua" });
+    fireEvent.press(seeAllLinks[0]);
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/browse");
+    fireEvent.press(seeAllLinks[1]);
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/history");
   });
 
   it("navigates to the event detail on an enterable card press", async () => {
@@ -260,11 +313,11 @@ describe("HomeScreen", () => {
     await waitFor(() => screen.getByRole("tab", { name: "Ticket" }));
 
     fireEvent.press(screen.getByRole("tab", { name: "Jelajah" }));
-    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/browse");
+    expect(mockRouter.push).toHaveBeenLastCalledWith("/browse");
     fireEvent.press(screen.getByRole("tab", { name: "Ticket" }));
-    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/my-tickets");
+    expect(mockRouter.push).toHaveBeenLastCalledWith("/my-tickets");
     fireEvent.press(screen.getByRole("tab", { name: "Profil" }));
-    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/profile");
+    expect(mockRouter.push).toHaveBeenLastCalledWith("/profile");
   });
 
   it("renders empty states when the catalog is empty", async () => {

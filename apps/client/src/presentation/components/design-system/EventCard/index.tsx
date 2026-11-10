@@ -130,9 +130,10 @@ export function EventCard({
   const dateTxt = formatDateID(event.startsAt);
   const image = eventImage(event.id, event.thumbnailUrl ?? event.imageUrl);
   const grayscaleImage = grayscaleImageUrl(image);
+  const hasColorRevealLayer = isNative && grayscaleImage !== image;
 
   useEffect(() => {
-    if (!isNative) return;
+    if (!hasColorRevealLayer) return;
     if (!isImageVisible) {
       colorReveal.value = 0;
       return;
@@ -142,7 +143,7 @@ export function EventCard({
       return;
     }
     colorReveal.value = withTiming(1, { duration: 900, easing: EASE });
-  }, [colorReveal, isImageVisible, isNative, reducedMotion]);
+  }, [colorReveal, hasColorRevealLayer, isImageVisible, reducedMotion]);
   const colorLayerStyle = useAnimatedStyle(() => ({
     opacity: colorReveal.value,
   }));
@@ -312,7 +313,7 @@ export function EventCard({
                 accessibilityIgnoresInvertColors
                 style={webImageStyle}
               />
-              {isNative ? (
+              {hasColorRevealLayer ? (
                 <Animated.View
                   style={[
                     styleForEventCardAnimatedView4(),

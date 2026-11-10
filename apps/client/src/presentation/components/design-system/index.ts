@@ -72,3 +72,4 @@ export type { CategoryCardProps } from "./CategoryCard";
 // On web, Header handles navigation instead
 export { BottomNav } from "./BottomNav";
 export type { BottomNavProps, BottomNavRoute } from "./BottomNav";
+export { navigateBottomTab } from "./BottomNav/navigation";

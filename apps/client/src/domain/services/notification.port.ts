@@ -32,4 +32,8 @@ export interface NotificationPort {
   scheduleLocal(notification: LocalNotification): Promise<void>;
   /** Register the device/browser for remote push and return its token. */
   registerForRemotePush(): Promise<string | null>;
+  /** Subscribe to in-app notification taps; returns an unsubscribe function. */
+  subscribeToResponses(
+    onResponse: (data: Readonly<Record<string, unknown>> | undefined) => void,
+  ): () => void;
 }

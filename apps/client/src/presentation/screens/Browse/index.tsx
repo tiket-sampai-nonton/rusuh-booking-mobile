@@ -3,12 +3,18 @@
  * regions are composed from fragments in this directory.
  */
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { FlatList, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FlatList,
+  Platform,
+  type ListRenderItemInfo,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   BottomNav,
+  navigateBottomTab,
   Header,
   ToastProvider,
 } from "@presentation/components/design-system";
@@ -25,7 +31,6 @@ import { useServices } from "@providers/service-context";
 import { BrowseCategoriesSection } from "./fragments/BrowseCategoriesSection";
 import { BrowseEmpty, BrowseLoading } from "./fragments/BrowseStates";
 import { BrowseHero } from "./fragments/BrowseHero";
-import { BrowseLoadMore } from "./fragments/BrowseLoadMore";
 import { BrowseNativeCategoryBar } from "./fragments/BrowseNativeCategoryBar";
 import { BrowseResultsToolbar } from "./fragments/BrowseResultsToolbar";
 import {
@@ -42,6 +47,8 @@ import {
 } from "./filter";
 import {
   browseMain,
+  browseNativeGridRowInset,
+  browseNativeListItem,
   browseNativeMain,
   browseNativeScrollContent,
   browseRoot,
@@ -73,7 +80,6 @@ export function BrowseScreen() {
         readBrowseCategory(params.category) ?? readBrowseCategory(params.genre),
     );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [loadMoreDisabled, setLoadMoreDisabled] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
   const genre = readGenre(params.genre);
@@ -119,9 +125,11 @@ export function BrowseScreen() {
     return allResults.filter((event) => matchesCategory(event, activeCategory));
   }, [activeCategory, allResults]);
 
-  const goToEvent = (eventId: string): void =>
-    router.push(`/events/${eventId}` as Href);
-  const goHome = (): void => router.navigate("/" as Href);
+  const goToEvent = useCallback(
+    (eventId: string): void => router.push(`/events/${eventId}` as Href),
+    [router],
+  );
+  const goHome = (): void => router.dismissTo("/" as Href);
   const navLinks = createPrimaryNavLinks({
     onHome: goHome,
     onBrowse: () => undefined,
@@ -150,14 +158,32 @@ export function BrowseScreen() {
     router.replace(`/browse?${query}` as Href);
   };
 
-  if (isLoading) return <BrowseLoading />;
-
   const columns = browseGridColumnCount(
     viewMode,
     isNative,
     gridColumns,
     isMobileWeb,
   );
+  const renderEvent = useCallback(
+    ({ item }: ListRenderItemInfo<(typeof results)[number]>) => (
+      <View
+        style={
+          columns === 1
+            ? [
+                browseGridList(isNative, isMobileWeb),
+                isNative ? browseNativeListItem : { width: "100%" },
+                { marginBottom: isMobileWeb ? 8 : 16 },
+              ]
+            : browseGridCell(columns, isNative)
+        }
+      >
+        <EventCard event={item} onPress={goToEvent} listMode={columns === 1} />
+      </View>
+    ),
+    [columns, goToEvent, isMobileWeb, isNative],
+  );
+  if (isLoading) return <BrowseLoading />;
+
   const header = (
     <>
       {!isNative && (
@@ -200,7 +226,14 @@ export function BrowseScreen() {
           data={results}
           keyExtractor={(event) => event.id}
           numColumns={columns}
-          columnWrapperStyle={columns > 1 ? browseGridRow(isNative) : undefined}
+          columnWrapperStyle={
+            columns > 1
+              ? [
+                  browseGridRow(isNative),
+                  isNative ? browseNativeGridRowInset : undefined,
+                ]
+              : undefined
+          }
           contentContainerStyle={[
             browseScrollContent(insets.bottom, isDesktop, isMobileWeb),
             isNative && browseNativeScrollContent(insets.top + 56 + 52 + 12),
@@ -216,32 +249,12 @@ export function BrowseScreen() {
               <BrowseEmpty />
             </View>
           }
-          ListFooterComponent={
-            !isNative && results.length > 0 ? (
-              <BrowseLoadMore
-                disabled={loadMoreDisabled}
-                onPress={() => setLoadMoreDisabled(true)}
-              />
-            ) : null
-          }
-          renderItem={({ item }) => (
-            <View
-              style={
-                columns === 1
-                  ? [
-                      browseGridList(isNative, isMobileWeb),
-                      { width: "100%", marginBottom: isMobileWeb ? 8 : 16 },
-                    ]
-                  : browseGridCell(columns, isNative)
-              }
-            >
-              <EventCard
-                event={item}
-                onPress={goToEvent}
-                listMode={columns === 1}
-              />
-            </View>
-          )}
+          initialNumToRender={Math.max(4, columns * 2)}
+          maxToRenderPerBatch={4}
+          updateCellsBatchingPeriod={50}
+          windowSize={7}
+          removeClippedSubviews={Platform.OS === "android"}
+          renderItem={renderEvent}
           testID="browse-scroll"
         />
 
@@ -264,12 +277,7 @@ export function BrowseScreen() {
         <BottomNav
           activeRoute="browse"
           isLoggedIn={Boolean(profile)}
-          onNavigate={(route) => {
-            if (route === "home") router.navigate("/" as Href);
-            else if (route === "tickets")
-              router.navigate("/my-tickets" as Href);
-            else if (route === "profile") router.navigate("/profile" as Href);
-          }}
+          onNavigate={(route) => navigateBottomTab(router, "browse", route)}
         />
         <FilterModal
           visible={filterOpen}

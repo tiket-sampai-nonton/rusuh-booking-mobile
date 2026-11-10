@@ -190,8 +190,8 @@ export const historyStateStyles = StyleSheet.create({
   },
 });
 
-/** Scroll content factory with bottom inset + desktop container. */
-export const historyScrollContent = (
+/** Virtualized list content with the same centered desktop width. */
+export const historyListContent = (
   bottom: number,
   isDesktop: boolean,
 ): ViewStyle => ({
@@ -211,12 +211,18 @@ export const historyGridRow: ViewStyle = {
   flexWrap: "wrap",
   backgroundColor: designColors.ink,
   gap: GRID_GAP,
+  paddingHorizontal: designSpacingSemantic.m,
 };
 
-/** One cell in the multi-column grid. */
-export const historyGridCell = (columns: number): ViewStyle => ({
-  width:
-    `${(100 - (GRID_GAP * (columns - 1)) / columns) / columns}%` as DimensionValue,
-  flexGrow: 1,
-  flexBasis: `${100 / columns - 1}%` as DimensionValue,
+/** One flexible cell in a multi-column grid. */
+export const historyGridCell: ViewStyle = {
+  flex: 1,
+  minWidth: 0,
+};
+
+/** Single-column list item spacing mirrors the former grid wrapper. */
+export const historyGridSingleCell = (isMobileWeb: boolean): ViewStyle => ({
+  width: "auto",
+  marginHorizontal: isMobileWeb ? 16 : designSpacingSemantic.m,
+  marginBottom: GRID_GAP,
 });

@@ -9,6 +9,9 @@ import { EventsHorizontalScroll } from "./fragments/EventsHorizontalScroll";
 import { SectionHeader } from "./fragments/SectionHeader";
 import { homeSectionsStyles } from "./style";
 
+const UPCOMING_PREVIEW_LIMIT = 8;
+const HISTORY_PREVIEW_LIMIT = 4;
+
 export function HomeSections({
   data,
   columns,
@@ -20,6 +23,8 @@ export function HomeSections({
   onNavigate,
 }: HomeSectionsProps) {
   const { isNative, isMobileWeb } = useResponsive();
+  const upcomingPreview = data.upcoming.slice(0, UPCOMING_PREVIEW_LIMIT);
+  const historyPreview = data.history.slice(0, HISTORY_PREVIEW_LIMIT);
 
   return (
     <View>
@@ -41,19 +46,19 @@ export function HomeSections({
         </Reveal>
         {isNative ? (
           <EventsHorizontalScroll
-            events={data.upcoming}
+            events={upcomingPreview}
             onPress={onPressEvent}
           />
         ) : (
           <EventsGrid
-            events={data.upcoming}
+            events={upcomingPreview}
             onPress={onPressEvent}
             columns={columns}
           />
         )}
       </View>
 
-      {data.history.length > 0 && (
+      {historyPreview.length > 0 && (
         <View
           style={homeSectionsStyles.historySection(isMobileWeb)}
           onLayout={(event) => onHistoryLayout(event.nativeEvent.layout.y)}
@@ -62,18 +67,20 @@ export function HomeSections({
           <Reveal>
             <SectionHeader
               title={isMobileWeb ? "Event sebelumnya" : "Event Sebelumnya"}
+              linkText="Lihat Semua"
+              onLinkPress={() => onNavigate("/history")}
               isNative={isNative}
               isMobileWeb={isMobileWeb}
             />
           </Reveal>
           {isNative ? (
             <EventsHorizontalScroll
-              events={data.history}
+              events={historyPreview}
               onPress={onPressEvent}
             />
           ) : (
             <EventsGrid
-              events={data.history}
+              events={historyPreview}
               onPress={onPressEvent}
               columns={columns}
               history

@@ -20,7 +20,11 @@ import { TicketTabs, type TicketTab } from "./fragments/TicketTabs";
 import { ticketsScrollContent, screenStyles } from "./style";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { BottomNav, Header } from "@presentation/components/design-system";
+import {
+  BottomNav,
+  Header,
+  navigateBottomTab,
+} from "@presentation/components/design-system";
 import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import { LoginModal } from "@presentation/components/auth/LoginModal";
 import { ScreenFade } from "@presentation/components/ScreenFade";
@@ -349,11 +353,7 @@ export function MyTicketsScreen() {
         <BottomNav
           activeRoute="tickets"
           isLoggedIn={Boolean(profile)}
-          onNavigate={(route) => {
-            if (route === "home") router.navigate("/" as Href);
-            if (route === "browse") router.navigate("/browse" as Href);
-            if (route === "profile") router.navigate("/profile" as Href);
-          }}
+          onNavigate={(route) => navigateBottomTab(router, "tickets", route)}
         />
       </View>
     </ScreenFade>

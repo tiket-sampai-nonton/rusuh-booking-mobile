@@ -7,7 +7,11 @@ import { CompleteRegistration } from "@application/auth/complete-registration.us
 import { ClearSession } from "@application/auth/clear-session.use-case";
 import { DomainError } from "@domain/errors/domain-error";
 import { ScreenFade } from "@presentation/components/ScreenFade";
-import { BottomNav, Header } from "@presentation/components/design-system";
+import {
+  BottomNav,
+  Header,
+  navigateBottomTab,
+} from "@presentation/components/design-system";
 import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
@@ -159,11 +163,7 @@ export function ProfileScreen() {
         <BottomNav
           activeRoute="profile"
           isLoggedIn={Boolean(profile)}
-          onNavigate={(route) => {
-            if (route === "home") router.navigate("/" as Href);
-            if (route === "browse") router.navigate("/browse" as Href);
-            if (route === "tickets") router.navigate("/my-tickets" as Href);
-          }}
+          onNavigate={(route) => navigateBottomTab(router, "profile", route)}
         />
         <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
       </View>

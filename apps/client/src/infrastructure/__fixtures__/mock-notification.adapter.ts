@@ -24,4 +24,8 @@ export class MockNotificationAdapter implements NotificationPort {
   async registerForRemotePush(): Promise<string | null> {
     return "mock-push-token";
   }
+
+  subscribeToResponses(): () => void {
+    return () => undefined;
+  }
 }

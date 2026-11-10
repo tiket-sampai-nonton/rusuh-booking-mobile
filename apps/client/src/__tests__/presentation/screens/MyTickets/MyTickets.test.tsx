@@ -16,6 +16,7 @@ const mockRouter = {
   push: jest.fn(),
   replace: jest.fn(),
   navigate: jest.fn(),
+  dismissTo: jest.fn(),
   back: jest.fn(),
 };
 const mockDownloadTickets = jest.fn(async () => undefined);
@@ -115,7 +116,7 @@ describe("MyTicketsScreen", () => {
     fireEvent.press(screen.getByTestId("bottom-nav-home"));
     fireEvent.press(screen.getByTestId("bottom-nav-browse"));
     fireEvent.press(screen.getByTestId("bottom-nav-profile"));
-    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/profile");
+    expect(mockRouter.dismissTo).toHaveBeenLastCalledWith("/profile");
   });
 
   it("loads account tickets and opens the selected booking QR sheet", async () => {

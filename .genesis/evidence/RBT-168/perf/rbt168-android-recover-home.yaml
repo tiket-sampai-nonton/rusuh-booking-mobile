@@ -1,0 +1,11 @@
+appId: host.exp.Exponent
+---
+- tapOn: "CARI EVENT LAIN"
+- assertVisible:
+    id: browse-scroll
+- tapOn:
+    id: bottom-nav-home
+- assertVisible:
+    id: home-scroll
+- assertNotVisible:
+    id: browse-scroll

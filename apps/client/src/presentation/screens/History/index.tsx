@@ -10,23 +10,33 @@
  * - Grayscale images, 2px borders
  */
 import { useRouter, type Href } from "expo-router";
-import { ScrollView, Text, View } from "react-native";
+import { FlatList, Platform, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { BottomNav, Header } from "@presentation/components/design-system";
+import {
+  BottomNav,
+  Header,
+  navigateBottomTab,
+} from "@presentation/components/design-system";
 import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
 
-import { HistoryGrid } from "./fragments/HistoryGrid";
 import {
   HistoryEmpty,
   HistoryError,
   HistoryLoading,
 } from "./fragments/HistoryStates";
-import { historyStyles, historyScrollContent } from "./style";
+import {
+  historyStyles,
+  historyGridCell,
+  historyGridRow,
+  historyGridSingleCell,
+  historyListContent,
+} from "./style";
+import { EventCard } from "@presentation/components/design-system/EventCard";
 
 export function HistoryScreen() {
   const router = useRouter();
@@ -38,18 +48,14 @@ export function HistoryScreen() {
 
   const history = data?.history ?? [];
 
-  // Past cards are disabled in EventCard (history mode) — this is a no-op
-  const noop = (): void => undefined;
-  let historyContent = (
-    <HistoryGrid events={history} onPress={noop} columns={gridColumns} />
-  );
-  if (isLoading) {
-    historyContent = <HistoryLoading />;
-  } else if (isError) {
-    historyContent = <HistoryError message={error?.message} />;
-  } else if (history.length === 0) {
-    historyContent = <HistoryEmpty />;
-  }
+  const showEmptyState = isLoading || isError || history.length === 0;
+  const historyState = isLoading ? (
+    <HistoryLoading />
+  ) : isError ? (
+    <HistoryError message={error?.message} />
+  ) : history.length === 0 ? (
+    <HistoryEmpty />
+  ) : null;
   const goHome = (): void => router.navigate("/" as Href);
   const goBrowse = (): void => router.navigate("/browse" as Href);
   const navLinks = createPrimaryNavLinks({
@@ -74,65 +80,77 @@ export function HistoryScreen() {
           isLoggedIn={Boolean(profile)}
         />
 
-        <ScrollView
-          contentContainerStyle={historyScrollContent(
+        <FlatList
+          key={`history-grid-${gridColumns}`}
+          data={showEmptyState ? [] : history}
+          keyExtractor={(event) => event.id}
+          numColumns={gridColumns}
+          columnWrapperStyle={gridColumns > 1 ? historyGridRow : undefined}
+          contentContainerStyle={historyListContent(
             insets.bottom + (isNative ? bottomBarHeight : 0),
             isDesktop,
           )}
-          testID="history-scroll"
-        >
-          {/*  Hero section — black bg with title */}
-          <View
-            style={[
-              historyStyles.hero,
-              isMobileWeb && historyStyles.mobileWebHero,
-            ]}
-          >
-            <View style={historyStyles.heroContent}>
-              <Text
+          ListHeaderComponent={
+            <>
+              <View
                 style={[
-                  historyStyles.heroTitle,
-                  isMobileWeb && historyStyles.mobileWebHeroTitle,
-                ]}
-                accessibilityRole="header"
-              >
-                Arsip Event
-              </Text>
-              <Text
-                style={[
-                  historyStyles.heroSubtitle,
-                  isMobileWeb && historyStyles.mobileWebHeroSubtitle,
+                  historyStyles.hero,
+                  isMobileWeb && historyStyles.mobileWebHero,
                 ]}
               >
-                Event yang sudah berlalu. Kartu diredam & tidak bisa diklik.
-              </Text>
+                <View style={historyStyles.heroContent}>
+                  <Text
+                    style={[
+                      historyStyles.heroTitle,
+                      isMobileWeb && historyStyles.mobileWebHeroTitle,
+                    ]}
+                    accessibilityRole="header"
+                  >
+                    Arsip Event
+                  </Text>
+                  <Text
+                    style={[
+                      historyStyles.heroSubtitle,
+                      isMobileWeb && historyStyles.mobileWebHeroSubtitle,
+                    ]}
+                  >
+                    Event yang sudah berlalu. Kartu diredam & tidak bisa diklik.
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={[
+                  historyStyles.main,
+                  isMobileWeb && historyStyles.mobileWebMain,
+                ]}
+              >
+                <Text style={historyStyles.sectionTitle}>Riwayat</Text>
+                {historyState}
+              </View>
+            </>
+          }
+          initialNumToRender={Math.max(4, gridColumns * 2)}
+          maxToRenderPerBatch={4}
+          updateCellsBatchingPeriod={50}
+          windowSize={7}
+          removeClippedSubviews={Platform.OS === "android"}
+          renderItem={({ item }) => (
+            <View
+              style={
+                gridColumns > 1
+                  ? historyGridCell
+                  : historyGridSingleCell(isMobileWeb)
+              }
+            >
+              <EventCard event={item} onPress={() => undefined} history />
             </View>
-          </View>
-
-          {/* Main content */}
-          <View
-            style={[
-              historyStyles.main,
-              isMobileWeb && historyStyles.mobileWebMain,
-            ]}
-          >
-            <Text style={historyStyles.sectionTitle}>Riwayat</Text>
-
-            {historyContent}
-          </View>
-        </ScrollView>
+          )}
+          testID="history-grid"
+        />
         <BottomNav
           activeRoute={null}
           isLoggedIn={Boolean(profile)}
-          onNavigate={(route) => {
-            if (route === "home") goHome();
-            else if (route === "browse") goBrowse();
-            else if (route === "tickets") {
-              router.navigate("/my-tickets" as Href);
-            } else if (route === "profile") {
-              router.navigate("/profile" as Href);
-            }
-          }}
+          onNavigate={(route) => navigateBottomTab(router, null, route)}
         />
       </View>
     </ScreenFade>
