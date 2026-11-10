@@ -45,6 +45,11 @@ export function webPushSupported(
 }
 
 export class WebPushNotificationAdapter implements NotificationPort {
+  subscribeToResponses(): () => void {
+    // Web taps are routed by the service worker's notificationclick handler.
+    return () => undefined;
+  }
+
   constructor(private readonly env: WebPushEnv = defaultWebPushEnv()) {}
 
   async requestPermission(): Promise<boolean> {

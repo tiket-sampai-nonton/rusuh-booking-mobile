@@ -1,0 +1,24 @@
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  4014920K total,  2992032K used,  1022888K free,    17208K buffers
+ Swap:  3011184K total,   488008K used,  2523176K free,  1324864K cached
+400%cpu  37%user   0%nice  37%sys 296%idle   0%iow  26%irq   4%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+28859 u0_a233      10 -10  45G 769M 187M S 40.7  19.6  17:18.48 host.exp.exponent
+
+
+
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  4014920K total,  2995280K used,  1019640K free,    17208K buffers
+ Swap:  3011184K total,   488008K used,  2523176K free,  1324864K cached
+400%cpu  40%user   0%nice  55%sys 261%idle   0%iow  42%irq   2%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+28859 u0_a233      10 -10  45G 769M 187M S 51.0  19.6  17:18.59 host.exp.exponent
+
+
+
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  4014920K total,  3000936K used,  1013984K free,    17224K buffers
+ Swap:  3011184K total,   488008K used,  2523176K free,  1327360K cached
+400%cpu 131%user   1%nice  73%sys 136%idle   5%iow  52%irq   2%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+28859 u0_a233      10 -10  45G 770M 187M S  131  19.6  17:19.10 host.exp.exponent

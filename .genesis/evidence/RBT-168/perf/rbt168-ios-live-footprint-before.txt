@@ -1,0 +1,39 @@
+======================================================================
+Expo Go [35847]: 64-bit    Footprint: 353 MB (16384 bytes per page)
+======================================================================
+
+  Dirty      Clean  Reclaimable    Regions    Category
+    ---        ---          ---        ---    ---
+ 188 MB        0 B        54 MB         78    MALLOC_SMALL
+  52 MB        0 B          0 B         64    untagged (VM_ALLOCATE)
+  30 MB        0 B          0 B          7    MALLOC_LARGE
+  25 MB        0 B       496 KB        190    CoreAnimation
+  22 MB        0 B          0 B         84    CG raster data
+  12 MB        0 B          0 B          3    Foundation
+9099 KB      32 KB          0 B       1085    __DATA
+8723 KB      16 KB          0 B       1115    __DATA_CONST
+2064 KB        0 B          0 B         13    dyld private memory
+1843 KB        0 B          0 B          1    page table
+1392 KB        0 B          0 B         10    MALLOC metadata
+ 771 KB        0 B          0 B       1078    unused dyld shared cache area
+ 608 KB        0 B        32 KB         37    stack
+ 176 KB        0 B       416 KB         10    SQLite page cache
+ 160 KB        0 B          0 B          1    MALLOC_TINY
+ 155 KB        0 B          0 B         14    __DATA_DIRTY
+ 128 KB        0 B          0 B          1    Accelerate image backing stores
+  84 KB        0 B          0 B          3    __TPRO_CONST
+  64 KB        0 B          0 B          2    MALLOC_NANO
+  48 KB        0 B          0 B          1    Activity Tracing
+  32 KB        0 B          0 B          1    __AUTH_CONST
+  16 KB        0 B          0 B          1    os_alloc_once
+    0 B      18 MB          0 B       1132    __TEXT
+    0 B      16 MB          0 B         17    __LINKEDIT
+    0 B    9232 KB          0 B         44    mapped file
+    0 B        0 B          0 B          1    __FONT_DATA
+    ---        ---          ---        ---    ---
+ 353 MB      43 MB        55 MB       4995    TOTAL
+
+Auxiliary data:
+    phys_footprint: 353 MB
+    phys_footprint_peak: 400 MB
+

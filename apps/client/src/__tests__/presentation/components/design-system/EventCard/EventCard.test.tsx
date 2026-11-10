@@ -1,4 +1,5 @@
 import { fireEvent, render } from "@testing-library/react-native";
+import { Image } from "react-native";
 
 import { EVENT_FIXTURES } from "@shared/test-fixtures/events.fixture";
 
@@ -21,10 +22,10 @@ describe("EventCard", () => {
     mockReducedMotion = false;
   });
 
-  it("navigates from an available native card and renders the color layer", () => {
+  it("navigates from an available native card and renders the fallback color layer", () => {
     mockReducedMotion = false;
     const onPress = jest.fn();
-    const { getByTestId, getByText } = render(
+    const { getByTestId, getByText, UNSAFE_getAllByType } = render(
       <EventCard event={EVENT_FIXTURES[0]} onPress={onPress} isImageVisible />,
     );
 
@@ -34,6 +35,19 @@ describe("EventCard", () => {
     expect(onPress).toHaveBeenCalledWith("evt-1");
     expect(getByText("Mulai dari")).toBeTruthy();
     expect(getByText("Stok Menipis")).toBeTruthy();
+    expect(UNSAFE_getAllByType(Image)).toHaveLength(2);
+  });
+
+  it("uses one native image for backend thumbnails without a grayscale URL", () => {
+    const event = {
+      ...EVENT_FIXTURES[0],
+      thumbnailUrl: "https://dev.rusuhbooking.my.id/media/event-thumb.jpg",
+    };
+    const { UNSAFE_getAllByType } = render(
+      <EventCard event={event} onPress={jest.fn()} isImageVisible />,
+    );
+
+    expect(UNSAFE_getAllByType(Image)).toHaveLength(1);
   });
 
   it("keeps history cards disabled and does not activate hover state", () => {

@@ -13,32 +13,92 @@ import type {
   LocalNotification,
   NotificationPort,
 } from "@domain/services/notification.port";
+import Constants from "expo-constants";
 
 type ExpoNotifications = typeof import("expo-notifications");
+type ExpoNotificationPermissions =
+  typeof import("expo-notifications/build/NotificationPermissions");
+type ExpoNotificationResponses =
+  typeof import("expo-notifications/build/NotificationsEmitter");
+type ExpoNotificationScheduler =
+  typeof import("expo-notifications/build/scheduleNotificationAsync");
+
+function isExpoGo(): boolean {
+  return (
+    Constants.appOwnership === "expo" ||
+    Constants.executionEnvironment === "storeClient" ||
+    Constants.expoVersion !== null
+  );
+}
 
 export class ExpoNotificationAdapter implements NotificationPort {
   // expo-notifications is required lazily so importing this module (e.g. on the
   // composition-root type graph) never pulls the native SDK on web/test.
   private get api(): ExpoNotifications {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require("expo-notifications") as ExpoNotifications;
   }
 
+  private get permissionsApi(): ExpoNotificationPermissions {
+    // Use the specific module so loading local notifications does not load the
+    // package barrel's Expo Go remote-push auto-registration side effect.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("expo-notifications/build/NotificationPermissions") as ExpoNotificationPermissions;
+  }
+
+  private get responsesApi(): ExpoNotificationResponses {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("expo-notifications/build/NotificationsEmitter") as ExpoNotificationResponses;
+  }
+
+  private get schedulerApi(): ExpoNotificationScheduler {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("expo-notifications/build/scheduleNotificationAsync") as ExpoNotificationScheduler;
+  }
+
   async requestPermission(): Promise<boolean> {
-    const current = await this.api.getPermissionsAsync();
+    const current = await this.permissionsApi.getPermissionsAsync();
     if (current.granted) return true;
-    const asked = await this.api.requestPermissionsAsync();
+    const asked = await this.permissionsApi.requestPermissionsAsync();
     return asked.granted;
   }
 
   async registerForRemotePush(): Promise<string | null> {
-    if (!(await this.requestPermission())) return null;
+    if (isExpoGo()) {
+      // Expo Go does not support remote push on SDK 53+; avoid calling the
+      // native API, which reports this limitation as a runtime error.
+      return null;
+    }
     try {
+      if (!(await this.requestPermission())) return null;
       const token = await this.api.getExpoPushTokenAsync();
       return token.data;
     } catch {
-      // No projectId / simulator / offline — degrade to no remote token; local
-      // notifications still work.
+      // Unsupported runtime (such as Expo Go on SDK 53), no projectId,
+      // simulator, or offline — degrade to no remote token.
       return null;
+    }
+  }
+
+  subscribeToResponses(
+    onResponse: (data: Readonly<Record<string, unknown>> | undefined) => void,
+  ): () => void {
+    try {
+      // In-app/local notifications are available in Expo Go even though remote
+      // push token registration is not.
+      const subscription =
+        this.responsesApi.addNotificationResponseReceivedListener(
+          (response) => {
+            const data = response.notification.request.content.data as
+              | Readonly<Record<string, unknown>>
+              | undefined;
+            onResponse(data);
+          },
+        );
+      return () => subscription.remove();
+    } catch {
+      // Some native runtimes do not expose notification response listeners.
+      return () => undefined;
     }
   }
 
@@ -50,13 +110,13 @@ export class ExpoNotificationAdapter implements NotificationPort {
       data: { deepLink: notification.deepLink, kind: notification.kind },
     };
     if (notification.scheduledAtMs && notification.scheduledAtMs > Date.now()) {
-      await this.api.scheduleNotificationAsync({
+      await this.schedulerApi.default({
         content,
         trigger: { date: new Date(notification.scheduledAtMs) } as never,
       });
       return;
     }
     // Immediate.
-    await this.api.scheduleNotificationAsync({ content, trigger: null });
+    await this.schedulerApi.default({ content, trigger: null });
   }
 }

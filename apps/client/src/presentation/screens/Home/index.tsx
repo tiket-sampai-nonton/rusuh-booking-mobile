@@ -32,6 +32,7 @@ import {
   Header,
   HeroCarousel,
   BottomNav,
+  navigateBottomTab,
 } from "@presentation/components/design-system";
 import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import { useEvents } from "@presentation/hooks/useEvents";
@@ -184,13 +185,7 @@ export function HomeScreen() {
         <BottomNav
           activeRoute="home"
           isLoggedIn={Boolean(profile)}
-          onNavigate={(route) => {
-            if (route === "browse") router.navigate("/browse" as Href);
-            else if (route === "tickets")
-              router.navigate("/my-tickets" as Href);
-            else if (route === "profile") router.navigate("/profile" as Href);
-            // home = current screen, no-op
-          }}
+          onNavigate={(route) => navigateBottomTab(router, "home", route)}
         />
       </View>
     </ToastProvider>

@@ -1,0 +1,7 @@
+Android Release profiler resume — 2026-11-10
+
+The host can reach the public dev BE (`GET https://dev.rusuhbooking.my.id/api/v1/events` returned HTTP 200), but the Android emulator cannot resolve `dev.rusuhbooking.my.id` (`adb shell ping -c 1 -W 2 dev.rusuhbooking.my.id` returned `ping: unknown host`). The emulator could ping public IP addresses. Its Wi-Fi resolver remained `10.0.2.3` after a reconnect.
+
+After a cold launch, the app initially showed its splash screen. The subsequent screenshot shows the Home shell without event content. The resumed Android Release five-cycle run failed the initial `home-scroll` assertion and was not counted as an app or performance failure. A later partial run was manually interrupted when requested; it is also excluded from Release results.
+
+The host and emulator network conditions differed, so an emulator `/etc/hosts` workaround was not applied (the system image refused remount because its bootloader is locked). Emulator DNS system properties were returned to the virtual network's configured DNS addresses.

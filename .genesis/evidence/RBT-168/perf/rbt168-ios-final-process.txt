@@ -1,0 +1,2 @@
+  PID    RSS  %CPU ELAPSED COMMAND
+31287 432976  45.8   06:38 /Users/rizkyrachmawan/Library/Developer/CoreSimulator/Devices/E80F96A4-1DF0-42CC-85EC-DE5B27B0333E/data/Containers/Bundle/Application/8B8F0978-8667-4DA7-9CEB-495EB1AE14C9/Expo-Go-2.33.17.tar.app/Expo Go
