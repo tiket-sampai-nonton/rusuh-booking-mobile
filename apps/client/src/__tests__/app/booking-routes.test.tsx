@@ -43,6 +43,7 @@ jest.mock("@presentation/hooks/useQueuePolling", () => ({
   useQueuePolling: () => ({
     entry: undefined,
     isLoading: false,
+    isStatusAuthoritative: false,
     isError: false,
     error: null,
     isSettled: false,

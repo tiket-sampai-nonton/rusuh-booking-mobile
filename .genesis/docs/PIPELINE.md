@@ -314,6 +314,7 @@ Create a new native build instead of OTA when a change includes:
 | `ANDROID_KEYSTORE_PASSWORD` | Android GitHub Actions | Environment-specific keystore password |
 | `ANDROID_KEY_ALIAS` | Android GitHub Actions | Environment-specific signing key alias |
 | `ANDROID_KEY_PASSWORD` | Android GitHub Actions | Environment-specific signing key password |
+| `APPLE_TEAM_ID` | Web app-link association generation | Public 10-character Apple Developer Team ID for the app signing team; configure separately per GitHub Environment and do not guess it |
 | `FIREBASE_SERVICE_ACCOUNT_JSON` | Firebase App Distribution | Environment-scoped CI authentication for APK distribution |
 | `FIREBASE_ANDROID_APP_ID` | Firebase App Distribution | Registered Android app ID for the selected Firebase project/environment |
 | `FIREBASE_TESTER_GROUPS` | Firebase App Distribution | Environment-specific tester group alias(es) |

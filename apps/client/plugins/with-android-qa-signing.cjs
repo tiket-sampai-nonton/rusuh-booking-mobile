@@ -18,10 +18,28 @@ const releaseBuildBlock = `        release {
 
 const qaSigningConfigsBlock = `    signingConfigs {
         debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+            ${marker}
+            def qaKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+            def qaKeystorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            def qaKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
+            def qaKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            def qaSigningValues = [qaKeystorePath, qaKeystorePassword, qaKeyAlias, qaKeyPassword]
+
+            if (qaSigningValues.any { it } && !qaSigningValues.every { it }) {
+                throw new GradleException("Android QA signing credentials are incomplete.")
+            }
+
+            if (qaSigningValues.every { it }) {
+                storeFile file(qaKeystorePath)
+                storePassword qaKeystorePassword
+                keyAlias qaKeyAlias
+                keyPassword qaKeyPassword
+            } else {
+                storeFile file('debug.keystore')
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+            }
         }
         release {
             ${marker}

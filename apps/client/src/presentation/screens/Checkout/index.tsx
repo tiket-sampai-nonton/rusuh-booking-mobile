@@ -41,6 +41,7 @@ import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
 import { useHoldBooking } from "@presentation/hooks/useHoldBooking";
+import { useEventDetail } from "@presentation/hooks/useEventDetail";
 import {
   prefillFromProfile,
   useAccountStore,
@@ -86,22 +87,33 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     error: sessionError,
     retry,
   } = useRestoreBookingSession(true, sessionId);
+  const {
+    data: eventDetail,
+    isError: eventDetailError,
+    refetch: retryEventDetail,
+  } = useEventDetail(session?.eventId ?? "");
   const { checks, pending, request } = useAttendeeCheck(sessionId);
   const { hold, isHolding, error: holdError } = useHoldBooking();
   const setOrderDetail = useSessionStore((s) => s.setOrderDetail);
   // Select the STABLE profile reference (not a fresh object) so zustand does not
   // re-render every tick; derive the prefill from it with useMemo.
   const profile = useAccountStore((s) => s.profile);
-  const prefill = useMemo(() => prefillFromProfile(profile), [profile]);
+  const accountEmail = useAccountStore((s) => s.buyerEmail);
+  const prefill = useMemo(
+    () => prefillFromProfile(profile, accountEmail),
+    [profile, accountEmail],
+  );
   // Logged-in users consented at registration; guests consent inline (AC3).
   const isGuest = !prefill.fromAccount;
 
   const [buyerName, setBuyerName] = useState(prefill.fullName ?? "");
   const [buyerNik, setBuyerNik] = useState("");
-  // The account API returns only a masked email, so the user enters the
-  // complete address needed for booking and confirmation.
-  const [buyerEmail, setBuyerEmail] = useState("");
-  const [emailConfirmation, setEmailConfirmation] = useState("");
+  // The full login email is held in memory for this session; the profile API
+  // returns only a masked address, so we never persist the unmasked value.
+  const [buyerEmail, setBuyerEmail] = useState(prefill.email ?? "");
+  const [emailConfirmation, setEmailConfirmation] = useState(
+    prefill.email ?? "",
+  );
   const [leaveError, setLeaveError] = useState("");
   const [rows, setRows] = useState<TicketRow[]>([emptyRow("")]);
   const [consent, setConsent] = useState(false);
@@ -114,6 +126,12 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     if (!prefill.fromAccount || !prefill.fullName?.trim()) return;
     setBuyerName((current) => current || prefill.fullName || "");
   }, [prefill.fromAccount, prefill.fullName]);
+
+  useEffect(() => {
+    if (!prefill.fromAccount || !prefill.email?.trim()) return;
+    setBuyerEmail((current) => current || prefill.email || "");
+    setEmailConfirmation((current) => current || prefill.email || "");
+  }, [prefill.email, prefill.fromAccount]);
 
   useEffect(() => {
     const booking = session?.booking;
@@ -339,7 +357,13 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           testID="checkout-scroll"
         >
           {session ? (
-            <CheckoutHero eventId={session.eventId} isMobileWeb={isMobileWeb} />
+            <CheckoutHero
+              eventId={session.eventId}
+              eventName={eventDetail?.name}
+              eventNameError={eventDetailError}
+              isMobileWeb={isMobileWeb}
+              onRetryEventName={() => void retryEventDetail()}
+            />
           ) : null}
 
           <Section title="Data Pembeli" number={1}>
@@ -395,9 +419,9 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               errorMessage={buyerEmailError}
               helperText={
                 prefill.fromAccount
-                  ? prefill.emailMasked
+                  ? prefill.emailMasked && !prefill.email
                     ? `Email akun tersimpan sebagai ${prefill.emailMasked}. Masukkan email lengkap untuk checkout.`
-                    : "Email akun hanya tersedia dalam bentuk tersamarkan. Masukkan email lengkap untuk checkout."
+                    : undefined
                   : undefined
               }
             />
@@ -494,6 +518,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               <ConsentGate
                 checked={consent}
                 onToggle={setConsent}
+                onOpenPrivacy={() => router.push("/privacy" as Href)}
                 errorMessage={
                   submitAttempted && !consent
                     ? "Persetujuan diperlukan sebelum melanjutkan."

@@ -382,8 +382,10 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
-    // : CheckoutHero shows "Pilih Tiketmu" (uppercase T)
-    await waitFor(() => expect(screen.getByText("Pilih Tiketmu")).toBeTruthy());
+    // The restored session's event identity is now shown in the checkout hero.
+    await waitFor(() =>
+      expect(screen.getByText("Rusuh Fest 2026")).toBeTruthy(),
+    );
   });
 
   it("offers recovery when no session is restored", async () => {

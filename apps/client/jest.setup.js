@@ -3,6 +3,10 @@ import "@testing-library/react-native/extend-expect";
 import { act } from "@testing-library/react-native";
 import { notifyManager } from "@tanstack/react-query";
 
+// Native FastImage view managers are unavailable in Jest. Use RN Image for
+// component assertions; device builds cover native caching/rendering.
+jest.mock("react-native-fast-image", () => require("react-native").Image);
+
 // TanStack Query flushes observer updates in a scheduled callback. Treat that
 // callback as a React update so async query and mutation tests stay inside act.
 notifyManager.setNotifyFunction((notify) => act(notify));

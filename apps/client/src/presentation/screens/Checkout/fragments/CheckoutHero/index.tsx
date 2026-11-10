@@ -6,7 +6,8 @@
  * - Grayscale image filter (web-only, RN needs library)
  * - Black/white typography with uppercase title
  */
-import { Image, Text, View, type ImageStyle } from "react-native";
+import { Pressable, Text, View, type ImageStyle } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { eventImage } from "@domain/rules/event-image";
 
@@ -15,7 +16,10 @@ import { styles } from "./style";
 
 export function CheckoutHero({
   eventId,
+  eventName,
+  eventNameError = false,
   isMobileWeb = false,
+  onRetryEventName,
 }: CheckoutHeroProps) {
   return (
     <View style={[styles.container, isMobileWeb && styles.compactContainer]}>
@@ -26,7 +30,7 @@ export function CheckoutHero({
           isMobileWeb && styles.compactImageContainer,
         ]}
       >
-        <Image
+        <CachedImage
           source={{ uri: eventImage(eventId) }}
           resizeMode="cover"
           style={[
@@ -40,8 +44,22 @@ export function CheckoutHero({
       {/* Event info */}
       <View style={[styles.info, isMobileWeb && styles.compactInfo]}>
         <Text style={[styles.title, isMobileWeb && styles.compactTitle]}>
-          Pilih Tiketmu
+          {eventName ??
+            (eventNameError
+              ? "Nama event tidak tersedia"
+              : "Memuat nama event…")}
         </Text>
+        {eventNameError && onRetryEventName ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={onRetryEventName}
+            testID="checkout-event-retry"
+          >
+            <Text className="mt-2 text-sm font-bold text-foreground underline">
+              Coba muat ulang
+            </Text>
+          </Pressable>
+        ) : null}
         <Text style={[styles.subtitle, isMobileWeb && styles.compactSubtitle]}>
           Lengkapi data pembeli &amp; penonton sebelum lanjut bayar.
         </Text>

@@ -20,7 +20,8 @@
  * - Badge: 10px, pink bg (sold out)
  */
 import { useCallback, useEffect, useState } from "react";
-import { Image, Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 import Animated, {
   Easing,
   interpolate,
@@ -114,14 +115,13 @@ export function EventCard({
   history = false,
   staggerIndex = 0,
   listMode = false,
-  isImageVisible = true,
+  isImageVisible = false,
 }: EventCardProps) {
   const reducedMotion = useReducedMotion();
   const { isNative, isMobileWeb } = useResponsive();
   const isMobileLayout = isNative || isMobileWeb;
   const compactListMode = listMode || isMobileWeb;
   const hovered = useSharedValue(0);
-  const colorReveal = useSharedValue(isNative ? 0 : 1);
   const staggerOpacity = useSharedValue(reducedMotion ? 1 : 0);
   const staggerTranslateY = useSharedValue(reducedMotion ? 0 : 20);
   const [isHovered, setIsHovered] = useState(false); // For web CSS filter
@@ -131,22 +131,6 @@ export function EventCard({
   const image = eventImage(event.id, event.thumbnailUrl ?? event.imageUrl);
   const grayscaleImage = grayscaleImageUrl(image);
   const hasColorRevealLayer = isNative && grayscaleImage !== image;
-
-  useEffect(() => {
-    if (!hasColorRevealLayer) return;
-    if (!isImageVisible) {
-      colorReveal.value = 0;
-      return;
-    }
-    if (reducedMotion) {
-      colorReveal.value = 1;
-      return;
-    }
-    colorReveal.value = withTiming(1, { duration: 900, easing: EASE });
-  }, [colorReveal, hasColorRevealLayer, isImageVisible, reducedMotion]);
-  const colorLayerStyle = useAnimatedStyle(() => ({
-    opacity: colorReveal.value,
-  }));
 
   // Mobile vs Desktop sizing
   const contentPadding = isMobileWeb
@@ -307,27 +291,17 @@ export function EventCard({
             <Animated.View
               style={[styleForEventCardAnimatedView3(), imageScaleStyle]}
             >
-              <Image
-                source={{ uri: isNative ? grayscaleImage : image }}
+              <CachedImage
+                source={{
+                  uri: isNative ? grayscaleImage : image,
+                  ...(isNative ? { memoryCache: false } : {}),
+                }}
                 resizeMode="cover"
                 accessibilityIgnoresInvertColors
                 style={webImageStyle}
               />
-              {hasColorRevealLayer ? (
-                <Animated.View
-                  style={[
-                    styleForEventCardAnimatedView4(),
-                    colorLayerStyle,
-                    pointerEventsNone,
-                  ]}
-                >
-                  <Image
-                    source={{ uri: image }}
-                    resizeMode="cover"
-                    accessibilityIgnoresInvertColors
-                    style={componentStyles.elementWidth0}
-                  />
-                </Animated.View>
+              {hasColorRevealLayer && isImageVisible ? (
+                <NativeColorRevealImage image={image} reduced={reducedMotion} />
               ) : null}
             </Animated.View>
 
@@ -390,7 +364,7 @@ export function EventCard({
                   <Text style={componentStyles.elementColor1}>Mulai dari</Text>
                 )}
                 <Text style={styleForEventCardText11(isMobileLayout)}>
-                  {minorToIDR(event.minPriceMinor, { compact: true })}
+                  {minorToIDR(event.minPriceMinor)}
                 </Text>
               </View>
 
@@ -417,6 +391,35 @@ export function EventCard({
         </Pressable>
       </Animated.View>
     </View>
+  );
+}
+
+function NativeColorRevealImage({
+  image,
+  reduced,
+}: {
+  readonly image: string;
+  readonly reduced: boolean;
+}) {
+  const opacity = useSharedValue(0);
+  useEffect(() => {
+    opacity.value = reduced
+      ? 1
+      : withTiming(1, { duration: 900, easing: EASE });
+  }, [opacity, reduced]);
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.View
+      style={[styleForEventCardAnimatedView4(), style, pointerEventsNone]}
+    >
+      <CachedImage
+        source={{ uri: image, memoryCache: false }}
+        resizeMode="cover"
+        accessibilityIgnoresInvertColors
+        style={componentStyles.elementWidth0}
+      />
+    </Animated.View>
   );
 }
 

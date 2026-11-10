@@ -61,7 +61,11 @@ class FakeUserRepository implements UserRepository {
   }
 }
 
-function renderModal(repo: UserRepository, visible = true) {
+function renderModal(
+  repo: UserRepository,
+  visible = true,
+  onOpenPrivacy = jest.fn(),
+) {
   const base = createContainer({ useMocks: true });
   const container: Container = { ...base, userRepository: repo };
   const queryClient = new QueryClient({
@@ -74,11 +78,15 @@ function renderModal(repo: UserRepository, visible = true) {
   const utils = render(
     <QueryClientProvider client={queryClient}>
       <ServiceProvider container={container}>
-        <LoginModal visible={visible} onClose={onClose} />
+        <LoginModal
+          visible={visible}
+          onClose={onClose}
+          onOpenPrivacy={onOpenPrivacy}
+        />
       </ServiceProvider>
     </QueryClientProvider>,
   );
-  return { ...utils, onClose };
+  return { ...utils, onClose, onOpenPrivacy };
 }
 
 describe("LoginModal (RBT-020)", () => {
@@ -337,6 +345,22 @@ describe("LoginModal (RBT-020)", () => {
     expect(getByTestId("login-reg-consent")).toBeTruthy();
     expect(getByText("Kebijakan Privasi")).toBeTruthy();
     expect(getByTestId("login-reg-submit")).toBeTruthy();
+  });
+
+  it("opens the privacy screen without toggling registration consent", async () => {
+    const repo = new FakeUserRepository();
+    repo.session = { token: "tok-new", isNew: true };
+    const { getByTestId, getByText, onClose, onOpenPrivacy } =
+      renderModal(repo);
+    await reachRegisterStep(getByTestId, getByText);
+
+    fireEvent.press(getByTestId("login-reg-privacy-link"));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onOpenPrivacy).toHaveBeenCalledTimes(1);
+    expect(
+      getByTestId("login-reg-consent").props.accessibilityState.checked,
+    ).toBe(false);
   });
 
   it("supports web focus transitions through OTP verification and registration", async () => {

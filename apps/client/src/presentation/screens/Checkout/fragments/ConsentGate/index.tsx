@@ -17,6 +17,7 @@ import { styleForConsentGateView0 } from "./style";
 export function ConsentGate({
   checked,
   onToggle,
+  onOpenPrivacy,
   errorMessage,
 }: ConsentGateProps) {
   return (
@@ -34,11 +35,19 @@ export function ConsentGate({
           {checked ? <CheckIcon color={designColors.ground} size={15} /> : null}
         </View>
         <Text style={componentStyles.elementFlex1}>
-          Saya menyetujui pemrosesan data (termasuk NIK) sesuai{" "}
-          <Text style={componentStyles.elementFontFamily2}>
-            Kebijakan Privasi
-          </Text>
-          . NIK dipakai untuk validasi tiket dan tidak disimpan di perangkat.
+          Saya menyetujui pemrosesan data (termasuk NIK) sesuai Kebijakan
+          Privasi. NIK dipakai untuk validasi tiket dan tidak disimpan di
+          perangkat.
+        </Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="link"
+        accessibilityLabel="Baca Kebijakan Privasi"
+        onPress={onOpenPrivacy}
+        testID="checkout-privacy-link"
+      >
+        <Text style={componentStyles.elementFontFamily2}>
+          Baca Kebijakan Privasi
         </Text>
       </Pressable>
       {errorMessage ? (

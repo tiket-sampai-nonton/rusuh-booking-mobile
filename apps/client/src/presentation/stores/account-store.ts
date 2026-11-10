@@ -22,15 +22,23 @@ import type { UserProfile } from "@domain/repositories/user.repository";
 export interface AccountState {
   /** The signed-in user's MASKED profile, or undefined when guest. */
   profile?: UserProfile;
+  /** Full login email, held only in memory for checkout autofill; never persisted. */
+  buyerEmail?: string;
   /** Store the masked profile after a successful sign-in / getMe. */
-  setProfile: (profile: UserProfile) => void;
+  setProfile: (profile: UserProfile, buyerEmail?: string) => void;
+  setBuyerEmail: (email: string) => void;
   /** Clear on sign-out / terminal (D7.4). */
   clearProfile: () => void;
 }
 
 export const useAccountStore = create<AccountState>((set) => ({
-  setProfile: (profile) => set({ profile }),
-  clearProfile: () => set({ profile: undefined }),
+  setProfile: (profile, buyerEmail) =>
+    set((current) => ({
+      profile,
+      buyerEmail: buyerEmail ?? current.buyerEmail,
+    })),
+  setBuyerEmail: (buyerEmail) => set({ buyerEmail }),
+  clearProfile: () => set({ profile: undefined, buyerEmail: undefined }),
 }));
 
 /**
@@ -41,6 +49,7 @@ export const useAccountStore = create<AccountState>((set) => ({
 export interface CheckoutPrefill {
   readonly fromAccount: boolean;
   readonly fullName?: string;
+  readonly email?: string;
   readonly emailMasked?: string;
   readonly nikMasked?: string;
 }
@@ -53,16 +62,18 @@ export interface CheckoutPrefill {
  */
 export function prefillFromProfile(
   p: UserProfile | undefined,
+  buyerEmail?: string,
 ): CheckoutPrefill {
   if (!p) return { fromAccount: false };
   return {
     fromAccount: true,
     fullName: p.fullName,
+    email: buyerEmail,
     emailMasked: p.emailMasked,
     nikMasked: p.nikMasked,
   };
 }
 
 export function selectCheckoutPrefill(state: AccountState): CheckoutPrefill {
-  return prefillFromProfile(state.profile);
+  return prefillFromProfile(state.profile, state.buyerEmail);
 }

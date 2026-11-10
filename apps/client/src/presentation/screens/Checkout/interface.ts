@@ -36,7 +36,10 @@ export interface CheckoutTopBarProps {
 
 export interface CheckoutHeroProps {
   readonly eventId: string;
+  readonly eventName?: string;
+  readonly eventNameError?: boolean;
   readonly isMobileWeb?: boolean;
+  readonly onRetryEventName?: () => void;
 }
 
 /** Per-row attendee-check status for the ticket row (RBT-052). */
@@ -67,6 +70,7 @@ export interface TicketItemProps {
 export interface ConsentGateProps {
   readonly checked: boolean;
   readonly onToggle: (on: boolean) => void;
+  readonly onOpenPrivacy: () => void;
   readonly errorMessage?: string;
 }
 

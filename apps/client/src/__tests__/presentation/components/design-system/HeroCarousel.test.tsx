@@ -1,5 +1,5 @@
 import { act, fireEvent, render } from "@testing-library/react-native";
-import { Platform } from "react-native";
+import { Image, Platform } from "react-native";
 
 import { EVENT_FIXTURES } from "@shared/test-fixtures/events.fixture";
 
@@ -44,7 +44,7 @@ describe("HeroCarousel", () => {
 
   it("automatically advances through the supplied hero events", () => {
     jest.useFakeTimers();
-    const { getByTestId } = render(
+    const { getByTestId, rerender, UNSAFE_getAllByType } = render(
       <HeroCarousel
         events={EVENT_FIXTURES.slice(0, 3)}
         onBook={jest.fn()}
@@ -55,11 +55,43 @@ describe("HeroCarousel", () => {
     expect(getByTestId("hero-book").props.accessibilityLabel).toBe(
       "Beli tiket untuk Rusuh Fest 2026",
     );
+    expect(UNSAFE_getAllByType(Image)).toHaveLength(1);
     act(() => jest.advanceTimersByTime(6000));
     expect(getByTestId("hero-book").props.accessibilityLabel).toBe(
       "Beli tiket untuk Nonton Bareng Finale",
     );
+    expect(UNSAFE_getAllByType(Image)).toHaveLength(2);
     act(() => jest.advanceTimersByTime(1000));
+    expect(UNSAFE_getAllByType(Image)).toHaveLength(1);
+    rerender(
+      <HeroCarousel
+        events={EVENT_FIXTURES.slice(0, 3)}
+        onBook={jest.fn()}
+        onSeeAll={jest.fn()}
+        autoPlay={false}
+        isActive={false}
+      />,
+    );
+    expect(getByTestId("hero-book").props.accessibilityLabel).toBe(
+      "Beli tiket untuk Nonton Bareng Finale",
+    );
+    expect(UNSAFE_getAllByType(Image)).toHaveLength(1);
+  });
+
+  it("keeps native hero titles stable instead of running the web scramble effect", () => {
+    jest.useFakeTimers();
+    const { getByText } = render(
+      <HeroCarousel
+        events={EVENT_FIXTURES.slice(0, 1)}
+        onBook={jest.fn()}
+        onSeeAll={jest.fn()}
+        autoPlay={false}
+      />,
+    );
+
+    expect(getByText("Rusuh Fest 2026")).toBeTruthy();
+    act(() => jest.advanceTimersByTime(500));
+    expect(getByText("Rusuh Fest 2026")).toBeTruthy();
   });
 
   it("rotates without motion effects when reduced motion is enabled", () => {
@@ -104,6 +136,7 @@ describe("HeroCarousel", () => {
 
       expect(getByText("Rusuh Fest 2026")).toBeTruthy();
       expect(getByText("Pengalaman konser tak terlupakan.")).toBeTruthy();
+      expect(getByText("Rp 450.000")).toBeTruthy();
       expect(getByTestId("hero-countdown")).toBeTruthy();
       expect(getByText("Gelora Bung Karno, Jakarta")).toBeTruthy();
       fireEvent.press(getByTestId("hero-book"));

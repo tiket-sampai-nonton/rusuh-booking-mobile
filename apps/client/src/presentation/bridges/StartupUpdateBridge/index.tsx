@@ -8,12 +8,14 @@ const STARTUP_UPDATE_TIMEOUT_MS = 10_000;
 interface StartupUpdateBridgeProps {
   readonly onComplete: () => void;
   readonly onStatusChange: (status: string) => void;
+  readonly onBuildLabelChange: (label: string) => void;
 }
 
 /** Holds the branded launch screen while checking/downloading, then applies an OTA. */
 export function StartupUpdateBridge({
   onComplete,
   onStatusChange,
+  onBuildLabelChange,
 }: StartupUpdateBridgeProps) {
   const { appUpdate } = useServices();
 
@@ -28,6 +30,7 @@ export function StartupUpdateBridge({
 
     const timeout = setTimeout(complete, STARTUP_UPDATE_TIMEOUT_MS);
     const prepareUpdate = new PrepareStartupUpdate(appUpdate);
+    onBuildLabelChange(appUpdate.getBuildLabel());
 
     void (async () => {
       try {
@@ -60,7 +63,7 @@ export function StartupUpdateBridge({
       finished = true;
       clearTimeout(timeout);
     };
-  }, [appUpdate, onComplete, onStatusChange]);
+  }, [appUpdate, onBuildLabelChange, onComplete, onStatusChange]);
 
   return null;
 }

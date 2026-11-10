@@ -313,11 +313,11 @@ describe("HomeScreen", () => {
     await waitFor(() => screen.getByRole("tab", { name: "Ticket" }));
 
     fireEvent.press(screen.getByRole("tab", { name: "Jelajah" }));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/browse");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/browse");
     fireEvent.press(screen.getByRole("tab", { name: "Ticket" }));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/my-tickets");
     fireEvent.press(screen.getByRole("tab", { name: "Profil" }));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/profile");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/profile");
   });
 
   it("renders empty states when the catalog is empty", async () => {

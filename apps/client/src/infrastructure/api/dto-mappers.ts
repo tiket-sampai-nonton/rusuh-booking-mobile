@@ -142,8 +142,27 @@ export function toEventSummary(dto: WireEventSummary): EventSummary {
 }
 
 export function toEventDetail(dto: WireEventDetail): EventDetail {
+  // The event summary's minPriceMinor can be stale or default to zero while
+  // the detail response carries the actual ticket prices. Prefer the minimum
+  // valid category price when categories are present (including a real free
+  // category at zero); fall back to the summary only when no usable category
+  // price was provided.
+  const categoryPrices = dto.categories
+    .map((category) => category.priceMinor)
+    .filter(
+      (price): price is number => Number.isSafeInteger(price) && price >= 0,
+    );
+  const minCategoryPrice =
+    categoryPrices.length > 0 ? Math.min(...categoryPrices) : undefined;
+  const summaryPrice =
+    Number.isSafeInteger(dto.event.minPriceMinor) &&
+    (dto.event.minPriceMinor ?? -1) >= 0
+      ? dto.event.minPriceMinor
+      : undefined;
+
   return {
     ...toEventSummary(dto.event),
+    minPriceMinor: minCategoryPrice ?? summaryPrice,
     maxTicketsPerOrder: dto.maxTicketsPerOrder,
     maxTicketsPerBuyerNik: dto.maxTicketsPerBuyerNik,
     allowMixedCategories: dto.allowMixedCategories,

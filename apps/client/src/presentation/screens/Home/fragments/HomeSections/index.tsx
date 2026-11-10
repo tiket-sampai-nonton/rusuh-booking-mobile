@@ -1,4 +1,5 @@
 /** Home screen sections composed from screen-owned fragments. */
+import { useMemo } from "react";
 import { View } from "react-native";
 import { Reveal } from "@presentation/components/design-system";
 import { useResponsive } from "@presentation/hooks/useResponsive";
@@ -23,8 +24,14 @@ export function HomeSections({
   onNavigate,
 }: HomeSectionsProps) {
   const { isNative, isMobileWeb } = useResponsive();
-  const upcomingPreview = data.upcoming.slice(0, UPCOMING_PREVIEW_LIMIT);
-  const historyPreview = data.history.slice(0, HISTORY_PREVIEW_LIMIT);
+  const upcomingPreview = useMemo(
+    () => data.upcoming.slice(0, UPCOMING_PREVIEW_LIMIT),
+    [data.upcoming],
+  );
+  const historyPreview = useMemo(
+    () => data.history.slice(0, HISTORY_PREVIEW_LIMIT),
+    [data.history],
+  );
 
   return (
     <View>

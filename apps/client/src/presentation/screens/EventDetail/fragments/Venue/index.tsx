@@ -11,7 +11,6 @@
  */
 import { useState } from "react";
 import {
-  Image,
   Linking,
   Platform,
   Pressable,
@@ -19,6 +18,7 @@ import {
   View,
   type ImageStyle,
 } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { designColors } from "@presentation/theme/event-design-tokens";
 import { PinIcon } from "@presentation/components/ArrowIcon";
@@ -67,7 +67,7 @@ export function Venue({ name, address, mapImage, mapsUrl }: VenueProps) {
         accessibilityRole="button"
         accessibilityLabel={`Buka lokasi ${name} di maps`}
       >
-        <Image
+        <CachedImage
           source={{ uri: imageUri }}
           style={[
             venueStyles.mapImage,

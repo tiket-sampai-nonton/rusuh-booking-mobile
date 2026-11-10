@@ -14,7 +14,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react-native";
-import { Dimensions, Platform } from "react-native";
+import { Dimensions, FlatList, Image, Platform } from "react-native";
 
 import type {
   EventDetail,
@@ -118,6 +118,31 @@ describe("BrowseScreen — URL-driven filters", () => {
     expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
     expect(screen.getByTestId("v2-event-card-folk")).toBeTruthy();
     expect(screen.getByTestId("browse-count")).toBeTruthy();
+  });
+
+  it("loads the color image layer only for Browse cards in view", async () => {
+    const { UNSAFE_getByType, UNSAFE_getAllByType } = renderWithProviders(
+      <BrowseScreen />,
+      { container: { eventRepository: repo(CATALOG) } },
+    );
+    await waitFor(() => screen.getByTestId("v2-event-card-rock"));
+
+    const imagesBeforeView = UNSAFE_getAllByType(Image).length;
+    const list = UNSAFE_getByType(FlatList);
+    const visibleToken = {
+      item: CATALOG[0],
+      key: CATALOG[0].id,
+      index: 0,
+      isViewable: true,
+    };
+    act(() =>
+      list.props.onViewableItemsChanged({
+        viewableItems: [visibleToken],
+        changed: [visibleToken],
+      }),
+    );
+
+    expect(UNSAFE_getAllByType(Image)).toHaveLength(imagesBeforeView + 1);
   });
 
   it("treats the all-genres URL value as the unfiltered category", async () => {
@@ -236,7 +261,7 @@ describe("BrowseScreen — URL-driven filters", () => {
     //  uses Header with header-logo testID
     await waitFor(() => screen.getByTestId("header-logo"));
     fireEvent.press(screen.getByTestId("header-logo"));
-    expect(mockRouter.dismissTo).toHaveBeenCalledWith("/");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
   });
 
   it("keeps the guest desktop header CTA inert on Browse", async () => {
@@ -269,9 +294,9 @@ describe("BrowseScreen — URL-driven filters", () => {
     fireEvent.press(screen.getByRole("tab", { name: "Ticket" }));
     fireEvent.press(screen.getByRole("tab", { name: "Profil" }));
 
-    expect(mockRouter.dismissTo).toHaveBeenCalledWith("/");
-    expect(mockRouter.dismissTo).toHaveBeenCalledWith("/my-tickets");
-    expect(mockRouter.dismissTo).toHaveBeenCalledWith("/profile");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/profile");
   });
 
   it("shows the Loader before data resolves", async () => {

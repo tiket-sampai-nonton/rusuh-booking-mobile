@@ -1,6 +1,7 @@
 import { useRouter, type Href } from "expo-router";
 import { useState } from "react";
-import { Image, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CompleteRegistration } from "@application/auth/complete-registration.use-case";
@@ -100,7 +101,7 @@ export function ProfileScreen() {
         >
           <View style={styles.content}>
             <View style={[styles.hero, isMobileWeb && styles.mobileWebHero]}>
-              <Image
+              <CachedImage
                 source={require("../../../../assets/brand-mark.png")}
                 resizeMode="contain"
                 style={styles.heroWatermark}
@@ -165,7 +166,11 @@ export function ProfileScreen() {
           isLoggedIn={Boolean(profile)}
           onNavigate={(route) => navigateBottomTab(router, "profile", route)}
         />
-        <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
+        <LoginModal
+          visible={loginOpen}
+          onClose={() => setLoginOpen(false)}
+          onOpenPrivacy={() => router.push("/privacy" as Href)}
+        />
       </View>
     </ScreenFade>
   );

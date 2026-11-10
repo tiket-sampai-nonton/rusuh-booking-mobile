@@ -10,6 +10,7 @@ import { Pressable, Switch, Text, View } from "react-native";
 
 import { isValidNik } from "@domain/rules/checkout";
 import { designColors } from "@presentation/theme";
+import { minorToIDR } from "@domain/services/money";
 
 import { Field } from ".././common";
 import type { TicketItemProps } from "../../interface";
@@ -76,14 +77,14 @@ export function TicketItem({
             <Pressable
               key={category.categoryId}
               accessibilityRole="button"
-              accessibilityLabel={`Kategori ${category.name}`}
+              accessibilityLabel={`Kategori ${category.name}, ${minorToIDR(category.priceMinor)}`}
               accessibilityState={{ selected }}
               onPress={() => onPatch({ categoryId: category.categoryId })}
               testID={`cat-${index}-${category.code}`}
               style={styleForTicketItemPressable0(selected)}
             >
               <Text style={styleForTicketItemText1(selected)}>
-                {category.name}
+                {category.name} · {minorToIDR(category.priceMinor)}
               </Text>
             </Pressable>
           );

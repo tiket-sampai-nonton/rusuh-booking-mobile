@@ -11,7 +11,8 @@
  * - Animated border on hover: inset border fades in + scales to 1
  */
 import { useCallback, useState } from "react";
-import { Image, Platform, Pressable, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 import Animated, {
   Easing,
   interpolate,
@@ -140,7 +141,7 @@ export function CategoryCard({
     >
       {/* Background image with grayscale + zoom */}
       <Animated.View style={[styleForCategoryCardAnimatedView0(), imageStyle]}>
-        <Image
+        <CachedImage
           source={{ uri: imageUri }}
           resizeMode="cover"
           style={webImageStyle}

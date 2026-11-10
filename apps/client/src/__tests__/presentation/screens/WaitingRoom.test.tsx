@@ -79,6 +79,7 @@ function polling(over: Partial<QueuePollingView> = {}): QueuePollingView {
     entry: entry(),
     admissionRatePerMin: 1400,
     isLoading: false,
+    isStatusAuthoritative: true,
     isError: false,
     isConnectionLost: false,
     isReconnected: false,
@@ -226,6 +227,20 @@ describe("WaitingRoomScreen — admit live region", () => {
     expect(screen.getByTestId("waiting-admitted")).toBeTruthy();
     expect(screen.getByText("Giliran Anda!")).toBeTruthy();
     expect(screen.queryByTestId("waiting-redirect")).toBeNull();
+  });
+
+  it("does not auto-claim a cached ADMITTED status before server reconciliation", () => {
+    mockUseQueuePolling.mockReturnValue(
+      polling({
+        entry: entry({ status: "ADMITTED", position: 0 }),
+        isSettled: true,
+        isStatusAuthoritative: false,
+      }),
+    );
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+    expect(mockUseAutoClaim).toHaveBeenCalledWith(
+      expect.objectContaining({ status: undefined }),
+    );
   });
 
   it("redirects to checkout immediately when claim yields a sessionId", () => {

@@ -13,7 +13,7 @@
  */
 import { useNavigation, useRouter, type Href } from "expo-router";
 import { useEffect, useState } from "react";
-import { BackHandler, ScrollView, Text, View } from "react-native";
+import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { PaymentMethod } from "@domain/repositories/payment.repository";
@@ -99,7 +99,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
 
   const warnTimer = remainingMs <= 60_000;
 
-  if (isLoading || !page) {
+  if (isLoading) {
     return (
       <View
         className="flex-1 items-center justify-center bg-background"
@@ -108,6 +108,31 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
         <Text className="text-sm text-muted-foreground">
           Memuat pembayaran…
         </Text>
+      </View>
+    );
+  }
+
+  // `/payment/[bookingId]` is a public URL shape, but the page and all actions
+  // stay gated by the BE's booking lookup. Direct/invalid access must settle on
+  // a recoverable screen instead of leaving a spinner or exposing pay actions.
+  if (!page) {
+    return (
+      <View
+        className="flex-1 items-center justify-center bg-background p-6"
+        testID="payment-unavailable"
+      >
+        <Text className="mb-4 text-center text-base font-bold">
+          Halaman pembayaran tidak tersedia atau sudah berakhir.
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Cari event lagi"
+          onPress={() => router.replace("/browse" as Href)}
+          testID="payment-unavailable-browse"
+          className="border-2 border-black px-6 py-3"
+        >
+          <Text className="font-bold">CARI EVENT LAGI</Text>
+        </Pressable>
       </View>
     );
   }

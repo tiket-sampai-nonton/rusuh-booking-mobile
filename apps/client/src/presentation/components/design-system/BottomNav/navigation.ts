@@ -10,22 +10,17 @@ const ROUTE_HREF: Record<BottomNavRoute, Href> = {
 };
 
 /**
- * Keep bottom-navigation destinations from accumulating duplicate stack screens.
- * Home pushes the first tab destination so Back can return Home; other tabs
- * dismiss to an existing destination or replace the current route if absent.
+ * Switch between public destinations without rebuilding the Home/Browse tabs.
+ * Routes outside the tab navigator (tickets/profile) are opened by the public
+ * stack; returning to a tab focuses its existing route when it is present.
  */
 export function navigateBottomTab(
-  router: Pick<Router, "push" | "dismissTo">,
+  router: Pick<Router, "navigate">,
   currentRoute: BottomNavRoute | null,
   nextRoute: BottomNavRoute,
 ): void {
   if (currentRoute === nextRoute) return;
 
   const href = ROUTE_HREF[nextRoute];
-  if (currentRoute === "home") {
-    router.push(href);
-    return;
-  }
-
-  router.dismissTo(href);
+  router.navigate(href);
 }

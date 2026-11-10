@@ -89,6 +89,25 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     );
   });
 
+  it("blocks payment actions and offers recovery when a direct route is rejected", async () => {
+    renderWithProviders(<PaymentScreen bookingId="unknown" />, {
+      container: {
+        paymentRepository: {
+          ...paymentRepo(page()),
+          getPaymentPage: async () => {
+            throw new Error("PAYMENT_NOT_FOUND: missing booking");
+          },
+        },
+      },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("payment-unavailable")).toBeTruthy(),
+    );
+    expect(screen.queryByTestId("pay-now")).toBeNull();
+    fireEvent.press(screen.getByTestId("payment-unavailable-browse"));
+    expect(mockRouter.replace).toHaveBeenCalledWith("/browse");
+  });
+
   it("renders the total == amountMinor with NO service-fee line (D10.1)", async () => {
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: { paymentRepository: paymentRepo(page()) },

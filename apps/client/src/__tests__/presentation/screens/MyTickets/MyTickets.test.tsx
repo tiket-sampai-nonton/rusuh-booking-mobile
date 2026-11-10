@@ -116,7 +116,7 @@ describe("MyTicketsScreen", () => {
     fireEvent.press(screen.getByTestId("bottom-nav-home"));
     fireEvent.press(screen.getByTestId("bottom-nav-browse"));
     fireEvent.press(screen.getByTestId("bottom-nav-profile"));
-    expect(mockRouter.dismissTo).toHaveBeenLastCalledWith("/profile");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/profile");
   });
 
   it("loads account tickets and opens the selected booking QR sheet", async () => {

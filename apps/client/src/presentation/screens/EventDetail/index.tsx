@@ -118,7 +118,6 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   }, [router]);
 
   const handleShare = useCallback(() => {
-    const title = event?.name ?? "Rusuh Booking";
     const siteUrl = (
       process.env.EXPO_PUBLIC_SITE_URL ?? "https://rusuh-booking.pages.dev"
     ).replace(/\/+$/, "");
@@ -129,7 +128,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
 
     if (Platform.OS === "web") {
       if (typeof navigator !== "undefined" && navigator.share) {
-        void navigator.share({ title, text: title, url }).catch(() => {
+        void navigator.share({ url }).catch(() => {
           void navigator.clipboard?.writeText(url);
         });
       } else if (typeof navigator !== "undefined") {
@@ -138,11 +137,8 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
       return;
     }
 
-    void Share.share({
-      title,
-      message: `${title}\n${url}`,
-    }).catch(() => undefined);
-  }, [event?.name, eventId]);
+    void Share.share({ message: url }).catch(() => undefined);
+  }, [eventId]);
 
   // Scroll handler for header visibility (native only)
   const handleScroll = useCallback(

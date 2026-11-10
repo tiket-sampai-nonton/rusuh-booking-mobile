@@ -22,6 +22,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   BackHandler,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -67,6 +68,8 @@ export interface LoginModalProps {
   readonly visible: boolean;
   /** Close request (backdrop, Escape, "Batal"/"Tutup"). */
   readonly onClose: () => void;
+  /** Optional in-app router callback for the privacy policy route. */
+  readonly onOpenPrivacy?: () => void;
 }
 
 /** Surface a typed DomainError's Bahasa message, else a prototype fallback. */
@@ -87,6 +90,7 @@ const RESEND_COOLDOWN = 60;
 export function LoginModal({
   visible,
   onClose,
+  onOpenPrivacy,
 }: LoginModalProps): React.ReactElement | null {
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -124,6 +128,17 @@ export function LoginModal({
   const { isMobileWeb } = useResponsive();
   const emailInputRef = useRef<TextInput>(null);
   const regNameInputRef = useRef<TextInput>(null);
+
+  const openPrivacyPolicy = () => {
+    onClose();
+    if (onOpenPrivacy) {
+      onOpenPrivacy();
+    } else if (Platform.OS === "web") {
+      if (typeof window !== "undefined") window.location.assign("/privacy");
+    } else {
+      void Linking.openURL("rusuhbooking:///privacy");
+    }
+  };
 
   // Compose OTP code from digits
   const otpCode = otpDigits.join("");
@@ -651,10 +666,20 @@ export function LoginModal({
                   </View>
                   <Text style={styles.consentText}>
                     Saya menyetujui pemrosesan data sesuai{" "}
-                    <Text style={styles.link}>Kebijakan Privasi</Text>.
+                    <Text
+                      testID="login-reg-privacy-link"
+                      accessibilityRole="link"
+                      style={styles.link}
+                      onPress={(event) => {
+                        event?.stopPropagation?.();
+                        openPrivacyPolicy();
+                      }}
+                    >
+                      Kebijakan Privasi
+                    </Text>
+                    .
                   </Text>
                 </Pressable>
-
                 <Text testID="login-reg-error" style={styles.err}>
                   {auth.registerError
                     ? messageFor(

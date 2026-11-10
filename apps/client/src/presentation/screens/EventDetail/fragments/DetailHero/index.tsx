@@ -21,13 +21,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef } from "react";
 import {
   Animated,
-  Image,
   Platform,
   StyleSheet,
   Text,
   View,
   type ImageStyle,
 } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import {
   designColors,
@@ -140,7 +140,7 @@ export function DetailHero({
           styleForDetailHeroAnimatedView0(scaleAnim),
         ]}
       >
-        <Image
+        <CachedImage
           source={{ uri: banner }}
           style={[
             StyleSheet.absoluteFill,

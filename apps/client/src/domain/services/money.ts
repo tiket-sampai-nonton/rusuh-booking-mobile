@@ -21,38 +21,17 @@ function groupThousands(nInteger: number): string {
   return out;
 }
 
-export interface MoneyOptions {
-  /**
-   * Compact card label (prototype `minorToIDR({compact:true})`): a major-unit
-   * value ≥ 1.000.000 renders as "Rp 1,2jt", ≥ 1.000 as "Rp 450rb". Used on the
-   * catalog card price tag; the full grouped form is used everywhere else.
-   */
-  readonly compact?: boolean;
-}
-
 /**
  * Format a minor-unit IDR amount as a display string, e.g. `45000000` →
- * `"Rp 450.000"` (or `"Rp 450rb"` with `{compact:true}`). A nullish amount
- * renders `"Rp 0"`. The minor→major divisor is 100.
+ * `"Rp 450.000"`. A nullish amount renders `"Rp 0"`. The minor→major divisor
+ * is 100. Keep full values consistent across platforms and screens.
  */
-export function minorToIDR(
-  amountMinor: number | null | undefined,
-  opts: MoneyOptions = {},
-): string {
+export function minorToIDR(amountMinor: number | null | undefined): string {
   const minor =
     typeof amountMinor === "number" && isFinite(amountMinor) ? amountMinor : 0;
   const major = Math.trunc(minor / 100);
   const sign = major < 0 ? "-" : "";
   const abs = Math.abs(major);
 
-  if (opts.compact && abs >= 1000) {
-    if (abs >= 1_000_000) {
-      // "Rp 1,2jt" — Indonesian decimal comma, 1 fraction digit, trailing 0 cut.
-      const jt = abs / 1_000_000;
-      const txt = jt.toFixed(1).replace(/\.0$/, "").replace(".", ",");
-      return `${sign}Rp ${txt}jt`;
-    }
-    return `${sign}Rp ${Math.round(abs / 1000)}rb`;
-  }
   return `${sign}Rp ${groupThousands(abs)}`;
 }
