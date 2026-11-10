@@ -21,8 +21,6 @@ import { PaymentWebViewNotice } from "./fragments/PaymentWebViewNotice";
 
 export interface PaymentWebViewScreenProps {
   readonly bookingId: string;
-  /** Absolute SNAP URL of the attempt; when set, loaded directly (no page token). */
-  readonly redirectUrl?: string;
 }
 
 /**
@@ -54,10 +52,7 @@ export function resolveWebViewNav(
   return null;
 }
 
-export function PaymentWebViewScreen({
-  bookingId,
-  redirectUrl,
-}: PaymentWebViewScreenProps) {
+export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
   const router = useRouter();
   const { createToken } = usePaymentWebView();
   const webView = useRef<WebView>(null);
@@ -68,10 +63,6 @@ export function PaymentWebViewScreen({
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (redirectUrl && /^https:\/\//.test(redirectUrl)) {
-      setPageUrl(redirectUrl);
-      return;
-    }
     let cancelled = false;
     void (async () => {
       try {

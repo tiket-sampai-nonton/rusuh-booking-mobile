@@ -158,7 +158,12 @@ if (!/output\s*:\s*["']static["']/.test(appConfig)) {
 
 const maxInitialJsGzipBytes = 1_000_000;
 
-for (const file of ["index.html", "browse.html", "history.html"]) {
+for (const file of [
+  "index.html",
+  "browse.html",
+  "history.html",
+  "privacy.html",
+]) {
   checkHtml(file, maxInitialJsGzipBytes, { publicPage: true });
 }
 

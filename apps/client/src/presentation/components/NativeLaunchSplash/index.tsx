@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { pointerEventsNone } from "@presentation/utils/style";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BrandSymbol } from "@presentation/components/BrandSymbol";
 import { SplashLetter } from "./SplashLetter";
 import { componentStyles } from "./style";
@@ -25,11 +26,14 @@ export function NativeLaunchSplash({
   onFinish,
   isReadyToExit = true,
   statusText = "Memuat",
+  buildLabel = "PREPROD 0.0.0.000",
 }: {
   readonly onFinish: () => void;
   readonly isReadyToExit?: boolean;
   readonly statusText?: string;
+  readonly buildLabel?: string;
 }) {
+  const insets = useSafeAreaInsets();
   const reducedMotion = useReducedMotion();
   const { height, width } = useWindowDimensions();
   const progress = useSharedValue(0);
@@ -94,6 +98,13 @@ export function NativeLaunchSplash({
       <View style={[componentStyles.elementPosition2, pointerEventsNone]} />
       <View style={[componentStyles.elementPosition3, pointerEventsNone]} />
       <Text style={componentStyles.elementPosition4}>.0</Text>
+      <Text
+        accessibilityLabel={`Versi aplikasi ${buildLabel}`}
+        style={[componentStyles.buildLabel, { top: insets.top + 14 }]}
+        testID="native-launch-build-label"
+      >
+        {buildLabel}
+      </Text>
 
       <View style={componentStyles.elementAlignItems5}>
         <Animated.View

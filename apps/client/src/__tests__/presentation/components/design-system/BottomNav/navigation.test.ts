@@ -2,26 +2,23 @@ import { navigateBottomTab } from "../../../../../presentation/components/design
 
 describe("navigateBottomTab", () => {
   const createRouter = () => ({
-    push: jest.fn(),
-    dismissTo: jest.fn(),
+    navigate: jest.fn(),
   });
 
-  it("pushes the first tab from Home so Home remains the back destination", () => {
+  it("switches tabs through the navigator so the Browse screen stays mounted", () => {
     const router = createRouter();
 
     navigateBottomTab(router, "home", "browse");
 
-    expect(router.push).toHaveBeenCalledWith("/browse");
-    expect(router.dismissTo).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith("/browse");
   });
 
-  it("dismisses to an existing tab from another route", () => {
+  it("returns to an existing tab from another route", () => {
     const router = createRouter();
 
     navigateBottomTab(router, "browse", "home");
 
-    expect(router.dismissTo).toHaveBeenCalledWith("/");
-    expect(router.push).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith("/");
   });
 
   it("does nothing when the selected tab is already active", () => {
@@ -29,7 +26,6 @@ describe("navigateBottomTab", () => {
 
     navigateBottomTab(router, "browse", "browse");
 
-    expect(router.dismissTo).not.toHaveBeenCalled();
-    expect(router.push).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 });

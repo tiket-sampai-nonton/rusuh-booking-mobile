@@ -348,7 +348,11 @@ export function MyTicketsScreen() {
         </ScrollView>
 
         {qrModal}
-        <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
+        <LoginModal
+          visible={loginOpen}
+          onClose={() => setLoginOpen(false)}
+          onOpenPrivacy={() => router.push("/privacy" as Href)}
+        />
 
         <BottomNav
           activeRoute="tickets"

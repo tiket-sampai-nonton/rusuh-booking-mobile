@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {
   Pressable,
+  Platform,
   StyleSheet,
   Text,
   View,
@@ -40,7 +41,9 @@ export function HeroInfoMobile({
   const translateY = useSharedValue(30);
   const { width } = useWindowDimensions();
 
-  const scrambledTitle = useTextScramble(event.name);
+  // Native title scrambles trigger frequent React text updates during every
+  // hero rotation. Keep the effect on web while showing stable text on devices.
+  const scrambledTitle = useTextScramble(event.name, Platform.OS === "web");
 
   // fadeSlideUp animation from prototype: 0.6s delay after loader exit
   useEffect(() => {
@@ -76,6 +79,7 @@ export function HeroInfoMobile({
       {/* Title: Large brutalist text */}
       <Text
         accessibilityRole="header"
+        accessibilityLabel={event.name}
         style={styleForHeroInfoMobileText6(titleFontSize, isMobileWeb)}
         numberOfLines={2}
       >

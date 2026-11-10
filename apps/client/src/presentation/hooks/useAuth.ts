@@ -77,6 +77,8 @@ export interface UseAuthResult {
 export function useAuth(): UseAuthResult {
   const { userRepository, tokenStorage } = useServices();
   const setAccountProfile = useAccountStore((s) => s.setProfile);
+  const setBuyerEmail = useAccountStore((s) => s.setBuyerEmail);
+  const clearAccountProfile = useAccountStore((s) => s.clearProfile);
 
   const { requestOtp, verifyOtp, completeRegistration, persistSession } =
     useMemo(
@@ -101,8 +103,11 @@ export function useAuth(): UseAuthResult {
     { email: string; code: string }
   >({
     mutationFn: ({ email, code }) => verifyOtp.execute(email, code),
-    onSuccess: async (result) => {
+    onSuccess: async (result, variables) => {
       await persistSession.execute(result.token);
+      // The OTP address is the only unmasked email available to the client.
+      // Keep it in the in-memory account store for this session's checkout.
+      setBuyerEmail(variables.email);
       // Returning user → fetch the masked profile for the signed-in panel.
       // New user → RBT-021 completes registration before a profile exists.
       if (result.isNew) {
@@ -112,7 +117,7 @@ export function useAuth(): UseAuthResult {
       try {
         const currentProfile = await userRepository.getMe();
         setProfile(currentProfile);
-        setAccountProfile(currentProfile);
+        setAccountProfile(currentProfile, variables.email);
       } catch {
         // Profile fetch is best-effort for the visual panel; a failure here
         // does not break the (optional) sign-in. The raw token is never logged.
@@ -140,7 +145,8 @@ export function useAuth(): UseAuthResult {
     verifyMutation.reset();
     registerMutation.reset();
     setProfile(null);
-  }, [requestMutation, verifyMutation, registerMutation]);
+    clearAccountProfile();
+  }, [requestMutation, verifyMutation, registerMutation, clearAccountProfile]);
 
   return {
     requestOtp: (email: string) => requestMutation.mutateAsync(email),

@@ -28,6 +28,8 @@ jobs:
       EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
       EXPO_PUBLIC_USE_MOCKS: ${{ vars.EXPO_PUBLIC_USE_MOCKS }}
       EXPO_PUBLIC_ENV: ${{ vars.EXPO_PUBLIC_ENV }}
+      EXPO_PUBLIC_SITE_URL: ${{ vars.EXPO_PUBLIC_SITE_URL }}
+      EXPO_PUBLIC_OTA_REVISION: ${{ github.run_number }}
       EXPO_PROJECT_ID: ${{ vars.EXPO_PROJECT_ID }}
       EAS_CHANNEL: ${{ inputs.target_environment }}
       ANDROID_VERSION_CODE: ${{ github.run_number }}
@@ -106,7 +108,7 @@ jobs:
             echo "The generated Android project is missing the $EAS_CHANNEL update channel."
             exit 1
           }
-      - name: Build release APK
+      - name: Build development debug or production release APK
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -120,18 +122,21 @@ jobs:
             }
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
           if [ "$TARGET_ENVIRONMENT" = 'development' ]; then
+            RBT_BUNDLE_DEBUG=true NODE_ENV=production ./gradlew assembleDebug --no-daemon
             APK_NAME='rusuh-booking.preprod.apk'
+            APK_SOURCE='app/build/outputs/apk/debug/app-debug.apk'
           else
+            ./gradlew assembleRelease --no-daemon
             APK_NAME='rusuh-booking.apk'
+            APK_SOURCE='app/build/outputs/apk/release/app-release.apk'
           fi
-          mv app/build/outputs/apk/release/app-release.apk \
-            "app/build/outputs/apk/release/$APK_NAME"
+          APK_DIR="$(dirname "$APK_SOURCE")"
+          mv "$APK_SOURCE" "$APK_DIR/$APK_NAME"
       - uses: actions/upload-artifact@v4
         with:
           name: rusuh-booking${{ inputs.target_environment == 'development' && '.preprod' || '' }}.apk
-          path: apps/client/android/app/build/outputs/apk/release/rusuh-booking${{ inputs.target_environment == 'development' && '.preprod' || '' }}.apk
+          path: apps/client/android/app/build/outputs/apk/${{ inputs.target_environment == 'development' && 'debug' || 'release' }}/rusuh-booking${{ inputs.target_environment == 'development' && '.preprod' || '' }}.apk
           if-no-files-found: error
           retention-days: 14
 

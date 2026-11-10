@@ -1,4 +1,5 @@
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { eventImage } from "@domain/rules/event-image";
 import { formatDateID } from "@domain/services/date-format";
@@ -38,7 +39,7 @@ export function TicketCard({
       style={[styles.card, past && styles.past]}
       testID={`ticket-card-${bookingId}`}
     >
-      <Image
+      <CachedImage
         source={{
           uri: eventImage(event.id, event.thumbnailUrl ?? event.imageUrl),
         }}
@@ -65,9 +66,7 @@ export function TicketCard({
             <Text style={styles.ticketLabel}>Tiket</Text>
             <Text style={styles.ticketCount}>{ticketCount} × Tiket Umum</Text>
           </View>
-          <Text style={styles.amount}>
-            {minorToIDR(amountMinor, { compact: true })}
-          </Text>
+          <Text style={styles.amount}>{minorToIDR(amountMinor)}</Text>
         </View>
         <View style={styles.actions}>
           <Pressable

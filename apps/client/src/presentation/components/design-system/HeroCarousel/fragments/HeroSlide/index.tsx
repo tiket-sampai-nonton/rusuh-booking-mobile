@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { Image, Platform, View, type ImageStyle } from "react-native";
+import { Platform, View, type ImageStyle } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -100,8 +101,8 @@ export function HeroSlide({
       <Animated.View
         style={[styleForHeroSlideAnimatedView1(), imageContainerStyle]}
       >
-        <Image
-          source={{ uri }}
+        <CachedImage
+          source={{ uri, memoryCache: false }}
           resizeMode="cover"
           style={[styleForHeroSlideImage2(), webImageFilter]}
           accessibilityIgnoresInvertColors

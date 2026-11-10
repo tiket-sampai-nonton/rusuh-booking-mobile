@@ -7,10 +7,7 @@ import { PaymentWebViewScreen } from "@presentation/screens/PaymentWebView";
 // Booking route `/payment-webview/[bookingId]` — RBT-062 mobile page-token
 // WebView reuse. noindex: transactional WebView handoff.
 export default function PaymentWebViewRoute() {
-  const { bookingId, redirectUrl } = useLocalSearchParams<{
-    bookingId: string;
-    redirectUrl?: string;
-  }>();
+  const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
   const id = bookingId ?? "";
   return (
     <Fragment>
@@ -20,7 +17,7 @@ export default function PaymentWebViewRoute() {
         path={`/payment-webview/${id}`}
         noindex
       />
-      <PaymentWebViewScreen bookingId={id} redirectUrl={redirectUrl} />
+      <PaymentWebViewScreen bookingId={id} />
     </Fragment>
   );
 }

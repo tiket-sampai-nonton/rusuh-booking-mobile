@@ -1,12 +1,6 @@
 import { useState } from "react";
-import {
-  Image,
-  Platform,
-  Pressable,
-  Text,
-  View,
-  type ImageStyle,
-} from "react-native";
+import { Platform, Pressable, Text, View, type ImageStyle } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { galleryStyles } from "../style";
 import {
@@ -42,7 +36,7 @@ export function GalleryItem({
       accessibilityRole="button"
       accessibilityLabel={`Lihat gambar ${index + 1}`}
     >
-      <Image
+      <CachedImage
         source={{ uri }}
         style={[
           galleryStyles.image,

@@ -41,6 +41,7 @@ const publicPaths = [
   "/",
   "/browse",
   "/history",
+  "/privacy",
   ...eventPages.map((name) => `/events/${name.slice(0, -5)}`),
 ];
 const escapeXml = (value) =>

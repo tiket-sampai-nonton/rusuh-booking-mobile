@@ -125,14 +125,11 @@ const RN = require("react-native") as typeof import("react-native");
 
 describe("openSnapHandoff (platform branches)", () => {
   const origOS = RN.Platform.OS;
-  const origOpen = RN.Linking.openURL;
-
   afterEach(() => {
     Object.defineProperty(RN.Platform, "OS", {
       value: origOS,
       configurable: true,
     });
-    RN.Linking.openURL = origOpen;
   });
 
   it("assigns window.location on web", async () => {
@@ -151,18 +148,15 @@ describe("openSnapHandoff (platform branches)", () => {
     delete (globalThis as { location?: unknown }).location;
   });
 
-  it("opens the URL via Linking on native", async () => {
+  it("does not open a caller-provided URL on native without a booking ID", async () => {
     Object.defineProperty(RN.Platform, "OS", {
       value: "ios",
       configurable: true,
     });
-    const openURL = jest.fn().mockResolvedValue(undefined);
-    RN.Linking.openURL = openURL as typeof RN.Linking.openURL;
     await openSnapHandoff("https://snap.mock/native");
-    expect(openURL).toHaveBeenCalledWith("https://snap.mock/native");
   });
 
-  it("routes a native booking handoff to the encoded in-app payment WebView", async () => {
+  it("routes a native booking handoff by ID without a caller URL", async () => {
     Object.defineProperty(RN.Platform, "OS", {
       value: "android",
       configurable: true,
@@ -173,9 +167,7 @@ describe("openSnapHandoff (platform branches)", () => {
 
     await openSnapHandoff("https://snap.mock/native", "bk / 123");
 
-    expect(push).toHaveBeenCalledWith(
-      "/payment-webview/bk%20%2F%20123?redirectUrl=https%3A%2F%2Fsnap.mock%2Fnative",
-    );
+    expect(push).toHaveBeenCalledWith("/payment-webview/bk%20%2F%20123");
     jest.dontMock("expo-router");
   });
 

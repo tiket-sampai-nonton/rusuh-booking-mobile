@@ -1,6 +1,11 @@
 const androidVersionCode = Number(process.env.ANDROID_VERSION_CODE || "1");
 const designTokens = require("./tailwind.config.js").theme.extend.colors;
-const appVersion = "0.1.0";
+const appVersion = require("./package.json").version;
+const buildEnvironment = process.env.EXPO_PUBLIC_ENV || "development";
+const otaRevision = process.env.EXPO_PUBLIC_OTA_REVISION || "0";
+const siteUrl = new URL(
+  process.env.EXPO_PUBLIC_SITE_URL || "https://rusuh-booking.pages.dev",
+);
 const expoProjectId = process.env.EXPO_PROJECT_ID;
 const easChannel = process.env.EAS_CHANNEL;
 if (
@@ -23,10 +28,10 @@ const config = {
   slug: "rusuh-booking",
   scheme: "rusuhbooking",
   version: appVersion,
-  // Native directories are generated with Expo Prebuild. Keep this runtime
-  // tied to the app version and increment it whenever native compatibility
-  // changes so old binaries never receive an incompatible JavaScript update.
-  runtimeVersion: appVersion,
+  // Native directories are generated with Expo Prebuild. Derive the OTA
+  // runtime from the native project so a later JS-only update cannot reach a
+  // binary that predates a native dependency or config-plugin change.
+  runtimeVersion: { policy: "fingerprint" },
   ...(expoProjectId
     ? {
         updates: {
@@ -36,9 +41,12 @@ const config = {
           // Expo's automatic check only for recovery from a failed update.
           checkAutomatically: "ON_ERROR_RECOVERY",
         },
-        extra: { eas: { projectId: expoProjectId } },
       }
     : {}),
+  extra: {
+    ...(expoProjectId ? { eas: { projectId: expoProjectId } } : {}),
+    buildInfo: { environment: buildEnvironment, otaRevision },
+  },
   orientation: "portrait",
   userInterfaceStyle: "automatic",
   icon: "./assets/app-icon.png",
@@ -54,10 +62,26 @@ const config = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.tiketsampainonton.rusuhbooking",
+    buildNumber: process.env.IOS_BUILD_NUMBER || "1",
+    associatedDomains: [`applinks:${siteUrl.host}`],
   },
   android: {
     package: "com.tiketsampainonton.rusuhbooking",
     versionCode: androidVersionCode,
+    intentFilters: [
+      {
+        action: "VIEW",
+        autoVerify: true,
+        data: [
+          {
+            scheme: "https",
+            host: siteUrl.host,
+            pathPrefix: "/events/",
+          },
+        ],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
+    ],
     adaptiveIcon: {
       foregroundImage: "./assets/brand-mark.png",
       backgroundColor: designTokens.background.dark,
@@ -86,7 +110,12 @@ const config = {
     "expo-asset",
     "expo-font",
     "expo-updates",
+    [
+      "react-native-fast-image",
+      { maxDiskSize: 536870912, maxMemorySize: 134217728, maxDiskAge: 2592000 },
+    ],
     "./plugins/with-android-qa-signing.cjs",
+    "./plugins/with-android-qa-bundle.cjs",
     "./plugins/with-android-chucker.cjs",
     "./plugins/with-ios-fmt-compat.cjs",
   ],

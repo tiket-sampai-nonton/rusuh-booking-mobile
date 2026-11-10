@@ -296,6 +296,23 @@ Never place real secrets in `EXPO_PUBLIC_*` variables; those values are embedded
 bundles. SonarCloud is temporarily skipped by project decision and is not a deployment secret
 requirement until the scan is restored.
 
+### Android App Links and iOS Universal Links
+
+The web release workflow generates association files in `dist/.well-known/` before it deploys:
+
+- `.well-known/assetlinks.json` uses the SHA-256 fingerprint of the same environment's Android
+  signing keystore. Keep the development and production keystores aligned with the APK signing
+  configuration.
+- `.well-known/apple-app-site-association` uses the public `APPLE_TEAM_ID` variable and the app's
+  bundle identifier. Configure the actual Apple Developer Team ID in each GitHub Environment; do
+  not infer it from a local simulator build.
+- `_headers` serves both files as `application/json`. Verify they return the JSON body directly
+  from `https://<EXPO_PUBLIC_SITE_URL>/.well-known/...` with no HTML fallback or redirect.
+
+If an association input is missing, the web site remains the fallback and that platform's links
+will not be verified to open the installed app. Add the correct GitHub Environment variable or
+signing keystore and redeploy the web release to publish the associations.
+
 ### Expected trigger behavior
 
 - A pull request into `develop` or `main` runs the shared quality gates and does not deploy.

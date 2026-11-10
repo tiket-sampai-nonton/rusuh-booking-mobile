@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 import {
   cancelAnimation,
@@ -55,9 +55,11 @@ export function HeroCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [glitchIndex, setGlitchIndex] = useState<number | null>(null);
-  const top = events.slice(0, autoPlay ? 3 : 1);
   const zoom = useSharedValue(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const {
     width: screenWidth,
     height: screenHeight,
@@ -65,6 +67,10 @@ export function HeroCarousel({
     isNative,
     isMobileWeb,
   } = useResponsive();
+  // Keep the active native slide stable when its route blurs. `autoPlay` is
+  // focus-driven by Home; shrinking `top` to one item on blur invalidated a
+  // previously selected slide and could temporarily blank the whole hero.
+  const top = events.slice(0, autoPlay || isNative ? 3 : 1);
 
   // The approved mobile web hero is a compact image-led banner below the site
   // header. Native and desktop keep their existing viewport-based layouts.
@@ -75,10 +81,42 @@ export function HeroCarousel({
   // Responsive: single column on narrow screens (<900px per prototype @media query)
   // For native: ALWAYS use mobile layout regardless of screen width
   const isNarrow = screenWidth < 900 || isNative;
+  const shouldAnimateZoom = !reducedMotion && isActive && !isNative;
+
+  const scheduleTransitionReset = useCallback(() => {
+    if (transitionTimeoutRef.current !== null) {
+      clearTimeout(transitionTimeoutRef.current);
+    }
+    transitionTimeoutRef.current = setTimeout(() => {
+      transitionTimeoutRef.current = null;
+      setPrevIndex(null);
+      setGlitchIndex(null);
+    }, FADE_DURATION_MS);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (transitionTimeoutRef.current !== null) {
+        clearTimeout(transitionTimeoutRef.current);
+        transitionTimeoutRef.current = null;
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (isActive) return;
+    if (transitionTimeoutRef.current !== null) {
+      clearTimeout(transitionTimeoutRef.current);
+      transitionTimeoutRef.current = null;
+    }
+    setPrevIndex(null);
+    setGlitchIndex(null);
+  }, [isActive]);
 
   // Ken Burns zoom loop (20s): scale 1 → 1.05 → 1
   useEffect(() => {
-    if (reducedMotion || !isActive) return;
+    if (!shouldAnimateZoom) return;
     zoom.value = withRepeat(
       withTiming(1, {
         duration: ZOOM_DURATION_MS,
@@ -88,65 +126,49 @@ export function HeroCarousel({
       true,
     );
     return () => cancelAnimation(zoom);
-  }, [isActive, reducedMotion, zoom]);
+  }, [shouldAnimateZoom, zoom]);
 
   // Show slide with glitch effect
   const showSlide = (index: number) => {
-    if (index === currentIndex) return;
+    if (index === currentIndex || index < 0 || index >= top.length) return;
     setPrevIndex(currentIndex);
     setGlitchIndex(index);
     setCurrentIndex(index);
-
-    setTimeout(() => {
-      setPrevIndex(null);
-      setGlitchIndex(null);
-    }, FADE_DURATION_MS);
+    scheduleTransitionReset();
   };
 
   // Auto-advance slides (6s interval)
   useEffect(() => {
     if (!autoPlay || !isActive || top.length <= 1) return;
     intervalRef.current = setInterval(() => {
-      setCurrentIndex((prev) => {
-        const next = (prev + 1) % top.length;
-        if (!reducedMotion) {
-          setPrevIndex(prev);
-          setGlitchIndex(next);
-          setTimeout(() => {
-            setPrevIndex(null);
-            setGlitchIndex(null);
-          }, FADE_DURATION_MS);
-        }
-        return next;
-      });
+      const previous = currentIndex % top.length;
+      const next = (previous + 1) % top.length;
+      if (!reducedMotion) {
+        setPrevIndex(previous);
+        setGlitchIndex(next);
+        scheduleTransitionReset();
+      }
+      setCurrentIndex(next);
     }, SLIDE_DURATION_MS);
     return () => {
       clearInterval(intervalRef.current as ReturnType<typeof setInterval>);
       intervalRef.current = null;
     };
-  }, [autoPlay, isActive, reducedMotion, top.length]);
+  }, [
+    autoPlay,
+    currentIndex,
+    isActive,
+    reducedMotion,
+    scheduleTransitionReset,
+    top.length,
+  ]);
 
   const handleDotPress = (index: number) => {
     showSlide(index);
-    // Reset timer
-    clearInterval(intervalRef.current as ReturnType<typeof setInterval>);
-    intervalRef.current = setInterval(() => {
-      setCurrentIndex((prev) => {
-        const next = (prev + 1) % top.length;
-        if (!reducedMotion) {
-          setPrevIndex(prev);
-          setGlitchIndex(next);
-          setTimeout(() => {
-            setPrevIndex(null);
-            setGlitchIndex(null);
-          }, FADE_DURATION_MS);
-        }
-        return next;
-      });
-    }, SLIDE_DURATION_MS);
   };
 
-  const currentEvent = top[currentIndex];
+  const activeIndex = currentIndex % top.length;
+  const currentEvent = top[activeIndex];
   if (!currentEvent) return null;
 
   const targetDateIso = currentEvent.startsAt;
@@ -155,17 +177,19 @@ export function HeroCarousel({
     <View style={styleForHeroCarouselView12(heroHeight)} testID="v2-hero">
       {/* Background slides (prototype .hero-slides) */}
       <View style={componentStyles.elementPosition32}>
-        {top.map((ev, i) => (
-          <HeroSlide
-            key={ev.id}
-            uri={eventImage(ev.id, ev.bannerUrl ?? ev.imageUrl)}
-            active={i === currentIndex}
-            isPrev={i === prevIndex}
-            isGlitching={i === glitchIndex}
-            zoomValue={zoom}
-            reduced={Boolean(reducedMotion)}
-          />
-        ))}
+        {top.map((ev, i) =>
+          i === activeIndex || i === prevIndex ? (
+            <HeroSlide
+              key={ev.id}
+              uri={eventImage(ev.id, ev.bannerUrl ?? ev.imageUrl)}
+              active={i === activeIndex}
+              isPrev={i === prevIndex}
+              isGlitching={i === glitchIndex}
+              zoomValue={zoom}
+              reduced={Boolean(reducedMotion)}
+            />
+          ) : null,
+        )}
       </View>
 
       {/* Gradient overlay (prototype .hero-slide-overlay) */}

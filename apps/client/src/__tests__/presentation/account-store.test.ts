@@ -15,7 +15,7 @@ const PROFILE: UserProfile = {
 
 describe("presentation/account-store", () => {
   beforeEach(() => {
-    useAccountStore.setState({ profile: undefined });
+    useAccountStore.setState({ profile: undefined, buyerEmail: undefined });
   });
 
   it("starts as a guest (no profile)", () => {
@@ -42,6 +42,7 @@ describe("selectCheckoutPrefill", () => {
     const state: AccountState = {
       profile: undefined,
       setProfile: () => {},
+      setBuyerEmail: () => {},
       clearProfile: () => {},
     };
     expect(selectCheckoutPrefill(state)).toEqual({ fromAccount: false });
@@ -51,12 +52,14 @@ describe("selectCheckoutPrefill", () => {
     const state: AccountState = {
       profile: PROFILE,
       setProfile: () => {},
+      setBuyerEmail: () => {},
       clearProfile: () => {},
     };
     const prefill = selectCheckoutPrefill(state);
     expect(prefill).toEqual({
       fromAccount: true,
       fullName: "Rizky R.",
+      email: undefined,
       emailMasked: "r***@gmail.com",
       nikMasked: "3171********1234",
     });
@@ -70,6 +73,16 @@ describe("selectCheckoutPrefill", () => {
     expect(prefill.fromAccount).toBe(true);
     expect(prefill.nikMasked).toBe("3171********1234");
   });
+
+  it("prefills the full email only when it is available in the current session", () => {
+    useAccountStore.getState().setBuyerEmail("rizky@example.com");
+    useAccountStore.getState().setProfile(PROFILE);
+    expect(selectCheckoutPrefill(useAccountStore.getState()).email).toBe(
+      "rizky@example.com",
+    );
+    useAccountStore.getState().clearProfile();
+    expect(useAccountStore.getState().buyerEmail).toBeUndefined();
+  });
 });
 
 describe("prefillFromProfile (stable-reference derivation, RBT-053)", () => {
@@ -81,6 +94,7 @@ describe("prefillFromProfile (stable-reference derivation, RBT-053)", () => {
     expect(prefillFromProfile(PROFILE)).toEqual({
       fromAccount: true,
       fullName: "Rizky R.",
+      email: undefined,
       emailMasked: "r***@gmail.com",
       nikMasked: "3171********1234",
     });

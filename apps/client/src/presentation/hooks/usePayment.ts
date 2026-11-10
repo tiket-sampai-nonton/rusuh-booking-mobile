@@ -6,14 +6,14 @@
  * PaymentRepository, records the selected method + attemptId in the session
  * store, then HANDS OFF to SNAP using the attempt's `redirectUrl`:
  *   • web   → navigate the browser to the SNAP page (redirectUrl)
- *   • native→ open the SNAP page in the in-app browser / WebView (Linking)
+ *   • native→ mint a backend page token and open it in the in-app WebView
  * The FE never marks PAID from here — the callback is verified server-side
  * (RBT-063). TanStack is confined to this hook (D3); the platform open is
  * injected so it is deterministic in tests.
  */
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { Linking, Platform } from "react-native";
+import { Platform } from "react-native";
 
 import { CreatePaymentAttempt } from "@application/payment/create-payment-attempt.use-case";
 import type {
@@ -30,8 +30,8 @@ export interface CreateAttemptInput {
 
 /**
  * Platform-aware SNAP handoff. Default: web assigns `window.location`, native
- * opens the URL via `Linking`. Overridable for tests. Returns a promise so a
- * caller can await the open.
+ * routes by booking ID on native; the BE supplies a one-time page token. Never
+ * put a payment URL in route params. Overridable for tests.
  */
 export async function openSnapHandoff(
   url: string,
@@ -56,15 +56,14 @@ export async function openSnapHandoff(
     }
     return;
   }
-  // Native: open the external SNAP page in the in-app browser / WebView.
+  // Native: don't trust a URL in route params. The WebView obtains a
+  // one-time page token from the BE for this booking before opening content.
   if (bookingId) {
     const { router } = require("expo-router") as typeof import("expo-router");
     router.push(
-      `/payment-webview/${encodeURIComponent(bookingId)}?redirectUrl=${encodeURIComponent(url)}` as import("expo-router").Href,
+      `/payment-webview/${encodeURIComponent(bookingId)}` as import("expo-router").Href,
     );
-    return;
   }
-  await Linking.openURL(url);
 }
 
 export function usePayment(

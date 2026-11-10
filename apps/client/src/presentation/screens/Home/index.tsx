@@ -86,9 +86,19 @@ export function HomeScreen() {
     }, []),
   );
 
-  const goToEvent = (eventId: string): void =>
-    router.push(`/events/${eventId}` as Href);
-  const goBrowse = (): void => router.navigate("/browse" as Href);
+  const goToEvent = useCallback(
+    (eventId: string): void => router.push(`/events/${eventId}` as Href),
+    [router],
+  );
+  const goBrowse = useCallback(
+    (): void => router.navigate("/browse" as Href),
+    [router],
+  );
+  const openFilter = useCallback(() => setFilterOpen(true), []);
+  const onNavigate = useCallback(
+    (href: string) => router.navigate(href as Href),
+    [router],
+  );
   const navLinks = createPrimaryNavLinks({
     onHome: () => scrollRef.current?.scrollTo({ y: 0, animated: true }),
     onBrowse: goBrowse,
@@ -98,15 +108,18 @@ export function HomeScreen() {
   });
 
   // Filter "Terapkan" → /browse with the chosen params.
-  const applyFilter = (f: FilterValue): void => {
-    setFilterOpen(false);
-    const qs = new URLSearchParams({
-      category: f.category,
-      time: f.time,
-      sort: f.sort,
-    }).toString();
-    router.navigate(`/browse?${qs}` as Href);
-  };
+  const applyFilter = useCallback(
+    (f: FilterValue): void => {
+      setFilterOpen(false);
+      const qs = new URLSearchParams({
+        category: f.category,
+        time: f.time,
+        sort: f.sort,
+      }).toString();
+      router.navigate(`/browse?${qs}` as Href);
+    },
+    [router],
+  );
 
   // Show loading screen (prototype loader with bouncing letters)
   if (isLoading) {
@@ -150,11 +163,11 @@ export function HomeScreen() {
               isDesktop={isDesktop}
               columns={gridColumns}
               onPressEvent={goToEvent}
-              onFilter={() => setFilterOpen(true)}
+              onFilter={openFilter}
               onSeeAll={goBrowse}
               onFeaturedLayout={() => undefined}
               onHistoryLayout={() => undefined}
-              onNavigate={(href) => router.navigate(href as Href)}
+              onNavigate={onNavigate}
             />
           )}
         </Animated.ScrollView>
@@ -174,7 +187,11 @@ export function HomeScreen() {
         />
 
         {/* Login/OTP + Filter modals */}
-        <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
+        <LoginModal
+          visible={loginOpen}
+          onClose={() => setLoginOpen(false)}
+          onOpenPrivacy={() => router.push("/privacy" as Href)}
+        />
         <FilterModal
           visible={filterOpen}
           onClose={() => setFilterOpen(false)}

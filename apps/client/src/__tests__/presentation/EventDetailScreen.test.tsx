@@ -152,10 +152,32 @@ describe("EventDetailScreen", () => {
     expect(screen.getByText("Reguler")).toBeTruthy();
     expect(screen.getByText("Habis")).toBeTruthy();
     // compact min price in the buy box
-    expect(screen.getByText("Rp 450rb")).toBeTruthy();
+    expect(screen.getAllByText("Rp 450.000").length).toBeGreaterThan(0);
     // hero ticket-count chip is web-only (hidden on native per v2-mobile prototype)
     // active CTA
     expect(screen.getByText("Masuk Antrean")).toBeTruthy();
+  });
+
+  it("shows the normalized minimum category price in both ticket list and CTA", async () => {
+    const paidEvent: EventDetail = {
+      ...available,
+      minPriceMinor: 185000,
+      description: {
+        categories: [
+          { code: "REG", name: "Reguler", priceMinor: 185000, available: 299 },
+          { code: "PREM", name: "Premium", priceMinor: 350000, available: 60 },
+        ],
+      },
+    };
+
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: { eventRepository: repo(paidEvent) },
+    });
+
+    await waitFor(() => expect(screen.getByTestId("join-cta")).toBeTruthy());
+    // One amount is in the category row and the other is the floating CTA.
+    expect(screen.getAllByText("Rp 1.850")).toHaveLength(2);
+    expect(screen.queryByText("Rp 0")).toBeNull();
   });
 
   it("joins the queue and navigates to the waiting room with the issued queueId on an active CTA press (RBT-041)", async () => {
@@ -321,9 +343,9 @@ describe("EventDetailScreen", () => {
       await waitFor(() => screen.getByTestId("join-cta"));
       expect(screen.getByText("120 tiket tersedia")).toBeTruthy();
       fireEvent.press(screen.getByLabelText("Bagikan"));
-      expect(share).toHaveBeenCalledWith(
-        expect.objectContaining({ title: available.name }),
-      );
+      expect(share).toHaveBeenCalledWith({
+        url: "https://example.invalid/events/evt-1",
+      });
     } finally {
       Object.defineProperty(Platform, "OS", {
         configurable: true,
@@ -369,8 +391,7 @@ describe("EventDetailScreen", () => {
     expect(screen.getByText("MYSTERY")).toBeTruthy();
     fireEvent.press(screen.getByRole("button", { name: "Bagikan" }));
     expect(share).toHaveBeenCalledWith({
-      title: "Rusuh Fest 2026",
-      message: "Rusuh Fest 2026\nhttps://rusuh-booking.pages.dev/events/evt-1",
+      message: "https://rusuh-booking.pages.dev/events/evt-1",
     });
     const scrollHandler = screen.getByTestId("detail-scroll").props.onScroll as
       | ((event: { nativeEvent: { contentOffset: { y: number } } }) => void)

@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { designDuration, neutral } from "@presentation/theme";
 import { nativeDriverSupported } from "@presentation/utils/style";
@@ -61,7 +55,7 @@ export function LineupCardNative({
         onPressOut={() => setIsPressed(false)}
       >
         <View style={lineupStyles.avatarContainer}>
-          <Image
+          <CachedImage
             source={{ uri: avatarUri }}
             style={lineupStyles.avatar}
             resizeMode="cover"

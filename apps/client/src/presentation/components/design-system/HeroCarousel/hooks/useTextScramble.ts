@@ -3,12 +3,12 @@ import { useReducedMotion } from "react-native-reanimated";
 
 import { SCRAMBLE_CHARS, SCRAMBLE_INTERVAL_MS } from "../constants";
 
-export function useTextScramble(text: string): string {
+export function useTextScramble(text: string, enabled = true): string {
   const [displayText, setDisplayText] = useState(text);
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (reducedMotion) {
+    if (!enabled || reducedMotion) {
       setDisplayText(text);
       return;
     }
@@ -37,7 +37,7 @@ export function useTextScramble(text: string): string {
     }, SCRAMBLE_INTERVAL_MS);
 
     return () => clearInterval(interval);
-  }, [text, reducedMotion]);
+  }, [enabled, text, reducedMotion]);
 
   return displayText;
 }

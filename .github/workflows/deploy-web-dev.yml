@@ -116,6 +116,30 @@ jobs:
           fi
       - run: npx expo export --platform web
       - run: npm run web:metadata
+      - name: Generate verified app-link association files
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ] &&
+             [ -n "$ANDROID_KEYSTORE_PASSWORD" ] &&
+             [ -n "$ANDROID_KEY_ALIAS" ]; then
+            KEYSTORE_PATH="$RUNNER_TEMP/app-link-signing.jks"
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+            FINGERPRINT_HEX="$(keytool -exportcert \
+              -keystore "$KEYSTORE_PATH" \
+              -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+              -alias "$ANDROID_KEY_ALIAS" | openssl dgst -sha256 | awk '{print $NF}')"
+            ANDROID_CERT_SHA256_FINGERPRINT="$(printf '%s' "$FINGERPRINT_HEX" | sed 's/../&:/g; s/:$//')"
+            rm -f "$KEYSTORE_PATH"
+          else
+            echo '::warning::Android signing credentials are missing; verified app links will stay in the browser.'
+            ANDROID_CERT_SHA256_FINGERPRINT=''
+          fi
+          ANDROID_CERT_SHA256_FINGERPRINT="$ANDROID_CERT_SHA256_FINGERPRINT" \
+            node scripts/generate-link-associations.cjs
       - run: npm run web:verify
       - uses: actions/upload-artifact@v4
         with:
@@ -160,6 +184,7 @@ jobs:
       EXPO_PUBLIC_USE_MOCKS: ${{ vars.EXPO_PUBLIC_USE_MOCKS }}
       EXPO_PUBLIC_ENV: ${{ vars.EXPO_PUBLIC_ENV }}
       EXPO_PUBLIC_SITE_URL: ${{ vars.EXPO_PUBLIC_SITE_URL }}
+      EXPO_PUBLIC_OTA_REVISION: ${{ github.run_number }}
       EAS_CHANNEL: ${{ github.ref_name == 'main' && 'production' || 'development' }}
       OTA_ENABLED: ${{ (github.ref_name == 'main' && vars.EAS_OTA_PRODUCTION_ENABLED) || (github.ref_name == 'develop' && vars.EAS_OTA_DEVELOPMENT_ENABLED) || 'false' }}
     outputs:

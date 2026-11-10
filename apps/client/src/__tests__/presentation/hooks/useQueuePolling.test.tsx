@@ -283,6 +283,67 @@ describe("RBT-042 useQueuePolling render seam", () => {
     unmount(); // TanStack cancels the query on unmount (cancel-on-unmount AC).
   });
 
+  it("reconciles cached ADMITTED status before exposing it as authoritative", async () => {
+    const repo = new CountingQueueRepository("CLAIMED");
+    let finishStatus: ((value: QueueEntry) => void) | undefined;
+    repo.getStatus = async (queueId: string) => {
+      repo.getStatusCalls += 1;
+      return new Promise((resolve) => {
+        finishStatus = (value) => resolve({ ...value, queueId });
+      });
+    };
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+    });
+    client.setQueryData(["queue", "q-1", "evt-1"], {
+      entry: entry("ADMITTED"),
+      admissionRatePerMin: 1200,
+    });
+    let last: ReturnType<typeof useQueuePolling> | undefined;
+    render(
+      <QueryClientProvider client={client}>
+        <ServiceProvider container={makeContainer(repo)}>
+          <Harness repo={repo} onView={(view) => (last = view)} />
+        </ServiceProvider>
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => expect(repo.getStatusCalls).toBe(1));
+    expect(last?.entry?.status).toBe("ADMITTED");
+    expect(last?.isStatusAuthoritative).toBe(false);
+
+    await act(async () => {
+      finishStatus?.(entry("CLAIMED"));
+    });
+    await waitFor(() => expect(last?.entry?.status).toBe("CLAIMED"));
+    expect(last?.isStatusAuthoritative).toBe(true);
+  });
+
+  it("never downgrades a claimed entry back to ADMITTED during cancellation cleanup", async () => {
+    const repo = new CountingQueueRepository("ADMITTED");
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+    });
+    client.setQueryData(["queue", "q-1", "evt-1"], {
+      entry: entry("CLAIMED"),
+      admissionRatePerMin: 1200,
+    });
+    let last: ReturnType<typeof useQueuePolling> | undefined;
+    render(
+      <QueryClientProvider client={client}>
+        <ServiceProvider container={makeContainer(repo)}>
+          <Harness repo={repo} onView={(view) => (last = view)} />
+        </ServiceProvider>
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => expect(repo.getStatusCalls).toBe(1));
+    await waitFor(() => expect(last?.isStatusAuthoritative).toBe(true));
+    expect(last?.entry?.status).toBe("CLAIMED");
+    expect(last?.isSettled).toBe(false);
+    expect(computeRefetchInterval(last?.entry)).not.toBe(false);
+  });
+
   it("exposes isSettled=false while WAITING (poller active)", async () => {
     const repo = new CountingQueueRepository("WAITING");
     let last: ReturnType<typeof useQueuePolling> | undefined;

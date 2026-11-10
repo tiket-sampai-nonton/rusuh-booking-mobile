@@ -17,7 +17,7 @@
  * §4.3). Admission/claim is a SEPARATE ticket (RBT-044) and the waiting SCREEN
  * is RBT-043 — neither is built here.
  */
-import { useQuery, type Query } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type Query } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ObserveQueue } from "@application/queue/observe-queue.use-case";
@@ -38,6 +38,8 @@ export interface QueuePollingView {
   /** Event-level throughput from the public server status document. */
   readonly admissionRatePerMin?: number;
   readonly isLoading: boolean;
+  /** True only after a successful status fetch for this mount. Cached status is not authoritative. */
+  readonly isStatusAuthoritative: boolean;
   readonly isError: boolean;
   /** A poll failed after retries; cached position remains renderable. */
   readonly isConnectionLost: boolean;
@@ -122,6 +124,7 @@ export function useQueuePolling(
   isScreenFocused = true,
 ): QueuePollingView {
   const { queueRepository, pushSubscription } = useServices();
+  const queryClient = useQueryClient();
   const hadConnectionError = useRef(false);
   const nextHeartbeatAt = useRef(0);
   const [isReconnected, setIsReconnected] = useState(false);
@@ -136,10 +139,22 @@ export function useQueuePolling(
     [queueRepository],
   );
 
+  const queryKey = ["queue", queueId, eventId] as const;
   const query = useQuery<QueuePollData, Error>({
-    queryKey: ["queue", queueId, eventId],
+    queryKey,
     queryFn: async () => {
-      const entry = await observe.execute(queueId, eventId);
+      const observedEntry = await observe.execute(queueId, eventId);
+      // Queue state is monotonic after a claim. A delayed read may briefly
+      // report ADMITTED while cancellation cleanup is being propagated; never
+      // downgrade the locally confirmed CLAIMED state and replay its one-use
+      // admission token. Keep polling CLAIMED until the server reports the
+      // terminal cleanup state.
+      const cachedEntry =
+        queryClient.getQueryData<QueuePollData>(queryKey)?.entry;
+      const entry =
+        cachedEntry?.status === "CLAIMED" && observedEntry.status === "ADMITTED"
+          ? { ...observedEntry, status: "CLAIMED" as const }
+          : observedEntry;
       if (!eventId) return { entry };
 
       if (entry.status === "WAITING" && Date.now() >= nextHeartbeatAt.current) {
@@ -179,6 +194,10 @@ export function useQueuePolling(
     // Web can immediately resume after an `online` event. Native keeps the
     // server-paced interval active and catches up on the next successful poll.
     refetchOnReconnect: true,
+    // A cached ADMITTED status may already have been claimed and consumed by
+    // Booking. Reconcile with the server whenever this screen remounts before
+    // allowing the one-shot claim side effect to run again.
+    refetchOnMount: "always",
   });
 
   const isConnectionLost =
@@ -210,6 +229,11 @@ export function useQueuePolling(
     entry,
     admissionRatePerMin: query.data?.admissionRatePerMin,
     isLoading: query.isLoading,
+    isStatusAuthoritative:
+      query.isFetchedAfterMount &&
+      query.isSuccess &&
+      !query.isRefetchError &&
+      !query.isFetching,
     isError: query.isError,
     isConnectionLost,
     isReconnected,

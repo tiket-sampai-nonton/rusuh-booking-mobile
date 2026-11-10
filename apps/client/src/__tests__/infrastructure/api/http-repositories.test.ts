@@ -76,6 +76,7 @@ describe("HttpEventRepository", () => {
           salesStartsAt: "x",
           salesEndsAt: "y",
           status: "SOLD_OUT",
+          minPriceMinor: 0,
           bannerUrl: "https://example.com/banner.jpg",
         },
         maxTicketsPerOrder: 4,
@@ -106,11 +107,101 @@ describe("HttpEventRepository", () => {
       maxTicketsPerBuyerNik: 2,
       allowMixedCategories: false,
       published: true,
+      minPriceMinor: 1000,
       description: {
         bannerImage: "https://example.com/banner.jpg",
         categories: [{ code: "REG", available: 2 }],
       },
     });
+  });
+
+  it("keeps a real free category at zero instead of falling back to a paid summary price", async () => {
+    const http = new FakeHttpClient();
+    http.queueResponse(
+      ok({
+        event: {
+          eventId: "free-event",
+          slug: "free-event",
+          name: "Free event",
+          salesStartsAt: "x",
+          salesEndsAt: "y",
+          status: "AVAILABLE",
+          minPriceMinor: 2000,
+        },
+        categories: [
+          {
+            categoryId: "free",
+            code: "FREE",
+            name: "Free",
+            priceMinor: 0,
+            available: 10,
+          },
+          {
+            categoryId: "paid",
+            code: "PAID",
+            name: "Paid",
+            priceMinor: 1000,
+            available: 10,
+          },
+        ],
+      }),
+    );
+
+    const repo = new HttpEventRepository(
+      http,
+      new ServerClock({ now: () => Date.parse("2030-01-01T00:00:00Z") }),
+    );
+    const out = await repo.getEventDetail("free-event");
+
+    expect(out.minPriceMinor).toBe(0);
+  });
+
+  it("ignores negative, fractional, and unsafe category prices", async () => {
+    const http = new FakeHttpClient();
+    http.queueResponse(
+      ok({
+        event: {
+          eventId: "invalid-prices",
+          slug: "invalid-prices",
+          name: "Invalid prices",
+          salesStartsAt: "x",
+          salesEndsAt: "y",
+          status: "AVAILABLE",
+          minPriceMinor: 5000,
+        },
+        categories: [
+          {
+            categoryId: "negative",
+            code: "NEG",
+            name: "Negative",
+            priceMinor: -100,
+            available: 1,
+          },
+          {
+            categoryId: "fractional",
+            code: "FRAC",
+            name: "Fractional",
+            priceMinor: 0.5,
+            available: 1,
+          },
+          {
+            categoryId: "unsafe",
+            code: "UNSAFE",
+            name: "Unsafe",
+            priceMinor: Number.MAX_SAFE_INTEGER + 1,
+            available: 1,
+          },
+        ],
+      }),
+    );
+
+    const repo = new HttpEventRepository(
+      http,
+      new ServerClock({ now: () => Date.parse("2030-01-01T00:00:00Z") }),
+    );
+    const out = await repo.getEventDetail("invalid-prices");
+
+    expect(out.minPriceMinor).toBe(5000);
   });
 });
 

@@ -31,6 +31,23 @@ export class ExpoAppUpdateAdapter implements AppUpdatePort {
     }
   }
 
+  getBuildLabel(): string {
+    const buildInfo = Constants.expoConfig?.extra?.buildInfo as
+      | { environment?: string; otaRevision?: string }
+      | undefined;
+    const prefix = buildInfo?.environment === "production" ? "PROD" : "PREPROD";
+    const appVersion = Constants.expoConfig?.version ?? "0.0.0";
+    let embedded = true;
+    try {
+      if (this.isEnabled) embedded = this.api.isEmbeddedLaunch;
+    } catch {
+      // Expo Go and older binaries show the embedded .000 revision.
+    }
+    const rawRevision = embedded ? "0" : (buildInfo?.otaRevision ?? "0");
+    const revision = /^\d+$/.test(rawRevision) ? rawRevision : "0";
+    return `${prefix} ${appVersion}.${revision.padStart(3, "0")}`;
+  }
+
   async checkForUpdate(): Promise<boolean> {
     if (!this.isEnabled) return false;
     try {

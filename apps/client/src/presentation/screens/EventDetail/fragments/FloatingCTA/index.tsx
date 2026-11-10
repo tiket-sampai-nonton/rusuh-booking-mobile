@@ -99,7 +99,7 @@ export function FloatingCTA({
 
   const priceText =
     typeof event.minPriceMinor === "number"
-      ? minorToIDR(event.minPriceMinor, { compact: true })
+      ? minorToIDR(event.minPriceMinor)
       : "Menyusul";
 
   const disabled = !canJoin;

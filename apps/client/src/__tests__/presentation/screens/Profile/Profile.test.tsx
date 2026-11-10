@@ -206,9 +206,9 @@ describe("ProfileScreen", () => {
     fireEvent.press(getByRole("tab", { name: "Jelajah" }));
     fireEvent.press(getByRole("tab", { name: "Ticket" }));
 
-    expect(mockRouter.dismissTo).toHaveBeenNthCalledWith(1, "/");
-    expect(mockRouter.dismissTo).toHaveBeenNthCalledWith(2, "/browse");
-    expect(mockRouter.dismissTo).toHaveBeenNthCalledWith(3, "/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(1, "/");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(2, "/browse");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(3, "/my-tickets");
   });
 
   it("opens sign-in from the guest desktop header action", () => {

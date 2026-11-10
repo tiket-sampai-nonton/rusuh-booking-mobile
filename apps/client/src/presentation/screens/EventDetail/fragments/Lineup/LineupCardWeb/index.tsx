@@ -1,11 +1,6 @@
 import { useState } from "react";
-import {
-  Image,
-  Platform,
-  Pressable,
-  Text,
-  type ImageStyle,
-} from "react-native";
+import { Platform, Pressable, Text, type ImageStyle } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { lineupStyles } from "../style";
 import type { LineupItem } from "../types";
@@ -24,7 +19,7 @@ export function LineupCardWeb({ name, role, avatar }: LineupItem) {
       onHoverIn={() => setIsHovered(true)}
       onHoverOut={() => setIsHovered(false)}
     >
-      <Image
+      <CachedImage
         source={{ uri: avatarUri }}
         style={[
           lineupStyles.avatar,

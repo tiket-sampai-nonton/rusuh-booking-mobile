@@ -11,7 +11,8 @@
  * - Keyboard navigation (Escape, Arrow keys)
  */
 import { useCallback, useEffect, useRef } from "react";
-import { Animated, Image, Modal, Platform, Text } from "react-native";
+import { Animated, Modal, Platform, Text } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { designDuration } from "@presentation/theme/event-design-tokens";
 import { nativeDriverSupported } from "@presentation/utils/style";
@@ -156,8 +157,8 @@ export function Lightbox({
             styleForLightboxAnimatedView1(scaleAnim),
           ]}
         >
-          <Image
-            source={{ uri: currentImage }}
+          <CachedImage
+            source={{ uri: currentImage, memoryCache: false }}
             style={lightboxStyles.image}
             resizeMode="contain"
             accessibilityIgnoresInvertColors

@@ -82,6 +82,7 @@ export function WaitingRoomScreen({
     entry,
     admissionRatePerMin,
     isLoading,
+    isStatusAuthoritative,
     isError,
     isConnectionLost,
     isReconnected,
@@ -95,7 +96,7 @@ export function WaitingRoomScreen({
   const { claiming, claimedSessionId, errorState } = useAutoClaim({
     eventId,
     queueId,
-    status: admitted ? entry.status : undefined,
+    status: admitted && isStatusAuthoritative ? entry.status : undefined,
   });
 
   // A successful, server-authorized claim proceeds immediately to checkout.

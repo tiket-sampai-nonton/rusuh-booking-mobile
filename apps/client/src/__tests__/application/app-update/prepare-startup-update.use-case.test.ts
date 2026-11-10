@@ -4,6 +4,7 @@ import { PrepareStartupUpdate } from "@application/app-update/prepare-startup-up
 function makeAppUpdate(isEnabled = true): AppUpdatePort {
   return {
     isEnabled,
+    getBuildLabel: () => "PREPROD 0.1.0.000",
     checkForUpdate: jest.fn().mockResolvedValue(false),
     downloadUpdate: jest.fn().mockResolvedValue(true),
     reload: jest.fn().mockResolvedValue(undefined),

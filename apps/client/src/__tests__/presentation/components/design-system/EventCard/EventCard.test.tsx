@@ -38,6 +38,22 @@ describe("EventCard", () => {
     expect(UNSAFE_getAllByType(Image)).toHaveLength(2);
   });
 
+  it("defers the extra native color image until the card becomes visible", () => {
+    const { rerender, UNSAFE_getAllByType } = render(
+      <EventCard event={EVENT_FIXTURES[0]} onPress={jest.fn()} />,
+    );
+
+    expect(UNSAFE_getAllByType(Image)).toHaveLength(1);
+    rerender(
+      <EventCard
+        event={EVENT_FIXTURES[0]}
+        onPress={jest.fn()}
+        isImageVisible
+      />,
+    );
+    expect(UNSAFE_getAllByType(Image)).toHaveLength(2);
+  });
+
   it("uses one native image for backend thumbnails without a grayscale URL", () => {
     const event = {
       ...EVENT_FIXTURES[0],
