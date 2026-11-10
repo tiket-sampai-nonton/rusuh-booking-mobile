@@ -87,6 +87,7 @@ const config = {
     "expo-font",
     "expo-updates",
     "./plugins/with-android-qa-signing.cjs",
+    "./plugins/with-android-chucker.cjs",
     "./plugins/with-ios-fmt-compat.cjs",
   ],
   experiments: { typedRoutes: true },
