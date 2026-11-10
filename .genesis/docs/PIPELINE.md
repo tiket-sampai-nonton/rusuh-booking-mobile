@@ -39,10 +39,10 @@ There are two runtime environments:
 
 | Environment | Branch | Android/iOS OTA channel | Web deployment | Backend target | Purpose |
 |---|---|---|---|---|---|
-| Preprod / development | `develop` | `development` | Dedicated Cloudflare Pages preprod project | Development/mock or integration BE | QA and team integration |
+| Preprod / development | `develop` | `development` | Dedicated Cloudflare Pages preprod project | Development integration BE | QA and team integration |
 | Production | `main` | `production` | Separate Cloudflare Pages production project/CDN | Production BE | End-user release |
 
-Use separate GitHub Environments and configuration for `development` and `production`. Preprod currently uses `EXPO_PUBLIC_ENV=development` and `EXPO_PUBLIC_USE_MOCKS=true` with its own Pages project and test URLs. Production must use `EXPO_PUBLIC_ENV=production`, `EXPO_PUBLIC_USE_MOCKS=false`, the live API URL, and a separate Pages project. Do not copy development/mock configuration into production.
+Use separate GitHub Environments and configuration for `development` and `production`. Preprod uses `EXPO_PUBLIC_ENV=development` and `EXPO_PUBLIC_USE_MOCKS=false` to call the development BE, with its own Pages project and test URLs. Production uses `EXPO_PUBLIC_ENV=production`, `EXPO_PUBLIC_USE_MOCKS=false`, the live API URL, and a separate Pages project. Keep the API URL and environment values scoped to their matching GitHub Environment.
 
 Preview builds are distribution artifacts for QA and product review, not a third runtime environment. They use the development or production-compatible configuration explicitly declared by the build profile.
 
@@ -211,7 +211,7 @@ After a successful merge into `develop`, the orchestrator automatically:
 5. Record Git SHA, Expo runtime version, environment, OTA update ID (if published), and web deployment ID.
 6. Send one Telegram release summary with each job result and the failed job name(s), if any.
 
-Firebase distribution is not part of the automatic post-merge path. An operator may manually select Firebase distribution in the same orchestrator; it builds a signed development APK with development/mock configuration and sends it to the QA tester group.
+Firebase distribution is not part of the automatic post-merge path. An operator may manually select Firebase distribution in the same orchestrator; it builds a signed development APK using the development BE with mocks disabled and sends it to the QA tester group.
 
 ### 7.2 Production (`main`) native OTA and web deployment
 
@@ -257,7 +257,7 @@ Create a new native build instead of OTA when a change includes:
 
 - Run only when the operator selects the manual Firebase mode on the Release Pipeline orchestrator. The selected branch must be `develop` or `main`; reject any branch/environment mismatch.
 - Use the Expo config-prebuild project and Gradle on `ubuntu-latest`.
-- For `develop`, build a signed preprod APK with development/mock configuration and the protected `development` environment's signing/Firebase settings.
+- For `develop`, build a signed preprod APK with `EXPO_PUBLIC_ENV=development` and `EXPO_PUBLIC_USE_MOCKS=false`, using the protected `development` environment's BE URL and signing/Firebase settings.
 - For `main`, build a signed production APK with production configuration and separate protected production signing/Firebase settings. Never use development mocks or QA signing credentials in the production APK.
 - Name the development APK `rusuh-booking.preprod.apk`; name the production APK `rusuh-booking.apk`.
 - Keep persistent keystores in GitHub Environment secrets; never generate or commit signing keys in CI. Increment Android `versionCode` monotonically for each environment's distributed build.
@@ -306,7 +306,7 @@ Create a new native build instead of OTA when a change includes:
 | `EXPO_PROJECT_ID` | EAS Update | Expo project attribution for OTA updates |
 | `EAS_OTA_DEVELOPMENT_ENABLED` | Release Pipeline | Repository Actions variable; set to `true` only after development EAS settings and an OTA-capable QA build are verified |
 | `EAS_OTA_PRODUCTION_ENABLED` | Release Pipeline | Repository Actions variable; keep unset/false until production EAS and release settings are ready |
-| `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_ENV`, `EXPO_PUBLIC_USE_MOCKS`, `EXPO_PUBLIC_SITE_URL` | Web and Android builds | Non-secret environment-specific app configuration; use development mocks only in `development` |
+| `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_ENV`, `EXPO_PUBLIC_USE_MOCKS`, `EXPO_PUBLIC_SITE_URL` | Web and Android builds | Non-secret environment-specific app configuration; development targets the development BE with mocks disabled, and production targets the production BE with mocks disabled |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare Pages | Secret with Pages Edit access; configure separately in `development` and `production` Environments |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Pages | Cloudflare account identifier; configure per GitHub Environment |
 | `CLOUDFLARE_PAGES_PROJECT` | Cloudflare Pages | Pages project name; use distinct preprod and production projects |

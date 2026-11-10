@@ -55,8 +55,8 @@ jobs:
         run: |
           if [ "$GITHUB_REF_NAME" = 'develop' ] && [ "$TARGET_ENVIRONMENT" = 'development' ]; then
             test "$EXPO_PUBLIC_ENV" = 'development' &&
-              test "$EXPO_PUBLIC_USE_MOCKS" = 'true' || {
-                echo 'develop APK must use development configuration with mocks enabled.'
+              test "$EXPO_PUBLIC_USE_MOCKS" = 'false' || {
+                echo 'develop APK must target the development BE with mocks disabled.'
                 exit 1
               }
           elif [ "$GITHUB_REF_NAME" = 'main' ] && [ "$TARGET_ENVIRONMENT" = 'production' ]; then
