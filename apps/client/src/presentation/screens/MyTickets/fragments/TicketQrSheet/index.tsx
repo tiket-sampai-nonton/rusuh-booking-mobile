@@ -19,6 +19,9 @@ interface TicketQrSheetProps {
   readonly bookingTickets?: readonly BookingTicketQr[];
   readonly isLoading: boolean;
   readonly isError: boolean;
+  readonly errorMessage?: string;
+  readonly isRetrying?: boolean;
+  readonly onRetry?: () => void;
   readonly downloadError: string;
   readonly onDownload: () => void;
   readonly onClose: () => void;
@@ -26,34 +29,31 @@ interface TicketQrSheetProps {
 
 export function TicketQrSheet({
   eventName,
-  bookingId,
   bookingTickets,
   isLoading,
   isError,
+  errorMessage,
+  isRetrying = false,
+  onRetry,
   downloadError,
   onDownload,
   onClose,
 }: TicketQrSheetProps) {
   const insets = useSafeAreaInsets();
   let ticketContent: ReactNode;
-  if (!bookingTickets) {
-    ticketContent = (
-      <View style={styles.fallbackQr}>
-        <QRCode
-          value={`RBT|${bookingId || "booking"}|1`}
-          size={190}
-          color={designColors.ink}
-          backgroundColor={designColors.ground}
-        />
-      </View>
-    );
-  } else if (isLoading) {
+  if (isLoading) {
     ticketContent = <Text style={styles.message}>Memuat QR…</Text>;
   } else if (isError) {
-    ticketContent = (
-      <Text style={styles.error}>
-        QR tiket gagal dimuat. Silakan coba lagi.
-      </Text>
+    ticketContent = errorContent(
+      errorMessage ?? "QR tiket gagal dimuat. Silakan coba lagi.",
+      isRetrying,
+      onRetry,
+    );
+  } else if (!bookingTickets || bookingTickets.length === 0) {
+    ticketContent = errorContent(
+      "Data QR tiket belum tersedia. Coba muat kembali.",
+      isRetrying,
+      onRetry,
     );
   } else {
     ticketContent = bookingTickets.map((ticket, index) => (
@@ -92,11 +92,14 @@ export function TicketQrSheet({
           <Text style={styles.instruction}>
             Tunjukkan kode ini di pintu masuk.
           </Text>
-          {bookingTickets && !isLoading && !isError && (
-            <Pressable onPress={onDownload} style={styles.download}>
-              <Text style={styles.downloadText}>Unduh E-Tiket</Text>
-            </Pressable>
-          )}
+          {bookingTickets &&
+            bookingTickets.length > 0 &&
+            !isLoading &&
+            !isError && (
+              <Pressable onPress={onDownload} style={styles.download}>
+                <Text style={styles.downloadText}>Unduh E-Tiket</Text>
+              </Pressable>
+            )}
           {downloadError ? (
             <Text style={styles.errorText}>{downloadError}</Text>
           ) : null}
@@ -112,5 +115,34 @@ export function TicketQrSheet({
         </ScrollView>
       </Pressable>
     </Pressable>
+  );
+}
+
+function errorContent(
+  message: string,
+  isRetrying: boolean,
+  onRetry?: () => void,
+): ReactNode {
+  return (
+    <View style={{ alignItems: "center", gap: 12 }}>
+      <Text style={styles.error} accessibilityLiveRegion="polite">
+        {message}
+      </Text>
+      {onRetry ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Coba muat QR tiket lagi"
+          accessibilityState={{ disabled: isRetrying }}
+          disabled={isRetrying}
+          onPress={onRetry}
+          style={styles.close}
+          testID="ticket-qr-retry"
+        >
+          <Text style={styles.closeText}>
+            {isRetrying ? "Memuat…" : "Coba Lagi"}
+          </Text>
+        </Pressable>
+      ) : null}
+    </View>
   );
 }

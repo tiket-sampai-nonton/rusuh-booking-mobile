@@ -41,6 +41,7 @@ import { useResponsive } from "@presentation/hooks/useResponsive";
 import { designColors, withAlpha } from "@presentation/theme";
 import { successStyles, componentStyles } from "./style";
 import { styleForSuccessScreenView0 } from "./style";
+import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 export interface SuccessScreenProps {
   readonly bookingId: string;
@@ -62,7 +63,14 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   // Re-verify authoritatively. verdict "failed" → the recovery screen; a
   // pending verdict stays on the processing state (the gate routes here on
   // PAID, so this is a safety re-check, not the primary poll).
-  const { verdict, isLoading } = useVerifyPayment(attemptId, bookingId);
+  const {
+    verdict,
+    isLoading,
+    isError: verificationError,
+    error: verificationFailure,
+    refetch: retryVerification,
+    isFetching: isRetryingVerification,
+  } = useVerifyPayment(attemptId, bookingId);
   const { ticketHistoryRepository } = useServices();
   const ticketsQuery = useQuery({
     queryKey: ["booking-tickets", bookingId],
@@ -136,7 +144,45 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
         path={`/success/${bookingId}`}
         noindex
       />
-      {!confirmed && (
+      {!confirmed && verificationError ? (
+        <View
+          className="w-full max-w-sm items-center gap-4"
+          accessibilityLiveRegion="polite"
+          testID="success-verification-error"
+        >
+          <Text
+            className={
+              isMobileWeb
+                ? "text-center text-base font-bold text-foreground"
+                : "text-center text-base font-bold text-v2-ground"
+            }
+          >
+            Pembayaran belum dapat diverifikasi.
+          </Text>
+          <Text
+            className={
+              isMobileWeb
+                ? "text-center text-sm text-muted-foreground"
+                : "text-center text-sm text-v2-ground/70"
+            }
+          >
+            {apiErrorMessage(verificationFailure)}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Coba verifikasi pembayaran lagi"
+            accessibilityState={{ disabled: isRetryingVerification }}
+            disabled={isRetryingVerification}
+            onPress={() => void retryVerification()}
+            testID="success-verification-retry"
+            className="border-2 border-white px-6 py-3"
+          >
+            <Text className="font-bold text-white">
+              {isRetryingVerification ? "MEMERIKSA…" : "COBA LAGI"}
+            </Text>
+          </Pressable>
+        </View>
+      ) : !confirmed ? (
         <View
           className="items-center gap-4"
           accessibilityLiveRegion="polite"
@@ -157,7 +203,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
             {verificationMessage}
           </Text>
         </View>
-      )}
+      ) : null}
       {confirmed && (
         <>
           <ScrollView
@@ -254,7 +300,30 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
             <View className="gap-6" testID="eticket-list">
               {ticketsQuery.isLoading ? <Text>Memuat e-tiket…</Text> : null}
               {ticketsQuery.isError ? (
-                <Text>Gagal memuat e-tiket. Silakan coba lagi.</Text>
+                <View
+                  className="items-center gap-2"
+                  accessibilityLiveRegion="polite"
+                  testID="success-tickets-error"
+                >
+                  <Text className="text-center">
+                    {apiErrorMessage(
+                      ticketsQuery.error,
+                      "Gagal memuat e-tiket. Silakan coba lagi.",
+                    )}
+                  </Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Coba muat e-tiket lagi"
+                    accessibilityState={{ disabled: ticketsQuery.isFetching }}
+                    disabled={ticketsQuery.isFetching}
+                    onPress={() => void ticketsQuery.refetch()}
+                    testID="success-tickets-retry"
+                  >
+                    <Text className="font-bold">
+                      {ticketsQuery.isFetching ? "Memuat…" : "Coba Lagi"}
+                    </Text>
+                  </Pressable>
+                </View>
               ) : null}
               {issuedTickets.map((ticket, i) => (
                 // Static derived list (fixed length, never reordered): the

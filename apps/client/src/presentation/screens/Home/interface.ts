@@ -2,7 +2,9 @@
 import type { EventSummary } from "@domain/repositories/event.repository";
 
 export interface HomeErrorProps {
-  readonly message?: string;
+  readonly error?: unknown;
+  readonly onRetry: () => void;
+  readonly isRetrying: boolean;
 }
 
 export interface HomeSectionsProps {

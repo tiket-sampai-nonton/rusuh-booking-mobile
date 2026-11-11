@@ -820,6 +820,15 @@ export const designDetailStyles = StyleSheet.create({
     justifyContent: "space-between",
     gap: designSpacingSemantic.s,
   },
+  apiErrorMessage: {
+    alignSelf: "center",
+    width: "100%",
+    maxWidth: 900,
+    marginBottom: designSpacingSemantic.xs,
+    color: designColors.danger,
+    fontFamily: plusJakartaSansFonts.semiBold,
+    fontSize: designFontSizes.xs,
+  },
   floatingCtaInfo: {
     flex: 1,
   },

@@ -48,6 +48,9 @@ export interface VerifyPaymentView {
   readonly isLoading: boolean;
   readonly isError: boolean;
   readonly error: Error | null;
+  /** Retry the authoritative status request after a transient API failure. */
+  readonly refetch: () => Promise<unknown>;
+  readonly isFetching: boolean;
   /** Collapsed verdict: paid / failed / pending (undefined until first read). */
   readonly verdict?: PaymentVerdict;
   /** True once the status is terminal — the poller has stopped. */
@@ -152,6 +155,8 @@ export function useVerifyPayment(
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
+    refetch: query.refetch,
+    isFetching: query.isFetching,
     verdict,
     isSettled,
     route,

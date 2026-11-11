@@ -42,7 +42,14 @@ import { homeScrollContent, componentStyles } from "./style";
 
 export function HomeScreen() {
   const router = useRouter();
-  const { data, isLoading, isError, error } = useEvents();
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch: retryEvents,
+    isFetching,
+  } = useEvents();
   const scrollRef = useRef<Animated.ScrollView>(null);
   const {
     isWeb,
@@ -132,7 +139,13 @@ export function HomeScreen() {
           )}
           testID="home-scroll"
         >
-          {isError && <HomeError message={error?.message} />}
+          {isError && (
+            <HomeError
+              error={error}
+              onRetry={() => void retryEvents()}
+              isRetrying={isFetching}
+            />
+          )}
 
           {/* Hero Carousel - Full viewport (prototype .hero) */}
           {data && data.upcoming.length > 0 && (

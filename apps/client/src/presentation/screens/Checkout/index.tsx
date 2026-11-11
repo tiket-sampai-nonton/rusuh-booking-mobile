@@ -62,6 +62,7 @@ import type { CheckoutScreenProps, RowCheckStatus } from "./interface";
 import { CheckoutSessionUnavailable } from "./fragments/CheckoutSessionUnavailable";
 import { checkoutScrollContent, componentStyles } from "./style";
 import { addTicketButtonStyle } from "./style";
+import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 /** Map a resolved NIK verdict (+ pending flag) to the row's display status. */
 function rowStatus(
@@ -333,6 +334,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     return (
       <CheckoutSessionUnavailable
         hasError={Boolean(sessionError)}
+        errorMessage={sessionError ? apiErrorMessage(sessionError) : undefined}
         onRetry={() => void retry()}
         onBrowse={() => router.replace("/browse" as Href)}
       />

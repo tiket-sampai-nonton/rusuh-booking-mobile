@@ -17,24 +17,26 @@ const baseProps = {
 describe("TicketQrSheet", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("shows a fallback QR and closes from either close affordance", () => {
+  it("does not fabricate a QR when ticket data is unavailable and still closes", () => {
     render(<TicketQrSheet {...baseProps} />);
 
     expect(screen.getByText("Stadium Tour Jakarta")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Tutup QR tiket" })).toBeTruthy();
-    expect(screen.getByTestId("qr-code").props.accessibilityLabel).toBe(
-      "RBT|booking-1|1",
-    );
+    expect(
+      screen.getByText("Data QR tiket belum tersedia. Coba muat kembali."),
+    ).toBeTruthy();
+    expect(screen.queryByTestId("qr-code")).toBeNull();
     fireEvent.press(screen.getByTestId("ticket-qr-close"));
     expect(baseProps.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("uses a safe booking placeholder and centers the backdrop on web", () => {
+  it("keeps missing booking data in an unavailable state and centers the backdrop on web", () => {
     render(<TicketQrSheet {...baseProps} bookingId="" />);
 
-    expect(screen.getByTestId("qr-code").props.accessibilityLabel).toBe(
-      "RBT|booking|1",
-    );
+    expect(
+      screen.getByText("Data QR tiket belum tersedia. Coba muat kembali."),
+    ).toBeTruthy();
+    expect(screen.queryByTestId("qr-code")).toBeNull();
     expect(ticketQrBackdropStyle("web")).toMatchObject({
       justifyContent: "center",
       padding: 24,
@@ -45,19 +47,26 @@ describe("TicketQrSheet", () => {
     });
   });
 
-  it("shows loading and error states for account-ticket QR data", () => {
-    const ticket = { ticketCode: "T-1", qrPayload: "safe-payload" };
-    const { rerender } = render(
-      <TicketQrSheet {...baseProps} bookingTickets={[]} isLoading />,
-    );
+  it("shows loading and retryable error states for account-ticket QR data", () => {
+    const onRetry = jest.fn();
+    const { rerender } = render(<TicketQrSheet {...baseProps} isLoading />);
     expect(screen.getByText("Memuat QR…")).toBeTruthy();
 
     rerender(
-      <TicketQrSheet {...baseProps} bookingTickets={[ticket]} isError />,
+      <TicketQrSheet
+        {...baseProps}
+        isError
+        errorMessage="Layanan sedang mengalami gangguan. Coba lagi sebentar."
+        onRetry={onRetry}
+      />,
     );
     expect(
-      screen.getByText("QR tiket gagal dimuat. Silakan coba lagi."),
+      screen.getByText(
+        "Layanan sedang mengalami gangguan. Coba lagi sebentar.",
+      ),
     ).toBeTruthy();
+    fireEvent.press(screen.getByTestId("ticket-qr-retry"));
+    expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
   it("renders each ticket code and downloads the account booking", () => {

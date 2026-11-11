@@ -121,7 +121,11 @@ describe("HistoryScreen", () => {
     await waitFor(() => screen.getByTestId("history-error"));
     // : error title is "Gagal Memuat Event"
     expect(screen.getByText("Gagal Memuat Event")).toBeTruthy();
-    expect(screen.getByText("Jaringan bermasalah")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
   });
 
   it("renders the empty state when there are no past events", async () => {

@@ -22,6 +22,7 @@ import { Animated, Platform, Text, View } from "react-native";
 import type { EventDetail } from "@domain/repositories/event.repository";
 import { minorToIDR } from "@domain/services/money";
 import { designDuration } from "@presentation/theme/event-design-tokens";
+import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 import { designDetailStyles as styles } from "../../style";
 import { nativeDriverSupported } from "@presentation/utils/style";
@@ -41,6 +42,8 @@ interface FloatingCTAProps {
   readonly onJoin: () => void;
   readonly isMobileWeb?: boolean;
   readonly isActive?: boolean;
+  readonly isJoining?: boolean;
+  readonly errorMessage?: unknown;
 }
 
 export function FloatingCTA({
@@ -50,6 +53,8 @@ export function FloatingCTA({
   onJoin,
   isMobileWeb = false,
   isActive = true,
+  isJoining = false,
+  errorMessage,
 }: FloatingCTAProps) {
   const isNative = Platform.OS !== "web";
 
@@ -70,7 +75,7 @@ export function FloatingCTA({
   }, [slideAnim]);
 
   useEffect(() => {
-    if (!canJoin || !isActive) {
+    if (!canJoin || isJoining || !isActive) {
       pulseAnim.stopAnimation();
       pulseAnim.setValue(0);
       return;
@@ -95,14 +100,19 @@ export function FloatingCTA({
       pulse.stop();
       pulseAnim.stopAnimation();
     };
-  }, [canJoin, isActive, isNative, pulseAnim]);
+  }, [canJoin, isActive, isJoining, isNative, pulseAnim]);
 
   const priceText =
     typeof event.minPriceMinor === "number"
       ? minorToIDR(event.minPriceMinor)
       : "Menyusul";
 
-  const disabled = !canJoin;
+  const disabled = !canJoin || isJoining;
+  const buttonLabel = isJoining
+    ? "Memproses…"
+    : errorMessage
+      ? "Coba Lagi"
+      : ctaLabel;
 
   return (
     <Animated.View
@@ -112,6 +122,16 @@ export function FloatingCTA({
         floatingCtaEntranceStyle(slideAnim),
       ]}
     >
+      {errorMessage ? (
+        <Text
+          accessibilityRole="alert"
+          accessibilityLiveRegion="assertive"
+          testID="join-queue-error"
+          style={styles.apiErrorMessage}
+        >
+          {apiErrorMessage(errorMessage)}
+        </Text>
+      ) : null}
       <View style={styles.floatingCtaInner}>
         {/* Left: Price Info */}
         <View
@@ -144,17 +164,17 @@ export function FloatingCTA({
         {/* Right: CTA Button */}
         {isNative ? (
           <NativeCTAButton
-            label={ctaLabel}
+            label={buttonLabel}
             disabled={disabled}
-            canJoin={canJoin}
+            canJoin={canJoin && !isJoining}
             onJoin={onJoin}
             pulseAnim={pulseAnim}
           />
         ) : (
           <WebCTAButton
-            label={ctaLabel}
+            label={buttonLabel}
             disabled={disabled}
-            canJoin={canJoin}
+            canJoin={canJoin && !isJoining}
             onJoin={onJoin}
             pulseAnim={pulseAnim}
             isMobileWeb={isMobileWeb}

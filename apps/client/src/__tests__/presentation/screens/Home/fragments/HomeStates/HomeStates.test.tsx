@@ -12,14 +12,24 @@ describe("Home states", () => {
     expect(screen.getByLabelText("Memuat event")).toBeTruthy();
   });
 
-  it("shows a supplied error message", () => {
-    render(<HomeError message="Koneksi terputus" />);
+  it("shows safe connection guidance for a network error", () => {
+    render(
+      <HomeError
+        error={new TypeError("Failed to fetch")}
+        onRetry={jest.fn()}
+        isRetrying={false}
+      />,
+    );
     expect(screen.getByTestId("home-error")).toBeTruthy();
-    expect(screen.getByText("Koneksi terputus")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
   });
 
   it("shows the fallback error message when none is supplied", () => {
-    render(<HomeError />);
+    render(<HomeError onRetry={jest.fn()} isRetrying={false} />);
     expect(
       screen.getByText("Terjadi kesalahan. Silakan coba lagi."),
     ).toBeTruthy();

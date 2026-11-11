@@ -308,6 +308,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_RESULTS: ${{ toJSON(needs) }}
+          OTA_JOB_RESULT: ${{ needs.publish_ota.result }}
           OTA_DECISION: ${{ needs.publish_ota.outputs.decision || needs.publish_ota.result }}
         run: |
           test -n "$TELEGRAM_BOT_TOKEN" && test -n "$TELEGRAM_CHAT_ID" || {
@@ -316,19 +317,34 @@ jobs:
           }
           RESULTS=$(printf '%s' "$JOB_RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"')
           FAILED_JOBS=$(printf '%s' "$JOB_RESULTS" | jq -r '[to_entries[] | select(.value.result == "failure" or .value.result == "cancelled") | .key] | join(", ")')
+          case "$OTA_DECISION" in
+            native-change-ota-skipped)
+              OTA_STATUS='SKIPPED — native changes require a new APK build'
+              ;;
+            ota-disabled)
+              OTA_STATUS='SKIPPED — EAS OTA is disabled for this environment'
+              ;;
+            ota-publish)
+              if [ "$OTA_JOB_RESULT" = 'success' ]; then
+                OTA_STATUS='PUBLISHED'
+              else
+                OTA_STATUS="NOT PUBLISHED — OTA job $OTA_JOB_RESULT"
+              fi
+              ;;
+            skipped)
+              OTA_STATUS='NOT RUN — manual Firebase distribution'
+              ;;
+            *)
+              OTA_STATUS="$OTA_DECISION"
+              ;;
+          esac
           if [ -n "$FAILED_JOBS" ]; then
             STATUS="FAILED — $FAILED_JOBS"
-          elif [ "$GITHUB_EVENT_NAME" = 'push' ] && \
-            [ "$OTA_DECISION" = 'native-change-ota-skipped' ]; then
-            STATUS='PARTIAL — native build required; OTA skipped'
-          elif [ "$GITHUB_EVENT_NAME" = 'push' ] && \
-            [ "$OTA_DECISION" = 'ota-disabled' ]; then
-            STATUS='PARTIAL — EAS OTA is not enabled'
           else
             STATUS="SUCCESS"
           fi
           MESSAGE=$(printf 'Release Pipeline: %s\nBranch: %s\nCommit: %s\nOTA: %s\n\n%s\n\n%s/%s/actions/runs/%s' \
-            "$STATUS" "$GITHUB_REF_NAME" "$GITHUB_SHA" "$OTA_DECISION" "$RESULTS" \
+            "$STATUS" "$GITHUB_REF_NAME" "$GITHUB_SHA" "$OTA_STATUS" "$RESULTS" \
             "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
           curl --fail-with-body --silent --show-error \
             --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \

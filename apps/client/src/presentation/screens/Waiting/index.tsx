@@ -52,6 +52,7 @@ import { LeaveButton } from "./fragments/LeaveButton";
 import { waitingRoomLeft } from "@domain/rules/notification-flows";
 import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
 import { useServices } from "@providers/service-context";
+import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 // MAIN SCREEN
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -199,7 +200,7 @@ export function WaitingRoomScreen({
             <ErrorState
               icon="warning"
               title={COPY.errorTitle}
-              message={error?.message ?? COPY.errorSub}
+              message={apiErrorMessage(error, COPY.errorSub)}
               buttonText="Coba Lagi"
               onPress={handleRejoinQueue}
               testID="waiting-error-state"
@@ -245,7 +246,7 @@ export function WaitingRoomScreen({
             <ErrorState
               icon="warning"
               title={COPY.errorTitle}
-              message={error?.message ?? COPY.errorSub}
+              message={apiErrorMessage(error, COPY.errorSub)}
               buttonText="Coba Lagi"
               onPress={handleRejoinQueue}
               testID="waiting-error-state"
