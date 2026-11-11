@@ -10,6 +10,7 @@
 import { Platform } from "react-native";
 
 import type { TokenStorage } from "@domain/auth/token-storage.port";
+import type { BuyerEmailStorage } from "@domain/auth/buyer-email-storage.port";
 import type { QueueMembershipStorage } from "@domain/queue/queue-membership.port";
 import type {
   BookingAvailabilitySnapshot,
@@ -48,8 +49,12 @@ import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.rep
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
 import { MockTicketHistoryRepository } from "@infrastructure/__fixtures__/mock-ticket-history.repository";
 import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-token-storage";
+import { InMemoryBuyerEmailStorage } from "@infrastructure/__fixtures__/in-memory-buyer-email-storage";
 import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
+import { WebLocalStorageTokenStorage } from "@infrastructure/auth/web-local-storage-token-storage";
+import { SecureStoreBuyerEmailStorage } from "@infrastructure/auth/secure-store-buyer-email-storage";
+import { WebLocalStorageBuyerEmailStorage } from "@infrastructure/auth/web-local-storage-buyer-email-storage";
 import { SecureStoreQueueMembership } from "@infrastructure/queue/secure-store-queue-membership";
 import { WebQueueMembership } from "@infrastructure/queue/web-queue-membership";
 import { ExpoFileShareAdapter } from "@infrastructure/files/expo-file-share.adapter";
@@ -84,6 +89,8 @@ export interface Container {
   readonly fileShare: FileSharePort;
   readonly appUpdate: AppUpdatePort;
   readonly tokenStorage: TokenStorage;
+  /** Persisted signed-in email used to refill checkout after refresh. */
+  readonly buyerEmailStorage: BuyerEmailStorage;
   /**
    * Anonymous waiting-room membership persistence (RBT-041). Like
    * {@link tokenStorage} it is a platform primitive: native binds the
@@ -99,19 +106,28 @@ export interface Container {
 }
 
 /**
- * Pick the TokenStorage adapter for the current platform (RBT-023). SecureStore
- * is native-only, so native binds {@link SecureStoreTokenStorage} (OS keychain /
- * KeyStore) while web binds the in-memory fallback — on web the token lives in
- * memory only and does NOT survive a reload (SECURITY.md tradeoff). Jest runs
- * under the `jest-expo` web-ish default, so tests also get the in-memory store,
- * which keeps the composition root deterministic without touching a keychain.
+ * Pick TokenStorage for the current platform. Native uses SecureStore. Real web
+ * uses localStorage for access/refresh tokens; mock web and tests stay in-memory.
  */
 export function createTokenStorage(
   platformOs: typeof Platform.OS = Platform.OS,
+  persistWeb = false,
 ): TokenStorage {
-  return platformOs === "web"
-    ? new InMemoryTokenStorage()
-    : new SecureStoreTokenStorage();
+  if (platformOs !== "web") return new SecureStoreTokenStorage();
+  return persistWeb
+    ? new WebLocalStorageTokenStorage()
+    : new InMemoryTokenStorage();
+}
+
+/** Pick secure native storage or web localStorage for the checkout email. */
+export function createBuyerEmailStorage(
+  platformOs: typeof Platform.OS = Platform.OS,
+  persistWeb = false,
+): BuyerEmailStorage {
+  if (platformOs !== "web") return new SecureStoreBuyerEmailStorage();
+  return persistWeb
+    ? new WebLocalStorageBuyerEmailStorage()
+    : new InMemoryBuyerEmailStorage();
 }
 
 /**
@@ -207,10 +223,10 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // split + timers read through it so a later sync corrects everything at once.
   const serverClock = new ServerClock(clock);
 
-  // TokenStorage is a platform primitive (like the clock): the native secure
-  // store vs web in-memory choice is driven by Platform.OS, not the mock flag,
-  // so it is bound in BOTH modes (RBT-023).
-  const tokenStorage: TokenStorage = createTokenStorage();
+  // Native tokens always use SecureStore. Web real-mode tokens use localStorage
+  // per the approved RBT-132 decision; mock mode remains in-memory.
+  const tokenStorage: TokenStorage = createTokenStorage(Platform.OS, !useMocks);
+  const buyerEmailStorage = createBuyerEmailStorage(Platform.OS, !useMocks);
   // Queue membership persistence is also a platform primitive (native secure
   // store vs web in-memory, driven by Platform.OS) → bound in BOTH modes (RBT-041).
   const queueMembership: QueueMembershipStorage =
@@ -232,6 +248,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
       clock,
       serverClock,
       tokenStorage,
+      buyerEmailStorage,
       queueMembership,
       idempotencyKeys,
       httpClient: new MockHttpClient(),
@@ -273,7 +290,9 @@ export function createContainer(options: ContainerOptions = {}): Container {
       : new SecureStoreTokenStorage("rusuh.visitor.token");
   const refreshTokenStorage =
     Platform.OS === "web"
-      ? new InMemoryTokenStorage()
+      ? useMocks
+        ? new InMemoryTokenStorage()
+        : new WebLocalStorageTokenStorage("rusuh.auth.refresh")
       : new SecureStoreTokenStorage("rusuh.auth.refresh");
   const transport: HttpClient = new FetchHttpClient({
     baseUrl,
@@ -294,6 +313,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
     clock,
     serverClock,
     tokenStorage,
+    buyerEmailStorage,
     queueMembership,
     idempotencyKeys,
     httpClient,

@@ -12,6 +12,7 @@ import Animated, {
 import { pointerEventsNone } from "@presentation/utils/style";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BrandSymbol } from "@presentation/components/BrandSymbol";
+import { NativeStatusBarBackdrop } from "@presentation/components/NativeStatusBarBackdrop";
 import { SplashLetter } from "./SplashLetter";
 import { componentStyles } from "./style";
 import {
@@ -97,6 +98,7 @@ export function NativeLaunchSplash({
       <View style={[componentStyles.elementPosition1, pointerEventsNone]} />
       <View style={[componentStyles.elementPosition2, pointerEventsNone]} />
       <View style={[componentStyles.elementPosition3, pointerEventsNone]} />
+      <NativeStatusBarBackdrop />
       <Text style={componentStyles.elementPosition4}>.0</Text>
       <Text
         accessibilityLabel={`Versi aplikasi ${buildLabel}`}

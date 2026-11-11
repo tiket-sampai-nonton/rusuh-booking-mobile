@@ -221,6 +221,11 @@ describe("HomeScreen", () => {
     expect(screen.getByTestId("v2-event-card-history-3")).toBeTruthy();
     expect(screen.queryByTestId("v2-event-card-history-4")).toBeNull();
 
+    fireEvent.press(screen.getByTestId("v2-event-card-history-0"));
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      "/events/history-0?source=history",
+    );
+
     const seeAllLinks = screen.getAllByRole("link", { name: "Lihat Semua" });
     fireEvent.press(seeAllLinks[0]);
     expect(mockRouter.navigate).toHaveBeenCalledWith("/browse");

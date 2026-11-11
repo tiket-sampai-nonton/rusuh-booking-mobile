@@ -34,6 +34,7 @@ const mockUseQueuePolling = jest.fn<
 >();
 const mockUseAutoClaim = jest.fn<UseAutoClaimResult, [unknown]>();
 const mockUseEventDetail = jest.fn();
+const mockUseRestoreBookingSession = jest.fn();
 const mockScheduleLocal = jest.fn().mockResolvedValue(undefined);
 
 jest.mock("@providers/service-context", () => ({
@@ -51,6 +52,10 @@ jest.mock("@presentation/hooks/useAutoClaim", () => ({
 }));
 jest.mock("@presentation/hooks/useEventDetail", () => ({
   useEventDetail: (eventId: string) => mockUseEventDetail(eventId),
+}));
+jest.mock("@presentation/hooks/useBookingSession", () => ({
+  useRestoreBookingSession: (...args: unknown[]) =>
+    mockUseRestoreBookingSession(...args),
 }));
 
 // Mock reduced-motion so tests can flip the branch deterministically.
@@ -113,6 +118,12 @@ beforeEach(() => {
   mockReducedMotion.mockReturnValue(false);
   mockUseQueuePolling.mockReturnValue(polling());
   mockUseAutoClaim.mockReturnValue(claim());
+  mockUseRestoreBookingSession.mockReturnValue({
+    session: null,
+    isLoading: false,
+    error: null,
+    retry: jest.fn(async () => ({ data: null })),
+  });
   mockUseEventDetail.mockReturnValue({
     data: {
       id: "evt-1",
@@ -253,7 +264,7 @@ describe("WaitingRoomScreen — admit live region", () => {
   it("redirects to checkout immediately when claim yields a sessionId", () => {
     mockUseQueuePolling.mockReturnValue(
       polling({
-        entry: entry({ status: "ADMITTED", position: 0 }),
+        entry: entry({ status: "CLAIMED", position: 0 }),
         isSettled: true,
       }),
     );
@@ -261,6 +272,7 @@ describe("WaitingRoomScreen — admit live region", () => {
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
 
     expect(mockReplace).toHaveBeenCalledWith("/checkout/sess-7");
+    expect(screen.getByTestId("waiting-claim-recovering")).toBeTruthy();
   });
 });
 
@@ -354,9 +366,41 @@ describe("WaitingRoomScreen — terminal + error states", () => {
     );
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
     expect(screen.getByTestId("waiting-claimed-recovery")).toBeTruthy();
-    expect(screen.getByText("Jelajahi Event Lain")).toBeTruthy();
+    expect(screen.getByText("Kembali ke Beranda")).toBeTruthy();
     fireEvent.press(screen.getByTestId("waiting-claimed-state"));
-    expect(mockReplace).toHaveBeenCalledWith("/browse");
+    expect(mockReplace).toHaveBeenCalledWith("/");
+  });
+
+  it("restores a claimed session and routes directly to its checkout", () => {
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: entry({ status: "CLAIMED", position: 0 }) }),
+    );
+    mockUseRestoreBookingSession.mockReturnValue({
+      session: { sessionId: "restored-session" },
+      isLoading: false,
+      error: null,
+      retry: jest.fn(),
+    });
+
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+
+    expect(mockReplace).toHaveBeenCalledWith("/checkout/restored-session");
+  });
+
+  it("keeps the already-used message hidden while a claimed session is restoring", () => {
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: entry({ status: "CLAIMED", position: 0 }) }),
+    );
+    mockUseRestoreBookingSession.mockReturnValue({
+      session: null,
+      isLoading: true,
+      error: null,
+      retry: jest.fn(),
+    });
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+
+    expect(screen.getByTestId("waiting-claim-recovering")).toBeTruthy();
+    expect(screen.queryByText("Sesi antrean sudah digunakan")).toBeNull();
   });
 
   it("renders the polling-error state", () => {

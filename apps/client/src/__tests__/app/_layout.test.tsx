@@ -7,6 +7,7 @@ let mockFontsLoaded = true;
 let mockFontError: Error | null = null;
 const mockServices = {
   tokenStorage: { load: jest.fn() },
+  buyerEmailStorage: { load: jest.fn() },
   userRepository: { getMe: jest.fn() },
 };
 
@@ -21,6 +22,9 @@ jest.mock("expo-router", () => ({
 }));
 jest.mock("@presentation/bridges/StartupUpdateBridge", () => ({
   StartupUpdateBridge: () => null,
+}));
+jest.mock("@presentation/bridges/QueueMembershipBridge", () => ({
+  QueueMembershipBridge: () => null,
 }));
 
 // Mock expo-font's useFonts for Plus Jakarta Sans font loading.
@@ -58,6 +62,7 @@ describe("RootLayout (skeleton)", () => {
     mockFontsLoaded = true;
     mockFontError = null;
     mockServices.tokenStorage.load.mockReset().mockResolvedValue(null);
+    mockServices.buyerEmailStorage.load.mockReset().mockResolvedValue(null);
     mockServices.userRepository.getMe.mockReset();
     useAccountStore.getState().clearProfile();
   });

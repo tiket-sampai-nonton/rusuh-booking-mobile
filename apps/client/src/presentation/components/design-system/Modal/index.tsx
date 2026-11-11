@@ -31,6 +31,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { designEasing } from "@presentation/theme";
+import { NativeStatusBarBackdrop } from "@presentation/components/NativeStatusBarBackdrop";
 import { styles } from "./style";
 import {
   styleForModalPressable0,
@@ -96,8 +97,9 @@ export function Modal({
       transparent
       animationType="fade"
       onRequestClose={onClose}
-      statusBarTranslucent
+      statusBarTranslucent={false}
     >
+      <NativeStatusBarBackdrop />
       {/* Backdrop */}
       <Pressable
         testID={testID ? `${testID}-backdrop` : "v2-modal-backdrop"}

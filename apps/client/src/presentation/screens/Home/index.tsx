@@ -88,6 +88,11 @@ export function HomeScreen() {
     (eventId: string): void => router.push(`/events/${eventId}` as Href),
     [router],
   );
+  const goToHistoryEvent = useCallback(
+    (eventId: string): void =>
+      router.push(`/events/${eventId}?source=history` as Href),
+    [router],
+  );
   const goBrowse = useCallback(
     (): void => router.navigate("/browse" as Href),
     [router],
@@ -167,6 +172,7 @@ export function HomeScreen() {
               isDesktop={isDesktop}
               columns={gridColumns}
               onPressEvent={goToEvent}
+              onPressHistoryEvent={goToHistoryEvent}
               onFilter={openFilter}
               onSeeAll={goBrowse}
               onFeaturedLayout={() => undefined}

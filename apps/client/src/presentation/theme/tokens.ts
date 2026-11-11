@@ -18,7 +18,7 @@ const shadows = tailwind.theme.extend.boxShadow;
 export const brand = {
   primary: colors.brand.DEFAULT,
   deep: colors.brand.deep,
-  pink: colors.brand.pink,
+  ember: colors.brand.ember,
 } as const;
 
 /** Status hues mirrored from Tailwind's semantic tokens. */

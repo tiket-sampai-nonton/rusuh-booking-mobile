@@ -52,7 +52,7 @@
 
 - **NEVER** log a full NIK, token, QR payload, or payment detail; mask NIK in display; no raw NIK in local storage or QR. (D7.1)
 - **NEVER** store secrets/signing keys in the repo or in client-exposed `EXPO_PUBLIC_*`. (D7.5)
-- **MUST** store native tokens in `expo-secure-store` and web tokens in a secure cookie/session; clear on success/expiry/logout/cancel. (D7.2/D7.4)
+- **MUST** store native tokens in `expo-secure-store`; web auth uses the RBT-132 approved localStorage adapter until the BE supports an HttpOnly cookie. Clear tokens on logout/expiry. Local storage is JS-readable and carries XSS exposure; never store raw NIK there. (D7.2/D7.4; approved web exception)
 - **MUST** validate deep-link params before rendering sensitive order data. (D7.4)
 
 ## CI / delivery / quality

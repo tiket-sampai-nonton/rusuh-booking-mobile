@@ -145,10 +145,17 @@ class CountingQueueRepository implements QueueRepository {
   }
 }
 
+const mockMembershipClear = jest.fn(async () => undefined);
+
 function makeContainer(repo: QueueRepository): Container {
-  // Only queueRepository is exercised; the rest are never touched by the hook.
+  // Only queueRepository and membership cleanup are exercised by this hook.
   return {
     queueRepository: repo,
+    queueMembership: {
+      save: async () => undefined,
+      load: async () => null,
+      clear: mockMembershipClear,
+    },
     pushSubscription: { remove: async () => {} },
   } as unknown as Container;
 }
@@ -358,6 +365,7 @@ describe("RBT-042 useQueuePolling render seam", () => {
   });
 
   it("leave() delegates to the port through LeaveQueue", async () => {
+    mockMembershipClear.mockClear();
     let leaveId: string | undefined;
     const repo = new CountingQueueRepository("ADMITTED");
     repo.leave = async (id: string) => {
@@ -368,6 +376,7 @@ describe("RBT-042 useQueuePolling render seam", () => {
     await waitFor(() => expect(last?.isSettled).toBe(true));
     await last!.leave();
     expect(leaveId).toBe("q-1");
+    expect(mockMembershipClear).toHaveBeenCalledTimes(1);
     unmount();
   });
 });

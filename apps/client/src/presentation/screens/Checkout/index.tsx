@@ -81,7 +81,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { isDesktop, isMobileWeb } = useResponsive();
-  const { serverClock, bookingRepository } = useServices();
+  const { serverClock, bookingRepository, queueMembership } = useServices();
   const {
     session,
     isLoading,
@@ -109,8 +109,8 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
 
   const [buyerName, setBuyerName] = useState(prefill.fullName ?? "");
   const [buyerNik, setBuyerNik] = useState("");
-  // The full login email is held in memory for this session; the profile API
-  // returns only a masked address, so we never persist the unmasked value.
+  // The full login email is restored from BuyerEmailStorage when available;
+  // the profile API returns only a masked address.
   const [buyerEmail, setBuyerEmail] = useState(prefill.email ?? "");
   const [emailConfirmation, setEmailConfirmation] = useState(
     prefill.email ?? "",
@@ -575,6 +575,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
             void (async () => {
               try {
                 await bookingRepository.cancelSession?.(sessionId);
+                await queueMembership.clear();
                 setConfirmLeave(false);
                 router.replace("/" as Href);
               } catch {

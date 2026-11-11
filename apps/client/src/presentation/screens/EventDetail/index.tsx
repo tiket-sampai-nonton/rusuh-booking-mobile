@@ -89,7 +89,10 @@ function heroStatusLabel(status: string): string {
 // MAIN SCREEN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
+export function EventDetailScreen({
+  eventId,
+  hideQueueCta = false,
+}: EventDetailScreenProps) {
   const router = useRouter();
   const {
     data: event,
@@ -128,10 +131,7 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
     const siteUrl = (
       process.env.EXPO_PUBLIC_SITE_URL ?? "https://rusuh-booking.pages.dev"
     ).replace(/\/+$/, "");
-    const url =
-      Platform.OS === "web" && typeof window !== "undefined"
-        ? window.location.href
-        : `${siteUrl}/events/${encodeURIComponent(eventId)}`;
+    const url = `${siteUrl}/events/${encodeURIComponent(eventId)}`;
 
     if (Platform.OS === "web") {
       if (typeof navigator !== "undefined" && navigator.share) {
@@ -365,16 +365,18 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
         </ScrollView>
 
         {/* Floating CTA (fixed bottom) */}
-        <FloatingCTA
-          event={event}
-          canJoin={cta.enabled}
-          ctaLabel={cta.label}
-          onJoin={onJoin}
-          isMobileWeb={isMobileWeb}
-          isActive={isScreenFocused}
-          isJoining={joinQueue.isPending}
-          errorMessage={joinQueue.isError ? joinQueue.error : undefined}
-        />
+        {!hideQueueCta ? (
+          <FloatingCTA
+            event={event}
+            canJoin={cta.enabled}
+            ctaLabel={cta.label}
+            onJoin={onJoin}
+            isMobileWeb={isMobileWeb}
+            isActive={isScreenFocused}
+            isJoining={joinQueue.isPending}
+            errorMessage={joinQueue.isError ? joinQueue.error : undefined}
+          />
+        ) : null}
 
         {/* Lightbox Modal */}
         <Lightbox

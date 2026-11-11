@@ -158,13 +158,13 @@ describe("HistoryScreen", () => {
     expect(screen.getByText("Riwayat")).toBeTruthy();
   });
 
-  it("past event cards are disabled (not navigable)", async () => {
+  it("opens a past event's informational detail without changing purchase availability", async () => {
     renderWithProviders(<HistoryScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
     fireEvent.press(screen.getByTestId("v2-event-card-rock"));
-    expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(mockRouter.push).toHaveBeenCalledWith("/events/rock?source=history");
   });
 
   it("navigates home from the top bar", async () => {

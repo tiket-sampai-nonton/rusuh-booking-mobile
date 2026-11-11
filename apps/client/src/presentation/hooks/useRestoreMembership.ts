@@ -67,6 +67,9 @@ export function useRestoreMembership(
   const navigatedTo = useRef<string | null>(null);
   useEffect(() => {
     if (resumed === null) return;
+    // A claimed queue entry is no longer a waiting room. The startup bridge
+    // restores its current booking session and routes directly to checkout.
+    if (resumed.entry.status === "CLAIMED") return;
     const { eventId, queueId } = resumed.membership;
     if (navigatedTo.current === queueId) return;
     navigatedTo.current = queueId;

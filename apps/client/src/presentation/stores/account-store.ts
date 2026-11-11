@@ -5,12 +5,11 @@
  * the user DOES sign in, this store holds their profile so checkout can
  * pre-fill the buyer box with a "Terisi dari akun" badge (AC1).
  *
- * SECURITY (SECURITY.md §3, D7.1): this store holds ONLY the MASKED profile the
- * BE returns (`emailMasked` / `fullName` / `nikMasked` / `hasNik`). It NEVER
- * holds a raw NIK — a raw 16-digit NIK must never live in a non-authoritative
- * client store. The checkout field is pre-filled from `nikMasked` for display;
- * the user re-enters / the BE validates the real NIK on submit. No token lives
- * here either (that is session state, RBT-023).
+ * SECURITY (SECURITY.md §3, D7.1): this store holds the masked profile the BE
+ * returns and the signed-in email for checkout autofill. The email is persisted
+ * separately through BuyerEmailStorage; the store itself remains in-memory. It
+ * NEVER holds a raw NIK — a raw 16-digit NIK must never live in a
+ * non-authoritative client store. No token lives here either.
  *
  * Zustand lives in presentation/stores per ARCHITECTURE §2.2 / D4. Framework
  * state only — no infrastructure import, no network.
@@ -22,7 +21,7 @@ import type { UserProfile } from "@domain/repositories/user.repository";
 export interface AccountState {
   /** The signed-in user's MASKED profile, or undefined when guest. */
   profile?: UserProfile;
-  /** Full login email, held only in memory for checkout autofill; never persisted. */
+  /** Full login email, restored from BuyerEmailStorage for checkout autofill. */
   buyerEmail?: string;
   /** Store the masked profile after a successful sign-in / getMe. */
   setProfile: (profile: UserProfile, buyerEmail?: string) => void;

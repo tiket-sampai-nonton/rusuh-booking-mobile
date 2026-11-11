@@ -28,6 +28,7 @@ import {
   isTerminal,
 } from "@domain/state-machines/queue-state-machine";
 import { useAutoClaim } from "@presentation/hooks/useAutoClaim";
+import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
 import { useQueuePolling } from "@presentation/hooks/useQueuePolling";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
@@ -107,12 +108,18 @@ export function WaitingRoomScreen({
     queueId,
     status: admitted && isStatusAuthoritative ? entry.status : undefined,
   });
+  const claimed = entry?.status === "CLAIMED";
+  const restoredBooking = useRestoreBookingSession(
+    Boolean(claimed && !claiming && !claimedSessionId),
+    undefined,
+    eventId,
+  );
 
   // A successful, server-authorized claim proceeds immediately to checkout.
   useEffect(() => {
-    if (claimedSessionId)
-      router.replace(`/checkout/${claimedSessionId}` as Href);
-  }, [claimedSessionId, router]);
+    const sessionId = claimedSessionId ?? restoredBooking.session?.sessionId;
+    if (sessionId) router.replace(`/checkout/${sessionId}` as Href);
+  }, [claimedSessionId, restoredBooking.session?.sessionId, router]);
 
   const handleLeavePress = useCallback(() => {
     setShowLeaveModal(true);
@@ -191,7 +198,7 @@ export function WaitingRoomScreen({
     );
   }
 
-  if (isError && !isConnectionLost) {
+  if (isError && !isConnectionLost && !claimed) {
     return (
       <View style={styles.root} testID="waiting-error">
         <Header />
@@ -257,10 +264,18 @@ export function WaitingRoomScreen({
     );
   }
 
-  // CLAIMED is a one-use state, not a waiting position. If the user returns
-  // here after closing checkout, don't render a zero-position spinner or keep
-  // polling forever; direct them to another event until the server ends it.
+  // CLAIMED is a one-use state, not a waiting position. Restore the active
+  // booking session and send the user back to checkout without showing the
+  // stale "already used" state during claim recovery.
   if (entry.status === "CLAIMED") {
+    if (claiming || claimedSessionId || restoredBooking.isLoading) {
+      return (
+        <View style={styles.root} testID="waiting-claim-recovering">
+          <Header />
+          <LoadingOverlay />
+        </View>
+      );
+    }
     return (
       <View style={styles.root} testID="waiting-claimed-recovery">
         <Header />
@@ -269,10 +284,26 @@ export function WaitingRoomScreen({
             <StatusBadge variant="expired" label="Antrean perlu diperbarui" />
             <ErrorState
               icon="clock"
-              title="Sesi antrean sudah digunakan"
-              message="Sesi antrean sebelumnya masih tercatat di server. Untuk saat ini, silakan pilih event lain."
-              buttonText="Jelajahi Event Lain"
-              onPress={handleBrowseEvents}
+              title={
+                restoredBooking.error
+                  ? "Gagal memulihkan checkout"
+                  : "Sesi checkout tidak tersedia"
+              }
+              message={
+                restoredBooking.error
+                  ? apiErrorMessage(
+                      restoredBooking.error,
+                      "Sesi checkout belum dapat dipulihkan. Periksa koneksi lalu coba lagi.",
+                    )
+                  : "Sesi antrean sudah diklaim, tetapi tidak ada sesi checkout aktif untuk event ini."
+              }
+              buttonText={
+                restoredBooking.error ? "Coba Lagi" : "Kembali ke Beranda"
+              }
+              onPress={() => {
+                if (restoredBooking.error) void restoredBooking.retry();
+                else router.replace("/" as Href);
+              }}
               testID="waiting-claimed-state"
             />
           </View>

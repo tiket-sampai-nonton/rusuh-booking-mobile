@@ -20,6 +20,7 @@ import { useAccountStore } from "@presentation/stores/account-store";
 import { useServices } from "@providers/service-context";
 
 import { LoginModal } from "@presentation/components/auth/LoginModal";
+import { useToast } from "@presentation/components/design-system/Toast";
 import { GuestAccountCard } from "./fragments/GuestAccountCard";
 import { SignedInProfile } from "./fragments/SignedInProfile";
 import { profileContentContainerStyle, styles } from "./style";
@@ -30,7 +31,8 @@ export function ProfileScreen() {
   const { isWeb, isMobileWeb, width } = useResponsive();
   const profile = useAccountStore((state) => state.profile);
   const clearProfile = useAccountStore((state) => state.clearProfile);
-  const { userRepository, tokenStorage } = useServices();
+  const { userRepository, tokenStorage, buyerEmailStorage } = useServices();
+  const { show: showToast } = useToast();
   const [loginOpen, setLoginOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [fullName, setFullName] = useState(profile?.fullName ?? "");
@@ -71,11 +73,13 @@ export function ProfileScreen() {
   const signOut = async () => {
     try {
       await userRepository.logout?.();
-      await new ClearSession(tokenStorage).execute();
+      await new ClearSession(tokenStorage, buyerEmailStorage).execute();
       clearProfile();
       setEditing(false);
+      showToast("Berhasil keluar dari akun.", "success");
     } catch {
       setError("Gagal keluar. Silakan coba lagi.");
+      showToast("Gagal keluar. Silakan coba lagi.", "error");
     }
   };
 

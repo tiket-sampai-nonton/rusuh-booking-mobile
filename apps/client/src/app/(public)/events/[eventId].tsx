@@ -22,7 +22,10 @@ export function generateStaticParams(): { eventId: string }[] {
  * Emits indexable SEO metadata + schema.org Event JSON-LD (RBT-033 §6.6).
  */
 export default function EventDetailRoute() {
-  const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const { eventId, source } = useLocalSearchParams<{
+    eventId: string;
+    source?: string;
+  }>();
   const id = eventId ?? "";
   const path = `/events/${id}`;
   const event = EVENT_FIXTURES.find((item) => item.id === id);
@@ -50,7 +53,7 @@ export default function EventDetailRoute() {
             : eventJsonLd({ name: "Event", path })
         }
       />
-      <EventDetailScreen eventId={id} />
+      <EventDetailScreen eventId={id} hideQueueCta={source === "history"} />
     </Fragment>
   );
 }

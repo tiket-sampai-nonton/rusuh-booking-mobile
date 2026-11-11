@@ -132,6 +132,26 @@ describe("useRestoreMembership", () => {
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 
+  it("leaves a CLAIMED entry for checkout-session recovery instead of reopening waiting", async () => {
+    const repo = new FakeQueueRepository();
+    repo.statusToReturn = "CLAIMED";
+    const storage = new InMemoryQueueMembership();
+    await storage.save({ eventId: "evt-1", queueId: "q-evt-1" });
+
+    const { result } = renderHook(() => useRestoreMembership(), {
+      wrapper: makeWrapper(repo, storage),
+    });
+
+    await waitFor(() =>
+      expect(result.current.resumed?.entry.status).toBe("CLAIMED"),
+    );
+    expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(await storage.load()).toEqual({
+      eventId: "evt-1",
+      queueId: "q-evt-1",
+    });
+  });
+
   it("does nothing when no membership is persisted", async () => {
     const repo = new FakeQueueRepository();
     const storage = new InMemoryQueueMembership();

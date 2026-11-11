@@ -78,16 +78,15 @@ describe("EventCard", () => {
     expect(UNSAFE_getByType(CachedImage).props.source.uri).toContain("w=960");
   });
 
-  it("keeps history cards disabled and does not activate hover state", () => {
+  it("keeps history cards navigable for event details", () => {
     const onPress = jest.fn();
     const { getByTestId } = render(
       <EventCard event={EVENT_FIXTURES[0]} onPress={onPress} history />,
     );
     const card = getByTestId("v2-event-card-evt-1");
-    expect(card.props.accessibilityState.disabled).toBe(true);
-    fireEvent(card, "hoverIn");
+    expect(card.props.accessibilityState.disabled).toBe(false);
     fireEvent.press(card);
-    expect(onPress).not.toHaveBeenCalled();
+    expect(onPress).toHaveBeenCalledWith("evt-1");
   });
 
   it("renders desktop card actions and responds to hover without motion", () => {

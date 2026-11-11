@@ -13,6 +13,7 @@ import { Animated } from "react-native";
 import type { Container } from "@providers/container";
 import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
+import { ToastProvider } from "@presentation/components/design-system/Toast";
 import { LoginButton } from "@presentation/components/auth/LoginButton";
 
 const completedAnimation = {
@@ -32,9 +33,11 @@ function renderButton() {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <ServiceProvider container={container}>
-        <LoginButton />
-      </ServiceProvider>
+      <ToastProvider>
+        <ServiceProvider container={container}>
+          <LoginButton />
+        </ServiceProvider>
+      </ToastProvider>
     </QueryClientProvider>,
   );
 }

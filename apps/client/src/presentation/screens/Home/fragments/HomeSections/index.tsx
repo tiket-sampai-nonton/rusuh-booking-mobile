@@ -17,6 +17,7 @@ export function HomeSections({
   data,
   columns,
   onPressEvent,
+  onPressHistoryEvent,
   onFilter,
   onFeaturedLayout,
   onHistoryLayout,
@@ -83,12 +84,12 @@ export function HomeSections({
           {isNative ? (
             <EventsHorizontalScroll
               events={historyPreview}
-              onPress={onPressEvent}
+              onPress={onPressHistoryEvent}
             />
           ) : (
             <EventsGrid
               events={historyPreview}
-              onPress={onPressEvent}
+              onPress={onPressHistoryEvent}
               columns={columns}
               history
             />

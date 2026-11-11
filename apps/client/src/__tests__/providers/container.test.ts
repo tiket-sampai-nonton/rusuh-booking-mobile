@@ -2,6 +2,7 @@ import { Platform } from "react-native";
 import {
   createContainer,
   createApiHeaders,
+  createBuyerEmailStorage,
   createQueueMembershipStorage,
   createTokenStorage,
   readUseMocksFlag,
@@ -9,6 +10,10 @@ import {
 import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-token-storage";
 import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
+import { WebLocalStorageTokenStorage } from "@infrastructure/auth/web-local-storage-token-storage";
+import { InMemoryBuyerEmailStorage } from "@infrastructure/__fixtures__/in-memory-buyer-email-storage";
+import { SecureStoreBuyerEmailStorage } from "@infrastructure/auth/secure-store-buyer-email-storage";
+import { WebLocalStorageBuyerEmailStorage } from "@infrastructure/auth/web-local-storage-buyer-email-storage";
 import { SecureStoreQueueMembership } from "@infrastructure/queue/secure-store-queue-membership";
 import { MockBookingRepository } from "@infrastructure/__fixtures__/mock-booking.repository";
 import { MockEventRepository } from "@infrastructure/__fixtures__/mock-event.repository";
@@ -154,6 +159,12 @@ describe("providers/container — createTokenStorage (RBT-023)", () => {
     expect(createTokenStorage("web")).toBeInstanceOf(InMemoryTokenStorage);
   });
 
+  it("binds localStorage for real web auth sessions", () => {
+    expect(createTokenStorage("web", true)).toBeInstanceOf(
+      WebLocalStorageTokenStorage,
+    );
+  });
+
   it("binds the secure-store adapter on iOS", () => {
     expect(createTokenStorage("ios")).toBeInstanceOf(SecureStoreTokenStorage);
   });
@@ -161,6 +172,26 @@ describe("providers/container — createTokenStorage (RBT-023)", () => {
   it("binds the secure-store adapter on Android", () => {
     expect(createTokenStorage("android")).toBeInstanceOf(
       SecureStoreTokenStorage,
+    );
+  });
+});
+
+describe("providers/container — createBuyerEmailStorage", () => {
+  it("uses in-memory storage for mock web", () => {
+    expect(createBuyerEmailStorage("web")).toBeInstanceOf(
+      InMemoryBuyerEmailStorage,
+    );
+  });
+
+  it("uses localStorage for real web", () => {
+    expect(createBuyerEmailStorage("web", true)).toBeInstanceOf(
+      WebLocalStorageBuyerEmailStorage,
+    );
+  });
+
+  it.each(["ios", "android"] as const)("uses SecureStore on %s", (platform) => {
+    expect(createBuyerEmailStorage(platform)).toBeInstanceOf(
+      SecureStoreBuyerEmailStorage,
     );
   });
 });

@@ -6,7 +6,7 @@
  *  Design (prototype 04-my-tickets):
  * - Black hero with large "ARSIP EVENT" title
  * - Header fixed at top
- * - EventCard grid in `history` (disabled) mode
+ * - EventCard grid in `history` (dimmed, navigable) mode
  * - Grayscale images, 2px borders
  */
 import { useRouter, type Href } from "expo-router";
@@ -125,7 +125,7 @@ export function HistoryScreen() {
                       isMobileWeb && historyStyles.mobileWebHeroSubtitle,
                     ]}
                   >
-                    Event yang sudah berlalu. Kartu diredam & tidak bisa diklik.
+                    Event yang sudah berlalu. Pilih kartu untuk melihat detail.
                   </Text>
                 </View>
               </View>
@@ -153,7 +153,13 @@ export function HistoryScreen() {
                   : historyGridSingleCell(isMobileWeb)
               }
             >
-              <EventCard event={item} onPress={() => undefined} history />
+              <EventCard
+                event={item}
+                onPress={(eventId) =>
+                  router.push(`/events/${eventId}?source=history` as Href)
+                }
+                history
+              />
             </View>
           )}
           testID="history-grid"
