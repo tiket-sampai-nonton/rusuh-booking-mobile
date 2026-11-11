@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react-native";
+import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
 const mockUseLocalSearchParams = jest.fn(
   (): { eventId?: string; sessionId?: string; bookingId?: string } => ({
@@ -114,7 +115,7 @@ describe("(booking) routes", () => {
   });
 
   it("renders the Waiting room (no-queue guard without a queueId)", () => {
-    render(<WaitingScreen />);
+    renderWithProviders(<WaitingScreen />);
     //  uses the localized no-queue message.
     expect(screen.getByTestId("waiting-noqueue")).toHaveTextContent(
       "Belum ada antrean",

@@ -17,6 +17,7 @@ const mockRouter = {
   navigate: jest.fn(),
   dismissTo: jest.fn(),
 };
+let mockHeroAutoPlay: boolean | undefined;
 const mockResponsive = { width: 393, height: 852 };
 function mockGridColumnsForWidth(width: number): number {
   if (width > 900) return 3;
@@ -67,12 +68,15 @@ jest.mock("@presentation/components/design-system/HeroCarousel", () => {
       events,
       onBook,
       onSeeAll,
+      autoPlay,
     }: {
       events: readonly { id: string; name: string }[];
       onBook: (eventId: string) => void;
       onSeeAll: () => void;
-    }) =>
-      ReactMock.createElement(
+      autoPlay?: boolean;
+    }) => {
+      mockHeroAutoPlay = autoPlay;
+      return ReactMock.createElement(
         View,
         { testID: "v2-hero" },
         ReactMock.createElement(
@@ -85,7 +89,8 @@ jest.mock("@presentation/components/design-system/HeroCarousel", () => {
           { testID: "hero-see-all", onPress: onSeeAll },
           ReactMock.createElement(Text, null, "Lihat Semua"),
         ),
-      ),
+      );
+    },
   };
 });
 
@@ -111,7 +116,7 @@ function catalogEvent(id: string, daysFromNow: number): EventSummary {
     salesStartsAt: new Date(Date.now() - day).toISOString(),
     salesEndsAt: new Date(Date.now() + day).toISOString(),
     status: "AVAILABLE",
-    minPriceMinor: 10000000,
+    minPriceMinor: 100000,
   };
 }
 
@@ -122,6 +127,7 @@ describe("HomeScreen", () => {
     mockRouter.push.mockReset();
     mockRouter.navigate.mockReset();
     mockRouter.dismissTo.mockReset();
+    mockHeroAutoPlay = undefined;
     mockResponsive.width = 393;
     mockResponsive.height = 852;
     act(() => useAccountStore.getState().clearProfile());
@@ -252,9 +258,10 @@ describe("HomeScreen", () => {
     );
     fireEvent.press(screen.getAllByTestId("hero-see-all")[0]);
     expect(mockRouter.navigate).toHaveBeenLastCalledWith("/browse");
+    expect(mockHeroAutoPlay).toBe(Platform.OS === "web");
   });
 
-  it("handles desktop header routes, section links, and scroll events", async () => {
+  it("handles desktop header routes and section links", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     mockResponsive.width = 1280;
     useAccountStore.getState().setProfile({
@@ -272,11 +279,6 @@ describe("HomeScreen", () => {
     fireEvent.press(screen.getByTestId("nav-browse"));
     fireEvent.press(screen.getByTestId("nav-tickets"));
     fireEvent.press(screen.getByTestId("nav-profile"));
-    const scrollHandler = screen.getByTestId("home-scroll").props.onScroll as
-      | ((event: { contentOffset: { y: number } }) => void)
-      | undefined;
-    act(() => scrollHandler?.({ contentOffset: { y: 240 } }));
-
     expect(mockRouter.navigate).toHaveBeenCalledWith("/browse");
     expect(mockRouter.navigate).toHaveBeenCalledWith("/my-tickets");
     expect(mockRouter.navigate).toHaveBeenCalledWith("/profile");

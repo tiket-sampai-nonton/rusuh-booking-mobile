@@ -1,9 +1,9 @@
 /**
  * Money formatting — pure domain service (framework-free).
  *
- * Amounts cross the contract as integer MINOR units of IDR (Rupiah has no
- * sub-unit in practice, but the BE models money in minor units for consistency,
- * so 45_000_000 minor = Rp 450.000). Mirrors the prototype's `API.minorToIDR`.
+ * Amount values cross the current API contract as whole Rupiah even where the
+ * field name ends in `Minor` (for example, 275000 means Rp 275.000). Do not
+ * apply a 100x minor-unit conversion: IDR has no sub-unit in the product data.
  *
  * No React / RN / Expo / Intl-locale dependency: the grouping is done by hand so
  * the output is identical on every platform (RN Android has historically shipped
@@ -22,16 +22,16 @@ function groupThousands(nInteger: number): string {
 }
 
 /**
- * Format a minor-unit IDR amount as a display string, e.g. `45000000` →
- * `"Rp 450.000"`. A nullish amount renders `"Rp 0"`. The minor→major divisor
- * is 100. Keep full values consistent across platforms and screens.
+ * Format an API IDR amount as a display string, e.g. `275000` →
+ * `"Rp 275.000"`. A nullish amount renders `"Rp 0"`. Keep full values
+ * consistent across platforms and screens.
  */
 export function minorToIDR(amountMinor: number | null | undefined): string {
-  const minor =
+  const amount =
     typeof amountMinor === "number" && isFinite(amountMinor) ? amountMinor : 0;
-  const major = Math.trunc(minor / 100);
-  const sign = major < 0 ? "-" : "";
-  const abs = Math.abs(major);
+  const rupiah = Math.trunc(amount);
+  const sign = rupiah < 0 ? "-" : "";
+  const abs = Math.abs(rupiah);
 
   return `${sign}Rp ${groupThousands(abs)}`;
 }

@@ -34,7 +34,7 @@ const available: EventDetail = {
   salesStartsAt: "2026-11-01T00:00:00.000Z",
   salesEndsAt: "2026-11-30T23:59:59.000Z",
   status: "AVAILABLE",
-  minPriceMinor: 45000000,
+  minPriceMinor: 450000,
   maxTicketsPerBuyerNik: 3,
   remainingTickets: 120,
   description: {
@@ -48,8 +48,8 @@ const available: EventDetail = {
     ],
     terms: "Wajib membawa KTP.",
     categories: [
-      { code: "VIP", name: "VIP", priceMinor: 75000000, available: 10 },
-      { code: "REG", name: "Reguler", priceMinor: 45000000, available: 0 },
+      { code: "VIP", name: "VIP", priceMinor: 750000, available: 10 },
+      { code: "REG", name: "Reguler", priceMinor: 450000, available: 0 },
     ],
   },
 };
@@ -176,7 +176,7 @@ describe("EventDetailScreen", () => {
 
     await waitFor(() => expect(screen.getByTestId("join-cta")).toBeTruthy());
     // One amount is in the category row and the other is the floating CTA.
-    expect(screen.getAllByText("Rp 1.850")).toHaveLength(2);
+    expect(screen.getAllByText("Rp 185.000")).toHaveLength(2);
     expect(screen.queryByText("Rp 0")).toBeNull();
   });
 
@@ -253,7 +253,7 @@ describe("EventDetailScreen", () => {
       description: {
         longDesc: "x",
         categories: [
-          { code: "REG", name: "Reguler", priceMinor: 30000000, available: 12 },
+          { code: "REG", name: "Reguler", priceMinor: 300000, available: 12 },
         ],
       },
     };

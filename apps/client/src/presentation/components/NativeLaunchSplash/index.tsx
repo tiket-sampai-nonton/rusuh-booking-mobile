@@ -134,7 +134,14 @@ export function NativeLaunchSplash({
             ))}
           </View>
         </View>
-        <Text style={componentStyles.elementColor10}>Tiket Tanpa Ribet</Text>
+        <Text
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
+          numberOfLines={1}
+          style={componentStyles.elementColor10}
+        >
+          Pesan tiket tanpa ribet
+        </Text>
       </View>
 
       <View style={componentStyles.elementPosition11}>

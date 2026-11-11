@@ -3,17 +3,15 @@
  * regions are composed from fragments in this directory.
  */
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   Platform,
   type ListRenderItemInfo,
-  type ViewToken,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { eventImage } from "@domain/rules/event-image";
 import {
   BottomNav,
   navigateBottomTab,
@@ -61,8 +59,6 @@ import {
 } from "./style";
 import { EventCard } from "@presentation/components/design-system";
 
-const BROWSE_VIEWABILITY_CONFIG = { itemVisiblePercentThreshold: 50 };
-
 export function BrowseScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -85,35 +81,6 @@ export function BrowseScreen() {
     );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filterOpen, setFilterOpen] = useState(false);
-  const [visibleEventIds, setVisibleEventIds] = useState<ReadonlySet<string>>(
-    () => new Set(),
-  );
-  const nativeRevealEventIds = useRef<ReadonlySet<string>>(new Set());
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      const nextIds = new Set(
-        viewableItems
-          .map((token) => token.item as { id?: string } | null)
-          .filter(
-            (event): event is { id: string } =>
-              event !== null &&
-              typeof event.id === "string" &&
-              nativeRevealEventIds.current.has(event.id),
-          )
-          .map((event) => event.id),
-      );
-      setVisibleEventIds((currentIds) => {
-        if (
-          currentIds.size === nextIds.size &&
-          Array.from(currentIds).every((id) => nextIds.has(id))
-        ) {
-          return currentIds;
-        }
-        return nextIds;
-      });
-    },
-  ).current;
-
   const genre = readGenre(params.genre);
   useEffect(() => {
     setActiveCategory(
@@ -156,21 +123,6 @@ export function BrowseScreen() {
     if (!activeCategory || activeCategory === "all") return allResults;
     return allResults.filter((event) => matchesCategory(event, activeCategory));
   }, [activeCategory, allResults]);
-  // Real BE thumbnails already have their intended color treatment. Avoid
-  // invalidating every visible card on every scroll for those lists; track
-  // viewability only for the native fallback images that need a reveal layer.
-  nativeRevealEventIds.current = new Set(
-    isNative
-      ? results
-          .filter((event) =>
-            eventImage(event.id, event.thumbnailUrl ?? event.imageUrl).includes(
-              "images.unsplash.com",
-            ),
-          )
-          .map((event) => event.id)
-      : [],
-  );
-
   const goToEvent = useCallback(
     (eventId: string): void => router.push(`/events/${eventId}` as Href),
     [router],
@@ -223,15 +175,10 @@ export function BrowseScreen() {
             : browseGridCell(columns, isNative)
         }
       >
-        <EventCard
-          event={item}
-          onPress={goToEvent}
-          listMode={columns === 1}
-          isImageVisible={visibleEventIds.has(item.id)}
-        />
+        <EventCard event={item} onPress={goToEvent} listMode={columns === 1} />
       </View>
     ),
-    [columns, goToEvent, isMobileWeb, isNative, visibleEventIds],
+    [columns, goToEvent, isMobileWeb, isNative],
   );
   if (isLoading) return <BrowseLoading />;
 
@@ -305,9 +252,6 @@ export function BrowseScreen() {
           updateCellsBatchingPeriod={50}
           windowSize={3}
           removeClippedSubviews={Platform.OS === "android"}
-          extraData={visibleEventIds}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={BROWSE_VIEWABILITY_CONFIG}
           renderItem={renderEvent}
           testID="browse-scroll"
         />

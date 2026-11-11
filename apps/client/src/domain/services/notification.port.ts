@@ -2,21 +2,27 @@
  * NotificationPort — domain PORT (ARCHITECTURE §2.1 ISP, §6.1).
  *
  * Pure TS interface: no React / React Native / Expo / browser / native imports.
- * Infrastructure adapters implement it per platform (`expo-notifications` on
- * native, web-push on web). The shared domain notification flow does not change
- * between platforms; only the bound adapter does.
+ * Infrastructure adapters implement it per platform (Notifee for native local
+ * notifications with Expo Notifications for remote tokens, web-push on web).
+ * The shared domain notification flow does not change between platforms; only
+ * the bound adapter does.
  */
 
 /** The required notification flows (RBT-072 AC1). */
 export type NotificationKind =
   | "expiry_reminder" // hold/payment deadline is near
   | "payment_success" // booking paid & confirmed
+  | "payment_failure" // payment attempt ended without payment
+  | "payment_cancelled" // buyer left the payment flow
+  | "waiting_room_left" // buyer left the queue
   | "admission" // queue admitted — your turn
   | "event_reminder"; // event starts soon
 
 /** A local notification + the in-app route a tap should deep-link to. */
 export interface LocalNotification {
   readonly kind: NotificationKind;
+  /** Stable per outcome so repeated authoritative reads update one alert. */
+  readonly notificationId?: string;
   readonly title: string;
   readonly body: string;
   /** Epoch-ms time to fire; omitted means immediate. */

@@ -117,6 +117,7 @@ const config = {
     "./plugins/with-android-qa-signing.cjs",
     "./plugins/with-android-qa-bundle.cjs",
     "./plugins/with-android-chucker.cjs",
+    "./plugins/with-notifee-android-maven.cjs",
     "./plugins/with-ios-fmt-compat.cjs",
   ],
   experiments: { typedRoutes: true },

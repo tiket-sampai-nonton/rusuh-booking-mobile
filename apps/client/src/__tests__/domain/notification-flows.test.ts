@@ -8,7 +8,10 @@ import {
   expiryReminder,
   notificationRoute,
   NOTIFICATION_KINDS,
+  paymentCancelled,
+  paymentFailure,
   paymentSuccess,
+  waitingRoomLeft,
 } from "@domain/rules/notification-flows";
 
 describe("required notification flows (RBT-072 AC1)", () => {
@@ -24,6 +27,27 @@ describe("required notification flows (RBT-072 AC1)", () => {
     const n = paymentSuccess("bk-1");
     expect(n.kind).toBe("payment_success");
     expect(n.deepLink).toBe("/success/bk-1");
+    expect(n.notificationId).toBe("payment-success-bk-1");
+  });
+
+  it("payment failure gives a retry path without claiming the ticket is lost", () => {
+    const n = paymentFailure("bk-1");
+    expect(n.kind).toBe("payment_failure");
+    expect(n.deepLink).toBe("/payment/bk-1");
+    expect(n.body).toContain("bisa coba lagi");
+  });
+
+  it("payment leave copy does not claim the provider cancelled the payment", () => {
+    const n = paymentCancelled("bk-1");
+    expect(n.kind).toBe("payment_cancelled");
+    expect(n.deepLink).toBe("/payment/bk-1");
+    expect(n.body).toContain("menutup proses pembayaran");
+  });
+
+  it("leaving the waiting room links back to the same event", () => {
+    const n = waitingRoomLeft("evt-1");
+    expect(n.kind).toBe("waiting_room_left");
+    expect(n.deepLink).toBe("/events/evt-1");
   });
 
   it("admission → /checkout/<session>", () => {
@@ -39,10 +63,13 @@ describe("required notification flows (RBT-072 AC1)", () => {
     expect(n.scheduledAtMs).toBe(456);
   });
 
-  it("exposes exactly the four mandated kinds", () => {
+  it("exposes all domain notification kinds", () => {
     expect(NOTIFICATION_KINDS).toEqual([
       "expiry_reminder",
       "payment_success",
+      "payment_failure",
+      "payment_cancelled",
+      "waiting_room_left",
       "admission",
       "event_reminder",
     ]);

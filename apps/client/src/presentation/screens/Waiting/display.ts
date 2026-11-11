@@ -121,22 +121,34 @@ export function terminalBody(status: QueueStatus): string {
 
 /** Claim-error (RBT-044) title mirrors the terminal titles. */
 export function claimErrorTitle(
-  errorState: "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN",
+  errorState:
+    | "TURN_MISSED"
+    | "EVENT_SOLD_OUT"
+    | "ADMISSION_TOKEN_INVALID"
+    | "UNKNOWN",
 ): string {
   if (errorState === "EVENT_SOLD_OUT") return "Tiket Habis";
+  if (errorState === "ADMISSION_TOKEN_INVALID")
+    return "Sesi antrean sudah tidak berlaku";
   if (errorState === "UNKNOWN") return "Gagal menghubungkan";
   return "Giliran Berakhir";
 }
 
 /** Claim-error body copy. */
 export function claimErrorBody(
-  errorState: "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN",
+  errorState:
+    | "TURN_MISSED"
+    | "EVENT_SOLD_OUT"
+    | "ADMISSION_TOKEN_INVALID"
+    | "UNKNOWN",
 ): string {
   if (errorState === "EVENT_SOLD_OUT") {
     return "Maaf, tiketnya habis saat giliranmu tiba. Coba lihat acara lainnya.";
   }
   if (errorState === "UNKNOWN")
     return "Kami belum bisa menyiapkan sesi tiket. Periksa koneksi, lalu coba lagi.";
+  if (errorState === "ADMISSION_TOKEN_INVALID")
+    return "Sesi antrean sebelumnya masih tercatat di server. Untuk saat ini, silakan pilih event lain.";
   return "Waktu untuk memilih tiket sudah habis. Kamu bisa bergabung lagi dari awal.";
 }
 

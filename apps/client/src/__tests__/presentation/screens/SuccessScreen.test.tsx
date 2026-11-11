@@ -131,7 +131,7 @@ describe("SuccessScreen (RBT-070)", () => {
   });
 
   it("renders the order summary ONLY when verified PAID (orderId/qty/amount/masked NIK)", async () => {
-    useSessionStore.getState().setBooking("bk-1", 45000000);
+    useSessionStore.getState().setBooking("bk-1", 450000);
     useSessionStore.getState().setOrderDetail("31****89", 2);
     const screen = renderScreen("PAID");
     await waitFor(() =>

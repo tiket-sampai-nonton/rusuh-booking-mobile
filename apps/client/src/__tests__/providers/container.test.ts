@@ -16,6 +16,7 @@ import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.rep
 import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
 import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notification.adapter";
+import { ExpoNotificationAdapter } from "@infrastructure/notifications/expo-notification.adapter";
 import { MockTicketHistoryRepository } from "@infrastructure/__fixtures__/mock-ticket-history.repository";
 import { ExpoFileShareAdapter } from "@infrastructure/files/expo-file-share.adapter";
 import { WebFileShareAdapter } from "@infrastructure/files/web-file-share.adapter";
@@ -89,7 +90,9 @@ describe("providers/container — createContainer (mock mode)", () => {
     expect(c.bookingRepository).toBeInstanceOf(MockBookingRepository);
     expect(c.paymentRepository).toBeInstanceOf(MockPaymentRepository);
     expect(c.userRepository).toBeInstanceOf(MockUserRepository);
-    expect(c.notification).toBeInstanceOf(MockNotificationAdapter);
+    expect(c.notification).toBeInstanceOf(
+      Platform.OS === "web" ? MockNotificationAdapter : ExpoNotificationAdapter,
+    );
     expect(c.fileShare).toBeInstanceOf(
       Platform.OS === "web" ? WebFileShareAdapter : ExpoFileShareAdapter,
     );

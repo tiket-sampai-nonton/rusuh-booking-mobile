@@ -18,7 +18,7 @@
  * never color-only: every zone/state carries an icon + text label (RBT-080 a11y).
  */
 import { useFocusEffect, useRouter, type Href } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -49,6 +49,9 @@ import { StatusBadge } from "./fragments/StatusBadge";
 import { WaitingActive } from "./fragments/WaitingActive";
 import { YourTurnState } from "./fragments/YourTurnState";
 import { LeaveButton } from "./fragments/LeaveButton";
+import { waitingRoomLeft } from "@domain/rules/notification-flows";
+import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
+import { useServices } from "@providers/service-context";
 
 // MAIN SCREEN
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -65,6 +68,11 @@ export function WaitingRoomScreen({
   const insets = useSafeAreaInsets();
   const reducedMotion = useReducedMotion() ?? false;
   const { isDesktop, isMobileWeb } = useResponsive();
+  const { notification } = useServices();
+  const scheduleNotification = useMemo(
+    () => new ScheduleLocalNotification(notification),
+    [notification],
+  );
   const shellStyle = [styles.shell, isMobileWeb && styles.mobileWebShell];
 
   // Modal state
@@ -117,13 +125,18 @@ export function WaitingRoomScreen({
     void leave()
       .then(() => {
         setShowLeaveModal(false);
+        if (eventId) {
+          void scheduleNotification
+            .execute(waitingRoomLeft(eventId))
+            .catch(() => undefined);
+        }
         router.replace("/" as Href);
       })
       .catch(() => {
         setShowLeaveModal(false);
         void refetch();
       });
-  }, [leave, refetch, router]);
+  }, [eventId, leave, refetch, router, scheduleNotification]);
 
   const handleBrowseEvents = useCallback(() => {
     router.replace("/browse" as Href);
@@ -243,6 +256,30 @@ export function WaitingRoomScreen({
     );
   }
 
+  // CLAIMED is a one-use state, not a waiting position. If the user returns
+  // here after closing checkout, don't render a zero-position spinner or keep
+  // polling forever; direct them to another event until the server ends it.
+  if (entry.status === "CLAIMED") {
+    return (
+      <View style={styles.root} testID="waiting-claimed-recovery">
+        <Header />
+        <View style={shellStyle}>
+          <View style={styles.waitingContainer}>
+            <StatusBadge variant="expired" label="Antrean perlu diperbarui" />
+            <ErrorState
+              icon="clock"
+              title="Sesi antrean sudah digunakan"
+              message="Sesi antrean sebelumnya masih tercatat di server. Untuk saat ini, silakan pilih event lain."
+              buttonText="Jelajahi Event Lain"
+              onPress={handleBrowseEvents}
+              testID="waiting-claimed-state"
+            />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // TERMINAL STATE (sold-out, ended)
   // ─────────────────────────────────────────────────────────────────────────────
@@ -290,7 +327,9 @@ export function WaitingRoomScreen({
                     ? "Tiket Habis"
                     : errorState === "UNKNOWN"
                       ? "Koneksi Bermasalah"
-                      : "Giliran Berakhir"
+                      : errorState === "ADMISSION_TOKEN_INVALID"
+                        ? "Sesi Antrean Berakhir"
+                        : "Giliran Berakhir"
                 }
               />
               <ErrorState
@@ -300,11 +339,16 @@ export function WaitingRoomScreen({
                 buttonText={
                   isSoldOut
                     ? "Jelajahi Event Lain"
-                    : errorState === "UNKNOWN"
-                      ? "Kembali ke Event"
+                    : errorState === "UNKNOWN" ||
+                        errorState === "ADMISSION_TOKEN_INVALID"
+                      ? "Jelajahi Event Lain"
                       : "Bergabung Kembali"
                 }
-                onPress={isSoldOut ? handleBrowseEvents : handleRejoinQueue}
+                onPress={
+                  isSoldOut || errorState === "ADMISSION_TOKEN_INVALID"
+                    ? handleBrowseEvents
+                    : handleRejoinQueue
+                }
                 testID="waiting-claim-error-state"
               />
             </View>

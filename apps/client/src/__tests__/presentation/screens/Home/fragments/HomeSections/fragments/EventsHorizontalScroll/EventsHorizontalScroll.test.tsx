@@ -1,8 +1,7 @@
-import { act, render, screen } from "@testing-library/react-native";
+import { render, screen } from "@testing-library/react-native";
 import { FlatList } from "react-native";
 
 import { EVENT_FIXTURES } from "@shared/test-fixtures/events.fixture";
-import { EventCard } from "@presentation/components/design-system/EventCard";
 import { EventsHorizontalScroll } from "../../../../../../../../presentation/screens/Home/fragments/HomeSections/fragments/EventsHorizontalScroll/index";
 
 describe("EventsHorizontalScroll", () => {
@@ -11,19 +10,15 @@ describe("EventsHorizontalScroll", () => {
     expect(screen.getByText("Belum ada event yang cocok.")).toBeTruthy();
   });
 
-  it("reveals cards reported as visible by the horizontal list", () => {
+  it("keeps the horizontal carousel virtualized without scroll-driven state", () => {
     const event = EVENT_FIXTURES[0];
     const tree = render(
       <EventsHorizontalScroll events={[event]} onPress={jest.fn()} />,
     );
     const list = tree.UNSAFE_getByType(FlatList);
-    act(() =>
-      list.props.onViewableItemsChanged({
-        viewableItems: [{ item: event }],
-        changed: [],
-      }),
-    );
-    expect(tree.UNSAFE_getByType(EventCard).props.isImageVisible).toBe(true);
+    expect(tree.getByTestId("v2-event-card-evt-1")).toBeTruthy();
+    expect(list.props.initialNumToRender).toBe(3);
+    expect(list.props.onViewableItemsChanged).toBeUndefined();
   });
 
   it("keeps Android Fabric from reattaching clipped animated event cards", () => {

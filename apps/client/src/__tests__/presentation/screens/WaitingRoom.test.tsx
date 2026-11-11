@@ -34,6 +34,13 @@ const mockUseQueuePolling = jest.fn<
 >();
 const mockUseAutoClaim = jest.fn<UseAutoClaimResult, [unknown]>();
 const mockUseEventDetail = jest.fn();
+const mockScheduleLocal = jest.fn().mockResolvedValue(undefined);
+
+jest.mock("@providers/service-context", () => ({
+  useServices: () => ({
+    notification: { scheduleLocal: mockScheduleLocal },
+  }),
+}));
 
 jest.mock("@presentation/hooks/useQueuePolling", () => ({
   useQueuePolling: (queueId: string, reducedMotion?: boolean) =>
@@ -314,6 +321,44 @@ describe("WaitingRoomScreen — terminal + error states", () => {
     );
   });
 
+  it("shows the specific recovery copy for ADMISSION_TOKEN_INVALID", () => {
+    mockUseQueuePolling.mockReturnValue(
+      polling({
+        entry: entry({ status: "ADMITTED", position: 0 }),
+        isSettled: true,
+      }),
+    );
+    mockUseAutoClaim.mockReturnValue(
+      claim({
+        errorState: "ADMISSION_TOKEN_INVALID",
+        error: new Error("ADMISSION_TOKEN_INVALID"),
+      }),
+    );
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+    expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent(
+      "Sesi Antrean Berakhir",
+      { exact: false },
+    );
+    expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent(
+      "Sesi antrean sebelumnya masih tercatat di server",
+      { exact: false },
+    );
+    expect(screen.getByText("Jelajahi Event Lain")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("waiting-claim-error-state"));
+    expect(mockReplace).toHaveBeenCalledWith("/browse");
+  });
+
+  it("does not present a CLAIMED entry as a zero-position waiting queue", () => {
+    mockUseQueuePolling.mockReturnValue(
+      polling({ entry: entry({ status: "CLAIMED", position: 0 }) }),
+    );
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+    expect(screen.getByTestId("waiting-claimed-recovery")).toBeTruthy();
+    expect(screen.getByText("Jelajahi Event Lain")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("waiting-claimed-state"));
+    expect(mockReplace).toHaveBeenCalledWith("/browse");
+  });
+
   it("renders the polling-error state", () => {
     mockUseQueuePolling.mockReturnValue(
       polling({ entry: undefined, isError: true, error: new Error("boom") }),
@@ -424,6 +469,12 @@ describe("WaitingRoomScreen — leave action", () => {
 
     expect(leave).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/"));
+    expect(mockScheduleLocal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "waiting_room_left",
+        deepLink: "/events/evt-1",
+      }),
+    );
   });
 
   it("closes the leave dialog when the user chooses to stay in the queue", () => {

@@ -35,13 +35,13 @@ describe("Checkout categories (RBT-051)", () => {
         BOOKING_CATEGORY_FIXTURE[0].categoryId,
         BOOKING_CATEGORY_FIXTURE,
       ),
-    ).toBe(45000000);
+    ).toBe(450000);
     expect(
       categoryPrice(
         BOOKING_CATEGORY_FIXTURE[1].categoryId,
         BOOKING_CATEGORY_FIXTURE,
       ),
-    ).toBe(95000000);
+    ).toBe(950000);
   });
 
   it("categoryPrice falls back to 0 for an unknown category", () => {

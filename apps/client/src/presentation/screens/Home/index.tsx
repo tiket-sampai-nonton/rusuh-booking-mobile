@@ -14,10 +14,7 @@
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { View } from "react-native";
-import Animated, {
-  useAnimatedScrollHandler,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LoginModal } from "@presentation/components/auth/LoginModal";
@@ -67,12 +64,6 @@ export function HomeScreen() {
   const bottomPadding = isNative
     ? bottomBarHeight + insets.bottom
     : insets.bottom;
-
-  // Scroll offset drives the hero parallax + scroll progress.
-  const scrollY = useSharedValue(0);
-  const onScroll = useAnimatedScrollHandler((e) => {
-    scrollY.value = e.contentOffset.y;
-  });
 
   // Modals (prototype: CTA → login modal; Filter → filter popup).
   const [loginOpen, setLoginOpen] = useState(false);
@@ -139,8 +130,6 @@ export function HomeScreen() {
             bottomPadding,
             isMobileWeb ? insets.top + headerHeight : 0,
           )}
-          onScroll={onScroll}
-          scrollEventThrottle={16}
           testID="home-scroll"
         >
           {isError && <HomeError message={error?.message} />}
@@ -151,7 +140,9 @@ export function HomeScreen() {
               events={data.upcoming.slice(0, 3)}
               onBook={goToEvent}
               onSeeAll={goBrowse}
-              autoPlay={isScreenFocused}
+              // Native prototype has one static featured hero. Avoid rotating
+              // three full-bleed images (and their decode work) every 6s.
+              autoPlay={!isNative && isScreenFocused}
               isActive={isScreenFocused}
             />
           )}

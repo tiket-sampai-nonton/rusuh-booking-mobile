@@ -192,11 +192,12 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // ClockPort is a platform primitive (not a backend capability): the real
   // system clock is bound in both modes. Tests inject a fake ClockPort directly.
   const clock: ClockPort = new SystemClock();
-  // Notification delivery is platform-specific; mock mode replaces it below.
+  // Local native notifications are a device capability, independent of whether
+  // API repositories use mocks. Mock mode disables remote push registration.
   const notificationAdapter: NotificationPort =
     Platform.OS === "web"
       ? new WebPushNotificationAdapter()
-      : new ExpoNotificationAdapter();
+      : new ExpoNotificationAdapter(!useMocks);
   const fileShareAdapter: FileSharePort =
     Platform.OS === "web"
       ? new WebFileShareAdapter()
@@ -247,7 +248,10 @@ export function createContainer(options: ContainerOptions = {}): Container {
             : undefined;
         },
       ),
-      notification: new MockNotificationAdapter(),
+      notification:
+        Platform.OS === "web"
+          ? new MockNotificationAdapter()
+          : notificationAdapter,
       pushSubscription: { register: async () => {}, remove: async () => {} },
       fileShare: fileShareAdapter,
       appUpdate: new ExpoAppUpdateAdapter(),
