@@ -18,6 +18,8 @@ export function usePaymentPage(bookingId: string): {
   page: PaymentPage | undefined;
   isLoading: boolean;
   error: Error | null;
+  refetch: () => Promise<unknown>;
+  isFetching: boolean;
 } {
   const { paymentRepository } = useServices();
   const usecase = useMemo(
@@ -33,5 +35,7 @@ export function usePaymentPage(bookingId: string): {
     page: query.data,
     isLoading: query.isLoading,
     error: query.error,
+    refetch: query.refetch,
+    isFetching: query.isFetching,
   };
 }

@@ -6,8 +6,10 @@ import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
+  Pressable,
   Platform,
   type ListRenderItemInfo,
+  Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,6 +29,7 @@ import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useAccountStore } from "@presentation/stores/account-store";
 import { useServices } from "@providers/service-context";
+import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 import { BrowseCategoriesSection } from "./fragments/BrowseCategoriesSection";
 import { BrowseEmpty, BrowseLoading } from "./fragments/BrowseStates";
@@ -98,7 +101,14 @@ export function BrowseScreen() {
         : {}),
     sort: sort === "furthest" ? ("DATE_DESC" as const) : ("DATE_ASC" as const),
   };
-  const { data, isLoading } = useEvents(eventQuery);
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch: retryEvents,
+    isFetching,
+  } = useEvents(eventQuery);
   const allResults = useMemo(
     () =>
       filterEvents(
@@ -199,6 +209,39 @@ export function BrowseScreen() {
           onSelect={setActiveCategory}
         />
       )}
+      {isError && results.length > 0 ? (
+        <View
+          testID="browse-stale-data-error"
+          accessibilityLiveRegion="polite"
+          style={{
+            alignItems: "center",
+            paddingHorizontal: 20,
+            paddingVertical: 12,
+          }}
+        >
+          <Text style={{ textAlign: "center", marginBottom: 8 }}>
+            {apiErrorMessage(error)}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Coba muat event lagi"
+            accessibilityState={{ disabled: isFetching }}
+            disabled={isFetching}
+            onPress={() => void retryEvents()}
+            testID="browse-retry-stale"
+            style={{
+              borderWidth: 2,
+              borderColor: "#000000",
+              paddingHorizontal: 20,
+              paddingVertical: 12,
+            }}
+          >
+            <Text style={{ fontWeight: "700" }}>
+              {isFetching ? "Memuat…" : "Coba Lagi"}
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
       <View
         style={isNative ? browseNativeMain : browseMain(isDesktop, isMobileWeb)}
       >
@@ -244,7 +287,40 @@ export function BrowseScreen() {
                 isNative ? browseNativeMain : browseMain(isDesktop, isMobileWeb)
               }
             >
-              <BrowseEmpty />
+              {isError ? (
+                <View
+                  testID="browse-error"
+                  accessibilityLiveRegion="polite"
+                  style={{ alignItems: "center", paddingVertical: 32 }}
+                >
+                  <Text style={{ fontWeight: "700", marginBottom: 8 }}>
+                    Event gagal dimuat
+                  </Text>
+                  <Text style={{ textAlign: "center", marginBottom: 16 }}>
+                    {apiErrorMessage(error)}
+                  </Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Coba muat event lagi"
+                    accessibilityState={{ disabled: isFetching }}
+                    disabled={isFetching}
+                    onPress={() => void retryEvents()}
+                    testID="browse-retry"
+                    style={{
+                      borderWidth: 2,
+                      borderColor: "#000000",
+                      paddingHorizontal: 20,
+                      paddingVertical: 12,
+                    }}
+                  >
+                    <Text style={{ fontWeight: "700" }}>
+                      {isFetching ? "Memuat…" : "Coba Lagi"}
+                    </Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <BrowseEmpty />
+              )}
             </View>
           }
           initialNumToRender={Math.max(4, columns * 2)}

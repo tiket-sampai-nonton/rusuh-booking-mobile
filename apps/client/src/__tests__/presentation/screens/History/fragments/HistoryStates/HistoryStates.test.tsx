@@ -29,11 +29,18 @@ describe("History states", () => {
   });
 
   it("shows the fallback and a supplied error message", () => {
-    const { rerender } = render(<HistoryError />);
+    const props = { onRetry: jest.fn(), isRetrying: false };
+    const { rerender } = render(<HistoryError {...props} />);
     expect(
       screen.getByText("Terjadi kesalahan. Silakan coba lagi."),
     ).toBeTruthy();
-    rerender(<HistoryError message="Layanan tidak tersedia" />);
-    expect(screen.getByText("Layanan tidak tersedia")).toBeTruthy();
+    rerender(
+      <HistoryError {...props} error={new TypeError("Failed to fetch")} />,
+    );
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
   });
 });

@@ -91,7 +91,14 @@ function heroStatusLabel(status: string): string {
 
 export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
   const router = useRouter();
-  const { data: event, isLoading, isError, error } = useEventDetail(eventId);
+  const {
+    data: event,
+    isLoading,
+    isError,
+    error,
+    refetch: retryEventDetail,
+    isFetching: isRetryingEventDetail,
+  } = useEventDetail(eventId);
   const { isDesktop, isNative, isMobileWeb } = useResponsive();
   const joinQueue = useJoinQueue();
 
@@ -171,7 +178,14 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
 
   // Error state
   if (isError || !event) {
-    return <DetailError message={error?.message} onBack={goHome} />;
+    return (
+      <DetailError
+        error={error}
+        onBack={goHome}
+        onRetry={() => void retryEventDetail()}
+        isRetrying={isRetryingEventDetail}
+      />
+    );
   }
 
   // Parse event description (categories, lineup, terms, gallery from opaque bag)
@@ -358,6 +372,8 @@ export function EventDetailScreen({ eventId }: EventDetailScreenProps) {
           onJoin={onJoin}
           isMobileWeb={isMobileWeb}
           isActive={isScreenFocused}
+          isJoining={joinQueue.isPending}
+          errorMessage={joinQueue.isError ? joinQueue.error : undefined}
         />
 
         {/* Lightbox Modal */}

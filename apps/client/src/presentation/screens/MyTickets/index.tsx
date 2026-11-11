@@ -36,6 +36,7 @@ import { useAccountStore } from "@presentation/stores/account-store";
 import { useServices } from "@providers/service-context";
 import type { MyBookingSummary } from "@domain/repositories/ticket-history.repository";
 import { useResponsive } from "@presentation/hooks/useResponsive";
+import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 import { historyContainerStyle, accountBookingColumnStyle } from "./style";
 import { TICKET_HISTORY_PAGE_SIZE } from "./constants";
@@ -88,9 +89,12 @@ export function MyTicketsScreen() {
     data: history,
     isLoading: historyLoading,
     isError: historyError,
+    error: historyFailure,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
+    isFetching: isFetchingBookings,
+    refetch: retryBookings,
   } = useInfiniteQuery({
     queryKey: ["my-bookings", profile?.emailMasked],
     initialPageParam: undefined as string | undefined,
@@ -106,6 +110,9 @@ export function MyTicketsScreen() {
     data: selectedTickets,
     isLoading: ticketsLoading,
     isError: ticketsError,
+    error: ticketsFailure,
+    isFetching: isFetchingSelectedTickets,
+    refetch: retrySelectedTickets,
   } = useQuery({
     queryKey: ["my-booking-tickets", selectedBooking?.bookingId],
     queryFn: () =>
@@ -210,6 +217,19 @@ export function MyTicketsScreen() {
       }
       isLoading={Boolean(selectedBooking && ticketsLoading)}
       isError={Boolean(selectedBooking && ticketsError)}
+      errorMessage={
+        selectedBooking && ticketsError
+          ? apiErrorMessage(ticketsFailure)
+          : localTickets.isError
+            ? apiErrorMessage(localTickets.error)
+            : undefined
+      }
+      isRetrying={
+        selectedBooking ? isFetchingSelectedTickets : localTickets.isFetching
+      }
+      onRetry={() =>
+        void (selectedBooking ? retrySelectedTickets() : localTickets.refetch())
+      }
       downloadError={downloadError}
       onDownload={() =>
         void (selectedBooking ? downloadSelectedBooking() : handleDownload())
@@ -303,11 +323,68 @@ export function MyTicketsScreen() {
             onChange={setTab}
           />
 
+          {bookingId && (paymentStatus.isError || localTickets.isError) ? (
+            <View
+              className="my-3 items-center gap-2 border-2 border-black p-4"
+              accessibilityLiveRegion="polite"
+              testID="my-ticket-api-error"
+            >
+              <Text className="text-center text-sm">
+                {apiErrorMessage(
+                  paymentStatus.error ?? localTickets.error,
+                  "Tiket belum dapat dimuat. Coba lagi.",
+                )}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Coba muat tiket lagi"
+                accessibilityState={{
+                  disabled: paymentStatus.isFetching || localTickets.isFetching,
+                }}
+                disabled={paymentStatus.isFetching || localTickets.isFetching}
+                onPress={() =>
+                  void (paymentStatus.isError
+                    ? paymentStatus.refetch()
+                    : localTickets.refetch())
+                }
+                testID="my-ticket-api-retry"
+                style={screenStyles.loadMore}
+              >
+                <Text style={screenStyles.loadMoreLabel}>
+                  {paymentStatus.isFetching || localTickets.isFetching
+                    ? "Memuat…"
+                    : "Coba Lagi"}
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
+
           <View style={historyContainerStyle(isWeb)}>
             {historyError ? (
-              <Text accessibilityLiveRegion="polite" style={screenStyles.error}>
-                Tiket gagal dimuat. Silakan coba lagi.
-              </Text>
+              <View
+                accessibilityLiveRegion="polite"
+                testID="booking-history-error"
+              >
+                <Text style={screenStyles.error}>
+                  {apiErrorMessage(
+                    historyFailure,
+                    "Tiket gagal dimuat. Silakan coba lagi.",
+                  )}
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Coba muat riwayat tiket lagi"
+                  accessibilityState={{ disabled: isFetchingBookings }}
+                  disabled={isFetchingBookings}
+                  onPress={() => void retryBookings()}
+                  testID="booking-history-retry"
+                  style={screenStyles.loadMore}
+                >
+                  <Text style={screenStyles.loadMoreLabel}>
+                    {isFetchingBookings ? "Memuat…" : "Coba Lagi"}
+                  </Text>
+                </Pressable>
+              </View>
             ) : null}
             {accountBookings.map((booking) => (
               <View

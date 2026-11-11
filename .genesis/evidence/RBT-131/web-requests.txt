@@ -1,0 +1,7 @@
+GET https://dev.rusuhbooking.my.id/api/v1/events/ec2f4c95-6247-4ee7-9524-2e5530edbfe4 => 200
+POST https://dev.rusuhbooking.my.id/api/v1/events/ec2f4c95-6247-4ee7-9524-2e5530edbfe4/queue-entries => net::ERR_INTERNET_DISCONNECTED (forced transport failure)
+POST https://dev.rusuhbooking.my.id/api/v1/events/ec2f4c95-6247-4ee7-9524-2e5530edbfe4/queue-entries => net::ERR_INTERNET_DISCONNECTED (retry)
+POST https://dev.rusuhbooking.my.id/api/v1/events/ec2f4c95-6247-4ee7-9524-2e5530edbfe4/queue-entries => 400 Bad Request (simulated VALIDATION_ERROR)
+POST https://dev.rusuhbooking.my.id/api/v1/events/ec2f4c95-6247-4ee7-9524-2e5530edbfe4/queue-entries => 500 Internal Server Error (simulated DEPENDENCY_UNAVAILABLE)
+
+Queue POST scenarios were intercepted in the browser. No queue entry or booking was created.

@@ -5,6 +5,7 @@ import type {
   EventDetail,
   EventRepository,
 } from "@domain/repositories/event.repository";
+import type { QueueRepository } from "@domain/repositories/queue.repository";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
 const mockRouter = { push: jest.fn(), navigate: jest.fn() };
@@ -121,7 +122,7 @@ describe("EventDetailScreen", () => {
     const failing: EventRepository = {
       listEvents: async () => [],
       getEventDetail: async () => {
-        throw new Error("Event tidak ditemukan.");
+        throw new Error("NOT_FOUND: event is missing");
       },
     };
     renderWithProviders(<EventDetailScreen eventId="nope" />, {
@@ -130,7 +131,33 @@ describe("EventDetailScreen", () => {
     await waitFor(() =>
       expect(screen.getByTestId("detail-error")).toBeTruthy(),
     );
-    expect(screen.getByText("Event tidak ditemukan.")).toBeTruthy();
+    expect(screen.getByText("Data yang diminta tidak ditemukan.")).toBeTruthy();
+    expect(screen.getByTestId("event-detail-retry")).toBeTruthy();
+  });
+
+  it("retries a failed event load from the error state", async () => {
+    let attempts = 0;
+    const retrying: EventRepository = {
+      listEvents: async () => [],
+      getEventDetail: async () => {
+        attempts += 1;
+        if (attempts === 1) throw new TypeError("Failed to fetch");
+        return available;
+      },
+    };
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: { eventRepository: retrying },
+    });
+
+    await waitFor(() => screen.getByTestId("event-detail-retry"));
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
+    fireEvent.press(screen.getByTestId("event-detail-retry"));
+    await waitFor(() => screen.getAllByText("Rusuh Fest 2026"));
+    expect(attempts).toBe(2);
   });
 
   it("renders hero, facts, description, categories and CTA for an available event", async () => {
@@ -194,6 +221,52 @@ describe("EventDetailScreen", () => {
         "/waiting/evt-1?queueId=q-evt-1",
       ),
     );
+  });
+
+  it("shows a safe retryable message when queue join fails due to network or CORS", async () => {
+    const queueRepository: QueueRepository = {
+      join: jest
+        .fn()
+        .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+        .mockResolvedValueOnce({
+          queueId: "q-evt-1",
+          eventId: "evt-1",
+          position: 3,
+          status: "WAITING",
+        }),
+      getStatus: async () => ({
+        queueId: "q-evt-1",
+        eventId: "evt-1",
+        position: 3,
+        status: "WAITING",
+      }),
+      getQueueStatus: async () => ({}),
+      leave: async () => undefined,
+      claim: async () => "token",
+      heartbeat: async () => undefined,
+    };
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: { eventRepository: repo(available), queueRepository },
+    });
+    await waitFor(() => screen.getByTestId("join-cta"));
+
+    fireEvent.press(screen.getByTestId("join-cta"));
+    await waitFor(() => screen.getByTestId("join-queue-error"));
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText("Failed to fetch")).toBeNull();
+    expect(screen.getByRole("button", { name: "Coba Lagi" })).toBeTruthy();
+
+    fireEvent.press(screen.getByRole("button", { name: "Coba Lagi" }));
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith(
+        "/waiting/evt-1?queueId=q-evt-1",
+      ),
+    );
+    expect(queueRepository.join).toHaveBeenCalledTimes(2);
   });
 
   it("disables the CTA and shows 'Tiket Habis' for a sold-out event", async () => {

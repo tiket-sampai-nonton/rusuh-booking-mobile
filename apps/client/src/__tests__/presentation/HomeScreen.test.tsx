@@ -347,7 +347,11 @@ describe("HomeScreen", () => {
     });
     await waitFor(() => expect(screen.getByTestId("home-error")).toBeTruthy());
     expect(screen.getByText("Gagal memuat event")).toBeTruthy();
-    expect(screen.getByText("jaringan bermasalah")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
   });
 
   it("falls back to a generic message when the error has no message", async () => {

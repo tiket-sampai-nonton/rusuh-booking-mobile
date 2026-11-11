@@ -26,6 +26,7 @@ import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
 import { useSessionStore } from "@presentation/stores/session-store";
 import { useServices } from "@providers/service-context";
+import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 import { PaymentBar } from "./fragments/PaymentBar";
 import { PaymentMethods } from "./fragments/PaymentMethods";
@@ -45,7 +46,13 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
     () => new ScheduleLocalNotification(notification),
     [notification],
   );
-  const { page, isLoading } = usePaymentPage(bookingId);
+  const {
+    page,
+    isLoading,
+    error: pageError,
+    refetch: retryPaymentPage,
+    isFetching: isRetryingPaymentPage,
+  } = usePaymentPage(bookingId);
   const { createAttempt, resumeHandoff } = usePayment();
   const setBooking = useSessionStore((s) => s.setBooking);
   const [confirmLeave, setConfirmLeave] = useState(false);
@@ -128,8 +135,25 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
         testID="payment-unavailable"
       >
         <Text className="mb-4 text-center text-base font-bold">
-          Halaman pembayaran tidak tersedia atau sudah berakhir.
+          {pageError
+            ? apiErrorMessage(pageError)
+            : "Halaman pembayaran tidak tersedia atau sudah berakhir."}
         </Text>
+        {pageError ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Coba muat pembayaran lagi"
+            accessibilityState={{ disabled: isRetryingPaymentPage }}
+            disabled={isRetryingPaymentPage}
+            onPress={() => void retryPaymentPage()}
+            testID="payment-retry"
+            className="mb-4 border-2 border-black px-6 py-3"
+          >
+            <Text className="font-bold">
+              {isRetryingPaymentPage ? "MEMUAT…" : "COBA LAGI"}
+            </Text>
+          </Pressable>
+        ) : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Cari event lagi"
@@ -179,8 +203,10 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
           resumeLabel={inFlight ? "Kembali ke SNAP" : undefined}
           errorMessage={
             createAttempt.isError
-              ? (createAttempt.error?.message ??
-                "Gagal memproses pembayaran. Coba lagi.")
+              ? apiErrorMessage(
+                  createAttempt.error,
+                  "Gagal memproses pembayaran. Coba lagi.",
+                )
               : undefined
           }
           onPay={() => {

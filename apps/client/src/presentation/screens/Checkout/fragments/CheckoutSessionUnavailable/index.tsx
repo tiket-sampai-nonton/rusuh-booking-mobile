@@ -9,6 +9,7 @@ import { RecoveryActions } from "@presentation/screens/ExpiredRecovery/fragments
 
 interface Props {
   readonly hasError: boolean;
+  readonly errorMessage?: string;
   readonly onRetry: () => void;
   readonly onBrowse: () => void;
 }
@@ -16,6 +17,7 @@ interface Props {
 /** A session may have ended or failed to load; retry without guessing its state. */
 export function CheckoutSessionUnavailable({
   hasError,
+  errorMessage,
   onRetry,
   onBrowse,
 }: Props) {
@@ -39,7 +41,8 @@ export function CheckoutSessionUnavailable({
             title={hasError ? "Sesi Gagal Dimuat" : "Sesi Tidak Tersedia"}
             body={
               hasError
-                ? "Kami tidak dapat memuat sesi pemilihan tiket. Periksa koneksi dan coba lagi."
+                ? (errorMessage ??
+                  "Kami tidak dapat memuat sesi pemilihan tiket. Periksa koneksi dan coba lagi.")
                 : "Sesi pemilihan tiket tidak ditemukan atau sudah berakhir."
             }
           />

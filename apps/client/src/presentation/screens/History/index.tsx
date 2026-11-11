@@ -44,7 +44,14 @@ export function HistoryScreen() {
   const { isDesktop, isMobileWeb, isNative, bottomBarHeight, gridColumns } =
     useResponsive();
   const profile = useAccountStore((state) => state.profile);
-  const { data, isLoading, isError, error } = useEvents();
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch: retryEvents,
+    isFetching,
+  } = useEvents();
 
   const history = data?.history ?? [];
 
@@ -52,7 +59,11 @@ export function HistoryScreen() {
   const historyState = isLoading ? (
     <HistoryLoading />
   ) : isError ? (
-    <HistoryError message={error?.message} />
+    <HistoryError
+      error={error}
+      onRetry={() => void retryEvents()}
+      isRetrying={isFetching}
+    />
   ) : history.length === 0 ? (
     <HistoryEmpty />
   ) : null;

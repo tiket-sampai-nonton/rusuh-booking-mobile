@@ -381,7 +381,7 @@ describe("MyTicketsScreen", () => {
     ]);
   });
 
-  it("shows a loading then error message when ticket history fails", async () => {
+  it("shows safe connection guidance and retry when ticket history fails", async () => {
     useAccountStore
       .getState()
       .setProfile({ emailMasked: "r***@example.com", hasNik: true });
@@ -409,8 +409,11 @@ describe("MyTicketsScreen", () => {
     expect(await screen.findByText("Memuat tiket…")).toBeTruthy();
     await act(async () => rejectHistory(new Error("offline")));
     expect(
-      await screen.findByText("Tiket gagal dimuat. Silakan coba lagi."),
+      await screen.findByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
     ).toBeTruthy();
+    expect(screen.getByTestId("booking-history-retry")).toBeTruthy();
   });
 
   it("closes the QR overlay on Android hardware back", async () => {
