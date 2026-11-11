@@ -31,8 +31,13 @@ import { useServices } from "@providers/service-context";
  * screen resumes polling the exact entry.
  */
 export function useJoinQueue(): UseMutationResult<QueueEntry, Error, string> {
-  const { queueRepository, queueMembership, notification, pushSubscription } =
-    useServices();
+  const {
+    queueRepository,
+    queueMembership,
+    notification,
+    pushSubscription,
+    bookingRepository,
+  } = useServices();
   const router = useRouter();
 
   const join = useMemo(
@@ -56,7 +61,19 @@ export function useJoinQueue(): UseMutationResult<QueueEntry, Error, string> {
           })
           .catch(() => {});
       }
-      router.push(`/waiting/${entry.eventId}?queueId=${entry.queueId}` as Href);
+      const waiting = `/waiting/${entry.eventId}?queueId=${entry.queueId}`;
+      if (entry.status !== "CLAIMED") {
+        router.push(waiting as Href);
+        return;
+      }
+      // Already claimed (re-join after leaving checkout): resume the live session,
+      // skip the waiting room; Waiting handles the expired/failed case.
+      void bookingRepository
+        .getCurrentSession(entry.eventId)
+        .catch(() => null)
+        .then((s) =>
+          router.push((s ? `/checkout/${s.sessionId}` : waiting) as Href),
+        );
     },
   });
 }

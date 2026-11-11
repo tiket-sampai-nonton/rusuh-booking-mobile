@@ -29,6 +29,7 @@ import {
 } from "@domain/state-machines/queue-state-machine";
 import { useAutoClaim } from "@presentation/hooks/useAutoClaim";
 import { useQueuePolling } from "@presentation/hooks/useQueuePolling";
+import { useRecoverClaimedSession } from "@presentation/hooks/useRecoverClaimedSession";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import {
@@ -107,11 +108,18 @@ export function WaitingRoomScreen({
     status: admitted && isStatusAuthoritative ? entry.status : undefined,
   });
 
+  // CLAIMED = token already spent. Resume the live session (never re-claim).
+  const recovery = useRecoverClaimedSession(
+    eventId,
+    entry?.status === "CLAIMED",
+  );
+
   // A successful, server-authorized claim proceeds immediately to checkout.
+  const checkoutSessionId = claimedSessionId ?? recovery.sessionId;
   useEffect(() => {
-    if (claimedSessionId)
-      router.replace(`/checkout/${claimedSessionId}` as Href);
-  }, [claimedSessionId, router]);
+    if (checkoutSessionId)
+      router.replace(`/checkout/${checkoutSessionId}` as Href);
+  }, [checkoutSessionId, router]);
 
   const handleLeavePress = useCallback(() => {
     setShowLeaveModal(true);
@@ -260,22 +268,39 @@ export function WaitingRoomScreen({
   // here after closing checkout, don't render a zero-position spinner or keep
   // polling forever; direct them to another event until the server ends it.
   if (entry.status === "CLAIMED") {
+    if (recovery.state === "expired" || recovery.state === "error") {
+      const expired = recovery.state === "expired";
+      return (
+        <View style={styles.root} testID="waiting-claimed-recovery">
+          <Header />
+          <View style={shellStyle}>
+            <View style={styles.waitingContainer}>
+              <StatusBadge
+                variant="expired"
+                label={expired ? "Waktu habis" : "Koneksi Bermasalah"}
+              />
+              <ErrorState
+                icon="clock"
+                title={expired ? "Waktu pemesanan habis" : COPY.errorTitle}
+                message={
+                  expired
+                    ? "Waktu untuk menyelesaikan pesanan sudah habis. Masuk antrean lagi untuk mencoba kembali."
+                    : COPY.errorSub
+                }
+                buttonText={expired ? "Masuk Antrean Lagi" : "Coba Lagi"}
+                onPress={expired ? handleRejoinQueue : recovery.retry}
+                testID="waiting-claimed-state"
+              />
+            </View>
+          </View>
+        </View>
+      );
+    }
+    // idle/checking, or a session found and the redirect is about to fire.
     return (
       <View style={styles.root} testID="waiting-claimed-recovery">
         <Header />
-        <View style={shellStyle}>
-          <View style={styles.waitingContainer}>
-            <StatusBadge variant="expired" label="Antrean perlu diperbarui" />
-            <ErrorState
-              icon="clock"
-              title="Sesi antrean sudah digunakan"
-              message="Sesi antrean sebelumnya masih tercatat di server. Untuk saat ini, silakan pilih event lain."
-              buttonText="Jelajahi Event Lain"
-              onPress={handleBrowseEvents}
-              testID="waiting-claimed-state"
-            />
-          </View>
-        </View>
+        <LoadingOverlay />
       </View>
     );
   }

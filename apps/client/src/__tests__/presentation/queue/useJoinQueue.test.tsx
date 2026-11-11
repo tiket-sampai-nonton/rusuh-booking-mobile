@@ -13,6 +13,7 @@ import { renderHook, waitFor } from "@testing-library/react-native";
 import React from "react";
 
 import type { QueueMembershipStorage } from "@domain/queue/queue-membership.port";
+import type { BookingRepository } from "@domain/repositories/booking.repository";
 import type {
   QueueEntry,
   QueueRepository,
@@ -37,10 +38,16 @@ class FakeQueueRepository implements QueueRepository {
   }
   public joinCalls: string[] = [];
   public joinError: Error | null = null;
+  public joinStatus: QueueEntry["status"] = "WAITING";
   async join(eventId: string): Promise<QueueEntry> {
     this.joinCalls.push(eventId);
     if (this.joinError) throw this.joinError;
-    return { queueId: `q-${eventId}`, eventId, position: 5, status: "WAITING" };
+    return {
+      queueId: `q-${eventId}`,
+      eventId,
+      position: 5,
+      status: this.joinStatus,
+    };
   }
   async getStatus(queueId: string): Promise<QueueEntry> {
     return { queueId, eventId: "evt-1", position: 1, status: "WAITING" };
@@ -53,12 +60,17 @@ class FakeQueueRepository implements QueueRepository {
   }
 }
 
-function makeWrapper(repo: QueueRepository, storage: QueueMembershipStorage) {
+function makeWrapper(
+  repo: QueueRepository,
+  storage: QueueMembershipStorage,
+  bookings?: Pick<BookingRepository, "getCurrentSession">,
+) {
   const base = createContainer({ useMocks: true });
   const container: Container = {
     ...base,
     queueRepository: repo,
     queueMembership: storage,
+    ...(bookings && { bookingRepository: bookings as BookingRepository }),
   };
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -116,5 +128,44 @@ describe("useJoinQueue", () => {
     expect(result.current.error?.message).toBe("join rejected");
     expect(await storage.load()).toBeNull();
     expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  describe("join returns an already CLAIMED entry", () => {
+    function joinClaimed(session: { sessionId: string } | null | Error) {
+      const repo = new FakeQueueRepository();
+      repo.joinStatus = "CLAIMED";
+      const getCurrentSession = jest.fn(async () => {
+        if (session instanceof Error) throw session;
+        return session as never;
+      });
+      const hook = renderHook(() => useJoinQueue(), {
+        wrapper: makeWrapper(repo, new InMemoryQueueMembership(), {
+          getCurrentSession,
+        }),
+      });
+      hook.result.current.mutate("evt-9");
+      return { hook, getCurrentSession };
+    }
+
+    it("goes straight to checkout when the session is still alive", async () => {
+      const { getCurrentSession } = joinClaimed({ sessionId: "sess-7" });
+      await waitFor(() =>
+        expect(mockRouter.push).toHaveBeenCalledWith("/checkout/sess-7"),
+      );
+      expect(getCurrentSession).toHaveBeenCalledWith("evt-9");
+      expect(mockRouter.push).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ["no live session (404)", null],
+      ["lookup failure", new Error("network")],
+    ])("falls back to the waiting room on %s", async (_name, session) => {
+      joinClaimed(session);
+      await waitFor(() =>
+        expect(mockRouter.push).toHaveBeenCalledWith(
+          "/waiting/evt-9?queueId=q-evt-9",
+        ),
+      );
+    });
   });
 });

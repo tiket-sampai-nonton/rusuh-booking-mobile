@@ -49,6 +49,11 @@ jest.mock("@presentation/hooks/useQueuePolling", () => ({
 jest.mock("@presentation/hooks/useAutoClaim", () => ({
   useAutoClaim: (params: unknown) => mockUseAutoClaim(params),
 }));
+const mockRecover = jest.fn();
+jest.mock("@presentation/hooks/useRecoverClaimedSession", () => ({
+  useRecoverClaimedSession: (eventId: string, enabled: boolean) =>
+    mockRecover(eventId, enabled),
+}));
 jest.mock("@presentation/hooks/useEventDetail", () => ({
   useEventDetail: (eventId: string) => mockUseEventDetail(eventId),
 }));
@@ -113,6 +118,7 @@ beforeEach(() => {
   mockReducedMotion.mockReturnValue(false);
   mockUseQueuePolling.mockReturnValue(polling());
   mockUseAutoClaim.mockReturnValue(claim());
+  mockRecover.mockReturnValue({ state: "idle", retry: jest.fn() });
   mockUseEventDetail.mockReturnValue({
     data: {
       id: "evt-1",
@@ -348,15 +354,52 @@ describe("WaitingRoomScreen — terminal + error states", () => {
     expect(mockReplace).toHaveBeenCalledWith("/browse");
   });
 
-  it("does not present a CLAIMED entry as a zero-position waiting queue", () => {
-    mockUseQueuePolling.mockReturnValue(
-      polling({ entry: entry({ status: "CLAIMED", position: 0 }) }),
-    );
+  describe("CLAIMED entry (unexpected cancel / re-entry)", () => {
+    beforeEach(() => {
+      mockUseQueuePolling.mockReturnValue(
+        polling({ entry: entry({ status: "CLAIMED", position: 0 }) }),
+      );
+    });
+
+    it("checks for the live session and shows no waiting UI while checking", () => {
+      mockRecover.mockReturnValue({ state: "checking", retry: jest.fn() });
+      render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+      expect(screen.getByTestId("waiting-claimed-recovery")).toBeTruthy();
+      expect(mockRecover).toHaveBeenCalledWith("evt-1", true);
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
+
+    it("goes straight to checkout when the session is still alive", () => {
+      mockRecover.mockReturnValue({
+        state: "checking",
+        sessionId: "sess-9",
+        retry: jest.fn(),
+      });
+      render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+      expect(mockReplace).toHaveBeenCalledWith("/checkout/sess-9");
+    });
+
+    it("shows time-out and a re-queue action when the session is gone", () => {
+      mockRecover.mockReturnValue({ state: "expired", retry: jest.fn() });
+      render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+      expect(screen.getByText("Masuk Antrean Lagi")).toBeTruthy();
+      fireEvent.press(screen.getByTestId("waiting-claimed-state"));
+      expect(mockReplace).toHaveBeenCalledWith("/events/evt-1");
+    });
+
+    it("offers a retry when the session lookup fails", () => {
+      const retry = jest.fn();
+      mockRecover.mockReturnValue({ state: "error", retry });
+      render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+      fireEvent.press(screen.getByTestId("waiting-claimed-state"));
+      expect(retry).toHaveBeenCalled();
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
+  });
+
+  it("does not look up a session for a WAITING entry", () => {
     render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
-    expect(screen.getByTestId("waiting-claimed-recovery")).toBeTruthy();
-    expect(screen.getByText("Jelajahi Event Lain")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("waiting-claimed-state"));
-    expect(mockReplace).toHaveBeenCalledWith("/browse");
+    expect(mockRecover).toHaveBeenCalledWith("evt-1", false);
   });
 
   it("renders the polling-error state", () => {

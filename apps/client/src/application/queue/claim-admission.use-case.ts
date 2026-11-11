@@ -70,6 +70,14 @@ export class ClaimAdmission {
       // Already-typed domain errors (TURN_MISSED / EVENT_SOLD_OUT / token
       // invalid …) carry the discriminable code the UI needs — pass through.
       if (cause instanceof DomainError) {
+        // The token was already spent on a session (double claim, retry, refresh):
+        // resume that session instead of failing; rethrow only if none is alive.
+        if (cause.code === "ADMISSION_TOKEN_INVALID") {
+          const current = await this.bookings
+            .getCurrentSession(eventId)
+            .catch(() => null);
+          if (current) return current;
+        }
         throw cause;
       }
       // Any untyped failure during the admission claim becomes a typed

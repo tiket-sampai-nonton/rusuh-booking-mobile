@@ -64,8 +64,11 @@ class FakeBookingRepository implements BookingRepository {
     const eventId = admissionToken.replace(/^admission:/, "");
     return { ...this.nextSession, eventId };
   }
-  async getCurrentSession(): Promise<BookingSession | null> {
-    return null;
+  public currentSession: BookingSession | null = null;
+  public currentCalls: (string | undefined)[] = [];
+  async getCurrentSession(eventId?: string): Promise<BookingSession | null> {
+    this.currentCalls.push(eventId);
+    return this.currentSession;
   }
   async checkAttendee(_sessionId: string, nik: string): Promise<AttendeeCheck> {
     return { nikMasked: nik, result: "AVAILABLE" };
@@ -140,5 +143,29 @@ describe("ClaimAdmission", () => {
       .catch((e: unknown) => e);
     expect(err).toBeInstanceOf(DomainError);
     expect((err as DomainError).code).toBe("DEPENDENCY_UNAVAILABLE");
+  });
+
+  it("resumes the live session when the admission token was already spent", async () => {
+    const repo = new FakeBookingRepository();
+    repo.createSessionError = mapError({ code: "ADMISSION_TOKEN_INVALID" });
+    repo.currentSession = { ...repo.nextSession, sessionId: "sess-live" };
+    const session = await new ClaimAdmission(
+      repo,
+      new FakeQueueRepository(),
+    ).execute("evt-9", "ADMITTED", "q-9");
+    expect(session.sessionId).toBe("sess-live");
+    expect(repo.currentCalls).toEqual(["evt-9"]);
+  });
+
+  it("rethrows ADMISSION_TOKEN_INVALID when no live session exists", async () => {
+    const repo = new FakeBookingRepository();
+    repo.createSessionError = mapError({ code: "ADMISSION_TOKEN_INVALID" });
+    await expect(
+      new ClaimAdmission(repo, new FakeQueueRepository()).execute(
+        "evt-9",
+        "ADMITTED",
+        "q-9",
+      ),
+    ).rejects.toMatchObject({ code: "ADMISSION_TOKEN_INVALID" });
   });
 });
