@@ -39,7 +39,8 @@ describe("NativeLaunchSplash", () => {
     expect(
       screen.getByTestId("native-launch-splash").props.accessibilityLabel,
     ).toBe("Memuat Rusuh Tiket");
-    expect(screen.getByText("Tiket Tanpa Ribet")).toBeTruthy();
+    const tagline = screen.getByText("Pesan tiket tanpa ribet");
+    expect(tagline.props.numberOfLines).toBe(1);
     act(() => jest.advanceTimersByTime(2500));
     expect(onFinish).toHaveBeenCalledTimes(1);
   });

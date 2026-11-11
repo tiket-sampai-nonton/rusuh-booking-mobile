@@ -151,7 +151,7 @@ describe("MockPaymentRepository", () => {
     const repo = new MockPaymentRepository();
     const p = await repo.getPaymentPage("book-1");
     expect(p.bookingId).toBe("book-1");
-    expect(p.amountMinor).toBe(45000000);
+    expect(p.amountMinor).toBe(450000);
     expect(p.methods).toContain("QRIS");
     expect(p.methods).not.toContain("CREDIT_CARD" as never);
     // paymentExpiresAt is ~10 min after serverTime.

@@ -49,6 +49,10 @@ describe("RBT-042 computeRefetchInterval", () => {
     expect(computeRefetchInterval(entry("ADMITTED"))).toBe(false);
   });
 
+  it("stops polling a CLAIMED one-use admission", () => {
+    expect(computeRefetchInterval(entry("CLAIMED"))).toBe(false);
+  });
+
   it("keeps polling on WAITING at the server-honoured adaptive wait", () => {
     const wait = computeRefetchInterval(entry("WAITING", 2000), false, () => 0);
     expect(wait).toBe(2000);
@@ -319,7 +323,7 @@ describe("RBT-042 useQueuePolling render seam", () => {
     expect(last?.isStatusAuthoritative).toBe(true);
   });
 
-  it("never downgrades a claimed entry back to ADMITTED during cancellation cleanup", async () => {
+  it("keeps a claimed entry from authorizing again and stops its waiting poller", async () => {
     const repo = new CountingQueueRepository("ADMITTED");
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false, gcTime: Infinity } },
@@ -340,8 +344,8 @@ describe("RBT-042 useQueuePolling render seam", () => {
     await waitFor(() => expect(repo.getStatusCalls).toBe(1));
     await waitFor(() => expect(last?.isStatusAuthoritative).toBe(true));
     expect(last?.entry?.status).toBe("CLAIMED");
-    expect(last?.isSettled).toBe(false);
-    expect(computeRefetchInterval(last?.entry)).not.toBe(false);
+    expect(last?.isSettled).toBe(true);
+    expect(computeRefetchInterval(last?.entry)).toBe(false);
   });
 
   it("exposes isSettled=false while WAITING (poller active)", async () => {

@@ -1,199 +1,213 @@
-/**
- * RBT-072 — ExpoNotificationAdapter over the (mocked) expo-notifications SDK.
- */
+/** Native NotificationPort: Notifee local delivery plus Expo remote token. */
 import { ExpoNotificationAdapter } from "@infrastructure/notifications/expo-notification.adapter";
+
+const mockLocalListener = jest.fn();
+const mockRemoveLocalListener = jest.fn();
+const mockRemoveExpoListener = jest.fn();
 
 jest.mock("expo-constants", () => ({
   appOwnership: null,
   executionEnvironment: "standalone",
   expoVersion: null,
 }));
-jest.mock("expo-notifications/build/NotificationPermissions", () => ({
-  getPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
-  requestPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
+jest.mock("expo-notifications", () => ({
+  getExpoPushTokenAsync: jest.fn().mockResolvedValue({
+    data: "ExpoPushToken[xyz]",
+  }),
 }));
 jest.mock("expo-notifications/build/NotificationsEmitter", () => ({
   addNotificationResponseReceivedListener: jest
     .fn()
-    .mockReturnValue({ remove: jest.fn() }),
+    .mockReturnValue({ remove: mockRemoveExpoListener }),
 }));
-jest.mock("expo-notifications/build/scheduleNotificationAsync", () => ({
-  default: jest.fn().mockResolvedValue("id"),
+jest.mock("@notifee/react-native", () => ({
+  __esModule: true,
+  default: {
+    requestPermission: jest.fn().mockResolvedValue({ authorizationStatus: 1 }),
+    createChannel: jest.fn().mockResolvedValue("booking-updates"),
+    displayNotification: jest.fn().mockResolvedValue("notification-id"),
+    createTriggerNotification: jest.fn().mockResolvedValue("trigger-id"),
+    onForegroundEvent: jest.fn().mockImplementation((handler) => {
+      mockLocalListener.mockImplementation(handler);
+      return mockRemoveLocalListener;
+    }),
+    getInitialNotification: jest.fn().mockResolvedValue(null),
+  },
+  AuthorizationStatus: { DENIED: 0, AUTHORIZED: 1, PROVISIONAL: 2 },
+  AndroidImportance: { DEFAULT: 3 },
+  TriggerType: { TIMESTAMP: 0 },
+  EventType: { PRESS: 1, ACTION_PRESS: 2 },
 }));
+
 const ExpoConstants = jest.requireMock("expo-constants") as {
   appOwnership: string | null;
   executionEnvironment: string;
   expoVersion: string | null;
 };
-const Permissions = jest.requireMock(
-  "expo-notifications/build/NotificationPermissions",
-) as {
-  getPermissionsAsync: jest.Mock;
-  requestPermissionsAsync: jest.Mock;
+const Notifee = jest.requireMock("@notifee/react-native") as {
+  default: {
+    requestPermission: jest.Mock;
+    createChannel: jest.Mock;
+    displayNotification: jest.Mock;
+    createTriggerNotification: jest.Mock;
+    onForegroundEvent: jest.Mock;
+    getInitialNotification: jest.Mock;
+  };
 };
-const Responses = jest.requireMock(
+const ExpoResponses = jest.requireMock(
   "expo-notifications/build/NotificationsEmitter",
-) as {
-  addNotificationResponseReceivedListener: jest.Mock;
-};
-const Scheduler = jest.requireMock(
-  "expo-notifications/build/scheduleNotificationAsync",
-) as { default: jest.Mock };
-
+) as { addNotificationResponseReceivedListener: jest.Mock };
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const Notifications = require("expo-notifications") as {
+const ExpoNotifications = require("expo-notifications") as {
   getExpoPushTokenAsync: jest.Mock;
 };
 
-describe("ExpoNotificationAdapter (RBT-072)", () => {
+describe("ExpoNotificationAdapter (Notifee local notifications)", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     ExpoConstants.appOwnership = null;
     ExpoConstants.executionEnvironment = "standalone";
     ExpoConstants.expoVersion = null;
-    Permissions.getPermissionsAsync.mockResolvedValue({ granted: true });
-    Permissions.requestPermissionsAsync.mockResolvedValue({ granted: true });
-    Notifications.getExpoPushTokenAsync.mockResolvedValue({
+    Notifee.default.requestPermission.mockResolvedValue({
+      authorizationStatus: 1,
+    });
+    Notifee.default.createChannel.mockResolvedValue("booking-updates");
+    Notifee.default.displayNotification.mockResolvedValue("notification-id");
+    Notifee.default.createTriggerNotification.mockResolvedValue("trigger-id");
+    Notifee.default.getInitialNotification.mockResolvedValue(null);
+    ExpoNotifications.getExpoPushTokenAsync.mockResolvedValue({
       data: "ExpoPushToken[xyz]",
     });
-    Scheduler.default.mockResolvedValue("id");
+    ExpoResponses.addNotificationResponseReceivedListener.mockReturnValue({
+      remove: mockRemoveExpoListener,
+    });
   });
 
-  it("requestPermission: granted current permission needs no prompt", async () => {
-    const a = new ExpoNotificationAdapter();
-    expect(await a.requestPermission()).toBe(true);
-    expect(Permissions.requestPermissionsAsync).not.toHaveBeenCalled();
+  it("requests OS notification permission through Notifee", async () => {
+    const adapter = new ExpoNotificationAdapter();
+    await expect(adapter.requestPermission()).resolves.toBe(true);
+    expect(Notifee.default.requestPermission).toHaveBeenCalledTimes(1);
   });
 
-  it("requestPermission: prompts when not already granted", async () => {
-    Permissions.getPermissionsAsync.mockResolvedValue({ granted: false });
-    Permissions.requestPermissionsAsync.mockResolvedValue({ granted: true });
-    const a = new ExpoNotificationAdapter();
-    expect(await a.requestPermission()).toBe(true);
-    expect(Permissions.requestPermissionsAsync).toHaveBeenCalled();
+  it("returns false when permission is denied", async () => {
+    Notifee.default.requestPermission.mockResolvedValue({
+      authorizationStatus: 0,
+    });
+    await expect(
+      new ExpoNotificationAdapter().requestPermission(),
+    ).resolves.toBe(false);
   });
 
-  it("registerForRemotePush: returns the Expo token when permitted", async () => {
-    const a = new ExpoNotificationAdapter();
-    expect(await a.registerForRemotePush()).toBe("ExpoPushToken[xyz]");
-  });
-
-  it("registerForRemotePush: null when permission denied", async () => {
-    Permissions.getPermissionsAsync.mockResolvedValue({ granted: false });
-    Permissions.requestPermissionsAsync.mockResolvedValue({ granted: false });
-    const a = new ExpoNotificationAdapter();
-    expect(await a.registerForRemotePush()).toBeNull();
-    expect(Notifications.getExpoPushTokenAsync).not.toHaveBeenCalled();
-  });
-
-  it("registerForRemotePush: null (not throw) when token mint fails", async () => {
-    Notifications.getExpoPushTokenAsync.mockRejectedValue(
-      new Error("no projectId"),
+  it("registers remote push using Expo only when enabled and permitted", async () => {
+    const adapter = new ExpoNotificationAdapter();
+    await expect(adapter.registerForRemotePush()).resolves.toBe(
+      "ExpoPushToken[xyz]",
     );
-    const a = new ExpoNotificationAdapter();
-    expect(await a.registerForRemotePush()).toBeNull();
+    expect(ExpoNotifications.getExpoPushTokenAsync).toHaveBeenCalledTimes(1);
   });
 
-  it("registerForRemotePush: null when the runtime does not support permissions", async () => {
-    Permissions.getPermissionsAsync.mockRejectedValue(
-      new Error("Remote notifications are unavailable in Expo Go"),
-    );
-    const a = new ExpoNotificationAdapter();
-    await expect(a.registerForRemotePush()).resolves.toBeNull();
+  it("does not register remote push in mock mode", async () => {
+    const adapter = new ExpoNotificationAdapter(false);
+    await expect(adapter.registerForRemotePush()).resolves.toBeNull();
+    expect(Notifee.default.requestPermission).toHaveBeenCalledTimes(1);
+    expect(ExpoNotifications.getExpoPushTokenAsync).not.toHaveBeenCalled();
   });
 
-  it("registerForRemotePush: skips the unsupported Expo Go remote-push API", async () => {
+  it("skips the unsupported Expo Go remote-push API", async () => {
+    ExpoConstants.appOwnership = "expo";
     ExpoConstants.executionEnvironment = "storeClient";
-    const a = new ExpoNotificationAdapter();
-    await expect(a.registerForRemotePush()).resolves.toBeNull();
-    expect(Permissions.getPermissionsAsync).not.toHaveBeenCalled();
+    await expect(
+      new ExpoNotificationAdapter().registerForRemotePush(),
+    ).resolves.toBeNull();
+    expect(Notifee.default.requestPermission).not.toHaveBeenCalled();
   });
 
-  it("detects Expo Go from its runtime version when other flags are absent", async () => {
+  it("still requests local permission in a standalone build with an Expo SDK version", async () => {
     ExpoConstants.expoVersion = "53.0.0";
-    const a = new ExpoNotificationAdapter();
-
-    await expect(a.registerForRemotePush()).resolves.toBeNull();
-    expect(Permissions.getPermissionsAsync).not.toHaveBeenCalled();
+    await expect(
+      new ExpoNotificationAdapter(false).registerForRemotePush(),
+    ).resolves.toBeNull();
+    expect(Notifee.default.requestPermission).toHaveBeenCalledTimes(1);
+    expect(ExpoNotifications.getExpoPushTokenAsync).not.toHaveBeenCalled();
   });
 
-  it("keeps local notification tap listeners available in Expo Go", () => {
+  it("requests permission in a custom development client", async () => {
     ExpoConstants.executionEnvironment = "storeClient";
-    const a = new ExpoNotificationAdapter();
-    const onResponse = jest.fn();
-    const remove = jest.fn();
-    Responses.addNotificationResponseReceivedListener.mockReturnValue({
-      remove,
-    });
-    const unsubscribe = a.subscribeToResponses(onResponse);
-
-    unsubscribe();
-    expect(
-      Responses.addNotificationResponseReceivedListener,
-    ).toHaveBeenCalledTimes(1);
-    expect(remove).toHaveBeenCalledTimes(1);
+    const adapter = new ExpoNotificationAdapter(false);
+    await expect(adapter.registerForRemotePush()).resolves.toBeNull();
+    expect(Notifee.default.requestPermission).toHaveBeenCalledTimes(1);
   });
 
-  it("routes tap data and removes the native response listener", () => {
-    const a = new ExpoNotificationAdapter();
-    const onResponse = jest.fn();
-    const remove = jest.fn();
-    Responses.addNotificationResponseReceivedListener.mockImplementation(
-      (handler: (response: unknown) => void) => {
-        handler({
-          notification: {
-            request: { content: { data: { deepLink: "/success/bk-1" } } },
-          },
-        });
-        return { remove };
-      },
+  it("shows an immediate notification with stable ID and route data", async () => {
+    const adapter = new ExpoNotificationAdapter();
+    const message = {
+      kind: "payment_success",
+      notificationId: "payment-success-bk-1",
+      title: "Pembayaran berhasil",
+      body: "Tiketmu aktif.",
+      deepLink: "/success/bk-1",
+    } as const;
+    await adapter.scheduleLocal(message);
+    await adapter.scheduleLocal(message);
+
+    expect(Notifee.default.createChannel).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "booking-updates" }),
     );
-
-    const unsubscribe = a.subscribeToResponses(onResponse);
-    unsubscribe();
-
-    expect(onResponse).toHaveBeenCalledWith({ deepLink: "/success/bk-1" });
-    expect(remove).toHaveBeenCalledTimes(1);
+    expect(Notifee.default.displayNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "payment-success-bk-1",
+        title: "Pembayaran berhasil",
+        data: {
+          deepLink: "/success/bk-1",
+          kind: "payment_success",
+        },
+        android: expect.objectContaining({
+          channelId: "booking-updates",
+          pressAction: { id: "default" },
+        }),
+      }),
+    );
+    expect(Notifee.default.displayNotification).toHaveBeenCalledTimes(1);
   });
 
-  it("scheduleLocal: immediate (trigger null) carries deepLink + kind in data", async () => {
-    const a = new ExpoNotificationAdapter();
-    await a.scheduleLocal({
-      kind: "payment_success",
-      title: "T",
-      body: "B",
-      deepLink: "/success/bk-1",
-    });
-    const call = Scheduler.default.mock.calls[0][0];
-    expect(call.trigger).toBeNull();
-    expect(call.content.data).toEqual({
-      deepLink: "/success/bk-1",
-      kind: "payment_success",
-    });
-  });
-
-  it("scheduleLocal: a future time schedules with a date trigger", async () => {
-    const a = new ExpoNotificationAdapter();
+  it("schedules future notifications through a Notifee timestamp trigger", async () => {
     const future = Date.now() + 60_000;
-    await a.scheduleLocal({
+    await new ExpoNotificationAdapter().scheduleLocal({
       kind: "expiry_reminder",
       title: "T",
       body: "B",
       scheduledAtMs: future,
     });
-    const call = Scheduler.default.mock.calls[0][0];
-    expect(call.trigger).toBeTruthy();
-    expect(call.trigger.date instanceof Date).toBe(true);
+    expect(Notifee.default.createTriggerNotification).toHaveBeenCalledWith(
+      expect.any(Object),
+      { type: 0, timestamp: future },
+    );
   });
 
-  it("scheduleLocal: a PAST scheduled time fires immediately", async () => {
-    const a = new ExpoNotificationAdapter();
-    await a.scheduleLocal({
-      kind: "admission",
-      title: "T",
-      body: "B",
-      scheduledAtMs: Date.now() - 1000,
+  it("routes local notification presses and unsubscribes", () => {
+    const onResponse = jest.fn();
+    const unsubscribe = new ExpoNotificationAdapter().subscribeToResponses(
+      onResponse,
+    );
+    mockLocalListener({
+      type: 1,
+      detail: { notification: { data: { deepLink: "/success/bk-1" } } },
     });
-    expect(Scheduler.default.mock.calls[0][0].trigger).toBeNull();
+    unsubscribe();
+
+    expect(onResponse).toHaveBeenCalledWith({ deepLink: "/success/bk-1" });
+    expect(mockRemoveLocalListener).toHaveBeenCalled();
+    expect(mockRemoveExpoListener).toHaveBeenCalled();
+  });
+
+  it("routes a cold-start Notifee notification", async () => {
+    const onResponse = jest.fn();
+    Notifee.default.getInitialNotification.mockResolvedValue({
+      notification: { data: { deepLink: "/payment/bk-1" } },
+    });
+    new ExpoNotificationAdapter().subscribeToResponses(onResponse);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(onResponse).toHaveBeenCalledWith({ deepLink: "/payment/bk-1" });
   });
 });

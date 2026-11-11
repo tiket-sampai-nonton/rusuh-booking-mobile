@@ -19,11 +19,13 @@
  */
 import { useEffect, useMemo } from "react";
 import { useQuery, type Query } from "@tanstack/react-query";
+import { Platform } from "react-native";
 
 import {
   VerifyPayment,
   CreatePaymentAttempt,
 } from "@application/payment/create-payment-attempt.use-case";
+import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
 import { useSessionStore } from "@presentation/stores/session-store";
 import type { PaymentAttempt } from "@domain/repositories/payment.repository";
 import {
@@ -33,6 +35,10 @@ import {
   resolvePaymentRoute,
   type PaymentVerdict,
 } from "@domain/rules/payment-verify";
+import {
+  paymentFailure,
+  paymentSuccess,
+} from "@domain/rules/notification-flows";
 import { useServices } from "@providers/service-context";
 
 /** What the result screen reads off the single verify poller. */
@@ -67,13 +73,18 @@ export function useVerifyPayment(
   bookingId: string,
   reducedMotion = false,
 ): VerifyPaymentView {
-  const { paymentRepository, serverClock, idempotencyKeys } = useServices();
+  const { paymentRepository, serverClock, idempotencyKeys, notification } =
+    useServices();
   const paymentMethod = useSessionStore((state) => state.paymentMethod);
   const storedBookingId = useSessionStore((state) => state.bookingId);
 
   const verify = useMemo(
     () => new VerifyPayment(paymentRepository),
     [paymentRepository],
+  );
+  const scheduleNotification = useMemo(
+    () => new ScheduleLocalNotification(notification),
+    [notification],
   );
 
   const query = useQuery<PaymentAttempt, Error>({
@@ -91,6 +102,7 @@ export function useVerifyPayment(
   });
 
   const attempt = query.data;
+  const attemptStatus = attempt?.status;
   const verdict = attempt ? classifyPayment(attempt.status) : undefined;
   const isSettled = attempt !== undefined && isPaymentTerminal(attempt.status);
 
@@ -108,6 +120,22 @@ export function useVerifyPayment(
     paymentMethod,
     storedBookingId,
   ]);
+
+  useEffect(() => {
+    if (
+      Platform.OS === "web" ||
+      !attemptStatus ||
+      !isPaymentTerminal(attemptStatus)
+    )
+      return;
+    const message =
+      attemptStatus === "PAID"
+        ? paymentSuccess(bookingId)
+        : paymentFailure(bookingId);
+    // Payment status comes from VerifyPayment (the BE-authoritative read).
+    // Delivery errors must never block the result route.
+    void scheduleNotification.execute(message).catch(() => undefined);
+  }, [attemptStatus, bookingId, scheduleNotification]);
 
   // Server-authoritative remaining time for the pending deadline reconcile.
   let remainingMs = Number.POSITIVE_INFINITY;

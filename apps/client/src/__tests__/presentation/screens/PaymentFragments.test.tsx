@@ -8,7 +8,7 @@ describe("PaymentBar (RBT-060)", () => {
     const onPay = jest.fn();
     render(
       <PaymentBar
-        amountMinor={45000000}
+        amountMinor={450000}
         canPay
         pending={false}
         expired={false}
@@ -66,7 +66,7 @@ describe("PaymentBar (RBT-060)", () => {
 
 describe("PaymentSummary (RBT-060)", () => {
   it("renders the total with no fee line", () => {
-    render(<PaymentSummary bookingId="bk-1" amountMinor={45000000} />);
+    render(<PaymentSummary bookingId="bk-1" amountMinor={450000} />);
     expect(screen.getByTestId("payment-total").props.children).toBe(
       "Rp 450.000",
     );

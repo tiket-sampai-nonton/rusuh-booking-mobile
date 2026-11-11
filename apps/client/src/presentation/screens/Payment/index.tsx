@@ -12,11 +12,13 @@
  * RBT-060 lands the page. No infrastructure import — ports via hooks only.
  */
 import { useNavigation, useRouter, type Href } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { PaymentMethod } from "@domain/repositories/payment.repository";
+import { paymentCancelled } from "@domain/rules/notification-flows";
+import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { usePayment } from "@presentation/hooks/usePayment";
 import { usePaymentPage } from "@presentation/hooks/usePaymentPage";
@@ -37,8 +39,12 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { isDesktop, isMobileWeb } = useResponsive();
-  const { serverClock } = useServices();
+  const { isDesktop, isMobileWeb, isNative } = useResponsive();
+  const { serverClock, notification } = useServices();
+  const scheduleNotification = useMemo(
+    () => new ScheduleLocalNotification(notification),
+    [notification],
+  );
   const { page, isLoading } = usePaymentPage(bookingId);
   const { createAttempt, resumeHandoff } = usePayment();
   const setBooking = useSessionStore((s) => s.setBooking);
@@ -197,6 +203,13 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
           onStay={() => setConfirmLeave(false)}
           onLeave={() => {
             setConfirmLeave(false);
+            if (isNative) {
+              // The BE has no cancel-attempt endpoint; this copy accurately
+              // describes the buyer leaving the payment flow, not provider cancellation.
+              void scheduleNotification
+                .execute(paymentCancelled(bookingId))
+                .catch(() => undefined);
+            }
             router.replace("/" as Href);
           }}
         />

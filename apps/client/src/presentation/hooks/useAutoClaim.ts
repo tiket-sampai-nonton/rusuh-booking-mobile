@@ -33,7 +33,11 @@ import { authorizes } from "@domain/state-machines/queue-state-machine";
 import { useServices } from "@providers/service-context";
 
 /** The error states RBT-044 surfaces in the waiting room (FR-08). */
-export type ClaimErrorState = "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN";
+export type ClaimErrorState =
+  | "TURN_MISSED"
+  | "EVENT_SOLD_OUT"
+  | "ADMISSION_TOKEN_INVALID"
+  | "UNKNOWN";
 
 export interface UseAutoClaimParams {
   /** The event whose admitted slot is being claimed. */
@@ -69,6 +73,8 @@ function toErrorState(error: Error | null): ClaimErrorState | null {
   if (error instanceof DomainError) {
     if (error.code === "TURN_MISSED") return "TURN_MISSED";
     if (error.code === "EVENT_SOLD_OUT") return "EVENT_SOLD_OUT";
+    if (error.code === "ADMISSION_TOKEN_INVALID")
+      return "ADMISSION_TOKEN_INVALID";
   }
   return "UNKNOWN";
 }

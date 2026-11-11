@@ -7,8 +7,9 @@
  * `setInterval`, so there is no request storm and no leaked timer (NFR-05/06).
  * The cadence is the SERVER's `nextPollAfterMs` turned into a wait by the pure
  * `pollIntervalMs` rule (RBT-042) with an anti-storm floor + additive jitter.
- * Polling STOPS (returns `false`) the moment the entry is terminal or admitted
- * — a settled entry never polls again.
+ * Polling STOPS (returns `false`) when the entry is terminal, admitted, or
+ * already claimed. A claimed token is one-use and cannot authorize another
+ * checkout, so a waiting-room route must not keep polling it indefinitely.
  *
  * TanStack Query is confined to this hook (the D3 swap seam). The hook reaches
  * the backend ONLY through the `ObserveQueue` use case → the frozen
@@ -47,8 +48,8 @@ export interface QueuePollingView {
   readonly isReconnected: boolean;
   readonly error: Error | null;
   /**
-   * True once the entry has settled (terminal OR admitted) — the poller has
-   * stopped. The screen (RBT-043) / claim (RBT-044) react to this.
+   * True once the entry has settled (terminal, admitted, or claimed) — the
+   * poller has stopped. The screen (RBT-043) / claim (RBT-044) react to this.
    */
   readonly isSettled: boolean;
   /** Leave the waiting room (abandons the slot). */
@@ -93,7 +94,7 @@ export function isRecoverableConnectionError(error: Error | null): boolean {
 /**
  * The adaptive `refetchInterval` decision, factored out of the hook so it is
  * unit-testable WITHOUT timers: return `false` (stop polling) when there is a
- * settled entry (terminal OR admitted); otherwise the jittered adaptive wait
+ * settled entry (terminal, admitted, or claimed); otherwise the jittered wait
  * from the pure rule. With no data yet, poll at the floor to get the first real
  * `nextPollAfterMs`.
  *
@@ -105,7 +106,12 @@ export function computeRefetchInterval(
   reducedMotion = false,
   random?: () => number,
 ): number | false {
-  if (entry && (isTerminal(entry.status) || isAdmitted(entry.status))) {
+  if (
+    entry &&
+    (isTerminal(entry.status) ||
+      isAdmitted(entry.status) ||
+      entry.status === "CLAIMED")
+  ) {
     return false;
   }
   return pollIntervalMs(entry ?? {}, reducedMotion, random);
@@ -147,8 +153,8 @@ export function useQueuePolling(
       // Queue state is monotonic after a claim. A delayed read may briefly
       // report ADMITTED while cancellation cleanup is being propagated; never
       // downgrade the locally confirmed CLAIMED state and replay its one-use
-      // admission token. Keep polling CLAIMED until the server reports the
-      // terminal cleanup state.
+      // admission token. A one-use CLAIMED entry is no longer a waiting room;
+      // stop its poller and show the recovery state instead of waiting forever.
       const cachedEntry =
         queryClient.getQueryData<QueuePollData>(queryKey)?.entry;
       const entry =
@@ -178,7 +184,7 @@ export function useQueuePolling(
       }
     },
     enabled: queueId.length > 0 && isScreenFocused,
-    // The SINGLE adaptive poller. Stop on terminal/admitted; else the jittered
+    // The SINGLE adaptive poller. Stop on terminal/admitted/claimed; else the jittered
     // server-honoured wait. TanStack cancels this interval on unmount.
     refetchInterval: (query: Query<QueuePollData, Error>) => {
       const interval = computeRefetchInterval(
@@ -223,7 +229,9 @@ export function useQueuePolling(
   const entry = query.data?.entry;
   const isSettled =
     entry !== undefined &&
-    (isTerminal(entry.status) || isAdmitted(entry.status));
+    (isTerminal(entry.status) ||
+      isAdmitted(entry.status) ||
+      entry.status === "CLAIMED");
 
   return {
     entry,

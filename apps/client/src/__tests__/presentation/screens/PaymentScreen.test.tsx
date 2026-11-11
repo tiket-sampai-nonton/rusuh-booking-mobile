@@ -6,6 +6,7 @@ import type {
   PaymentPage,
   PaymentRepository,
 } from "@domain/repositories/payment.repository";
+import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notification.adapter";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 import { useSessionStore } from "@presentation/stores/session-store";
 
@@ -23,7 +24,7 @@ function page(over: Partial<PaymentPage> = {}): PaymentPage {
   return {
     bookingId: "bk-1",
     methods: ["VA_BCA", "QRIS", "GOPAY"],
-    amountMinor: 45000000,
+    amountMinor: 450000,
     paymentExpiresAt: "2999-01-01T00:00:00.000Z",
     serverTime: "2026-12-01T00:00:00.000Z",
     ...over,
@@ -117,7 +118,7 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
         "Rp 450.000",
       ),
     );
-    expect(useSessionStore.getState().amountMinor).toBe(45000000);
+    expect(useSessionStore.getState().amountMinor).toBe(450000);
     expect(screen.queryByText(/biaya layanan/i)).toBeNull();
   });
 
@@ -235,6 +236,31 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy();
     expect(mockRouter.replace).not.toHaveBeenCalled();
     fireEvent.press(screen.getByTestId("checkout-leave-confirm"));
+    expect(mockRouter.replace).toHaveBeenCalledWith("/");
+  });
+
+  it("sends a local notification after confirming payment-flow exit", async () => {
+    const notification = new MockNotificationAdapter();
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: {
+        paymentRepository: paymentRepo(page()),
+        notification,
+      },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("payment-back")).toBeTruthy(),
+    );
+    fireEvent.press(screen.getByTestId("payment-back"));
+    fireEvent.press(screen.getByTestId("checkout-leave-confirm"));
+
+    await waitFor(() =>
+      expect(notification.scheduled).toEqual([
+        expect.objectContaining({
+          kind: "payment_cancelled",
+          deepLink: "/payment/bk-1",
+        }),
+      ]),
+    );
     expect(mockRouter.replace).toHaveBeenCalledWith("/");
   });
 

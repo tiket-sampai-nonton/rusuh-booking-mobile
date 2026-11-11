@@ -17,7 +17,7 @@ import { usePaymentPage } from "@presentation/hooks/usePaymentPage";
 const PAGE: PaymentPage = {
   bookingId: "bk-1",
   methods: ["VA_BCA", "QRIS"],
-  amountMinor: 45000000,
+  amountMinor: 450000,
   paymentExpiresAt: "2999-01-01T00:00:00.000Z",
   serverTime: "2026-12-01T00:00:00.000Z",
 };
@@ -70,7 +70,7 @@ describe("GetPaymentPage (RBT-060)", () => {
     const repo = new FakeRepo();
     const out = await new GetPaymentPage(repo).execute("bk-9");
     expect(repo.calls).toEqual(["bk-9"]);
-    expect(out.amountMinor).toBe(45000000);
+    expect(out.amountMinor).toBe(450000);
   });
 });
 

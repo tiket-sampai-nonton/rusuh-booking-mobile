@@ -42,7 +42,7 @@ export class MockPaymentRepository implements PaymentRepository {
     return {
       bookingId,
       methods: MOCK_METHODS,
-      amountMinor: 45000000,
+      amountMinor: 450000,
       paymentExpiresAt: new Date(now + 600_000).toISOString(),
       serverTime: new Date(now).toISOString(),
       currentAttempt: this.attemptByBooking.get(bookingId),

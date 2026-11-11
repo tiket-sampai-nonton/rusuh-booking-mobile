@@ -2,7 +2,7 @@
  * HomeScreen — web-desktop layout branches.
  *
  * The desktop container (max-width centered), the multi-column CardGrid, the
- * nav center links (web > 720px), and the hero scroll-parallax handler only
+ * nav center links (web > 720px), and desktop navigation behavior only
  * run on RN Web at a wide viewport. We mock the useResponsive hook to report a
  * wide-web viewport so HomeScreen takes all those branches, without disturbing
  * react-native's native-module getters.
@@ -101,14 +101,6 @@ describe("HomeScreen (web desktop)", () => {
     // : Multi-column CardGrid uses v2-event-card-<id> testIDs
     fireEvent.press(screen.getByTestId("v2-event-card-evt-1"));
     expect(mockRouter.push).toHaveBeenCalledWith("/events/evt-1");
-    // Drive the scroll handler (hero parallax) — covers the onScroll path.
-    fireEvent.scroll(screen.getByTestId("home-scroll"), {
-      nativeEvent: {
-        contentOffset: { y: 120 },
-        contentSize: { height: 2000, width: 1200 },
-        layoutMeasurement: { height: 900, width: 1200 },
-      },
-    });
   });
 
   it("'Filter Event' opens the filter popup (does NOT navigate)", async () => {

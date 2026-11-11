@@ -1,0 +1,839 @@
+2026-11-11 08:30:50.816 xcodebuild[95637:3319775] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+2026-11-11 08:30:50.826 xcodebuild[95637:3319775] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+2026-11-11 08:30:52.239 xcodebuild[95637:3319775] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+** BUILD INTERRUPTED **
+30:53.759880+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Default] Running tests...
+2026-11-11 08:30:53.819732+0700 maestro-driver-iosUITests-Runner[95825:3320227] snapshotKeyHonorModalViews configured to value: (null)
+objc[95825]: Class UIAccessibilityLoaderWebShared is implemented in both /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebCore.axbundle/WebCore (0x106bc8310) and /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebKit.axbundle/WebKit (0x106448398). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'Selected tests' started at 2026-11-11 08:30:56.878.
+Test Suite 'maestro-driver-iosUITests.xctest' started at 2026-11-11 08:30:56.878.
+Test Suite 'maestro_driver_iosUITests' started at 2026-11-11 08:30:56.879.
+    t =      nans Suite Set Up
+Test Case '-[maestro_driver_iosUITests.maestro_driver_iosUITests testHttpServer]' started.
+    t =     0.00s Start Test at 2026-11-11 08:30:56.880
+    t =     0.03s Set Up
+2026-11-11 08:30:56.909943+0700 maestro-driver-iosUITests-Runner[95825:3320325] [maestro_driver_iosUITests] Will start HTTP server
+2026-11-11 08:30:56.968688+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] starting server 127.0.0.1:59919
+2026-11-11 08:30:57.035115+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> open connection
+2026-11-11 08:30:57.039449+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: GET /status
+2026-11-11 08:30:57.081781+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> open connection
+2026-11-11 08:30:57.083513+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     0.20s Getting device orientation
+2026-11-11 08:30:57.102824+0700 maestro-driver-iosUITests-Runner[95825:3320227] Using singleton test manager
+2026-11-11 08:30:57.103669+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     0.23s Getting device orientation
+    t =     0.23s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:30:57.199684+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:30:57.271708+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     0.39s Getting device orientation
+2026-11-11 08:30:57.275057+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     0.40s Getting device orientation
+2026-11-11 08:30:57.276950+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:30:57.277434+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:30:57.355086+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:30:57.358881+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:30:57.359439+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:30:57.359576+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     0.48s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:30:57.427759+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:30:57.427948+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     0.55s Checking existence of `StatusBar (First Match)`
+    t =     0.59s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     0.62s Find the StatusBar (Element at index 0)
+    t =     0.64s Find the StatusBar (Element at index 1)
+2026-11-11 08:30:57.539081+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.11107993125915527
+2026-11-11 08:30:57.539153+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:30:57.540943+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0017679929733276367
+    t =     0.66s Find the Application 'com.apple.springboard'
+2026-11-11 08:30:57.555659+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:30:57.596160+0700 maestro-driver-iosUITests-Runner[95825:3320320] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     0.72s Getting device orientation
+2026-11-11 08:30:57.598982+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     0.72s Getting device orientation
+2026-11-11 08:30:57.600304+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:30:57.600458+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:30:57.602065+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:30:57.604007+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:30:57.604472+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:30:57.604526+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     0.73s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:30:57.671859+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:30:57.672009+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     0.79s Checking existence of `StatusBar (First Match)`
+    t =     0.80s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     0.82s Find the StatusBar (Element at index 0)
+    t =     0.83s Find the StatusBar (Element at index 1)
+2026-11-11 08:30:57.733858+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.06180894374847412
+2026-11-11 08:30:57.733919+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:30:57.734345+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.00040900707244873047
+    t =     0.86s Find the Application 'com.apple.springboard'
+2026-11-11 08:30:57.748564+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:30:57.761076+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:30:58.036970+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:30:58.259047+0700 maestro-driver-iosUITests-Runner[95825:3320320] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:30:58.263295+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     1.38s Getting device orientation
+2026-11-11 08:30:58.264629+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =     1.39s Getting device orientation
+2026-11-11 08:30:58.265379+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 67.0, 805.0
+    t =     1.39s Getting device orientation
+2026-11-11 08:30:58.601254+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.3331449031829834
+2026-11-11 08:30:58.606853+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:30:58.836888+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     1.96s Getting device orientation
+2026-11-11 08:30:58.849406+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     1.97s Getting device orientation
+2026-11-11 08:30:58.854899+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:30:58.855209+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:30:58.859365+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:30:58.863224+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:30:58.864311+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:30:58.864400+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     1.99s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:30:58.940185+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:30:58.940353+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     2.06s Checking existence of `StatusBar (First Match)`
+    t =     2.07s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     2.09s Find the StatusBar (Element at index 0)
+    t =     2.10s Find the StatusBar (Element at index 1)
+2026-11-11 08:30:59.005088+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.0646829605102539
+2026-11-11 08:30:59.005191+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:30:59.005644+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0004379749298095703
+    t =     2.13s Find the Application 'com.apple.springboard'
+2026-11-11 08:30:59.024554+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:30:59.054166+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     2.18s Getting device orientation
+2026-11-11 08:30:59.057591+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     2.18s Getting device orientation
+2026-11-11 08:30:59.059301+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:30:59.059434+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:30:59.060913+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:30:59.063434+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:30:59.063837+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:30:59.063885+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     2.18s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:30:59.136805+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:30:59.136970+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     2.26s Checking existence of `StatusBar (First Match)`
+    t =     2.27s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     2.28s Find the StatusBar (Element at index 0)
+    t =     2.30s Find the StatusBar (Element at index 1)
+2026-11-11 08:30:59.199259+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.06224691867828369
+2026-11-11 08:30:59.199310+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:30:59.199663+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0003420114517211914
+    t =     2.32s Find the Application 'com.apple.springboard'
+2026-11-11 08:30:59.213598+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:30:59.221009+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:30:59.428893+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:30:59.585798+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:30:59.587993+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     2.71s Getting device orientation
+2026-11-11 08:30:59.589046+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =     2.71s Getting device orientation
+2026-11-11 08:30:59.589845+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 201.0, 805.0
+    t =     2.71s Getting device orientation
+2026-11-11 08:30:59.923108+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.3324660062789917
+2026-11-11 08:30:59.926376+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:00.103286+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:00.273181+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:00.465865+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:00.693262+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     3.81s Getting device orientation
+2026-11-11 08:31:00.696924+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     3.82s Getting device orientation
+2026-11-11 08:31:00.698149+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:00.698288+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:00.700495+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:00.702251+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:00.702673+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:00.702729+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     3.82s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:00.754395+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:00.754533+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     3.88s Checking existence of `StatusBar (First Match)`
+    t =     3.88s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     3.90s Find the StatusBar (Element at index 0)
+    t =     3.92s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:00.815765+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.061155080795288086
+2026-11-11 08:31:00.815857+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:00.816305+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0003999471664428711
+    t =     3.94s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:00.830682+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:00.850141+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     3.97s Getting device orientation
+2026-11-11 08:31:00.853250+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     3.97s Getting device orientation
+2026-11-11 08:31:00.854564+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:00.854787+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:00.859156+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     3.98s Getting device orientation
+2026-11-11 08:31:00.861779+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     3.98s Getting device orientation
+2026-11-11 08:31:00.863095+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:00.863196+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:00.865713+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     3.99s Getting device orientation
+2026-11-11 08:31:00.868719+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     3.99s Getting device orientation
+2026-11-11 08:31:00.869926+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:00.870041+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:00.871817+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:01.079102+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:01.273913+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:01.473292+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:01.677357+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:01.880542+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:02.082461+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:02.295603+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /swipeV2
+2026-11-11 08:31:02.298713+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     5.42s Getting device orientation
+2026-11-11 08:31:02.299974+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =     5.42s Getting device orientation
+    t =     5.42s Getting device orientation
+2026-11-11 08:31:02.304169+0700 maestro-driver-iosUITests-Runner[95825:3320227] [SwipeRouteHandlerV2] Swipe (v2) from (201.0, 786.0) to (201.0, 87.0) with 0.4 duration
+2026-11-11 08:31:02.305891+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     5.43s Swipe (v2) from (201.0, 786.0) to (201.0, 87.0) with 0.4 duration
+2026-11-11 08:31:02.306823+0700 maestro-driver-iosUITests-Runner[95825:3320227] Quiescence checks are disabled for com.tiketsampainonton.rusuhbooking application. Making it to believe it is idling
+    t =     5.43s     Find the Any (First Match)
+    t =     5.43s Application is configured to skip UI interruption handling
+    t =     5.43s     Synthesize event
+    t =     5.43s         Getting device orientation
+2026-11-11 08:31:03.034517+0700 maestro-driver-iosUITests-Runner[95825:3320227] Quiescence checks are disabled for com.tiketsampainonton.rusuhbooking application. Making it to believe it is idling
+2026-11-11 08:31:03.039316+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:03.258224+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     6.38s Getting device orientation
+2026-11-11 08:31:03.261064+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     6.38s Getting device orientation
+2026-11-11 08:31:03.262205+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:03.262318+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:03.264738+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:03.266344+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:03.266770+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:03.266811+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     6.39s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:03.316235+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:03.316362+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     6.44s Checking existence of `StatusBar (First Match)`
+    t =     6.44s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     6.46s Find the StatusBar (Element at index 0)
+    t =     6.48s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:03.376397+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.0599820613861084
+2026-11-11 08:31:03.376493+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:03.376985+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0004590749740600586
+    t =     6.50s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:03.391794+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:03.396922+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:03.622679+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:31:03.785676+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:31:03.788003+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     6.91s Getting device orientation
+2026-11-11 08:31:03.789684+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =     6.91s Getting device orientation
+2026-11-11 08:31:03.790555+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 67.0, 805.0
+    t =     6.91s Getting device orientation
+2026-11-11 08:31:04.124543+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.3326059579849243
+2026-11-11 08:31:04.127028+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:04.332125+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     7.45s Getting device orientation
+2026-11-11 08:31:04.335045+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     7.46s Getting device orientation
+2026-11-11 08:31:04.336075+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:04.336156+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:04.338222+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:04.339997+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:04.340425+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:04.340468+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     7.46s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:04.426203+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:04.426389+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     7.55s Checking existence of `StatusBar (First Match)`
+    t =     7.56s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     7.57s Find the StatusBar (Element at index 0)
+    t =     7.59s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:04.491154+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.06471097469329834
+2026-11-11 08:31:04.491227+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:04.491726+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0004680156707763672
+    t =     7.61s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:04.506700+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:04.516013+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     7.64s Getting device orientation
+2026-11-11 08:31:04.519260+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     7.64s Getting device orientation
+2026-11-11 08:31:04.520588+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:04.520728+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:04.522074+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:04.523940+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:04.524414+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:04.524458+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     7.65s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:04.590505+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:04.590673+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     7.71s Checking existence of `StatusBar (First Match)`
+    t =     7.73s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     7.75s Find the StatusBar (Element at index 0)
+    t =     7.76s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:04.662434+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.07171893119812012
+2026-11-11 08:31:04.662494+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:04.662881+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0003699064254760742
+    t =     7.78s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:04.677021+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:04.686401+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:04.890057+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:31:05.049953+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:31:05.051934+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     8.17s Getting device orientation
+2026-11-11 08:31:05.053056+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =     8.17s Getting device orientation
+2026-11-11 08:31:05.053767+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 201.0, 805.0
+    t =     8.17s Getting device orientation
+2026-11-11 08:31:05.381975+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.32731497287750244
+2026-11-11 08:31:05.384576+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:05.589666+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     8.71s Getting device orientation
+2026-11-11 08:31:05.592480+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     8.71s Getting device orientation
+2026-11-11 08:31:05.593538+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:05.593624+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:05.595447+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:05.597004+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:05.597438+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:05.597481+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =     8.72s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:05.664885+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:05.665010+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =     8.79s Checking existence of `StatusBar (First Match)`
+    t =     8.79s Get all elements bound by index for: Descendants matching type StatusBar
+    t =     8.81s Find the StatusBar (Element at index 0)
+    t =     8.83s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:05.727940+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.06288504600524902
+2026-11-11 08:31:05.728003+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:05.728419+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.00039505958557128906
+    t =     8.85s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:05.742459+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:05.758849+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     8.88s Getting device orientation
+2026-11-11 08:31:05.761659+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     8.88s Getting device orientation
+2026-11-11 08:31:05.762828+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:05.762944+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:05.764915+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     8.89s Getting device orientation
+2026-11-11 08:31:05.767605+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     8.89s Getting device orientation
+2026-11-11 08:31:05.768951+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:05.769067+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:05.770481+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     8.89s Getting device orientation
+2026-11-11 08:31:05.772812+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     8.89s Getting device orientation
+2026-11-11 08:31:05.773928+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:05.774036+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:05.775605+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:05.977071+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /swipeV2
+2026-11-11 08:31:05.979114+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     9.10s Getting device orientation
+2026-11-11 08:31:05.980262+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =     9.10s Getting device orientation
+    t =     9.10s Getting device orientation
+2026-11-11 08:31:05.981574+0700 maestro-driver-iosUITests-Runner[95825:3320227] [SwipeRouteHandlerV2] Swipe (v2) from (201.0, 786.0) to (201.0, 87.0) with 0.4 duration
+2026-11-11 08:31:05.982861+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =     9.10s Swipe (v2) from (201.0, 786.0) to (201.0, 87.0) with 0.4 duration
+2026-11-11 08:31:05.983451+0700 maestro-driver-iosUITests-Runner[95825:3320227] Quiescence checks are disabled for com.tiketsampainonton.rusuhbooking application. Making it to believe it is idling
+    t =     9.10s     Find the Any (First Match)
+    t =     9.11s Application is configured to skip UI interruption handling
+    t =     9.11s     Synthesize event
+    t =     9.11s         Getting device orientation
+2026-11-11 08:31:06.712553+0700 maestro-driver-iosUITests-Runner[95825:3320227] Quiescence checks are disabled for com.tiketsampainonton.rusuhbooking application. Making it to believe it is idling
+2026-11-11 08:31:06.716917+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:06.928050+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    10.05s Getting device orientation
+2026-11-11 08:31:06.930737+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    10.05s Getting device orientation
+2026-11-11 08:31:06.931819+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:06.931913+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:06.933750+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:06.935453+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:06.935897+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:06.935951+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    10.06s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:06.983703+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:06.983844+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    10.10s Checking existence of `StatusBar (First Match)`
+    t =    10.11s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    10.13s Find the StatusBar (Element at index 0)
+    t =    10.14s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:07.043872+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.05998408794403076
+2026-11-11 08:31:07.043940+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:07.044336+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.00037801265716552734
+    t =    10.17s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:07.058424+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:07.069035+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:07.266824+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:31:07.423672+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:31:07.425836+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    10.55s Getting device orientation
+2026-11-11 08:31:07.426914+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =    10.55s Getting device orientation
+2026-11-11 08:31:07.427624+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 67.0, 805.0
+    t =    10.55s Getting device orientation
+2026-11-11 08:31:07.761873+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.3335169553756714
+2026-11-11 08:31:07.763490+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:07.974199+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    11.10s Getting device orientation
+2026-11-11 08:31:07.977017+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    11.10s Getting device orientation
+2026-11-11 08:31:07.978128+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:07.978212+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:07.980171+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:07.981560+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:07.981983+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:07.982026+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    11.10s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:08.047427+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:08.047602+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    11.17s Checking existence of `StatusBar (First Match)`
+    t =    11.18s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    11.19s Find the StatusBar (Element at index 0)
+    t =    11.21s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:08.107977+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.06032907962799072
+2026-11-11 08:31:08.108052+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:08.108471+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.00040793418884277344
+    t =    11.23s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:08.122613+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:08.139662+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    11.26s Getting device orientation
+2026-11-11 08:31:08.142502+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    11.26s Getting device orientation
+2026-11-11 08:31:08.143910+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:08.144031+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:08.145425+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:08.147305+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:08.147755+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:08.147805+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    11.27s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:08.212961+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:08.213117+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    11.33s Checking existence of `StatusBar (First Match)`
+    t =    11.34s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    11.36s Find the StatusBar (Element at index 0)
+    t =    11.37s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:08.273505+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.060325026512145996
+2026-11-11 08:31:08.273582+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:08.273999+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0004010200500488281
+    t =    11.40s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:08.288059+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:08.298780+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:08.502802+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:31:08.666093+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:31:08.668325+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    11.79s Getting device orientation
+2026-11-11 08:31:08.669492+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =    11.79s Getting device orientation
+2026-11-11 08:31:08.670454+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 201.0, 805.0
+    t =    11.79s Getting device orientation
+2026-11-11 08:31:09.003487+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.3321080207824707
+2026-11-11 08:31:09.006950+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:09.216296+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    12.34s Getting device orientation
+2026-11-11 08:31:09.219112+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    12.34s Getting device orientation
+2026-11-11 08:31:09.220278+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:09.220370+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:09.222723+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:09.224247+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:09.224669+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:09.224707+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    12.35s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:09.274694+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:09.274843+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    12.40s Checking existence of `StatusBar (First Match)`
+    t =    12.40s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    12.42s Find the StatusBar (Element at index 0)
+    t =    12.44s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:09.336438+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.06155204772949219
+2026-11-11 08:31:09.336504+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:09.336935+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.00040400028228759766
+    t =    12.46s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:09.351605+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:09.358399+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    12.48s Getting device orientation
+2026-11-11 08:31:09.362887+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    12.48s Getting device orientation
+2026-11-11 08:31:09.364316+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:09.364444+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:09.366188+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    12.49s Getting device orientation
+2026-11-11 08:31:09.371143+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    12.49s Getting device orientation
+2026-11-11 08:31:09.373896+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:09.374238+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:09.375693+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    12.50s Getting device orientation
+2026-11-11 08:31:09.378420+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    12.50s Getting device orientation
+2026-11-11 08:31:09.379471+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:09.379557+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:09.380748+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:09.578792+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /swipeV2
+2026-11-11 08:31:09.580614+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    12.70s Getting device orientation
+2026-11-11 08:31:09.581792+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =    12.70s Getting device orientation
+    t =    12.70s Getting device orientation
+2026-11-11 08:31:09.583218+0700 maestro-driver-iosUITests-Runner[95825:3320227] [SwipeRouteHandlerV2] Swipe (v2) from (201.0, 786.0) to (201.0, 87.0) with 0.4 duration
+2026-11-11 08:31:09.584633+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    12.71s Swipe (v2) from (201.0, 786.0) to (201.0, 87.0) with 0.4 duration
+2026-11-11 08:31:09.585287+0700 maestro-driver-iosUITests-Runner[95825:3320227] Quiescence checks are disabled for com.tiketsampainonton.rusuhbooking application. Making it to believe it is idling
+    t =    12.71s     Find the Any (First Match)
+    t =    12.71s Application is configured to skip UI interruption handling
+    t =    12.71s     Synthesize event
+    t =    12.71s         Getting device orientation
+2026-11-11 08:31:10.313317+0700 maestro-driver-iosUITests-Runner[95825:3320227] Quiescence checks are disabled for com.tiketsampainonton.rusuhbooking application. Making it to believe it is idling
+2026-11-11 08:31:10.317296+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:10.527066+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    13.65s Getting device orientation
+2026-11-11 08:31:10.529862+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    13.65s Getting device orientation
+2026-11-11 08:31:10.530898+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:10.530983+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:10.532508+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:10.534495+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:10.534972+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:10.535073+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    13.66s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:10.584538+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:10.584669+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    13.71s Checking existence of `StatusBar (First Match)`
+    t =    13.71s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    13.73s Find the StatusBar (Element at index 0)
+    t =    13.75s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:10.644378+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.059646010398864746
+2026-11-11 08:31:10.644457+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:10.644977+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0005010366439819336
+    t =    13.77s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:10.659552+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:10.669323+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:10.866189+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:31:11.023347+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:31:11.025328+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    14.15s Getting device orientation
+2026-11-11 08:31:11.026536+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =    14.15s Getting device orientation
+2026-11-11 08:31:11.027289+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 67.0, 805.0
+    t =    14.15s Getting device orientation
+2026-11-11 08:31:11.361808+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.33373403549194336
+2026-11-11 08:31:11.364789+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:11.569286+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    14.69s Getting device orientation
+2026-11-11 08:31:11.571812+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    14.69s Getting device orientation
+2026-11-11 08:31:11.572928+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:11.573037+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:11.574918+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:11.576591+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:11.577044+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:11.577089+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    14.70s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:11.642933+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:11.643077+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    14.76s Checking existence of `StatusBar (First Match)`
+    t =    14.77s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    14.79s Find the StatusBar (Element at index 0)
+    t =    14.80s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:11.702390+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.05924999713897705
+2026-11-11 08:31:11.702466+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:11.702882+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.00040209293365478516
+    t =    14.82s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:11.716853+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:11.735348+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    14.86s Getting device orientation
+2026-11-11 08:31:11.738086+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    14.86s Getting device orientation
+2026-11-11 08:31:11.739261+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:11.739363+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:11.741080+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:11.742853+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:11.743286+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:11.743322+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    14.86s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:11.809123+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:11.809273+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    14.93s Checking existence of `StatusBar (First Match)`
+    t =    14.94s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    14.95s Find the StatusBar (Element at index 0)
+    t =    14.97s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:11.868916+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.05959200859069824
+2026-11-11 08:31:11.868988+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:11.869422+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0004140138626098633
+    t =    14.99s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:11.883753+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:11.895800+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:12.094568+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:31:12.252820+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:31:12.254652+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    15.38s Getting device orientation
+2026-11-11 08:31:12.255727+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =    15.38s Getting device orientation
+2026-11-11 08:31:12.256437+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 201.0, 805.0
+    t =    15.38s Getting device orientation
+2026-11-11 08:31:12.586784+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.3295520544052124
+2026-11-11 08:31:12.589002+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:12.799705+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    15.92s Getting device orientation
+2026-11-11 08:31:12.802509+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    15.92s Getting device orientation
+2026-11-11 08:31:12.803567+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:12.803665+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:12.805799+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:12.807273+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:12.807657+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:12.807719+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    15.93s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:12.855873+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:12.856004+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    15.98s Checking existence of `StatusBar (First Match)`
+    t =    15.98s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    16.00s Find the StatusBar (Element at index 0)
+    t =    16.02s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:12.915550+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.0595020055770874
+2026-11-11 08:31:12.915617+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:12.916027+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.00038802623748779297
+    t =    16.04s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:12.930000+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:12.941575+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    16.06s Getting device orientation
+2026-11-11 08:31:12.944060+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    16.07s Getting device orientation
+2026-11-11 08:31:12.945159+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:12.945249+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:12.947170+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    16.07s Getting device orientation
+2026-11-11 08:31:12.949725+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    16.07s Getting device orientation
+2026-11-11 08:31:12.951026+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:12.951129+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:12.952431+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    16.07s Getting device orientation
+2026-11-11 08:31:12.954903+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    16.08s Getting device orientation
+2026-11-11 08:31:12.955982+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:12.956075+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:12.957209+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:13.157770+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /swipeV2
+2026-11-11 08:31:13.159754+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    16.28s Getting device orientation
+2026-11-11 08:31:13.160999+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =    16.28s Getting device orientation
+    t =    16.28s Getting device orientation
+2026-11-11 08:31:13.162367+0700 maestro-driver-iosUITests-Runner[95825:3320227] [SwipeRouteHandlerV2] Swipe (v2) from (201.0, 786.0) to (201.0, 87.0) with 0.4 duration
+2026-11-11 08:31:13.163747+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    16.29s Swipe (v2) from (201.0, 786.0) to (201.0, 87.0) with 0.4 duration
+2026-11-11 08:31:13.164304+0700 maestro-driver-iosUITests-Runner[95825:3320227] Quiescence checks are disabled for com.tiketsampainonton.rusuhbooking application. Making it to believe it is idling
+    t =    16.29s     Find the Any (First Match)
+    t =    16.29s Application is configured to skip UI interruption handling
+    t =    16.29s     Synthesize event
+    t =    16.29s         Getting device orientation
+2026-11-11 08:31:13.892544+0700 maestro-driver-iosUITests-Runner[95825:3320227] Quiescence checks are disabled for com.tiketsampainonton.rusuhbooking application. Making it to believe it is idling
+2026-11-11 08:31:13.897129+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:14.112877+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    17.23s Getting device orientation
+2026-11-11 08:31:14.115664+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    17.24s Getting device orientation
+2026-11-11 08:31:14.116876+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:14.116971+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:14.118974+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:14.120606+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:14.121022+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:14.121071+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    17.24s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:14.169306+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:14.169439+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    17.29s Checking existence of `StatusBar (First Match)`
+    t =    17.30s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    17.31s Find the StatusBar (Element at index 0)
+    t =    17.33s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:14.228836+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.05934798717498779
+2026-11-11 08:31:14.228914+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:14.229326+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.00038993358612060547
+    t =    17.35s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:14.243563+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:14.252452+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:14.452391+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:31:14.611116+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:31:14.613151+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    17.73s Getting device orientation
+2026-11-11 08:31:14.614373+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =    17.74s Getting device orientation
+2026-11-11 08:31:14.615284+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 67.0, 805.0
+    t =    17.74s Getting device orientation
+2026-11-11 08:31:14.950508+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.3344210386276245
+2026-11-11 08:31:14.952815+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:15.162926+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    18.28s Getting device orientation
+2026-11-11 08:31:15.165731+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    18.29s Getting device orientation
+2026-11-11 08:31:15.166780+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:15.166874+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:15.168895+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:15.170596+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:15.171027+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:15.171070+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    18.29s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:15.238963+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:15.239110+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    18.36s Checking existence of `StatusBar (First Match)`
+    t =    18.37s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    18.38s Find the StatusBar (Element at index 0)
+    t =    18.40s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:15.299676+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.06052589416503906
+2026-11-11 08:31:15.299738+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:15.300121+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0003679990768432617
+    t =    18.42s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:15.314349+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:15.329515+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    18.45s Getting device orientation
+2026-11-11 08:31:15.332634+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    18.45s Getting device orientation
+2026-11-11 08:31:15.334006+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:15.334121+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:15.335349+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:15.337369+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:15.337870+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:15.337924+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    18.46s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:15.403226+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:15.403365+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    18.52s Checking existence of `StatusBar (First Match)`
+    t =    18.53s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    18.55s Find the StatusBar (Element at index 0)
+    t =    18.56s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:15.463181+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.05976593494415283
+2026-11-11 08:31:15.463246+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:15.463667+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0003979206085205078
+    t =    18.58s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:15.477989+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:15.487988+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:15.692447+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:31:15.853380+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:31:15.855536+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    18.98s Getting device orientation
+2026-11-11 08:31:15.856805+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =    18.98s Getting device orientation
+2026-11-11 08:31:15.857622+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 201.0, 805.0
+    t =    18.98s Getting device orientation
+2026-11-11 08:31:16.193578+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.3351069688796997
+2026-11-11 08:31:16.196839+0700 maestro-driver-iosUITests-Runner[95825:3320324] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:16.406367+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    19.53s Getting device orientation
+2026-11-11 08:31:16.409241+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    19.53s Getting device orientation
+2026-11-11 08:31:16.410426+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:16.410547+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:16.411850+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:16.413849+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:16.414501+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:16.414569+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    19.54s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:16.463939+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:16.464077+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    19.59s Checking existence of `StatusBar (First Match)`
+    t =    19.59s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    19.61s Find the StatusBar (Element at index 0)
+    t =    19.63s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:16.525263+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.06114697456359863
+2026-11-11 08:31:16.525342+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:16.525771+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0004080533981323242
+    t =    19.65s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:16.539846+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:16.548004+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    19.67s Getting device orientation
+2026-11-11 08:31:16.550824+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    19.67s Getting device orientation
+2026-11-11 08:31:16.551987+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:16.552117+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:16.553711+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    19.67s Getting device orientation
+2026-11-11 08:31:16.556466+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    19.68s Getting device orientation
+2026-11-11 08:31:16.557585+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:16.557678+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:16.558975+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    19.68s Getting device orientation
+2026-11-11 08:31:16.561572+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    19.68s Getting device orientation
+2026-11-11 08:31:16.562763+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:16.562853+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:16.564096+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:16.763033+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /swipeV2
+2026-11-11 08:31:16.764955+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    19.89s Getting device orientation
+2026-11-11 08:31:16.766163+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =    19.89s Getting device orientation
+    t =    19.89s Getting device orientation
+2026-11-11 08:31:16.767603+0700 maestro-driver-iosUITests-Runner[95825:3320227] [SwipeRouteHandlerV2] Swipe (v2) from (201.0, 786.0) to (201.0, 87.0) with 0.4 duration
+2026-11-11 08:31:16.769056+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    19.89s Swipe (v2) from (201.0, 786.0) to (201.0, 87.0) with 0.4 duration
+2026-11-11 08:31:16.769618+0700 maestro-driver-iosUITests-Runner[95825:3320227] Quiescence checks are disabled for com.tiketsampainonton.rusuhbooking application. Making it to believe it is idling
+    t =    19.89s     Find the Any (First Match)
+    t =    19.89s Application is configured to skip UI interruption handling
+    t =    19.89s     Synthesize event
+    t =    19.89s         Getting device orientation
+2026-11-11 08:31:17.496247+0700 maestro-driver-iosUITests-Runner[95825:3320227] Quiescence checks are disabled for com.tiketsampainonton.rusuhbooking application. Making it to believe it is idling
+2026-11-11 08:31:17.499361+0700 maestro-driver-iosUITests-Runner[95825:3320312] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:17.722044+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    20.84s Getting device orientation
+2026-11-11 08:31:17.724660+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    20.85s Getting device orientation
+2026-11-11 08:31:17.725748+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:17.725839+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:17.727574+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:17.729565+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:17.729963+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:17.730017+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    20.85s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:17.778107+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:17.778239+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    20.90s Checking existence of `StatusBar (First Match)`
+    t =    20.91s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    20.92s Find the StatusBar (Element at index 0)
+    t =    20.94s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:17.839029+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.06074202060699463
+2026-11-11 08:31:17.839099+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:17.839495+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.00037097930908203125
+    t =    20.96s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:17.854048+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:17.862515+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:18.060907+0700 maestro-driver-iosUITests-Runner[95825:3320314] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-11 08:31:18.223935+0700 maestro-driver-iosUITests-Runner[95825:3320325] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-11 08:31:18.226180+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    21.35s Getting device orientation
+2026-11-11 08:31:18.227402+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+    t =    21.35s Getting device orientation
+2026-11-11 08:31:18.228286+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping 67.0, 805.0
+    t =    21.35s Getting device orientation
+2026-11-11 08:31:18.561793+0700 maestro-driver-iosUITests-Runner[95825:3320227] Tapping took 0.3326880931854248
+2026-11-11 08:31:18.564372+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-11 08:31:18.780779+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    21.90s Getting device orientation
+2026-11-11 08:31:18.783635+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+    t =    21.91s Getting device orientation
+2026-11-11 08:31:18.784787+0700 maestro-driver-iosUITests-Runner[95825:3320227] Returning cached screen size
+2026-11-11 08:31:18.784870+0700 maestro-driver-iosUITests-Runner[95825:3320227] Device orientation is 1
+2026-11-11 08:31:18.786640+0700 maestro-driver-iosUITests-Runner[95825:3320318] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-11 08:31:18.788340+0700 maestro-driver-iosUITests-Runner[95825:3320227] Detected running apps: ["com.tiketsampainonton.rusuhbooking"]
+2026-11-11 08:31:18.788802+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Start] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:18.788853+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    21.91s Find the Application 'com.tiketsampainonton.rusuhbooking'
+2026-11-11 08:31:18.854988+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-11 08:31:18.855218+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    21.98s Checking existence of `StatusBar (First Match)`
+    t =    21.98s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    22.00s Find the StatusBar (Element at index 0)
+    t =    22.02s Find the StatusBar (Element at index 1)
+2026-11-11 08:31:18.916412+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch status bar hierarchy - duration 0.06112205982208252
+2026-11-11 08:31:18.916496+0700 maestro-driver-iosUITests-Runner[95825:3320227] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-11 08:31:18.916915+0700 maestro-driver-iosUITests-Runner[95825:3320227] Fetch Safari WebView hierarchy - duration 0.0003979206085205078
+    t =    22.04s Find the Application 'com.apple.springboard'
+2026-11-11 08:31:18.930974+0700 maestro-driver-iosUITests-Runner[95825:3320227] [Done] View hierarchy snapshot for Application 'com.tiketsampainonton.rusuhbooking' 
+2026-11-11 08:31:19.716457+0700 maestro-driver-iosUITests-Runner[95825:3320323] [FlyingFox] <127.0.0.1> request: GET /status

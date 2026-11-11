@@ -46,7 +46,7 @@ describe("useNotifications (RBT-072)", () => {
     expect(mockRouter.push).toHaveBeenCalledWith("/success/bk-1");
   });
 
-  it("does not subscribe when optional push registration fails", async () => {
+  it("still listens for notification taps when optional push registration fails", async () => {
     const container = createContainer({ useMocks: true });
     const register = jest
       .spyOn(container.notification, "registerForRemotePush")
@@ -61,7 +61,7 @@ describe("useNotifications (RBT-072)", () => {
 
     renderHook(() => useNotifications(), { wrapper });
     await waitFor(() => expect(register).toHaveBeenCalled());
-    expect(subscribe).not.toHaveBeenCalled();
+    expect(subscribe).toHaveBeenCalledTimes(1);
   });
 
   it("ignores taps without a valid deep link", async () => {

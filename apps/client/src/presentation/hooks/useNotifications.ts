@@ -31,31 +31,17 @@ export function useNotifications(): void {
   const { notification } = useServices();
 
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
+    // Listen before requesting permission/token so a cold-start notification tap
+    // is not missed while the optional remote registration is in progress.
+    const unsubscribe = notification.subscribeToResponses((data) => {
+      const route = routeForTap(data as TappedNotificationData | undefined);
+      if (route) router.push(route as Href);
+    });
 
-    void (async () => {
-      // Ask permission + register for remote push (token handed to the BE
-      // later). On web this registers the service worker + push subscription
-      // (RBT-073, degrades gracefully when unsupported); on native it is the
-      // Expo push token (RBT-072).
-      try {
-        await notification.registerForRemotePush();
-      } catch {
-        // Push is optional and may be unavailable in Expo Go or offline.
-        return;
-      }
+    // Remote push is optional and may be unavailable in Expo Go or offline.
+    void notification.registerForRemotePush().catch(() => undefined);
 
-      try {
-        unsubscribe = notification.subscribeToResponses((data) => {
-          const route = routeForTap(data as TappedNotificationData | undefined);
-          if (route) router.push(route as Href);
-        });
-      } catch {
-        // Notification tap routing is optional when the platform lacks support.
-      }
-    })();
-
-    return () => unsubscribe?.();
+    return unsubscribe;
     // notification is a stable DI binding; run once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

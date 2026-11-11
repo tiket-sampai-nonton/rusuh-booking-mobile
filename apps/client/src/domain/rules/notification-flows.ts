@@ -4,7 +4,7 @@
  *
  * Builds the four mandated flows (expiry reminder, payment success, admission,
  * event reminder) as platform-neutral `LocalNotification`s. The adapter
- * (expo-notifications on native, web-push on web) only delivers what this rule
+ * (Notifee on native, web-push on web) only delivers what this rule
  * produces, so the copy + deep link are identical on every platform and
  * unit-testable without a device. A tap opens `deepLink` (RBT-072 tap→route).
  */
@@ -31,9 +31,43 @@ export function expiryReminder(
 export function paymentSuccess(bookingId: string): LocalNotification {
   return {
     kind: "payment_success",
+    notificationId: `payment-success-${bookingId}`,
     title: "Pembayaran berhasil",
     body: "Tiketmu sudah aktif. Buka e-tiket dan QR-nya di sini.",
     deepLink: `/success/${bookingId}`,
+  };
+}
+
+/** Payment failure/expiry — report the result without implying the ticket is lost. */
+export function paymentFailure(bookingId: string): LocalNotification {
+  return {
+    kind: "payment_failure",
+    notificationId: `payment-failure-${bookingId}`,
+    title: "Pembayaran belum berhasil",
+    body: "Pembayaranmu belum selesai. Kamu bisa coba lagi dari halaman pembayaran.",
+    deepLink: `/payment/${bookingId}`,
+  };
+}
+
+/** Buyer leaves the payment screen; this does not claim the provider cancelled it. */
+export function paymentCancelled(bookingId: string): LocalNotification {
+  return {
+    kind: "payment_cancelled",
+    notificationId: `payment-left-${bookingId}`,
+    title: "Proses pembayaran ditutup",
+    body: "Kamu menutup proses pembayaran sebelum selesai. Kamu bisa lanjut lagi kapan saja.",
+    deepLink: `/payment/${bookingId}`,
+  };
+}
+
+/** Buyer successfully leaves the waiting room. */
+export function waitingRoomLeft(eventId: string): LocalNotification {
+  return {
+    kind: "waiting_room_left",
+    notificationId: `queue-left-${eventId}`,
+    title: "Kamu sudah keluar dari antrean",
+    body: "Tidak apa-apa, kamu bisa pilih event lain atau antre lagi kapan saja.",
+    deepLink: `/events/${eventId}`,
   };
 }
 
@@ -65,6 +99,9 @@ export function eventReminder(
 export const NOTIFICATION_KINDS: readonly NotificationKind[] = [
   "expiry_reminder",
   "payment_success",
+  "payment_failure",
+  "payment_cancelled",
+  "waiting_room_left",
   "admission",
   "event_reminder",
 ];

@@ -19,7 +19,7 @@
  * - Footer: 1px dashed border (not 2px solid), 32x32 icon btn
  * - Badge: 10px, pink bg (sold out)
  */
-import { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import { CachedImage } from "@presentation/components/design-system/CachedImage";
 import Animated, {
@@ -59,7 +59,6 @@ import {
   styleForEventCardAnimatedView1,
   styleForEventCardPressable2,
   styleForEventCardAnimatedView3,
-  styleForEventCardAnimatedView4,
   styleForEventCardAnimatedView5,
   styleForEventCardText6,
   styleForEventCardText7,
@@ -96,8 +95,6 @@ export interface EventCardProps {
   readonly staggerIndex?: number;
   /** List view mode: use 16:9 aspect ratio instead of 1:1 */
   readonly listMode?: boolean;
-  /** Native Home carousel: reveal the color layer when the card enters view. */
-  readonly isImageVisible?: boolean;
 }
 
 /** Badge label per tone */
@@ -109,28 +106,143 @@ const BADGE_LABEL: Record<BadgeTone, string> = {
   done: "Selesai",
 };
 
-export function EventCard({
+function EventCardComponent(props: EventCardProps) {
+  const isNative = Platform.OS !== "web";
+  return isNative ? (
+    <NativeEventCard {...props} />
+  ) : (
+    <AnimatedEventCard {...props} />
+  );
+}
+
+/** Native event cards are static while scrolling; avoid per-cell Reanimated worklets. */
+function NativeEventCard({
+  event,
+  onPress,
+  history = false,
+  listMode = false,
+}: EventCardProps) {
+  const badge = badgeFor(event);
+  const disabled = badge.disabled || history;
+  const badgeAlwaysShow =
+    badge.tone === "soldout" || badge.tone === "done" || badge.tone === "low";
+  const dateTxt = formatDateID(event.startsAt);
+  const image = eventImage(event.id, event.thumbnailUrl ?? event.imageUrl);
+  const imageUri = resizeNativeUnsplashImage(image, listMode);
+
+  return (
+    <View style={styleForEventCardView0()}>
+      <View style={[styleForEventCardAnimatedView1(), pointerEventsNone]} />
+      <View style={eventCardContainerStyle(false, disabled, true)}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${event.name}, ${event.venue ?? ""}, ${dateTxt}`}
+          accessibilityState={{ disabled: history }}
+          disabled={history}
+          onPress={() => onPress(event.id)}
+          testID={`v2-event-card-${event.id}`}
+        >
+          <View style={eventCardImageContainerStyle(true, listMode, false)}>
+            <View style={styleForEventCardAnimatedView3()}>
+              <CachedImage
+                source={{ uri: imageUri }}
+                resizeMode="cover"
+                accessibilityIgnoresInvertColors
+                style={eventCardImageStyle(false, false)}
+              />
+            </View>
+            <View
+              style={[
+                styleForEventCardAnimatedView5(true, badge),
+                {
+                  opacity: badgeAlwaysShow ? 1 : 0,
+                  transform: [{ translateX: badgeAlwaysShow ? 0 : -110 }],
+                },
+              ]}
+            >
+              <Text style={styleForEventCardText6(true)}>
+                {BADGE_LABEL[badge.tone]}
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={eventCardContentStyle(
+              MOBILE_CONTENT_PADDING,
+              true,
+              false,
+              listMode,
+            )}
+          >
+            <View>
+              {dateTxt && (
+                <Text style={styleForEventCardText7(MOBILE_DATE_SIZE, true)}>
+                  {dateTxt}
+                </Text>
+              )}
+              <Text
+                style={styleForEventCardAnimatedText8(MOBILE_TITLE_SIZE, true)}
+                numberOfLines={2}
+              >
+                {event.name}
+              </Text>
+              {event.venue && (
+                <View style={styleForEventCardView9(true)}>
+                  <PinIcon color={designColors.inkMuted} size={12} />
+                  <Text
+                    style={styleForEventCardText10(MOBILE_VENUE_SIZE)}
+                    numberOfLines={1}
+                  >
+                    {event.venue}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View style={eventCardFooterStyle(true)}>
+              <View>
+                <Text style={componentStyles.elementColor1}>Mulai dari</Text>
+                <Text style={styleForEventCardText11(true)}>
+                  {minorToIDR(event.minPriceMinor)}
+                </Text>
+              </View>
+              <View style={styleForEventCardView12(disabled)}>
+                <ArrowIcon
+                  direction="right"
+                  color={eventCardArrowColor(disabled, false)}
+                  size={16}
+                />
+              </View>
+            </View>
+          </View>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+function AnimatedEventCard({
   event,
   onPress,
   history = false,
   staggerIndex = 0,
   listMode = false,
-  isImageVisible = false,
 }: EventCardProps) {
   const reducedMotion = useReducedMotion();
   const { isNative, isMobileWeb } = useResponsive();
   const isMobileLayout = isNative || isMobileWeb;
   const compactListMode = listMode || isMobileWeb;
   const hovered = useSharedValue(0);
-  const staggerOpacity = useSharedValue(reducedMotion ? 1 : 0);
-  const staggerTranslateY = useSharedValue(reducedMotion ? 0 : 20);
+  const staggerOpacity = useSharedValue(reducedMotion || isNative ? 1 : 0);
+  const staggerTranslateY = useSharedValue(reducedMotion || isNative ? 0 : 20);
   const [isHovered, setIsHovered] = useState(false); // For web CSS filter
   const badge = badgeFor(event);
   const disabled = badge.disabled || history;
   const dateTxt = formatDateID(event.startsAt);
   const image = eventImage(event.id, event.thumbnailUrl ?? event.imageUrl);
-  const grayscaleImage = grayscaleImageUrl(image);
-  const hasColorRevealLayer = isNative && grayscaleImage !== image;
+  const imageUri = isNative
+    ? resizeNativeUnsplashImage(image, listMode)
+    : image;
 
   // Mobile vs Desktop sizing
   const contentPadding = isMobileWeb
@@ -144,7 +256,9 @@ export function EventCard({
 
   // Stagger animation on mount (mobile: FadeInUp.delay(index * 100))
   useEffect(() => {
-    if (reducedMotion) {
+    // Virtualized native cells can mount repeatedly while scrolling. Keep them
+    // static there; web retains the stagger entrance motion.
+    if (reducedMotion || isNative) {
       staggerOpacity.value = 1;
       staggerTranslateY.value = 0;
       return;
@@ -158,12 +272,19 @@ export function EventCard({
       delay,
       withTiming(0, { duration: 500, easing: EASE }),
     );
-  }, [reducedMotion, staggerIndex, staggerOpacity, staggerTranslateY]);
+  }, [
+    isNative,
+    reducedMotion,
+    staggerIndex,
+    staggerOpacity,
+    staggerTranslateY,
+  ]);
 
   const setHovered = useCallback(
     (v: boolean) => {
       if (disabled) return;
-      setIsHovered(v); // For web CSS
+      if (isWeb) setIsHovered(v); // Web hover styles only.
+      if (isNative) return; // Native cards stay static during fast scrolling.
       if (reducedMotion) {
         hovered.value = v ? 1 : 0;
         return;
@@ -173,7 +294,7 @@ export function EventCard({
         easing: EASE,
       });
     },
-    [disabled, reducedMotion, hovered],
+    [disabled, isNative, reducedMotion, hovered],
   );
 
   // Card hover: translateY(-8px) rotateX(2deg) + shadow
@@ -292,17 +413,11 @@ export function EventCard({
               style={[styleForEventCardAnimatedView3(), imageScaleStyle]}
             >
               <CachedImage
-                source={{
-                  uri: isNative ? grayscaleImage : image,
-                  ...(isNative ? { memoryCache: false } : {}),
-                }}
+                source={{ uri: imageUri }}
                 resizeMode="cover"
                 accessibilityIgnoresInvertColors
                 style={webImageStyle}
               />
-              {hasColorRevealLayer && isImageVisible ? (
-                <NativeColorRevealImage image={image} reduced={reducedMotion} />
-              ) : null}
             </Animated.View>
 
             {/* Badge */}
@@ -394,41 +509,20 @@ export function EventCard({
   );
 }
 
-function NativeColorRevealImage({
-  image,
-  reduced,
-}: {
-  readonly image: string;
-  readonly reduced: boolean;
-}) {
-  const opacity = useSharedValue(0);
-  useEffect(() => {
-    opacity.value = reduced
-      ? 1
-      : withTiming(1, { duration: 900, easing: EASE });
-  }, [opacity, reduced]);
-  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
-
-  return (
-    <Animated.View
-      style={[styleForEventCardAnimatedView4(), style, pointerEventsNone]}
-    >
-      <CachedImage
-        source={{ uri: image, memoryCache: false }}
-        resizeMode="cover"
-        accessibilityIgnoresInvertColors
-        style={componentStyles.elementWidth0}
-      />
-    </Animated.View>
-  );
-}
-
+export const EventCard = memo(EventCardComponent);
 export default EventCard;
 
-function grayscaleImageUrl(image: string): string {
-  if (!image.includes("images.unsplash.com")) return image;
-  const separator = image.includes("?") ? "&" : "?";
-  return `${image}${separator}sat=-100`;
+function resizeNativeUnsplashImage(uri: string, listMode: boolean): string {
+  if (!uri.includes("images.unsplash.com")) return uri;
+
+  const [path, query = ""] = uri.split("?", 2);
+  const params = new URLSearchParams(query);
+  // Two-column cards render at roughly 480 physical pixels on the QA phone.
+  // Request a modestly larger source for density while avoiding oversized
+  // decodes during a fast scroll; a single-column card can use up to 960 px.
+  params.set("w", listMode ? "960" : "576");
+  params.set("q", "75");
+  return `${path}?${params.toString()}`;
 }
 
 function eventCardArrowColor(disabled: boolean, isHovered: boolean): string {

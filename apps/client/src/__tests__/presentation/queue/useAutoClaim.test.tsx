@@ -192,17 +192,28 @@ describe("useAutoClaim", () => {
     );
   });
 
-  it("maps any other claim failure to the UNKNOWN error state", async () => {
+  it("surfaces an invalid admission token as a specific recovery state", async () => {
     const repo = new FakeBookingRepository();
-    // A typed-but-unrelated code still surfaces as UNKNOWN in the UI's
-    // TURN_MISSED/EVENT_SOLD_OUT discrimination.
     repo.createSessionError = mapError({ code: "ADMISSION_TOKEN_INVALID" });
     const { result } = renderHook(
       () =>
         useAutoClaim({ eventId: "evt-1", queueId: "q-1", status: "ADMITTED" }),
       { wrapper: makeWrapper(repo) },
     );
-    await waitFor(() => expect(result.current.errorState).toBe("UNKNOWN"));
+    await waitFor(() =>
+      expect(result.current.errorState).toBe("ADMISSION_TOKEN_INVALID"),
+    );
     expect(result.current.error).not.toBeNull();
+  });
+
+  it("maps any other claim failure to the UNKNOWN error state", async () => {
+    const repo = new FakeBookingRepository();
+    repo.createSessionError = mapError({ code: "BOOKING_LOCKED" });
+    const { result } = renderHook(
+      () =>
+        useAutoClaim({ eventId: "evt-1", queueId: "q-1", status: "ADMITTED" }),
+      { wrapper: makeWrapper(repo) },
+    );
+    await waitFor(() => expect(result.current.errorState).toBe("UNKNOWN"));
   });
 });

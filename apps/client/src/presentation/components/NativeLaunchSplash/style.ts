@@ -73,8 +73,11 @@ export const componentStyles = StyleSheet.create({
   elementColor10: {
     color: withAlpha(designColors.ground, 0.6),
     fontFamily: plusJakartaSansFonts.medium,
-    fontSize: 14,
-    letterSpacing: 2,
+    fontSize: 12,
+    letterSpacing: 0.4,
+    maxWidth: "100%",
+    flexShrink: 1,
+    textAlign: "center",
   },
   elementPosition11: {
     position: "absolute",

@@ -18,6 +18,7 @@ import type {
 import type { Container } from "@providers/container";
 import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
+import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notification.adapter";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 
 class StatusRepo implements PaymentRepository {
@@ -50,9 +51,16 @@ class StatusRepo implements PaymentRepository {
   }
 }
 
-function wrapper(repo: PaymentRepository) {
+function wrapper(
+  repo: PaymentRepository,
+  notification = new MockNotificationAdapter(),
+) {
   const base = createContainer({ useMocks: true });
-  const container: Container = { ...base, paymentRepository: repo };
+  const container: Container = {
+    ...base,
+    paymentRepository: repo,
+    notification,
+  };
   const qc = new QueryClient({
     defaultOptions: {
       queries: { retry: false, gcTime: Infinity },
@@ -77,26 +85,45 @@ function attempt(
 
 describe("useVerifyPayment (RBT-063)", () => {
   it("PAID → verdict paid, settled, route /success", async () => {
+    const notification = new MockNotificationAdapter();
     const { result } = renderHook(() => useVerifyPayment("a1", "bk-1"), {
-      wrapper: wrapper(new StatusRepo(attempt("PAID"))),
+      wrapper: wrapper(new StatusRepo(attempt("PAID")), notification),
     });
     await waitFor(() => expect(result.current.verdict).toBe("paid"));
     expect(result.current.isSettled).toBe(true);
     expect(result.current.route).toBe("/success/bk-1");
+    await waitFor(() =>
+      expect(notification.scheduled).toEqual([
+        expect.objectContaining({
+          kind: "payment_success",
+          deepLink: "/success/bk-1",
+        }),
+      ]),
+    );
   });
 
   it("FAILED → verdict failed, route /expired", async () => {
+    const notification = new MockNotificationAdapter();
     const { result } = renderHook(() => useVerifyPayment("a1", "bk-1"), {
-      wrapper: wrapper(new StatusRepo(attempt("FAILED"))),
+      wrapper: wrapper(new StatusRepo(attempt("FAILED")), notification),
     });
     await waitFor(() => expect(result.current.verdict).toBe("failed"));
     expect(result.current.route).toBe(
       "/failed/bk-1?reason=payment&bookingId=bk-1&status=FAILED",
     );
+    await waitFor(() =>
+      expect(notification.scheduled[0]).toEqual(
+        expect.objectContaining({
+          kind: "payment_failure",
+          deepLink: "/payment/bk-1",
+        }),
+      ),
+    );
   });
 
   it("pending with time left → verdict pending, route null (keep polling)", async () => {
     const future = new Date(Date.now() + 300_000).toISOString();
+    const notification = new MockNotificationAdapter();
     const { result } = renderHook(() => useVerifyPayment("a1", "bk-1"), {
       wrapper: wrapper(
         new StatusRepo(
@@ -105,12 +132,14 @@ describe("useVerifyPayment (RBT-063)", () => {
             serverTime: new Date().toISOString(),
           }),
         ),
+        notification,
       ),
     });
     await waitFor(() => expect(result.current.attempt).toBeDefined());
     expect(result.current.verdict).toBe("pending");
     expect(result.current.isSettled).toBe(false);
     expect(result.current.route).toBeNull();
+    expect(notification.scheduled).toHaveLength(0);
   });
 
   it("pending but SERVER deadline already passed → route /expired (reconciled)", async () => {

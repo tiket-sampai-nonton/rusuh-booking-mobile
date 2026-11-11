@@ -14,7 +14,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react-native";
-import { Dimensions, FlatList, Image, Platform } from "react-native";
+import { Dimensions, FlatList, Platform } from "react-native";
 
 import type {
   EventDetail,
@@ -120,29 +120,16 @@ describe("BrowseScreen — URL-driven filters", () => {
     expect(screen.getByTestId("browse-count")).toBeTruthy();
   });
 
-  it("loads the color image layer only for Browse cards in view", async () => {
-    const { UNSAFE_getByType, UNSAFE_getAllByType } = renderWithProviders(
-      <BrowseScreen />,
-      { container: { eventRepository: repo(CATALOG) } },
-    );
+  it("keeps native browse scrolling virtualized without viewability rerenders", async () => {
+    const { UNSAFE_getByType } = renderWithProviders(<BrowseScreen />, {
+      container: { eventRepository: repo(CATALOG) },
+    });
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
 
-    const imagesBeforeView = UNSAFE_getAllByType(Image).length;
     const list = UNSAFE_getByType(FlatList);
-    const visibleToken = {
-      item: CATALOG[0],
-      key: CATALOG[0].id,
-      index: 0,
-      isViewable: true,
-    };
-    act(() =>
-      list.props.onViewableItemsChanged({
-        viewableItems: [visibleToken],
-        changed: [visibleToken],
-      }),
-    );
-
-    expect(UNSAFE_getAllByType(Image)).toHaveLength(imagesBeforeView + 1);
+    expect(list.props.windowSize).toBe(3);
+    expect(list.props.maxToRenderPerBatch).toBe(4);
+    expect(list.props.onViewableItemsChanged).toBeUndefined();
   });
 
   it("treats the all-genres URL value as the unfiltered category", async () => {
