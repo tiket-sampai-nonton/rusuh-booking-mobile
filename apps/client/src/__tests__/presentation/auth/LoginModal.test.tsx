@@ -21,6 +21,7 @@ import React from "react";
 import { Animated, BackHandler, Platform } from "react-native";
 
 import type { Container } from "@providers/container";
+import type { BuyerEmailStorage } from "@domain/auth/buyer-email-storage.port";
 import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
 import { ToastProvider } from "@presentation/components/design-system/Toast";
@@ -67,9 +68,14 @@ function renderModal(
   repo: UserRepository,
   visible = true,
   onOpenPrivacy = jest.fn(),
+  buyerEmailStorage?: BuyerEmailStorage,
 ) {
   const base = createContainer({ useMocks: true });
-  const container: Container = { ...base, userRepository: repo };
+  const container: Container = {
+    ...base,
+    userRepository: repo,
+    ...(buyerEmailStorage ? { buyerEmailStorage } : {}),
+  };
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false, gcTime: Infinity },
@@ -336,6 +342,32 @@ describe("LoginModal (RBT-020)", () => {
     expect(queryByTestId("login-logout")).toBeNull();
     expect(getByTestId("login-close-signed")).toBeTruthy();
     expect(getByText("Berhasil masuk.")).toBeTruthy();
+  });
+
+  it("persists the verified email for checkout autofill after refresh", async () => {
+    const repo = new FakeUserRepository();
+    const buyerEmailStorage: BuyerEmailStorage = {
+      save: jest.fn().mockResolvedValue(undefined),
+      load: jest.fn().mockResolvedValue(null),
+      clear: jest.fn().mockResolvedValue(undefined),
+    };
+    const { getByTestId, getByText } = renderModal(
+      repo,
+      true,
+      jest.fn(),
+      buyerEmailStorage,
+    );
+    fireEvent.changeText(getByTestId("login-email-input"), "buyer@mail.com");
+    fireEvent.press(getByTestId("login-send"));
+    await waitFor(() => getByText("Verifikasi OTP"));
+    for (const [index, digit] of [..."123456"].entries()) {
+      fireEvent.changeText(getByTestId(`login-otp-${index}`), digit);
+    }
+    fireEvent.press(getByTestId("login-verify"));
+
+    await waitFor(() =>
+      expect(buyerEmailStorage.save).toHaveBeenCalledWith("buyer@mail.com"),
+    );
   });
 
   it("automatically closes after five seconds and keeps manual close available", async () => {

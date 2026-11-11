@@ -109,8 +109,8 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
 
   const [buyerName, setBuyerName] = useState(prefill.fullName ?? "");
   const [buyerNik, setBuyerNik] = useState("");
-  // The full login email is held in memory for this session; the profile API
-  // returns only a masked address, so we never persist the unmasked value.
+  // The full login email is restored from BuyerEmailStorage when available;
+  // the profile API returns only a masked address.
   const [buyerEmail, setBuyerEmail] = useState(prefill.email ?? "");
   const [emailConfirmation, setEmailConfirmation] = useState(
     prefill.email ?? "",

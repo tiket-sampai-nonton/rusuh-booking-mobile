@@ -181,7 +181,7 @@ export function styleForEventCardAnimatedView5(
     position: "absolute",
     top: designSpacingSemantic.xs,
     left: designSpacingSemantic.xs,
-    // Mobile: pink bg (sold out), desktop: black bg unless sold out.
+    // Mobile: red bg (sold out), desktop: black bg unless sold out.
     backgroundColor,
     paddingHorizontal: arg0 ? 8 : 10, // Mobile: 0.5rem = 8px
     paddingVertical: arg0 ? 4 : 4, // Mobile: 0.25rem = 4px

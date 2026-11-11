@@ -1,4 +1,4 @@
-import { act, render } from "@testing-library/react-native";
+import { act, render, waitFor } from "@testing-library/react-native";
 
 import type { Container } from "@providers/container";
 import { createContainer } from "@providers/container";
@@ -33,6 +33,34 @@ describe("AccountSessionBridge lifecycle", () => {
 
     await act(async () => Promise.resolve());
     expect(getMe).not.toHaveBeenCalled();
+  });
+
+  it("restores the saved buyer email with the authenticated profile", async () => {
+    const base = createContainer({ useMocks: true });
+    const container: Container = {
+      ...base,
+      buyerEmailStorage: {
+        ...base.buyerEmailStorage,
+        load: async () => "buyer@example.com",
+      },
+      tokenStorage: { ...base.tokenStorage, load: async () => "session-token" },
+      userRepository: {
+        ...base.userRepository,
+        getMe: async () => ({
+          emailMasked: "b***@example.com",
+          fullName: "Buyer",
+          hasNik: false,
+        }),
+      },
+    };
+
+    renderBridge(container);
+    await waitFor(() =>
+      expect(useAccountStore.getState().buyerEmail).toBe("buyer@example.com"),
+    );
+    expect(useAccountStore.getState().profile?.emailMasked).toBe(
+      "b***@example.com",
+    );
   });
 
   it("ignores a session result after the bridge unmounts", async () => {

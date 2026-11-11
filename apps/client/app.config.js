@@ -49,6 +49,11 @@ const config = {
   },
   orientation: "portrait",
   userInterfaceStyle: "automatic",
+  androidStatusBar: {
+    backgroundColor: "#FFFFFF",
+    barStyle: "dark-content",
+    translucent: false,
+  },
   icon: "./assets/app-icon.png",
   splash: {
     image: "./assets/brand-mark.png",

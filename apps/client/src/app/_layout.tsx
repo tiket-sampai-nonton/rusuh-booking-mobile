@@ -56,7 +56,7 @@ export default function RootLayout() {
           <ActivityIndicator size="large" color={brand.primary} />
         </View>
       )}
-      <StatusBar style={showSplash ? "light" : "auto"} />
+      <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
       {showSplash && Platform.OS !== "web" ? (
         <NativeLaunchSplash
           onFinish={finishSplash}

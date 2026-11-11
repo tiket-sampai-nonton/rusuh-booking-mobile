@@ -277,6 +277,23 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     expect(screen.getByTestId("buyer-email").props.value).toBe("");
   });
 
+  it("prefills buyer email restored for the signed-in account", async () => {
+    useAccountStore.getState().setBuyerEmail("rizky@example.com");
+    useAccountStore.getState().setProfile(LOGGED_IN);
+    renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
+      container: { bookingRepository: bookingRepo(SESSION) },
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("buyer-email").props.value).toBe(
+        "rizky@example.com",
+      ),
+    );
+    expect(screen.getByTestId("buyer-email-confirmation").props.value).toBe(
+      "rizky@example.com",
+    );
+  });
+
   it("back opens the confirm-leave dialog; leaving re-queues to home", async () => {
     const clearMembership = jest.fn(async () => undefined);
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {

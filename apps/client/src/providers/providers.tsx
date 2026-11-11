@@ -17,6 +17,7 @@ import type { Container } from "@providers/container";
 import { createQueryClient } from "@providers/query-client";
 import { ServiceProvider } from "@providers/service-context";
 import { ToastProvider } from "@presentation/components/design-system/Toast";
+import { NativeStatusBarBackdrop } from "@presentation/components/NativeStatusBarBackdrop";
 
 export interface AppProvidersProps {
   /** Override the container (tests inject mocks). */
@@ -49,6 +50,7 @@ export function AppProviders({
   );
   return (
     <SafeAreaProvider>
+      <NativeStatusBarBackdrop />
       <QueryClientProvider client={client}>{serviceTree}</QueryClientProvider>
     </SafeAreaProvider>
   );

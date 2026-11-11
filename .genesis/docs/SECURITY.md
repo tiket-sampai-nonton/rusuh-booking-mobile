@@ -27,7 +27,7 @@
   - Never store raw NIK in AsyncStorage / localStorage / any non-authoritative client store.
   - Display **masked** NIK only (e.g. `3171********1234`); BE returns `nikMasked`.
   - Never embed raw NIK in the QR payload (QR comes from BE; FE renders as-is but must not add NIK).
-- Email used for e-ticket delivery; treat as PII, mask in display where shown (`emailMasked`).
+- Email used for e-ticket delivery; treat as PII, mask in display where shown (`emailMasked`). The signed-in email is persisted for checkout autofill: native uses SecureStore; web uses localStorage alongside the approved web auth session, so successful XSS can read it. Clear it on sign-out. Prefer an HttpOnly cookie-backed profile field if the BE contract supports that later.
 - Clear checkout/session/NIK state on success, expiry, logout, or explicit cancellation (D7.4).
 
 ## 4. Payment / PCI (D7.3, D10)

@@ -24,10 +24,10 @@ const tailwindBrand = (
 ).theme?.extend?.colors?.brand;
 
 describe("RBT-003 raw tokens", () => {
-  it("exposes the black, white, and pink brand palette", () => {
-    expect(brand.primary).toBe("#D81B60");
-    expect(brand.deep).toBe("#880E4F");
-    expect(brand.pink).toBe("#FF5C9A");
+  it("exposes the black, white, and red brand palette", () => {
+    expect(brand.primary).toBe("#EC1C24");
+    expect(brand.deep).toBe("#A8111B");
+    expect(brand.ember).toBe("#FF5A2D");
   });
 
   it("mirrors the Tailwind brand palette as the canonical token source", () => {
@@ -37,7 +37,7 @@ describe("RBT-003 raw tokens", () => {
 
     expect(brand.primary).toBe(tailwindBrand.DEFAULT);
     expect(brand.deep).toBe(tailwindBrand.deep);
-    expect(brand.pink).toBe(tailwindBrand.pink);
+    expect(brand.ember).toBe(tailwindBrand.ember);
   });
 
   it("exposes light + dark status hues", () => {
@@ -46,22 +46,22 @@ describe("RBT-003 raw tokens", () => {
       okDark: "#4ADE80",
       warn: "#FF6600",
       warnDark: "#F5B301",
-      error: "#D81B60",
-      errorDark: "#FF5C9A",
+      error: "#EC1C24",
+      errorDark: "#FF5A2D",
     });
   });
 
   it("exposes prototype neutral/surface hues", () => {
-    expect(neutral.ink).toBe("#000000");
+    expect(neutral.ink).toBe("#0A0A0C");
     expect(neutral.ink2).toBe("#121217");
-    expect(neutral.paper).toBe("#FFFFFF");
+    expect(neutral.paper).toBe("#FBFBFD");
     expect(neutral.card).toBe("#FFFFFF");
     expect(neutral.darkBackground).toBe("#0A0A0C");
     expect(neutral.darkCard).toBe("#121217");
     expect(neutral.darkForeground).toBe("#FFFFFF");
     expect(neutral.overlay).toBe("#0A0A0C");
     expect(neutral.muted).toBe("#666666");
-    expect(neutral.line).toBe("rgba(0,0,0,0.14)");
+    expect(neutral.line).toBe("rgba(10,10,12,0.14)");
     expect(neutral.mutedDark).toBe("rgba(255,255,255,0.62)");
     expect(neutral.lineDark).toBe("rgba(255,255,255,0.18)");
     expect(neutral.field).toBe("#F5F5F5");
@@ -79,9 +79,9 @@ describe("RBT-003 raw tokens", () => {
       text: "#E65100",
     });
     expect(zone.bad).toEqual({
-      bg: "#FCE4EC",
-      border: "#D81B60",
-      text: "#880E4F",
+      bg: "#FDE8E8",
+      border: "#EC1C24",
+      text: "#A8111B",
     });
   });
 
@@ -138,8 +138,8 @@ describe("RBT-003 raw tokens", () => {
   });
 
   it("shadow strings are present for the four prototype elevations", () => {
-    expect(shadow.brand).toContain("rgba(216,27,96,0.28)");
-    expect(shadow.button).toContain("rgba(0,0,0,0.42)");
+    expect(shadow.brand).toContain("rgba(236,28,36,0.28)");
+    expect(shadow.button).toContain("rgba(10,10,12,0.42)");
     expect(shadow.filter).toContain("rgba(18,18,23,0.5)");
     expect(shadow.ok).toContain("rgba(0,170,0,0.36)");
   });

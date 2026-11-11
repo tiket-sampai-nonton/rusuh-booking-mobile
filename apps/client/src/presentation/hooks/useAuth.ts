@@ -75,7 +75,7 @@ export interface UseAuthResult {
  * `userRepository`. The use cases are memoized per repository instance.
  */
 export function useAuth(): UseAuthResult {
-  const { userRepository, tokenStorage } = useServices();
+  const { userRepository, tokenStorage, buyerEmailStorage } = useServices();
   const setAccountProfile = useAccountStore((s) => s.setProfile);
   const setBuyerEmail = useAccountStore((s) => s.setBuyerEmail);
 
@@ -105,8 +105,11 @@ export function useAuth(): UseAuthResult {
     onSuccess: async (result, variables) => {
       await persistSession.execute(result.token);
       // The OTP address is the only unmasked email available to the client.
-      // Keep it in the in-memory account store for this session's checkout.
+      // Persist it through the platform adapter so Checkout can refill it after
+      // refresh/restart. Storage failure must not turn a valid login into an
+      // apparent auth failure; the current session still keeps it in memory.
       setBuyerEmail(variables.email);
+      await buyerEmailStorage.save(variables.email).catch(() => undefined);
       // Returning user → fetch the masked profile for the signed-in panel.
       // New user → RBT-021 completes registration before a profile exists.
       if (result.isNew) {
