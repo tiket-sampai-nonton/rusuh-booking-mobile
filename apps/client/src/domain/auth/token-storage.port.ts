@@ -5,12 +5,12 @@
  * WHERE the auth session token is persisted so the session lifecycle use cases
  * (persist / restore / clear) are storage-agnostic and deterministic in tests.
  * The composition root binds a concrete adapter: secure storage on native
- * (expo-secure-store), a non-persistent in-memory fallback on web/tests.
+ * (expo-secure-store), localStorage for real web sessions, and memory for
+ * mocks/tests.
  *
  * SECURITY: the token is sensitive. Adapters MUST NOT log the raw token and
  * MUST store it only through secure storage on native (SECURITY.md). The web
- * fallback is in-memory only (SecureStore is native-only) — the token does not
- * survive a page reload on web; that tradeoff is documented on the adapters.
+ * adapter may persist it in localStorage and must never log the raw value.
  */
 export interface TokenStorage {
   /** Persist the auth session token (overwrites any existing value). */

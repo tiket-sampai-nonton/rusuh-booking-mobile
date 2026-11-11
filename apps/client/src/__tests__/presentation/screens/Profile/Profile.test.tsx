@@ -10,6 +10,7 @@ import type {
 } from "@domain/repositories/user.repository";
 import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
+import { ToastProvider } from "@presentation/components/design-system/Toast";
 import { ProfileScreen } from "@presentation/screens/Profile";
 import { useAccountStore } from "@presentation/stores/account-store";
 
@@ -42,11 +43,13 @@ function renderProfile(
   overrides: {
     completeRegistration?: UserRepository["completeRegistration"];
     clearToken?: TokenStorage["clear"];
+    logout?: UserRepository["logout"];
   } = {},
 ) {
   const base = createContainer({ useMocks: true });
   const userRepository: UserRepository = {
     ...base.userRepository,
+    logout: overrides.logout ?? base.userRepository.logout,
     completeRegistration:
       overrides.completeRegistration ??
       jest.fn().mockResolvedValue(returningProfile),
@@ -64,7 +67,9 @@ function renderProfile(
   const screen = render(
     <QueryClientProvider client={queryClient}>
       <ServiceProvider container={{ ...base, userRepository, tokenStorage }}>
-        <ProfileScreen />
+        <ToastProvider>
+          <ProfileScreen />
+        </ToastProvider>
       </ServiceProvider>
     </QueryClientProvider>,
   );
@@ -172,8 +177,23 @@ describe("ProfileScreen", () => {
     fireEvent.press(getByTestId("profile-sign-out"));
 
     await waitFor(() => expect(getByText("Akun Tamu")).toBeTruthy());
+    expect(getByText("Berhasil keluar dari akun.")).toBeTruthy();
     expect(clearToken).toHaveBeenCalledTimes(1);
     expect(useAccountStore.getState().profile).toBeUndefined();
+  });
+
+  it("shows a failure toast and keeps the account when logout fails", async () => {
+    useAccountStore.getState().setProfile(returningProfile);
+    const { getByTestId, getAllByText } = renderProfile({
+      logout: jest.fn().mockRejectedValue(new Error("offline")),
+    });
+
+    fireEvent.press(getByTestId("profile-sign-out"));
+
+    await waitFor(() =>
+      expect(getAllByText("Gagal keluar. Silakan coba lagi.")).toHaveLength(1),
+    );
+    expect(useAccountStore.getState().profile).toEqual(returningProfile);
   });
 
   it("supports desktop navigation and cancels an incomplete profile edit", () => {

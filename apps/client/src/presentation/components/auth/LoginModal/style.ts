@@ -161,7 +161,7 @@ export const loginStyles = StyleSheet.create({
     backgroundColor: designColors.ground,
     // Shadow offset effect
     ...(hardShadowStyle(4, 4, designColors.ink, 0) as TextStyle),
-    transform: [{ translateX: -2 }, { translateY: -2 }],
+    transform: [{ translateY: -2 }],
   },
   inputReadonly: {
     backgroundColor: designColors.field,

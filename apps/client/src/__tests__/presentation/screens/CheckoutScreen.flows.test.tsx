@@ -278,8 +278,16 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
   });
 
   it("back opens the confirm-leave dialog; leaving re-queues to home", async () => {
+    const clearMembership = jest.fn(async () => undefined);
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
-      container: { bookingRepository: bookingRepo(SESSION) },
+      container: {
+        bookingRepository: bookingRepo(SESSION),
+        queueMembership: {
+          save: async () => undefined,
+          load: async () => null,
+          clear: clearMembership,
+        },
+      },
     });
     await waitFor(() =>
       expect(screen.getByTestId("checkout-back")).toBeTruthy(),
@@ -298,6 +306,7 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
     );
     fireEvent.press(screen.getByTestId("checkout-leave-confirm"));
     await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/"));
+    expect(clearMembership).toHaveBeenCalledTimes(1);
   });
 
   it("submit includes buyer details in the booking hold", async () => {

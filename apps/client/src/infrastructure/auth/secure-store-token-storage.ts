@@ -5,8 +5,7 @@
  *
  * Native-only: SecureStore persists the auth token in the OS keychain /
  * KeyStore. SecureStore is UNSUPPORTED on web — the composition root binds the
- * in-memory fallback there instead (SECURITY.md: web keeps the token in memory
- * only, so it does not survive a reload).
+ * web storage adapter there instead.
  *
  * SECURITY: the raw token is written/read only through SecureStore under a
  * fixed key and is NEVER logged.

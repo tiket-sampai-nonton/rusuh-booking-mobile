@@ -66,7 +66,7 @@ export interface UseAuthResult {
   /** The registration error (typed DomainError, e.g. NIK_INVALID), if any. */
   readonly registerError: Error | null;
 
-  /** Reset all auth state (used by "Ganti email" and when the modal closes). */
+  /** Reset the modal's auth flow state without clearing the app session. */
   readonly reset: () => void;
 }
 
@@ -78,7 +78,6 @@ export function useAuth(): UseAuthResult {
   const { userRepository, tokenStorage } = useServices();
   const setAccountProfile = useAccountStore((s) => s.setProfile);
   const setBuyerEmail = useAccountStore((s) => s.setBuyerEmail);
-  const clearAccountProfile = useAccountStore((s) => s.clearProfile);
 
   const { requestOtp, verifyOtp, completeRegistration, persistSession } =
     useMemo(
@@ -145,8 +144,7 @@ export function useAuth(): UseAuthResult {
     verifyMutation.reset();
     registerMutation.reset();
     setProfile(null);
-    clearAccountProfile();
-  }, [requestMutation, verifyMutation, registerMutation, clearAccountProfile]);
+  }, [requestMutation, verifyMutation, registerMutation]);
 
   return {
     requestOtp: (email: string) => requestMutation.mutateAsync(email),

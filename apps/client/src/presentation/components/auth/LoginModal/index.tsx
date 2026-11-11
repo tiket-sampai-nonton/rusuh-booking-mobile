@@ -44,6 +44,7 @@ import {
 import { useAuth } from "@presentation/hooks/useAuth";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { CheckIcon, CloseIcon } from "@presentation/components/ArrowIcon";
+import { useToast } from "@presentation/components/design-system/Toast";
 import {
   designColors,
   designDuration,
@@ -125,6 +126,7 @@ export function LoginModal({
   const [regDoneName, setRegDoneName] = useState("");
 
   const auth = useAuth();
+  const { show: showToast } = useToast();
   const { isMobileWeb } = useResponsive();
   const emailInputRef = useRef<TextInput>(null);
   const regNameInputRef = useRef<TextInput>(null);
@@ -208,6 +210,12 @@ export function LoginModal({
   }, [onClose]);
 
   useEffect(() => {
+    if (!visible || (step !== "signed" && step !== "success")) return;
+    const timeout = setTimeout(close, 5000);
+    return () => clearTimeout(timeout);
+  }, [close, step, visible]);
+
+  useEffect(() => {
     if (!visible || Platform.OS !== "android") return;
     const subscription = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -226,11 +234,13 @@ export function LoginModal({
     const trimmed = email.trim();
     if (!isValidEmail(trimmed)) {
       setEmailError(EMAIL_ERROR);
+      showToast(EMAIL_ERROR, "error");
       return;
     }
     setEmailError("");
     try {
       await auth.requestOtp(trimmed);
+      showToast("Kode verifikasi dikirim ke email Anda.", "success");
       setEmail(trimmed);
       setOtpDigits(["", "", "", "", "", ""]);
       setStep("otp");
@@ -250,18 +260,37 @@ export function LoginModal({
       if (Platform.OS === "web") {
         setTimeout(() => otpRefs.current[0]?.focus(), 100);
       }
-    } catch {
+    } catch (cause) {
       // Error surfaced via auth.requestError
+      showToast(
+        messageFor(
+          cause instanceof Error ? cause : null,
+          "Gagal mengirim kode. Silakan coba lagi.",
+        ),
+        "error",
+      );
     }
-  }, [auth, email]);
+  }, [auth, email, showToast]);
 
   // ---------------------------------------------------------------------------
   // OTP digit handling (6 separate boxes like prototype)
   // ---------------------------------------------------------------------------
   const handleOtpChange = useCallback(
     (index: number, value: string) => {
-      // Only allow single digit
-      const digit = value.replace(/\D/g, "").slice(-1);
+      const digits = value.replace(/\D/g, "");
+      if (digits.length > 1) {
+        const startAt = digits.length >= 6 ? 0 : index;
+        const nextDigits = ["", "", "", "", "", ""];
+        const available = 6 - startAt;
+        const pasted = digits.slice(0, available).split("");
+        for (let offset = 0; offset < available; offset += 1) {
+          nextDigits[startAt + offset] = pasted[offset] ?? "";
+        }
+        setOtpDigits(nextDigits);
+        otpRefs.current[Math.min(startAt + pasted.length, 5)]?.focus();
+        return;
+      }
+      const digit = digits.slice(-1);
       const newDigits = [...otpDigits];
       newDigits[index] = digit;
       setOtpDigits(newDigits);
@@ -303,11 +332,19 @@ export function LoginModal({
       } else {
         // Returning user → signed-in panel
         setStep("signed");
+        showToast("Berhasil masuk.", "success");
       }
-    } catch {
+    } catch (cause) {
       // Error surfaced via auth.verifyError
+      showToast(
+        messageFor(
+          cause instanceof Error ? cause : null,
+          "Kode verifikasi salah atau kedaluwarsa.",
+        ),
+        "error",
+      );
     }
-  }, [auth, email, otpCode]);
+  }, [auth, email, otpCode, showToast]);
 
   const onResendOtp = useCallback(async () => {
     try {
@@ -365,10 +402,18 @@ export function LoginModal({
       setRegDoneName(profile.fullName ?? regName.trim());
       setRegNik(""); // Clear NIK immediately (SECURITY)
       setStep("success");
-    } catch {
+      showToast("Pendaftaran berhasil. Anda sudah masuk.", "success");
+    } catch (cause) {
       // Error surfaced via auth.registerError
+      showToast(
+        messageFor(
+          cause instanceof Error ? cause : null,
+          "Pendaftaran gagal. Silakan coba lagi.",
+        ),
+        "error",
+      );
     }
-  }, [auth, regName, regNik]);
+  }, [auth, regName, regNik, showToast]);
 
   const modalBody = (
     <View
@@ -517,7 +562,8 @@ export function LoginModal({
                         }
                         keyboardType="number-pad"
                         inputMode="numeric"
-                        maxLength={1}
+                        autoComplete="one-time-code"
+                        textContentType="oneTimeCode"
                         selectTextOnFocus
                         style={[
                           styles.otpBox,
@@ -534,9 +580,6 @@ export function LoginModal({
                           "Kode OTP salah atau kedaluwarsa.",
                         )
                       : ""}
-                  </Text>
-                  <Text style={styles.hint}>
-                    Kode demo: <Text style={styles.bold}>123456</Text>
                   </Text>
                 </View>
 
@@ -739,12 +782,6 @@ export function LoginModal({
                   <GhostButton
                     testID="login-close-signed"
                     label="Tutup"
-                    onPress={close}
-                  />
-                  <PrimaryButton
-                    testID="login-logout"
-                    label="Keluar"
-                    variant="danger"
                     onPress={close}
                   />
                 </View>

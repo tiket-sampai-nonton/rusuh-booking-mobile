@@ -14,6 +14,8 @@ import type { EventCategory } from "@domain/rules/event-description";
 
 export interface EventDetailScreenProps {
   readonly eventId: string;
+  /** Opened from history: keep the event informative without a queue CTA. */
+  readonly hideQueueCta?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

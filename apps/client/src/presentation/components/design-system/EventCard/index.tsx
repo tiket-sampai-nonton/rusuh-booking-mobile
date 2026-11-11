@@ -89,7 +89,7 @@ const DESKTOP_VENUE_SIZE = 14; // --text-s
 export interface EventCardProps {
   readonly event: EventSummary;
   readonly onPress: (eventId: string) => void;
-  /** History/archive mode: dimmed, disabled */
+  /** History/archive mode: dimmed but still opens its informational detail. */
   readonly history?: boolean;
   /** Index for stagger animation (mobile: delay(index * 100ms)) */
   readonly staggerIndex?: number;
@@ -137,8 +137,7 @@ function NativeEventCard({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${event.name}, ${event.venue ?? ""}, ${dateTxt}`}
-          accessibilityState={{ disabled: history }}
-          disabled={history}
+          accessibilityState={{ disabled: false }}
           onPress={() => onPress(event.id)}
           testID={`v2-event-card-${event.id}`}
         >
@@ -391,10 +390,9 @@ function AnimatedEventCard({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${event.name}, ${event.venue ?? ""}, ${dateTxt}`}
-          // Availability controls purchase styling, not access to event details.
-          // Historical cards remain informational and intentionally non-interactive.
-          accessibilityState={{ disabled: history }}
-          disabled={history}
+          // Availability and history control styling; event details remain
+          // accessible after ticket sales have ended.
+          accessibilityState={{ disabled: false }}
           onPress={() => onPress(event.id)}
           onHoverIn={() => setHovered(true)}
           onHoverOut={() => setHovered(false)}

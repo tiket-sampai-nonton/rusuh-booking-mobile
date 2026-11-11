@@ -48,8 +48,8 @@ export const HEADER_HEIGHT =
 /** Floating CTA height */
 export const FLOATING_CTA_HEIGHT = 100;
 
-/** Safe area bottom padding for native */
-export const SAFE_AREA_BOTTOM = Platform.OS === "web" ? 0 : 34;
+/** Runtime CTA spacing uses the device's safe-area inset. */
+export const SAFE_AREA_BOTTOM = 0;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN STYLES
@@ -802,10 +802,7 @@ export const designDetailStyles = StyleSheet.create({
     right: 0,
     paddingVertical: designSpacingSemantic.s,
     paddingHorizontal: Platform.OS === "web" ? designSpacingSemantic.m : 16, // frame padding on mobile
-    paddingBottom:
-      Platform.OS === "web"
-        ? designSpacingSemantic.m
-        : designSpacingSemantic.s + SAFE_AREA_BOTTOM,
+    paddingBottom: Platform.OS === "web" ? designSpacingSemantic.m : 4,
     backgroundColor: designColors.ground,
     borderTopWidth: designBorders.standard,
     borderTopColor: designColors.ink,

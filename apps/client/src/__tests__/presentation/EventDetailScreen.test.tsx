@@ -403,7 +403,11 @@ describe("EventDetailScreen", () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     Object.defineProperty(globalThis, "window", {
       configurable: true,
-      value: { location: { href: "https://example.invalid/events/evt-1" } },
+      value: {
+        location: {
+          href: "https://example.invalid/events/evt-1?source=history#tickets",
+        },
+      },
     });
     Object.defineProperty(globalThis.navigator, "share", {
       configurable: true,
@@ -417,7 +421,7 @@ describe("EventDetailScreen", () => {
       expect(screen.getByText("120 tiket tersedia")).toBeTruthy();
       fireEvent.press(screen.getByLabelText("Bagikan"));
       expect(share).toHaveBeenCalledWith({
-        url: "https://example.invalid/events/evt-1",
+        url: "https://rusuh-booking.pages.dev/events/evt-1",
       });
     } finally {
       Object.defineProperty(Platform, "OS", {
@@ -445,6 +449,16 @@ describe("EventDetailScreen", () => {
     expect(mockRouter.push).not.toHaveBeenCalledWith(
       expect.stringContaining("/waiting/"),
     );
+  });
+
+  it("hides the queue CTA when opened from history", async () => {
+    renderWithProviders(<EventDetailScreen eventId="evt-1" hideQueueCta />, {
+      container: { eventRepository: repo({ ...available, status: "CLOSED" }) },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("event-detail-screen")).toBeTruthy(),
+    );
+    expect(screen.queryByTestId("join-cta")).toBeNull();
   });
 
   it("uses a safe label for unknown status, supports native sharing, and handles scrolling", async () => {
@@ -488,7 +502,9 @@ describe("EventDetailScreen", () => {
     });
     await waitFor(() => expect(screen.getByTestId("join-cta")).toBeTruthy());
     fireEvent.press(screen.getByRole("button", { name: "Bagikan" }));
-    expect(writeText).toHaveBeenCalledWith("https://example.test/events/evt-1");
+    expect(writeText).toHaveBeenCalledWith(
+      "https://rusuh-booking.pages.dev/events/evt-1",
+    );
     const scrollHandler = screen.getByTestId("detail-scroll").props.onScroll as
       | ((event: { nativeEvent: { contentOffset: { y: number } } }) => void)
       | undefined;

@@ -13,7 +13,7 @@
 
 | Concern | FE rule |
 |---|---|
-| Session/account token (logged-in) | Native: `expo-secure-store`. Web: secure, HttpOnly cookie strategy (token not readable by JS where possible). |
+| Session/account token (logged-in) | Native: `expo-secure-store`. Web: `localStorage` for access + refresh tokens per the approved RBT-132 product decision; tokens are JS-readable and exposed to successful XSS. Prefer migrating to an HttpOnly cookie when the BE contract supports it. |
 | Visitor token (guest) | `rb_visitor` cookie (web) / `X-Visitor-Token` (mobile), injected by the API client. |
 | Admission token | Short-lived (TTL ~60s), used once to create a booking session; never persisted long-term. |
 | Detail/Payment access | Token-protected server-side (NFR-07). FE cannot reach these without admission; a bypass attempt gets 401/403 → route to re-queue. |

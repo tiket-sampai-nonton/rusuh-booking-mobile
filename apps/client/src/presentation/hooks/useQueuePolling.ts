@@ -129,7 +129,7 @@ export function useQueuePolling(
   eventId?: string,
   isScreenFocused = true,
 ): QueuePollingView {
-  const { queueRepository, pushSubscription } = useServices();
+  const { queueRepository, queueMembership, pushSubscription } = useServices();
   const queryClient = useQueryClient();
   const hadConnectionError = useRef(false);
   const nextHeartbeatAt = useRef(0);
@@ -249,6 +249,7 @@ export function useQueuePolling(
     isSettled,
     leave: async () => {
       await leaveQueue.execute(queueId, eventId);
+      await queueMembership.clear();
       if (eventId) await pushSubscription.remove(eventId).catch(() => {});
     },
     refetch: query.refetch,

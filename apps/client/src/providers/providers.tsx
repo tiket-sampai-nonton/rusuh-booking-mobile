@@ -1,10 +1,9 @@
 /**
  * providers.tsx — composition of the app-wide providers (ARCHITECTURE §3, §11.7).
  *
- * Composes the server-data provider (TanStack `QueryClientProvider`) around the
- * DI `ServiceProvider`, inside a `SafeAreaProvider` (so screens can read
- * `useSafeAreaInsets()` on native + web). `_layout.tsx` wraps the router tree
- * with `<AppProviders>`.
+ * Composes toast, server-data (TanStack `QueryClientProvider`), and DI
+ * `ServiceProvider` providers inside a `SafeAreaProvider` so app routes share
+ * toast feedback and can read `useSafeAreaInsets()` on native + web.
  *
  * TanStack landed in RBT-010; `createQueryClient()` now returns a real client.
  * The `queryClient` prop lets tests inject a retry-disabled client for
@@ -17,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import type { Container } from "@providers/container";
 import { createQueryClient } from "@providers/query-client";
 import { ServiceProvider } from "@providers/service-context";
+import { ToastProvider } from "@presentation/components/design-system/Toast";
 
 export interface AppProvidersProps {
   /** Override the container (tests inject mocks). */
@@ -29,7 +29,7 @@ export interface AppProvidersProps {
 /**
  * Wrap the subtree with the composition-root providers.
  *
- * Order (outer → inner): SafeAreaProvider → QueryClientProvider
+ * Order (outer → inner): SafeAreaProvider → QueryClientProvider → ToastProvider
  * → ServiceProvider. TODO(RBT-003): add ThemeProvider once the theme lands.
  */
 export function AppProviders({
@@ -43,7 +43,9 @@ export function AppProviders({
   );
 
   const serviceTree = (
-    <ServiceProvider container={container}>{children}</ServiceProvider>
+    <ToastProvider>
+      <ServiceProvider container={container}>{children}</ServiceProvider>
+    </ToastProvider>
   );
   return (
     <SafeAreaProvider>

@@ -81,7 +81,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { isDesktop, isMobileWeb } = useResponsive();
-  const { serverClock, bookingRepository } = useServices();
+  const { serverClock, bookingRepository, queueMembership } = useServices();
   const {
     session,
     isLoading,
@@ -575,6 +575,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
             void (async () => {
               try {
                 await bookingRepository.cancelSession?.(sessionId);
+                await queueMembership.clear();
                 setConfirmLeave(false);
                 router.replace("/" as Href);
               } catch {

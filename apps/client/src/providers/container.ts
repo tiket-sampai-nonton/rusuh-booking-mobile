@@ -50,6 +50,7 @@ import { MockTicketHistoryRepository } from "@infrastructure/__fixtures__/mock-t
 import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-token-storage";
 import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
+import { WebLocalStorageTokenStorage } from "@infrastructure/auth/web-local-storage-token-storage";
 import { SecureStoreQueueMembership } from "@infrastructure/queue/secure-store-queue-membership";
 import { WebQueueMembership } from "@infrastructure/queue/web-queue-membership";
 import { ExpoFileShareAdapter } from "@infrastructure/files/expo-file-share.adapter";
@@ -99,19 +100,17 @@ export interface Container {
 }
 
 /**
- * Pick the TokenStorage adapter for the current platform (RBT-023). SecureStore
- * is native-only, so native binds {@link SecureStoreTokenStorage} (OS keychain /
- * KeyStore) while web binds the in-memory fallback — on web the token lives in
- * memory only and does NOT survive a reload (SECURITY.md tradeoff). Jest runs
- * under the `jest-expo` web-ish default, so tests also get the in-memory store,
- * which keeps the composition root deterministic without touching a keychain.
+ * Pick TokenStorage for the current platform. Native uses SecureStore. Real web
+ * uses localStorage for access/refresh tokens; mock web and tests stay in-memory.
  */
 export function createTokenStorage(
   platformOs: typeof Platform.OS = Platform.OS,
+  persistWeb = false,
 ): TokenStorage {
-  return platformOs === "web"
-    ? new InMemoryTokenStorage()
-    : new SecureStoreTokenStorage();
+  if (platformOs !== "web") return new SecureStoreTokenStorage();
+  return persistWeb
+    ? new WebLocalStorageTokenStorage()
+    : new InMemoryTokenStorage();
 }
 
 /**
@@ -207,10 +206,9 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // split + timers read through it so a later sync corrects everything at once.
   const serverClock = new ServerClock(clock);
 
-  // TokenStorage is a platform primitive (like the clock): the native secure
-  // store vs web in-memory choice is driven by Platform.OS, not the mock flag,
-  // so it is bound in BOTH modes (RBT-023).
-  const tokenStorage: TokenStorage = createTokenStorage();
+  // Native tokens always use SecureStore. Web real-mode tokens use localStorage
+  // per the approved RBT-132 decision; mock mode remains in-memory.
+  const tokenStorage: TokenStorage = createTokenStorage(Platform.OS, !useMocks);
   // Queue membership persistence is also a platform primitive (native secure
   // store vs web in-memory, driven by Platform.OS) → bound in BOTH modes (RBT-041).
   const queueMembership: QueueMembershipStorage =
@@ -273,7 +271,9 @@ export function createContainer(options: ContainerOptions = {}): Container {
       : new SecureStoreTokenStorage("rusuh.visitor.token");
   const refreshTokenStorage =
     Platform.OS === "web"
-      ? new InMemoryTokenStorage()
+      ? useMocks
+        ? new InMemoryTokenStorage()
+        : new WebLocalStorageTokenStorage("rusuh.auth.refresh")
       : new SecureStoreTokenStorage("rusuh.auth.refresh");
   const transport: HttpClient = new FetchHttpClient({
     baseUrl,

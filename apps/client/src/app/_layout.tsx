@@ -7,6 +7,7 @@ import { ActivityIndicator, Platform, View } from "react-native";
 
 import { NotificationBridge } from "@presentation/bridges/NotificationBridge";
 import { AccountSessionBridge } from "@presentation/bridges/AccountSessionBridge";
+import { QueueMembershipBridge } from "@presentation/bridges/QueueMembershipBridge";
 import { usePlusJakartaSansFonts } from "@presentation/theme/fonts";
 import { brand } from "@presentation/theme";
 import { AppProviders } from "@providers/providers";
@@ -46,6 +47,7 @@ export default function RootLayout() {
             ) : null}
             <NotificationBridge />
             <AccountSessionBridge />
+            <QueueMembershipBridge />
             <Stack screenOptions={{ headerShown: false }} />
           </Fragment>
         </AppProviders>

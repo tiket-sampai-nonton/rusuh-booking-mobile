@@ -9,6 +9,7 @@ import {
 import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-token-storage";
 import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
+import { WebLocalStorageTokenStorage } from "@infrastructure/auth/web-local-storage-token-storage";
 import { SecureStoreQueueMembership } from "@infrastructure/queue/secure-store-queue-membership";
 import { MockBookingRepository } from "@infrastructure/__fixtures__/mock-booking.repository";
 import { MockEventRepository } from "@infrastructure/__fixtures__/mock-event.repository";
@@ -152,6 +153,12 @@ describe("providers/container — createContainer (mock mode)", () => {
 describe("providers/container — createTokenStorage (RBT-023)", () => {
   it("binds the in-memory fallback on web (SecureStore unsupported)", () => {
     expect(createTokenStorage("web")).toBeInstanceOf(InMemoryTokenStorage);
+  });
+
+  it("binds localStorage for real web auth sessions", () => {
+    expect(createTokenStorage("web", true)).toBeInstanceOf(
+      WebLocalStorageTokenStorage,
+    );
   });
 
   it("binds the secure-store adapter on iOS", () => {

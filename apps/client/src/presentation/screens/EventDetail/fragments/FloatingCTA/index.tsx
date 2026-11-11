@@ -18,6 +18,7 @@
  */
 import { useEffect, useRef } from "react";
 import { Animated, Platform, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { EventDetail } from "@domain/repositories/event.repository";
 import { minorToIDR } from "@domain/services/money";
@@ -57,6 +58,7 @@ export function FloatingCTA({
   errorMessage,
 }: FloatingCTAProps) {
   const isNative = Platform.OS !== "web";
+  const insets = useSafeAreaInsets();
 
   // Entrance slide-up animation
   const slideAnim = useRef(new Animated.Value(100)).current;
@@ -118,6 +120,7 @@ export function FloatingCTA({
     <Animated.View
       style={[
         styles.floatingCta,
+        isNative && { paddingBottom: Math.max(4, insets.bottom + 4) },
         isMobileWeb && styles.mobileWebFloatingCta,
         floatingCtaEntranceStyle(slideAnim),
       ]}
