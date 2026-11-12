@@ -34,7 +34,7 @@ export class ExpoAppUpdateAdapter implements AppUpdatePort {
     const buildInfo = Constants.expoConfig?.extra?.buildInfo as
       | { environment?: string; otaRevision?: string }
       | undefined;
-    const prefix = buildInfo?.environment === "production" ? "PROD" : "PREPROD";
+    const prefix = buildInfo?.environment === "production" ? "" : "PREPROD ";
     const appVersion = Constants.expoConfig?.version ?? "0.0.0";
     let embedded = true;
     try {
@@ -44,7 +44,7 @@ export class ExpoAppUpdateAdapter implements AppUpdatePort {
     }
     const rawRevision = embedded ? "0" : (buildInfo?.otaRevision ?? "0");
     const revision = /^\d+$/.test(rawRevision) ? rawRevision : "0";
-    return `${prefix} ${appVersion}.${revision.padStart(3, "0")}`;
+    return `${prefix}${appVersion}.${revision.padStart(3, "0")}`;
   }
 
   async checkForUpdate(): Promise<boolean> {

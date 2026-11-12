@@ -26,8 +26,7 @@ export default function RootLayout() {
     Platform.OS === "web",
   );
   const [startupUpdateStatus, setStartupUpdateStatus] = useState("Memuat");
-  const [startupBuildLabel, setStartupBuildLabel] =
-    useState("PREPROD 0.0.0.000");
+  const [startupBuildLabel, setStartupBuildLabel] = useState("0.0.0.000");
   const finishSplash = useCallback(() => setShowSplash(false), []);
   const finishStartupUpdate = useCallback(
     () => setStartupUpdateComplete(true),

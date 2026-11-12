@@ -40,7 +40,7 @@ export function NativeLaunchSplash({
   onFinish,
   isReadyToExit = true,
   statusText = "Memuat",
-  buildLabel = "PREPROD 0.0.0.000",
+  buildLabel = "0.0.0.000",
 }: {
   readonly onFinish: () => void;
   readonly isReadyToExit?: boolean;
