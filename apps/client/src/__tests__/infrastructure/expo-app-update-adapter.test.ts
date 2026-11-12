@@ -99,7 +99,7 @@ describe("ExpoAppUpdateAdapter", () => {
     };
     Updates.isEmbeddedLaunch = false;
 
-    expect(new ExpoAppUpdateAdapter().getBuildLabel()).toBe("PROD 1.2.3.007");
+    expect(new ExpoAppUpdateAdapter().getBuildLabel()).toBe("1.2.3.007");
   });
 
   it("falls back safely when app config or OTA revision is missing or invalid", () => {
@@ -108,7 +108,7 @@ describe("ExpoAppUpdateAdapter", () => {
     };
     Updates.isEmbeddedLaunch = false;
 
-    expect(new ExpoAppUpdateAdapter().getBuildLabel()).toBe("PROD 0.0.0.000");
+    expect(new ExpoAppUpdateAdapter().getBuildLabel()).toBe("0.0.0.000");
 
     ExpoConstants.expoConfig = null;
     Updates.isEnabled = false;
