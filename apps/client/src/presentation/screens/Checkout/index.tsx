@@ -196,7 +196,7 @@ function hasRestoredSession(
   session: BookingSession | null | undefined,
   sessionId: string,
 ): session is BookingSession {
-  return Boolean(session && session.sessionId === sessionId);
+  return session?.sessionId === sessionId;
 }
 
 function sessionErrorMessage(error: unknown): string | undefined {

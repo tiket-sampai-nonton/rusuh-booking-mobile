@@ -109,19 +109,29 @@ const BADGE_LABEL: Record<BadgeTone, string> = {
 function EventCardComponent(props: EventCardProps) {
   const isNative = Platform.OS !== "web";
   return isNative ? (
-    <NativeEventCard {...props} />
+    <NativeEventCard
+      event={props.event}
+      onPress={props.onPress}
+      history={props.history}
+      listMode={props.listMode}
+    />
   ) : (
     <AnimatedEventCard {...props} />
   );
 }
 
 /** Native event cards are static while scrolling; avoid per-cell Reanimated worklets. */
+type NativeEventCardProps = Pick<
+  EventCardProps,
+  "event" | "onPress" | "history" | "listMode"
+>;
+
 function NativeEventCard({
   event,
   onPress,
   history = false,
   listMode = false,
-}: EventCardProps) {
+}: NativeEventCardProps) {
   const badge = badgeFor(event);
   const disabled = badge.disabled || history;
   const dateTxt = formatDateID(event.startsAt);

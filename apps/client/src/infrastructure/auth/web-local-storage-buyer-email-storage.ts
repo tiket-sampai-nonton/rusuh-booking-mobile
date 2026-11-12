@@ -20,9 +20,7 @@ export class WebLocalStorageBuyerEmailStorage implements BuyerEmailStorage {
 
   private storage(): Storage | undefined {
     try {
-      return globalThis.localStorage === undefined
-        ? undefined
-        : globalThis.localStorage;
+      return globalThis.localStorage ?? undefined;
     } catch {
       return undefined;
     }

@@ -77,10 +77,12 @@ interface BrowseEventRenderContext {
   readonly isNative: boolean;
   readonly isMobileWeb: boolean;
   readonly isTabletWeb: boolean;
-  readonly columns: 1 | 2 | 3;
+  readonly columns: BrowseColumns;
   readonly eventCount: number;
   readonly onPress: (eventId: string) => void;
 }
+
+type BrowseColumns = 1 | 2 | 3;
 
 function browseEventItemStyle(
   index: number,

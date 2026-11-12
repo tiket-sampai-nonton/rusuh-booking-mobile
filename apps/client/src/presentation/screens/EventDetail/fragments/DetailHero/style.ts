@@ -76,15 +76,7 @@ export function styleForDetailHeroAnimatedView2(
   } as DynamicStyle;
 }
 
-export function styleForDetailHeroAnimatedText3(
-  arg0: Animated.Value,
-  arg1: Animated.Value,
-): DynamicStyle {
-  return {
-    opacity: arg0,
-    transform: [{ translateY: arg1 }],
-  } as DynamicStyle;
-}
+export const styleForDetailHeroAnimatedText3 = styleForDetailHeroAnimatedView2;
 
 export const styleForDetailHeroAnimatedText4 = styleForDetailHeroAnimatedText3;
 

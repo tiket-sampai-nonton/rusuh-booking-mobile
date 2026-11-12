@@ -119,14 +119,14 @@ export function terminalBody(status: QueueStatus): string {
     : "Masa penjualan tiket event ini telah berakhir.";
 }
 
+export type ClaimErrorDisplayState =
+  | "TURN_MISSED"
+  | "EVENT_SOLD_OUT"
+  | "ADMISSION_TOKEN_INVALID"
+  | "UNKNOWN";
+
 /** Claim-error (RBT-044) title mirrors the terminal titles. */
-export function claimErrorTitle(
-  errorState:
-    | "TURN_MISSED"
-    | "EVENT_SOLD_OUT"
-    | "ADMISSION_TOKEN_INVALID"
-    | "UNKNOWN",
-): string {
+export function claimErrorTitle(errorState: ClaimErrorDisplayState): string {
   if (errorState === "EVENT_SOLD_OUT") return "Tiket Habis";
   if (errorState === "ADMISSION_TOKEN_INVALID")
     return "Sesi antrean sudah tidak berlaku";
@@ -135,11 +135,7 @@ export function claimErrorTitle(
 }
 
 export function claimErrorBadgeLabel(
-  errorState:
-    | "TURN_MISSED"
-    | "EVENT_SOLD_OUT"
-    | "ADMISSION_TOKEN_INVALID"
-    | "UNKNOWN",
+  errorState: ClaimErrorDisplayState,
 ): string {
   if (errorState === "EVENT_SOLD_OUT") return "Tiket Habis";
   if (errorState === "UNKNOWN") return "Koneksi Bermasalah";
@@ -148,11 +144,7 @@ export function claimErrorBadgeLabel(
 }
 
 export function claimErrorActionLabel(
-  errorState:
-    | "TURN_MISSED"
-    | "EVENT_SOLD_OUT"
-    | "ADMISSION_TOKEN_INVALID"
-    | "UNKNOWN",
+  errorState: ClaimErrorDisplayState,
 ): string {
   if (
     errorState === "EVENT_SOLD_OUT" ||
@@ -164,13 +156,7 @@ export function claimErrorActionLabel(
 }
 
 /** Claim-error body copy. */
-export function claimErrorBody(
-  errorState:
-    | "TURN_MISSED"
-    | "EVENT_SOLD_OUT"
-    | "ADMISSION_TOKEN_INVALID"
-    | "UNKNOWN",
-): string {
+export function claimErrorBody(errorState: ClaimErrorDisplayState): string {
   if (errorState === "EVENT_SOLD_OUT") {
     return "Maaf, tiketnya habis saat giliranmu tiba. Coba lihat acara lainnya.";
   }

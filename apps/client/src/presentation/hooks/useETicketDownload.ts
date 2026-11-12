@@ -8,7 +8,7 @@ function utf8Base64(value: string): string {
   const binary = encodeURIComponent(value).replace(
     /%([0-9A-F]{2})|([^%])/gi,
     (_match, hex: string | undefined, character: string | undefined) =>
-      hex ? String.fromCharCode(Number.parseInt(hex, 16)) : (character ?? ""),
+      hex ? String.fromCodePoint(Number.parseInt(hex, 16)) : (character ?? ""),
   );
   return btoa(binary);
 }

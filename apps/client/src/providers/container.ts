@@ -197,6 +197,82 @@ export function createApiHeaders(
   };
 }
 
+function createNotificationAdapter(useMocks: boolean): NotificationPort {
+  if (Platform.OS === "web") {
+    return useMocks
+      ? new MockNotificationAdapter()
+      : new WebPushNotificationAdapter();
+  }
+  return new ExpoNotificationAdapter(!useMocks);
+}
+
+function createFileShareAdapter(): FileSharePort {
+  return Platform.OS === "web"
+    ? new WebFileShareAdapter()
+    : new ExpoFileShareAdapter();
+}
+
+function createQueueMembershipAdapter(
+  useMocks: boolean,
+): QueueMembershipStorage {
+  if (!useMocks && Platform.OS === "web") return new WebQueueMembership();
+  return createQueueMembershipStorage();
+}
+
+function createIdempotencyKeys(useMocks: boolean): IdempotencyKeys {
+  return new IdempotencyKeys(
+    useMocks
+      ? new InMemoryIdempotencyStore()
+      : new DurableIdempotencyStore(Platform.OS),
+  );
+}
+
+function createVisitorTokenStorage(): TokenStorage {
+  return Platform.OS === "web"
+    ? new InMemoryTokenStorage()
+    : new SecureStoreTokenStorage("rusuh.visitor.token");
+}
+
+function createRefreshTokenStorage(useMocks: boolean): TokenStorage {
+  if (Platform.OS !== "web") {
+    return new SecureStoreTokenStorage("rusuh.auth.refresh");
+  }
+  return useMocks
+    ? new InMemoryTokenStorage()
+    : new WebLocalStorageTokenStorage("rusuh.auth.refresh");
+}
+
+type BookingAvailabilityStream = NonNullable<
+  ConstructorParameters<typeof HttpBookingRepository>[1]
+>;
+
+function createBookingAvailabilityStream(
+  baseUrl: string,
+): BookingAvailabilityStream | undefined {
+  if (Platform.OS !== "web" || globalThis.EventSource === undefined) {
+    return undefined;
+  }
+  return (sessionId, onAvailability) => {
+    const stream = new EventSource(
+      `${trimTrailingSlashes(baseUrl)}/booking-sessions/${encodeURIComponent(sessionId)}/stream`,
+      { withCredentials: true },
+    );
+    stream.addEventListener("availability", (event) => {
+      try {
+        const payload = JSON.parse(
+          (event as MessageEvent<string>).data,
+        ) as unknown;
+        const snapshot: BookingAvailabilitySnapshot | null =
+          toBookingAvailability(payload);
+        if (snapshot) onAvailability(snapshot);
+      } catch {
+        // Ignore malformed SSE frames; the session GET remains authoritative.
+      }
+    });
+    return () => stream.close();
+  };
+}
+
 /**
  * Build the application container.
  *
@@ -211,14 +287,8 @@ export function createContainer(options: ContainerOptions = {}): Container {
   const clock: ClockPort = new SystemClock();
   // Local native notifications are a device capability, independent of whether
   // API repositories use mocks. Mock mode disables remote push registration.
-  const notificationAdapter: NotificationPort =
-    Platform.OS === "web"
-      ? new WebPushNotificationAdapter()
-      : new ExpoNotificationAdapter(!useMocks);
-  const fileShareAdapter: FileSharePort =
-    Platform.OS === "web"
-      ? new WebFileShareAdapter()
-      : new ExpoFileShareAdapter();
+  const notificationAdapter = createNotificationAdapter(useMocks);
+  const fileShareAdapter = createFileShareAdapter();
   // Server-authoritative clock layered over the device clock. Unsynced until a
   // server timestamp arrives (offset 0 → serverNow === device now); the catalog
   // split + timers read through it so a later sync corrects everything at once.
@@ -230,17 +300,10 @@ export function createContainer(options: ContainerOptions = {}): Container {
   const buyerEmailStorage = createBuyerEmailStorage(Platform.OS, !useMocks);
   // Queue membership persistence is also a platform primitive (native secure
   // store vs web in-memory, driven by Platform.OS) → bound in BOTH modes (RBT-041).
-  const queueMembership: QueueMembershipStorage =
-    !useMocks && Platform.OS === "web"
-      ? new WebQueueMembership()
-      : createQueueMembershipStorage();
+  const queueMembership = createQueueMembershipAdapter(useMocks);
   // Idempotency keys are a client-side primitive over an in-memory store →
   // bound in BOTH modes (RBT-012/054).
-  const idempotencyKeys = new IdempotencyKeys(
-    useMocks
-      ? new InMemoryIdempotencyStore()
-      : new DurableIdempotencyStore(Platform.OS),
-  );
+  const idempotencyKeys = createIdempotencyKeys(useMocks);
 
   if (useMocks) {
     const mockBooking = new MockBookingRepository();
@@ -266,10 +329,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
             : undefined;
         },
       ),
-      notification:
-        Platform.OS === "web"
-          ? new MockNotificationAdapter()
-          : notificationAdapter,
+      notification: notificationAdapter,
       pushSubscription: { register: async () => {}, remove: async () => {} },
       fileShare: fileShareAdapter,
       appUpdate: new ExpoAppUpdateAdapter(),
@@ -285,18 +345,8 @@ export function createContainer(options: ContainerOptions = {}): Container {
         "(or set EXPO_PUBLIC_USE_MOCKS=true for mock wiring).",
     );
   }
-  const visitorTokenStorage =
-    Platform.OS === "web"
-      ? new InMemoryTokenStorage()
-      : new SecureStoreTokenStorage("rusuh.visitor.token");
-  let refreshTokenStorage: TokenStorage;
-  if (Platform.OS === "web") {
-    refreshTokenStorage = useMocks
-      ? new InMemoryTokenStorage()
-      : new WebLocalStorageTokenStorage("rusuh.auth.refresh");
-  } else {
-    refreshTokenStorage = new SecureStoreTokenStorage("rusuh.auth.refresh");
-  }
+  const visitorTokenStorage = createVisitorTokenStorage();
+  const refreshTokenStorage = createRefreshTokenStorage(useMocks);
   const transport: HttpClient = new FetchHttpClient({
     baseUrl,
     getHeaders: async () => {
@@ -324,28 +374,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
     queueRepository: new HttpQueueRepository(httpClient, visitorTokenStorage),
     bookingRepository: new HttpBookingRepository(
       httpClient,
-      Platform.OS === "web" && globalThis.EventSource !== undefined
-        ? (sessionId, onAvailability) => {
-            const stream = new EventSource(
-              `${trimTrailingSlashes(baseUrl)}/booking-sessions/${encodeURIComponent(sessionId)}/stream`,
-              { withCredentials: true },
-            );
-            stream.addEventListener("availability", (event) => {
-              try {
-                const payload = JSON.parse(
-                  (event as MessageEvent<string>).data,
-                ) as unknown;
-                const snapshot: BookingAvailabilitySnapshot | null =
-                  toBookingAvailability(payload);
-                if (snapshot) onAvailability(snapshot);
-              } catch {
-                // Ignore malformed SSE frames; the session GET remains the
-                // authoritative initial snapshot.
-              }
-            });
-            return () => stream.close();
-          }
-        : undefined,
+      createBookingAvailabilityStream(baseUrl),
     ),
     paymentRepository: new HttpPaymentRepository(httpClient),
     userRepository: new HttpUserRepository(

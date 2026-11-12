@@ -18,4 +18,9 @@ describe("slash trimming helpers", () => {
     expect(trimLeadingSlashes("///")).toBe("");
     expect(trimTrailingSlashes("///")).toBe("");
   });
+
+  it("preserves supplementary Unicode characters next to separators", () => {
+    expect(trimLeadingSlashes("///🎟️/event")).toBe("🎟️/event");
+    expect(trimTrailingSlashes("/event/🎟️///")).toBe("/event/🎟️");
+  });
 });
