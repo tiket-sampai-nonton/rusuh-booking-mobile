@@ -85,7 +85,7 @@ export class HttpBookingRepository implements BookingRepository {
       body: {
         sessionId,
         buyer: {
-          ...(buyer.useLoginNik ? { useLoginNik: true } : { nik: buyer.nik }),
+          nik: buyer.nik,
           email: buyer.email,
           emailConfirmation: buyer.emailConfirmation,
           consent: buyer.consent,
@@ -93,9 +93,7 @@ export class HttpBookingRepository implements BookingRepository {
         items: items.map((item) => ({
           categoryId: item.categoryId,
           attendee: {
-            ...(item.useLoginNik
-              ? { useLoginNik: true }
-              : { nik: item.attendeeNik }),
+            nik: item.attendeeNik,
             fullName: item.attendeeName,
           },
         })),

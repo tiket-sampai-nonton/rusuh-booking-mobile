@@ -22,6 +22,20 @@ export const venueStyles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  mapUnavailable: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: designSpacingSemantic.s,
+    backgroundColor: designColors.card,
+    padding: designSpacingSemantic.m,
+  },
+  mapUnavailableText: {
+    fontFamily: plusJakartaSansFonts.regular,
+    fontSize: designFontSizes.s,
+    color: designColors.inkMuted,
+    textAlign: "center",
+  },
   mapOverlay: {
     position: "absolute",
     top: 0,

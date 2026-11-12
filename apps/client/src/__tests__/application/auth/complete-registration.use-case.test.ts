@@ -43,6 +43,9 @@ class FakeUserRepository implements UserRepository {
   async getMe(): Promise<UserProfile> {
     return this.nextProfile;
   }
+  async getCheckoutDetails() {
+    return { email: "test@example.com" };
+  }
 }
 
 const VALID_NIK = "3201234567890123";

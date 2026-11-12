@@ -153,8 +153,6 @@ export function isAttendeeWarning(result: AttendeeCheckResult): boolean {
 
 export interface CheckoutState {
   readonly buyerNik: string;
-  /** True only when the signed-in account's saved NIK was explicitly selected. */
-  readonly buyerUsesSavedNik?: boolean;
   readonly buyerEmail: string;
   readonly rows: readonly TicketRow[];
   readonly maxSelectable: number;
@@ -173,7 +171,7 @@ export interface CheckoutState {
 
 /** Overall readiness: valid buyer, valid quantity, every row complete + unique. */
 export function isCheckoutReady(state: CheckoutState): boolean {
-  if (!state.buyerUsesSavedNik && !isValidNik(state.buyerNik)) return false;
+  if (!isValidNik(state.buyerNik)) return false;
   if (!isValidEmail(state.buyerEmail)) return false;
   if (!isQuantityValid(state.rows.length, state.maxSelectable)) return false;
   if (!buyerNikUsedOnce(state.rows)) return false;
@@ -183,14 +181,12 @@ export function isCheckoutReady(state: CheckoutState): boolean {
   const checks = state.attendeeChecks ?? {};
   for (const r of state.rows) {
     if (r.categoryId.length === 0) return false;
-    const usesUnknownSavedNik = r.useBuyerNik && state.buyerUsesSavedNik;
     const nik = r.useBuyerNik ? state.buyerNik : r.attendeeNik;
     const name = r.attendeeName;
-    if (!usesUnknownSavedNik && !isValidNik(nik)) return false;
+    if (!isValidNik(nik)) return false;
     if (name.trim().length === 0) return false;
     // A NIK the BE already flagged ALREADY_REGISTERED cannot be held.
-    if (!usesUnknownSavedNik && isAttendeeBlocked(checks[nik] ?? "AVAILABLE"))
-      return false;
+    if (isAttendeeBlocked(checks[nik] ?? "AVAILABLE")) return false;
   }
   return attendeeNiksUnique(state.rows, state.buyerNik);
 }

@@ -30,6 +30,7 @@ import {
 
 interface LightboxProps {
   readonly images: readonly string[];
+  readonly fallbackUri?: string;
   readonly currentIndex: number;
   readonly visible: boolean;
   readonly onClose: () => void;
@@ -38,6 +39,7 @@ interface LightboxProps {
 
 export function Lightbox({
   images,
+  fallbackUri,
   currentIndex,
   visible,
   onClose,
@@ -159,6 +161,7 @@ export function Lightbox({
         >
           <CachedImage
             source={{ uri: currentImage, memoryCache: false }}
+            fallbackSource={fallbackUri ? { uri: fallbackUri } : undefined}
             style={lightboxStyles.image}
             resizeMode="contain"
             accessibilityIgnoresInvertColors

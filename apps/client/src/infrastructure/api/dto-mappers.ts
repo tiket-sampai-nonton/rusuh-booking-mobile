@@ -32,6 +32,7 @@ import type {
 } from "@domain/repositories/queue.repository";
 import type {
   AuthSession,
+  CheckoutUserDetails,
   UserProfile,
 } from "@domain/repositories/user.repository";
 
@@ -118,8 +119,10 @@ interface WireAuthSession {
   account: WireUserProfile;
 }
 interface WireUserProfile {
+  email?: string;
   emailMasked: string;
   fullName?: string;
+  nik?: string;
   nikMasked?: string;
   hasNik: boolean;
 }
@@ -298,5 +301,20 @@ export function toUserProfile(dto: WireUserProfile): UserProfile {
     fullName: dto.fullName,
     nikMasked: dto.nikMasked,
     hasNik: dto.hasNik,
+  };
+}
+
+/**
+ * Map authenticated GET /me values for the checkout screen only. Callers must
+ * keep this value transient; `toUserProfile` remains the safe account-store
+ * projection and deliberately drops the real email/NIK.
+ */
+export function toCheckoutUserDetails(
+  dto: WireUserProfile,
+): CheckoutUserDetails {
+  return {
+    email: dto.email ?? "",
+    fullName: dto.fullName,
+    nik: dto.nik,
   };
 }

@@ -62,6 +62,9 @@ class FakeUserRepository implements UserRepository {
   async getMe(): Promise<UserProfile> {
     return this.profile;
   }
+  async getCheckoutDetails() {
+    return { email: "budi@example.com", fullName: this.profile.fullName };
+  }
 }
 
 function renderModal(

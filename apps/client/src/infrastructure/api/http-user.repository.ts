@@ -2,19 +2,24 @@
  * HttpUserRepository — infrastructure/api (ARCHITECTURE §3, SECURITY; RBT-010).
  *
  * Implements `UserRepository` over the `HttpClient` port. Passwordless OTP +
- * profile. The FE only ever handles a MASKED NIK — a raw NIK is never logged or
- * stored here (SECURITY). Sign-in is optional (D8.5); these calls are only made
- * when the user chooses to authenticate.
+ * profile. Account-profile calls retain only masked identity; the separate
+ * checkout-only endpoint projection returns full email/NIK for transient form
+ * state and must never be persisted or logged (SECURITY). Sign-in is optional.
  */
 
 import type {
   AuthSession,
+  CheckoutUserDetails,
   UserProfile,
   UserRepository,
 } from "@domain/repositories/user.repository";
 import type { TokenStorage } from "@domain/auth/token-storage.port";
 import { assertOk, unwrap } from "@infrastructure/api/envelope";
-import { toAuthSession, toUserProfile } from "@infrastructure/api/dto-mappers";
+import {
+  toAuthSession,
+  toCheckoutUserDetails,
+  toUserProfile,
+} from "@infrastructure/api/dto-mappers";
 import type { HttpClient } from "@infrastructure/http/http-client";
 
 export class HttpUserRepository implements UserRepository {
@@ -74,6 +79,17 @@ export class HttpUserRepository implements UserRepository {
       headers: await this.authHeaders(),
     });
     return toUserProfile(unwrap<Parameters<typeof toUserProfile>[0]>(res));
+  }
+
+  async getCheckoutDetails(): Promise<CheckoutUserDetails> {
+    const res = await this.http.request({
+      method: "GET",
+      url: "me",
+      headers: await this.authHeaders(),
+    });
+    return toCheckoutUserDetails(
+      unwrap<Parameters<typeof toCheckoutUserDetails>[0]>(res),
+    );
   }
 
   async logout(): Promise<void> {

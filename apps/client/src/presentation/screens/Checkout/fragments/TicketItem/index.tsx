@@ -45,7 +45,6 @@ export function TicketItem({
   categories,
   buyerName = "",
   buyerNik = "",
-  buyerUsesSavedNik = false,
   categoryError,
   attendeeNameError,
   attendeeNikError,
@@ -107,32 +106,24 @@ export function TicketItem({
         errorMessage={attendeeNameError}
         testID={`attendee-name-${index}`}
       />
-      {row.useBuyerNik && buyerUsesSavedNik ? (
-        <View className="mt-4 border-2 border-ink bg-card p-3">
-          <Text className="text-xs font-bold uppercase text-ink">
-            NIK penonton menggunakan NIK tersimpan di akun
-          </Text>
-        </View>
-      ) : (
-        <Field
-          label="NIK Penonton (16 digit)"
-          value={row.useBuyerNik ? buyerNik : row.attendeeNik}
-          onChangeText={(t) =>
-            onPatch({ attendeeNik: t.replace(/\D/g, "").slice(0, 16) })
-          }
-          placeholder="16 digit KTP penonton"
-          keyboardType="number-pad"
-          editable={!row.useBuyerNik}
-          invalid={
-            Boolean(attendeeNikError) ||
-            (!row.useBuyerNik &&
-              row.attendeeNik.length > 0 &&
-              !isValidNik(row.attendeeNik))
-          }
-          errorMessage={attendeeNikError}
-          testID={`attendee-nik-${index}`}
-        />
-      )}
+      <Field
+        label="NIK Penonton (16 digit)"
+        value={row.useBuyerNik ? buyerNik : row.attendeeNik}
+        onChangeText={(t) =>
+          onPatch({ attendeeNik: t.replace(/\D/g, "").slice(0, 16) })
+        }
+        placeholder="16 digit KTP penonton"
+        keyboardType="number-pad"
+        editable={!row.useBuyerNik}
+        invalid={
+          Boolean(attendeeNikError) ||
+          (!row.useBuyerNik &&
+            row.attendeeNik.length > 0 &&
+            !isValidNik(row.attendeeNik))
+        }
+        errorMessage={attendeeNikError}
+        testID={`attendee-nik-${index}`}
+      />
 
       {statusInfo ? (
         <Text
@@ -146,16 +137,10 @@ export function TicketItem({
 
       <View style={componentStyles.elementMarginTop6}>
         <Text style={componentStyles.elementFlex7}>
-          {buyerUsesSavedNik
-            ? "Gunakan NIK akun untuk tiket ini (maks. 1 tiket)"
-            : "Gunakan data pembeli (pembeli ikut nonton)"}
+          "Gunakan data pembeli (pembeli ikut nonton)"
         </Text>
         <Switch
-          accessibilityLabel={
-            buyerUsesSavedNik
-              ? `Gunakan NIK akun untuk tiket ${index + 1}`
-              : `Gunakan data pembeli untuk tiket ${index + 1}`
-          }
+          accessibilityLabel={`Gunakan data pembeli untuk tiket ${index + 1}`}
           value={row.useBuyerNik}
           onValueChange={onUseBuyer}
           trackColor={{ false: designColors.field, true: designColors.ink }} // Use field per Design Palette Guide
