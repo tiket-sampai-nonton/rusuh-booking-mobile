@@ -27,7 +27,7 @@ const tailwindBrand = (
 describe("RBT-003 raw tokens", () => {
   it("exposes the black, white, and neon cyberpunk brand palette", () => {
     expect(brand.primary).toBe("#DE00A0");
-    expect(brand.deep).toBe("#730050");
+    expect(brand.deep).toBe("#D600A0");
     expect(brand.ember).toBe("#00E5FF");
   });
 

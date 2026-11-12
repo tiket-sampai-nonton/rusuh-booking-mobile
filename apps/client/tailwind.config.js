@@ -1,6 +1,6 @@
 const palette = {
   brandPrimary: "#DE00A0",
-  brandDeep: "#730050",
+  brandDeep: "#D600A0",
   brandEmber: "#00E5FF",
   ground: "#FBFBFD",
   darkBackground: "#0A0A0C",
