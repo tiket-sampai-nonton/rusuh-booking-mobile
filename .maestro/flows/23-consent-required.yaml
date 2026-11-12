@@ -1,0 +1,26 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 23-consent-required
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/checkout.yaml
+- runFlow: ../helpers/fill-checkout.yaml
+- tapOn:
+    id: checkout-consent
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: checkout-consent
+    checked: false
+- tapOn:
+    id: checkout-submit
+    waitToSettleTimeoutMs: 200
+- scrollUntilVisible:
+    element:
+      id: checkout-consent-error
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: checkout-consent-error
+- assertNotVisible:
+    id: payment-timer

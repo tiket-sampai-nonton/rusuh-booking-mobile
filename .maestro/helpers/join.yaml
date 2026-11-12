@@ -1,0 +1,9 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: join
+tags:
+  - regression
+---
+- runFlow: event.yaml
+- tapOn:
+    id: join-cta
+    waitToSettleTimeoutMs: 200

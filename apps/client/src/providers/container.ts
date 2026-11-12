@@ -361,7 +361,9 @@ export function createContainer(options: ContainerOptions = {}): Container {
       idempotencyKeys,
       httpClient: new MockHttpClient(),
       eventRepository: new MockEventRepository(),
-      queueRepository: new MockQueueRepository(),
+      queueRepository: new MockQueueRepository(
+        process.env.EXPO_PUBLIC_MAESTRO_QUEUE_SCENARIO,
+      ),
       bookingRepository: mockBooking,
       paymentRepository: mockPayment,
       userRepository: new MockUserRepository(),

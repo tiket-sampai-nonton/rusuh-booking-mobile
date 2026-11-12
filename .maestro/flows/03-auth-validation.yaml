@@ -1,0 +1,31 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 03-auth-validation
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- openLink:
+    link: rusuhbooking://profile
+    autoVerify: true
+- extendedWaitUntil:
+    visible:
+      id: profile-login
+    timeout: 30000
+- tapOn:
+    id: profile-login
+    waitToSettleTimeoutMs: 200
+- tapOn:
+    id: login-email-input
+    waitToSettleTimeoutMs: 200
+- inputText: invalid
+- hideKeyboard
+- tapOn:
+    id: login-send
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: login-email-error
+- tapOn:
+    id: login-close
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: profile-login

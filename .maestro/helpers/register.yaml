@@ -1,0 +1,44 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: register
+tags:
+  - regression
+---
+- runFlow: otp.yaml
+- scrollUntilVisible:
+    element:
+      id: login-reg-name-input
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: login-reg-name-input
+    waitToSettleTimeoutMs: 200
+- inputText: Maestro Account
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: login-reg-nik-input
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: login-reg-nik-input
+    waitToSettleTimeoutMs: 200
+- inputText: "9900000000000002"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: login-reg-consent
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: login-reg-consent
+    waitToSettleTimeoutMs: 200
+- tapOn:
+    id: login-reg-submit
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: login-done-close
+    timeout: 30000
+- tapOn:
+    id: login-done-close
+    waitToSettleTimeoutMs: 200

@@ -1,0 +1,13 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: hold
+tags:
+  - regression
+---
+- runFlow: fill-checkout.yaml
+- tapOn:
+    id: checkout-submit
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: payment-timer
+    timeout: 30000

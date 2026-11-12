@@ -1,0 +1,45 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: verify-otp
+tags:
+  - regression
+---
+- tapOn:
+    id: login-email-input
+    waitToSettleTimeoutMs: 200
+- inputText: maestro@example.test
+- hideKeyboard
+- tapOn:
+    id: login-send
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: login-otp-0
+    timeout: 30000
+- tapOn:
+    id: login-otp-0
+    waitToSettleTimeoutMs: 200
+- inputText: "1"
+- tapOn:
+    id: login-otp-1
+    waitToSettleTimeoutMs: 200
+- inputText: "2"
+- tapOn:
+    id: login-otp-2
+    waitToSettleTimeoutMs: 200
+- inputText: "3"
+- tapOn:
+    id: login-otp-3
+    waitToSettleTimeoutMs: 200
+- inputText: "4"
+- tapOn:
+    id: login-otp-4
+    waitToSettleTimeoutMs: 200
+- inputText: "5"
+- tapOn:
+    id: login-otp-5
+    waitToSettleTimeoutMs: 200
+- inputText: "6"
+- hideKeyboard
+- tapOn:
+    id: login-verify
+    waitToSettleTimeoutMs: 200
