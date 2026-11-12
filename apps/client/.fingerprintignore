@@ -1,0 +1,4 @@
+# Tailwind is consumed by NativeWind to generate the JavaScript UI bundle.
+# Expo's native project settings are kept separate in app.config.js and remain
+# fingerprinted, so palette edits can ship by OTA without masking native changes.
+tailwind.config.js

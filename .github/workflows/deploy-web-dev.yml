@@ -319,7 +319,7 @@ jobs:
           printf '%s\n' "$CHANGED_FILES"
           NATIVE_CHANGE=false
           if printf '%s\n' "$CHANGED_FILES" | grep -Eq \
-            '^(apps/client/(fingerprint\.config\.(js|cjs)|app\.json|eas\.json|package\.json|package-lock\.json|plugins/|android/|ios/|assets/|google-services\.json|GoogleService-Info\.plist)|.*\.(entitlements|podspec)$)'; then
+            '^(apps/client/(\.fingerprintignore|fingerprint\.config\.(js|cjs)|app\.json|eas\.json|package\.json|package-lock\.json|plugins/|android/|ios/|assets/|google-services\.json|GoogleService-Info\.plist)|.*\.(entitlements|podspec)$)'; then
             NATIVE_CHANGE=true
           fi
 

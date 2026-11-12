@@ -114,7 +114,10 @@ flowchart LR
 
 This is a release-routing decision, not a separate test. The pipeline checks whether the commit changes anything that is compiled into, configured for, or required by the Android/iOS binary. A change that only corrects the Expo project `slug` to match the already-linked EAS project is treated as OTA-compatible metadata; it does not change the update URL, runtime version, or native binary configuration.
 
+The JavaScript theme in `apps/client/tailwind.config.js` is excluded from the native fingerprint. Expo's native splash and adaptive-icon background colors are fixed in `app.config.js`; native code, dependencies, plugins, app identity, permissions, links, and other critical native configuration remain fingerprinted.
+
 - native Android/iOS code or a new/changed native dependency;
+- `.fingerprintignore` or `fingerprint.config.js` / `fingerprint.config.cjs` changes;
 - Expo config (other than the slug-only EAS project-link correction described above), config plugins, app identity, URL schemes, entitlements, permissions, icons, or splash assets;
 - push-notification, payment, camera, biometric, file-system, WebView, or other native capability configuration;
 - Expo SDK or React Native version changes.
@@ -415,6 +418,6 @@ Web rollback is separate from native OTA rollback:
 
 ### OTA fingerprint and QA debug builds
 
-`fingerprint.config.cjs` excludes only Android versionCode, iOS buildNumber and the display-only OTA revision from the Expo configuration fingerprint. Other native configuration and dependencies remain fingerprinted. The runtime quality job checks counter stability and detects a native app-link change. Android Firebase development builds set `EX_UPDATES_NATIVE_DEBUG=1`, allowing Expo Updates in the bundled debug APK; Metro JS debugging is unavailable in that build. Production uses the release build. Existing APKs require a new build before they can use this configuration. A published OTA still needs a matching runtime and channel.
+`fingerprint.config.cjs` excludes Android versionCode, iOS buildNumber and the display-only OTA revision from the Expo configuration fingerprint. `.fingerprintignore` excludes the JavaScript-only Tailwind theme; the native splash and adaptive-icon backgrounds are fixed separately in `app.config.js`. Other native configuration and dependencies remain fingerprinted. The runtime quality job checks counter stability and detects a native app-link change. Android Firebase development builds set `EX_UPDATES_NATIVE_DEBUG=1`, allowing Expo Updates in the bundled debug APK; Metro JS debugging is unavailable in that build. Production uses the release build. Existing APKs require a new build before they can use this configuration. A published OTA still needs a matching runtime and channel.
 
 The release workflow exposes typecheck, lint, format, coverage, runtime validation, dependency audit and release-branch validation as separate checks. They run on pull requests and again on branch pushes to validate the actual deployed commit, including direct pushes.

@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { brand, neutral } from "@presentation/theme";
+import { brandMark, neutral } from "@presentation/theme";
 
 interface BrandSymbolProps {
   readonly size?: number;
@@ -11,8 +11,8 @@ interface BrandSymbolProps {
 const ticketPath =
   "M8 6h24a3 3 0 0 1 3 3v6.8c-2.4 1.1-4 2.4-4 4.2s1.6 3.1 4 4.2V31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-6.8c2.4-1.1 4-2.4 4-4.2s-1.6-3.1-4-4.2V9a3 3 0 0 1 3-3Z";
 const ticketGradient = [
-  brand.primary,
-  brand.deep,
+  brandMark.primary,
+  brandMark.deep,
   neutral.darkBackground,
 ] as const;
 
@@ -47,7 +47,7 @@ export function BrandSymbol({ size = 36, testID }: BrandSymbolProps) {
         <Path
           d="M27 10v20"
           fill="none"
-          stroke={brand.primary}
+          stroke={brandMark.primary}
           strokeDasharray="1 1"
           strokeLinecap="round"
           strokeWidth={1.2}

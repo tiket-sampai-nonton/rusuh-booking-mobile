@@ -24,14 +24,14 @@ const tw = (
 
 describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
   describe("designColors", () => {
-    it("exposes the black, white, and red brand palette", () => {
+    it("exposes the black, white, and neon cyberpunk brand palette", () => {
       expect(designColors).toMatchObject({
         ground: "#FBFBFD",
         ink: "#0A0A0C",
         overlay: "#0A0A0C",
         inkMuted: "#666666",
         field: "#F5F5F5",
-        danger: "#EC1C24",
+        danger: "#C1121F",
         success: "#00AA00",
         warning: "#FF6600",
       });
@@ -40,8 +40,8 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
     it("includes legacy aliases for backwards compatibility", () => {
       expect(designColors.muted).toBe("#666666");
       expect(designColors.warn).toBe("#FF6600");
-      expect(designColors.accent).toBe("#EC1C24");
-      expect(designColors.ember).toBe("#FF5A2D");
+      expect(designColors.accent).toBe("#DE00A0");
+      expect(designColors.ember).toBe("#00E5FF");
     });
   });
 
@@ -108,9 +108,9 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
         text: "#E65100",
       });
       expect(designZoneBanners.notEnough).toEqual({
-        bg: "#FDE8E8",
-        border: "#EC1C24",
-        text: "#A8111B",
+        bg: "#FCE8EA",
+        border: "#C1121F",
+        text: "#7F1D1D",
       });
     });
   });
