@@ -1,0 +1,11 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: queue-admitted
+tags:
+  - scenario
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/join.yaml
+- extendedWaitUntil:
+    visible:
+      id: checkout-scroll
+    timeout: 60000

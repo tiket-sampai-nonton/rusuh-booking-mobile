@@ -1,6 +1,14 @@
 # OS
 .DS_Store
 
+# Local Android/Gradle/Kotlin tooling and generated build output
+.gradle/
+.kotlin/
+.idea/
+*.iml
+local.properties
+build/
+
 # Local agent/tooling settings (per-machine, not shared)
 .kiro/*
 # ...but DO share steering (every teammate's agent must auto-load the workflow)
@@ -22,3 +30,8 @@ ios/
 .env
 !.env.example
 expo-env.d.ts
+
+# Local Maestro output
+.maestro/*.log
+.maestro/screen.json
+.maestro/artifacts/

@@ -1,0 +1,14 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: start
+tags:
+  - regression
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    permissions:
+      notifications: allow
+- extendedWaitUntil:
+    visible:
+      id: home-scroll
+    timeout: 60000
