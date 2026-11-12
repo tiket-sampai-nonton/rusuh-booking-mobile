@@ -78,11 +78,15 @@ export interface Booking {
 export interface BookingItemInput {
   readonly categoryId: string;
   readonly attendeeName: string;
-  readonly attendeeNik: string;
+  /** Omitted when the logged-in buyer's linked NIK is used. */
+  readonly attendeeNik?: string;
+  readonly useLoginNik?: boolean;
 }
 
 export interface BookingBuyerInput {
-  readonly nik: string;
+  /** Omitted when useLoginNik is true. */
+  readonly nik?: string;
+  readonly useLoginNik?: boolean;
   readonly email: string;
   readonly emailConfirmation: string;
   readonly consent: boolean;

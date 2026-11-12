@@ -89,11 +89,14 @@ export function HeroInfoMobile({
       {/* Meta: Date · Venue (compact, single line with wrap) */}
       <View style={componentStyles.elementFlexDirection22}>
         <View style={componentStyles.elementFlexDirection23}>
-          <CalendarIcon color={designColors.inkMuted} />
+          <CalendarIcon
+            color={isMobileWeb ? designColors.ground : designColors.ink}
+          />
           <Text
             style={[
               componentStyles.elementColor24,
               isMobileWeb && mobileWebStyles.meta,
+              Platform.OS !== "web" && nativeStyles.meta,
             ]}
           >
             {formatDateID(event.startsAt)}
@@ -101,11 +104,14 @@ export function HeroInfoMobile({
         </View>
         {event.venue && (
           <View style={componentStyles.elementFlexDirection25}>
-            <MapPinIcon color={designColors.inkMuted} />
+            <MapPinIcon
+              color={isMobileWeb ? designColors.ground : designColors.ink}
+            />
             <Text
               style={[
                 componentStyles.elementColor26,
                 isMobileWeb && mobileWebStyles.meta,
+                Platform.OS !== "web" && nativeStyles.meta,
               ]}
             >
               {event.venue}
@@ -162,4 +168,8 @@ const mobileWebStyles = StyleSheet.create({
     fontWeight: "700",
     textDecorationLine: "underline",
   },
+});
+
+const nativeStyles = StyleSheet.create({
+  meta: { color: designColors.ink, fontWeight: "700" },
 });

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View } from "react-native";
+import FastImage from "react-native-fast-image";
 import {
   cancelAnimation,
   Easing,
@@ -55,6 +56,7 @@ export function HeroCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [glitchIndex, setGlitchIndex] = useState<number | null>(null);
+  const [heroImagesReady, setHeroImagesReady] = useState(false);
   const zoom = useSharedValue(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -70,7 +72,45 @@ export function HeroCarousel({
   // Keep the active native slide stable when its route blurs. `autoPlay` is
   // focus-driven by Home; shrinking `top` to one item on blur invalidated a
   // previously selected slide and could temporarily blank the whole hero.
-  const top = events.slice(0, autoPlay || isNative ? 3 : 1);
+  const top = useMemo(
+    () => events.slice(0, autoPlay || isNative ? 3 : 1),
+    [events, autoPlay, isNative],
+  );
+  const imageUris = useMemo(
+    () =>
+      top.map((event) =>
+        eventImage(event.id, event.bannerUrl ?? event.imageUrl),
+      ),
+    [top],
+  );
+
+  // Warm the same image cache used by CachedImage before a slide can become
+  // active. Disk-only preloading avoids decoding every large banner into RAM.
+  useEffect(() => {
+    let cancelled = false;
+    if (imageUris.length === 0) {
+      setHeroImagesReady(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+    setHeroImagesReady(false);
+    const preload = FastImage.preload;
+    if (typeof preload !== "function") {
+      setHeroImagesReady(true);
+      return () => {
+        cancelled = true;
+      };
+    }
+    void preload(imageUris.map((uri) => ({ uri, memoryCache: false }))).then(
+      () => {
+        if (!cancelled) setHeroImagesReady(true);
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [imageUris]);
 
   // The approved mobile web hero is a compact image-led banner below the site
   // header. Native and desktop keep their existing viewport-based layouts.
@@ -139,7 +179,7 @@ export function HeroCarousel({
 
   // Auto-advance slides (6s interval)
   useEffect(() => {
-    if (!autoPlay || !isActive || top.length <= 1) return;
+    if (!autoPlay || !isActive || !heroImagesReady || top.length <= 1) return;
     intervalRef.current = setInterval(() => {
       const previous = currentIndex % top.length;
       const next = (previous + 1) % top.length;
@@ -157,6 +197,7 @@ export function HeroCarousel({
   }, [
     autoPlay,
     currentIndex,
+    heroImagesReady,
     isActive,
     reducedMotion,
     scheduleTransitionReset,
@@ -177,19 +218,20 @@ export function HeroCarousel({
     <View style={styleForHeroCarouselView12(heroHeight)} testID="v2-hero">
       {/* Background slides (prototype .hero-slides) */}
       <View style={componentStyles.elementPosition32}>
-        {top.map((ev, i) =>
-          i === activeIndex || i === prevIndex ? (
-            <HeroSlide
-              key={ev.id}
-              uri={eventImage(ev.id, ev.bannerUrl ?? ev.imageUrl)}
-              active={i === activeIndex}
-              isPrev={i === prevIndex}
-              isGlitching={i === glitchIndex}
-              zoomValue={zoom}
-              reduced={Boolean(reducedMotion)}
-            />
-          ) : null,
-        )}
+        {heroImagesReady &&
+          top.map((ev, i) =>
+            i === activeIndex || i === prevIndex ? (
+              <HeroSlide
+                key={ev.id}
+                uri={imageUris[i]}
+                active={i === activeIndex}
+                isPrev={i === prevIndex}
+                isGlitching={i === glitchIndex}
+                zoomValue={zoom}
+                reduced={Boolean(reducedMotion)}
+              />
+            ) : null,
+          )}
       </View>
 
       {/* Gradient overlay (prototype .hero-slide-overlay) */}

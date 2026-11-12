@@ -20,6 +20,8 @@ export function CheckoutBar({
   pending,
   expired,
   errorMessage,
+  errorActionLabel,
+  onErrorAction,
   onSubmit,
   bottomInset,
 }: CheckoutBarProps) {
@@ -38,9 +40,20 @@ export function CheckoutBar({
     >
       {/* Error message */}
       {errorMessage ? (
-        <Text style={styles.errorText} accessibilityLiveRegion="polite">
-          {errorMessage}
-        </Text>
+        <View>
+          <Text style={styles.errorText} accessibilityLiveRegion="polite">
+            {errorMessage}
+          </Text>
+          {errorActionLabel && onErrorAction ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={onErrorAction}
+              testID="checkout-error-action"
+            >
+              <Text style={styles.errorText}>{errorActionLabel}</Text>
+            </Pressable>
+          ) : null}
+        </View>
       ) : null}
 
       <View style={[styles.content, isMobileWeb && styles.mobileWebContent]}>

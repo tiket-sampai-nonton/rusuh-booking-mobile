@@ -34,6 +34,7 @@ export function useHoldBooking(): {
   hold: (input: HoldInput) => Promise<Booking>;
   isHolding: boolean;
   error: DomainError | null;
+  resetError: () => void;
 } {
   const { bookingRepository, idempotencyKeys } = useServices();
   const setBooking = useSessionStore((s) => s.setBooking);
@@ -50,5 +51,6 @@ export function useHoldBooking(): {
     hold: mutation.mutateAsync,
     isHolding: mutation.isPending,
     error: mutation.error,
+    resetError: mutation.reset,
   };
 }

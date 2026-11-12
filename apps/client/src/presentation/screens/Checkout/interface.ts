@@ -62,6 +62,7 @@ export interface TicketItemProps {
   readonly categories: readonly BookingCategory[];
   readonly buyerName?: string;
   readonly buyerNik?: string;
+  readonly buyerUsesSavedNik?: boolean;
   readonly categoryError?: string;
   readonly attendeeNameError?: string;
   readonly attendeeNikError?: string;
@@ -81,6 +82,8 @@ export interface CheckoutBarProps {
   readonly pending: boolean;
   readonly expired: boolean;
   readonly errorMessage?: string;
+  readonly errorActionLabel?: string;
+  readonly onErrorAction?: () => void;
   readonly onSubmit: () => void;
   readonly bottomInset: number;
 }

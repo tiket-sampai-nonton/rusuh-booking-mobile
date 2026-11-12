@@ -2,7 +2,7 @@
  * HoldBooking use case (application layer — framework-free) — RBT-054.
  *
  * Maps the checkout form rows to the contract `BookingItemInput[]` (resolving a
- * "use buyer NIK" row to the buyer's NIK), mints ONE Idempotency-Key for the
+ * "use buyer NIK" row to the buyer's selected identity), mints ONE Idempotency-Key for the
  * action and REUSES it across retry/refresh (RBT-012/FR-25) so a double-submit
  * cannot create a second booking, then calls the port's idempotent `hold`. The
  * key is cleared on success (terminal for this action). No React / RN / Expo
@@ -37,11 +37,14 @@ export class HoldBooking {
     buyer: BookingBuyerInput,
   ): Promise<Booking> {
     const resolved = resolveAttendeeNiks(rows, buyerNik);
-    const items: BookingItemInput[] = rows.map((r, i) => ({
-      categoryId: r.categoryId,
-      attendeeName: r.attendeeName,
-      attendeeNik: resolved[i],
-    }));
+    const items: BookingItemInput[] = rows.map((r, i) => {
+      const useLoginNik = r.useBuyerNik && buyer.useLoginNik === true;
+      return {
+        categoryId: r.categoryId,
+        attendeeName: r.attendeeName,
+        ...(useLoginNik ? { useLoginNik: true } : { attendeeNik: resolved[i] }),
+      };
+    });
     const actionId = HoldBooking.actionId(sessionId);
     // Mint ONCE and reuse across retry (the key is NOT cleared on failure, so a
     // retry of the same action reuses it — FR-25). Cleared only on success.
@@ -60,7 +63,14 @@ export class HoldBooking {
         cause instanceof DomainError
           ? cause
           : mapFailure(cause, "DEPENDENCY_UNAVAILABLE");
-      if (error.code === "IDEMPOTENCY_KEY_REUSED") this.keys.clear(actionId);
+      // A saved NIK that is not linked is a rejected selection, so switching
+      // to manual entry starts a new payload/action. Temporary dependency
+      // failures intentionally retain the same key for safe retries.
+      if (
+        error.code === "IDEMPOTENCY_KEY_REUSED" ||
+        error.code === "NIK_NOT_LINKED"
+      )
+        this.keys.clear(actionId);
       throw error;
     }
   }

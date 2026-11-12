@@ -58,12 +58,11 @@ describe("GradientOverlay", () => {
     const { UNSAFE_getByType } = render(<GradientOverlay />);
     const gradient = UNSAFE_getByType(LinearGradient);
 
-    expect(gradient.props.locations).toEqual([0, 0.4, 0.7, 1]);
+    expect(gradient.props.locations).toEqual([0, 0.7, 1]);
     expect(gradient.props.colors).toEqual([
-      withAlpha(designColors.ground, 0.04),
-      withAlpha(designColors.ground, 0.12),
-      withAlpha(designColors.ground, 0.24),
-      withAlpha(designColors.ground, 0.42),
+      withAlpha(designColors.ground, 0),
+      withAlpha(designColors.ground, 0),
+      withAlpha(designColors.ground, 0.96),
     ]);
   });
 });
