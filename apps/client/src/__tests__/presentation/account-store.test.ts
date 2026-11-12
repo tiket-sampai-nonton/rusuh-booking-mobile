@@ -45,7 +45,10 @@ describe("selectCheckoutPrefill", () => {
       setBuyerEmail: () => {},
       clearProfile: () => {},
     };
-    expect(selectCheckoutPrefill(state)).toEqual({ fromAccount: false });
+    expect(selectCheckoutPrefill(state)).toEqual({
+      fromAccount: false,
+      hasNik: false,
+    });
   });
 
   it("returns masked buyer fields + fromAccount:true when signed in", () => {
@@ -58,6 +61,7 @@ describe("selectCheckoutPrefill", () => {
     const prefill = selectCheckoutPrefill(state);
     expect(prefill).toEqual({
       fromAccount: true,
+      hasNik: true,
       fullName: "Rizky R.",
       email: undefined,
       emailMasked: "r***@gmail.com",
@@ -87,12 +91,16 @@ describe("selectCheckoutPrefill", () => {
 
 describe("prefillFromProfile (stable-reference derivation, RBT-053)", () => {
   it("returns fromAccount:false for an undefined profile", () => {
-    expect(prefillFromProfile(undefined)).toEqual({ fromAccount: false });
+    expect(prefillFromProfile(undefined)).toEqual({
+      fromAccount: false,
+      hasNik: false,
+    });
   });
 
   it("maps a profile to the masked prefill", () => {
     expect(prefillFromProfile(PROFILE)).toEqual({
       fromAccount: true,
+      hasNik: true,
       fullName: "Rizky R.",
       email: undefined,
       emailMasked: "r***@gmail.com",

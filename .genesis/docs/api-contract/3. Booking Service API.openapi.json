@@ -627,7 +627,7 @@
             "headers": {}
           },
           "422": {
-            "description": "Melebihi batas atau aturan event — errorCode: `QUANTITY_EXCEEDS_LIMIT`, `MIXED_CATEGORIES_NOT_ALLOWED`, `NIK_INVALID`",
+            "description": "Melebihi batas atau aturan event — errorCode: `QUANTITY_EXCEEDS_LIMIT`, `MIXED_CATEGORIES_NOT_ALLOWED`, `NIK_INVALID`, `NIK_NOT_LINKED` (saved account NIK is not linked; continue with manual NIK entry)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1463,10 +1463,43 @@
             "type": "string",
             "format": "uuid"
           },
+          "buyer": {
+            "type": "object",
+            "description": "Buyer identity is provided in manual mode with nik, or by selecting useLoginNik and sending the authenticated buyer bearer token. When useLoginNik is true, omit nik.",
+            "properties": {
+              "nik": {
+                "type": "string",
+                "pattern": "^[0-9]{16}$",
+                "description": "Buyer NIK; required unless useLoginNik is true."
+              },
+              "useLoginNik": {
+                "type": "boolean",
+                "description": "Use the saved account NIK. Requires an authenticated account with a linked NIK; omit nik when true."
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "emailConfirmation": {
+                "type": "string",
+                "format": "email"
+              },
+              "consent": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "email",
+              "emailConfirmation",
+              "consent"
+            ]
+          },
           "items": {
             "type": "array",
             "minItems": 1,
             "maxItems": 3,
+            "description": "One item per ticket. The server authoritatively validates duplicate NIK and quota constraints.",
             "items": {
               "type": "object",
               "properties": {
@@ -1476,20 +1509,24 @@
                 },
                 "attendee": {
                   "type": "object",
+                  "description": "Manual mode uses nik. Saved-NIK mode requires buyer.useLoginNik=true, allows at most one attendee per order, and omits nik.",
                   "properties": {
                     "nik": {
                       "type": "string",
                       "pattern": "^[0-9]{16}$",
-                      "description": "NIK 16 digit (dicek strukturnya; tidak pernah disimpan plaintext)"
+                      "description": "Attendee NIK; required unless useLoginNik is true."
+                    },
+                    "useLoginNik": {
+                      "type": "boolean",
+                      "description": "Use the buyer account NIK for this ticket. Only one attendee may set this true, and buyer.useLoginNik must also be true."
                     },
                     "fullName": {
                       "type": "string",
-                      "minLength": 1,
+                      "minLength": 2,
                       "maxLength": 100
                     }
                   },
                   "required": [
-                    "nik",
                     "fullName"
                   ]
                 }
@@ -1503,6 +1540,7 @@
         },
         "required": [
           "sessionId",
+          "buyer",
           "items"
         ]
       },

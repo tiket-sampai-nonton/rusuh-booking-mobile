@@ -10,6 +10,8 @@ export type CachedImageProps = Omit<
   "defaultSource" | "source"
 > & {
   readonly source: ImageSource;
+  /** Keep remote-image placeholders off for already-prefetched hero slides. */
+  readonly showPlaceholder?: boolean;
 };
 
 function sourceKey(source: ImageSource): string {
@@ -26,6 +28,7 @@ function sourceKey(source: ImageSource): string {
 export function CachedImage({
   source,
   onError,
+  showPlaceholder = true,
   ...props
 }: CachedImageProps): React.ReactElement {
   const key = sourceKey(source);
@@ -40,7 +43,7 @@ export function CachedImage({
   return (
     <FastImage
       {...props}
-      defaultSource={IMAGE_FALLBACK}
+      defaultSource={showPlaceholder ? IMAGE_FALLBACK : undefined}
       source={failed ? IMAGE_FALLBACK : source}
       onError={(event) => {
         setFailedSource(key);

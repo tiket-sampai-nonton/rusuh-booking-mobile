@@ -47,6 +47,7 @@ export const useAccountStore = create<AccountState>((set) => ({
  */
 export interface CheckoutPrefill {
   readonly fromAccount: boolean;
+  readonly hasNik: boolean;
   readonly fullName?: string;
   readonly email?: string;
   readonly emailMasked?: string;
@@ -63,9 +64,10 @@ export function prefillFromProfile(
   p: UserProfile | undefined,
   buyerEmail?: string,
 ): CheckoutPrefill {
-  if (!p) return { fromAccount: false };
+  if (!p) return { fromAccount: false, hasNik: false };
   return {
     fromAccount: true,
+    hasNik: p.hasNik,
     fullName: p.fullName,
     email: buyerEmail,
     emailMasked: p.emailMasked,

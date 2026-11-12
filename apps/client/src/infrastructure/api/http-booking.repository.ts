@@ -84,10 +84,20 @@ export class HttpBookingRepository implements BookingRepository {
       headers: { "idempotency-key": idempotencyKey },
       body: {
         sessionId,
-        buyer,
+        buyer: {
+          ...(buyer.useLoginNik ? { useLoginNik: true } : { nik: buyer.nik }),
+          email: buyer.email,
+          emailConfirmation: buyer.emailConfirmation,
+          consent: buyer.consent,
+        },
         items: items.map((item) => ({
           categoryId: item.categoryId,
-          attendee: { nik: item.attendeeNik, fullName: item.attendeeName },
+          attendee: {
+            ...(item.useLoginNik
+              ? { useLoginNik: true }
+              : { nik: item.attendeeNik }),
+            fullName: item.attendeeName,
+          },
         })),
       },
     });

@@ -382,12 +382,29 @@ export interface components {
     HoldRequest: {
       /** Format: uuid */
       sessionId: string;
+      /** @description Buyer identity is provided in manual mode with nik, or by selecting useLoginNik and sending the authenticated buyer bearer token. When useLoginNik is true, omit nik. */
+      buyer: {
+        /** @description Buyer NIK; required unless useLoginNik is true. */
+        nik?: string;
+        /** @description Use the saved account NIK. Requires an authenticated account with a linked NIK; omit nik when true. */
+        useLoginNik?: boolean;
+        /** Format: email */
+        email: string;
+        /** Format: email */
+        emailConfirmation: string;
+        /** @constant */
+        consent: true;
+      };
+      /** @description One item per ticket. The server authoritatively validates duplicate NIK and quota constraints. */
       items: {
         /** Format: uuid */
         categoryId: string;
+        /** @description Manual mode uses nik. Saved-NIK mode requires buyer.useLoginNik=true, allows at most one attendee per order, and omits nik. */
         attendee: {
-          /** @description NIK 16 digit (dicek strukturnya; tidak pernah disimpan plaintext) */
-          nik: string;
+          /** @description Attendee NIK; required unless useLoginNik is true. */
+          nik?: string;
+          /** @description Use the buyer account NIK for this ticket. Only one attendee may set this true, and buyer.useLoginNik must also be true. */
+          useLoginNik?: boolean;
           fullName: string;
         };
       }[];
@@ -877,7 +894,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorEnvelope"];
         };
       };
-      /** @description Melebihi batas atau aturan event — errorCode: `QUANTITY_EXCEEDS_LIMIT`, `MIXED_CATEGORIES_NOT_ALLOWED`, `NIK_INVALID` */
+      /** @description Melebihi batas atau aturan event — errorCode: `QUANTITY_EXCEEDS_LIMIT`, `MIXED_CATEGORIES_NOT_ALLOWED`, `NIK_INVALID`, `NIK_NOT_LINKED` (saved account NIK is not linked; continue with manual NIK entry) */
       422: {
         headers: {
           [name: string]: unknown;

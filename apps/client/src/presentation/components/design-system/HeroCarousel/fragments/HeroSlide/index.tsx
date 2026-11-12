@@ -104,6 +104,8 @@ export function HeroSlide({
         <CachedImage
           source={{ uri, memoryCache: false }}
           resizeMode="cover"
+          showPlaceholder={false}
+          transition={{ duration: 0 }}
           style={[styleForHeroSlideImage2(), webImageFilter]}
           accessibilityIgnoresInvertColors
         />

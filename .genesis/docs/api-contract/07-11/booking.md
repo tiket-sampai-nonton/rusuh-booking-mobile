@@ -1495,7 +1495,7 @@ POST /api/v1/bookings
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Token visitor tidak valid atau kedaluwarsa — errorCode: `UNAUTHORIZED`|[ErrorEnvelope](#schemaerrorenvelope)|
 |409|[Conflict](https://tools.ietf.org/html/rfc7231#section-6.5.8)|Konflik — errorCode: `ATTENDEE_NIK_ALREADY_REGISTERED`, `ATTENDEE_NIK_DUPLICATE_IN_ORDER`, `CATEGORY_UNAVAILABLE` (pesan `CATEGORY_UNAVAILABLE: <categoryId>[,<categoryId>]`, id terurut, dipisah koma; baca ulang ketersediaan kategori lewat endpoint/SSE yang ada), `IDEMPOTENCY_KEY_REUSED`, `EVENT_CANCELLED`|[ErrorEnvelope](#schemaerrorenvelope)|
 |410|[Gone](https://tools.ietf.org/html/rfc7231#section-6.5.9)|Sesi habis — errorCode: `SESSION_EXPIRED`|[ErrorEnvelope](#schemaerrorenvelope)|
-|422|[Unprocessable Entity](https://tools.ietf.org/html/rfc2518#section-10.3)|Melebihi batas atau aturan event — errorCode: `QUANTITY_EXCEEDS_LIMIT`, `QUANTITY_INVALID` (kosong atau lebih dari unit yang dicadangkan untuk sesi ini), `MIXED_CATEGORIES_NOT_ALLOWED`, `NIK_INVALID`, `EMAIL_MISMATCH`, `CONSENT_REQUIRED`, `BUYER_NIK_LIMIT_REACHED` ("NIK ini sudah mencapai batas, gunakan NIK lain"; sesi, unit cadangan, dan timer tetap; boleh dicoba lagi dengan NIK pembeli lain dan Idempotency-Key yang sama)|[ErrorEnvelope](#schemaerrorenvelope)|
+|422|[Unprocessable Entity](https://tools.ietf.org/html/rfc2518#section-10.3)|Melebihi batas atau aturan event — errorCode: `QUANTITY_EXCEEDS_LIMIT`, `QUANTITY_INVALID` (kosong atau lebih dari unit yang dicadangkan untuk sesi ini), `MIXED_CATEGORIES_NOT_ALLOWED`, `NIK_INVALID`, `NIK_NOT_LINKED` (NIK belum tertaut; pengguna dapat beralih ke input manual), `EMAIL_MISMATCH`, `CONSENT_REQUIRED`, `BUYER_NIK_LIMIT_REACHED` ("NIK ini sudah mencapai batas, gunakan NIK lain"; sesi, unit cadangan, dan timer tetap; boleh dicoba lagi dengan NIK pembeli lain dan Idempotency-Key yang sama)|[ErrorEnvelope](#schemaerrorenvelope)|
 |429|[Too Many Requests](https://tools.ietf.org/html/rfc6585#section-4)|Terlalu banyak percobaan NIK pembeli pada sesi ini; tunggu sesuai header Retry-After — errorCode: `BUYER_NIK_THROTTLED`|[ErrorEnvelope](#schemaerrorenvelope)|
 |503|[Service Unavailable](https://tools.ietf.org/html/rfc7231#section-6.6.4)|Dependency sementara tidak tersedia; ulangi dengan Idempotency-Key yang sama — errorCode: `DEPENDENCY_UNAVAILABLE`|[ErrorEnvelope](#schemaerrorenvelope)|
 
@@ -3058,15 +3058,17 @@ Nilai filter yang tersedia lintas katalog publik (event terbit, non-cancelled).
 |Name|Type|Required|Restrictions|Title|Description|
 |---|---|---|---|---|---|
 |sessionId|string(uuid)|true|none||none|
-|buyer|object|true|none||Data pembeli diisi di halaman Booking (ADR-030) dan diikat ke admission di dalam transaksi hold.<br />Pengguna login boleh diprefill dari akun di klien; server tetap memvalidasi. Bearer opsional hanya<br />mengidentifikasi akun, tidak pernah menyuplai NIK.|
-|» nik|string|true|none||NIK pembeli 16 digit (struktur dicek; disimpan hanya sebagai HMAC dan versi tersamar)|
+|buyer|object|true|none||Data pembeli pada hold. Mode manual mengirim `nik`; mode saved-NIK mengirim `useLoginNik: true`, bearer pembeli wajib, dan `nik` dihilangkan.|
+|» nik|string|conditional|none||NIK pembeli 16 digit; wajib bila `useLoginNik` bukan `true`. Bila memakai NIK akun, kirim `useLoginNik: true` dan hilangkan `nik`.|
+|» useLoginNik|boolean|false|none||Gunakan NIK tersimpan dari akun; bearer pembeli wajib dan akun harus memiliki NIK tertaut.|
 |» email|string(email)|true|none||none|
 |» emailConfirmation|string(email)|true|none||none|
 |» consent|boolean|true|none||none|
 |items|[object]|true|none||Satu item per tiket; 1 qty = 1 NIK pemegang. Jumlah item tidak boleh melebihi outstandingUnits sesi.|
 |» categoryId|string(uuid)|true|none||none|
 |» attendee|object|true|none||none|
-|»» nik|string|true|none||NIK 16 digit (dicek strukturnya; tidak pernah disimpan plaintext)|
+|»» nik|string|conditional|none||NIK penonton 16 digit; hilangkan bila `useLoginNik: true`.|
+|»» useLoginNik|boolean|false|none||Gunakan NIK akun pembeli untuk tiket ini; hanya satu attendee per pesanan dan buyer harus memakai `useLoginNik: true`.|
 |»» fullName|string|true|none||none|
 
 <h2 id="tocS_ReplaceItemsRequest">ReplaceItemsRequest</h2>

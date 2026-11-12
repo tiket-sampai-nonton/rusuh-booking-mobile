@@ -110,7 +110,7 @@ export class MockBookingRepository implements BookingRepository {
       publicRef: booking.bookingId,
       amountMinor,
       ticketQuantity: items.length,
-      buyerNikMasked: buyer
+      buyerNikMasked: buyer.nik
         ? `${buyer.nik.slice(0, 2)}****${buyer.nik.slice(-2)}`
         : "••••",
       tickets: items.map((item, index) => ({
@@ -120,7 +120,9 @@ export class MockBookingRepository implements BookingRepository {
             (category) => category.categoryId === item.categoryId,
           )?.code ?? item.categoryId,
         attendeeName: item.attendeeName,
-        attendeeNikMasked: `${item.attendeeNik.slice(0, 2)}****${item.attendeeNik.slice(-2)}`,
+        attendeeNikMasked: item.attendeeNik
+          ? `${item.attendeeNik.slice(0, 2)}****${item.attendeeNik.slice(-2)}`
+          : "••••",
         qrPayload: `MOCK|${booking.bookingId}|${index + 1}`,
       })),
     });

@@ -33,14 +33,14 @@ export function GradientOverlay({
     // ramp preserves text contrast without washing out the hero image.
     return (
       <LinearGradient
-        // Gradient from top to bottom (CSS "to top" reversed for RN)
+        // Keep the artwork fully clear through the top 70%; blend to white
+        // only across the lower 30% where native hero copy sits.
         colors={[
-          withAlpha(designColors.ground, 0.04),
-          withAlpha(designColors.ground, 0.12),
-          withAlpha(designColors.ground, 0.24),
-          withAlpha(designColors.ground, 0.42),
+          withAlpha(designColors.ground, 0),
+          withAlpha(designColors.ground, 0),
+          withAlpha(designColors.ground, 0.96),
         ]}
-        locations={[0, 0.4, 0.7, 1]}
+        locations={[0, 0.7, 1]}
         style={[componentStyles.elementPosition2, pointerEventsNone]}
       />
     );
