@@ -1,9 +1,8 @@
 /** Login modal layout and behavior styles. Colors come from shared theme tokens. */
-import { Platform, StyleSheet, type TextStyle } from "react-native";
+import { Animated, Platform, StyleSheet, type TextStyle } from "react-native";
 
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import { withAlpha } from "@presentation/theme";
-import { hardShadowStyle } from "@presentation/utils/style";
 import {
   designBorders,
   designColors,
@@ -15,8 +14,7 @@ import {
 /**
  * Modal overlay color is derived from the shared neutral overlay token.
  */
-import type { DynamicStyle } from "@presentation/utils/style";
-import { Animated } from "react-native";
+import { hardShadowStyle, type DynamicStyle } from "@presentation/utils/style";
 
 export const SCRIM = withAlpha(designColors.overlay, 0.8);
 
@@ -440,10 +438,12 @@ export function styleForLoginModalAnimatedView1(
   arg2: Animated.Value,
   isMobileWeb = false,
 ): DynamicStyle {
+  let maxHeight: DynamicStyle["maxHeight"] = "92%";
+  if (!isMobileWeb && Platform.OS === "web") maxHeight = undefined;
   return {
     width: "100%",
     maxWidth: isMobileWeb ? "100%" : 400,
-    maxHeight: isMobileWeb ? "92%" : Platform.OS === "web" ? undefined : "92%",
+    maxHeight,
     opacity: arg0,
     transform: [{ scale: arg1 }, { translateY: arg2 }],
   } as DynamicStyle;

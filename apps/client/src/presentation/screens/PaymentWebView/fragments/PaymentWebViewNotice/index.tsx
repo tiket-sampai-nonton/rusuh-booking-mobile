@@ -1,5 +1,4 @@
-import { Text, View } from "react-native";
-import { Pressable } from "react-native";
+import { Text, View, Pressable } from "react-native";
 
 export type PaymentWebViewNoticeVariant = "web" | "error" | "loading";
 

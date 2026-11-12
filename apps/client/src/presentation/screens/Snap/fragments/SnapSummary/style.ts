@@ -1,11 +1,11 @@
 import { StyleSheet } from "react-native";
 
-import { designColors, designBorder } from "@presentation/theme";
+import { designColors, designBorders } from "@presentation/theme";
 
 export const snapSummaryStyles = StyleSheet.create({
   container: {
     backgroundColor: designColors.field,
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
   },
   label: {

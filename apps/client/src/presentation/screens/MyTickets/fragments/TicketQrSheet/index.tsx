@@ -8,8 +8,7 @@ import type {
 } from "@domain/repositories/ticket-history.repository";
 import { minorToIDR } from "@domain/services/money";
 import { designColors } from "@presentation/theme";
-import { styles } from "./style";
-import { ticketQrContentStyle, ticketQrBackdropStyle } from "./style";
+import { styles, ticketQrContentStyle, ticketQrBackdropStyle } from "./style";
 
 export { ticketQrBackdropStyle } from "./style";
 
@@ -28,8 +27,23 @@ interface TicketQrSheetProps {
   readonly onClose: () => void;
 }
 
-export function TicketQrSheet({
-  eventName,
+export function TicketQrSheet(props: TicketQrSheetProps) {
+  const insets = useSafeAreaInsets();
+  return <TicketQrSheetView {...props} bottomInset={insets.bottom} />;
+}
+
+type TicketContentProps = Pick<
+  TicketQrSheetProps,
+  | "bookingTickets"
+  | "bookingSummary"
+  | "isLoading"
+  | "isError"
+  | "errorMessage"
+  | "isRetrying"
+  | "onRetry"
+>;
+
+function buildTicketContent({
   bookingTickets,
   bookingSummary,
   isLoading,
@@ -37,71 +51,111 @@ export function TicketQrSheet({
   errorMessage,
   isRetrying = false,
   onRetry,
-  downloadError,
-  onDownload,
-  onClose,
-}: TicketQrSheetProps) {
-  const insets = useSafeAreaInsets();
-  let ticketContent: ReactNode;
+}: TicketContentProps): ReactNode {
   if (bookingSummary && bookingSummary.status !== "PAID") {
-    const reason =
-      bookingSummary.status === "EXPIRED"
-        ? "Pesanan ini kedaluwarsa sebelum pembayaran selesai, jadi e-tiket tidak diterbitkan."
-        : bookingSummary.status === "CANCELLED"
-          ? "Pesanan ini dibatalkan, jadi e-tiket tidak diterbitkan."
-          : "E-tiket akan tersedia setelah pembayaran berhasil dikonfirmasi.";
-    ticketContent = (
-      <View style={styles.bookingSummary} testID="booking-order-summary">
-        <Text style={styles.ticketDetails}>
-          Referensi {bookingSummary.publicRef}
-        </Text>
-        <Text style={styles.ticketDetails}>
-          Status {bookingSummary.status.replace(/_/g, " ")}
-        </Text>
-        <Text style={styles.bookingAmount}>
-          {minorToIDR(bookingSummary.amountMinor)}
-        </Text>
-        <Text style={styles.ticketDetails}>{reason}</Text>
-      </View>
-    );
-  } else if (isLoading) {
-    ticketContent = <Text style={styles.message}>Memuat QR…</Text>;
-  } else if (isError) {
-    ticketContent = errorContent(
+    return unpaidBookingContent(bookingSummary);
+  }
+  if (isLoading) return <Text style={styles.message}>Memuat QR…</Text>;
+  if (isError) {
+    return errorContent(
       errorMessage ?? "QR tiket gagal dimuat. Silakan coba lagi.",
       isRetrying,
       onRetry,
     );
-  } else if (!bookingTickets || bookingTickets.length === 0) {
-    ticketContent = errorContent(
+  }
+  if (!bookingTickets || bookingTickets.length === 0) {
+    return errorContent(
       "Data QR tiket belum tersedia. Coba muat kembali.",
       isRetrying,
       onRetry,
     );
-  } else {
-    ticketContent = bookingTickets.map((ticket, index) => (
-      <View
-        key={ticket.ticketCode}
-        pointerEvents={ticketQrCardPointerEvents(Platform.OS)}
-        style={styles.ticketQr}
-      >
-        <QRCode
-          value={ticket.qrPayload}
-          size={190}
-          color={designColors.ink}
-          backgroundColor={designColors.ground}
-        />
-        <Text style={styles.ticketCode}>{ticket.ticketCode}</Text>
-        <Text style={styles.ticketDetails}>
-          Kategori {ticket.categoryCode || "—"}
-        </Text>
-        <Text style={styles.ticketDetails}>
-          {ticket.attendeeName || "Pemegang tiket"} ·{" "}
-          {ticket.attendeeNikMasked || "••••"}
-        </Text>
-      </View>
-    ));
   }
+  return bookingTicketCards(bookingTickets);
+}
+
+function unpaidBookingContent(booking: MyBookingSummary): ReactNode {
+  const reason = unpaidBookingReason(booking.status);
+  return (
+    <View style={styles.bookingSummary} testID="booking-order-summary">
+      <Text style={styles.ticketDetails}>Referensi {booking.publicRef}</Text>
+      <Text style={styles.ticketDetails}>
+        Status {booking.status.replaceAll("_", " ")}
+      </Text>
+      <Text style={styles.bookingAmount}>
+        {minorToIDR(booking.amountMinor)}
+      </Text>
+      <Text style={styles.ticketDetails}>{reason}</Text>
+    </View>
+  );
+}
+
+function unpaidBookingReason(status: MyBookingSummary["status"]): string {
+  if (status === "EXPIRED") {
+    return "Pesanan ini kedaluwarsa sebelum pembayaran selesai, jadi e-tiket tidak diterbitkan.";
+  }
+  if (status === "CANCELLED") {
+    return "Pesanan ini dibatalkan, jadi e-tiket tidak diterbitkan.";
+  }
+  return "E-tiket akan tersedia setelah pembayaran berhasil dikonfirmasi.";
+}
+
+function bookingTicketCards(tickets: readonly BookingTicket[]): ReactNode {
+  return tickets.map((ticket) => (
+    <View
+      key={ticket.ticketCode}
+      pointerEvents={ticketQrCardPointerEvents(Platform.OS)}
+      style={styles.ticketQr}
+    >
+      <QRCode
+        value={ticket.qrPayload}
+        size={190}
+        color={designColors.ink}
+        backgroundColor={designColors.ground}
+      />
+      <Text style={styles.ticketCode}>{ticket.ticketCode}</Text>
+      <Text style={styles.ticketDetails}>
+        Kategori {ticket.categoryCode || "—"}
+      </Text>
+      <Text style={styles.ticketDetails}>
+        {ticket.attendeeName || "Pemegang tiket"} ·{" "}
+        {ticket.attendeeNikMasked || "••••"}
+      </Text>
+    </View>
+  ));
+}
+
+interface TicketQrSheetViewProps extends TicketQrSheetProps {
+  readonly bottomInset: number;
+}
+
+function TicketQrSheetView({
+  eventName,
+  bookingId,
+  bookingTickets,
+  bookingSummary,
+  isLoading,
+  isError,
+  errorMessage,
+  isRetrying,
+  onRetry,
+  downloadError,
+  onDownload,
+  onClose,
+  bottomInset,
+}: TicketQrSheetViewProps) {
+  const hasUnpaidSummary =
+    bookingSummary !== undefined && bookingSummary.status !== "PAID";
+  const hasTickets = (bookingTickets?.length ?? 0) > 0;
+  const showDownload = hasTickets && !isLoading && !isError;
+  const ticketContent = buildTicketContent({
+    bookingTickets,
+    bookingSummary,
+    isLoading,
+    isError,
+    errorMessage,
+    isRetrying,
+    onRetry,
+  });
 
   return (
     <View style={ticketQrBackdropStyle(Platform.OS)}>
@@ -113,44 +167,40 @@ export function TicketQrSheet({
       />
       <View
         accessibilityViewIsModal
+        accessibilityLabel={`QR tiket untuk pesanan ${bookingId}`}
         style={styles.sheet}
         testID="ticket-qr-sheet"
       >
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={ticketQrContentStyle(insets.bottom)}
+          contentContainerStyle={ticketQrContentStyle(bottomInset)}
           keyboardShouldPersistTaps="handled"
           nestedScrollEnabled
           showsVerticalScrollIndicator={false}
           testID="ticket-qr-scrollview"
         >
-          {bookingSummary && bookingSummary.status !== "PAID" ? (
+          {hasUnpaidSummary ? (
             <Text style={styles.sectionTitle}>Detail Tiket</Text>
           ) : null}
           <Text style={styles.title}>{eventName}</Text>
           {ticketContent}
-          {bookingTickets?.length ? (
+          {hasTickets ? (
             <Text style={styles.instruction}>
               Tunjukkan kode ini di pintu masuk.
             </Text>
           ) : null}
-          {bookingTickets &&
-            bookingTickets.length > 0 &&
-            !isLoading &&
-            !isError && (
-              <Pressable onPress={onDownload} style={styles.download}>
-                <Text style={styles.downloadText}>Unduh E-Tiket</Text>
-              </Pressable>
-            )}
+          {showDownload && (
+            <Pressable onPress={onDownload} style={styles.download}>
+              <Text style={styles.downloadText}>Unduh E-Tiket</Text>
+            </Pressable>
+          )}
           {downloadError ? (
             <Text style={styles.errorText}>{downloadError}</Text>
           ) : null}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={
-              bookingSummary && bookingSummary.status !== "PAID"
-                ? "Tutup detail tiket"
-                : "Tutup QR tiket"
+              hasUnpaidSummary ? "Tutup detail tiket" : "Tutup QR tiket"
             }
             onPress={onClose}
             style={styles.close}
@@ -177,26 +227,26 @@ function errorContent(
   isRetrying: boolean,
   onRetry?: () => void,
 ): ReactNode {
+  const retryLabel = isRetrying ? "Memuat…" : "Coba Lagi";
+  const retryButton = onRetry ? (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Coba muat QR tiket lagi"
+      accessibilityState={{ disabled: isRetrying }}
+      disabled={isRetrying}
+      onPress={onRetry}
+      style={styles.close}
+      testID="ticket-qr-retry"
+    >
+      <Text style={styles.closeText}>{retryLabel}</Text>
+    </Pressable>
+  ) : null;
   return (
     <View style={{ alignItems: "center", gap: 12 }}>
       <Text style={styles.error} accessibilityLiveRegion="polite">
         {message}
       </Text>
-      {onRetry ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Coba muat QR tiket lagi"
-          accessibilityState={{ disabled: isRetrying }}
-          disabled={isRetrying}
-          onPress={onRetry}
-          style={styles.close}
-          testID="ticket-qr-retry"
-        >
-          <Text style={styles.closeText}>
-            {isRetrying ? "Memuat…" : "Coba Lagi"}
-          </Text>
-        </Pressable>
-      ) : null}
+      {retryButton}
     </View>
   );
 }

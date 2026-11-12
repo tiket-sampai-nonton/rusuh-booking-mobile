@@ -395,9 +395,12 @@ export const browseNativeListItem: ViewStyle = {
 export const browseGridList = (
   isNative = false,
   isMobileWeb = false,
-): ViewStyle => ({
-  gap: isMobileWeb ? 8 : isNative ? GAP_MOBILE : 16,
-});
+): ViewStyle => {
+  let gap = 16;
+  if (isNative) gap = GAP_MOBILE;
+  if (isMobileWeb) gap = 8;
+  return { gap };
+};
 
 /** One cell in the multi-column grid */
 export const browseGridCell = (

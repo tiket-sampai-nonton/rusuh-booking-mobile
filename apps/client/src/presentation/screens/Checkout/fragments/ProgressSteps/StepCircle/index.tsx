@@ -22,6 +22,7 @@ export function StepCircle({
   const numberStyle = filled
     ? stepCircleStyles.filledNumber
     : stepCircleStyles.emptyNumber;
+  const checkSize = compact ? 12 : 16;
   return (
     <View
       style={[
@@ -32,7 +33,7 @@ export function StepCircle({
       ]}
     >
       {isCompleted ? (
-        <CheckIcon color={designColors.ground} size={compact ? 12 : 16} />
+        <CheckIcon color={designColors.ground} size={checkSize} />
       ) : (
         <Text
           style={[

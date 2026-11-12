@@ -45,6 +45,7 @@ export function Field({
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: shakeX.value }],
   }));
+  const errorTestID = testID ? `${testID}-error` : undefined;
 
   return (
     <View
@@ -84,7 +85,7 @@ export function Field({
         <Text
           style={checkoutFieldStyles.error}
           accessibilityRole="alert"
-          testID={testID ? `${testID}-error` : undefined}
+          testID={errorTestID}
         >
           {errorMessage ?? `NIK harus ${NIK_LENGTH} digit.`}
         </Text>

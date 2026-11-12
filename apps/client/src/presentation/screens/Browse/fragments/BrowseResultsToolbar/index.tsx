@@ -90,11 +90,10 @@ export function BrowseResultsToolbar({
               aria-label="Urutkan event"
               value={sortBy}
               onChange={(event) => onSortChange(event.target.value)}
-              style={
-                isMobileWeb
-                  ? { ...browseSortControl, ...browseSortControlCompactStyle }
-                  : browseSortControl
-              }
+              style={{
+                ...browseSortControl,
+                ...browseSortControlCompactStyle,
+              }}
             >
               {SORT_OPTIONS.map((option) => (
                 <option key={option.key} value={option.key}>

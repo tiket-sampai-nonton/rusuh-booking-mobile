@@ -22,8 +22,7 @@ import { CachedImage } from "@presentation/components/design-system/CachedImage"
 
 import { designColors } from "@presentation/theme/event-design-tokens";
 import { PinIcon } from "@presentation/components/ArrowIcon";
-import { venueStyles } from "./style";
-import { styleForVenueImage0, styleForVenueView1 } from "./style";
+import { venueStyles, styleForVenueImage0, styleForVenueView1 } from "./style";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // VENUE COMPONENT

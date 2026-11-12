@@ -50,19 +50,28 @@ import {
   designDuration,
 } from "@presentation/theme/event-design-tokens";
 
-import { loginStyles as styles, componentStyles } from "./style";
-import { nativeDriverSupported } from "@presentation/utils/style";
-import { GhostButton } from "./GhostButton";
-import { PrimaryButton } from "./PrimaryButton";
 import {
+  loginStyles as styles,
+  componentStyles,
   styleForLoginModalView0,
   styleForLoginModalAnimatedView1,
   styleForLoginModalPressable2,
   styleForLoginModalText3,
   styleForLoginModalView4,
 } from "./style";
+import { nativeDriverSupported } from "@presentation/utils/style";
+import { GhostButton } from "./GhostButton";
+import { PrimaryButton } from "./PrimaryButton";
 
 type Step = "phone" | "otp" | "register" | "success" | "signed";
+const OTP_SLOT_KEYS = [
+  "otp-slot-1",
+  "otp-slot-2",
+  "otp-slot-3",
+  "otp-slot-4",
+  "otp-slot-5",
+  "otp-slot-6",
+] as const;
 
 export interface LoginModalProps {
   /** Whether the modal is open. */
@@ -87,6 +96,405 @@ function initialOf(name: string | undefined, emailMasked: string): string {
 
 /** Resend OTP cooldown in seconds (prototype: 60s). */
 const RESEND_COOLDOWN = 60;
+
+interface LoginStepContentProps {
+  readonly step: Step;
+  readonly isMobileWeb: boolean;
+  readonly email: string;
+  readonly setEmail: React.Dispatch<React.SetStateAction<string>>;
+  readonly emailError: string;
+  readonly setEmailError: React.Dispatch<React.SetStateAction<string>>;
+  readonly emailFocused: boolean;
+  readonly setEmailFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  readonly emailInputRef: React.RefObject<TextInput | null>;
+  readonly otpDigits: readonly string[];
+  readonly otpRefs: React.MutableRefObject<(TextInput | null)[]>;
+  readonly handleOtpChange: (index: number, value: string) => void;
+  readonly handleOtpKeyPress: (index: number, key: string) => void;
+  readonly resendTimer: number;
+  readonly auth: ReturnType<typeof useAuth>;
+  readonly canVerify: boolean;
+  readonly onSendOtp: () => void;
+  readonly onVerify: () => void;
+  readonly onResendOtp: () => void;
+  readonly backToPhone: () => void;
+  readonly regName: string;
+  readonly setRegName: React.Dispatch<React.SetStateAction<string>>;
+  readonly regNameInputRef: React.RefObject<TextInput | null>;
+  readonly regNik: string;
+  readonly onChangeNik: (value: string) => void;
+  readonly regNikError: string;
+  readonly regConsent: boolean;
+  readonly setRegConsent: React.Dispatch<React.SetStateAction<boolean>>;
+  readonly canRegister: boolean;
+  readonly onSubmitRegister: () => void;
+  readonly openPrivacyPolicy: () => void;
+  readonly regDoneName: string;
+  readonly close: () => void;
+}
+
+function LoginStepContent(props: LoginStepContentProps) {
+  switch (props.step) {
+    case "phone":
+      return <LoginPhoneStep {...props} />;
+    case "otp":
+      return <LoginOtpStep {...props} />;
+    case "register":
+      return <LoginRegistrationStep {...props} />;
+    case "signed":
+      return <LoginSignedStep {...props} />;
+    case "success":
+      return <LoginSuccessStep {...props} />;
+    default:
+      return null;
+  }
+}
+
+function LoginPhoneStep({
+  email,
+  setEmail,
+  emailError,
+  setEmailError,
+  emailFocused,
+  setEmailFocused,
+  emailInputRef,
+  auth,
+  onSendOtp,
+  close,
+}: LoginStepContentProps) {
+  return (
+    <View>
+      <Text accessibilityRole="header" style={styles.title}>
+        Masuk / Daftar
+      </Text>
+      <Text style={styles.sub}>Masukkan email untuk menerima kode OTP</Text>
+      <View style={styles.fld}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          ref={emailInputRef}
+          testID="login-email-input"
+          accessibilityLabel="Email"
+          value={email}
+          onChangeText={(value) => {
+            setEmail(value);
+            if (emailError) setEmailError("");
+          }}
+          onFocus={() => setEmailFocused(true)}
+          onBlur={() => setEmailFocused(false)}
+          placeholder="kamu@email.com"
+          placeholderTextColor={designColors.inkMuted}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+          textContentType="emailAddress"
+          style={[
+            styles.input,
+            emailFocused && styles.inputFocused,
+            emailError && styles.inputError,
+          ]}
+        />
+        <Text testID="login-email-error" style={styles.err}>
+          {emailError ||
+            (auth.requestError
+              ? messageFor(
+                  auth.requestError,
+                  "Terjadi kesalahan. Silakan coba lagi.",
+                )
+              : "")}
+        </Text>
+      </View>
+      <View style={styles.actions}>
+        <GhostButton testID="login-cancel" label="Batal" onPress={close} />
+        <PrimaryButton
+          testID="login-send"
+          label={auth.isRequesting ? "Mengirim…" : "Kirim OTP"}
+          disabled={auth.isRequesting}
+          onPress={onSendOtp}
+        />
+      </View>
+    </View>
+  );
+}
+
+function LoginOtpStep({
+  email,
+  otpDigits,
+  otpRefs,
+  handleOtpChange,
+  handleOtpKeyPress,
+  isMobileWeb,
+  resendTimer,
+  auth,
+  canVerify,
+  onResendOtp,
+  backToPhone,
+  onVerify,
+}: LoginStepContentProps) {
+  return (
+    <View>
+      <Text accessibilityRole="header" style={styles.title}>
+        Verifikasi OTP
+      </Text>
+      <Text style={styles.sub}>
+        Masukkan 6 digit kode yang dikirim ke{" "}
+        <Text style={styles.bold}>{email}</Text>
+      </Text>
+      <View style={styles.fld}>
+        <View style={[styles.otpRow, isMobileWeb && styles.mobileWebOtpRow]}>
+          {otpDigits.map((digit, index) => (
+            <TextInput
+              key={OTP_SLOT_KEYS[index]}
+              ref={(ref) => {
+                otpRefs.current[index] = ref;
+              }}
+              testID={`login-otp-${index}`}
+              value={digit}
+              onChangeText={(value) => handleOtpChange(index, value)}
+              onKeyPress={({ nativeEvent }) =>
+                handleOtpKeyPress(index, nativeEvent.key)
+              }
+              keyboardType="number-pad"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              textContentType="oneTimeCode"
+              selectTextOnFocus
+              style={[
+                styles.otpBox,
+                isMobileWeb && styles.mobileWebOtpBox,
+                digit && styles.otpBoxFocused,
+              ]}
+            />
+          ))}
+        </View>
+        <Text testID="login-otp-error" style={styles.err}>
+          {auth.verifyError
+            ? messageFor(auth.verifyError, "Kode OTP salah atau kedaluwarsa.")
+            : ""}
+        </Text>
+      </View>
+      <View style={styles.resendRow}>
+        <Text style={styles.resendText}>Tidak menerima kode? </Text>
+        <Pressable
+          testID="login-resend"
+          disabled={resendTimer > 0}
+          onPress={onResendOtp}
+          style={styles.resendBtn}
+        >
+          <Text
+            style={[
+              styles.resendBtnText,
+              resendTimer > 0 && styles.resendBtnDisabled,
+            ]}
+          >
+            {resendTimer > 0 ? `Kirim ulang (${resendTimer}s)` : "Kirim ulang"}
+          </Text>
+        </Pressable>
+      </View>
+      <View style={styles.actions}>
+        <GhostButton
+          testID="login-change-email"
+          label="Ubah Email"
+          onPress={backToPhone}
+        />
+        <PrimaryButton
+          testID="login-verify"
+          label={auth.isVerifying ? "Memeriksa…" : "Verifikasi"}
+          disabled={!canVerify || auth.isVerifying}
+          onPress={onVerify}
+        />
+      </View>
+    </View>
+  );
+}
+
+function LoginRegistrationStep({
+  email,
+  regName,
+  setRegName,
+  regNameInputRef,
+  regNik,
+  onChangeNik,
+  regNikError,
+  regConsent,
+  setRegConsent,
+  auth,
+  canRegister,
+  onSubmitRegister,
+  openPrivacyPolicy,
+  backToPhone,
+}: LoginStepContentProps) {
+  return (
+    <View>
+      <Text accessibilityRole="header" style={styles.title}>
+        Lengkapi Pendaftaran
+      </Text>
+      <Text style={styles.sub}>
+        Email baru — isi data diri sekali saja untuk checkout otomatis.
+      </Text>
+      <View style={styles.fld}>
+        <Text style={styles.label}>Email (untuk e-tiket)</Text>
+        <TextInput
+          testID="login-reg-email"
+          accessibilityLabel="Email terverifikasi"
+          value={email}
+          editable={false}
+          style={[styles.input, styles.inputReadonly]}
+        />
+        <Text style={styles.hint}>
+          Sudah terverifikasi. E-tiket dikirim ke email ini.
+        </Text>
+      </View>
+      <View style={styles.fld}>
+        <Text style={styles.label}>Nama Lengkap</Text>
+        <TextInput
+          ref={regNameInputRef}
+          testID="login-reg-name-input"
+          accessibilityLabel="Nama Lengkap"
+          value={regName}
+          onChangeText={setRegName}
+          placeholder="Nama sesuai KTP"
+          placeholderTextColor={designColors.inkMuted}
+          autoComplete="name"
+          textContentType="name"
+          style={styles.input}
+        />
+      </View>
+      <View style={styles.fld}>
+        <Text style={styles.label}>NIK (16 digit)</Text>
+        <TextInput
+          testID="login-reg-nik-input"
+          accessibilityLabel="NIK 16 digit"
+          value={regNik}
+          onChangeText={onChangeNik}
+          placeholder="16 digit KTP"
+          placeholderTextColor={designColors.inkMuted}
+          keyboardType="number-pad"
+          inputMode="numeric"
+          maxLength={NIK_LENGTH}
+          style={styles.input}
+        />
+        <Text testID="login-reg-nik-error" style={styles.err}>
+          {regNikError}
+        </Text>
+        <Text style={styles.hint}>
+          NIK dipakai untuk batas {MAX_TICKETS} tiket/NIK &amp; divalidasi
+          server.
+        </Text>
+      </View>
+      <Pressable
+        testID="login-reg-consent"
+        accessibilityRole="checkbox"
+        accessibilityLabel="Setujui kebijakan privasi"
+        accessibilityState={{ checked: regConsent }}
+        onPress={() => setRegConsent((current) => !current)}
+        style={styles.consentRow}
+      >
+        <View style={[styles.checkbox, regConsent && styles.checkboxChecked]}>
+          {regConsent ? (
+            <CheckIcon color={designColors.ground} size={14} />
+          ) : null}
+        </View>
+        <Text style={styles.consentText}>
+          Saya menyetujui pemrosesan data sesuai{" "}
+          <Text
+            testID="login-reg-privacy-link"
+            accessibilityRole="link"
+            style={styles.link}
+            onPress={(event) => {
+              event?.stopPropagation?.();
+              openPrivacyPolicy();
+            }}
+          >
+            Kebijakan Privasi
+          </Text>
+          .
+        </Text>
+      </Pressable>
+      <Text testID="login-reg-error" style={styles.err}>
+        {auth.registerError
+          ? messageFor(
+              auth.registerError,
+              "Pendaftaran gagal. Periksa data lalu coba lagi.",
+            )
+          : ""}
+      </Text>
+      <View style={styles.actions}>
+        <GhostButton
+          testID="login-reg-cancel"
+          label="Batal"
+          onPress={backToPhone}
+        />
+        <PrimaryButton
+          testID="login-reg-submit"
+          label={auth.isRegistering ? "Mendaftar…" : "Daftar & Masuk"}
+          disabled={!canRegister || auth.isRegistering}
+          onPress={onSubmitRegister}
+        />
+      </View>
+    </View>
+  );
+}
+
+function LoginSignedStep({ auth, email, close }: LoginStepContentProps) {
+  const fullName = auth.profile?.fullName;
+  const emailMasked = auth.profile?.emailMasked ?? email;
+  return (
+    <View>
+      <Text accessibilityRole="header" style={styles.title}>
+        Akun Kamu
+      </Text>
+      <View style={styles.signedin}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>
+            {initialOf(fullName, emailMasked)}
+          </Text>
+        </View>
+        <View>
+          <Text testID="login-signed-name" style={styles.signedName}>
+            {fullName ?? "—"}
+          </Text>
+          <Text testID="login-signed-email" style={styles.signedEmail}>
+            {emailMasked}
+          </Text>
+        </View>
+      </View>
+      <Text style={[styles.sub, styleForLoginModalText3()]}>
+        Data pembeli akan terisi otomatis saat checkout.
+      </Text>
+      <View style={styles.actions}>
+        <GhostButton
+          testID="login-close-signed"
+          label="Tutup"
+          onPress={close}
+        />
+      </View>
+    </View>
+  );
+}
+
+function LoginSuccessStep({ regDoneName, close }: LoginStepContentProps) {
+  return (
+    <View style={styles.doneContainer}>
+      <View style={styles.doneCheck}>
+        <CheckIcon color={designColors.ground} size={28} />
+      </View>
+      <Text accessibilityRole="header" style={[styles.title, styles.doneTitle]}>
+        Berhasil!
+      </Text>
+      <Text style={[styles.sub, styles.doneSub]}>
+        Akun <Text style={styles.bold}>{regDoneName || "—"}</Text> aktif. Data
+        pembeli akan terisi otomatis saat checkout.
+      </Text>
+      <View style={[styles.actions, styles.doneActions]}>
+        <PrimaryButton
+          testID="login-done-close"
+          label="Cari Tiket"
+          onPress={close}
+        />
+      </View>
+    </View>
+  );
+}
 
 export function LoginModal({
   visible,
@@ -470,349 +878,41 @@ export function LoginModal({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {/* Step 1: Phone/Email */}
-            {step === "phone" && (
-              <View>
-                <Text accessibilityRole="header" style={styles.title}>
-                  Masuk / Daftar
-                </Text>
-                <Text style={styles.sub}>
-                  Masukkan email untuk menerima kode OTP
-                </Text>
-                <View style={styles.fld}>
-                  <Text style={styles.label}>Email</Text>
-                  <TextInput
-                    ref={emailInputRef}
-                    testID="login-email-input"
-                    accessibilityLabel="Email"
-                    value={email}
-                    onChangeText={(t) => {
-                      setEmail(t);
-                      if (emailError) setEmailError("");
-                    }}
-                    onFocus={() => setEmailFocused(true)}
-                    onBlur={() => setEmailFocused(false)}
-                    placeholder="kamu@email.com"
-                    placeholderTextColor={designColors.inkMuted}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    textContentType="emailAddress"
-                    style={[
-                      styles.input,
-                      emailFocused && styles.inputFocused,
-                      emailError && styles.inputError,
-                    ]}
-                  />
-                  <Text testID="login-email-error" style={styles.err}>
-                    {emailError ||
-                      (auth.requestError
-                        ? messageFor(
-                            auth.requestError,
-                            "Terjadi kesalahan. Silakan coba lagi.",
-                          )
-                        : "")}
-                  </Text>
-                </View>
-                <View style={styles.actions}>
-                  <GhostButton
-                    testID="login-cancel"
-                    label="Batal"
-                    onPress={close}
-                  />
-                  <PrimaryButton
-                    testID="login-send"
-                    label={auth.isRequesting ? "Mengirim…" : "Kirim OTP"}
-                    disabled={auth.isRequesting}
-                    onPress={onSendOtp}
-                  />
-                </View>
-              </View>
-            )}
-
-            {/* Step 2: OTP verification (6 separate boxes) */}
-            {step === "otp" && (
-              <View>
-                <Text accessibilityRole="header" style={styles.title}>
-                  Verifikasi OTP
-                </Text>
-                <Text style={styles.sub}>
-                  Masukkan 6 digit kode yang dikirim ke{" "}
-                  <Text style={styles.bold}>{email}</Text>
-                </Text>
-
-                <View style={styles.fld}>
-                  <View
-                    style={[
-                      styles.otpRow,
-                      isMobileWeb && styles.mobileWebOtpRow,
-                    ]}
-                  >
-                    {otpDigits.map((digit, idx) => (
-                      <TextInput
-                        key={idx}
-                        ref={(ref) => {
-                          otpRefs.current[idx] = ref;
-                        }}
-                        testID={`login-otp-${idx}`}
-                        value={digit}
-                        onChangeText={(v) => handleOtpChange(idx, v)}
-                        onKeyPress={({ nativeEvent }) =>
-                          handleOtpKeyPress(idx, nativeEvent.key)
-                        }
-                        keyboardType="number-pad"
-                        inputMode="numeric"
-                        autoComplete="one-time-code"
-                        textContentType="oneTimeCode"
-                        selectTextOnFocus
-                        style={[
-                          styles.otpBox,
-                          isMobileWeb && styles.mobileWebOtpBox,
-                          digit && styles.otpBoxFocused,
-                        ]}
-                      />
-                    ))}
-                  </View>
-                  <Text testID="login-otp-error" style={styles.err}>
-                    {auth.verifyError
-                      ? messageFor(
-                          auth.verifyError,
-                          "Kode OTP salah atau kedaluwarsa.",
-                        )
-                      : ""}
-                  </Text>
-                </View>
-
-                {/* Resend timer */}
-                <View style={styles.resendRow}>
-                  <Text style={styles.resendText}>Tidak menerima kode? </Text>
-                  <Pressable
-                    testID="login-resend"
-                    disabled={resendTimer > 0}
-                    onPress={onResendOtp}
-                    style={styles.resendBtn}
-                  >
-                    <Text
-                      style={[
-                        styles.resendBtnText,
-                        resendTimer > 0 && styles.resendBtnDisabled,
-                      ]}
-                    >
-                      {resendTimer > 0
-                        ? `Kirim ulang (${resendTimer}s)`
-                        : "Kirim ulang"}
-                    </Text>
-                  </Pressable>
-                </View>
-
-                <View style={styles.actions}>
-                  <GhostButton
-                    testID="login-change-email"
-                    label="Ubah Email"
-                    onPress={backToPhone}
-                  />
-                  <PrimaryButton
-                    testID="login-verify"
-                    label={auth.isVerifying ? "Memeriksa…" : "Verifikasi"}
-                    disabled={!canVerify || auth.isVerifying}
-                    onPress={onVerify}
-                  />
-                </View>
-              </View>
-            )}
-
-            {/* Register step: name + NIK + consent */}
-            {step === "register" && (
-              <View>
-                <Text accessibilityRole="header" style={styles.title}>
-                  Lengkapi Pendaftaran
-                </Text>
-                <Text style={styles.sub}>
-                  Email baru — isi data diri sekali saja untuk checkout
-                  otomatis.
-                </Text>
-
-                {/* Email (verified, read-only) */}
-                <View style={styles.fld}>
-                  <Text style={styles.label}>Email (untuk e-tiket)</Text>
-                  <TextInput
-                    testID="login-reg-email"
-                    accessibilityLabel="Email terverifikasi"
-                    value={email}
-                    editable={false}
-                    style={[styles.input, styles.inputReadonly]}
-                  />
-                  <Text style={styles.hint}>
-                    Sudah terverifikasi. E-tiket dikirim ke email ini.
-                  </Text>
-                </View>
-
-                {/* Nama Lengkap */}
-                <View style={styles.fld}>
-                  <Text style={styles.label}>Nama Lengkap</Text>
-                  <TextInput
-                    ref={regNameInputRef}
-                    testID="login-reg-name-input"
-                    accessibilityLabel="Nama Lengkap"
-                    value={regName}
-                    onChangeText={setRegName}
-                    placeholder="Nama sesuai KTP"
-                    placeholderTextColor={designColors.inkMuted}
-                    autoComplete="name"
-                    textContentType="name"
-                    style={styles.input}
-                  />
-                </View>
-
-                {/* NIK */}
-                <View style={styles.fld}>
-                  <Text style={styles.label}>NIK (16 digit)</Text>
-                  <TextInput
-                    testID="login-reg-nik-input"
-                    accessibilityLabel="NIK 16 digit"
-                    value={regNik}
-                    onChangeText={onChangeNik}
-                    placeholder="16 digit KTP"
-                    placeholderTextColor={designColors.inkMuted}
-                    keyboardType="number-pad"
-                    inputMode="numeric"
-                    maxLength={NIK_LENGTH}
-                    style={styles.input}
-                  />
-                  <Text testID="login-reg-nik-error" style={styles.err}>
-                    {regNikError}
-                  </Text>
-                  <Text style={styles.hint}>
-                    NIK dipakai untuk batas {MAX_TICKETS} tiket/NIK & divalidasi
-                    server.
-                  </Text>
-                </View>
-
-                {/* Consent */}
-                <Pressable
-                  testID="login-reg-consent"
-                  accessibilityRole="checkbox"
-                  accessibilityLabel="Setujui kebijakan privasi"
-                  accessibilityState={{ checked: regConsent }}
-                  onPress={() => setRegConsent((v) => !v)}
-                  style={styles.consentRow}
-                >
-                  <View
-                    style={[
-                      styles.checkbox,
-                      regConsent && styles.checkboxChecked,
-                    ]}
-                  >
-                    {regConsent && (
-                      <CheckIcon color={designColors.ground} size={14} />
-                    )}
-                  </View>
-                  <Text style={styles.consentText}>
-                    Saya menyetujui pemrosesan data sesuai{" "}
-                    <Text
-                      testID="login-reg-privacy-link"
-                      accessibilityRole="link"
-                      style={styles.link}
-                      onPress={(event) => {
-                        event?.stopPropagation?.();
-                        openPrivacyPolicy();
-                      }}
-                    >
-                      Kebijakan Privasi
-                    </Text>
-                    .
-                  </Text>
-                </Pressable>
-                <Text testID="login-reg-error" style={styles.err}>
-                  {auth.registerError
-                    ? messageFor(
-                        auth.registerError,
-                        "Pendaftaran gagal. Periksa data lalu coba lagi.",
-                      )
-                    : ""}
-                </Text>
-
-                <View style={styles.actions}>
-                  <GhostButton
-                    testID="login-reg-cancel"
-                    label="Batal"
-                    onPress={backToPhone}
-                  />
-                  <PrimaryButton
-                    testID="login-reg-submit"
-                    label={auth.isRegistering ? "Mendaftar…" : "Daftar & Masuk"}
-                    disabled={!canRegister || auth.isRegistering}
-                    onPress={onSubmitRegister}
-                  />
-                </View>
-              </View>
-            )}
-
-            {/* Signed-in panel (returning user) */}
-            {step === "signed" && (
-              <View>
-                <Text accessibilityRole="header" style={styles.title}>
-                  Akun Kamu
-                </Text>
-                <View style={styles.signedin}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>
-                      {initialOf(
-                        auth.profile?.fullName,
-                        auth.profile?.emailMasked ?? email,
-                      )}
-                    </Text>
-                  </View>
-                  <View>
-                    <Text testID="login-signed-name" style={styles.signedName}>
-                      {auth.profile?.fullName ?? "—"}
-                    </Text>
-                    <Text
-                      testID="login-signed-email"
-                      style={styles.signedEmail}
-                    >
-                      {auth.profile?.emailMasked ?? email}
-                    </Text>
-                  </View>
-                </View>
-                <Text style={[styles.sub, styleForLoginModalText3()]}>
-                  Data pembeli akan terisi otomatis saat checkout.
-                </Text>
-                <View style={styles.actions}>
-                  <GhostButton
-                    testID="login-close-signed"
-                    label="Tutup"
-                    onPress={close}
-                  />
-                </View>
-              </View>
-            )}
-
-            {/* Success step (new registration complete) */}
-            {step === "success" && (
-              <View style={styles.doneContainer}>
-                <View style={styles.doneCheck}>
-                  <CheckIcon color={designColors.ground} size={28} />
-                </View>
-                <Text
-                  accessibilityRole="header"
-                  style={[styles.title, styles.doneTitle]}
-                >
-                  Berhasil!
-                </Text>
-                <Text style={[styles.sub, styles.doneSub]}>
-                  Akun <Text style={styles.bold}>{regDoneName || "—"}</Text>{" "}
-                  aktif. Data pembeli akan terisi otomatis saat checkout.
-                </Text>
-                <View style={[styles.actions, styles.doneActions]}>
-                  <PrimaryButton
-                    testID="login-done-close"
-                    label="Cari Tiket"
-                    onPress={close}
-                  />
-                </View>
-              </View>
-            )}
+            <LoginStepContent
+              step={step}
+              isMobileWeb={isMobileWeb}
+              email={email}
+              setEmail={setEmail}
+              emailError={emailError}
+              setEmailError={setEmailError}
+              emailFocused={emailFocused}
+              setEmailFocused={setEmailFocused}
+              emailInputRef={emailInputRef}
+              otpDigits={otpDigits}
+              otpRefs={otpRefs}
+              handleOtpChange={handleOtpChange}
+              handleOtpKeyPress={handleOtpKeyPress}
+              resendTimer={resendTimer}
+              auth={auth}
+              canVerify={canVerify}
+              onSendOtp={onSendOtp}
+              onVerify={onVerify}
+              onResendOtp={onResendOtp}
+              backToPhone={backToPhone}
+              regName={regName}
+              setRegName={setRegName}
+              regNameInputRef={regNameInputRef}
+              regNik={regNik}
+              onChangeNik={onChangeNik}
+              regNikError={regNikError}
+              regConsent={regConsent}
+              setRegConsent={setRegConsent}
+              canRegister={canRegister}
+              onSubmitRegister={onSubmitRegister}
+              openPrivacyPolicy={openPrivacyPolicy}
+              regDoneName={regDoneName}
+              close={close}
+            />
           </ScrollView>
         </Pressable>
       </Animated.View>

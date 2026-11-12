@@ -48,14 +48,14 @@ export function CachedImage({
 
   const stage = failure?.key === key ? failure.stage : undefined;
   const isFallbackSource = stage === "source" && fallbackSource !== undefined;
-  const displayedSource =
-    stage === "fallback"
-      ? IMAGE_FALLBACK
-      : isFallbackSource
-        ? fallbackSource
-        : stage === "source"
-          ? IMAGE_FALLBACK
-          : source;
+  let displayedSource = source;
+  if (stage === "fallback") {
+    displayedSource = IMAGE_FALLBACK;
+  } else if (isFallbackSource) {
+    displayedSource = fallbackSource;
+  } else if (stage === "source") {
+    displayedSource = IMAGE_FALLBACK;
+  }
 
   return (
     <FastImage

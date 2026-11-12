@@ -25,8 +25,9 @@ import { SnapActions } from "./fragments/SnapActions";
 import { SnapLogo } from "./fragments/SnapLogo";
 import { SnapSummary } from "./fragments/SnapSummary";
 import type { SnapSimulatorScreenProps } from "./interface";
-import { snapStyles, componentStyles } from "./style";
 import {
+  snapStyles,
+  componentStyles,
   styleForSnapSimulatorScreenView0,
   styleForSnapSimulatorScreenView1,
   styleForSnapSimulatorScreenView2,

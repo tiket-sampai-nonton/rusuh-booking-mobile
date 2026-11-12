@@ -110,11 +110,9 @@ export function FloatingCTA({
       : "Menyusul";
 
   const disabled = !canJoin || isJoining;
-  const buttonLabel = isJoining
-    ? "Memproses…"
-    : errorMessage
-      ? "Coba Lagi"
-      : ctaLabel;
+  let buttonLabel = ctaLabel;
+  if (errorMessage) buttonLabel = "Coba Lagi";
+  if (isJoining) buttonLabel = "Memproses…";
 
   return (
     <Animated.View

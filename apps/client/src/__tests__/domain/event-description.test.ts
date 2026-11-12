@@ -138,4 +138,59 @@ describe("parseDescription — defensive rich-description parsing", () => {
     const d = parseDescription({ categories: ["nope", 1, null] });
     expect(d.categories).toEqual([]);
   });
+
+  it("defaults malformed optional description fields without throwing", () => {
+    const d = parseDescription({
+      lineup: [
+        { name: " ", stage: " ", acts: " " },
+        { stage: "Side Stage", acts: " " },
+        { stage: " ", acts: "DJ Example" },
+        false,
+      ],
+      terms: 42,
+      categories: [
+        {
+          code: "BAD",
+          name: "Invalid",
+          priceMinor: Number.NaN,
+          available: Infinity,
+        },
+      ],
+      location: {
+        name: " ",
+        address: " ",
+        mapsUrl: " ",
+        mapImage: " ",
+        latitude: Number.NaN,
+        longitude: Infinity,
+      },
+      gallery: [],
+      bannerImage: 10,
+      subtitle: " ",
+    });
+
+    expect(d.lineup).toEqual([
+      { name: "Side Stage", role: "Performer" },
+      { name: "DJ Example", role: "Performer" },
+    ]);
+    expect(d.terms).toEqual([]);
+    expect(d.categories[0]).toEqual({
+      code: "BAD",
+      name: "Invalid",
+      priceMinor: 0,
+      available: 0,
+    });
+    expect(d.location).toBeUndefined();
+    expect(d.gallery).toBeUndefined();
+    expect(d.bannerImage).toBeUndefined();
+    expect(d.subtitle).toBeUndefined();
+  });
+
+  it("keeps a location with any valid coordinate or text field", () => {
+    expect(
+      parseDescription({
+        location: { latitude: -6.9, longitude: 107.6, name: " Hall " },
+      }).location,
+    ).toEqual({ name: "Hall", latitude: -6.9, longitude: 107.6 });
+  });
 });

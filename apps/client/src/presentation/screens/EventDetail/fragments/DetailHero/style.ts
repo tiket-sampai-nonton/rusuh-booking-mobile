@@ -1,9 +1,8 @@
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, Animated } from "react-native";
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import { designColors } from "@presentation/theme/event-design-tokens";
 import { withAlpha } from "@presentation/theme";
 
-import { Animated } from "react-native";
 import type { DynamicStyle } from "@presentation/utils/style";
 
 export const heroStyles = StyleSheet.create({
@@ -87,32 +86,8 @@ export function styleForDetailHeroAnimatedText3(
   } as DynamicStyle;
 }
 
-export function styleForDetailHeroAnimatedText4(
-  arg0: Animated.Value,
-  arg1: Animated.Value,
-): DynamicStyle {
-  return {
-    opacity: arg0,
-    transform: [{ translateY: arg1 }],
-  } as DynamicStyle;
-}
+export const styleForDetailHeroAnimatedText4 = styleForDetailHeroAnimatedText3;
 
-export function styleForDetailHeroAnimatedView5(
-  arg0: Animated.Value,
-  arg1: Animated.Value,
-): DynamicStyle {
-  return {
-    opacity: arg0,
-    transform: [{ translateY: arg1 }],
-  } as DynamicStyle;
-}
+export const styleForDetailHeroAnimatedView5 = styleForDetailHeroAnimatedText3;
 
-export function styleForDetailHeroAnimatedView6(
-  arg0: Animated.Value,
-  arg1: Animated.Value,
-): DynamicStyle {
-  return {
-    opacity: arg0,
-    transform: [{ translateY: arg1 }],
-  } as DynamicStyle;
-}
+export const styleForDetailHeroAnimatedView6 = styleForDetailHeroAnimatedText3;

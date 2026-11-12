@@ -18,8 +18,8 @@ import { designDuration } from "@presentation/theme/event-design-tokens";
 import { nativeDriverSupported } from "@presentation/utils/style";
 import { NavButton } from "./NavButton";
 import { lightboxNavButtonStyles } from "./NavButton/style";
-import { lightboxStyles } from "./style";
 import {
+  lightboxStyles,
   styleForLightboxAnimatedView0,
   styleForLightboxAnimatedView1,
 } from "./style";

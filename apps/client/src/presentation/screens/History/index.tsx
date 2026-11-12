@@ -10,11 +10,12 @@
  * - Grayscale images, 2px borders
  */
 import { useRouter, type Href } from "expo-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   FlatList,
   Platform,
   Pressable,
+  type ListRenderItemInfo,
   type StyleProp,
   Text,
   View,
@@ -33,6 +34,7 @@ import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
 import { EventCard } from "@presentation/components/design-system/EventCard";
+import type { EventSummary } from "@domain/repositories/event.repository";
 import { gridItemStyle as homeGridItemStyle } from "../Home/fragments/HomeSections/fragments/EventsGrid/style";
 import { GridIcon } from "../Browse/fragments/BrowseResultsToolbar/icons/GridIcon";
 import { ListIcon } from "../Browse/fragments/BrowseResultsToolbar/icons/ListIcon";
@@ -48,6 +50,105 @@ type HistoryViewMode = "grid" | "list";
 
 function MobileWebEventSeparator() {
   return <View style={{ height: 8 }} />;
+}
+
+function historyColumns(
+  viewMode: HistoryViewMode,
+  isNative: boolean,
+  gridColumns: number,
+): number {
+  if (viewMode === "list") return 1;
+  return isNative ? 2 : gridColumns;
+}
+
+function historyColumnWrapper(
+  columns: number,
+  isNative: boolean,
+): StyleProp<ViewStyle> | undefined {
+  if (columns <= 1) return undefined;
+  return isNative ? { flexDirection: "row" } : historyStyles.webGridRow;
+}
+
+function historyStateContent(
+  isLoading: boolean,
+  isError: boolean,
+  error: unknown,
+  retryEvents: () => unknown,
+  isFetching: boolean,
+  hasHistory: boolean,
+): ReactNode {
+  if (isLoading) return <HistoryLoading />;
+  if (isError) {
+    return (
+      <HistoryError
+        error={error}
+        onRetry={() => void retryEvents()}
+        isRetrying={isFetching}
+      />
+    );
+  }
+  return hasHistory ? null : <HistoryEmpty />;
+}
+
+interface HistoryCellStyleInput {
+  readonly isNative: boolean;
+  readonly isMobileWeb: boolean;
+  readonly isListMode: boolean;
+  readonly columns: number;
+  readonly index: number;
+  readonly length: number;
+}
+
+function historyCellStyle({
+  isNative,
+  isMobileWeb,
+  isListMode,
+  columns,
+  index,
+  length,
+}: HistoryCellStyleInput): StyleProp<ViewStyle> {
+  if (isNative) {
+    return columns > 1
+      ? historyStyles.nativeGridCell
+      : historyStyles.nativeListCell;
+  }
+  if (isMobileWeb) {
+    return [
+      homeGridItemStyle(index, length, columns, true),
+      historyStyles.mobileWebGridCell,
+    ];
+  }
+  if (isListMode) return historyStyles.webListCell;
+  return homeGridItemStyle(index, length, columns, false, true);
+}
+
+interface HistoryRenderContext
+  extends Omit<HistoryCellStyleInput, "index" | "length"> {
+  readonly historyLength: number;
+  readonly router: ReturnType<typeof useRouter>;
+}
+
+function renderHistoryItem(
+  { item, index }: ListRenderItemInfo<EventSummary>,
+  context: HistoryRenderContext,
+) {
+  const cellStyle = historyCellStyle({
+    ...context,
+    index,
+    length: context.historyLength,
+  });
+  return (
+    <View style={cellStyle}>
+      <EventCard
+        event={item}
+        onPress={(eventId) =>
+          context.router.push(`/events/${eventId}?source=history` as Href)
+        }
+        history
+        listMode={context.isListMode}
+      />
+    </View>
+  );
 }
 
 export function HistoryScreen() {
@@ -67,20 +168,18 @@ export function HistoryScreen() {
   } = useEvents();
 
   const history = data?.history ?? [];
-  const columns = viewMode === "list" ? 1 : isNative ? 2 : gridColumns;
+  const columns = historyColumns(viewMode, isNative, gridColumns);
 
   const showEmptyState = isLoading || isError || history.length === 0;
-  const historyState = isLoading ? (
-    <HistoryLoading />
-  ) : isError ? (
-    <HistoryError
-      error={error}
-      onRetry={() => void retryEvents()}
-      isRetrying={isFetching}
-    />
-  ) : history.length === 0 ? (
-    <HistoryEmpty />
-  ) : null;
+  const columnWrapperStyle = historyColumnWrapper(columns, isNative);
+  const historyState = historyStateContent(
+    isLoading,
+    isError,
+    error,
+    retryEvents,
+    isFetching,
+    history.length > 0,
+  );
   const goHome = (): void => router.navigate("/" as Href);
   const goBrowse = (): void => router.navigate("/browse" as Href);
   const navLinks = createPrimaryNavLinks({
@@ -110,13 +209,7 @@ export function HistoryScreen() {
           data={showEmptyState ? [] : history}
           keyExtractor={(event) => event.id}
           numColumns={columns}
-          columnWrapperStyle={
-            columns > 1
-              ? isNative
-                ? { flexDirection: "row" }
-                : historyStyles.webGridRow
-              : undefined
-          }
+          columnWrapperStyle={columnWrapperStyle}
           ItemSeparatorComponent={
             isMobileWeb ? MobileWebEventSeparator : undefined
           }
@@ -173,40 +266,16 @@ export function HistoryScreen() {
           updateCellsBatchingPeriod={50}
           windowSize={7}
           removeClippedSubviews={Platform.OS === "android"}
-          renderItem={({ item, index }) => {
-            const isListMode = viewMode === "list";
-            const cellStyle: StyleProp<ViewStyle> = isNative
-              ? columns > 1
-                ? historyStyles.nativeGridCell
-                : historyStyles.nativeListCell
-              : isMobileWeb
-                ? [
-                    homeGridItemStyle(index, history.length, columns, true),
-                    historyStyles.mobileWebGridCell,
-                  ]
-                : isListMode
-                  ? historyStyles.webListCell
-                  : homeGridItemStyle(
-                      index,
-                      history.length,
-                      columns,
-                      false,
-                      true,
-                    );
-
-            return (
-              <View style={cellStyle}>
-                <EventCard
-                  event={item}
-                  onPress={(eventId) =>
-                    router.push(`/events/${eventId}?source=history` as Href)
-                  }
-                  history
-                  listMode={isListMode}
-                />
-              </View>
-            );
-          }}
+          renderItem={(info) =>
+            renderHistoryItem(info, {
+              isNative,
+              isMobileWeb,
+              isListMode: viewMode === "list",
+              columns,
+              historyLength: history.length,
+              router,
+            })
+          }
           testID="history-grid"
         />
         <BottomNav

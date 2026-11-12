@@ -43,8 +43,8 @@ import {
 import type { DetailHeroProps } from "../../interface";
 import { designDetailStyles as styles } from "../../style";
 import { nativeDriverSupported } from "@presentation/utils/style";
-import { heroStyles } from "./style";
 import {
+  heroStyles,
   styleForDetailHeroAnimatedView0,
   styleForDetailHeroImage1,
   styleForDetailHeroAnimatedView2,
@@ -74,6 +74,10 @@ export function DetailHero({
   const slideAnim = useRef(new Animated.Value(20)).current;
 
   const isNative = Platform.OS !== "web";
+  const metaItems = meta.split(" · ");
+  const webOverlayStyle = isMobileWeb
+    ? heroStyles.mobileWebOverlay
+    : heroStyles.overlayWeb;
 
   useEffect(() => {
     // Entrance animations
@@ -180,12 +184,7 @@ export function DetailHero({
           style={StyleSheet.absoluteFill}
         />
       ) : (
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            isMobileWeb ? heroStyles.mobileWebOverlay : heroStyles.overlayWeb,
-          ]}
-        />
+        <View style={[StyleSheet.absoluteFill, webOverlayStyle]} />
       )}
 
       {/* Scan Lines (web only) */}
@@ -251,9 +250,9 @@ export function DetailHero({
               styleForDetailHeroAnimatedView5(fadeAnim, slideAnim),
             ]}
           >
-            {meta.split(" · ").map((item, i) => (
-              <View key={i} style={styles.heroMetaItem}>
-                {getMetaIcon(i)}
+            {metaItems.map((item, index) => (
+              <View key={item} style={styles.heroMetaItem}>
+                {getMetaIcon(index)}
                 <Text
                   style={[
                     styles.heroMetaText,

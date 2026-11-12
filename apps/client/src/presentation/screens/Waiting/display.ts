@@ -134,6 +134,35 @@ export function claimErrorTitle(
   return "Giliran Berakhir";
 }
 
+export function claimErrorBadgeLabel(
+  errorState:
+    | "TURN_MISSED"
+    | "EVENT_SOLD_OUT"
+    | "ADMISSION_TOKEN_INVALID"
+    | "UNKNOWN",
+): string {
+  if (errorState === "EVENT_SOLD_OUT") return "Tiket Habis";
+  if (errorState === "UNKNOWN") return "Koneksi Bermasalah";
+  if (errorState === "ADMISSION_TOKEN_INVALID") return "Sesi Antrean Berakhir";
+  return "Giliran Berakhir";
+}
+
+export function claimErrorActionLabel(
+  errorState:
+    | "TURN_MISSED"
+    | "EVENT_SOLD_OUT"
+    | "ADMISSION_TOKEN_INVALID"
+    | "UNKNOWN",
+): string {
+  if (
+    errorState === "EVENT_SOLD_OUT" ||
+    errorState === "UNKNOWN" ||
+    errorState === "ADMISSION_TOKEN_INVALID"
+  )
+    return "Jelajahi Event Lain";
+  return "Bergabung Kembali";
+}
+
 /** Claim-error body copy. */
 export function claimErrorBody(
   errorState:

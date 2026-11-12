@@ -13,8 +13,7 @@
  *
  * ENTRANCE: opacity 0→1, translateY 20→0, scale 0.95→1, 0.4s
  */
-import { useEffect } from "react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import {
   Modal as NativeModal,
   Platform,
@@ -32,8 +31,8 @@ import Animated, {
 
 import { designEasing } from "@presentation/theme";
 import { NativeStatusBarBackdrop } from "@presentation/components/NativeStatusBarBackdrop";
-import { styles } from "./style";
 import {
+  styles,
   styleForModalPressable0,
   styleForModalPressable1,
   styleForModalAnimatedView2,

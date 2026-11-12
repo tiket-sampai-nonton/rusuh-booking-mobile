@@ -32,7 +32,6 @@ export function HeroInfoMobile({
 }: {
   readonly event: EventSummary;
   readonly onBook: (eventId: string) => void;
-  readonly onSeeAll?: () => void;
   readonly isMobileWeb?: boolean;
 }) {
   const reducedMotion = useReducedMotion();

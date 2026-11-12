@@ -28,7 +28,9 @@ function groupThousands(nInteger: number): string {
  */
 export function minorToIDR(amountMinor: number | null | undefined): string {
   const amount =
-    typeof amountMinor === "number" && isFinite(amountMinor) ? amountMinor : 0;
+    typeof amountMinor === "number" && Number.isFinite(amountMinor)
+      ? amountMinor
+      : 0;
   const rupiah = Math.trunc(amount);
   const sign = rupiah < 0 ? "-" : "";
   const abs = Math.abs(rupiah);

@@ -14,8 +14,8 @@ import { minorToIDR } from "@domain/services/money";
 
 import { Field } from ".././common";
 import type { TicketItemProps } from "../../interface";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForTicketItemPressable0,
   styleForTicketItemText1,
   styleForTicketItemText2,

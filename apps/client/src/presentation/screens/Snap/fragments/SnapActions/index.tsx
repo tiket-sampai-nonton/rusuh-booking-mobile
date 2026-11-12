@@ -1,11 +1,11 @@
 /**  brutalist SNAP simulate-success / -fail / -unknown actions + verify note. */
 import { Pressable, Text, View } from "react-native";
 
-import { designBorder, designColors } from "@presentation/theme";
+import { designBorders, designColors } from "@presentation/theme";
 
 import type { SnapActionsProps } from "../../interface";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForSnapActionsPressable0,
   styleForSnapActionsPressable1,
   styleForSnapActionsPressable2,
@@ -18,7 +18,7 @@ export function SnapActions({
   pending = false,
 }: SnapActionsProps) {
   const btnBase = {
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     opacity: pending ? 0.5 : 1,
   };
   return (

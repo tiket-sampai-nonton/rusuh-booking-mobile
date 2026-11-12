@@ -37,7 +37,7 @@ export interface CreateAttemptInput {
  * routes by booking ID on native. The SNAP URL is kept in memory and never put
  * in route params. Overridable for tests.
  */
-export async function openSnapHandoff(
+export function openSnapHandoff(
   url: string,
   bookingId?: string,
   returns?: PaymentReturnUrls,
@@ -50,7 +50,7 @@ export async function openSnapHandoff(
   if (url.startsWith("/")) {
     const { router } = require("expo-router") as typeof import("expo-router");
     router.push(url as import("expo-router").Href);
-    return;
+    return Promise.resolve();
   }
   if (Platform.OS === "web") {
     // Full-page redirect to the external SNAP gateway (D10.2).
@@ -59,7 +59,7 @@ export async function openSnapHandoff(
         globalThis as { location: { assign: (u: string) => void } }
       ).location.assign(url);
     }
-    return;
+    return Promise.resolve();
   }
   // Native: validate the backend-issued gateway URL and keep it in memory.
   if (bookingId) {
@@ -69,6 +69,7 @@ export async function openSnapHandoff(
       `/payment-webview/${encodeURIComponent(bookingId)}` as import("expo-router").Href,
     );
   }
+  return Promise.resolve();
 }
 
 export function usePayment(

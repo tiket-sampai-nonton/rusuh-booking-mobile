@@ -21,6 +21,7 @@ import {
   navigateBottomTab,
   Header,
   ToastProvider,
+  EventCard,
 } from "@presentation/components/design-system";
 import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import {
@@ -31,6 +32,7 @@ import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useAccountStore } from "@presentation/stores/account-store";
 import { useServices } from "@providers/service-context";
+import type { EventSummary } from "@domain/repositories/event.repository";
 import { apiErrorMessage } from "@presentation/utils/api-error-message";
 import { designColors, designSpacingSemantic } from "@presentation/theme";
 import { gridItemStyle as homeGridItemStyle } from "../Home/fragments/HomeSections/fragments/EventsGrid/style";
@@ -65,10 +67,311 @@ import {
   browseGridList,
   browseGridRow,
 } from "./style";
-import { EventCard } from "@presentation/components/design-system";
 
 function MobileWebEventSeparator() {
   return <View style={{ height: 8 }} />;
+}
+
+interface BrowseEventRenderContext {
+  readonly viewMode: "grid" | "list";
+  readonly isNative: boolean;
+  readonly isMobileWeb: boolean;
+  readonly isTabletWeb: boolean;
+  readonly columns: 1 | 2 | 3;
+  readonly eventCount: number;
+  readonly onPress: (eventId: string) => void;
+}
+
+function browseEventItemStyle(
+  index: number,
+  context: BrowseEventRenderContext,
+): StyleProp<ViewStyle> {
+  if (context.isNative) {
+    if (context.columns === 1) {
+      return [
+        browseGridList(context.isNative, context.isMobileWeb),
+        browseNativeListItem,
+        { marginBottom: 16 },
+      ];
+    }
+    return browseGridCell(context.columns, context.isNative);
+  }
+  if (context.isMobileWeb) {
+    return [
+      homeGridItemStyle(index, context.eventCount, context.columns, true),
+      { paddingHorizontal: 16 },
+    ];
+  }
+  if (context.viewMode === "list") {
+    return [
+      browseGridList(context.isNative, context.isMobileWeb),
+      context.isTabletWeb
+        ? {
+            alignSelf: "stretch",
+            marginHorizontal: designSpacingSemantic.m,
+            marginBottom: 16,
+          }
+        : { width: "100%", marginBottom: 16 },
+    ];
+  }
+  return homeGridItemStyle(
+    index,
+    context.eventCount,
+    context.columns,
+    false,
+    true,
+  );
+}
+
+function renderBrowseEvent(
+  { item, index }: ListRenderItemInfo<EventSummary>,
+  context: BrowseEventRenderContext,
+) {
+  return (
+    <View style={browseEventItemStyle(index, context)}>
+      <EventCard
+        event={item}
+        onPress={context.onPress}
+        listMode={context.viewMode === "list"}
+      />
+    </View>
+  );
+}
+
+function isTabletWebViewport(isWeb: boolean, width: number): boolean {
+  return isWeb && width > 640 && width < 960;
+}
+
+function hasActiveBrowseFilters(
+  category: BrowseCategoryKey | null,
+  genre: string,
+  time: string,
+  sort: string,
+): boolean {
+  return (
+    (category !== null && category !== "all") ||
+    genre !== "Semua" ||
+    time !== "all" ||
+    sort !== "closest"
+  );
+}
+
+function browseTimeframe(time: string): "THIS_WEEK" | "THIS_MONTH" | undefined {
+  if (time === "week") return "THIS_WEEK";
+  if (time === "month") return "THIS_MONTH";
+  return undefined;
+}
+
+function browseEventQuery(genre: string, time: string, sort: string) {
+  const timeframe = browseTimeframe(time);
+  return {
+    ...(genre !== "Semua" ? { genres: [genre] } : {}),
+    ...(timeframe ? { timeframe } : {}),
+    sort: sort === "furthest" ? ("DATE_DESC" as const) : ("DATE_ASC" as const),
+  };
+}
+
+function browseColumnWrapper(
+  columns: number,
+  isNative: boolean,
+): StyleProp<ViewStyle> | undefined {
+  if (columns <= 1) return undefined;
+  if (isNative) return [browseGridRow(isNative), browseNativeGridRowInset];
+  return { flexDirection: "row", marginHorizontal: designSpacingSemantic.m };
+}
+
+function browseListContentStyle(
+  bottomInset: number,
+  isDesktop: boolean,
+  isMobileWeb: boolean,
+  isNative: boolean,
+  topInset: number,
+  resultCount: number,
+) {
+  return [
+    browseScrollContent(bottomInset, isDesktop, isMobileWeb),
+    isNative &&
+      browseNativeScrollContent(
+        topInset + 56 + BROWSE_NATIVE_CATEGORY_BAR_HEIGHT + 12,
+      ),
+    resultCount === 0 && { flexGrow: 1 },
+  ];
+}
+
+interface BrowseListHeaderProps {
+  readonly topInset: number;
+  readonly isNative: boolean;
+  readonly isDesktop: boolean;
+  readonly isMobileWeb: boolean;
+  readonly activeCategory: BrowseCategoryKey | null;
+  readonly time: string;
+  readonly sort: string;
+  readonly isFiltered: boolean;
+  readonly onSelectCategory: (category: BrowseCategoryKey | null) => void;
+  readonly onReset: () => void;
+  readonly isError: boolean;
+  readonly error: unknown;
+  readonly isFetching: boolean;
+  readonly retryLabel: string;
+  readonly onRetry: () => void;
+  readonly count: number;
+  readonly viewMode: "grid" | "list";
+  readonly onFilterPress: () => void;
+  readonly onSortChange: (sort: string) => void;
+  readonly onViewModeChange: (mode: "grid" | "list") => void;
+}
+
+function BrowseListHeader({
+  topInset,
+  isNative,
+  isDesktop,
+  isMobileWeb,
+  activeCategory,
+  time,
+  sort,
+  isFiltered,
+  onSelectCategory,
+  onReset,
+  isError,
+  error,
+  isFetching,
+  retryLabel,
+  onRetry,
+  count,
+  viewMode,
+  onFilterPress,
+  onSortChange,
+  onViewModeChange,
+}: BrowseListHeaderProps) {
+  return (
+    <>
+      {!isNative ? (
+        <BrowseHero
+          topInset={topInset}
+          isDesktop={isDesktop}
+          isMobileWeb={isMobileWeb}
+        />
+      ) : null}
+      {!isNative ? (
+        <BrowseCategoriesSection
+          activeCategory={activeCategory}
+          isDesktop={isDesktop}
+          isMobileWeb={isMobileWeb}
+          time={time}
+          sort={sort}
+          isFiltered={isFiltered}
+          onSelect={onSelectCategory}
+          onReset={onReset}
+        />
+      ) : null}
+      {isError && count > 0 ? (
+        <View
+          testID="browse-stale-data-error"
+          accessibilityLiveRegion="polite"
+          style={{
+            alignItems: "center",
+            paddingHorizontal: 20,
+            paddingVertical: 12,
+          }}
+        >
+          <Text style={{ textAlign: "center", marginBottom: 8 }}>
+            {apiErrorMessage(error)}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Coba muat event lagi"
+            accessibilityState={{ disabled: isFetching }}
+            disabled={isFetching}
+            onPress={onRetry}
+            testID="browse-retry-stale"
+            style={{
+              borderWidth: 2,
+              borderColor: designColors.ink,
+              paddingHorizontal: 20,
+              paddingVertical: 12,
+            }}
+          >
+            <Text style={{ fontWeight: "700" }}>{retryLabel}</Text>
+          </Pressable>
+        </View>
+      ) : null}
+      <View
+        style={isNative ? browseNativeMain : browseMain(isDesktop, isMobileWeb)}
+      >
+        <BrowseResultsToolbar
+          count={count}
+          isNative={isNative}
+          sortBy={sort}
+          viewMode={viewMode}
+          isMobileWeb={isMobileWeb}
+          onFilterPress={onFilterPress}
+          onSortChange={onSortChange}
+          onViewModeChange={onViewModeChange}
+        />
+      </View>
+    </>
+  );
+}
+
+interface BrowseListEmptyProps {
+  readonly isNative: boolean;
+  readonly isDesktop: boolean;
+  readonly isMobileWeb: boolean;
+  readonly isError: boolean;
+  readonly error: unknown;
+  readonly isFetching: boolean;
+  readonly retryLabel: string;
+  readonly onRetry: () => void;
+}
+
+function BrowseListEmpty({
+  isNative,
+  isDesktop,
+  isMobileWeb,
+  isError,
+  error,
+  isFetching,
+  retryLabel,
+  onRetry,
+}: BrowseListEmptyProps) {
+  return (
+    <View
+      style={isNative ? browseNativeMain : browseMain(isDesktop, isMobileWeb)}
+    >
+      {isError ? (
+        <View
+          testID="browse-error"
+          accessibilityLiveRegion="polite"
+          style={{ alignItems: "center", paddingVertical: 32 }}
+        >
+          <Text style={{ fontWeight: "700", marginBottom: 8 }}>
+            Event gagal dimuat
+          </Text>
+          <Text style={{ textAlign: "center", marginBottom: 16 }}>
+            {apiErrorMessage(error)}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Coba muat event lagi"
+            accessibilityState={{ disabled: isFetching }}
+            disabled={isFetching}
+            onPress={onRetry}
+            testID="browse-retry"
+            style={{
+              borderWidth: 2,
+              borderColor: designColors.ink,
+              paddingHorizontal: 20,
+              paddingVertical: 12,
+            }}
+          >
+            <Text style={{ fontWeight: "700" }}>{retryLabel}</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <BrowseEmpty />
+      )}
+    </View>
+  );
 }
 
 export function BrowseScreen() {
@@ -76,7 +379,7 @@ export function BrowseScreen() {
   const insets = useSafeAreaInsets();
   const { isWeb, isDesktop, isNative, isMobileWeb, width, gridColumns } =
     useResponsive();
-  const isTabletWeb = isWeb && width > 640 && width < 960;
+  const isTabletWeb = isTabletWebViewport(isWeb, width);
   const params = useLocalSearchParams<{
     category?: string;
     genre?: string;
@@ -102,20 +405,8 @@ export function BrowseScreen() {
   }, [params.category, params.genre]);
   const time = readParam(params.time, TIMES, "all");
   const sort = readParam(params.sort, SORTS, "closest");
-  const isFiltered =
-    (activeCategory !== null && activeCategory !== "all") ||
-    genre !== "Semua" ||
-    time !== "all" ||
-    sort !== "closest";
-  const eventQuery = {
-    ...(genre !== "Semua" ? { genres: [genre] } : {}),
-    ...(time === "week"
-      ? { timeframe: "THIS_WEEK" as const }
-      : time === "month"
-        ? { timeframe: "THIS_MONTH" as const }
-        : {}),
-    sort: sort === "furthest" ? ("DATE_DESC" as const) : ("DATE_ASC" as const),
-  };
+  const isFiltered = hasActiveBrowseFilters(activeCategory, genre, time, sort);
+  const eventQuery = browseEventQuery(genre, time, sort);
   const {
     data,
     isLoading,
@@ -192,41 +483,18 @@ export function BrowseScreen() {
     gridColumns,
     isMobileWeb,
   );
+  const retryLabel = isFetching ? "Memuat…" : "Coba Lagi";
   const renderEvent = useCallback(
-    ({ item, index }: ListRenderItemInfo<(typeof results)[number]>) => {
-      const isListMode = viewMode === "list";
-      const itemStyle: StyleProp<ViewStyle> = isNative
-        ? columns === 1
-          ? [
-              browseGridList(isNative, isMobileWeb),
-              browseNativeListItem,
-              { marginBottom: 16 },
-            ]
-          : browseGridCell(columns, isNative)
-        : isMobileWeb
-          ? [
-              homeGridItemStyle(index, results.length, columns, true),
-              { paddingHorizontal: 16 },
-            ]
-          : isListMode
-            ? [
-                browseGridList(isNative, isMobileWeb),
-                isTabletWeb
-                  ? {
-                      alignSelf: "stretch",
-                      marginHorizontal: designSpacingSemantic.m,
-                      marginBottom: 16,
-                    }
-                  : { width: "100%", marginBottom: 16 },
-              ]
-            : homeGridItemStyle(index, results.length, columns, false, true);
-
-      return (
-        <View style={itemStyle}>
-          <EventCard event={item} onPress={goToEvent} listMode={isListMode} />
-        </View>
-      );
-    },
+    (info: ListRenderItemInfo<EventSummary>) =>
+      renderBrowseEvent(info, {
+        viewMode,
+        isNative,
+        isMobileWeb,
+        isTabletWeb,
+        columns,
+        eventCount: results.length,
+        onPress: goToEvent,
+      }),
     [
       columns,
       goToEvent,
@@ -239,75 +507,31 @@ export function BrowseScreen() {
   );
   if (isLoading) return <BrowseLoading />;
 
+  const columnWrapperStyle = browseColumnWrapper(columns, isNative);
+
   const header = (
-    <>
-      {!isNative && (
-        <BrowseHero
-          topInset={insets.top}
-          isDesktop={isDesktop}
-          isMobileWeb={isMobileWeb}
-        />
-      )}
-      {!isNative && (
-        <BrowseCategoriesSection
-          activeCategory={activeCategory}
-          isDesktop={isDesktop}
-          isMobileWeb={isMobileWeb}
-          time={time}
-          sort={sort}
-          isFiltered={isFiltered}
-          onSelect={setActiveCategory}
-          onReset={resetFilters}
-        />
-      )}
-      {isError && results.length > 0 ? (
-        <View
-          testID="browse-stale-data-error"
-          accessibilityLiveRegion="polite"
-          style={{
-            alignItems: "center",
-            paddingHorizontal: 20,
-            paddingVertical: 12,
-          }}
-        >
-          <Text style={{ textAlign: "center", marginBottom: 8 }}>
-            {apiErrorMessage(error)}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Coba muat event lagi"
-            accessibilityState={{ disabled: isFetching }}
-            disabled={isFetching}
-            onPress={() => void retryEvents()}
-            testID="browse-retry-stale"
-            style={{
-              borderWidth: 2,
-              borderColor: designColors.ink,
-              paddingHorizontal: 20,
-              paddingVertical: 12,
-            }}
-          >
-            <Text style={{ fontWeight: "700" }}>
-              {isFetching ? "Memuat…" : "Coba Lagi"}
-            </Text>
-          </Pressable>
-        </View>
-      ) : null}
-      <View
-        style={isNative ? browseNativeMain : browseMain(isDesktop, isMobileWeb)}
-      >
-        <BrowseResultsToolbar
-          count={results.length}
-          isNative={isNative}
-          sortBy={sort}
-          viewMode={viewMode}
-          isMobileWeb={isMobileWeb}
-          onFilterPress={() => setFilterOpen(true)}
-          onSortChange={changeSort}
-          onViewModeChange={setViewMode}
-        />
-      </View>
-    </>
+    <BrowseListHeader
+      topInset={insets.top}
+      isNative={isNative}
+      isDesktop={isDesktop}
+      isMobileWeb={isMobileWeb}
+      activeCategory={activeCategory}
+      time={time}
+      sort={sort}
+      isFiltered={isFiltered}
+      onSelectCategory={setActiveCategory}
+      onReset={resetFilters}
+      isError={isError}
+      error={error}
+      isFetching={isFetching}
+      retryLabel={retryLabel}
+      onRetry={() => void retryEvents()}
+      count={results.length}
+      viewMode={viewMode}
+      onFilterPress={() => setFilterOpen(true)}
+      onSortChange={changeSort}
+      onViewModeChange={setViewMode}
+    />
   );
 
   return (
@@ -318,69 +542,30 @@ export function BrowseScreen() {
           data={results}
           keyExtractor={(event) => event.id}
           numColumns={columns}
-          columnWrapperStyle={
-            columns > 1
-              ? isNative
-                ? [browseGridRow(isNative), browseNativeGridRowInset]
-                : {
-                    flexDirection: "row",
-                    marginHorizontal: designSpacingSemantic.m,
-                  }
-              : undefined
-          }
+          columnWrapperStyle={columnWrapperStyle}
           ItemSeparatorComponent={
             isMobileWeb ? MobileWebEventSeparator : undefined
           }
-          contentContainerStyle={[
-            browseScrollContent(insets.bottom, isDesktop, isMobileWeb),
-            isNative &&
-              browseNativeScrollContent(
-                insets.top + 56 + BROWSE_NATIVE_CATEGORY_BAR_HEIGHT + 12,
-              ),
-            results.length === 0 && { flexGrow: 1 },
-          ]}
+          contentContainerStyle={browseListContentStyle(
+            insets.bottom,
+            isDesktop,
+            isMobileWeb,
+            isNative,
+            insets.top,
+            results.length,
+          )}
           ListHeaderComponent={header}
           ListEmptyComponent={
-            <View
-              style={
-                isNative ? browseNativeMain : browseMain(isDesktop, isMobileWeb)
-              }
-            >
-              {isError ? (
-                <View
-                  testID="browse-error"
-                  accessibilityLiveRegion="polite"
-                  style={{ alignItems: "center", paddingVertical: 32 }}
-                >
-                  <Text style={{ fontWeight: "700", marginBottom: 8 }}>
-                    Event gagal dimuat
-                  </Text>
-                  <Text style={{ textAlign: "center", marginBottom: 16 }}>
-                    {apiErrorMessage(error)}
-                  </Text>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Coba muat event lagi"
-                    accessibilityState={{ disabled: isFetching }}
-                    disabled={isFetching}
-                    onPress={() => void retryEvents()}
-                    testID="browse-retry"
-                    style={{
-                      borderWidth: 2,
-                      borderColor: designColors.ink,
-                      paddingHorizontal: 20,
-                      paddingVertical: 12,
-                    }}
-                  >
-                    <Text style={{ fontWeight: "700" }}>
-                      {isFetching ? "Memuat…" : "Coba Lagi"}
-                    </Text>
-                  </Pressable>
-                </View>
-              ) : (
-                <BrowseEmpty />
-              )}
-            </View>
+            <BrowseListEmpty
+              isNative={isNative}
+              isDesktop={isDesktop}
+              isMobileWeb={isMobileWeb}
+              isError={isError}
+              error={error}
+              isFetching={isFetching}
+              retryLabel={retryLabel}
+              onRetry={() => void retryEvents()}
+            />
           }
           initialNumToRender={Math.max(4, columns * 2)}
           maxToRenderPerBatch={4}

@@ -17,8 +17,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { StepCircle } from "./StepCircle";
 import { useResponsive } from "@presentation/hooks/useResponsive";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForProgressStepsAnimatedView2,
   styleForProgressStepsText3,
 } from "./style";

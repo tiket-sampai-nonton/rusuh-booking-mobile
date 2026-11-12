@@ -44,4 +44,18 @@ describe("apiErrorMessage", () => {
       "Terjadi kesalahan. Silakan coba lagi.",
     );
   });
+
+  it("maps common HTTP errors and ignores malformed error objects", () => {
+    expect(apiErrorMessage({ status: 401 })).toContain("Akses sesi");
+    expect(apiErrorMessage({ status: 403 })).toContain("Akses sesi");
+    expect(apiErrorMessage({ status: 404 })).toContain("Data tidak ditemukan");
+    expect(apiErrorMessage({ status: 409 })).toContain("status terbaru");
+    expect(apiErrorMessage({ status: 408 })).toContain("terlalu lama");
+    expect(apiErrorMessage({ status: 429 })).toContain("terlalu lama");
+    expect(apiErrorMessage(null, "Coba lagi nanti")).toBe("Coba lagi nanti");
+    expect(apiErrorMessage("raw backend error", "Coba lagi nanti")).toBe(
+      "Coba lagi nanti",
+    );
+    expect(apiErrorMessage({ userMessage: "Pesan aman" })).toBe("Pesan aman");
+  });
 });

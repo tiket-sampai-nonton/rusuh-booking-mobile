@@ -8,8 +8,7 @@ import type {
   PaymentPage,
   PaymentRepository,
 } from "@domain/repositories/payment.repository";
-import type { Container } from "@providers/container";
-import { createContainer } from "@providers/container";
+import { createContainer, type Container } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
 import { openSnapHandoff, usePayment } from "@presentation/hooks/usePayment";
 import { useSessionStore } from "@presentation/stores/session-store";
@@ -153,7 +152,9 @@ describe("openSnapHandoff (platform branches)", () => {
       value: "ios",
       configurable: true,
     });
-    await openSnapHandoff("https://snap.mock/native");
+    await expect(openSnapHandoff("https://snap.mock/native")).resolves.toBe(
+      undefined,
+    );
   });
 
   it("routes a native booking handoff by ID without a caller URL", async () => {

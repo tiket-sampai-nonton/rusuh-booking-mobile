@@ -183,8 +183,8 @@ describe("MyTicketsScreen", () => {
     );
     fireEvent.press(screen.getByText("Unduh E-Tiket"));
     expect(
-      (await screen.findAllByText("Penyimpanan tidak tersedia")).length,
-    ).toBe(2);
+      await screen.findAllByText("Penyimpanan tidak tersedia"),
+    ).toHaveLength(2);
 
     fireEvent.press(screen.getByTestId("ticket-qr-close"));
     await waitFor(() =>

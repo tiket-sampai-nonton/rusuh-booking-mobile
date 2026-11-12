@@ -1,9 +1,12 @@
 import { StyleSheet } from "react-native";
-import { designColors, plusJakartaSansFonts } from "@presentation/theme";
+import {
+  designColors,
+  plusJakartaSansFonts,
+  designInput,
+  designBorders,
+} from "@presentation/theme";
 
-import type { DynamicStyle } from "@presentation/utils/style";
-import { hardShadowStyle } from "@presentation/utils/style";
-import { designInput, designBorders } from "@presentation/theme";
+import { type DynamicStyle, hardShadowStyle } from "@presentation/utils/style";
 
 export const componentStyles = StyleSheet.create({
   elementGap0: { gap: 8 },
