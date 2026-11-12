@@ -179,7 +179,7 @@ describe("HomeScreen", () => {
       expect(screen.getByTestId("section-events")).toBeTruthy(),
     );
     // Native and web use the same Indonesian Home section title.
-    expect(screen.getByText("Daftar Event")).toBeTruthy();
+    expect(screen.getByText("Jelajahi Event")).toBeTruthy();
     expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
     // "Rusuh Fest 2026" shows in the static hero and catalog card.
     expect(
