@@ -176,7 +176,7 @@ export const browseViewDivider: ViewStyle = {
 };
 export const browseSortControl = {
   borderWidth: 0,
-  backgroundColor: "transparent",
+  backgroundColor: designColors.transparent,
   fontFamily: plusJakartaSansFonts.medium,
   fontWeight: "500",
   fontSize: 14,
@@ -215,7 +215,7 @@ export const browseNativeCategoryButton = (active: boolean): ViewStyle => ({
   minHeight: 34,
   justifyContent: "center",
   borderWidth: 2,
-  borderColor: designColors.ink,
+  borderColor: active ? designColors.ember : designColors.ink,
   backgroundColor: active ? brand.deep : designColors.ground,
 });
 export const browseNativeCategoryLabel = (active: boolean): TextStyle => ({
@@ -290,6 +290,7 @@ export const browseCategoryBtn: ViewStyle = {
 export const browseCategoryBtnActive: ViewStyle = {
   ...browseCategoryBtn,
   backgroundColor: brand.deep,
+  borderColor: designColors.ember,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -340,7 +341,7 @@ export const browseViewBtn: ViewStyle = {
 
 export const browseViewBtnActive: ViewStyle = {
   ...browseViewBtn,
-  backgroundColor: designColors.ink,
+  backgroundColor: designColors.accentDeep,
 };
 
 export const browseSortSelect: ViewStyle = {

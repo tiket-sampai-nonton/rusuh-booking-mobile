@@ -33,6 +33,9 @@ class FakeUserRepository implements UserRepository {
   async getMe(): Promise<UserProfile> {
     return { emailMasked: "t***@x.com", hasNik: false };
   }
+  async getCheckoutDetails() {
+    return { email: "test@example.com" };
+  }
 }
 
 describe("RequestOtp", () => {

@@ -23,8 +23,10 @@ export const brand = {
 
 /** Logo-only colors stay fixed when the app's brand palette changes. */
 export const brandMark = {
-  primary: "#EC1C24",
-  deep: "#A8111B",
+  primary: colors.brandMark.primary,
+  deep: colors.brandMark.deep,
+  white: colors.brandMark.white,
+  stroke: colors.brandMark.stroke,
 } as const;
 
 /** Status hues mirrored from Tailwind's semantic tokens. */
@@ -52,6 +54,7 @@ export const neutral = {
   mutedDark: colors.muted.dark,
   lineDark: colors.line.dark,
   field: colors.v2.field,
+  transparent: colors.transparent,
 } as const;
 
 /** Waiting-room status surfaces mirrored from Tailwind's `v2` tokens. */

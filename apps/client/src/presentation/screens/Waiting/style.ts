@@ -54,6 +54,7 @@ export const palette = {
 
   // Legacy aliases for compatibility
   white: designColors.ground,
+  transparent: designColors.transparent,
   pillDot: designColors.danger,
   okText: designColors.success,
   errText: designColors.danger,
@@ -705,8 +706,8 @@ export const styles = StyleSheet.create({
     borderRadius: RING_SIZE / 2,
     borderWidth: RING_STROKE,
     borderColor: palette.ink,
-    borderLeftColor: "transparent",
-    borderBottomColor: "transparent",
+    borderLeftColor: palette.transparent,
+    borderBottomColor: palette.transparent,
     transform: [{ rotate: "-45deg" }],
   },
 

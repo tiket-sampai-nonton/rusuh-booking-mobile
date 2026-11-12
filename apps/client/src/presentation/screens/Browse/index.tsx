@@ -32,7 +32,7 @@ import { useEvents } from "@presentation/hooks/useEvents";
 import { useAccountStore } from "@presentation/stores/account-store";
 import { useServices } from "@providers/service-context";
 import { apiErrorMessage } from "@presentation/utils/api-error-message";
-import { designSpacingSemantic } from "@presentation/theme";
+import { designColors, designSpacingSemantic } from "@presentation/theme";
 import { gridItemStyle as homeGridItemStyle } from "../Home/fragments/HomeSections/fragments/EventsGrid/style";
 
 import { BrowseCategoriesSection } from "./fragments/BrowseCategoriesSection";
@@ -282,7 +282,7 @@ export function BrowseScreen() {
             testID="browse-retry-stale"
             style={{
               borderWidth: 2,
-              borderColor: "#000000",
+              borderColor: designColors.ink,
               paddingHorizontal: 20,
               paddingVertical: 12,
             }}
@@ -367,7 +367,7 @@ export function BrowseScreen() {
                     testID="browse-retry"
                     style={{
                       borderWidth: 2,
-                      borderColor: "#000000",
+                      borderColor: designColors.ink,
                       paddingHorizontal: 20,
                       paddingVertical: 12,
                     }}

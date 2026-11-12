@@ -31,8 +31,8 @@ export const componentStyles = StyleSheet.create({
   },
   elementBorderWidth8: {
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
-    backgroundColor: designColors.ink,
+    borderColor: designColors.accent,
+    backgroundColor: designColors.accentDeep,
     paddingVertical: 8,
     paddingHorizontal: 16,
     overflow: "hidden",

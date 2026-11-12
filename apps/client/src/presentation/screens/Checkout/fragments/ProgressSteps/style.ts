@@ -48,7 +48,7 @@ export function styleForProgressStepsAnimatedView2(): DynamicStyle {
     top: 20,
     left: "10%",
     height: 2,
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.accent,
     zIndex: 2,
   } as DynamicStyle;
 }
@@ -62,6 +62,10 @@ export function styleForProgressStepsText3(
     fontFamily: plusJakartaSansFonts.medium,
     textTransform: "uppercase",
     letterSpacing: 0.6,
-    color: arg0 || arg1 ? designColors.ink : designColors.gray,
+    color: arg0
+      ? designColors.accent
+      : arg1
+        ? designColors.ink
+        : designColors.gray,
   } as DynamicStyle;
 }

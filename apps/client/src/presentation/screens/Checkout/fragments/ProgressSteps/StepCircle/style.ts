@@ -17,7 +17,10 @@ export const stepCircleStyles = StyleSheet.create({
   },
   compactCircle: { width: 26, height: 26, borderWidth: 1 },
   filledCircle: {
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.accentDeep,
+  },
+  activeCircle: {
+    borderColor: designColors.ember,
   },
   emptyCircle: {
     backgroundColor: designColors.ground,

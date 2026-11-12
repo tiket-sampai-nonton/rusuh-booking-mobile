@@ -382,12 +382,10 @@ export interface components {
     HoldRequest: {
       /** Format: uuid */
       sessionId: string;
-      /** @description Buyer identity is provided in manual mode with nik, or by selecting useLoginNik and sending the authenticated buyer bearer token. When useLoginNik is true, omit nik. */
+      /** @description Buyer identity must include the NIK. Authenticated clients may prefill it from GET /api/v1/me. */
       buyer: {
-        /** @description Buyer NIK; required unless useLoginNik is true. */
-        nik?: string;
-        /** @description Use the saved account NIK. Requires an authenticated account with a linked NIK; omit nik when true. */
-        useLoginNik?: boolean;
+        /** @description Buyer NIK; required. */
+        nik: string;
         /** Format: email */
         email: string;
         /** Format: email */
@@ -399,12 +397,10 @@ export interface components {
       items: {
         /** Format: uuid */
         categoryId: string;
-        /** @description Manual mode uses nik. Saved-NIK mode requires buyer.useLoginNik=true, allows at most one attendee per order, and omits nik. */
+        /** @description Every attendee must include a NIK. The client may prefill the buyer's NIK for a ticket where the buyer will attend. */
         attendee: {
-          /** @description Attendee NIK; required unless useLoginNik is true. */
-          nik?: string;
-          /** @description Use the buyer account NIK for this ticket. Only one attendee may set this true, and buyer.useLoginNik must also be true. */
-          useLoginNik?: boolean;
+          /** @description Attendee NIK; required. */
+          nik: string;
           fullName: string;
         };
       }[];
@@ -894,7 +890,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorEnvelope"];
         };
       };
-      /** @description Melebihi batas atau aturan event — errorCode: `QUANTITY_EXCEEDS_LIMIT`, `MIXED_CATEGORIES_NOT_ALLOWED`, `NIK_INVALID`, `NIK_NOT_LINKED` (saved account NIK is not linked; continue with manual NIK entry) */
+      /** @description Melebihi batas atau aturan event — errorCode: `QUANTITY_EXCEEDS_LIMIT`, `MIXED_CATEGORIES_NOT_ALLOWED`, `NIK_INVALID` */
       422: {
         headers: {
           [name: string]: unknown;

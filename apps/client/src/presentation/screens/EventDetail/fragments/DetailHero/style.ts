@@ -9,7 +9,7 @@ import type { DynamicStyle } from "@presentation/utils/style";
 export const heroStyles = StyleSheet.create({
   // Web: gradient from white at bottom
   overlayWeb: {
-    backgroundColor: "transparent",
+    backgroundColor: designColors.transparent,
     ...(Platform.OS === "web" && {
       backgroundImage: `linear-gradient(
         to top,
@@ -21,7 +21,7 @@ export const heroStyles = StyleSheet.create({
     }),
   },
   mobileWebOverlay: {
-    backgroundColor: "transparent",
+    backgroundColor: designColors.transparent,
     ...(Platform.OS === "web" && {
       backgroundImage: `linear-gradient(to top, ${withAlpha(designColors.overlay, 0.92)} 0%, ${withAlpha(designColors.overlay, 0.42)} 42%, ${withAlpha(designColors.overlay, 0.08)} 100%)`,
     }),

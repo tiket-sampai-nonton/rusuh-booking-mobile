@@ -264,11 +264,11 @@ export function styleForEventCardView12(
     width: MOBILE_ACTION_SIZE,
     height: MOBILE_ACTION_SIZE,
     borderWidth: designBorders.standard,
-    borderColor: isActive ? designColors.danger : designColors.ink,
+    borderColor: isActive ? designColors.accent : designColors.ink,
     backgroundColor: disabled
       ? designColors.inkMuted
       : isActive
-        ? designColors.danger
+        ? designColors.accent
         : designColors.ground,
     alignItems: "center",
     justifyContent: "center",
@@ -283,14 +283,14 @@ export function styleForEventCardView13(
     backgroundColor: disabled
       ? designColors.inkMuted
       : isHovered
-        ? designColors.danger
-        : designColors.ink,
+        ? designColors.accent
+        : designColors.accentDeep,
     borderWidth: designBorders.standard,
     borderColor: disabled
       ? designColors.inkMuted
       : isHovered
-        ? designColors.danger
-        : designColors.ink,
+        ? designColors.accent
+        : designColors.accentDeep,
     paddingHorizontal: 16,
     paddingVertical: 8,
   } as DynamicStyle;

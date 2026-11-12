@@ -1,5 +1,6 @@
 import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { neutral } from "@presentation/theme";
 
 /** White backing for iOS's transparent status-bar region. */
 export function NativeStatusBarBackdrop() {
@@ -16,7 +17,7 @@ export function NativeStatusBarBackdrop() {
         left: 0,
         right: 0,
         height: insets.top,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: neutral.card,
       }}
       accessibilityElementsHidden
     />

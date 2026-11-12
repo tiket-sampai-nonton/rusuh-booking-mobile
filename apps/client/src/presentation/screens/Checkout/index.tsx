@@ -7,19 +7,13 @@
  * - 2px solid borders, no rounded corners
  * - Plus Jakarta Sans font family
  *
- * NIK is never logged; the buyer/attendee NIK fields are masked on handoff
- * (D7.1/D7.5). No infrastructure import — ports via useServices/hooks only.
+ * NIK is never logged or persisted. The authenticated /me NIK is kept only in
+ * this mounted screen's form state; booking summaries use its masked form.
+ * No infrastructure import — ports via useServices/hooks only.
  */
 import { useNavigation, useRouter, type Href } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import {
-  BackHandler,
-  Pressable,
-  ScrollView,
-  Switch,
-  Text,
-  View,
-} from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PlusIcon } from "@presentation/components/ArrowIcon";
 import { DomainError } from "@domain/errors/domain-error";
@@ -71,6 +65,8 @@ import { checkoutScrollContent, componentStyles } from "./style";
 import { addTicketButtonStyle } from "./style";
 import { apiErrorMessage } from "@presentation/utils/api-error-message";
 import { LoginModal } from "@presentation/components/auth/LoginModal";
+import { GetCheckoutUserDetails } from "@application/auth/get-checkout-user-details.use-case";
+import type { CheckoutUserDetails } from "@domain/repositories/user.repository";
 
 /** Map a resolved NIK verdict (+ pending flag) to the row's display status. */
 function rowStatus(
@@ -89,7 +85,13 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { isDesktop, isMobileWeb } = useResponsive();
-  const { serverClock, bookingRepository, queueMembership } = useServices();
+  const {
+    serverClock,
+    bookingRepository,
+    queueMembership,
+    tokenStorage,
+    userRepository,
+  } = useServices();
   const {
     session,
     isLoading,
@@ -108,17 +110,18 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   // re-render every tick; derive the prefill from it with useMemo.
   const profile = useAccountStore((s) => s.profile);
   const accountEmail = useAccountStore((s) => s.buyerEmail);
+  const getCheckoutUserDetails = useMemo(
+    () => new GetCheckoutUserDetails(userRepository),
+    [userRepository],
+  );
   const prefill = useMemo(
     () => prefillFromProfile(profile, accountEmail),
     [profile, accountEmail],
   );
-  // Logged-in users consented at registration; guests consent inline (AC3).
-  const isGuest = !prefill.fromAccount;
-
   const [buyerName, setBuyerName] = useState(prefill.fullName ?? "");
   const [buyerNik, setBuyerNik] = useState("");
-  // The full login email is restored from BuyerEmailStorage when available;
-  // the profile API returns only a masked address.
+  const [checkoutDetails, setCheckoutDetails] =
+    useState<CheckoutUserDetails | null>(null);
   const [buyerEmail, setBuyerEmail] = useState(prefill.email ?? "");
   const [emailConfirmation, setEmailConfirmation] = useState(
     prefill.email ?? "",
@@ -128,8 +131,48 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const [consent, setConsent] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
-  const [buyerUsesSavedNik, setBuyerUsesSavedNik] = useState(false);
   const [authRecoveryOpen, setAuthRecoveryOpen] = useState(false);
+  const [hasAuthToken, setHasAuthToken] = useState(false);
+  const checkoutDetailsRequestStarted = useRef(false);
+  // Logged-in users consented at registration; guests consent inline (AC3).
+  const isAccountUser =
+    prefill.fromAccount || hasAuthToken || checkoutDetails !== null;
+  const isGuest = !isAccountUser;
+
+  // Fetch authenticated /me data specifically for checkout. The raw NIK stays
+  // in this mounted screen's state and is never placed in shared/persisted
+  // account storage. Guests continue with manual entry.
+  useEffect(() => {
+    if (checkoutDetailsRequestStarted.current) return;
+    let active = true;
+    void (async () => {
+      try {
+        const token = await tokenStorage.load();
+        if (!token || !active) return;
+        checkoutDetailsRequestStarted.current = true;
+        setHasAuthToken(true);
+        const details = await getCheckoutUserDetails.execute();
+        if (active) {
+          setCheckoutDetails(details);
+          if (details.fullName?.trim()) setBuyerName(details.fullName);
+          if (details.nik) {
+            setBuyerNik(details.nik.replace(/\D/g, "").slice(0, 16));
+          }
+          if (details.email.trim()) {
+            setBuyerEmail(details.email.trim());
+            setEmailConfirmation(details.email.trim());
+          }
+        }
+      } catch {
+        checkoutDetailsRequestStarted.current = false;
+        // Keep manual checkout available if /me is unavailable or the session
+        // has expired; the booking API remains authoritative.
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [getCheckoutUserDetails, prefill.fromAccount, tokenStorage]);
 
   // Profile names may arrive after the checkout screen mounts. Fill an empty
   // buyer name field once, without overwriting anything the user entered.
@@ -230,7 +273,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   // A ticket using buyer identity resolves to the current buyer name + NIK.
   // Keep the attendee's own fields untouched so switching the option off
   // restores the identity they had entered for that ticket.
-  const resolvedBuyerNik = buyerUsesSavedNik ? "" : buyerNik;
+  const resolvedBuyerNik = buyerNik;
   const resolvedRows = useMemo(
     () =>
       rows.map((row) =>
@@ -250,7 +293,6 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
       buyerEmail.trim() === emailConfirmation.trim() &&
       isCheckoutReady({
         buyerNik: resolvedBuyerNik,
-        buyerUsesSavedNik,
         buyerEmail,
         rows: resolvedRows,
         maxSelectable: cap,
@@ -259,7 +301,6 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
       }),
     [
       resolvedBuyerNik,
-      buyerUsesSavedNik,
       buyerEmail,
       emailConfirmation,
       resolvedRows,
@@ -275,9 +316,8 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
       ? "Nama pembeli wajib diisi untuk menggunakan data pembeli."
       : undefined;
   const buyerNikError =
-    !buyerUsesSavedNik &&
-    ((submitAttempted && !buyerNik.trim()) ||
-      (buyerNik.length > 0 && !isValidNik(buyerNik)))
+    (submitAttempted && !buyerNik.trim()) ||
+    (buyerNik.length > 0 && !isValidNik(buyerNik))
       ? buyerNik.length > 0
         ? "NIK pembeli harus terdiri dari 16 digit."
         : "NIK pembeli wajib diisi (16 digit)."
@@ -316,11 +356,10 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   // resolved NIK (a useBuyerNik row resolves to the buyer NIK).
   useEffect(() => {
     for (const r of rows) {
-      if (r.useBuyerNik && buyerUsesSavedNik) continue;
       const nik = r.useBuyerNik ? buyerNik : r.attendeeNik;
       if (isValidNik(nik)) request(nik);
     }
-  }, [rows, buyerNik, buyerUsesSavedNik, request]);
+  }, [rows, buyerNik, request]);
 
   // Row mutations delegate to the pure domain rules (cap / min-1 / single-use).
   const addRow = (): void =>
@@ -348,20 +387,15 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
         const booking = await hold({
           sessionId,
           rows: resolvedRows,
-          buyerNik: buyerUsesSavedNik ? "" : buyerNik,
+          buyerNik,
           buyer: {
-            ...(buyerUsesSavedNik ? { useLoginNik: true } : { nik: buyerNik }),
+            nik: buyerNik,
             email: buyerEmail.trim(),
             emailConfirmation: emailConfirmation.trim(),
             consent: consentGiven,
           },
         });
-        // The server supplies the masked saved NIK to the account profile.
-        // Never derive or persist a raw value for this summary.
-        setOrderDetail(
-          buyerUsesSavedNik ? (prefill.nikMasked ?? "****") : maskNik(buyerNik),
-          rows.length,
-        );
+        setOrderDetail(maskNik(buyerNik), rows.length);
         router.replace(`/payment/${booking.bookingId}` as Href);
       } catch {
         // holdError (DomainError.userMessage) is shown in CheckoutBar; stay on
@@ -371,19 +405,14 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   };
 
   const holdErrorActionLabel =
-    holdError?.code === "NIK_NOT_LINKED"
-      ? "Masukkan NIK manual"
-      : holdError?.kind === "auth"
-        ? "Masuk kembali"
-        : holdError?.kind === "dependency"
-          ? "Coba lagi"
-          : undefined;
+    holdError?.kind === "auth"
+      ? "Masuk kembali"
+      : holdError?.kind === "dependency"
+        ? "Coba lagi"
+        : undefined;
 
   const handleHoldErrorAction = (): void => {
-    if (holdError?.code === "NIK_NOT_LINKED") {
-      resetError();
-      setBuyerUsesSavedNik(false);
-    } else if (holdError?.kind === "auth") {
+    if (holdError?.kind === "auth") {
       resetError();
       setAuthRecoveryOpen(true);
     } else if (holdError?.kind === "dependency") {
@@ -443,7 +472,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           ) : null}
 
           <Section title="Data Pembeli" number={1}>
-            {prefill.fromAccount ? (
+            {isAccountUser ? (
               <View
                 style={componentStyles.buyerPrefillBadge}
                 testID="prefill-badge"
@@ -462,60 +491,35 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               onChangeText={setBuyerName}
               placeholder="Nama sesuai KTP"
               testID="buyer-name"
+              editable={!checkoutDetails?.fullName?.trim()}
               invalid={Boolean(buyerNameError)}
               errorMessage={buyerNameError}
+              helperText={
+                checkoutDetails?.fullName?.trim()
+                  ? "Nama diisi dari akun dan tidak dapat diubah di sini."
+                  : undefined
+              }
             />
-            {prefill.fromAccount && prefill.hasNik ? (
-              <View className="mt-4 flex-row items-center justify-between border-2 border-black bg-white p-3">
-                <View className="mr-3 flex-1">
-                  <Text className="text-sm font-bold text-black">
-                    Gunakan NIK tersimpan di akun
-                  </Text>
-                  <Text className="mt-1 text-xs text-gray-600">
-                    {prefill.nikMasked
-                      ? `Akun ${prefill.nikMasked}`
-                      : "NIK diambil aman oleh server"}
-                  </Text>
-                </View>
-                <Switch
-                  accessibilityLabel="Gunakan NIK tersimpan di akun untuk pembeli"
-                  accessibilityState={{ checked: buyerUsesSavedNik }}
-                  value={buyerUsesSavedNik}
-                  onValueChange={setBuyerUsesSavedNik}
-                  trackColor={{
-                    false: designColors.field,
-                    true: designColors.ink,
-                  }}
-                  thumbColor={designColors.ground}
-                  testID="buyer-use-login-nik"
-                />
-              </View>
-            ) : null}
-            {buyerUsesSavedNik ? (
-              <View className="mt-3 border-2 border-black bg-white p-3">
-                <Text className="text-xs font-bold uppercase text-black">
-                  NIK pembeli akan diambil dari akun Anda
-                </Text>
-              </View>
-            ) : (
-              <Field
-                label="NIK Pembeli (16 digit)"
-                value={buyerNik}
-                onChangeText={(t) =>
-                  setBuyerNik(t.replace(/\D/g, "").slice(0, 16))
-                }
-                placeholder="16 digit KTP pembeli"
-                keyboardType="number-pad"
-                testID="buyer-nik"
-                invalid={Boolean(buyerNikError)}
-                errorMessage={buyerNikError}
-                helperText={
-                  prefill.fromAccount && !prefill.hasNik
-                    ? "Belum ada NIK yang tertaut ke akun. Anda tetap bisa mengisi NIK secara manual."
+            <Field
+              label="NIK Pembeli (16 digit)"
+              value={buyerNik}
+              onChangeText={(value) =>
+                setBuyerNik(value.replace(/\D/g, "").slice(0, 16))
+              }
+              placeholder="16 digit KTP pembeli"
+              keyboardType="number-pad"
+              testID="buyer-nik"
+              editable={!checkoutDetails?.nik}
+              invalid={Boolean(buyerNikError)}
+              errorMessage={buyerNikError}
+              helperText={
+                checkoutDetails?.nik
+                  ? "NIK diisi dari akun dan tidak dapat diubah di sini."
+                  : isAccountUser
+                    ? "NIK akun tidak tersedia. Silakan isi NIK secara manual."
                     : undefined
-                }
-              />
-            )}
+              }
+            />
             <Field
               label="Email"
               value={buyerEmail}
@@ -523,14 +527,19 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               placeholder="kamu@email.com"
               keyboardType="email-address"
               testID="buyer-email"
+              editable={!checkoutDetails?.email}
               invalid={Boolean(buyerEmailError)}
               errorMessage={buyerEmailError}
               helperText={
-                prefill.fromAccount
-                  ? prefill.emailMasked && !prefill.email
-                    ? `Email akun tersimpan sebagai ${prefill.emailMasked}. Masukkan email lengkap untuk checkout.`
+                checkoutDetails?.email
+                  ? "Email diisi dari akun dan tidak dapat diubah di sini."
+                  : isAccountUser
+                    ? prefill.emailMasked &&
+                      !prefill.email &&
+                      !checkoutDetails?.email
+                      ? `Email akun tersimpan sebagai ${prefill.emailMasked}. Masukkan email lengkap untuk checkout.`
+                      : undefined
                     : undefined
-                  : undefined
               }
             />
             <Field
@@ -540,19 +549,20 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               placeholder="Masukkan kembali email"
               keyboardType="email-address"
               testID="buyer-email-confirmation"
+              editable={!checkoutDetails?.email}
               invalid={Boolean(emailConfirmationError)}
               errorMessage={emailConfirmationError}
+              helperText={
+                checkoutDetails?.email
+                  ? "Konfirmasi mengikuti email akun dan tidak dapat diubah."
+                  : undefined
+              }
             />
           </Section>
 
           <Section title="Tiket" number={2}>
             {rows.map((row, i) => {
-              const usesSavedNik = row.useBuyerNik && buyerUsesSavedNik;
-              const nik = usesSavedNik
-                ? ""
-                : row.useBuyerNik
-                  ? buyerNik
-                  : row.attendeeNik;
+              const nik = row.useBuyerNik ? buyerNik : row.attendeeNik;
               return (
                 // Key on the STABLE rowId (not the array index): rows are
                 // add/remove-able, so an index key would remount the wrong
@@ -563,7 +573,6 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
                   row={row}
                   buyerName={buyerName}
                   buyerNik={buyerNik}
-                  buyerUsesSavedNik={buyerUsesSavedNik}
                   categoryError={
                     submitAttempted && !row.categoryId
                       ? "Pilih kategori tiket."
@@ -577,11 +586,11 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
                       : undefined
                   }
                   attendeeNikError={
-                    !usesSavedNik && submitAttempted && !isValidNik(nik)
+                    submitAttempted && !isValidNik(nik)
                       ? row.useBuyerNik
                         ? "Masukkan NIK pembeli yang valid pada bagian Data Pembeli."
                         : "NIK penonton wajib diisi (16 digit)."
-                      : !usesSavedNik && !isValidNik(nik) && nik.length > 0
+                      : !isValidNik(nik) && nik.length > 0
                         ? "NIK penonton harus terdiri dari 16 digit."
                         : submitAttempted && !attendeeNiksAreUnique
                           ? "NIK ini sudah digunakan pada tiket lain."

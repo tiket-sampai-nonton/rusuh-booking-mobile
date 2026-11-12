@@ -209,7 +209,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
             disabled={isRetryingPaymentPage}
             onPress={() => void retryPaymentPage()}
             testID="payment-retry"
-            className="mb-4 border-2 border-black px-6 py-3"
+            className="mb-4 border-2 border-ink px-6 py-3"
           >
             <Text className="font-bold">
               {isRetryingPaymentPage ? "MEMUAT…" : "COBA LAGI"}
@@ -221,7 +221,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
           accessibilityLabel="Cari event lagi"
           onPress={() => router.replace("/browse" as Href)}
           testID="payment-unavailable-browse"
-          className="border-2 border-black px-6 py-3"
+          className="border-2 border-ink px-6 py-3"
         >
           <Text className="font-bold">CARI EVENT LAGI</Text>
         </Pressable>

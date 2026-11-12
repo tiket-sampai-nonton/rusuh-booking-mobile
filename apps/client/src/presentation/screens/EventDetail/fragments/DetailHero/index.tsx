@@ -172,7 +172,7 @@ export function DetailHero({
           colors={[
             designColors.ground, // 0% - ground at bottom
             withAlpha(designColors.overlay, 0.3), // 50% - dark overlay
-            "transparent", // 100% - transparent at top
+            designColors.transparent, // 100% - transparent at top
           ]}
           locations={[0, 0.5, 1]}
           start={{ x: 0.5, y: 1 }} // from bottom

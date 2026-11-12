@@ -163,7 +163,11 @@ export interface components {
       /** Format: uuid */
       accountId: string;
       emailMasked: string;
+      /** @description Full email is included only by GET /api/v1/me. */
+      email?: string;
       fullName?: string;
+      /** @description Full NIK is included only by GET /api/v1/me when linked. */
+      nik?: string;
       /**
        * @description NIK tersamar
        * @example 3174********0001

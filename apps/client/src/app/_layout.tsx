@@ -9,7 +9,7 @@ import { NotificationBridge } from "@presentation/bridges/NotificationBridge";
 import { AccountSessionBridge } from "@presentation/bridges/AccountSessionBridge";
 import { QueueMembershipBridge } from "@presentation/bridges/QueueMembershipBridge";
 import { usePlusJakartaSansFonts } from "@presentation/theme/fonts";
-import { brand } from "@presentation/theme";
+import { brand, neutral } from "@presentation/theme";
 import { AppProviders } from "@providers/providers";
 import { NativeLaunchSplash } from "@presentation/components/NativeLaunchSplash";
 import { StartupUpdateBridge } from "@presentation/bridges/StartupUpdateBridge";
@@ -56,7 +56,11 @@ export default function RootLayout() {
           <ActivityIndicator size="large" color={brand.primary} />
         </View>
       )}
-      <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
+      <StatusBar
+        style="dark"
+        backgroundColor={neutral.card}
+        translucent={false}
+      />
       {showSplash && Platform.OS !== "web" ? (
         <NativeLaunchSplash
           onFinish={finishSplash}

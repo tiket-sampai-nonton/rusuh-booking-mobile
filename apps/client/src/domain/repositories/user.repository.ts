@@ -8,7 +8,9 @@
  * Covers the User service: passwordless OTP (request/verify) + profile. Sign-in
  * is OPTIONAL — a guest completes the whole flow without it (D8.5). Consumed by
  * the auth use cases (E3, RBT-020/021). NIK is stored encrypted BE-side; the FE
- * only ever sees a masked NIK (never logs/stores a raw NIK — SECURITY).
+ * keeps only a masked NIK in the account profile. Checkout may request the
+ * authenticated user's real email/NIK for prefill; that response is transient
+ * screen state and must never be persisted or logged (SECURITY).
  */
 
 /** Issued after a successful OTP verify. */
@@ -18,13 +20,24 @@ export interface AuthSession {
   readonly isNew: boolean;
 }
 
-/** The signed-in user's profile (masked identity only). */
+/** The signed-in user's profile (safe for the in-memory account store). */
 export interface UserProfile {
   readonly emailMasked: string;
   readonly fullName?: string;
   readonly nikMasked?: string;
   /** Profile-complete indicator (FE-NEED O1 → maps GET /me.hasNik). */
   readonly hasNik: boolean;
+}
+
+/**
+ * Checkout-only values returned by authenticated GET /me. The raw NIK is
+ * intentionally separate from UserProfile so it cannot be placed in the
+ * shared account store or persisted by existing session code.
+ */
+export interface CheckoutUserDetails {
+  readonly email: string;
+  readonly fullName?: string;
+  readonly nik?: string;
 }
 
 export interface UserRepository {
@@ -39,5 +52,7 @@ export interface UserRepository {
   }): Promise<UserProfile>;
   /** Fetch the current profile (powers checkout auto-fill). */
   getMe(): Promise<UserProfile>;
+  /** Fetch full email/NIK for checkout prefill; never persist this result. */
+  getCheckoutDetails(): Promise<CheckoutUserDetails>;
   logout?(): Promise<void>;
 }

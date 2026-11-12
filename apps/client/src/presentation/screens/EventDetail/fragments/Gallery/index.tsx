@@ -22,10 +22,11 @@ import { galleryStyles } from "./style";
 
 interface GalleryProps {
   readonly images: readonly string[];
+  readonly fallbackUri?: string;
   readonly onImagePress?: (index: number) => void;
 }
 
-export function Gallery({ images, onImagePress }: GalleryProps) {
+export function Gallery({ images, fallbackUri, onImagePress }: GalleryProps) {
   const { isDesktop } = useResponsive();
   const columns = isDesktop ? 4 : 2;
 
@@ -39,6 +40,7 @@ export function Gallery({ images, onImagePress }: GalleryProps) {
         <GalleryItem
           key={uri}
           uri={uri}
+          fallbackUri={fallbackUri}
           index={index}
           columns={columns}
           onPress={() => onImagePress?.(index)}

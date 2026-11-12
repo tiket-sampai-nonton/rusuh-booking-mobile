@@ -2,6 +2,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { historyStateStyles, historyStyles } from "../../../style";
 import { apiErrorMessage } from "@presentation/utils/api-error-message";
+import { designColors } from "@presentation/theme";
 
 export interface HistoryErrorProps {
   readonly error?: unknown;
@@ -30,7 +31,7 @@ export function HistoryError({
             alignSelf: "center",
             marginTop: 16,
             borderWidth: 2,
-            borderColor: "#000000",
+            borderColor: designColors.ink,
             paddingHorizontal: 20,
             paddingVertical: 12,
           }}

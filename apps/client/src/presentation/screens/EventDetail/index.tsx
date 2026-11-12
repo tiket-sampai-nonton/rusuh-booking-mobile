@@ -222,6 +222,10 @@ export function EventDetailScreen({
   }
 
   const galleryImages = desc.gallery ?? [];
+  // Descriptions may contain third-party gallery URLs. Fall back to the event's
+  // first-party BE-hosted artwork when a gallery asset cannot be reached.
+  const galleryFallbackUri =
+    event.imageUrl ?? event.bannerUrl ?? event.thumbnailUrl;
 
   // Use venue details from the event. Missing venue data stays visibly missing.
   const venueInfo = createVenueInfo(event.venue, desc.location);
@@ -334,7 +338,11 @@ export function EventDetailScreen({
               </Block>
 
               <Block label="Galeri">
-                <Gallery images={galleryImages} onImagePress={openLightbox} />
+                <Gallery
+                  images={galleryImages}
+                  fallbackUri={galleryFallbackUri}
+                  onImagePress={openLightbox}
+                />
               </Block>
 
               <Block label="Syarat dan ketentuan">
@@ -381,6 +389,7 @@ export function EventDetailScreen({
         {/* Lightbox Modal */}
         <Lightbox
           images={galleryImages}
+          fallbackUri={galleryFallbackUri}
           currentIndex={lightbox.currentIndex}
           visible={lightbox.visible}
           onClose={closeLightbox}

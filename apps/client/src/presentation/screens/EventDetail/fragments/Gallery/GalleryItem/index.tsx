@@ -11,6 +11,7 @@ import {
 
 interface GalleryItemProps {
   readonly uri: string;
+  readonly fallbackUri?: string;
   readonly index: number;
   readonly columns: number;
   readonly onPress: () => void;
@@ -18,6 +19,7 @@ interface GalleryItemProps {
 
 export function GalleryItem({
   uri,
+  fallbackUri,
   index,
   columns,
   onPress,
@@ -38,6 +40,7 @@ export function GalleryItem({
     >
       <CachedImage
         source={{ uri }}
+        fallbackSource={fallbackUri ? { uri: fallbackUri } : undefined}
         style={[
           galleryStyles.image,
           Platform.OS === "web" &&

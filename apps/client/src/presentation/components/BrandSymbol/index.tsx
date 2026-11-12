@@ -39,8 +39,8 @@ export function BrandSymbol({ size = 36, testID }: BrandSymbolProps) {
       <Svg width={symbolSize} height={symbolSize} viewBox="0 0 40 40">
         <Path
           d={ticketPath}
-          fill="#FFFFFF"
-          stroke="#F3F0F0"
+          fill={brandMark.white}
+          stroke={brandMark.stroke}
           strokeLinejoin="round"
           strokeWidth={0.7}
         />

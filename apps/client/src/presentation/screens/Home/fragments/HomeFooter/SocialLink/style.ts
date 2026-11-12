@@ -40,7 +40,7 @@ export function socialLinkContainerColor(
   groundColor: string,
 ): string {
   "worklet";
-  return hovered > 0.5 ? "transparent" : groundColor;
+  return hovered > 0.5 ? designColors.transparent : groundColor;
 }
 
 export function socialLinkTextColor(

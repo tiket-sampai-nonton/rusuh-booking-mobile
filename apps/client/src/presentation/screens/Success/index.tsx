@@ -169,9 +169,9 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
             disabled={isRetryingVerification}
             onPress={() => void retryVerification()}
             testID="success-verification-retry"
-            className="border-2 border-white px-6 py-3"
+            className="border-2 border-card px-6 py-3"
           >
-            <Text className="font-bold text-white">
+            <Text className="font-bold text-card">
               {isRetryingVerification ? "MEMERIKSA…" : "COBA LAGI"}
             </Text>
           </Pressable>

@@ -37,14 +37,11 @@ export class HoldBooking {
     buyer: BookingBuyerInput,
   ): Promise<Booking> {
     const resolved = resolveAttendeeNiks(rows, buyerNik);
-    const items: BookingItemInput[] = rows.map((r, i) => {
-      const useLoginNik = r.useBuyerNik && buyer.useLoginNik === true;
-      return {
-        categoryId: r.categoryId,
-        attendeeName: r.attendeeName,
-        ...(useLoginNik ? { useLoginNik: true } : { attendeeNik: resolved[i] }),
-      };
-    });
+    const items: BookingItemInput[] = rows.map((r, i) => ({
+      categoryId: r.categoryId,
+      attendeeName: r.attendeeName,
+      attendeeNik: resolved[i],
+    }));
     const actionId = HoldBooking.actionId(sessionId);
     // Mint ONCE and reuse across retry (the key is NOT cleared on failure, so a
     // retry of the same action reuses it — FR-25). Cleared only on success.
@@ -63,14 +60,9 @@ export class HoldBooking {
         cause instanceof DomainError
           ? cause
           : mapFailure(cause, "DEPENDENCY_UNAVAILABLE");
-      // A saved NIK that is not linked is a rejected selection, so switching
-      // to manual entry starts a new payload/action. Temporary dependency
+      // A rejected idempotency key cannot be replayed. Temporary dependency
       // failures intentionally retain the same key for safe retries.
-      if (
-        error.code === "IDEMPOTENCY_KEY_REUSED" ||
-        error.code === "NIK_NOT_LINKED"
-      )
-        this.keys.clear(actionId);
+      if (error.code === "IDEMPOTENCY_KEY_REUSED") this.keys.clear(actionId);
       throw error;
     }
   }

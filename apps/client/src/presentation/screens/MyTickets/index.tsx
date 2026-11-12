@@ -323,7 +323,7 @@ export function MyTicketsScreen() {
 
           {bookingId && (paymentStatus.isError || localTickets.isError) ? (
             <View
-              className="my-3 items-center gap-2 border-2 border-black p-4"
+              className="my-3 items-center gap-2 border-2 border-ink p-4"
               accessibilityLiveRegion="polite"
               testID="my-ticket-api-error"
             >

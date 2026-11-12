@@ -15,7 +15,7 @@ export function HomeError({ error, onRetry, isRetrying }: HomeErrorProps) {
         {apiErrorMessage(error)}
       </Text>
       <Pressable
-        className="mt-4 self-start border-2 border-black px-5 py-3"
+        className="mt-4 self-start border-2 border-ink px-5 py-3"
         accessibilityRole="button"
         accessibilityLabel="Coba muat event lagi"
         accessibilityState={{ disabled: isRetrying }}

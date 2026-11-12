@@ -10,9 +10,16 @@ export type CachedImageProps = Omit<
   "defaultSource" | "source"
 > & {
   readonly source: ImageSource;
+  /** Optional first-party image shown when the requested remote image fails. */
+  readonly fallbackSource?: ImageSource;
   /** Keep remote-image placeholders off for already-prefetched hero slides. */
   readonly showPlaceholder?: boolean;
 };
+
+interface ImageFailure {
+  readonly key: string;
+  readonly stage: "source" | "fallback";
+}
 
 function sourceKey(source: ImageSource): string {
   if (Array.isArray(source)) {
@@ -27,26 +34,38 @@ function sourceKey(source: ImageSource): string {
 /** FastImage with a bundled placeholder and a visible fallback after load errors. */
 export function CachedImage({
   source,
+  fallbackSource,
   onError,
   showPlaceholder = true,
   ...props
 }: CachedImageProps): React.ReactElement {
-  const key = sourceKey(source);
-  const [failedSource, setFailedSource] = useState<string | null>(null);
+  const key = `${sourceKey(source)}|${fallbackSource ? sourceKey(fallbackSource) : ""}`;
+  const [failure, setFailure] = useState<ImageFailure | null>(null);
 
   useEffect(() => {
-    setFailedSource(null);
+    setFailure(null);
   }, [key]);
 
-  const failed = failedSource === key;
+  const stage = failure?.key === key ? failure.stage : undefined;
+  const isFallbackSource = stage === "source" && fallbackSource !== undefined;
+  const displayedSource =
+    stage === "fallback"
+      ? IMAGE_FALLBACK
+      : isFallbackSource
+        ? fallbackSource
+        : stage === "source"
+          ? IMAGE_FALLBACK
+          : source;
 
   return (
     <FastImage
       {...props}
-      defaultSource={showPlaceholder ? IMAGE_FALLBACK : undefined}
-      source={failed ? IMAGE_FALLBACK : source}
+      defaultSource={
+        showPlaceholder && stage !== "fallback" ? IMAGE_FALLBACK : undefined
+      }
+      source={displayedSource}
       onError={(event) => {
-        setFailedSource(key);
+        setFailure({ key, stage: isFallbackSource ? "fallback" : "source" });
         onError?.(event);
       }}
     />
