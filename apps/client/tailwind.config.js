@@ -1,15 +1,15 @@
 const palette = {
-  brandPrimary: "#8B00FF",
-  brandDeep: "#7000CC",
-  brandEmber: "#00E5FF",
+  brandPrimary: "#EC1C24",
+  brandDeep: "#A8111B",
+  brandEmber: "#FF5A2D",
   brandMarkPrimary: "#EC1C24",
   brandMarkDeep: "#A8111B",
   brandMarkWhite: "#FFFFFF",
   brandMarkStroke: "#F3F0F0",
   transparent: "transparent",
-  ground: "#FBFBFD",
+  ground: "#FFFFFF",
   darkBackground: "#0A0A0C",
-  ink: "#0A0A0C",
+  ink: "#000000",
   inkSoft: "#121217",
   card: "#FFFFFF",
   darkCard: "#121217",
@@ -22,14 +22,14 @@ const palette = {
   successDark: "#4ADE80",
   warning: "#FF6600",
   warningDark: "#F5B301",
-  error: "#C1121F",
-  errorDark: "#FF6B81",
+  error: "#EC1C24",
+  errorDark: "#FF6A4C",
   zoneOk: "#E8F5E9",
   zoneOkText: "#1B5E20",
   zoneWarn: "#FFF3E0",
   zoneWarnText: "#E65100",
-  zoneBad: "#FCE8EA",
-  zoneBadText: "#7F1D1D",
+  zoneBad: "#FFEBEE",
+  zoneBadText: "#B71C1C",
 };
 
 function withAlpha(hex, alpha) {
@@ -104,7 +104,7 @@ const colorTokens = {
  * SINGLE design-token source of truth (NativeWind) — RBT-003.
  *
  * Layout and typography follow the prototype V5 design system. The visual balance
- * targets 45% black, 45% white, and 10% neon purple/cyan accents, with separate semantic
+ * targets 45% black, 45% white, and 10% red accents, with separate semantic
  * status colors.
  * `src/presentation/theme/` derives values from this palette for contexts
  * NativeWind cannot style (SVG / Canvas / QR / Reanimated) — it mirrors this
@@ -221,10 +221,10 @@ module.exports = {
 
       // ---- Shadows (prototype box-shadows on cards/buttons) ----
       boxShadow: {
-        brand: `0 4px 16px -2px ${withAlpha(palette.brandPrimary, 0.28)}`,
+        brand: `0 4px 16px -2px ${withAlpha(palette.ink, 0.28)}`,
         button: `0 14px 40px -12px ${withAlpha(palette.ink, 0.42)}`,
-        filter: `0 12px 30px -24px ${withAlpha(palette.inkSoft, 0.5)}`,
-        ok: `0 16px 40px -14px ${withAlpha(palette.success, 0.36)}`,
+        filter: `0 12px 30px -24px ${withAlpha(palette.ink, 0.5)}`,
+        ok: `0 16px 40px -14px ${withAlpha(palette.ink, 0.36)}`,
       },
     },
   },

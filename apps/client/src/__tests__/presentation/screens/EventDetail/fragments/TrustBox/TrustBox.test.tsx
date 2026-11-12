@@ -10,8 +10,6 @@ describe("TrustBox", () => {
     expect(
       screen.getByText("Tiket elektronik langsung ke pintu masuk"),
     ).toBeTruthy();
-    expect(
-      screen.getByText("Pengembalian dana sesuai ketentuan penyelenggara"),
-    ).toBeTruthy();
+    expect(screen.queryByText(/pengembalian dana/i)).toBeNull();
   });
 });

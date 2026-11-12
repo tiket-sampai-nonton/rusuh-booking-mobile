@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
+import Head from "expo-router/head";
 import FastImage from "react-native-fast-image";
 import {
   cancelAnimation,
@@ -57,6 +58,9 @@ export function HeroCarousel({
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [glitchIndex, setGlitchIndex] = useState<number | null>(null);
   const [heroImagesReady, setHeroImagesReady] = useState(false);
+  const [initialHeroImageReady, setInitialHeroImageReady] = useState(
+    Platform.OS === "web",
+  );
   const zoom = useSharedValue(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -78,10 +82,13 @@ export function HeroCarousel({
   );
   const imageUris = useMemo(
     () =>
-      top.map((event) =>
-        eventImage(event.id, event.bannerUrl ?? event.imageUrl),
-      ),
-    [top],
+      top.map((event) => {
+        const uri = eventImage(event.id, event.bannerUrl ?? event.imageUrl);
+        return Platform.OS === "web"
+          ? resizeWebHeroImage(uri, screenWidth)
+          : uri;
+      }),
+    [screenWidth, top],
   );
 
   // Warm the same image cache used by CachedImage before a slide can become
@@ -90,6 +97,7 @@ export function HeroCarousel({
     let cancelled = false;
     if (imageUris.length === 0) {
       setHeroImagesReady(false);
+      setInitialHeroImageReady(false);
       return () => {
         cancelled = true;
       };
@@ -98,15 +106,34 @@ export function HeroCarousel({
     const preload = FastImage.preload;
     if (typeof preload !== "function") {
       setHeroImagesReady(true);
+      setInitialHeroImageReady(true);
       return () => {
         cancelled = true;
       };
     }
-    void preload(imageUris.map((uri) => ({ uri, memoryCache: false }))).then(
-      () => {
-        if (!cancelled) setHeroImagesReady(true);
-      },
-    );
+
+    const sources = imageUris.map((uri) => ({ uri, memoryCache: false }));
+    if (Platform.OS !== "web") {
+      void preload(sources).then(() => {
+        if (!cancelled) {
+          setHeroImagesReady(true);
+          setInitialHeroImageReady(true);
+        }
+      });
+    } else {
+      void preload(sources.slice(0, 1)).then(() => {
+        if (cancelled) return;
+        setInitialHeroImageReady(true);
+        const remainingSources = sources.slice(1);
+        if (remainingSources.length === 0) {
+          setHeroImagesReady(true);
+          return;
+        }
+        void preload(remainingSources).then(() => {
+          if (!cancelled) setHeroImagesReady(true);
+        });
+      });
+    }
     return () => {
       cancelled = true;
     };
@@ -216,9 +243,20 @@ export function HeroCarousel({
 
   return (
     <View style={styleForHeroCarouselView12(heroHeight)} testID="v2-hero">
+      {Platform.OS === "web" && imageUris[0] ? (
+        <Head>
+          <link rel="preconnect" href="https://images.unsplash.com" />
+          <link
+            rel="preload"
+            as="image"
+            href={imageUris[0]}
+            fetchPriority="high"
+          />
+        </Head>
+      ) : null}
       {/* Background slides (prototype .hero-slides) */}
       <View style={componentStyles.elementPosition32}>
-        {heroImagesReady &&
+        {(Platform.OS === "web" ? initialHeroImageReady : heroImagesReady) &&
           top.map((ev, i) =>
             i === activeIndex || i === prevIndex ? (
               <HeroSlide
@@ -298,6 +336,20 @@ export function HeroCarousel({
       {!isNarrow && isActive && <ScrollIndicator />}
     </View>
   );
+}
+
+function resizeWebHeroImage(uri: string, viewportWidth: number): string {
+  if (!uri.includes("images.unsplash.com")) return uri;
+
+  const [path, query = ""] = uri.split("?", 2);
+  const params = new URLSearchParams(query);
+  // On mobile, match the first event-card candidate so the browser reuses the
+  // same cached image instead of downloading a second, larger hero variant.
+  const requestedWidth =
+    viewportWidth <= 900 ? 640 : Math.min(1600, Math.ceil(viewportWidth * 1.5));
+  params.set("w", String(requestedWidth));
+  params.set("q", viewportWidth <= 900 ? "56" : "68");
+  return `${path}?${params.toString()}`;
 }
 
 export default HeroCarousel;

@@ -80,7 +80,11 @@ export function TicketQrSheet({
     );
   } else {
     ticketContent = bookingTickets.map((ticket, index) => (
-      <View key={ticket.ticketCode} style={styles.ticketQr}>
+      <View
+        key={ticket.ticketCode}
+        pointerEvents={ticketQrCardPointerEvents(Platform.OS)}
+        style={styles.ticketQr}
+      >
         <QRCode
           value={ticket.qrPayload}
           size={190}
@@ -100,22 +104,25 @@ export function TicketQrSheet({
   }
 
   return (
-    <Pressable
-      accessible={false}
-      onPress={onClose}
-      style={ticketQrBackdropStyle(Platform.OS)}
-      testID="ticket-qr-backdrop"
-    >
+    <View style={ticketQrBackdropStyle(Platform.OS)}>
       <Pressable
-        onPress={(event) => event?.stopPropagation?.()}
         accessible={false}
+        onPress={onClose}
+        style={styles.backdropDismiss}
+        testID="ticket-qr-backdrop"
+      />
+      <View
         accessibilityViewIsModal
         style={styles.sheet}
         testID="ticket-qr-sheet"
       >
         <ScrollView
+          style={styles.scroll}
           contentContainerStyle={ticketQrContentStyle(insets.bottom)}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
           showsVerticalScrollIndicator={false}
+          testID="ticket-qr-scrollview"
         >
           {bookingSummary && bookingSummary.status !== "PAID" ? (
             <Text style={styles.sectionTitle}>Detail Tiket</Text>
@@ -152,9 +159,17 @@ export function TicketQrSheet({
             <Text style={styles.closeText}>Tutup</Text>
           </Pressable>
         </ScrollView>
-      </Pressable>
-    </Pressable>
+      </View>
+    </View>
   );
+}
+
+export function ticketQrCardPointerEvents(
+  platform: typeof Platform.OS,
+): "auto" | "none" {
+  // SVG QR cells are visual-only. Let vertical gestures started on the QR or
+  // its labels reach the native ScrollView instead of being claimed by SVG.
+  return platform === "web" ? "auto" : "none";
 }
 
 function errorContent(

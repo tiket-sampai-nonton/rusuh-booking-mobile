@@ -25,10 +25,10 @@ const tailwindBrand = (
 ).theme?.extend?.colors?.brand;
 
 describe("RBT-003 raw tokens", () => {
-  it("exposes the black, white, and neon cyberpunk brand palette", () => {
-    expect(brand.primary).toBe("#8B00FF");
-    expect(brand.deep).toBe("#7000CC");
-    expect(brand.ember).toBe("#00E5FF");
+  it("exposes the black, white, and red brand palette", () => {
+    expect(brand.primary).toBe("#EC1C24");
+    expect(brand.deep).toBe("#A8111B");
+    expect(brand.ember).toBe("#FF5A2D");
   });
 
   it("keeps the existing ticket mark colors unchanged", () => {
@@ -56,22 +56,22 @@ describe("RBT-003 raw tokens", () => {
       okDark: "#4ADE80",
       warn: "#FF6600",
       warnDark: "#F5B301",
-      error: "#C1121F",
-      errorDark: "#FF6B81",
+      error: "#EC1C24",
+      errorDark: "#FF6A4C",
     });
   });
 
   it("exposes prototype neutral/surface hues", () => {
-    expect(neutral.ink).toBe("#0A0A0C");
+    expect(neutral.ink).toBe("#000000");
     expect(neutral.ink2).toBe("#121217");
-    expect(neutral.paper).toBe("#FBFBFD");
+    expect(neutral.paper).toBe("#FFFFFF");
     expect(neutral.card).toBe("#FFFFFF");
     expect(neutral.darkBackground).toBe("#0A0A0C");
     expect(neutral.darkCard).toBe("#121217");
     expect(neutral.darkForeground).toBe("#FFFFFF");
     expect(neutral.overlay).toBe("#0A0A0C");
     expect(neutral.muted).toBe("#666666");
-    expect(neutral.line).toBe("rgba(10,10,12,0.14)");
+    expect(neutral.line).toBe("rgba(0,0,0,0.14)");
     expect(neutral.mutedDark).toBe("rgba(255,255,255,0.62)");
     expect(neutral.lineDark).toBe("rgba(255,255,255,0.18)");
     expect(neutral.field).toBe("#F5F5F5");
@@ -89,9 +89,9 @@ describe("RBT-003 raw tokens", () => {
       text: "#E65100",
     });
     expect(zone.bad).toEqual({
-      bg: "#FCE8EA",
-      border: "#C1121F",
-      text: "#7F1D1D",
+      bg: "#FFEBEE",
+      border: "#EC1C24",
+      text: "#B71C1C",
     });
   });
 
@@ -148,10 +148,10 @@ describe("RBT-003 raw tokens", () => {
   });
 
   it("shadow strings are present for the four prototype elevations", () => {
-    expect(shadow.brand).toContain("rgba(139,0,255,0.28)");
-    expect(shadow.button).toContain("rgba(10,10,12,0.42)");
-    expect(shadow.filter).toContain("rgba(18,18,23,0.5)");
-    expect(shadow.ok).toContain("rgba(0,170,0,0.36)");
+    expect(shadow.brand).toContain("rgba(0,0,0,0.28)");
+    expect(shadow.button).toContain("rgba(0,0,0,0.42)");
+    expect(shadow.filter).toContain("rgba(0,0,0,0.5)");
+    expect(shadow.ok).toContain("rgba(0,0,0,0.36)");
   });
 
   it("the tokens bag re-exports every group by reference", () => {

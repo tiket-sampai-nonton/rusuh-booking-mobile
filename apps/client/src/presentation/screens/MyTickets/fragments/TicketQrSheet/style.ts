@@ -13,18 +13,26 @@ import { Platform } from "react-native";
 export const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
+    position: "relative",
     backgroundColor: withAlpha(designColors.overlay, 0.72),
     alignItems: "center",
+  },
+  backdropDismiss: {
+    ...StyleSheet.absoluteFillObject,
   },
   sheet: {
     width: "100%",
     maxWidth: 480,
     maxHeight: "90%",
+    flexShrink: 1,
+    zIndex: 1,
+    elevation: 1,
     backgroundColor: designColors.ground,
     borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     ...hardShadowStyle(4, 4, designColors.ink, 5),
   },
+  scroll: { flexGrow: 0, flexShrink: 1 },
   title: {
     color: designColors.ink,
     fontFamily: plusJakartaSansFonts.extraBold,

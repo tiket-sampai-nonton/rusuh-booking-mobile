@@ -32,7 +32,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       longDesc: "Festival musik tahunan terbesar dengan line-up lintas genre.",
       lineup: ["Band A", "Band B", "DJ C"],
       gallery: MOCK_EVENT_GALLERY,
-      terms: "Tiket tidak dapat dikembalikan. Wajib membawa KTP sesuai NIK.",
+      terms: "Wajib membawa KTP sesuai NIK.",
       bannerImage:
         "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80&auto=format&fit=crop",
       // FE-NEED (O2): pricing categories + availability, mocked until the BE

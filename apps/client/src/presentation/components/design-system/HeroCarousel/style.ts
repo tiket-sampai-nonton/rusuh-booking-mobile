@@ -177,7 +177,7 @@ export const componentStyles = StyleSheet.create({
     backgroundColor: designColors.accent,
     borderWidth: designBorders.standard,
     borderColor: designColors.ember,
-    ...hardShadowStyle(4, 4, designColors.accent, 4),
+    ...hardShadowStyle(4, 4, designColors.ink, 4),
   },
   elementFlexDirection28: {
     flexDirection: "row",

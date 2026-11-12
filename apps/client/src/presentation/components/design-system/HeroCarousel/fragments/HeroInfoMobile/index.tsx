@@ -21,7 +21,6 @@ import { designColors, withAlpha } from "@presentation/theme";
 
 import { EASE, INFO_FADE_DELAY_MS } from "../../constants";
 import { componentStyles, styleForHeroInfoMobileText6 } from "../../style";
-import { useTextScramble } from "../../hooks/useTextScramble";
 import { CalendarIcon } from "../CalendarIcon";
 import { MapPinIcon } from "../MapPinIcon";
 import { ArrowIcon } from "../ArrowIcon";
@@ -40,10 +39,6 @@ export function HeroInfoMobile({
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(30);
   const { width } = useWindowDimensions();
-
-  // Native title scrambles trigger frequent React text updates during every
-  // hero rotation. Keep the effect on web while showing stable text on devices.
-  const scrambledTitle = useTextScramble(event.name, Platform.OS === "web");
 
   // fadeSlideUp animation from prototype: 0.6s delay after loader exit
   useEffect(() => {
@@ -83,7 +78,7 @@ export function HeroInfoMobile({
         style={styleForHeroInfoMobileText6(titleFontSize, isMobileWeb)}
         numberOfLines={2}
       >
-        {scrambledTitle}
+        {event.name}
       </Text>
 
       {/* Meta: Date · Venue (compact, single line with wrap) */}

@@ -10,10 +10,10 @@
  * - border: 2px solid the shared ink token
  *
  * GHOST: paper surface, ink text
- * GHOST hover: neon purple fill from the bottom
+ * GHOST hover: red fill from the bottom
  *
- * PRIMARY: neon-purple background with light text
- * PRIMARY hover: neon-cyan reveal with ink text
+ * PRIMARY: red background with light text
+ * PRIMARY hover: red-orange reveal with ink text
  */
 import { useCallback } from "react";
 import type { ReactNode } from "react";
@@ -51,7 +51,7 @@ export interface ButtonProps {
   readonly label: string;
   /** Press handler */
   readonly onPress?: () => void;
-  /** Visual variant: primary (neon purple), ghost (outlined), danger (semantic red) */
+  /** Visual variant: primary (red), ghost (outlined), danger (semantic red) */
   readonly variant?: ButtonVariant;
   /** Disabled state */
   readonly disabled?: boolean;
@@ -70,7 +70,7 @@ export interface ButtonProps {
 function getPalette(variant: ButtonVariant) {
   switch (variant) {
     case "ghost":
-      // Ghost: white surface → neon-purple fill from bottom
+      // Ghost: white surface → red fill from bottom
       return {
         bg: designColors.ground,
         fg: designColors.ink,
@@ -87,7 +87,7 @@ function getPalette(variant: ButtonVariant) {
       };
     case "primary":
     default:
-      // Primary: neon-purple bg → neon-cyan reveal from top
+      // Primary: red bg → red-orange reveal from top
       return {
         bg: designColors.accent,
         fg: designColors.ground,
