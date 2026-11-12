@@ -66,6 +66,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   const { createAttempt, resumeHandoff } = usePayment();
   const setBooking = useSessionStore((s) => s.setBooking);
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const [handoffError, setHandoffError] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (event) => {
@@ -263,20 +264,23 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
           expired={expired}
           resumeLabel={inFlight ? "Kembali ke SNAP" : undefined}
           errorMessage={
-            createAttempt.isError
-              ? apiErrorMessage(
-                  createAttempt.error,
-                  "Gagal memproses pembayaran. Coba lagi.",
-                )
-              : undefined
+            handoffError
+              ? "Gagal membuka halaman pembayaran. Coba lagi."
+              : createAttempt.isError
+                ? apiErrorMessage(
+                    createAttempt.error,
+                    "Gagal memproses pembayaran. Coba lagi.",
+                  )
+                : undefined
           }
           onPay={() => {
+            setHandoffError(false);
             // The bar is only pressable when canPay (a method is selected or an
             // attempt is in flight, and not expired), so the two paths below are
             // exhaustive.
             if (inFlight) {
               // Resume: re-open the SNAP handoff for the existing attempt (AC2).
-              void resumeHandoff(inFlight);
+              void resumeHandoff(inFlight).catch(() => setHandoffError(true));
             } else if (method) {
               // Create the attempt (idempotent) → hands off to SNAP on success.
               createAttempt.mutate({ bookingId, method });

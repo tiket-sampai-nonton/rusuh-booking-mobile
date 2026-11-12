@@ -165,7 +165,10 @@ describe("openSnapHandoff (platform branches)", () => {
     const push = jest.fn();
     jest.doMock("expo-router", () => ({ router: { push } }));
 
-    await openSnapHandoff("https://snap.mock/native", "bk / 123");
+    await openSnapHandoff(
+      "https://app.sandbox.midtrans.com/snap/native",
+      "bk / 123",
+    );
 
     expect(push).toHaveBeenCalledWith("/payment-webview/bk%20%2F%20123");
     jest.dontMock("expo-router");

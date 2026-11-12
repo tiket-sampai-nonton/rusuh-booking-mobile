@@ -36,7 +36,7 @@
 - This keeps the FE **out of PCI-DSS scope** — do not add any card-input UI.
 - Verify payment outcome with BE (`GET /payments/{id}/status`) before rendering success; never trust the SNAP callback alone.
 - Resolve the BE's relative `/pay/{bookingId}` URL against `EXPO_PUBLIC_SITE_URL`; reject non-HTTPS, non-site origins, or paths outside `/pay/{bookingId}`.
-- Keep the native handoff URL on the configured HTTPS site and exact `/pay/{bookingId}` route. The `/pay` bootstrap calls the `PaymentRepository` exchange from that page context; do not inject raw API requests into arbitrary WebView pages. Route callbacks only when both origin and booking ID match.
+- Native payment opens the backend-issued HTTPS Midtrans SNAP redirect in a WebView after validating its host. Keep the SNAP URL in transient memory, never in navigation parameters or logs. Verify backend status after matching a backend-provided return URL or a configured site callback; callback parameters are not proof of payment.
 
 ## 5. Transport & data handling
 

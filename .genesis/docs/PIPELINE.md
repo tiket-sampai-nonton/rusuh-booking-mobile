@@ -411,3 +411,10 @@ Web rollback is separate from native OTA rollback:
 - React Native Web uses web deployment rollback, not EAS mobile OTA rollback.
 - iOS device testing requires Apple signing and appropriate CI/device access.
 - Production web SEO is only valid when the deployed output is static or server-rendered and the public routes have generated HTML.
+
+
+### OTA fingerprint and QA debug builds
+
+`fingerprint.config.cjs` excludes only Android versionCode, iOS buildNumber and the display-only OTA revision from the Expo configuration fingerprint. Other native configuration and dependencies remain fingerprinted. The runtime quality job checks counter stability and detects a native app-link change. Android Firebase development builds set `EX_UPDATES_NATIVE_DEBUG=1`, allowing Expo Updates in the bundled debug APK; Metro JS debugging is unavailable in that build. Production uses the release build. Existing APKs require a new build before they can use this configuration. A published OTA still needs a matching runtime and channel.
+
+The release workflow exposes typecheck, lint, format, coverage, runtime validation, dependency audit and release-branch validation as separate checks. They run on pull requests and again on branch pushes to validate the actual deployed commit, including direct pushes.

@@ -87,3 +87,8 @@ There were **54 existing files** under `.genesis/docs` immediately before this r
 The main implementation files are `apps/client/.eslintrc.js`, `apps/client/public/robots.txt`, `apps/client/scripts/verify-web.cjs`, `apps/client/src/app/pay/[bookingId].tsx`, `apps/client/src/presentation/screens/PaymentPageBootstrap/index.tsx`, `apps/client/src/presentation/screens/PaymentWebView/index.tsx`, `apps/client/src/presentation/hooks/usePaymentWebView.ts`, `apps/client/src/presentation/hooks/useSuccessTickets.ts`, `apps/client/src/presentation/hooks/useMyTicketsData.ts`, `apps/client/src/presentation/components/ETicketCard/index.tsx`, `apps/client/src/presentation/screens/Success/index.tsx`, and `apps/client/src/presentation/screens/MyTickets/`.
 
 This PR bundles the completed payment-ticket, event-list presentation, notification, documentation, and release-pipeline changes present in the working tree. It does not deploy the web artifact or publish OTA; those are handled by the post-merge workflow.
+
+
+### Subsequent correction: native SNAP handoff
+
+The earlier page-token bootstrap description records the former implementation. Native payment now opens the backend-issued Midtrans SNAP redirect URL directly in the WebView, in accordance with the current BE payment contract. The URL is held only in memory. Both success and failure callbacks enter the server-authoritative payment status verification gate. The standalone `/pay` bootstrap remains for the existing web route.
