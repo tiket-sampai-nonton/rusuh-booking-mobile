@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
     borderColor: designColors.ink,
     flexDirection: "row",
     flexWrap: "wrap",
-    backgroundColor: "transparent",
+    backgroundColor: designColors.transparent,
     overflow: "hidden",
   },
 });

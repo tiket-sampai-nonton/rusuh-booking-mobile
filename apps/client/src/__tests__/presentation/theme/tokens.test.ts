@@ -26,13 +26,18 @@ const tailwindBrand = (
 
 describe("RBT-003 raw tokens", () => {
   it("exposes the black, white, and neon cyberpunk brand palette", () => {
-    expect(brand.primary).toBe("#DE00A0");
-    expect(brand.deep).toBe("#D600A0");
+    expect(brand.primary).toBe("#8B00FF");
+    expect(brand.deep).toBe("#7000CC");
     expect(brand.ember).toBe("#00E5FF");
   });
 
   it("keeps the existing ticket mark colors unchanged", () => {
-    expect(brandMark).toEqual({ primary: "#EC1C24", deep: "#A8111B" });
+    expect(brandMark).toEqual({
+      primary: "#EC1C24",
+      deep: "#A8111B",
+      white: "#FFFFFF",
+      stroke: "#F3F0F0",
+    });
   });
 
   it("mirrors the Tailwind brand palette as the canonical token source", () => {
@@ -143,7 +148,7 @@ describe("RBT-003 raw tokens", () => {
   });
 
   it("shadow strings are present for the four prototype elevations", () => {
-    expect(shadow.brand).toContain("rgba(222,0,160,0.28)");
+    expect(shadow.brand).toContain("rgba(139,0,255,0.28)");
     expect(shadow.button).toContain("rgba(10,10,12,0.42)");
     expect(shadow.filter).toContain("rgba(18,18,23,0.5)");
     expect(shadow.ok).toContain("rgba(0,170,0,0.36)");

@@ -11,6 +11,8 @@ import { brand, neutral, status, zone } from "./tokens";
 export const designColors = {
   // Core palette (semantic naming)
   ground: neutral.paper,
+  card: neutral.card,
+  transparent: neutral.transparent,
   ink: neutral.ink,
   overlay: neutral.overlay,
   inkMuted: neutral.muted,
@@ -26,6 +28,7 @@ export const designColors = {
   white: neutral.paper,
   gray: neutral.muted,
   ember: brand.ember,
+  accentDeep: brand.deep,
   green: status.ok,
   accent: brand.primary,
 

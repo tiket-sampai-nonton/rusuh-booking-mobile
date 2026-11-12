@@ -28,6 +28,7 @@ export function StepCircle({
         stepCircleStyles.circle,
         compact && stepCircleStyles.compactCircle,
         filled ? stepCircleStyles.filledCircle : stepCircleStyles.emptyCircle,
+        isActive && stepCircleStyles.activeCircle,
       ]}
     >
       {isCompleted ? (

@@ -58,14 +58,14 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
 /**
  * Get border color based on validation state.
  */
-function getBorderColor(state: InputState): string {
+function getBorderColor(state: InputState, focused: boolean): string {
   switch (state) {
     case "valid":
       return designColors.success;
     case "error":
       return designColors.danger;
     default:
-      return designColors.ink;
+      return focused ? designColors.accent : designColors.ink;
   }
 }
 
@@ -117,7 +117,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
     ],
   }));
 
-  const borderColor = getBorderColor(state);
+  const borderColor = getBorderColor(state, isFocused);
 
   // Show error message only when in error state
   const showError = state === "error" && error;

@@ -102,9 +102,9 @@ export const componentStyles = StyleSheet.create({
     flexWrap: "wrap",
   },
   elementBackgroundColor16: {
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.accentDeep,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
+    borderColor: designColors.ember,
     paddingVertical: 16, // .btn-large: 1rem
     paddingHorizontal: 32, // .btn-large: 2rem
   },
@@ -174,17 +174,17 @@ export const componentStyles = StyleSheet.create({
   },
   elementAlignSelf27: {
     alignSelf: "flex-start",
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.accent,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
-    ...hardShadowStyle(4, 4, designColors.ink, 4),
+    borderColor: designColors.ember,
+    ...hardShadowStyle(4, 4, designColors.accent, 4),
   },
   elementFlexDirection28: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.accent,
     paddingVertical: 14,
     paddingHorizontal: 24,
     minHeight: 44,
@@ -292,7 +292,7 @@ export function styleForNavDotPressable7(arg0: boolean): DynamicStyle {
   return {
     width: arg0 ? 60 : 40, // active: 60px, default: 40px
     height: 4,
-    backgroundColor: designColors.inkMuted,
+    backgroundColor: arg0 ? designColors.accent : designColors.inkMuted,
     overflow: "hidden",
     position: "relative",
   } as DynamicStyle;
@@ -305,7 +305,7 @@ export function styleForNavDotAnimatedView8(): DynamicStyle {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.ember,
     transformOrigin: "left",
   } as DynamicStyle;
 }

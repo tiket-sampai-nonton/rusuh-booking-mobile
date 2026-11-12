@@ -26,6 +26,7 @@ export const pillGroupStyles = StyleSheet.create({
   },
   selectedOption: {
     backgroundColor: brand.deep,
+    borderColor: designColors.ember,
   },
   unselectedOption: {
     backgroundColor: designColors.ground,

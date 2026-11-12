@@ -2,7 +2,7 @@
 
 > GENESIS Phase 2 output. Conforms to `GROOMING-DECISIONS.md` and `ARCHITECTURE.md`.
 > Scope: the shared cross-platform (Expo + RN + RN Web) design language in `apps/client/src/presentation/theme` (token re-exports) + `apps/client/src/presentation/components`, styled with **NativeWind**. The single token source of truth is `apps/client/tailwind.config.js` (generated from prototype V5).
-> Visual reference: shared black-and-white surfaces with a red brand accent and Plus Jakarta Sans. Platform split is presentation-only; tokens and primitives are shared.
+> Visual reference: shared black-and-white surfaces with electric purple and neon cyan accents, plus Plus Jakarta Sans. Platform split is presentation-only; tokens and primitives are shared.
 
 ## 1. Principles
 
@@ -13,7 +13,7 @@
 
 ## 2. Design tokens (`tailwind.config.js` + `presentation/theme` re-export)
 
-Tokens are platform-neutral values defined once in `apps/client/tailwind.config.js` (the single source of truth) and consumed via NativeWind classes on RN + RN Web; `presentation/theme` derives the same values for SVG/Canvas/QR/Reanimated. Follow the V5 balance of 45% black, 45% white, and 10% neon accent. The app brand palette uses electric fuchsia `#DE00A0`, vivid fuchsia `#D600A0`, and neon cyan `#00E5FF`; status and queue-zone colors remain semantic tokens. Tailwind theme values are excluded from the native fingerprint so JavaScript theme changes can ship by OTA; native shell backgrounds remain fixed in Expo config.
+Tokens are platform-neutral values defined once in `apps/client/tailwind.config.js` (the single source of truth) and consumed via NativeWind classes on RN + RN Web; `presentation/theme` derives the same values for SVG/Canvas/QR/Reanimated. Follow the V5 balance of 45% black, 45% white, and 10% neon accent. The UI palette uses electric purple `#8B00FF`, deep violet `#7000CC`, and neon cyan `#00E5FF`; the existing red ticket mark and semantic status colors remain fixed. Components consume shared tokens instead of declaring color literals. Tailwind theme values are excluded from the native fingerprint so JavaScript theme changes can ship by OTA; native shell backgrounds remain fixed in Expo config.
 
 | Token group | Members |
 |---|---|

@@ -108,8 +108,8 @@ export function TicketItem({
         testID={`attendee-name-${index}`}
       />
       {row.useBuyerNik && buyerUsesSavedNik ? (
-        <View className="mt-4 border-2 border-black bg-white p-3">
-          <Text className="text-xs font-bold uppercase text-black">
+        <View className="mt-4 border-2 border-ink bg-card p-3">
+          <Text className="text-xs font-bold uppercase text-ink">
             NIK penonton menggunakan NIK tersimpan di akun
           </Text>
         </View>

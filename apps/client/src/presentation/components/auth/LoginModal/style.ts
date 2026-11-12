@@ -13,7 +13,7 @@ import {
 } from "@presentation/theme/event-design-tokens";
 
 /**
- * Modal overlay color is derived from the shared deep-green overlay token.
+ * Modal overlay color is derived from the shared neutral overlay token.
  */
 import type { DynamicStyle } from "@presentation/utils/style";
 import { Animated } from "react-native";
@@ -224,7 +224,7 @@ export const loginStyles = StyleSheet.create({
   },
 
   // ---------------------------------------------------------------------------
-  // Primary button — prototype .btn-primary (ink fill with arrow)
+  // Primary button — shared neon-purple action fill.
   // ---------------------------------------------------------------------------
   go: {
     flex: 1,
@@ -232,9 +232,9 @@ export const loginStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: designColors.danger,
+    backgroundColor: designColors.accent,
     borderWidth: designBorders.standard,
-    borderColor: designColors.danger,
+    borderColor: designColors.accent,
     borderRadius: 0, // Brutalist: NO border-radius
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -303,7 +303,7 @@ export const loginStyles = StyleSheet.create({
     color: designColors.inkMuted,
   },
   resendBtn: {
-    backgroundColor: "transparent",
+    backgroundColor: designColors.transparent,
     padding: 4,
   },
   resendBtnText: {

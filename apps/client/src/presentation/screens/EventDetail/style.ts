@@ -94,7 +94,7 @@ export const designDetailStyles = StyleSheet.create({
     paddingHorizontal: designSpacingSemantic.m, // 24px
     // Web: solid background, Native: controlled by headerScrolled
     backgroundColor:
-      Platform.OS === "web" ? designColors.ground : "transparent",
+      Platform.OS === "web" ? designColors.ground : designColors.transparent,
     borderBottomWidth: Platform.OS === "web" ? designBorders.standard : 0,
     borderBottomColor: designColors.ink,
   },
@@ -185,7 +185,7 @@ export const designDetailStyles = StyleSheet.create({
     borderColor: designColors.ink,
   },
   stepNumInactive: {
-    backgroundColor: "transparent",
+    backgroundColor: designColors.transparent,
     borderColor: designColors.inkMuted,
   },
   stepNumText: {
@@ -386,7 +386,7 @@ export const designDetailStyles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: designColors.danger,
+    backgroundColor: designColors.ember,
   },
   heroTitle: {
     fontFamily: plusJakartaSansFonts.extraBold,
@@ -858,9 +858,9 @@ export const designDetailStyles = StyleSheet.create({
     paddingVertical:
       Platform.OS === "web" ? designSpacingSemantic.m : designSpacingSemantic.s, // 24px web, 16px native
     paddingHorizontal: Platform.OS === "web" ? designSpacingSemantic.l : 32, // 48px web, 32px native
-    backgroundColor: designColors.danger,
+    backgroundColor: designColors.accent,
     borderWidth: designBorders.standard,
-    borderColor: designColors.danger,
+    borderColor: designColors.ember,
     // Pulse glow animation applied separately
   },
   floatingCtaBtnDisabled: {

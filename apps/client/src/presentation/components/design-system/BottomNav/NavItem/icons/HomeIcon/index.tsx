@@ -5,7 +5,7 @@ import { designColors } from "@presentation/theme";
 import type { BottomNavIconProps } from "../../../types";
 
 export function HomeIcon({ active }: BottomNavIconProps) {
-  const color = active ? designColors.ink : designColors.inkMuted;
+  const color = active ? designColors.accent : designColors.inkMuted;
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
       <Path

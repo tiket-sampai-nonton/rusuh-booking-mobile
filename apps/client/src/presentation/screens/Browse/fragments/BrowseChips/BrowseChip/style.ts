@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { brand, designColors } from "@presentation/theme";
+import { designColors } from "@presentation/theme";
 
 export const browseChipStyles = StyleSheet.create({
   container: {
@@ -11,7 +11,7 @@ export const browseChipStyles = StyleSheet.create({
     paddingVertical: 7,
   },
   selectedContainer: {
-    borderColor: brand.deep,
+    borderColor: designColors.ember,
   },
   label: {
     color: designColors.muted,

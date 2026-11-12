@@ -1,7 +1,12 @@
 const palette = {
-  brandPrimary: "#DE00A0",
-  brandDeep: "#D600A0",
+  brandPrimary: "#8B00FF",
+  brandDeep: "#7000CC",
   brandEmber: "#00E5FF",
+  brandMarkPrimary: "#EC1C24",
+  brandMarkDeep: "#A8111B",
+  brandMarkWhite: "#FFFFFF",
+  brandMarkStroke: "#F3F0F0",
+  transparent: "transparent",
   ground: "#FBFBFD",
   darkBackground: "#0A0A0C",
   ink: "#0A0A0C",
@@ -41,6 +46,13 @@ const colorTokens = {
     deep: palette.brandDeep,
     ember: palette.brandEmber,
   },
+  brandMark: {
+    primary: palette.brandMarkPrimary,
+    deep: palette.brandMarkDeep,
+    white: palette.brandMarkWhite,
+    stroke: palette.brandMarkStroke,
+  },
+  transparent: palette.transparent,
   background: { DEFAULT: palette.ground, dark: palette.darkBackground },
   foreground: { DEFAULT: palette.ink, dark: palette.darkForeground },
   card: {
@@ -92,7 +104,7 @@ const colorTokens = {
  * SINGLE design-token source of truth (NativeWind) — RBT-003.
  *
  * Layout and typography follow the prototype V5 design system. The visual balance
- * targets 45% black, 45% white, and 10% red accent, with separate semantic
+ * targets 45% black, 45% white, and 10% neon purple/cyan accents, with separate semantic
  * status colors.
  * `src/presentation/theme/` derives values from this palette for contexts
  * NativeWind cannot style (SVG / Canvas / QR / Reanimated) — it mirrors this

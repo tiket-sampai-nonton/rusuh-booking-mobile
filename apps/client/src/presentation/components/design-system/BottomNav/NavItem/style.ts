@@ -17,7 +17,7 @@ export const navItemStyles = StyleSheet.create({
     marginLeft: -16,
     width: 32,
     height: 3,
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.ember,
   },
   label: {
     fontSize: 10,
@@ -28,7 +28,7 @@ export const navItemStyles = StyleSheet.create({
 });
 
 export function navItemLabelStyle(active: boolean): TextStyle {
-  return { color: active ? designColors.ink : designColors.inkMuted };
+  return { color: active ? designColors.accent : designColors.inkMuted };
 }
 
 export function navItemBackgroundStyle(
@@ -36,5 +36,7 @@ export function navItemBackgroundStyle(
   fieldColor: string,
 ): ViewStyle {
   "worklet";
-  return { backgroundColor: pressed > 0.5 ? fieldColor : "transparent" };
+  return {
+    backgroundColor: pressed > 0.5 ? fieldColor : designColors.transparent,
+  };
 }

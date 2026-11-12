@@ -15,7 +15,7 @@ export const componentStyles = StyleSheet.create({
     borderBottomWidth: designBorder.base,
     borderBottomColor: designColors.ink,
   },
-  elementColor2: { color: designColors.ground },
+  elementColor2: { color: designColors.ink },
   elementBackgroundColor3: { backgroundColor: designColors.ground },
   mobileWebContainer: { borderWidth: 1 },
 });
@@ -23,8 +23,8 @@ export const componentStyles = StyleSheet.create({
 export function styleForPaymentMethodsPressable0(arg0: boolean): DynamicStyle {
   return {
     borderWidth: designBorder.base,
-    borderColor: designColors.ink,
-    backgroundColor: arg0 ? designColors.ink : designColors.ground,
+    borderColor: arg0 ? designColors.ember : designColors.ink,
+    backgroundColor: arg0 ? designColors.accentDeep : designColors.ground,
   } as DynamicStyle;
 }
 
@@ -43,6 +43,6 @@ export function styleForPaymentMethodsText2(arg0: boolean): DynamicStyle {
 export function styleForPaymentMethodsView3(arg0: boolean): DynamicStyle {
   return {
     borderWidth: designBorder.base,
-    borderColor: arg0 ? designColors.ground : designColors.ink,
+    borderColor: arg0 ? designColors.ember : designColors.ink,
   } as DynamicStyle;
 }

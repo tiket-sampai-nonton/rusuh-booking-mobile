@@ -466,9 +466,9 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               errorMessage={buyerNameError}
             />
             {prefill.fromAccount && prefill.hasNik ? (
-              <View className="mt-4 flex-row items-center justify-between border-2 border-black bg-white p-3">
+              <View className="mt-4 flex-row items-center justify-between border-2 border-ink bg-card p-3">
                 <View className="mr-3 flex-1">
-                  <Text className="text-sm font-bold text-black">
+                  <Text className="text-sm font-bold text-ink">
                     Gunakan NIK tersimpan di akun
                   </Text>
                   <Text className="mt-1 text-xs text-gray-600">
@@ -492,8 +492,8 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               </View>
             ) : null}
             {buyerUsesSavedNik ? (
-              <View className="mt-3 border-2 border-black bg-white p-3">
-                <Text className="text-xs font-bold uppercase text-black">
+              <View className="mt-3 border-2 border-ink bg-card p-3">
+                <Text className="text-xs font-bold uppercase text-ink">
                   NIK pembeli akan diambil dari akun Anda
                 </Text>
               </View>
