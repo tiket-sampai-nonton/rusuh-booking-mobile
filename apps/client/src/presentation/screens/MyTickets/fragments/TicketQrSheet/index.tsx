@@ -2,21 +2,22 @@ import type { ReactNode } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type {
+  BookingTicket,
+  MyBookingSummary,
+} from "@domain/repositories/ticket-history.repository";
+import { minorToIDR } from "@domain/services/money";
 import { designColors } from "@presentation/theme";
 import { styles } from "./style";
 import { ticketQrContentStyle, ticketQrBackdropStyle } from "./style";
 
 export { ticketQrBackdropStyle } from "./style";
 
-interface BookingTicketQr {
-  readonly ticketCode: string;
-  readonly qrPayload: string;
-}
-
 interface TicketQrSheetProps {
   readonly eventName: string;
   readonly bookingId: string;
-  readonly bookingTickets?: readonly BookingTicketQr[];
+  readonly bookingTickets?: readonly BookingTicket[];
+  readonly bookingSummary?: MyBookingSummary;
   readonly isLoading: boolean;
   readonly isError: boolean;
   readonly errorMessage?: string;
@@ -30,6 +31,7 @@ interface TicketQrSheetProps {
 export function TicketQrSheet({
   eventName,
   bookingTickets,
+  bookingSummary,
   isLoading,
   isError,
   errorMessage,
@@ -41,7 +43,28 @@ export function TicketQrSheet({
 }: TicketQrSheetProps) {
   const insets = useSafeAreaInsets();
   let ticketContent: ReactNode;
-  if (isLoading) {
+  if (bookingSummary && bookingSummary.status !== "PAID") {
+    const reason =
+      bookingSummary.status === "EXPIRED"
+        ? "Pesanan ini kedaluwarsa sebelum pembayaran selesai, jadi e-tiket tidak diterbitkan."
+        : bookingSummary.status === "CANCELLED"
+          ? "Pesanan ini dibatalkan, jadi e-tiket tidak diterbitkan."
+          : "E-tiket akan tersedia setelah pembayaran berhasil dikonfirmasi.";
+    ticketContent = (
+      <View style={styles.bookingSummary} testID="booking-order-summary">
+        <Text style={styles.ticketDetails}>
+          Referensi {bookingSummary.publicRef}
+        </Text>
+        <Text style={styles.ticketDetails}>
+          Status {bookingSummary.status.replace(/_/g, " ")}
+        </Text>
+        <Text style={styles.bookingAmount}>
+          {minorToIDR(bookingSummary.amountMinor)}
+        </Text>
+        <Text style={styles.ticketDetails}>{reason}</Text>
+      </View>
+    );
+  } else if (isLoading) {
     ticketContent = <Text style={styles.message}>Memuat QR…</Text>;
   } else if (isError) {
     ticketContent = errorContent(
@@ -65,6 +88,13 @@ export function TicketQrSheet({
           backgroundColor={designColors.ground}
         />
         <Text style={styles.ticketCode}>{ticket.ticketCode}</Text>
+        <Text style={styles.ticketDetails}>
+          Kategori {ticket.categoryCode || "—"}
+        </Text>
+        <Text style={styles.ticketDetails}>
+          {ticket.attendeeName || "Pemegang tiket"} ·{" "}
+          {ticket.attendeeNikMasked || "••••"}
+        </Text>
       </View>
     ));
   }
@@ -87,11 +117,16 @@ export function TicketQrSheet({
           contentContainerStyle={ticketQrContentStyle(insets.bottom)}
           showsVerticalScrollIndicator={false}
         >
+          {bookingSummary && bookingSummary.status !== "PAID" ? (
+            <Text style={styles.sectionTitle}>Detail Tiket</Text>
+          ) : null}
           <Text style={styles.title}>{eventName}</Text>
           {ticketContent}
-          <Text style={styles.instruction}>
-            Tunjukkan kode ini di pintu masuk.
-          </Text>
+          {bookingTickets?.length ? (
+            <Text style={styles.instruction}>
+              Tunjukkan kode ini di pintu masuk.
+            </Text>
+          ) : null}
           {bookingTickets &&
             bookingTickets.length > 0 &&
             !isLoading &&
@@ -105,7 +140,11 @@ export function TicketQrSheet({
           ) : null}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Tutup QR tiket"
+            accessibilityLabel={
+              bookingSummary && bookingSummary.status !== "PAID"
+                ? "Tutup detail tiket"
+                : "Tutup QR tiket"
+            }
             onPress={onClose}
             style={styles.close}
             testID="ticket-qr-close"

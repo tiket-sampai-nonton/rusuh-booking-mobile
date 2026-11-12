@@ -1,24 +1,35 @@
 import { Pressable, ScrollView, Text, View } from "react-native";
 
+import { BrowseChips } from "../BrowseChips";
 import { BROWSE_CATEGORIES, type BrowseCategoryKey } from "../categories";
 import {
   browseNativeCategoryBar,
   browseNativeCategoryBarPosition,
   browseNativeCategoryButton,
   browseNativeCategoryLabel,
+  browseNativeCategoryScroll,
   browseNativeCategoryScrollContent,
+  browseNativeCategorySummary,
 } from "../../style";
 
 interface BrowseNativeCategoryBarProps {
   readonly top: number;
   readonly activeCategory: BrowseCategoryKey | null;
+  readonly time?: string;
+  readonly sort?: string;
+  readonly isFiltered?: boolean;
   readonly onSelect: (category: BrowseCategoryKey) => void;
+  readonly onReset?: () => void;
 }
 
 export function BrowseNativeCategoryBar({
   top,
   activeCategory,
+  time = "all",
+  sort = "closest",
+  isFiltered = false,
   onSelect,
+  onReset,
 }: BrowseNativeCategoryBarProps) {
   const visibleCategories = BROWSE_CATEGORIES.filter(
     (category) =>
@@ -30,11 +41,12 @@ export function BrowseNativeCategoryBar({
     >
       <ScrollView
         horizontal
+        style={browseNativeCategoryScroll}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={browseNativeCategoryScrollContent}
       >
         {visibleCategories.map((category) => {
-          const active = activeCategory === category.key;
+          const active = (activeCategory ?? "all") === category.key;
           return (
             <Pressable
               key={category.key}
@@ -51,6 +63,18 @@ export function BrowseNativeCategoryBar({
           );
         })}
       </ScrollView>
+      <View style={browseNativeCategorySummary}>
+        <BrowseChips
+          genre="Semua"
+          time={time}
+          sort={sort}
+          isFiltered={isFiltered}
+          showCategory={false}
+          showRefine={false}
+          showReset={false}
+          onReset={onReset}
+        />
+      </View>
     </View>
   );
 }

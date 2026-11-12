@@ -192,6 +192,7 @@ for (const eventFile of eventFiles) {
 const transactionSegments = new Set([
   "checkout",
   "payment",
+  "pay",
   "payment-result",
   "payment-webview",
   "snap",

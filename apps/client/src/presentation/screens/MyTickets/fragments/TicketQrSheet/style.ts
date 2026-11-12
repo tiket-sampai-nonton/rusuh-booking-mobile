@@ -32,6 +32,12 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     textAlign: "center",
   },
+  sectionTitle: {
+    color: designColors.ink,
+    fontFamily: plusJakartaSansFonts.extraBold,
+    fontSize: 18,
+    textTransform: "uppercase",
+  },
   message: { marginTop: 24 },
   error: { marginTop: 24, color: designColors.danger },
   ticketQr: {
@@ -45,6 +51,27 @@ export const styles = StyleSheet.create({
     marginTop: 8,
     color: designColors.ink,
     fontFamily: plusJakartaSansFonts.bold,
+  },
+  ticketDetails: {
+    marginTop: 6,
+    color: designColors.inkMuted,
+    fontFamily: plusJakartaSansFonts.medium,
+    fontSize: 12,
+    textAlign: "center",
+  },
+  bookingSummary: {
+    marginTop: 20,
+    width: "100%",
+    padding: 16,
+    alignItems: "center",
+    gap: 8,
+    borderWidth: designBorders.standard,
+    borderColor: designColors.ink,
+  },
+  bookingAmount: {
+    color: designColors.ink,
+    fontFamily: plusJakartaSansFonts.bold,
+    fontSize: 16,
   },
   fallbackQr: {
     marginTop: 24,

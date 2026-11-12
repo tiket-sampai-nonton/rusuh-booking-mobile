@@ -13,8 +13,10 @@ export type NotificationKind =
   | "expiry_reminder" // hold/payment deadline is near
   | "payment_success" // booking paid & confirmed
   | "payment_failure" // payment attempt ended without payment
+  | "payment_timeout" // payment deadline elapsed
   | "payment_cancelled" // buyer left the payment flow
   | "waiting_room_left" // buyer left the queue
+  | "queue_timeout" // server reports the queue turn was missed
   | "admission" // queue admitted — your turn
   | "event_reminder"; // event starts soon
 
@@ -36,6 +38,8 @@ export interface NotificationPort {
   requestPermission(): Promise<boolean>;
   /** Schedule (or immediately show) a local notification. */
   scheduleLocal(notification: LocalNotification): Promise<void>;
+  /** Remove a scheduled/displayed notification by its stable ID. */
+  cancelLocal(notificationId: string): Promise<void>;
   /** Register the device/browser for remote push and return its token. */
   registerForRemotePush(): Promise<string | null>;
   /** Subscribe to in-app notification taps; returns an unsubscribe function. */

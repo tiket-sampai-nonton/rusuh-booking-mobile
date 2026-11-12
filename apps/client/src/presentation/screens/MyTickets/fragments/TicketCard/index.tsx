@@ -18,6 +18,10 @@ interface TicketCardProps {
   readonly bookingId: string;
   readonly amountMinor: number;
   readonly ticketCount: number;
+  readonly categoryCounts?: readonly {
+    readonly categoryCode: string;
+    readonly count: number;
+  }[];
   readonly onOpenQr: () => void;
   readonly onDownload: () => void;
   readonly onShare: () => void;
@@ -29,6 +33,7 @@ export function TicketCard({
   bookingId,
   amountMinor,
   ticketCount,
+  categoryCounts = [],
   onOpenQr,
   onDownload,
   onShare,
@@ -64,7 +69,15 @@ export function TicketCard({
         <View style={styles.details}>
           <View>
             <Text style={styles.ticketLabel}>Tiket</Text>
-            <Text style={styles.ticketCount}>{ticketCount} × Tiket Umum</Text>
+            <Text style={styles.ticketCount}>
+              {categoryCounts.length > 0
+                ? categoryCounts
+                    .map(
+                      ({ categoryCode, count }) => `${count} × ${categoryCode}`,
+                    )
+                    .join(" · ")
+                : `${ticketCount} tiket`}
+            </Text>
           </View>
           <Text style={styles.amount}>{minorToIDR(amountMinor)}</Text>
         </View>

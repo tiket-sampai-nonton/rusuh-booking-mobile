@@ -29,17 +29,16 @@ export function GradientOverlay({
 
   // Native: use expo-linear-gradient for smooth gradient (no more banding)
   if (!isWeb) {
-    // Mobile prototype: var(--ground) 0% → 0.95 30% → 0.7 60% → 0.3 100%
-    // "to top" in CSS = start from bottom, so we reverse the colors array (top → bottom)
-    // and use locations from top (0) to bottom (1)
+    // Keep the native artwork visible behind the title. The lower-opacity white
+    // ramp preserves text contrast without washing out the hero image.
     return (
       <LinearGradient
         // Gradient from top to bottom (CSS "to top" reversed for RN)
         colors={[
-          withAlpha(designColors.ground, 0.3), // top (100% in CSS)
-          withAlpha(designColors.ground, 0.7), // 60% point in CSS → 0.4 from top
-          withAlpha(designColors.ground, 0.95), // 30% point in CSS → 0.7 from top
-          designColors.ground, // bottom (0% in CSS)
+          withAlpha(designColors.ground, 0.04),
+          withAlpha(designColors.ground, 0.12),
+          withAlpha(designColors.ground, 0.24),
+          withAlpha(designColors.ground, 0.42),
         ]}
         locations={[0, 0.4, 0.7, 1]}
         style={[componentStyles.elementPosition2, pointerEventsNone]}

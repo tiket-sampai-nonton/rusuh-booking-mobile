@@ -1,5 +1,4 @@
 import { useRouter, type Href } from "expo-router";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
@@ -29,6 +28,7 @@ import { createPrimaryNavLinks } from "@presentation/components/design-system/pr
 import { LoginModal } from "@presentation/components/auth/LoginModal";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
+import { useMyTicketsData } from "@presentation/hooks/useMyTicketsData";
 import { useETicketShare } from "@presentation/hooks/useETicketShare";
 import { useETicketDownload } from "@presentation/hooks/useETicketDownload";
 import { useSessionStore } from "@presentation/stores/session-store";
@@ -51,8 +51,7 @@ export function MyTicketsScreen() {
   const amountMinor = useSessionStore((s) => s.amountMinor) ?? 0;
   const ticketCount = useSessionStore((s) => s.ticketCount) ?? 1;
   const profile = useAccountStore((s) => s.profile);
-  const { ticketHistoryRepository, paymentRepository, serverClock } =
-    useServices();
+  const { serverClock } = useServices();
   const activeEvent = useMemo(
     () => (data?.upcoming ?? []).find((event) => event.id === eventId),
     [data?.upcoming, eventId],
@@ -72,19 +71,19 @@ export function MyTicketsScreen() {
     onProfile: () => router.navigate("/profile" as Href),
     isLoggedIn: Boolean(profile),
   });
-  const paymentStatus = useQuery({
-    queryKey: ["my-ticket-payment-status", bookingId],
-    queryFn: () => paymentRepository.getStatus(bookingId!, bookingId!),
-    enabled: Boolean(bookingId),
+  const {
+    paymentStatus,
+    localTickets,
+    history: historyQuery,
+    selectedTickets: selectedTicketsQuery,
+  } = useMyTicketsData({
+    bookingId: bookingId ?? undefined,
+    isSignedIn: Boolean(profile),
+    profileEmailMasked: profile?.emailMasked,
+    selectedBookingId: selectedBooking?.bookingId,
+    selectedBookingStatus: selectedBooking?.status,
+    historyPageSize: TICKET_HISTORY_PAGE_SIZE,
   });
-  const localTickets = useQuery({
-    queryKey: ["booking-tickets", bookingId],
-    queryFn: () => ticketHistoryRepository.getBookingTickets(bookingId!),
-    enabled: Boolean(bookingId && paymentStatus.data?.status === "PAID"),
-  });
-  const showTicket = Boolean(
-    bookingId && activeEvent && localTickets.data && tab === "upcoming",
-  );
   const {
     data: history,
     isLoading: historyLoading,
@@ -95,17 +94,7 @@ export function MyTicketsScreen() {
     isFetchingNextPage,
     isFetching: isFetchingBookings,
     refetch: retryBookings,
-  } = useInfiniteQuery({
-    queryKey: ["my-bookings", profile?.emailMasked],
-    initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam }) =>
-      ticketHistoryRepository.listMyBookings(
-        pageParam,
-        TICKET_HISTORY_PAGE_SIZE,
-      ),
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    enabled: Boolean(profile),
-  });
+  } = historyQuery;
   const {
     data: selectedTickets,
     isLoading: ticketsLoading,
@@ -113,14 +102,21 @@ export function MyTicketsScreen() {
     error: ticketsFailure,
     isFetching: isFetchingSelectedTickets,
     refetch: retrySelectedTickets,
-  } = useQuery({
-    queryKey: ["my-booking-tickets", selectedBooking?.bookingId],
-    queryFn: () =>
-      ticketHistoryRepository.getBookingTickets(selectedBooking!.bookingId),
-    enabled: Boolean(selectedBooking),
-    retry: 1,
-  });
-
+  } = selectedTicketsQuery;
+  const localTicketCategoryCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const ticket of localTickets.data?.tickets ?? []) {
+      const code = ticket.categoryCode || "—";
+      counts.set(code, (counts.get(code) ?? 0) + 1);
+    }
+    return Array.from(counts, ([categoryCode, count]) => ({
+      categoryCode,
+      count,
+    }));
+  }, [localTickets.data?.tickets]);
+  const showTicket = Boolean(
+    bookingId && activeEvent && localTickets.data && tab === "upcoming",
+  );
   const allAccountBookings = profile
     ? (history?.pages.flatMap((page) => page.bookings) ?? [])
     : [];
@@ -209,7 +205,8 @@ export function MyTicketsScreen() {
   const qrSheet = (
     <TicketQrSheet
       eventName={selectedBooking?.eventName ?? "QR Tiket Anda"}
-      bookingId={bookingId ?? "booking"}
+      bookingId={selectedBooking?.bookingId ?? bookingId ?? "booking"}
+      bookingSummary={selectedBooking ?? undefined}
       bookingTickets={
         selectedBooking
           ? (selectedTickets?.tickets ?? [])
@@ -246,6 +243,7 @@ export function MyTicketsScreen() {
         bookingId={bookingId ?? "booking"}
         amountMinor={localTickets.data?.amountMinor ?? amountMinor}
         ticketCount={localTickets.data?.tickets.length ?? ticketCount}
+        categoryCounts={localTicketCategoryCounts}
         onOpenQr={() => setQrOpen(true)}
         onDownload={() => void handleDownload()}
         onShare={() =>

@@ -58,6 +58,7 @@ interface WireEventSummary {
 interface WireEventDetail {
   event: WireEventSummary;
   categories: BookingSession["categories"];
+  description?: Readonly<Record<string, unknown>>;
   maxTicketsPerOrder?: number;
   maxTicketsPerBuyerNik?: number;
   allowMixedCategories?: boolean;
@@ -168,8 +169,12 @@ export function toEventDetail(dto: WireEventDetail): EventDetail {
     allowMixedCategories: dto.allowMixedCategories,
     published: dto.published,
     description: {
+      ...dto.description,
       categories: dto.categories,
-      bannerImage: dto.event.bannerUrl ?? dto.event.imageUrl,
+      bannerImage:
+        dto.description?.bannerImage ??
+        dto.event.bannerUrl ??
+        dto.event.imageUrl,
     },
   };
 }

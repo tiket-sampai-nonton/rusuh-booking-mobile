@@ -7,5 +7,6 @@ Allow: /history
 Disallow: /waiting/
 Disallow: /checkout/
 Disallow: /payment/
+Disallow: /pay/
 Disallow: /success/
 Disallow: /expired/

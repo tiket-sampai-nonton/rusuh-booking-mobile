@@ -130,12 +130,21 @@ export class ExpoNotificationAdapter implements NotificationPort {
     const existing = id ? this.localDeliveries.get(id) : undefined;
     if (existing) return existing;
 
-    const delivery = this.deliverLocal(notification).catch((error: unknown) => {
-      if (id) this.localDeliveries.delete(id);
-      throw error;
+    const delivery = this.deliverLocal(notification);
+    if (!id) return delivery;
+
+    const inFlight = delivery.finally(() => {
+      if (this.localDeliveries.get(id) === inFlight) {
+        this.localDeliveries.delete(id);
+      }
     });
-    if (id) this.localDeliveries.set(id, delivery);
-    return delivery;
+    this.localDeliveries.set(id, inFlight);
+    return inFlight;
+  }
+
+  async cancelLocal(notificationId: string): Promise<void> {
+    this.localDeliveries.delete(notificationId);
+    await this.notifeeApi.default.cancelNotification(notificationId);
   }
 
   private async deliverLocal(notification: LocalNotification): Promise<void> {

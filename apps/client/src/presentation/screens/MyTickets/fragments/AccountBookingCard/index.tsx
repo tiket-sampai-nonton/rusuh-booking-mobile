@@ -21,24 +21,28 @@ export function AccountBookingCard({
   booking,
   onOpenQr,
 }: AccountBookingCardProps) {
-  return (
-    <View style={styles.card} testID={`account-ticket-${booking.bookingId}`}>
+  const content = (
+    <>
       <Text style={styles.eventName}>{booking.eventName}</Text>
       <Text style={styles.details}>
         {booking.publicRef} · {STATUS_LABELS[booking.status]}
       </Text>
       <Text style={styles.amount}>{minorToIDR(booking.amountMinor)}</Text>
-      {booking.status === "PAID" ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Lihat QR ${booking.eventName}`}
-          onPress={() => onOpenQr(booking)}
-          style={styles.qrButton}
-          testID={`account-ticket-qr-${booking.bookingId}`}
-        >
-          <Text style={styles.qrLabel}>Lihat QR</Text>
-        </Pressable>
-      ) : null}
-    </View>
+      <View style={styles.qrButton}>
+        <Text style={styles.qrLabel}>Lihat Detail Tiket</Text>
+      </View>
+    </>
+  );
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Lihat detail tiket ${booking.eventName}`}
+      onPress={() => onOpenQr(booking)}
+      style={styles.card}
+      testID={`account-ticket-${booking.bookingId}`}
+    >
+      {content}
+    </Pressable>
   );
 }

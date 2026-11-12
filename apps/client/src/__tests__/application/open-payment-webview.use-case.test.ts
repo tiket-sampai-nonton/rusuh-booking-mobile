@@ -8,7 +8,7 @@ describe("OpenPaymentWebView (RBT-062) + mock page-token exchange", () => {
     const uc = new OpenPaymentWebView(repo);
     const token = await uc.createToken("bk-1");
     expect(token.pageToken).toMatch(/^pgt_bk-1_/);
-    expect(token.pageUrl).toContain("/payment/bk-1");
+    expect(token.pageUrl).toContain("/pay/bk-1");
     expect(token.pageUrl).toContain(token.pageToken); // URL carries the token
     // First exchange succeeds (token live).
     await expect(uc.exchange(token.pageToken)).resolves.toBeUndefined();

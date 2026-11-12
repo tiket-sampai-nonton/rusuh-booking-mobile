@@ -35,9 +35,10 @@ Isi:
    - 3.3 [Queue Entry](#33-state-queue-entry)
 4. [Polling / Timing](#4-polling--timing)
 
-> Catatan: endpoint bertanda **(FE-NEED)** belum ada di contract saat ini (lihat daftar
+> Catatan: endpoint bertanda **(FE-NEED)** belum ada di contract snapshot saat ini (lihat daftar
 > **FE NEED THIS** di `FE-BE-align-contract.md`): `POST /booking-sessions/{id}/buyer` (set-buyer),
-> `JoinRequest` anonim, `remainingTickets`, `description` JSON, dsb. Di prototype di-mock.
+> `JoinRequest` anonim, `remainingTickets`, dan profile-complete indicator. Runtime `description`
+> JSON sudah tersedia pada event detail; its schema documentation is still pending from BE.
 
 ---
 
@@ -270,7 +271,7 @@ sequenceDiagram
 > - Blok `opt mobile WebView` (page-token / `rb_pay` / `POST /payment-page-sessions`) **TETAP scope FE** (D10.3) — halaman bayar FE yang sama dipakai ulang di WebView mobile lewat one-time pageToken; timer tetap server-authoritative lintas handoff. Diagram di bawah akurat.
 > - Pemilihan metode terjadi **di halaman FE kita** (bucket metode); detail instrumen (no. kartu/VA/PIN) terjadi di SNAP → PCI tetap di luar scope.
 > - **FR-24 dipenuhi oleh halaman bayar FE reusable + handoff SNAP** (konsisten web+mobile tanpa membangun ulang UI native).
-> - **Terbuka (O2, diskusikan dengan BE):** bentuk persis request/response `createAttempt`, endpoint page-token (`POST /payments/{id}/page-tokens`, `POST /payment-page-sessions`), dan bentuk success/failed return URL untuk web vs WebView mobile.
+> - **Status addendum (2026-11-12):** BE page-token endpoints are implemented. The BE returns a site-relative `/pay/{bookingId}` URL; native resolves it against `EXPO_PUBLIC_SITE_URL`, and the same-origin `/pay` bootstrap screen exchanges the one-use token through `PaymentRepository` before opening `/payment/{bookingId}`. The current deployed Pages bundle still lacks this route until the updated web app is deployed. The 07-11 OpenAPI snapshot and physical-device cookie/redirect QA remain outstanding; see `AS-BUILT-ALIGNMENT-2026-11-12.md`.
 
 Pilih metode → buat attempt → redirect ke SNAP → kembali ke success/failed callback → verifikasi status BE.
 

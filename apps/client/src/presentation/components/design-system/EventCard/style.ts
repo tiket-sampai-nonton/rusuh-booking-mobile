@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { designColors, plusJakartaSansFonts } from "@presentation/theme";
+import { brand, designColors, plusJakartaSansFonts } from "@presentation/theme";
 
 import type { ViewStyle, ImageStyle } from "react-native";
 import { designBorders, designSpacingSemantic } from "@presentation/theme";
@@ -60,14 +60,13 @@ export function eventCardImageContainerStyle(
     aspectRatio = 4 / 3;
   } else if (isWeb && listMode) {
     width = 240;
-    height = 160;
   }
 
   return {
     aspectRatio,
     width,
     height,
-    alignSelf: isMobileWeb && listMode ? "stretch" : undefined,
+    alignSelf: isWeb && listMode ? "stretch" : undefined,
     flexShrink: 0,
     overflow: "hidden",
     position: "relative",
@@ -176,12 +175,14 @@ export function styleForEventCardAnimatedView5(
   arg1: EventBadge,
 ): DynamicStyle {
   const backgroundColor =
-    arg0 || arg1.tone === "soldout" ? designColors.danger : designColors.ink;
+    arg0 || arg1.tone === "soldout" || arg1.tone === "ok" || arg1.tone === "low"
+      ? brand.deep
+      : designColors.ink;
   return {
     position: "absolute",
     top: designSpacingSemantic.xs,
     left: designSpacingSemantic.xs,
-    // Mobile: red bg (sold out), desktop: black bg unless sold out.
+    // Red is the shared availability accent; labels remain explicit for status clarity.
     backgroundColor,
     paddingHorizontal: arg0 ? 8 : 10, // Mobile: 0.5rem = 8px
     paddingVertical: arg0 ? 4 : 4, // Mobile: 0.25rem = 4px

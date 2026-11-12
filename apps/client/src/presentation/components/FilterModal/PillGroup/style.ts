@@ -1,6 +1,7 @@
 import { StyleSheet, type TextStyle, type ViewStyle } from "react-native";
 
 import {
+  brand,
   designBorders,
   designColors,
   plusJakartaSansFonts,
@@ -24,7 +25,7 @@ export const pillGroupStyles = StyleSheet.create({
     borderColor: designColors.ink,
   },
   selectedOption: {
-    backgroundColor: designColors.ink,
+    backgroundColor: brand.deep,
   },
   unselectedOption: {
     backgroundColor: designColors.ground,

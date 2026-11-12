@@ -160,9 +160,9 @@ describe("MyTicketsScreen", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("account-ticket-qr-booking-1")).toBeTruthy(),
+      expect(screen.getByTestId("account-ticket-booking-1")).toBeTruthy(),
     );
-    fireEvent.press(screen.getByTestId("account-ticket-qr-booking-1"));
+    fireEvent.press(screen.getByTestId("account-ticket-booking-1"));
     expect(await screen.findByTestId("ticket-qr-sheet")).toBeTruthy();
     expect(await screen.findByText("TICKET-1")).toBeTruthy();
     expect(screen.getByTestId("qr-code").props.accessibilityLabel).toBe(
@@ -317,15 +317,23 @@ describe("MyTicketsScreen", () => {
               ],
               nextCursor: "cursor-1",
             },
-      getBookingTickets: async () => ({
-        bookingId: "unused",
-        orderId: "unused",
-        publicRef: "unused",
+      getBookingTickets: jest.fn(async (bookingId: string) => ({
+        bookingId,
+        orderId: "order-past",
+        publicRef: "OLD",
         amountMinor: 100,
-        ticketQuantity: 0,
-        buyerNikMasked: "",
-        tickets: [],
-      }),
+        ticketQuantity: 1,
+        buyerNikMasked: "31****89",
+        tickets: [
+          {
+            ticketCode: "OLD-TICKET-1",
+            categoryCode: "REG",
+            attendeeName: "Rizky Rachmawan",
+            attendeeNikMasked: "31****89",
+            qrPayload: "old-ticket-payload",
+          },
+        ],
+      })),
     };
     renderWithProviders(<MyTicketsScreen />, {
       container: { eventRepository, ticketHistoryRepository },
@@ -344,7 +352,24 @@ describe("MyTicketsScreen", () => {
     expect(
       screen.getByTestId("account-ticket-booking-event-past"),
     ).toBeTruthy();
+    expect(screen.getAllByText("Lihat Detail Tiket")).toHaveLength(3);
     expect(screen.queryByTestId("account-ticket-booking-paid")).toBeNull();
+    fireEvent.press(screen.getByTestId("account-ticket-booking-event-past"));
+    expect(await screen.findByTestId("ticket-qr-sheet")).toBeTruthy();
+    expect(await screen.findByText("OLD-TICKET-1")).toBeTruthy();
+    expect(screen.getByText("Kategori REG")).toBeTruthy();
+    expect(screen.getByText("Rizky Rachmawan · 31****89")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("ticket-qr-close"));
+
+    fireEvent.press(screen.getByTestId("account-ticket-booking-expired"));
+    expect(await screen.findByTestId("booking-order-summary")).toBeTruthy();
+    expect(screen.getByText("Referensi EXP")).toBeTruthy();
+    expect(screen.queryByTestId("qr-code")).toBeNull();
+    expect(ticketHistoryRepository.getBookingTickets).toHaveBeenCalledTimes(1);
+    expect(ticketHistoryRepository.getBookingTickets).toHaveBeenCalledWith(
+      "booking-event-past",
+    );
+    fireEvent.press(screen.getByTestId("ticket-qr-close"));
 
     fireEvent.press(screen.getByTestId("tickets-tab-upcoming"));
     await waitFor(() =>
@@ -465,11 +490,9 @@ describe("MyTicketsScreen", () => {
     });
 
     await waitFor(() =>
-      expect(
-        screen.getByTestId("account-ticket-qr-booking-android"),
-      ).toBeTruthy(),
+      expect(screen.getByTestId("account-ticket-booking-android")).toBeTruthy(),
     );
-    fireEvent.press(screen.getByTestId("account-ticket-qr-booking-android"));
+    fireEvent.press(screen.getByTestId("account-ticket-booking-android"));
     await screen.findByText("ANDROID-1");
     expect(backHandlerSpy).toHaveBeenCalledWith(
       "hardwareBackPress",
@@ -530,9 +553,9 @@ describe("MyTicketsScreen", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("account-ticket-qr-booking-web")).toBeTruthy(),
+      expect(screen.getByTestId("account-ticket-booking-web")).toBeTruthy(),
     );
-    fireEvent.press(screen.getByTestId("account-ticket-qr-booking-web"));
+    fireEvent.press(screen.getByTestId("account-ticket-booking-web"));
     expect(await screen.findByTestId("ticket-qr-sheet")).toBeTruthy();
     expect(await screen.findByText("WEB-1")).toBeTruthy();
     fireEvent.press(screen.getByText("Unduh E-Tiket"));

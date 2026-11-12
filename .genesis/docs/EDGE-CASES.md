@@ -4,6 +4,8 @@
 > **observes and reacts**, never reconciles inventory locally. Error codes map to Bahasa messages (D3.5).
 > Conforms to `GROOMING-DECISIONS.md`, `ARCHITECTURE.md`, `FE-Flow-Diagrams.md`.
 
+> **Implementation status addendum (2026-11-12):** the live detail API now supplies rich event `description`; catalog-level `remainingTickets` remains optional/unavailable. Current payment WebView URL and retry handling are documented in the payment cases below.
+
 ## 1. Session / continuity ("jangan PHP") — D0, NFR-02
 
 | Case | FE reaction |
@@ -58,6 +60,9 @@
 | Double "Bayar" tap | One `Idempotency-Key` reused → no duplicate attempt (D3.3) |
 | Callback arrives but status still PENDING | Keep polling with backoff until terminal; show processing |
 | User closes WebView without finishing | On return, re-check status; if still payable, allow retry |
+| BE returns relative page URL (`/pay/{bookingId}`) | Resolve against `EXPO_PUBLIC_SITE_URL`; require HTTPS and same configured origin before mounting WebView |
+| WebView cannot load payment page or token exchange fails | Show a retry action; native mints a fresh one-time token. The `/pay` bootstrap exchanges through `PaymentRepository` once and routes to payment only after success |
+| WebView navigates to a non-site payment/callback URL | Keep the one-use token confined to the configured HTTPS `/pay/{bookingId}` URL; only route callbacks from the configured site origin and matching booking ID |
 
 ## 5. Success / tickets — FR-22
 
@@ -65,6 +70,7 @@
 |---|---|
 | Status not yet `PAID` on success page | `BOOKING_NOT_PAYABLE` → back to payment |
 | `qrPayload` missing | Error state; do not fabricate a QR |
+| Mixed categories / attendees in one booking | Render each issued ticket with its own `categoryCode`, `attendeeName`, and masked attendee NIK; never infer a generic category |
 | Download/print | Native: file-system + share; Web: Blob/print |
 | Email not received (user concern) | Email is BE async (retry/DLQ, NFR-10); FE states e-ticket is also on-screen/QR |
 
@@ -75,7 +81,7 @@
 | Empty event list | EmptyState, no throw (defensive null-checks everywhere) |
 | Broken image/asset | Fallback placeholder; (verify served content-type, not just 200) |
 | BE maintenance / config empty | Maintenance state ("Kami segera kembali", D8.1) |
-| FE-NEED field absent (e.g. `remainingTickets`, `description`) | Degrade gracefully behind typed-optional/flag; mock adapter until BE delivers (O1) |
+| Optional field absent (e.g. catalog `remainingTickets` or a rich-description subfield) | Degrade gracefully; rich event description parsing tolerates absent/malformed fields. The live detail response currently includes rich description; catalog remaining-stock availability remains a separate contract gap |
 | Partial degraded service (one call 5xx) | Isolate; don't fail the whole page; retry that call |
 
 ## 7. Notifications — D8.2 (native + web push, v1)

@@ -10,7 +10,16 @@
  * - Grayscale images, 2px borders
  */
 import { useRouter, type Href } from "expo-router";
-import { FlatList, Platform, Text, View } from "react-native";
+import { useState } from "react";
+import {
+  FlatList,
+  Platform,
+  Pressable,
+  type StyleProp,
+  Text,
+  View,
+  type ViewStyle,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -23,26 +32,30 @@ import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
+import { EventCard } from "@presentation/components/design-system/EventCard";
+import { gridItemStyle as homeGridItemStyle } from "../Home/fragments/HomeSections/fragments/EventsGrid/style";
+import { GridIcon } from "../Browse/fragments/BrowseResultsToolbar/icons/GridIcon";
+import { ListIcon } from "../Browse/fragments/BrowseResultsToolbar/icons/ListIcon";
 
 import {
   HistoryEmpty,
   HistoryError,
   HistoryLoading,
 } from "./fragments/HistoryStates";
-import {
-  historyStyles,
-  historyGridCell,
-  historyGridRow,
-  historyGridSingleCell,
-  historyListContent,
-} from "./style";
-import { EventCard } from "@presentation/components/design-system/EventCard";
+import { historyStyles, historyListContent } from "./style";
+
+type HistoryViewMode = "grid" | "list";
+
+function MobileWebEventSeparator() {
+  return <View style={{ height: 8 }} />;
+}
 
 export function HistoryScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isDesktop, isMobileWeb, isNative, bottomBarHeight, gridColumns } =
     useResponsive();
+  const [viewMode, setViewMode] = useState<HistoryViewMode>("grid");
   const profile = useAccountStore((state) => state.profile);
   const {
     data,
@@ -54,6 +67,7 @@ export function HistoryScreen() {
   } = useEvents();
 
   const history = data?.history ?? [];
+  const columns = viewMode === "list" ? 1 : isNative ? 2 : gridColumns;
 
   const showEmptyState = isLoading || isError || history.length === 0;
   const historyState = isLoading ? (
@@ -92,14 +106,22 @@ export function HistoryScreen() {
         />
 
         <FlatList
-          key={`history-grid-${gridColumns}`}
+          key={`history-grid-${columns}`}
           data={showEmptyState ? [] : history}
           keyExtractor={(event) => event.id}
-          numColumns={gridColumns}
-          columnWrapperStyle={gridColumns > 1 ? historyGridRow : undefined}
+          numColumns={columns}
+          columnWrapperStyle={
+            columns > 1
+              ? isNative
+                ? { flexDirection: "row" }
+                : historyStyles.webGridRow
+              : undefined
+          }
+          ItemSeparatorComponent={
+            isMobileWeb ? MobileWebEventSeparator : undefined
+          }
           contentContainerStyle={historyListContent(
             insets.bottom + (isNative ? bottomBarHeight : 0),
-            isDesktop,
           )}
           ListHeaderComponent={
             <>
@@ -136,32 +158,55 @@ export function HistoryScreen() {
                 ]}
               >
                 <Text style={historyStyles.sectionTitle}>Riwayat</Text>
+                <HistoryResultsToolbar
+                  count={history.length}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                  showViewModeToggle={!isMobileWeb}
+                />
                 {historyState}
               </View>
             </>
           }
-          initialNumToRender={Math.max(4, gridColumns * 2)}
+          initialNumToRender={Math.max(4, columns * 2)}
           maxToRenderPerBatch={4}
           updateCellsBatchingPeriod={50}
           windowSize={7}
           removeClippedSubviews={Platform.OS === "android"}
-          renderItem={({ item }) => (
-            <View
-              style={
-                gridColumns > 1
-                  ? historyGridCell
-                  : historyGridSingleCell(isMobileWeb)
-              }
-            >
-              <EventCard
-                event={item}
-                onPress={(eventId) =>
-                  router.push(`/events/${eventId}?source=history` as Href)
-                }
-                history
-              />
-            </View>
-          )}
+          renderItem={({ item, index }) => {
+            const isListMode = viewMode === "list";
+            const cellStyle: StyleProp<ViewStyle> = isNative
+              ? columns > 1
+                ? historyStyles.nativeGridCell
+                : historyStyles.nativeListCell
+              : isMobileWeb
+                ? [
+                    homeGridItemStyle(index, history.length, columns, true),
+                    historyStyles.mobileWebGridCell,
+                  ]
+                : isListMode
+                  ? historyStyles.webListCell
+                  : homeGridItemStyle(
+                      index,
+                      history.length,
+                      columns,
+                      false,
+                      true,
+                    );
+
+            return (
+              <View style={cellStyle}>
+                <EventCard
+                  event={item}
+                  onPress={(eventId) =>
+                    router.push(`/events/${eventId}?source=history` as Href)
+                  }
+                  history
+                  listMode={isListMode}
+                />
+              </View>
+            );
+          }}
           testID="history-grid"
         />
         <BottomNav
@@ -171,5 +216,59 @@ export function HistoryScreen() {
         />
       </View>
     </ScreenFade>
+  );
+}
+
+interface HistoryResultsToolbarProps {
+  readonly count: number;
+  readonly viewMode: HistoryViewMode;
+  readonly onViewModeChange: (mode: HistoryViewMode) => void;
+  readonly showViewModeToggle: boolean;
+}
+
+function HistoryResultsToolbar({
+  count,
+  viewMode,
+  onViewModeChange,
+  showViewModeToggle,
+}: HistoryResultsToolbarProps) {
+  return (
+    <View style={historyStyles.resultsToolbar}>
+      <Text style={historyStyles.resultsCount} testID="history-count">
+        Menampilkan <Text style={historyStyles.resultsCountValue}>{count}</Text>{" "}
+        event
+      </Text>
+      {showViewModeToggle ? (
+        <View style={historyStyles.viewToggle}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Tampilan grid"
+            accessibilityState={{ selected: viewMode === "grid" }}
+            onPress={() => onViewModeChange("grid")}
+            style={[
+              historyStyles.viewButton,
+              viewMode === "grid" && historyStyles.viewButtonActive,
+            ]}
+            testID="history-view-grid"
+          >
+            <GridIcon active={viewMode === "grid"} />
+          </Pressable>
+          <View style={historyStyles.viewDivider} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Tampilan satu kolom"
+            accessibilityState={{ selected: viewMode === "list" }}
+            onPress={() => onViewModeChange("list")}
+            style={[
+              historyStyles.viewButton,
+              viewMode === "list" && historyStyles.viewButtonActive,
+            ]}
+            testID="history-view-list"
+          >
+            <ListIcon active={viewMode === "list"} />
+          </Pressable>
+        </View>
+      ) : null}
+    </View>
   );
 }

@@ -203,6 +203,7 @@ values are embedded during the runner's build; never store secrets in `EXPO_PUBL
 1. Open **Workers & Pages → `rusuh-booking` → Deployments**.
 2. After GitHub Actions deploys to the `develop` branch, open `https://rusuh-booking.pages.dev`.
 3. Confirm the home and public routes load, then check the GitHub Actions run and Telegram summary.
+4. Verify `https://rusuh-booking.pages.dev/pay/<booking-id>?ppt=invalid&embedded=1` renders the payment bootstrap/error UI, not Expo's "Unmatched Route". The BE's native page-token URL depends on the `/pay/[bookingId]` route being present in the deployed web bundle; an HTTP 200 fallback alone does not prove the client route exists.
 
 ### C4. Branch → environment mapping (matches PIPELINE.md)
 - Merge/push to **`develop`** → automatic preprod web build and deployment to the `rusuh-booking`
@@ -258,8 +259,8 @@ files should not create separate user-triggered pipelines.
    | Secret | `TELEGRAM_CHAT_ID` | Telegram group or chat ID for release notices |
    | Variable | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID |
    | Variable | `CLOUDFLARE_PAGES_PROJECT` | `rusuh-booking` |
-   | Variable | `EXPO_PUBLIC_API_BASE_URL` | Development API URL or safe placeholder while mocks are enabled |
-   | Variable | `EXPO_PUBLIC_USE_MOCKS` | `true` |
+   | Variable | `EXPO_PUBLIC_API_BASE_URL` | Development API URL |
+   | Variable | `EXPO_PUBLIC_USE_MOCKS` | `false` |
    | Variable | `EXPO_PUBLIC_ENV` | `development` |
    | Variable | `EXPO_PUBLIC_SITE_URL` | `https://rusuh-booking.pages.dev` |
 
@@ -293,8 +294,8 @@ files should not create separate user-triggered pipelines.
    production Expo and release settings are ready; enabling development OTA does not enable `main`.
 
 Never place real secrets in `EXPO_PUBLIC_*` variables; those values are embedded in browser/mobile
-bundles. SonarCloud is temporarily skipped by project decision and is not a deployment secret
-requirement until the scan is restored.
+bundles. SonarCloud uses the `SONAR_TOKEN` secret from the `development` GitHub Environment, plus
+`SONAR_ORGANIZATION` and `SONAR_PROJECT_KEY` as Actions variables; none are deployment variables.
 
 ### Android App Links and iOS Universal Links
 
@@ -321,8 +322,8 @@ signing keystore and redeploy the web release to publish the associations.
 - A successful merge to `main` starts the same orchestrator and deploys to a separate production
   Pages project, then publishes an EAS production OTA only when compatible.
 - Firebase APK distribution is an optional manual mode on that same orchestrator. Select `develop`
-  for the mock/preprod APK or `main` for the live production APK. Native-affecting changes require
-  this new APK path; OTA must be skipped for those changes. The artifact names are
+  for the preprod APK using the development BE with mocks disabled, or `main` for the production APK.
+  Native-affecting changes require this new APK path; OTA must be skipped for those changes. The artifact names are
   `rusuh-booking.preprod.apk` for `develop` and `rusuh-booking.apk` for `main`.
 - The Telegram summary runs for success or failure and identifies failed jobs.
 

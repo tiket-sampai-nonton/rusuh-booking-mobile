@@ -15,7 +15,6 @@
  */
 import { useNavigation, useRouter, type Href } from "expo-router";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   ActivityIndicator,
   Pressable,
@@ -28,11 +27,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { minorToIDR } from "@domain/services/money";
 import { SummaryRow } from "./fragments/SummaryRow";
 import { ETicketCard } from "@presentation/components/ETicketCard";
-import { useServices } from "@providers/service-context";
 import { Seo } from "@presentation/components/Seo";
 import { useETicketDownload } from "@presentation/hooks/useETicketDownload";
 import { CheckIcon, MailIcon } from "@presentation/components/ArrowIcon";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
+import { useSuccessTickets } from "@presentation/hooks/useSuccessTickets";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
 import { ArrowIcon } from "@presentation/components/ArrowIcon";
 import { useSessionStore } from "@presentation/stores/session-store";
@@ -71,12 +70,7 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
     refetch: retryVerification,
     isFetching: isRetryingVerification,
   } = useVerifyPayment(attemptId, bookingId);
-  const { ticketHistoryRepository } = useServices();
-  const ticketsQuery = useQuery({
-    queryKey: ["booking-tickets", bookingId],
-    queryFn: () => ticketHistoryRepository.getBookingTickets(bookingId),
-    enabled: verdict === "paid" && Boolean(bookingId),
-  });
+  const ticketsQuery = useSuccessTickets(bookingId, verdict === "paid");
   const { downloadTickets } = useETicketDownload();
   const issuedTickets = ticketsQuery.data?.tickets ?? [];
   const count = issuedTickets.length;
@@ -336,8 +330,9 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
                   eventName={event?.name}
                   venue={event?.venue}
                   startsAt={event?.startsAt}
-                  attendeeNikMasked={buyerNikMasked}
+                  attendeeNikMasked={ticket.attendeeNikMasked}
                   attendeeName={ticket.attendeeName}
+                  categoryCode={ticket.categoryCode}
                   qrPayload={ticket.qrPayload}
                   ticketCode={ticket.ticketCode}
                 />

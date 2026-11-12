@@ -145,7 +145,7 @@ export class MockPaymentRepository implements PaymentRepository {
     this.liveTokens.add(pageToken);
     return {
       pageToken,
-      pageUrl: `/payment/${bookingId}?rb_pay_token=${pageToken}`,
+      pageUrl: `/pay/${encodeURIComponent(bookingId)}?ppt=${encodeURIComponent(pageToken)}&embedded=1`,
     };
   }
 

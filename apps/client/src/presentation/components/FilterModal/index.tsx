@@ -42,6 +42,8 @@ export interface FilterValue {
 export interface FilterModalProps {
   readonly visible: boolean;
   readonly onClose: () => void;
+  /** Current applied filters; restored each time the modal opens. */
+  readonly value?: FilterValue;
   /** Apply — receives the chosen filter (the screen navigates to /browse). */
   readonly onApply: (value: FilterValue) => void;
 }
@@ -63,12 +65,24 @@ const SORTS = [
   { v: "furthest", l: "Terjauh" },
 ];
 
-export function FilterModal({ visible, onClose, onApply }: FilterModalProps) {
+export function FilterModal({
+  visible,
+  value,
+  onClose,
+  onApply,
+}: FilterModalProps) {
   const insets = useSafeAreaInsets();
   const { isMobileWeb } = useResponsive();
-  const [category, setCategory] = useState("all");
-  const [time, setTime] = useState("all");
-  const [sort, setSort] = useState("closest");
+  const [category, setCategory] = useState(value?.category ?? "all");
+  const [time, setTime] = useState(value?.time ?? "all");
+  const [sort, setSort] = useState(value?.sort ?? "closest");
+
+  useEffect(() => {
+    if (!visible) return;
+    setCategory(value?.category ?? "all");
+    setTime(value?.time ?? "all");
+    setSort(value?.sort ?? "closest");
+  }, [value?.category, value?.sort, value?.time, visible]);
 
   const apply = (): void => {
     onApply({ category, time, sort });

@@ -17,8 +17,14 @@ import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { PaymentMethod } from "@domain/repositories/payment.repository";
-import { paymentCancelled } from "@domain/rules/notification-flows";
+import {
+  paymentCancelled,
+  paymentFailure,
+  paymentSuccess,
+  paymentTimeout,
+} from "@domain/rules/notification-flows";
 import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
+import { CancelLocalNotification } from "@application/notifications/cancel-local-notification.use-case";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { usePayment } from "@presentation/hooks/usePayment";
 import { usePaymentPage } from "@presentation/hooks/usePaymentPage";
@@ -44,6 +50,10 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   const { serverClock, notification } = useServices();
   const scheduleNotification = useMemo(
     () => new ScheduleLocalNotification(notification),
+    [notification],
+  );
+  const cancelNotification = useMemo(
+    () => new CancelLocalNotification(notification),
     [notification],
   );
   const {
@@ -107,8 +117,59 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
     clock: serverClock,
     expiresAtIso: page?.paymentExpiresAt,
     serverTimeIso: page?.serverTime,
-    onExpire: () => router.replace(`/failed/${bookingId}` as Href),
+    onExpire: () => {
+      const status = page?.currentAttempt?.status;
+      const hasTerminalResult =
+        status === "PAID" || status === "FAILED" || status === "EXPIRED";
+      if (isNative && !hasTerminalResult) {
+        void cancelNotification
+          .execute(`payment-timeout-${bookingId}`)
+          .catch(() => undefined)
+          .then(() => scheduleNotification.execute(paymentTimeout(bookingId)))
+          .catch(() => undefined);
+      }
+      router.replace(`/failed/${bookingId}` as Href);
+    },
   });
+
+  useEffect(() => {
+    if (!isNative || !page) return;
+    const attemptStatus = page.currentAttempt?.status;
+    if (
+      attemptStatus === "PAID" ||
+      attemptStatus === "FAILED" ||
+      attemptStatus === "EXPIRED"
+    ) {
+      const outcome =
+        attemptStatus === "PAID"
+          ? paymentSuccess(bookingId)
+          : attemptStatus === "EXPIRED"
+            ? paymentTimeout(bookingId)
+            : paymentFailure(bookingId);
+      void cancelNotification
+        .execute(`payment-timeout-${bookingId}`)
+        .catch(() => undefined)
+        .then(() => scheduleNotification.execute(outcome))
+        .catch(() => undefined);
+      return;
+    }
+
+    // Translate the server-clock duration to an OS timestamp once per payment
+    // page payload so Notifee can deliver even while the app is backgrounded.
+    const remaining = serverClock.remaining(page.paymentExpiresAt);
+    if (remaining <= 0) return; // The countdown's one-shot expiry path handles this.
+    const scheduledAtMs = Date.now() + remaining;
+    void scheduleNotification
+      .execute(paymentTimeout(bookingId, scheduledAtMs))
+      .catch(() => undefined);
+  }, [
+    bookingId,
+    cancelNotification,
+    isNative,
+    page,
+    scheduleNotification,
+    serverClock,
+  ]);
 
   const warnTimer = remainingMs <= 60_000;
 

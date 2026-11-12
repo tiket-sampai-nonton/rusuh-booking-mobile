@@ -17,7 +17,7 @@
 | Visitor token (guest) | `rb_visitor` cookie (web) / `X-Visitor-Token` (mobile), injected by the API client. |
 | Admission token | Short-lived (TTL ~60s), used once to create a booking session; never persisted long-term. |
 | Detail/Payment access | Token-protected server-side (NFR-07). FE cannot reach these without admission; a bypass attempt gets 401/403 → route to re-queue. |
-| Token in URLs | Never put access/admission tokens in shareable URLs or logs. |
+| Token in URLs | Never put access/admission tokens in shareable URLs or logs. The BE's short-lived, one-use payment page token is an explicit D10.3 exception: accept it only in the HTTPS `/pay/{bookingId}` URL on the configured `EXPO_PUBLIC_SITE_URL`, never log/share it, and let the same-origin bootstrap route exchange/remove it promptly. |
 
 ## 3. PII — NIK & email (D7.1, UU PDP)
 
@@ -35,6 +35,8 @@
 - **Card/instrument data never touches the FE.** The FE builds the payment page (order summary + **method-bucket selection** + timer) and hands off to the **Midtrans SNAP hosted page**, where the actual card number / VA auth / e-wallet PIN is entered. FE triggers create-attempt, opens the SNAP link, and verifies status with BE — it never collects or stores a payment instrument (PCI stays out of scope).
 - This keeps the FE **out of PCI-DSS scope** — do not add any card-input UI.
 - Verify payment outcome with BE (`GET /payments/{id}/status`) before rendering success; never trust the SNAP callback alone.
+- Resolve the BE's relative `/pay/{bookingId}` URL against `EXPO_PUBLIC_SITE_URL`; reject non-HTTPS, non-site origins, or paths outside `/pay/{bookingId}`.
+- Keep the native handoff URL on the configured HTTPS site and exact `/pay/{bookingId}` route. The `/pay` bootstrap calls the `PaymentRepository` exchange from that page context; do not inject raw API requests into arbitrary WebView pages. Route callbacks only when both origin and booking ID match.
 
 ## 5. Transport & data handling
 

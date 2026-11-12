@@ -25,6 +25,7 @@ export interface ETicketCardProps {
   readonly startsAt?: string;
   readonly attendeeName?: string;
   readonly attendeeNikMasked?: string;
+  readonly categoryCode?: string;
   readonly qrPayload?: string;
   readonly ticketCode?: string;
 }
@@ -42,6 +43,7 @@ export function ETicketCard({
   startsAt,
   attendeeName,
   attendeeNikMasked,
+  categoryCode,
   qrPayload,
   ticketCode,
 }: ETicketCardProps) {
@@ -88,31 +90,33 @@ export function ETicketCard({
         >
           {ticketCode ?? "Tiket belum tersedia"}
         </Text>
-        {eventName ? (
-          <View
-            className="mt-5 w-full gap-2"
-            style={componentStyles.elementBorderTopWidth5}
-          >
+        <View
+          className="mt-5 w-full gap-2"
+          style={componentStyles.elementBorderTopWidth5}
+        >
+          {eventName ? (
             <Text
               className="text-lg font-extrabold uppercase"
               style={componentStyles.elementColor6}
             >
               {eventName}
             </Text>
-            <Text className="text-xs" style={componentStyles.elementColor7}>
-              {attendeeName ?? "Pemegang tiket"} · {attendeeNikMasked ?? "••••"}
-            </Text>
+          ) : null}
+          <Text className="text-xs" style={componentStyles.elementColor7}>
+            {attendeeName || "Pemegang tiket"} · {attendeeNikMasked || "••••"}
+          </Text>
+          {eventName || startsAt || venue ? (
             <Text className="text-xs" style={componentStyles.elementColor8}>
               {startsAt ?? "Tanggal menyusul"} · {venue ?? "Lokasi menyusul"}
             </Text>
-            <Text
-              className="text-xs font-bold uppercase"
-              style={componentStyles.elementColor9}
-            >
-              Tiket Umum · Kode tiket {ticketCode ?? "—"}
-            </Text>
-          </View>
-        ) : null}
+          ) : null}
+          <Text
+            className="text-xs font-bold uppercase"
+            style={componentStyles.elementColor9}
+          >
+            Kategori {categoryCode || "—"} · Kode tiket {ticketCode ?? "—"}
+          </Text>
+        </View>
         <Text className="mt-1 text-2xs" style={componentStyles.elementColor10}>
           Tunjukkan QR ini di gerbang masuk.
         </Text>

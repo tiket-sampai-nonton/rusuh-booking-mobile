@@ -49,7 +49,8 @@ describe("EventCard style variants", () => {
     ).toBeCloseTo(4 / 3);
     expect(eventCardImageContainerStyle(false, true, true)).toMatchObject({
       width: 240,
-      height: 160,
+      height: undefined,
+      alignSelf: "stretch",
     });
     expect(eventCardContentStyle(16, true, false, false)).toMatchObject({
       justifyContent: "space-between",
@@ -87,9 +88,7 @@ describe("EventCard style variants", () => {
     ).toBeDefined();
     expect(
       styleForEventCardAnimatedView5(false, soldOut).backgroundColor,
-    ).not.toBe(
-      styleForEventCardAnimatedView5(false, available).backgroundColor,
-    );
+    ).toBe(styleForEventCardAnimatedView5(false, available).backgroundColor);
     expect(styleForEventCardText6(true).fontSize).toBe(10);
     expect(styleForEventCardText6(false).fontSize).toBe(12);
     expect(styleForEventCardText7(12, true).marginBottom).toBe(4);

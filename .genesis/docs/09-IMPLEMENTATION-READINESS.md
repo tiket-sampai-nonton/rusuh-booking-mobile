@@ -3,6 +3,8 @@
 > GENESIS Phase 5 output. Final consistency check before implementation (`WORKFLOW.md`).
 > Scope: **FE only** (Expo Universal). BE is a consumed contract delivered by another team.
 
+> **Historical gate snapshot (2026-10-29/30):** readiness decisions remain the record of the H5 start gate, not a live project-status dashboard. Current implementation and cross-team gaps are summarized in [`AS-BUILT-ALIGNMENT-2026-11-12.md`](AS-BUILT-ALIGNMENT-2026-11-12.md).
+
 ---
 
 ## Overall Status

@@ -1,18 +1,13 @@
 /**
- * PaymentWebView screen — mobile page-token WebView reuse (RBT-062, D10.3).
+ * PaymentWebView screen — mobile page-token handoff (RBT-062, D10.3).
  *
- * The mobile app opens the SNAP/payment `pageUrl` inside a WebView and exchanges
- * the one-time page token for the `rb_pay` session cookie so the SAME FE payment
- * page is reused — the server-authoritative timer is unaffected because it is
- * computed from `paymentExpiresAt`/`serverTime`, not a client clock, so moving
- * into the WebView never resets it.
- *
- * On web there is no WebView handoff (the browser is already on the page), so
- * this screen is a no-op notice there. Native renders the WebView. FE-NEED (O2):
- * endpoints mocked until the BE delivers.
+ * The payment service returns a site-relative `/pay/{bookingId}` bootstrap URL.
+ * Native resolves and validates it, then lets that same-origin FE route exchange
+ * the one-use token through PaymentRepository before opening `/payment/{id}`.
+ * The page and its server-authoritative timer are reused inside the WebView.
  */
 import { useRouter, type Href } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Platform, View } from "react-native";
 import { WebView } from "react-native-webview";
 
@@ -23,53 +18,119 @@ export interface PaymentWebViewScreenProps {
   readonly bookingId: string;
 }
 
-/**
- * Map a WebView navigation URL to the result route, or null to stay. The SNAP
- * gateway returns to successReturnUrl/failedReturnUrl; the FE routes on that
- * but NEVER marks PAID itself. A SUCCESS callback goes to the RBT-063 result
- * gate (`/payment-result/...`), which verifies the authoritative status before
- * showing /success — the callback URL alone never renders PAID. A failed/expired
- * callback can route straight to /expired (no success claim to verify).
- *
- * @param attemptId carried into the result gate so it can verify this attempt.
- */
+/** Map a trusted site callback to the app's payment result route. */
 export function resolveWebViewNav(
   url: string,
   bookingId: string,
   attemptId?: string,
+  siteUrl = process.env.EXPO_PUBLIC_SITE_URL ??
+    "https://rusuh-booking.pages.dev",
 ): string | null {
-  if (url.includes("/success/")) {
-    const q = attemptId ? `?attemptId=${encodeURIComponent(attemptId)}` : "";
-    return `/payment-result/${bookingId}${q}`;
+  let target: URL;
+  try {
+    target = new URL(url);
+    if (target.origin !== new URL(siteUrl).origin) return null;
+  } catch {
+    return null;
   }
-  if (url.includes("/payment-result/")) {
-    const id = /[?&]attemptId=([^&#]+)/.exec(url)?.[1];
-    return `/payment-result/${bookingId}${id ? `?attemptId=${id}` : ""}`;
+
+  const routeIdMatches = (value: string): boolean => {
+    try {
+      return decodeURIComponent(value) === bookingId;
+    } catch {
+      return false;
+    }
+  };
+  const success = /^\/success\/([^/]+)\/?$/.exec(target.pathname);
+  if (success && routeIdMatches(success[1])) {
+    const query = attemptId
+      ? `?attemptId=${encodeURIComponent(attemptId)}`
+      : "";
+    return `/payment-result/${encodeURIComponent(bookingId)}${query}`;
   }
-  if (url.includes("/failed") || url.includes("/expired")) {
-    return `/failed/${bookingId}`;
+
+  const result = /^\/payment-result\/([^/]+)\/?$/.exec(target.pathname);
+  if (result && routeIdMatches(result[1])) {
+    const callbackAttempt = target.searchParams.get("attemptId");
+    return `/payment-result/${encodeURIComponent(bookingId)}${
+      callbackAttempt ? `?attemptId=${encodeURIComponent(callbackAttempt)}` : ""
+    }`;
+  }
+
+  const failure = /^\/(?:failed|expired)(?:\/([^/]+))?\/?$/.exec(
+    target.pathname,
+  );
+  if (failure && (failure[1] === undefined || routeIdMatches(failure[1]))) {
+    return `/failed/${encodeURIComponent(bookingId)}`;
   }
   return null;
+}
+
+/** Resolve and constrain the BE-issued URL to this booking and the site origin. */
+export function resolvePaymentPageUrl(
+  pageUrl: string,
+  bookingId: string,
+  pageToken: string,
+  siteUrl = process.env.EXPO_PUBLIC_SITE_URL ??
+    "https://rusuh-booking.pages.dev",
+): string {
+  const configuredSite = new URL(siteUrl);
+  const resolved = new URL(pageUrl, `${configuredSite.origin}/`);
+  if (resolved.protocol !== "https:") {
+    throw new Error("Payment page URL must use HTTPS");
+  }
+  if (resolved.origin !== configuredSite.origin) {
+    throw new Error("Payment page URL must use the configured site origin");
+  }
+
+  const route = /^\/pay\/([^/]+)\/?$/.exec(resolved.pathname);
+  let routeBookingId: string | null = null;
+  try {
+    routeBookingId = route ? decodeURIComponent(route[1]) : null;
+  } catch {
+    routeBookingId = null;
+  }
+  if (!route || routeBookingId !== bookingId) {
+    throw new Error("Payment page URL must point to this booking");
+  }
+  if (resolved.searchParams.get("ppt") !== pageToken) {
+    throw new Error("Payment page URL must carry its one-time page token");
+  }
+  return resolved.toString();
+}
+
+function isConfiguredSiteUrl(url: string, siteUrl: string): boolean {
+  try {
+    return new URL(url).origin === new URL(siteUrl).origin;
+  } catch {
+    return false;
+  }
 }
 
 export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
   const router = useRouter();
   const { createToken } = usePaymentWebView();
-  const webView = useRef<WebView>(null);
-  const exchanging = useRef(false);
-  const exchanged = useRef(false);
   const [pageUrl, setPageUrl] = useState<string | null>(null);
-  const [pageToken, setPageToken] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  const [retryGeneration, setRetryGeneration] = useState(0);
+  const siteUrl =
+    process.env.EXPO_PUBLIC_SITE_URL ?? "https://rusuh-booking.pages.dev";
 
   useEffect(() => {
+    if (Platform.OS === "web") return;
     let cancelled = false;
     void (async () => {
       try {
         const token = await createToken(bookingId);
         if (cancelled) return;
-        setPageUrl(token.pageUrl);
-        setPageToken(token.pageToken);
+        setPageUrl(
+          resolvePaymentPageUrl(
+            token.pageUrl,
+            bookingId,
+            token.pageToken,
+            siteUrl,
+          ),
+        );
       } catch {
         if (!cancelled) setError(true);
       }
@@ -77,17 +138,23 @@ export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
     return () => {
       cancelled = true;
     };
-    // createToken is stable for the booking; run once per booking.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bookingId]);
+  }, [bookingId, createToken, retryGeneration, siteUrl]);
 
-  // On web there is no WebView handoff — reuse the page directly.
   if (Platform.OS === "web") {
     return <PaymentWebViewNotice variant="web" />;
   }
 
   if (error) {
-    return <PaymentWebViewNotice variant="error" />;
+    return (
+      <PaymentWebViewNotice
+        variant="error"
+        onRetry={() => {
+          setError(false);
+          setPageUrl(null);
+          setRetryGeneration((generation) => generation + 1);
+        }}
+      />
+    );
   }
 
   if (!pageUrl) {
@@ -97,50 +164,32 @@ export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
   return (
     <View className="flex-1 bg-background" testID="paywv-container">
       <WebView
-        ref={webView}
         testID="paywv-webview"
         source={{ uri: pageUrl }}
-        // On load, exchange the one-time token for the rb_pay cookie so the FE
-        // payment page is reused inside the WebView (D10.3).
-        onLoadEnd={() => {
-          if (!pageToken || exchanging.current || exchanged.current) return;
-          if (
-            process.env.EXPO_PUBLIC_USE_MOCKS !== "false" &&
-            process.env.EXPO_PUBLIC_USE_MOCKS !== "0"
-          ) {
-            exchanged.current = true;
-            return;
-          }
-          const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL;
-          if (!apiBase) {
-            setError(true);
-            return;
-          }
-          exchanging.current = true;
-          const url = `${apiBase.replace(/\/+$/, "")}/payment-page-sessions`;
-          const script = `fetch(${JSON.stringify(url)}, {method:'POST',credentials:'include',headers:{'content-type':'application/json'},body:JSON.stringify({pageToken:${JSON.stringify(pageToken)}})}).then(function(r){window.ReactNativeWebView.postMessage(r.ok?'rb-pay-exchanged':'rb-pay-error')}).catch(function(){window.ReactNativeWebView.postMessage('rb-pay-error')});true;`;
-          webView.current?.injectJavaScript(script);
-        }}
         onMessage={(event) => {
-          if (
-            event.nativeEvent.data === "rb-pay-exchanged" &&
-            exchanging.current
-          ) {
-            exchanging.current = false;
-            exchanged.current = true;
-            setPageToken(null);
-            webView.current?.reload();
-          } else if (
-            event.nativeEvent.data === "rb-pay-error" &&
-            exchanging.current
-          ) {
-            exchanging.current = false;
+          if (event.nativeEvent.data === "rb-pay-error") setError(true);
+        }}
+        onError={(event) => {
+          const failedUrl = event.nativeEvent.url ?? "";
+          if (!failedUrl || isConfiguredSiteUrl(failedUrl, siteUrl)) {
             setError(true);
           }
         }}
-        // A SNAP success/failed return navigates the app to the result route.
+        onHttpError={(event) => {
+          if (
+            event.nativeEvent.statusCode >= 400 &&
+            isConfiguredSiteUrl(event.nativeEvent.url ?? "", siteUrl)
+          ) {
+            setError(true);
+          }
+        }}
         onNavigationStateChange={(nav: { url: string }) => {
-          const route = resolveWebViewNav(nav.url, bookingId);
+          const route = resolveWebViewNav(
+            nav.url,
+            bookingId,
+            undefined,
+            siteUrl,
+          );
           if (route) router.replace(route as Href);
         }}
       />

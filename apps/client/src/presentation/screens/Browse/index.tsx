@@ -9,6 +9,8 @@ import {
   Pressable,
   Platform,
   type ListRenderItemInfo,
+  type StyleProp,
+  type ViewStyle,
   Text,
   View,
 } from "react-native";
@@ -30,6 +32,8 @@ import { useEvents } from "@presentation/hooks/useEvents";
 import { useAccountStore } from "@presentation/stores/account-store";
 import { useServices } from "@providers/service-context";
 import { apiErrorMessage } from "@presentation/utils/api-error-message";
+import { designSpacingSemantic } from "@presentation/theme";
+import { gridItemStyle as homeGridItemStyle } from "../Home/fragments/HomeSections/fragments/EventsGrid/style";
 
 import { BrowseCategoriesSection } from "./fragments/BrowseCategoriesSection";
 import { BrowseEmpty, BrowseLoading } from "./fragments/BrowseStates";
@@ -49,6 +53,7 @@ import {
   TIMES,
 } from "./filter";
 import {
+  BROWSE_NATIVE_CATEGORY_BAR_HEIGHT,
   browseMain,
   browseNativeGridRowInset,
   browseNativeListItem,
@@ -62,11 +67,16 @@ import {
 } from "./style";
 import { EventCard } from "@presentation/components/design-system";
 
+function MobileWebEventSeparator() {
+  return <View style={{ height: 8 }} />;
+}
+
 export function BrowseScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isWeb, isDesktop, isNative, isMobileWeb, width, gridColumns } =
     useResponsive();
+  const isTabletWeb = isWeb && width > 640 && width < 960;
   const params = useLocalSearchParams<{
     category?: string;
     genre?: string;
@@ -92,6 +102,11 @@ export function BrowseScreen() {
   }, [params.category, params.genre]);
   const time = readParam(params.time, TIMES, "all");
   const sort = readParam(params.sort, SORTS, "closest");
+  const isFiltered =
+    (activeCategory !== null && activeCategory !== "all") ||
+    genre !== "Semua" ||
+    time !== "all" ||
+    sort !== "closest";
   const eventQuery = {
     ...(genre !== "Semua" ? { genres: [genre] } : {}),
     ...(time === "week"
@@ -166,6 +181,11 @@ export function BrowseScreen() {
     router.replace(`/browse?${query}` as Href);
   };
 
+  const resetFilters = (): void => {
+    setActiveCategory("all");
+    router.replace("/browse" as Href);
+  };
+
   const columns = browseGridColumnCount(
     viewMode,
     isNative,
@@ -173,22 +193,49 @@ export function BrowseScreen() {
     isMobileWeb,
   );
   const renderEvent = useCallback(
-    ({ item }: ListRenderItemInfo<(typeof results)[number]>) => (
-      <View
-        style={
-          columns === 1
+    ({ item, index }: ListRenderItemInfo<(typeof results)[number]>) => {
+      const isListMode = viewMode === "list";
+      const itemStyle: StyleProp<ViewStyle> = isNative
+        ? columns === 1
+          ? [
+              browseGridList(isNative, isMobileWeb),
+              browseNativeListItem,
+              { marginBottom: 16 },
+            ]
+          : browseGridCell(columns, isNative)
+        : isMobileWeb
+          ? [
+              homeGridItemStyle(index, results.length, columns, true),
+              { paddingHorizontal: 16 },
+            ]
+          : isListMode
             ? [
                 browseGridList(isNative, isMobileWeb),
-                isNative ? browseNativeListItem : { width: "100%" },
-                { marginBottom: isMobileWeb ? 8 : 16 },
+                isTabletWeb
+                  ? {
+                      alignSelf: "stretch",
+                      marginHorizontal: designSpacingSemantic.m,
+                      marginBottom: 16,
+                    }
+                  : { width: "100%", marginBottom: 16 },
               ]
-            : browseGridCell(columns, isNative)
-        }
-      >
-        <EventCard event={item} onPress={goToEvent} listMode={columns === 1} />
-      </View>
-    ),
-    [columns, goToEvent, isMobileWeb, isNative],
+            : homeGridItemStyle(index, results.length, columns, false, true);
+
+      return (
+        <View style={itemStyle}>
+          <EventCard event={item} onPress={goToEvent} listMode={isListMode} />
+        </View>
+      );
+    },
+    [
+      columns,
+      goToEvent,
+      isMobileWeb,
+      isNative,
+      isTabletWeb,
+      results.length,
+      viewMode,
+    ],
   );
   if (isLoading) return <BrowseLoading />;
 
@@ -206,7 +253,11 @@ export function BrowseScreen() {
           activeCategory={activeCategory}
           isDesktop={isDesktop}
           isMobileWeb={isMobileWeb}
+          time={time}
+          sort={sort}
+          isFiltered={isFiltered}
           onSelect={setActiveCategory}
+          onReset={resetFilters}
         />
       )}
       {isError && results.length > 0 ? (
@@ -269,15 +320,23 @@ export function BrowseScreen() {
           numColumns={columns}
           columnWrapperStyle={
             columns > 1
-              ? [
-                  browseGridRow(isNative),
-                  isNative ? browseNativeGridRowInset : undefined,
-                ]
+              ? isNative
+                ? [browseGridRow(isNative), browseNativeGridRowInset]
+                : {
+                    flexDirection: "row",
+                    marginHorizontal: designSpacingSemantic.m,
+                  }
               : undefined
+          }
+          ItemSeparatorComponent={
+            isMobileWeb ? MobileWebEventSeparator : undefined
           }
           contentContainerStyle={[
             browseScrollContent(insets.bottom, isDesktop, isMobileWeb),
-            isNative && browseNativeScrollContent(insets.top + 56 + 52 + 12),
+            isNative &&
+              browseNativeScrollContent(
+                insets.top + 56 + BROWSE_NATIVE_CATEGORY_BAR_HEIGHT + 12,
+              ),
             results.length === 0 && { flexGrow: 1 },
           ]}
           ListHeaderComponent={header}
@@ -346,6 +405,10 @@ export function BrowseScreen() {
             top={insets.top + 56}
             activeCategory={activeCategory}
             onSelect={setActiveCategory}
+            time={time}
+            sort={sort}
+            isFiltered={isFiltered}
+            onReset={resetFilters}
           />
         )}
         <BottomNav
@@ -355,6 +418,7 @@ export function BrowseScreen() {
         />
         <FilterModal
           visible={filterOpen}
+          value={{ category: activeCategory ?? "all", time, sort }}
           onClose={() => setFilterOpen(false)}
           onApply={applyFilter}
         />
