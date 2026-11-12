@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, type ViewStyle, type TextStyle } from "react-native";
 import {
   designBorders,
   designColors,
@@ -6,7 +6,17 @@ import {
   plusJakartaSansFonts,
 } from "@presentation/theme";
 
-import type { ViewStyle, TextStyle } from "react-native";
+function responsiveValue<T>(
+  isNative: boolean,
+  isMobileWeb: boolean,
+  mobileWebValue: T,
+  nativeValue: T,
+  desktopValue: T,
+): T {
+  if (isMobileWeb) return mobileWebValue;
+  if (isNative) return nativeValue;
+  return desktopValue;
+}
 
 export const styles = StyleSheet.create({
   container: {
@@ -43,11 +53,13 @@ export function sectionHeaderContainerStyle(
   isMobileWeb = false,
 ): ViewStyle {
   return {
-    marginBottom: isMobileWeb
-      ? 12
-      : isNative
-        ? designSpacingSemantic.m
-        : designSpacingSemantic.l,
+    marginBottom: responsiveValue(
+      isNative,
+      isMobileWeb,
+      12,
+      designSpacingSemantic.m,
+      designSpacingSemantic.l,
+    ),
     paddingBottom: isMobileWeb ? 0 : undefined,
     borderBottomWidth: isMobileWeb ? 0 : undefined,
   };
@@ -58,8 +70,8 @@ export function sectionHeaderTitleStyle(
   isMobileWeb = false,
 ): TextStyle {
   return {
-    fontSize: isMobileWeb ? 18 : isNative ? 20 : 24,
-    letterSpacing: isMobileWeb ? -0.3 : isNative ? -0.2 : 0.48,
+    fontSize: responsiveValue(isNative, isMobileWeb, 18, 20, 24),
+    letterSpacing: responsiveValue(isNative, isMobileWeb, -0.3, -0.2, 0.48),
     textTransform: isMobileWeb ? "none" : undefined,
   };
 }
@@ -68,7 +80,7 @@ export function sectionLinkStyle(
   isNative: boolean,
   isMobileWeb = false,
 ): ViewStyle {
-  return { gap: isMobileWeb ? 4 : isNative ? 4 : 8 };
+  return { gap: responsiveValue(isNative, isMobileWeb, 4, 4, 8) };
 }
 
 export function sectionLinkTextStyle(
@@ -77,10 +89,10 @@ export function sectionLinkTextStyle(
 ): TextStyle {
   return {
     color: isNative ? designColors.inkMuted : designColors.ink,
-    fontSize: isMobileWeb ? 12 : isNative ? 12 : 14,
+    fontSize: responsiveValue(isNative, isMobileWeb, 12, 12, 14),
     fontFamily: isNative
       ? plusJakartaSansFonts.semiBold
       : plusJakartaSansFonts.bold,
-    letterSpacing: isMobileWeb ? 0.48 : isNative ? 0.6 : 0.56,
+    letterSpacing: responsiveValue(isNative, isMobileWeb, 0.48, 0.6, 0.56),
   };
 }

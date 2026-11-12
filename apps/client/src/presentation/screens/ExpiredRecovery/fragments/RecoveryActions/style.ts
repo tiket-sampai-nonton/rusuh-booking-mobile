@@ -1,7 +1,5 @@
 import { StyleSheet } from "react-native";
-import { designColors } from "@presentation/theme";
-
-import { designBorder } from "@presentation/theme";
+import { designBorders, designColors } from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   primaryButton: {
@@ -10,14 +8,14 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 16,
     backgroundColor: designColors.ink,
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
   },
   secondaryButton: {
     minHeight: 48,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     backgroundColor: designColors.ground,
   },
@@ -27,7 +25,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 16,
     backgroundColor: designColors.ground,
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
   },
   primaryText: {

@@ -1,8 +1,11 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorders } from "@presentation/theme";
+import {
+  designColors,
+  designBorders,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
-import { plusJakartaSansFonts } from "@presentation/theme";
 
 export const componentStyles = StyleSheet.create({
   elementBackgroundColor0: {
@@ -57,15 +60,14 @@ export function styleForProgressStepsText3(
   arg0: boolean,
   arg1: boolean,
 ): DynamicStyle {
+  let color = designColors.gray;
+  if (arg0) color = designColors.accent;
+  else if (arg1) color = designColors.ink;
   return {
     fontSize: 12,
     fontFamily: plusJakartaSansFonts.medium,
     textTransform: "uppercase",
     letterSpacing: 0.6,
-    color: arg0
-      ? designColors.accent
-      : arg1
-        ? designColors.ink
-        : designColors.gray,
+    color,
   } as DynamicStyle;
 }

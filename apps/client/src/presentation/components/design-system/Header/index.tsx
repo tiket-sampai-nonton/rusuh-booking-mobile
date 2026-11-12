@@ -51,8 +51,6 @@ import {
   headerRowStyle,
   headerMobileMenuBackdrop,
   headerMobileMenuPanel,
-} from "./style";
-import {
   styleForHeaderAnimatedView2,
   styleForHeaderAnimatedText3,
 } from "./style";
@@ -308,7 +306,7 @@ export function Header({
                   setMenuOpen(false);
                   link.onPress();
                 }}
-                testID={link.testID ? `mobile-${link.testID}` : undefined}
+                testID={mobileMenuItemTestId(link.testID)}
                 style={componentStyles.mobileMenuItem}
               >
                 <Text style={componentStyles.mobileMenuLabel}>
@@ -333,4 +331,9 @@ export default Header;
 function formatActionCount(count: number): string {
   if (count > 99) return "99+";
   return String(count);
+}
+
+function mobileMenuItemTestId(testID: string | undefined): string | undefined {
+  if (!testID) return undefined;
+  return `mobile-${testID}`;
 }

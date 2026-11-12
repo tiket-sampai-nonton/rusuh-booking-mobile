@@ -27,8 +27,8 @@ import { CloseIcon } from "@presentation/components/ArrowIcon";
 import { designColors } from "@presentation/theme";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { PillGroup } from "./PillGroup";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForFilterModalPressable0,
   styleForFilterModalView1,
 } from "./style";

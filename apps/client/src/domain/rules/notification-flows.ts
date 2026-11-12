@@ -64,6 +64,16 @@ export function paymentTimeout(
   };
 }
 
+/** Map the server-authoritative terminal payment status to user-facing copy. */
+export function paymentResultNotification(
+  status: string,
+  bookingId: string,
+): LocalNotification {
+  if (status === "PAID") return paymentSuccess(bookingId);
+  if (status === "EXPIRED") return paymentTimeout(bookingId);
+  return paymentFailure(bookingId);
+}
+
 /** Buyer leaves the payment screen; this does not claim the provider cancelled it. */
 export function paymentCancelled(bookingId: string): LocalNotification {
   return {
@@ -145,5 +155,5 @@ export function notificationRoute(
   notification: Pick<LocalNotification, "deepLink">,
 ): string | null {
   const link = notification.deepLink;
-  return link && link.startsWith("/") ? link : null;
+  return link?.startsWith("/") ? link : null;
 }

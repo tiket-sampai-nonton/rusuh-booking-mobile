@@ -14,8 +14,8 @@
  * VALID and error states use semantic success and danger tokens.
  */
 import { forwardRef, useState, useCallback } from "react";
-import type { TextInputProps } from "react-native";
-import { TextInput, View, Text } from "react-native";
+import { type TextInputProps, TextInput, View, Text } from "react-native";
+
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -29,8 +29,8 @@ import {
   designEasing,
   designDuration,
 } from "@presentation/theme";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForComponentAnimatedView0,
   styleForComponentAnimatedTextInput1,
 } from "./style";

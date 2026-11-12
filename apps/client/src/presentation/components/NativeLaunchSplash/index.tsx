@@ -14,14 +14,27 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BrandSymbol } from "@presentation/components/BrandSymbol";
 import { NativeStatusBarBackdrop } from "@presentation/components/NativeStatusBarBackdrop";
 import { SplashLetter } from "./SplashLetter";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForNativeLaunchSplashAnimatedView1,
   styleForNativeLaunchSplashAnimatedView2,
   styleForNativeLaunchSplashAnimatedView3,
 } from "./style";
 
-const LETTERS = ["R", "U", "S", "U", "H", "T", "I", "K", "E", "T"];
+const FIRST_WORD_LETTERS = [
+  { id: "r", letter: "R", index: 0 },
+  { id: "u-first", letter: "U", index: 1 },
+  { id: "s", letter: "S", index: 2 },
+  { id: "u-second", letter: "U", index: 3 },
+  { id: "h", letter: "H", index: 4 },
+];
+const SECOND_WORD_LETTERS = [
+  { id: "t-first", letter: "T", index: 5 },
+  { id: "i", letter: "I", index: 6 },
+  { id: "k", letter: "K", index: 7 },
+  { id: "e", letter: "E", index: 8 },
+  { id: "t-second", letter: "T", index: 9 },
+];
 
 export function NativeLaunchSplash({
   onFinish,
@@ -39,15 +52,19 @@ export function NativeLaunchSplash({
   const { height, width } = useWindowDimensions();
   const progress = useSharedValue(0);
   const exit = useSharedValue(0);
+  const targetProgress = isReadyToExit ? 1 : 0.72;
+  const progressDuration = isReadyToExit ? 300 : 1800;
 
   useEffect(() => {
-    progress.value = reducedMotion
-      ? 1
-      : withTiming(isReadyToExit ? 1 : 0.72, {
-          duration: isReadyToExit ? 300 : 1800,
-          easing: Easing.out(Easing.cubic),
-        });
-  }, [isReadyToExit, progress, reducedMotion]);
+    if (reducedMotion) {
+      progress.value = 1;
+      return;
+    }
+    progress.value = withTiming(targetProgress, {
+      duration: progressDuration,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [progress, progressDuration, reducedMotion, targetProgress]);
 
   useEffect(() => {
     if (!isReadyToExit) return;
@@ -116,9 +133,9 @@ export function NativeLaunchSplash({
         </Animated.View>
         <View style={componentStyles.elementFlexDirection7}>
           <View style={componentStyles.elementFlexDirection8}>
-            {LETTERS.slice(0, 5).map((letter, index) => (
+            {FIRST_WORD_LETTERS.map(({ id, letter, index }) => (
               <SplashLetter
-                key={`rusuh-${index}`}
+                key={id}
                 letter={letter}
                 index={index}
                 reducedMotion={Boolean(reducedMotion)}
@@ -126,11 +143,11 @@ export function NativeLaunchSplash({
             ))}
           </View>
           <View style={componentStyles.elementFlexDirection9}>
-            {LETTERS.slice(5).map((letter, index) => (
+            {SECOND_WORD_LETTERS.map(({ id, letter, index }) => (
               <SplashLetter
-                key={`tiket-${index}`}
+                key={id}
                 letter={letter}
-                index={index + 5}
+                index={index}
                 reducedMotion={Boolean(reducedMotion)}
               />
             ))}

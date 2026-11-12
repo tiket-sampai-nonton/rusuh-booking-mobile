@@ -10,8 +10,8 @@
 import { Modal, Platform, Pressable, Text, View } from "react-native";
 
 import type { LeaveConfirmProps } from "../../interface";
-import { styles } from "./style";
 import {
+  styles,
   styleForLeaveConfirmPressable0,
   styleForLeaveConfirmPressable1,
 } from "./style";

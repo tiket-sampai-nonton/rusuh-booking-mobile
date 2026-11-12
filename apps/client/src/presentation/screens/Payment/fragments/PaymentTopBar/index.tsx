@@ -8,8 +8,8 @@ import { designColors } from "@presentation/theme";
 
 import type { PaymentTopBarProps } from "../../interface";
 import { paymentStyles, paymentTopBar } from "../../style";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForPaymentTopBarView0,
   styleForPaymentTopBarView1,
 } from "./style";

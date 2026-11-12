@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, type ViewStyle, Platform } from "react-native";
 import {
   designBorders,
   designColors,
@@ -6,9 +6,6 @@ import {
   withAlpha,
 } from "@presentation/theme";
 import { hardShadowStyle } from "@presentation/utils/style";
-
-import type { ViewStyle } from "react-native";
-import { Platform } from "react-native";
 
 export const styles = StyleSheet.create({
   backdrop: {

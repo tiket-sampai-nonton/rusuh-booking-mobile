@@ -30,7 +30,7 @@ export function formatDateID(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
   const ms = d.getTime();
-  if (!isFinite(ms)) return "";
+  if (!Number.isFinite(ms)) return "";
   const dd = d.getUTCDate().toString().padStart(2, "0");
   const mmm = ID_MONTHS[d.getUTCMonth()];
   const yyyy = d.getUTCFullYear();
@@ -41,7 +41,7 @@ export function formatDateID(iso: string | null | undefined): string {
 export function formatTimeID(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
-  if (!isFinite(d.getTime())) return "";
+  if (!Number.isFinite(d.getTime())) return "";
   const hh = d.getUTCHours().toString().padStart(2, "0");
   const mm = d.getUTCMinutes().toString().padStart(2, "0");
   return `${hh}:${mm} WIB`;

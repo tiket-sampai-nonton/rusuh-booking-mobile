@@ -36,6 +36,7 @@ export function ticketRef(bookingId: string, index: number): string {
 }
 
 export function ETicketCard({
+  bookingId,
   index,
   total,
   eventName,
@@ -52,7 +53,7 @@ export function ETicketCard({
     <View
       style={componentStyles.elementBorderWidth0}
       testID={`eticket-${index}`}
-      accessibilityLabel={`E-tiket ${index + 1} dari ${total}`}
+      accessibilityLabel={`E-tiket ${index + 1} dari ${total} untuk pesanan ${bookingId}`}
     >
       {/* Black top strip (prototype `.ticket-top`). */}
       <View

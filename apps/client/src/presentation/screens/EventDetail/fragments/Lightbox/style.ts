@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Animated } from "react-native";
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import { withAlpha } from "@presentation/theme";
 import {
@@ -7,7 +7,6 @@ import {
   designSpacingSemantic,
 } from "@presentation/theme/event-design-tokens";
 
-import { Animated } from "react-native";
 import type { DynamicStyle } from "@presentation/utils/style";
 
 export const lightboxStyles = StyleSheet.create({

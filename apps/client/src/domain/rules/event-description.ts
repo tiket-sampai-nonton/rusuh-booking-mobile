@@ -72,11 +72,11 @@ function asString(v: unknown): string {
 }
 
 function asFiniteNumber(v: unknown): number {
-  return typeof v === "number" && isFinite(v) ? v : 0;
+  return typeof v === "number" && Number.isFinite(v) ? v : 0;
 }
 
 function optionalFiniteNumber(v: unknown): number | undefined {
-  return typeof v === "number" && isFinite(v) ? v : undefined;
+  return typeof v === "number" && Number.isFinite(v) ? v : undefined;
 }
 
 /** Normalise supported lineup records without inventing performer data. */

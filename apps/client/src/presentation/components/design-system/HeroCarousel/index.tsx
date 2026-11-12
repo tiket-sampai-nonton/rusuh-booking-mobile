@@ -32,8 +32,8 @@ import {
   componentStyles,
   styleForHeroCarouselView12,
   styleForHeroCarouselView13,
+  heroInfoColumnStyle,
 } from "./style";
-import { heroInfoColumnStyle } from "./style";
 
 export interface HeroCarouselProps {
   readonly events: readonly EventSummary[];
@@ -113,27 +113,30 @@ export function HeroCarousel({
     }
 
     const sources = imageUris.map((uri) => ({ uri, memoryCache: false }));
-    if (Platform.OS !== "web") {
-      void preload(sources).then(() => {
+    void (async () => {
+      try {
+        if (Platform.OS !== "web") {
+          await preload(sources);
+          if (!cancelled) {
+            setHeroImagesReady(true);
+            setInitialHeroImageReady(true);
+          }
+          return;
+        }
+
+        await preload(sources.slice(0, 1));
+        if (cancelled) return;
+        setInitialHeroImageReady(true);
+        const remainingSources = sources.slice(1);
+        if (remainingSources.length > 0) await preload(remainingSources);
+        if (!cancelled) setHeroImagesReady(true);
+      } catch {
         if (!cancelled) {
           setHeroImagesReady(true);
           setInitialHeroImageReady(true);
         }
-      });
-    } else {
-      void preload(sources.slice(0, 1)).then(() => {
-        if (cancelled) return;
-        setInitialHeroImageReady(true);
-        const remainingSources = sources.slice(1);
-        if (remainingSources.length === 0) {
-          setHeroImagesReady(true);
-          return;
-        }
-        void preload(remainingSources).then(() => {
-          if (!cancelled) setHeroImagesReady(true);
-        });
-      });
-    }
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -298,7 +301,6 @@ export function HeroCarousel({
           <HeroInfoMobile
             event={currentEvent}
             onBook={onBook}
-            onSeeAll={onSeeAll}
             isMobileWeb={isMobileWeb}
           />
         ) : (

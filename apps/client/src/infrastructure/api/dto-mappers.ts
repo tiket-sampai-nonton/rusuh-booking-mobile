@@ -70,7 +70,7 @@ interface WireQueueEntry {
   eventId: string;
   position: number;
   status: QueueStatus;
-  zone?: QueueEntry["zone"];
+  zone?: NonNullable<QueueEntry["zone"]>;
   nextPollAfterMs?: number;
   serverTime?: string;
 }
@@ -97,8 +97,8 @@ interface WireBookingSession {
   serverTime?: string;
   maxSelectable?: number;
   categories: BookingSession["categories"];
-  phase?: BookingSession["phase"];
-  booking?: BookingSession["booking"];
+  phase?: NonNullable<BookingSession["phase"]>;
+  booking?: NonNullable<BookingSession["booking"]>;
 }
 interface WireAttendeeCheck {
   nikMasked?: string;

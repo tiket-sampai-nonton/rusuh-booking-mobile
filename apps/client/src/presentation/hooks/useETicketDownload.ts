@@ -5,7 +5,12 @@ import { designColors } from "@presentation/theme";
 import { useServices } from "@providers/service-context";
 
 function utf8Base64(value: string): string {
-  return btoa(unescape(encodeURIComponent(value)));
+  const binary = encodeURIComponent(value).replace(
+    /%([0-9A-F]{2})|([^%])/gi,
+    (_match, hex: string | undefined, character: string | undefined) =>
+      hex ? String.fromCharCode(Number.parseInt(hex, 16)) : (character ?? ""),
+  );
+  return btoa(binary);
 }
 
 const htmlEscapes: Record<string, string> = {

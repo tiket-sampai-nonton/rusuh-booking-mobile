@@ -102,14 +102,11 @@ export class HttpPaymentRepository implements PaymentRepository {
       url: `payments/${encodeURIComponent(id)}/status`,
     });
     const data = unwrap<WireStatus>(res);
-    const status: PaymentStatus =
-      data.bookingStatus === "PAID"
-        ? "PAID"
-        : data.bookingStatus === "EXPIRED"
-          ? "EXPIRED"
-          : data.bookingStatus === "CANCELLED"
-            ? "FAILED"
-            : attemptStatus(data.attempt?.status);
+    let status: PaymentStatus;
+    if (data.bookingStatus === "PAID") status = "PAID";
+    else if (data.bookingStatus === "EXPIRED") status = "EXPIRED";
+    else if (data.bookingStatus === "CANCELLED") status = "FAILED";
+    else status = attemptStatus(data.attempt?.status);
     return {
       attemptId: data.attempt ? String(data.attempt.attemptNo) : "",
       bookingId: data.bookingId,

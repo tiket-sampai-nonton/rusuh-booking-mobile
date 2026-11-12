@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorder, withAlpha } from "@presentation/theme";
+import { designColors, designBorders, withAlpha } from "@presentation/theme";
 
 import type { EdgeInsets } from "react-native-safe-area-context";
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -19,7 +19,7 @@ export const componentStyles = StyleSheet.create({
   },
   elementBackgroundColor5: {
     backgroundColor: designColors.ground,
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ground,
   },
   elementColor6: { color: designColors.ink, letterSpacing: 0.5 },

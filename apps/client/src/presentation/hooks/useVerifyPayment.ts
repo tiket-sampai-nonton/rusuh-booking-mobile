@@ -36,11 +36,7 @@ import {
   resolvePaymentRoute,
   type PaymentVerdict,
 } from "@domain/rules/payment-verify";
-import {
-  paymentFailure,
-  paymentTimeout,
-  paymentSuccess,
-} from "@domain/rules/notification-flows";
+import { paymentResultNotification } from "@domain/rules/notification-flows";
 import { useServices } from "@providers/service-context";
 
 /** What the result screen reads off the single verify poller. */
@@ -137,12 +133,7 @@ export function useVerifyPayment(
       !isPaymentTerminal(attemptStatus)
     )
       return;
-    const message =
-      attemptStatus === "PAID"
-        ? paymentSuccess(bookingId)
-        : attemptStatus === "EXPIRED"
-          ? paymentTimeout(bookingId)
-          : paymentFailure(bookingId);
+    const message = paymentResultNotification(attemptStatus, bookingId);
     // Payment status comes from VerifyPayment (the BE-authoritative read).
     // Delivery errors must never block the result route.
     void cancelNotification

@@ -15,8 +15,10 @@ import { useNavigation, useRouter, type Href } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { PlusIcon } from "@presentation/components/ArrowIcon";
+import { PlusIcon, WarningIcon } from "@presentation/components/ArrowIcon";
 import { DomainError } from "@domain/errors/domain-error";
+import type { BookingSession } from "@domain/repositories/booking.repository";
+import type { DomainErrorKind } from "@domain/errors/domain-error";
 
 import {
   appendRow,
@@ -36,7 +38,7 @@ import {
 } from "@domain/rules/checkout";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { designColors } from "@presentation/theme";
-import { WarningIcon } from "@presentation/components/ArrowIcon";
+
 import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
@@ -61,8 +63,12 @@ import { ProgressSteps } from "./fragments/ProgressSteps";
 import { TicketItem } from "./fragments/TicketItem";
 import type { CheckoutScreenProps, RowCheckStatus } from "./interface";
 import { CheckoutSessionUnavailable } from "./fragments/CheckoutSessionUnavailable";
-import { checkoutScrollContent, componentStyles } from "./style";
-import { addTicketButtonStyle } from "./style";
+import {
+  checkoutScrollContent,
+  componentStyles,
+  addTicketButtonStyle,
+} from "./style";
+
 import { apiErrorMessage } from "@presentation/utils/api-error-message";
 import { LoginModal } from "@presentation/components/auth/LoginModal";
 import { GetCheckoutUserDetails } from "@application/auth/get-checkout-user-details.use-case";
@@ -78,6 +84,373 @@ function rowStatus(
   if (isAttendeeBlocked(verdict)) return "blocked";
   if (isAttendeeWarning(verdict)) return "warning";
   return "available";
+}
+
+function requiredOrInvalidNikMessage(
+  submitAttempted: boolean,
+  nik: string,
+  subject: "pembeli" | "penonton",
+): string | undefined {
+  if (nik.length > 0 && !isValidNik(nik))
+    return `NIK ${subject} harus terdiri dari 16 digit.`;
+  if (submitAttempted && !nik.trim())
+    return `NIK ${subject} wajib diisi (16 digit).`;
+  return undefined;
+}
+
+function requiredOrInvalidEmailMessage(
+  submitAttempted: boolean,
+  email: string,
+): string | undefined {
+  if (email.length > 0 && !isValidEmail(email))
+    return email.trim()
+      ? "Masukkan alamat email yang valid."
+      : "Email wajib diisi.";
+  if (submitAttempted && !email.trim()) return "Email wajib diisi.";
+  return undefined;
+}
+
+function emailConfirmationMessage(
+  submitAttempted: boolean,
+  confirmation: string,
+  email: string,
+): string | undefined {
+  if (confirmation.length > 0 && confirmation.trim() !== email.trim())
+    return "Konfirmasi email harus sama dengan email pembeli.";
+  if (submitAttempted && !confirmation.trim())
+    return "Konfirmasi email wajib diisi.";
+  return undefined;
+}
+
+function isAccountCheckout(
+  fromAccount: boolean,
+  hasAuthToken: boolean,
+  checkoutDetails: CheckoutUserDetails | null,
+): boolean {
+  return fromAccount || hasAuthToken || checkoutDetails !== null;
+}
+
+function buyerNameValidationMessage(
+  submitAttempted: boolean,
+  required: boolean,
+  buyerName: string,
+): string | undefined {
+  return submitAttempted && required && !buyerName.trim()
+    ? "Nama pembeli wajib diisi untuk menggunakan data pembeli."
+    : undefined;
+}
+
+function buyerNikHelperMessage(
+  hasAccountNik: boolean,
+  isAccountUser: boolean,
+): string | undefined {
+  if (hasAccountNik)
+    return "NIK diisi dari akun dan tidak dapat diubah di sini.";
+  if (isAccountUser)
+    return "NIK akun tidak tersedia. Silakan isi NIK secara manual.";
+  return undefined;
+}
+
+function buyerEmailHelperMessage(
+  hasAccountEmail: boolean,
+  isAccountUser: boolean,
+  emailMasked: string | undefined,
+  emailAvailable: boolean,
+): string | undefined {
+  if (hasAccountEmail)
+    return "Email diisi dari akun dan tidak dapat diubah di sini.";
+  if (isAccountUser && emailMasked && !emailAvailable) {
+    return `Email akun tersimpan sebagai ${emailMasked}. Masukkan email lengkap untuk checkout.`;
+  }
+  return undefined;
+}
+
+function holdErrorActionLabel(
+  kind: DomainErrorKind | undefined,
+): string | undefined {
+  if (kind === "auth") return "Masuk kembali";
+  if (kind === "dependency") return "Coba lagi";
+  return undefined;
+}
+
+function runHoldErrorAction(
+  kind: DomainErrorKind | undefined,
+  resetError: () => void,
+  openAuthRecovery: () => void,
+  retryHold: () => void,
+): void {
+  switch (kind) {
+    case "auth":
+      resetError();
+      openAuthRecovery();
+      return;
+    case "dependency":
+      retryHold();
+      return;
+    default:
+      return;
+  }
+}
+
+function hasRestoredSession(
+  session: BookingSession | null | undefined,
+  sessionId: string,
+): session is BookingSession {
+  return Boolean(session && session.sessionId === sessionId);
+}
+
+function sessionErrorMessage(error: unknown): string | undefined {
+  return error ? apiErrorMessage(error) : undefined;
+}
+
+function attendeeNikMessage(
+  submitAttempted: boolean,
+  nik: string,
+  useBuyerNik: boolean,
+  attendeeNiksAreUnique: boolean,
+): string | undefined {
+  if (submitAttempted && !isValidNik(nik)) {
+    return useBuyerNik
+      ? "Masukkan NIK pembeli yang valid pada bagian Data Pembeli."
+      : "NIK penonton wajib diisi (16 digit).";
+  }
+  if (!isValidNik(nik) && nik.length > 0)
+    return "NIK penonton harus terdiri dari 16 digit.";
+  if (submitAttempted && !attendeeNiksAreUnique)
+    return "NIK ini sudah digunakan pada tiket lain.";
+  return undefined;
+}
+
+interface CheckoutBuyerFieldsProps {
+  readonly isAccountUser: boolean;
+  readonly buyerName: string;
+  readonly onBuyerNameChange: (value: string) => void;
+  readonly buyerNameError?: string;
+  readonly buyerNameHelperText?: string;
+  readonly buyerNameLocked: boolean;
+  readonly buyerNik: string;
+  readonly onBuyerNikChange: (value: string) => void;
+  readonly buyerNikError?: string;
+  readonly buyerNikHelperText?: string;
+  readonly buyerNikLocked: boolean;
+  readonly buyerEmail: string;
+  readonly onBuyerEmailChange: (value: string) => void;
+  readonly buyerEmailError?: string;
+  readonly buyerEmailHelperText?: string;
+  readonly buyerEmailLocked: boolean;
+  readonly emailConfirmation: string;
+  readonly onEmailConfirmationChange: (value: string) => void;
+  readonly emailConfirmationError?: string;
+  readonly emailConfirmationHelperText?: string;
+}
+
+function CheckoutBuyerFields({
+  isAccountUser,
+  buyerName,
+  onBuyerNameChange,
+  buyerNameError,
+  buyerNameHelperText,
+  buyerNameLocked,
+  buyerNik,
+  onBuyerNikChange,
+  buyerNikError,
+  buyerNikHelperText,
+  buyerNikLocked,
+  buyerEmail,
+  onBuyerEmailChange,
+  buyerEmailError,
+  buyerEmailHelperText,
+  buyerEmailLocked,
+  emailConfirmation,
+  onEmailConfirmationChange,
+  emailConfirmationError,
+  emailConfirmationHelperText,
+}: CheckoutBuyerFieldsProps) {
+  return (
+    <Section title="Data Pembeli" number={1}>
+      {isAccountUser ? (
+        <View style={componentStyles.buyerPrefillBadge} testID="prefill-badge">
+          <Text
+            style={componentStyles.buyerPrefillBadgeText}
+            className="text-2xs font-sans font-bold uppercase"
+          >
+            Akun terhubung
+          </Text>
+        </View>
+      ) : null}
+      <Field
+        label="Nama Pembeli"
+        value={buyerName}
+        onChangeText={onBuyerNameChange}
+        placeholder="Nama sesuai KTP"
+        testID="buyer-name"
+        editable={!buyerNameLocked}
+        invalid={Boolean(buyerNameError)}
+        errorMessage={buyerNameError}
+        helperText={buyerNameHelperText}
+      />
+      <Field
+        label="NIK Pembeli (16 digit)"
+        value={buyerNik}
+        onChangeText={onBuyerNikChange}
+        placeholder="16 digit KTP pembeli"
+        keyboardType="number-pad"
+        testID="buyer-nik"
+        editable={!buyerNikLocked}
+        invalid={Boolean(buyerNikError)}
+        errorMessage={buyerNikError}
+        helperText={buyerNikHelperText}
+      />
+      <Field
+        label="Email"
+        value={buyerEmail}
+        onChangeText={onBuyerEmailChange}
+        placeholder="kamu@email.com"
+        keyboardType="email-address"
+        testID="buyer-email"
+        editable={!buyerEmailLocked}
+        invalid={Boolean(buyerEmailError)}
+        errorMessage={buyerEmailError}
+        helperText={buyerEmailHelperText}
+      />
+      <Field
+        label="Konfirmasi email"
+        value={emailConfirmation}
+        onChangeText={onEmailConfirmationChange}
+        placeholder="Masukkan kembali email"
+        keyboardType="email-address"
+        testID="buyer-email-confirmation"
+        editable={!buyerEmailLocked}
+        invalid={Boolean(emailConfirmationError)}
+        errorMessage={emailConfirmationError}
+        helperText={emailConfirmationHelperText}
+      />
+    </Section>
+  );
+}
+
+interface CheckoutTicketFieldsProps {
+  readonly rows: readonly TicketRow[];
+  readonly buyerName: string;
+  readonly buyerNik: string;
+  readonly submitAttempted: boolean;
+  readonly attendeeNiksAreUnique: boolean;
+  readonly checks: Readonly<Record<string, AttendeeCheckResult>>;
+  readonly pending: Readonly<Record<string, boolean>>;
+  readonly maxSelectable: number;
+  readonly categories: BookingSession["categories"];
+  readonly onAdd: () => void;
+  readonly onRemove: (index: number) => void;
+  readonly onPatch: (index: number, patch: Partial<TicketRow>) => void;
+  readonly onUseBuyer: (index: number, enabled: boolean) => void;
+}
+
+function CheckoutTicketFields({
+  rows,
+  buyerName,
+  buyerNik,
+  submitAttempted,
+  attendeeNiksAreUnique,
+  checks,
+  pending,
+  maxSelectable,
+  categories,
+  onAdd,
+  onRemove,
+  onPatch,
+  onUseBuyer,
+}: CheckoutTicketFieldsProps) {
+  return (
+    <Section title="Tiket" number={2}>
+      {rows.map((row, index) => {
+        const nik = row.useBuyerNik ? buyerNik : row.attendeeNik;
+        const attendeeNikError = attendeeNikMessage(
+          submitAttempted,
+          nik,
+          row.useBuyerNik,
+          attendeeNiksAreUnique,
+        );
+        return (
+          <TicketItem
+            key={row.rowId}
+            index={index}
+            row={row}
+            buyerName={buyerName}
+            buyerNik={buyerNik}
+            categoryError={
+              submitAttempted && !row.categoryId
+                ? "Pilih kategori tiket."
+                : undefined
+            }
+            attendeeNameError={
+              submitAttempted && !row.useBuyerNik && !row.attendeeName.trim()
+                ? "Nama penonton wajib diisi."
+                : undefined
+            }
+            attendeeNikError={attendeeNikError}
+            canRemove={rows.length > 1}
+            onRemove={() => onRemove(index)}
+            onPatch={(patch) => onPatch(index, patch)}
+            onUseBuyer={(enabled) => onUseBuyer(index, enabled)}
+            status={rowStatus(checks[nik], Boolean(pending[nik]))}
+            categories={categories}
+          />
+        );
+      })}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Tambah tiket"
+        accessibilityState={{ disabled: rows.length >= maxSelectable }}
+        disabled={rows.length >= maxSelectable}
+        onPress={onAdd}
+        testID="add-ticket"
+        style={addTicketButtonStyle(rows, maxSelectable)}
+      >
+        <View className="flex-row items-center gap-2">
+          <PlusIcon color={designColors.ink} size={16} />
+          <Text style={componentStyles.addTicketLabel}>Tambah tiket</Text>
+        </View>
+      </Pressable>
+      <View style={componentStyles.quotaWarning}>
+        <WarningIcon color={designColors.warn} />
+        <Text style={componentStyles.quotaWarningText}>
+          Batas{" "}
+          <Text style={componentStyles.quotaWarningEmphasis}>
+            {maxSelectable} tiket per NIK
+          </Text>{" "}
+          divalidasi server saat Lanjut Bayar. Tiap tiket butuh 1 NIK penonton.
+        </Text>
+      </View>
+    </Section>
+  );
+}
+
+interface CheckoutConsentSectionProps {
+  readonly visible: boolean;
+  readonly consent: boolean;
+  readonly errorMessage?: string;
+  readonly onToggle: (checked: boolean) => void;
+  readonly onOpenPrivacy: () => void;
+}
+
+function CheckoutConsentSection({
+  visible,
+  consent,
+  errorMessage,
+  onToggle,
+  onOpenPrivacy,
+}: CheckoutConsentSectionProps) {
+  if (!visible) return null;
+  return (
+    <Section title="Persetujuan" number={3}>
+      <ConsentGate
+        checked={consent}
+        onToggle={onToggle}
+        onOpenPrivacy={onOpenPrivacy}
+        errorMessage={errorMessage}
+      />
+    </Section>
+  );
 }
 
 export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
@@ -135,8 +508,11 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const [hasAuthToken, setHasAuthToken] = useState(false);
   const checkoutDetailsRequestStarted = useRef(false);
   // Logged-in users consented at registration; guests consent inline (AC3).
-  const isAccountUser =
-    prefill.fromAccount || hasAuthToken || checkoutDetails !== null;
+  const isAccountUser = isAccountCheckout(
+    prefill.fromAccount,
+    hasAuthToken,
+    checkoutDetails,
+  );
   const isGuest = !isAccountUser;
 
   // Fetch authenticated /me data specifically for checkout. The raw NIK stays
@@ -311,36 +687,49 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   );
 
   const buyerNameRequired = rows.some((row) => row.useBuyerNik);
-  const buyerNameError =
-    submitAttempted && buyerNameRequired && !buyerName.trim()
-      ? "Nama pembeli wajib diisi untuk menggunakan data pembeli."
-      : undefined;
-  const buyerNikError =
-    (submitAttempted && !buyerNik.trim()) ||
-    (buyerNik.length > 0 && !isValidNik(buyerNik))
-      ? buyerNik.length > 0
-        ? "NIK pembeli harus terdiri dari 16 digit."
-        : "NIK pembeli wajib diisi (16 digit)."
-      : undefined;
-  const buyerEmailError =
-    (submitAttempted && !buyerEmail.trim()) ||
-    (buyerEmail.length > 0 && !isValidEmail(buyerEmail))
-      ? buyerEmail.trim()
-        ? "Masukkan alamat email yang valid."
-        : "Email wajib diisi."
-      : undefined;
-  const emailConfirmationError =
-    (submitAttempted && !emailConfirmation.trim()) ||
-    (emailConfirmation.length > 0 &&
-      emailConfirmation.trim() !== buyerEmail.trim())
-      ? emailConfirmation.trim()
-        ? "Konfirmasi email harus sama dengan email pembeli."
-        : "Konfirmasi email wajib diisi."
-      : undefined;
+  const buyerNameError = buyerNameValidationMessage(
+    submitAttempted,
+    buyerNameRequired,
+    buyerName,
+  );
+  const buyerNikError = requiredOrInvalidNikMessage(
+    submitAttempted,
+    buyerNik,
+    "pembeli",
+  );
+  const buyerEmailError = requiredOrInvalidEmailMessage(
+    submitAttempted,
+    buyerEmail,
+  );
+  const emailConfirmationError = emailConfirmationMessage(
+    submitAttempted,
+    emailConfirmation,
+    buyerEmail,
+  );
+  const buyerNikHelperText = buyerNikHelperMessage(
+    Boolean(checkoutDetails?.nik),
+    isAccountUser,
+  );
+  const buyerEmailHelperText = buyerEmailHelperMessage(
+    Boolean(checkoutDetails?.email),
+    isAccountUser,
+    prefill.emailMasked,
+    Boolean(prefill.email),
+  );
+  const buyerNameHelperText = checkoutDetails?.fullName?.trim()
+    ? "Nama diisi dari akun dan tidak dapat diubah di sini."
+    : undefined;
+  const emailConfirmationHelperText = checkoutDetails?.email
+    ? "Konfirmasi mengikuti email akun dan tidak dapat diubah."
+    : undefined;
   const attendeeNiksAreUnique = attendeeNiksUnique(
     resolvedRows,
     resolvedBuyerNik,
   );
+  const consentErrorMessage =
+    submitAttempted && !consent
+      ? "Persetujuan diperlukan sebelum melanjutkan."
+      : undefined;
 
   const totalMinor = useMemo(
     () =>
@@ -404,21 +793,14 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     })();
   };
 
-  const holdErrorActionLabel =
-    holdError?.kind === "auth"
-      ? "Masuk kembali"
-      : holdError?.kind === "dependency"
-        ? "Coba lagi"
-        : undefined;
-
-  const handleHoldErrorAction = (): void => {
-    if (holdError?.kind === "auth") {
-      resetError();
-      setAuthRecoveryOpen(true);
-    } else if (holdError?.kind === "dependency") {
-      handleSubmit();
-    }
-  };
+  const holdErrorAction = holdErrorActionLabel(holdError?.kind);
+  const handleHoldErrorAction = (): void =>
+    runHoldErrorAction(
+      holdError?.kind,
+      resetError,
+      () => setAuthRecoveryOpen(true),
+      handleSubmit,
+    );
 
   if (isLoading) {
     return (
@@ -433,11 +815,11 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     );
   }
 
-  if (!session || session.sessionId !== sessionId) {
+  if (!hasRestoredSession(session, sessionId)) {
     return (
       <CheckoutSessionUnavailable
         hasError={Boolean(sessionError)}
-        errorMessage={sessionError ? apiErrorMessage(sessionError) : undefined}
+        errorMessage={sessionErrorMessage(sessionError)}
         onRetry={() => void retry()}
         onBrowse={() => router.replace("/browse" as Href)}
       />
@@ -461,195 +843,62 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           contentContainerStyle={checkoutScrollContent(isDesktop, isMobileWeb)}
           testID="checkout-scroll"
         >
-          {session ? (
-            <CheckoutHero
-              eventId={session.eventId}
-              eventName={eventDetail?.name}
-              eventNameError={eventDetailError}
-              isMobileWeb={isMobileWeb}
-              onRetryEventName={() => void retryEventDetail()}
-            />
-          ) : null}
+          <CheckoutHero
+            eventId={session.eventId}
+            eventName={eventDetail?.name}
+            eventNameError={eventDetailError}
+            isMobileWeb={isMobileWeb}
+            onRetryEventName={() => void retryEventDetail()}
+          />
 
-          <Section title="Data Pembeli" number={1}>
-            {isAccountUser ? (
-              <View
-                style={componentStyles.buyerPrefillBadge}
-                testID="prefill-badge"
-              >
-                <Text
-                  style={componentStyles.buyerPrefillBadgeText}
-                  className="text-2xs font-sans font-bold uppercase"
-                >
-                  Akun terhubung
-                </Text>
-              </View>
-            ) : null}
-            <Field
-              label="Nama Pembeli"
-              value={buyerName}
-              onChangeText={setBuyerName}
-              placeholder="Nama sesuai KTP"
-              testID="buyer-name"
-              editable={!checkoutDetails?.fullName?.trim()}
-              invalid={Boolean(buyerNameError)}
-              errorMessage={buyerNameError}
-              helperText={
-                checkoutDetails?.fullName?.trim()
-                  ? "Nama diisi dari akun dan tidak dapat diubah di sini."
-                  : undefined
-              }
-            />
-            <Field
-              label="NIK Pembeli (16 digit)"
-              value={buyerNik}
-              onChangeText={(value) =>
-                setBuyerNik(value.replace(/\D/g, "").slice(0, 16))
-              }
-              placeholder="16 digit KTP pembeli"
-              keyboardType="number-pad"
-              testID="buyer-nik"
-              editable={!checkoutDetails?.nik}
-              invalid={Boolean(buyerNikError)}
-              errorMessage={buyerNikError}
-              helperText={
-                checkoutDetails?.nik
-                  ? "NIK diisi dari akun dan tidak dapat diubah di sini."
-                  : isAccountUser
-                    ? "NIK akun tidak tersedia. Silakan isi NIK secara manual."
-                    : undefined
-              }
-            />
-            <Field
-              label="Email"
-              value={buyerEmail}
-              onChangeText={setBuyerEmail}
-              placeholder="kamu@email.com"
-              keyboardType="email-address"
-              testID="buyer-email"
-              editable={!checkoutDetails?.email}
-              invalid={Boolean(buyerEmailError)}
-              errorMessage={buyerEmailError}
-              helperText={
-                checkoutDetails?.email
-                  ? "Email diisi dari akun dan tidak dapat diubah di sini."
-                  : isAccountUser
-                    ? prefill.emailMasked &&
-                      !prefill.email &&
-                      !checkoutDetails?.email
-                      ? `Email akun tersimpan sebagai ${prefill.emailMasked}. Masukkan email lengkap untuk checkout.`
-                      : undefined
-                    : undefined
-              }
-            />
-            <Field
-              label="Konfirmasi email"
-              value={emailConfirmation}
-              onChangeText={setEmailConfirmation}
-              placeholder="Masukkan kembali email"
-              keyboardType="email-address"
-              testID="buyer-email-confirmation"
-              editable={!checkoutDetails?.email}
-              invalid={Boolean(emailConfirmationError)}
-              errorMessage={emailConfirmationError}
-              helperText={
-                checkoutDetails?.email
-                  ? "Konfirmasi mengikuti email akun dan tidak dapat diubah."
-                  : undefined
-              }
-            />
-          </Section>
+          <CheckoutBuyerFields
+            isAccountUser={isAccountUser}
+            buyerName={buyerName}
+            onBuyerNameChange={setBuyerName}
+            buyerNameError={buyerNameError}
+            buyerNameHelperText={buyerNameHelperText}
+            buyerNameLocked={Boolean(checkoutDetails?.fullName?.trim())}
+            buyerNik={buyerNik}
+            onBuyerNikChange={(value) =>
+              setBuyerNik(value.replace(/\D/g, "").slice(0, 16))
+            }
+            buyerNikError={buyerNikError}
+            buyerNikHelperText={buyerNikHelperText}
+            buyerNikLocked={Boolean(checkoutDetails?.nik)}
+            buyerEmail={buyerEmail}
+            onBuyerEmailChange={setBuyerEmail}
+            buyerEmailError={buyerEmailError}
+            buyerEmailHelperText={buyerEmailHelperText}
+            buyerEmailLocked={Boolean(checkoutDetails?.email)}
+            emailConfirmation={emailConfirmation}
+            onEmailConfirmationChange={setEmailConfirmation}
+            emailConfirmationError={emailConfirmationError}
+            emailConfirmationHelperText={emailConfirmationHelperText}
+          />
 
-          <Section title="Tiket" number={2}>
-            {rows.map((row, i) => {
-              const nik = row.useBuyerNik ? buyerNik : row.attendeeNik;
-              return (
-                // Key on the STABLE rowId (not the array index): rows are
-                // add/remove-able, so an index key would remount the wrong
-                // row's input state when a middle row is removed.
-                <TicketItem
-                  key={row.rowId}
-                  index={i}
-                  row={row}
-                  buyerName={buyerName}
-                  buyerNik={buyerNik}
-                  categoryError={
-                    submitAttempted && !row.categoryId
-                      ? "Pilih kategori tiket."
-                      : undefined
-                  }
-                  attendeeNameError={
-                    submitAttempted &&
-                    !row.useBuyerNik &&
-                    !row.attendeeName.trim()
-                      ? "Nama penonton wajib diisi."
-                      : undefined
-                  }
-                  attendeeNikError={
-                    submitAttempted && !isValidNik(nik)
-                      ? row.useBuyerNik
-                        ? "Masukkan NIK pembeli yang valid pada bagian Data Pembeli."
-                        : "NIK penonton wajib diisi (16 digit)."
-                      : !isValidNik(nik) && nik.length > 0
-                        ? "NIK penonton harus terdiri dari 16 digit."
-                        : submitAttempted && !attendeeNiksAreUnique
-                          ? "NIK ini sudah digunakan pada tiket lain."
-                          : undefined
-                  }
-                  canRemove={rows.length > 1}
-                  onRemove={() => removeRow(i)}
-                  onPatch={(p) => patchRow(i, p)}
-                  onUseBuyer={(on) => setUseBuyer(i, on)}
-                  status={rowStatus(checks[nik], !!pending[nik])}
-                  categories={session?.categories ?? []}
-                />
-              );
-            })}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Tambah tiket"
-              accessibilityState={{ disabled: rows.length >= cap }}
-              disabled={rows.length >= cap}
-              onPress={addRow}
-              testID="add-ticket"
-              style={addTicketButtonStyle(rows, cap)}
-            >
-              <Text style={componentStyles.addTicketText}>
-                <View className="flex-row items-center gap-2">
-                  <PlusIcon color={designColors.ink} size={16} />
-                  <Text style={componentStyles.addTicketLabel}>
-                    Tambah tiket
-                  </Text>
-                </View>
-              </Text>
-            </Pressable>
-            <View style={componentStyles.quotaWarning}>
-              <WarningIcon color={designColors.warn} />
-              <Text style={componentStyles.quotaWarningText}>
-                Batas{" "}
-                <Text style={componentStyles.quotaWarningEmphasis}>
-                  {cap} tiket per NIK
-                </Text>{" "}
-                divalidasi server saat Lanjut Bayar. Tiap tiket butuh 1 NIK
-                penonton.
-              </Text>
-            </View>
-          </Section>
+          <CheckoutTicketFields
+            rows={rows}
+            buyerName={buyerName}
+            buyerNik={buyerNik}
+            submitAttempted={submitAttempted}
+            attendeeNiksAreUnique={attendeeNiksAreUnique}
+            checks={checks}
+            pending={pending}
+            maxSelectable={cap}
+            categories={session.categories}
+            onAdd={addRow}
+            onRemove={removeRow}
+            onPatch={patchRow}
+            onUseBuyer={setUseBuyer}
+          />
 
-          {isGuest ? (
-            <Section title="Persetujuan" number={3}>
-              <ConsentGate
-                checked={consent}
-                onToggle={setConsent}
-                onOpenPrivacy={() => router.push("/privacy" as Href)}
-                errorMessage={
-                  submitAttempted && !consent
-                    ? "Persetujuan diperlukan sebelum melanjutkan."
-                    : undefined
-                }
-              />
-            </Section>
-          ) : null}
+          <CheckoutConsentSection
+            visible={isGuest}
+            consent={consent}
+            onToggle={setConsent}
+            onOpenPrivacy={() => router.push("/privacy" as Href)}
+            errorMessage={consentErrorMessage}
+          />
         </ScrollView>
 
         <CheckoutBar
@@ -657,7 +906,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           pending={isHolding}
           expired={expired}
           errorMessage={holdError?.userMessage ?? (leaveError || undefined)}
-          errorActionLabel={holdErrorActionLabel}
+          errorActionLabel={holdErrorAction}
           onErrorAction={handleHoldErrorAction}
           onSubmit={handleSubmit}
           bottomInset={insets.bottom}

@@ -19,8 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { PaymentMethod } from "@domain/repositories/payment.repository";
 import {
   paymentCancelled,
-  paymentFailure,
-  paymentSuccess,
+  paymentResultNotification,
   paymentTimeout,
 } from "@domain/rules/notification-flows";
 import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
@@ -141,12 +140,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
       attemptStatus === "FAILED" ||
       attemptStatus === "EXPIRED"
     ) {
-      const outcome =
-        attemptStatus === "PAID"
-          ? paymentSuccess(bookingId)
-          : attemptStatus === "EXPIRED"
-            ? paymentTimeout(bookingId)
-            : paymentFailure(bookingId);
+      const outcome = paymentResultNotification(attemptStatus, bookingId);
       void cancelNotification
         .execute(`payment-timeout-${bookingId}`)
         .catch(() => undefined)
@@ -173,6 +167,15 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   ]);
 
   const warnTimer = remainingMs <= 60_000;
+  const paymentPageRetryLabel = isRetryingPaymentPage ? "MEMUAT…" : "COBA LAGI";
+  let paymentErrorMessage: string | undefined;
+  if (handoffError)
+    paymentErrorMessage = "Gagal membuka halaman pembayaran. Coba lagi.";
+  else if (createAttempt.isError)
+    paymentErrorMessage = apiErrorMessage(
+      createAttempt.error,
+      "Gagal memproses pembayaran. Coba lagi.",
+    );
 
   if (isLoading) {
     return (
@@ -211,9 +214,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
             testID="payment-retry"
             className="mb-4 border-2 border-ink px-6 py-3"
           >
-            <Text className="font-bold">
-              {isRetryingPaymentPage ? "MEMUAT…" : "COBA LAGI"}
-            </Text>
+            <Text className="font-bold">{paymentPageRetryLabel}</Text>
           </Pressable>
         ) : null}
         <Pressable
@@ -263,16 +264,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
           pending={createAttempt.isPending}
           expired={expired}
           resumeLabel={inFlight ? "Kembali ke SNAP" : undefined}
-          errorMessage={
-            handoffError
-              ? "Gagal membuka halaman pembayaran. Coba lagi."
-              : createAttempt.isError
-                ? apiErrorMessage(
-                    createAttempt.error,
-                    "Gagal memproses pembayaran. Coba lagi.",
-                  )
-                : undefined
-          }
+          errorMessage={paymentErrorMessage}
           onPay={() => {
             setHandoffError(false);
             // The bar is only pressable when canPay (a method is selected or an

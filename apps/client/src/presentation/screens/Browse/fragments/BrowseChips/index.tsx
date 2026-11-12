@@ -19,6 +19,7 @@ export function BrowseChips({
   onRefine,
   onReset,
 }: BrowseChipsProps) {
+  const categoryValue = genre === "Semua" ? "Semua" : genre;
   return (
     <View
       className="flex-row flex-wrap items-center"
@@ -27,7 +28,7 @@ export function BrowseChips({
       {showCategory ? (
         <BrowseChip
           label="Kategori"
-          value={genre === "Semua" ? "Semua" : genre}
+          value={categoryValue}
           selected={genre !== "Semua"}
         />
       ) : null}

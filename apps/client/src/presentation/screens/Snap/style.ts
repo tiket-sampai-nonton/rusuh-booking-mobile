@@ -4,7 +4,7 @@
  */
 import { StyleSheet, Platform } from "react-native";
 
-import { designColors, designBorder } from "@presentation/theme";
+import { designColors, designBorders } from "@presentation/theme";
 
 import type { EdgeInsets } from "react-native-safe-area-context";
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -31,7 +31,7 @@ export const componentStyles = StyleSheet.create({
     height: 44,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
   },
   elementColor2: { color: designColors.ink, fontSize: 22 },
@@ -46,12 +46,12 @@ export const componentStyles = StyleSheet.create({
   elementMarginBottom5: { marginBottom: 24 },
   elementColor6: { color: designColors.ink, letterSpacing: 1.5 },
   elementBorderWidth7: {
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
   },
   elementColor8: { color: designColors.ink, fontSize: 12, fontWeight: "700" },
   elementBorderWidth9: {
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     backgroundColor: designColors.field,
   },
@@ -59,7 +59,7 @@ export const componentStyles = StyleSheet.create({
   elementColor11: { color: designColors.ink },
   elementColor12: { color: designColors.gray },
   elementBorderWidth13: {
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     padding: 16,
   },
@@ -78,7 +78,7 @@ export function styleForSnapSimulatorScreenView0(
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: designColors.ground,
-    borderBottomWidth: designBorder.base,
+    borderBottomWidth: designBorders.standard,
     borderBottomColor: designColors.ink,
   } as DynamicStyle;
 }
@@ -92,7 +92,7 @@ export function styleForSnapSimulatorScreenView1(): DynamicStyle {
 
 export function styleForSnapSimulatorScreenView2(): DynamicStyle {
   return {
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     padding: 16,
   } as DynamicStyle;
@@ -132,7 +132,7 @@ export function styleForSnapSimulatorScreenPressable5(
     minHeight: 44,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     backgroundColor: arg0 === arg1 ? designColors.field : designColors.ground,
   } as DynamicStyle;
@@ -146,7 +146,7 @@ export function styleForSnapSimulatorScreenPressable6(
     minHeight: 44,
     justifyContent: "center",
     paddingHorizontal: 14,
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     backgroundColor: arg0 === arg1 ? designColors.field : designColors.ground,
   } as DynamicStyle;

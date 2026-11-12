@@ -26,9 +26,10 @@ export const SORTS = ["closest", "furthest"] as const;
  * Until server-backed filters land, any non-empty query is noindex while the
  * Seo component keeps its canonical URL at `/browse`.
  */
-export function hasBrowseQueryParams(
-  params: Readonly<Record<string, string | string[] | undefined>>,
-): boolean {
+type BrowseQueryValue = string | string[] | undefined;
+type BrowseQueryParams = Readonly<Record<string, BrowseQueryValue>>;
+
+export function hasBrowseQueryParams(params: BrowseQueryParams): boolean {
   return Object.values(params).some((value) =>
     Array.isArray(value)
       ? value.some((item) => item.trim().length > 0)
@@ -106,7 +107,7 @@ export function inTimeBucket(
   now: number,
 ): boolean {
   if (time === "all") return true;
-  const t = ev.startsAt ? new Date(ev.startsAt).getTime() : NaN;
+  const t = ev.startsAt ? new Date(ev.startsAt).getTime() : Number.NaN;
   if (!Number.isFinite(t)) return false;
   if (time === "week") return t >= now && t <= now + 7 * DAY;
   if (time === "month") return t >= now && t <= now + 30 * DAY;

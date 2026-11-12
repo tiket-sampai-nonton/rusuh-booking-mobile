@@ -1,8 +1,12 @@
-import { StyleSheet } from "react-native";
-import { brand, designColors, plusJakartaSansFonts } from "@presentation/theme";
+import { StyleSheet, type ViewStyle, type ImageStyle } from "react-native";
+import {
+  brand,
+  designColors,
+  plusJakartaSansFonts,
+  designBorders,
+  designSpacingSemantic,
+} from "@presentation/theme";
 
-import type { ViewStyle, ImageStyle } from "react-native";
-import { designBorders, designSpacingSemantic } from "@presentation/theme";
 import type { DynamicStyle } from "@presentation/utils/style";
 import type { EventBadge } from "@domain/rules/event-display";
 
@@ -99,15 +103,13 @@ export function eventCardContentStyle(
   } else if (isWeb && listMode) {
     justifyContent = "center";
   }
+  let minHeight: ViewStyle["minHeight"];
+  if (isMobileWeb && listMode) minHeight = 116;
+  else if (isNative || (isWeb && listMode)) minHeight = 160;
 
   return {
     padding: contentPadding,
-    minHeight:
-      isMobileWeb && listMode
-        ? 116
-        : isNative || (isWeb && listMode)
-          ? 160
-          : undefined,
+    minHeight,
     justifyContent,
     flex: isWeb && listMode ? 1 : undefined,
   };
@@ -117,19 +119,25 @@ export function eventCardFooterStyle(
   isNative: boolean,
   isMobileWeb = false,
 ): ViewStyle {
+  let borderTopWidth: number;
+  if (isMobileWeb) borderTopWidth = 0;
+  else if (isNative) borderTopWidth = 1;
+  else borderTopWidth = designBorders.standard;
+
+  let marginTop: number;
+  if (isMobileWeb) marginTop = 4;
+  else if (isNative) marginTop = designSpacingSemantic.s;
+  else marginTop = designSpacingSemantic.m;
+
   return {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingTop: isMobileWeb ? 0 : designSpacingSemantic.s,
-    borderTopWidth: isMobileWeb ? 0 : isNative ? 1 : designBorders.standard,
+    borderTopWidth,
     borderStyle: isNative ? "dashed" : "solid",
     borderTopColor: designColors.ink,
-    marginTop: isMobileWeb
-      ? 4
-      : isNative
-        ? designSpacingSemantic.s
-        : designSpacingSemantic.m,
+    marginTop,
   };
 }
 
@@ -185,7 +193,7 @@ export function styleForEventCardAnimatedView5(
     // Red is the shared availability accent; labels remain explicit for status clarity.
     backgroundColor,
     paddingHorizontal: arg0 ? 8 : 10, // Mobile: 0.5rem = 8px
-    paddingVertical: arg0 ? 4 : 4, // Mobile: 0.25rem = 4px
+    paddingVertical: 4, // Mobile: 0.25rem = 4px
   } as DynamicStyle;
 }
 
@@ -260,16 +268,15 @@ export function styleForEventCardView12(
   isHovered = false,
 ): DynamicStyle {
   const isActive = isHovered && !disabled;
+  let backgroundColor = designColors.ground;
+  if (disabled) backgroundColor = designColors.inkMuted;
+  else if (isActive) backgroundColor = designColors.accent;
   return {
     width: MOBILE_ACTION_SIZE,
     height: MOBILE_ACTION_SIZE,
     borderWidth: designBorders.standard,
     borderColor: isActive ? designColors.accent : designColors.ink,
-    backgroundColor: disabled
-      ? designColors.inkMuted
-      : isActive
-        ? designColors.accent
-        : designColors.ground,
+    backgroundColor,
     alignItems: "center",
     justifyContent: "center",
   } as DynamicStyle;
@@ -279,18 +286,13 @@ export function styleForEventCardView13(
   disabled: boolean,
   isHovered = false,
 ): DynamicStyle {
+  let actionColor = designColors.accentDeep;
+  if (disabled) actionColor = designColors.inkMuted;
+  else if (isHovered) actionColor = designColors.accent;
   return {
-    backgroundColor: disabled
-      ? designColors.inkMuted
-      : isHovered
-        ? designColors.accent
-        : designColors.accentDeep,
+    backgroundColor: actionColor,
     borderWidth: designBorders.standard,
-    borderColor: disabled
-      ? designColors.inkMuted
-      : isHovered
-        ? designColors.accent
-        : designColors.accentDeep,
+    borderColor: actionColor,
     paddingHorizontal: 16,
     paddingVertical: 8,
   } as DynamicStyle;

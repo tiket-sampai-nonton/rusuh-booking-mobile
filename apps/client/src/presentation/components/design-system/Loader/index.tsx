@@ -61,6 +61,23 @@ export function Loader({
     () => label.split("").slice(0, LOADER_MAX_LETTERS),
     [label],
   );
+  const letterKeys = useMemo(() => {
+    const occurrences = new Map<string, number>();
+    return letters.map((letter) => {
+      const occurrence = occurrences.get(letter) ?? 0;
+      occurrences.set(letter, occurrence + 1);
+      return `${letter}-${occurrence}`;
+    });
+  }, [letters]);
+  const letterItems = useMemo(
+    () =>
+      letters.map((letter, index) => ({
+        id: letterKeys[index],
+        letter,
+        index,
+      })),
+    [letterKeys, letters],
+  );
   const [hasExited, setHasExited] = useState(false);
   const exitCompleted = useRef(false);
 
@@ -187,9 +204,9 @@ export function Loader({
     >
       {/* Bouncing letters */}
       <View style={loaderStyles.wordmark}>
-        {letters.map((letter, index) => (
+        {letterItems.map(({ id, letter, index }) => (
           <AnimatedLetter
-            key={index}
+            key={id}
             letter={letter}
             bounce={letterBounces[index]}
             reducedMotion={reducedMotion ?? false}

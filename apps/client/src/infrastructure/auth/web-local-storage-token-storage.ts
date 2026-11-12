@@ -26,7 +26,7 @@ export class WebLocalStorageTokenStorage implements TokenStorage {
 
   private storage(): Storage | undefined {
     try {
-      return typeof globalThis.localStorage === "undefined"
+      return globalThis.localStorage === undefined
         ? undefined
         : globalThis.localStorage;
     } catch {

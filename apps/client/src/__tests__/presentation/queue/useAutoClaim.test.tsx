@@ -22,8 +22,7 @@ import type {
   BookingSession,
 } from "@domain/repositories/booking.repository";
 import type { QueueStatus } from "@domain/repositories/queue.repository";
-import type { Container } from "@providers/container";
-import { createContainer } from "@providers/container";
+import { createContainer, type Container } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
 import { useAutoClaim } from "@presentation/hooks/useAutoClaim";
 
@@ -133,7 +132,7 @@ describe("useAutoClaim", () => {
     // Re-render repeatedly with the same ADMITTED status.
     act(() => rerender({ status: "ADMITTED" }));
     act(() => rerender({ status: "ADMITTED" }));
-    await waitFor(() => expect(repo.createSessionCalls.length).toBe(1));
+    await waitFor(() => expect(repo.createSessionCalls).toHaveLength(1));
     expect(repo.createSessionCalls).toEqual(["mock-admission:evt-1"]);
   });
 

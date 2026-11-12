@@ -37,6 +37,8 @@ import {
 } from "react-native";
 
 import { ctaFor } from "@domain/rules/event-detail-cta";
+import type { EventDetail as EventDetailData } from "@domain/repositories/event.repository";
+import { trimTrailingSlashes } from "@shared/utils/trim-slashes";
 import { parseDescription } from "@domain/rules/event-description";
 import { eventImage } from "@domain/rules/event-image";
 import { formatDateID, formatTimeID } from "@domain/services/date-format";
@@ -85,6 +87,122 @@ function heroStatusLabel(status: string): string {
   }
 }
 
+interface EventDetailMobileStatsProps {
+  readonly remainingTicketsText: string;
+  readonly purchaseLimitText: string;
+}
+
+function EventDetailMobileStats({
+  remainingTicketsText,
+  purchaseLimitText,
+}: EventDetailMobileStatsProps) {
+  return (
+    <View style={styles.mobileWebTicketStats}>
+      <View style={styles.mobileWebTicketStat}>
+        <Text style={styles.mobileWebTicketStatLabel}>Tiket tersedia</Text>
+        <Text style={styles.mobileWebTicketStatValue}>
+          {remainingTicketsText}
+        </Text>
+      </View>
+      <View style={styles.mobileWebTicketStat}>
+        <Text style={styles.mobileWebTicketStatLabel}>Maks. pembelian</Text>
+        <Text style={styles.mobileWebTicketStatValue}>{purchaseLimitText}</Text>
+      </View>
+    </View>
+  );
+}
+
+type ParsedEventDescription = ReturnType<typeof parseDescription>;
+type VenueInfo = ReturnType<typeof createVenueInfo>;
+
+interface EventDetailContentProps {
+  readonly event: EventDetailData;
+  readonly description: ParsedEventDescription;
+  readonly date: string;
+  readonly time: string;
+  readonly isMobileWeb: boolean;
+  readonly isNative: boolean;
+  readonly venueInfo: VenueInfo;
+  readonly galleryFallbackUri?: string;
+  readonly onImagePress: (index: number) => void;
+}
+
+function EventDetailContent({
+  event,
+  description,
+  date,
+  time,
+  isMobileWeb,
+  isNative,
+  venueInfo,
+  galleryFallbackUri,
+  onImagePress,
+}: EventDetailContentProps) {
+  return (
+    <View style={[styles.content, isMobileWeb && styles.mobileWebContent]}>
+      <InfoCard
+        date={date}
+        time={time}
+        venue={event.venue ?? "Lokasi akan diumumkan"}
+      />
+      <Block label="Kategori Tiket">
+        <Categories categories={description.categories} />
+      </Block>
+      <Block label="Tentang Event">
+        <Text style={styles.description}>
+          {description.longDesc ||
+            "Informasi tentang acara ini belum tersedia."}
+        </Text>
+      </Block>
+      <Block label="Pengisi Acara">
+        <Lineup items={description.lineup} />
+      </Block>
+      <Block label="Lokasi">
+        {venueInfo ? (
+          <Venue
+            name={venueInfo.name}
+            address={venueInfo.address}
+            mapImage={venueInfo.mapImage}
+            mapsUrl={venueInfo.mapsUrl}
+          />
+        ) : (
+          <Text style={styles.description}>
+            Informasi lokasi akan diumumkan penyelenggara.
+          </Text>
+        )}
+      </Block>
+      <Block label="Galeri">
+        <Gallery
+          images={description.gallery ?? []}
+          fallbackUri={galleryFallbackUri}
+          onImagePress={onImagePress}
+        />
+      </Block>
+      <Block label="Syarat dan ketentuan">
+        {description.terms.length > 0 ? (
+          <View style={styles.termsList}>
+            {description.terms.map((term) => (
+              <View key={term} style={styles.termsItem}>
+                <CheckIcon color={designColors.ink} size={14} />
+                <Text style={styles.termsText}>{term}</Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.description}>
+            Informasi syarat dan ketentuan belum tersedia.
+          </Text>
+        )}
+      </Block>
+      {!isNative ? (
+        <Block label="Jaminan Kami">
+          <TrustBox />
+        </Block>
+      ) : null}
+    </View>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN SCREEN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -128,9 +246,9 @@ export function EventDetailScreen({
   }, [router]);
 
   const handleShare = useCallback(() => {
-    const siteUrl = (
-      process.env.EXPO_PUBLIC_SITE_URL ?? "https://rusuh-booking.pages.dev"
-    ).replace(/\/+$/, "");
+    const siteUrl = trimTrailingSlashes(
+      process.env.EXPO_PUBLIC_SITE_URL ?? "https://rusuh-booking.pages.dev",
+    );
     const url = `${siteUrl}/events/${encodeURIComponent(eventId)}`;
 
     if (Platform.OS === "web") {
@@ -217,6 +335,15 @@ export function EventDetailScreen({
     event.maxTicketsPerOrder && `${event.maxTicketsPerOrder} tiket / pesanan`,
     event.maxTicketsPerBuyerNik && `${event.maxTicketsPerBuyerNik} tiket / NIK`,
   ].filter((value): value is string => Boolean(value));
+  const remainingTicketsText =
+    typeof event.remainingTickets === "number"
+      ? `${event.remainingTickets.toLocaleString("id-ID")} tiket`
+      : "Cek saat checkout";
+  const purchaseLimitText =
+    purchaseLimits.length > 0
+      ? purchaseLimits.join(" · ")
+      : "Sesuai ketentuan event";
+  const joinQueueError = joinQueue.isError ? joinQueue.error : undefined;
   if (purchaseLimits.length > 0) {
     chips.push(`Maks ${purchaseLimits.join(" · ")}`);
   }
@@ -268,108 +395,22 @@ export function EventDetailScreen({
           />
 
           {isMobileWeb ? (
-            <View style={styles.mobileWebTicketStats}>
-              <View style={styles.mobileWebTicketStat}>
-                <Text style={styles.mobileWebTicketStatLabel}>
-                  Tiket tersedia
-                </Text>
-                <Text style={styles.mobileWebTicketStatValue}>
-                  {typeof event.remainingTickets === "number"
-                    ? `${event.remainingTickets.toLocaleString("id-ID")} tiket`
-                    : "Cek saat checkout"}
-                </Text>
-              </View>
-              <View style={styles.mobileWebTicketStat}>
-                <Text style={styles.mobileWebTicketStatLabel}>
-                  Maks. pembelian
-                </Text>
-                <Text style={styles.mobileWebTicketStatValue}>
-                  {purchaseLimits.length > 0
-                    ? purchaseLimits.join(" · ")
-                    : "Sesuai ketentuan event"}
-                </Text>
-              </View>
-            </View>
-          ) : null}
-
-          {/* Content Sections */}
-          <View
-            style={[styles.content, isMobileWeb && styles.mobileWebContent]}
-          >
-            {/* Info Card (native only - date/location) */}
-            <InfoCard
-              date={dateTxt}
-              time={timeTxt}
-              venue={event.venue ?? "Lokasi akan diumumkan"}
+            <EventDetailMobileStats
+              remainingTicketsText={remainingTicketsText}
+              purchaseLimitText={purchaseLimitText}
             />
-
-            {/* Ticket Categories Preview — FIRST per prototype section order */}
-            <Block label="Kategori Tiket">
-              <Categories categories={desc.categories} />
-            </Block>
-
-            {/* About Event */}
-            <Block label="Tentang Event">
-              <Text style={styles.description}>
-                {desc.longDesc || "Informasi tentang acara ini belum tersedia."}
-              </Text>
-            </Block>
-
-            {/* Lineup Grid/Scroll */}
-            <Block label="Pengisi Acara">
-              <Lineup items={desc.lineup} />
-            </Block>
-
-            {/* Both native and web share these event information sections. */}
-            <>
-              <Block label="Lokasi">
-                {venueInfo ? (
-                  <Venue
-                    name={venueInfo.name}
-                    address={venueInfo.address}
-                    mapImage={venueInfo.mapImage}
-                    mapsUrl={venueInfo.mapsUrl}
-                  />
-                ) : (
-                  <Text style={styles.description}>
-                    Informasi lokasi akan diumumkan penyelenggara.
-                  </Text>
-                )}
-              </Block>
-
-              <Block label="Galeri">
-                <Gallery
-                  images={galleryImages}
-                  fallbackUri={galleryFallbackUri}
-                  onImagePress={openLightbox}
-                />
-              </Block>
-
-              <Block label="Syarat dan ketentuan">
-                {desc.terms.length > 0 ? (
-                  <View style={styles.termsList}>
-                    {desc.terms.map((t) => (
-                      <View key={t} style={styles.termsItem}>
-                        <CheckIcon color={designColors.ink} size={14} />
-                        <Text style={styles.termsText}>{t}</Text>
-                      </View>
-                    ))}
-                  </View>
-                ) : (
-                  <Text style={styles.description}>
-                    Informasi syarat dan ketentuan belum tersedia.
-                  </Text>
-                )}
-              </Block>
-            </>
-
-            {/* Trust Box (web only - can be removed if using inline badges) */}
-            {!isNative && (
-              <Block label="Jaminan Kami">
-                <TrustBox />
-              </Block>
-            )}
-          </View>
+          ) : null}
+          <EventDetailContent
+            event={event}
+            description={desc}
+            date={dateTxt}
+            time={timeTxt}
+            isMobileWeb={isMobileWeb}
+            isNative={isNative}
+            venueInfo={venueInfo}
+            galleryFallbackUri={galleryFallbackUri}
+            onImagePress={openLightbox}
+          />
         </ScrollView>
 
         {/* Floating CTA (fixed bottom) */}
@@ -382,7 +423,7 @@ export function EventDetailScreen({
             isMobileWeb={isMobileWeb}
             isActive={isScreenFocused}
             isJoining={joinQueue.isPending}
-            errorMessage={joinQueue.isError ? joinQueue.error : undefined}
+            errorMessage={joinQueueError}
           />
         ) : null}
 

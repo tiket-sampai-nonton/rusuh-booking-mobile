@@ -104,9 +104,9 @@ export function defaultWebPushEnv(): WebPushEnv {
     };
     PushManager?: unknown;
   };
-  const hasNotification = typeof g.Notification !== "undefined";
+  const hasNotification = g.Notification !== undefined;
   const hasServiceWorker = !!g.navigator?.serviceWorker;
-  const hasPushManager = typeof g.PushManager !== "undefined";
+  const hasPushManager = g.PushManager !== undefined;
   return {
     hasNotification,
     hasServiceWorker,

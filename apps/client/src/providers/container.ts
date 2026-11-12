@@ -8,6 +8,7 @@
  * base URL and backend behavior for the documented integration gaps.
  */
 import { Platform } from "react-native";
+import { trimTrailingSlashes } from "@shared/utils/trim-slashes";
 
 import type { TokenStorage } from "@domain/auth/token-storage.port";
 import type { BuyerEmailStorage } from "@domain/auth/buyer-email-storage.port";
@@ -288,12 +289,14 @@ export function createContainer(options: ContainerOptions = {}): Container {
     Platform.OS === "web"
       ? new InMemoryTokenStorage()
       : new SecureStoreTokenStorage("rusuh.visitor.token");
-  const refreshTokenStorage =
-    Platform.OS === "web"
-      ? useMocks
-        ? new InMemoryTokenStorage()
-        : new WebLocalStorageTokenStorage("rusuh.auth.refresh")
-      : new SecureStoreTokenStorage("rusuh.auth.refresh");
+  let refreshTokenStorage: TokenStorage;
+  if (Platform.OS === "web") {
+    refreshTokenStorage = useMocks
+      ? new InMemoryTokenStorage()
+      : new WebLocalStorageTokenStorage("rusuh.auth.refresh");
+  } else {
+    refreshTokenStorage = new SecureStoreTokenStorage("rusuh.auth.refresh");
+  }
   const transport: HttpClient = new FetchHttpClient({
     baseUrl,
     getHeaders: async () => {
@@ -321,10 +324,10 @@ export function createContainer(options: ContainerOptions = {}): Container {
     queueRepository: new HttpQueueRepository(httpClient, visitorTokenStorage),
     bookingRepository: new HttpBookingRepository(
       httpClient,
-      Platform.OS === "web" && typeof globalThis.EventSource !== "undefined"
+      Platform.OS === "web" && globalThis.EventSource !== undefined
         ? (sessionId, onAvailability) => {
             const stream = new EventSource(
-              `${baseUrl.replace(/\/+$/, "")}/booking-sessions/${encodeURIComponent(sessionId)}/stream`,
+              `${trimTrailingSlashes(baseUrl)}/booking-sessions/${encodeURIComponent(sessionId)}/stream`,
               { withCredentials: true },
             );
             stream.addEventListener("availability", (event) => {

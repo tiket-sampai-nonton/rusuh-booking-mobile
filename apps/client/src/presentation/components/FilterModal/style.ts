@@ -7,8 +7,7 @@ import {
 } from "@presentation/theme";
 
 import type { EdgeInsets } from "react-native-safe-area-context";
-import type { DynamicStyle } from "@presentation/utils/style";
-import { hardShadowStyle } from "@presentation/utils/style";
+import { hardShadowStyle, type DynamicStyle } from "@presentation/utils/style";
 
 export const componentStyles = StyleSheet.create({
   elementFlex0: {
@@ -90,16 +89,15 @@ export function styleForFilterModalPressable0(
   insets: EdgeInsets,
   isMobileWeb = false,
 ): DynamicStyle {
+  let paddingBottom = Math.max(24, insets.bottom + 16);
+  if (Platform.OS === "web") paddingBottom = 24;
+  if (isMobileWeb) paddingBottom = Math.max(16, insets.bottom + 12);
   return {
     width: "100%",
     maxWidth: isMobileWeb ? "100%" : 480,
     maxHeight: isMobileWeb ? "100%" : "90%",
     padding: isMobileWeb ? 16 : 24,
-    paddingBottom: isMobileWeb
-      ? Math.max(16, insets.bottom + 12)
-      : Platform.OS === "web"
-        ? 24
-        : Math.max(24, insets.bottom + 16),
+    paddingBottom,
     borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     ...(isMobileWeb && {

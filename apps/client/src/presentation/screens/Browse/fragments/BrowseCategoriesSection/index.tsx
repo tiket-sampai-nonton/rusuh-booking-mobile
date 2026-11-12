@@ -1,4 +1,11 @@
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 
 import { BrowseChips } from "../BrowseChips";
 import { BROWSE_CATEGORIES, type BrowseCategoryKey } from "../categories";
@@ -46,19 +53,18 @@ export function BrowseCategoriesSection({
 
   const categoryButtons = visibleCategories.map((category) => {
     const isActive = (activeCategory ?? "all") === category.key;
+    let buttonStyle: StyleProp<ViewStyle> = browseCategoryBtn;
+    if (isActive) buttonStyle = browseCategoryBtnActive;
+    if (isMobileWeb) {
+      const mobileButtonStyle = isActive
+        ? browseCategoryBtnActive
+        : browseCategoryBtn;
+      buttonStyle = [mobileButtonStyle, browseCategoryBtnCompactStyle];
+    }
     return (
       <Pressable
         key={category.key}
-        style={
-          isMobileWeb
-            ? [
-                isActive ? browseCategoryBtnActive : browseCategoryBtn,
-                browseCategoryBtnCompactStyle,
-              ]
-            : isActive
-              ? browseCategoryBtnActive
-              : browseCategoryBtn
-        }
+        style={buttonStyle}
         onPress={() => onSelect(category.key)}
         testID={`category-${category.key}`}
         accessibilityRole="button"

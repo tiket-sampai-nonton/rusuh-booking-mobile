@@ -33,19 +33,21 @@ export default function RootLayout() {
     () => setStartupUpdateComplete(true),
     [],
   );
+  const startupUpdateBridge =
+    Platform.OS !== "web" ? (
+      <StartupUpdateBridge
+        onComplete={finishStartupUpdate}
+        onStatusChange={setStartupUpdateStatus}
+        onBuildLabelChange={setStartupBuildLabel}
+      />
+    ) : null;
 
   return (
     <View style={rootLayoutStyles.root}>
       {appReady ? (
         <AppProviders>
           <Fragment>
-            {Platform.OS !== "web" ? (
-              <StartupUpdateBridge
-                onComplete={finishStartupUpdate}
-                onStatusChange={setStartupUpdateStatus}
-                onBuildLabelChange={setStartupBuildLabel}
-              />
-            ) : null}
+            {startupUpdateBridge}
             <NotificationBridge />
             <AccountSessionBridge />
             <QueueMembershipBridge />

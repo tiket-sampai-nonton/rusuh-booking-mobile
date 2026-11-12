@@ -348,6 +348,9 @@ export function styleForHeroCarouselView13(
   arg1: boolean,
   arg2 = false,
 ): DynamicStyle {
+  let gap = SPACE_L;
+  if (arg1) gap = SPACE_M;
+  if (arg2) gap = SPACE_XS;
   return {
     position: "absolute",
     bottom: arg0 || arg2 ? SPACE_S : SPACE_L + 40,
@@ -357,7 +360,7 @@ export function styleForHeroCarouselView13(
     // Desktop: row layout with title + info side by side
     // Native: single column (mobile prototype has Badge→Title→Meta→CTA stacked)
     flexDirection: arg0 || arg1 || arg2 ? "column" : "row",
-    gap: arg2 ? SPACE_XS : arg1 ? SPACE_M : SPACE_L,
+    gap,
     alignItems: arg1 || arg2 ? "flex-start" : "flex-end",
   } as DynamicStyle;
 }

@@ -48,8 +48,8 @@ import {
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { pointerEventsNone } from "@presentation/utils/style";
 import { ArrowIcon, PinIcon } from "@presentation/components/ArrowIcon";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   eventCardContainerStyle,
   eventCardImageContainerStyle,
   eventCardImageStyle,
@@ -172,7 +172,7 @@ function NativeEventCard({
             )}
           >
             <View>
-              {dateTxt && (
+              {Boolean(dateTxt) && (
                 <Text style={styleForEventCardText7(MOBILE_DATE_SIZE, true)}>
                   {dateTxt}
                 </Text>
@@ -242,11 +242,9 @@ function AnimatedEventCard({
     : responsiveWebImageSource(image, compactListMode);
 
   // Mobile vs Desktop sizing
-  const contentPadding = isMobileWeb
-    ? 10
-    : isNative
-      ? MOBILE_CONTENT_PADDING
-      : DESKTOP_CONTENT_PADDING;
+  let contentPadding: number = DESKTOP_CONTENT_PADDING;
+  if (isNative) contentPadding = MOBILE_CONTENT_PADDING;
+  if (isMobileWeb) contentPadding = 10;
   const dateSize = isMobileLayout ? MOBILE_DATE_SIZE : DESKTOP_DATE_SIZE;
   const titleSize = isMobileLayout ? MOBILE_TITLE_SIZE : DESKTOP_TITLE_SIZE;
   const venueSize = isMobileLayout ? MOBILE_VENUE_SIZE : DESKTOP_VENUE_SIZE;
@@ -426,7 +424,7 @@ function AnimatedEventCard({
             {/* Top section: date, title, venue */}
             <View>
               {/* Date: Mobile: 12px uppercase, Desktop: 14px */}
-              {dateTxt && (
+              {Boolean(dateTxt) && (
                 <Text style={styleForEventCardText7(dateSize, isMobileLayout)}>
                   {dateTxt}
                 </Text>

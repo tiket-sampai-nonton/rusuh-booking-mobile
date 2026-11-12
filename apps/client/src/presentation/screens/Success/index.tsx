@@ -29,21 +29,100 @@ import { SummaryRow } from "./fragments/SummaryRow";
 import { ETicketCard } from "@presentation/components/ETicketCard";
 import { Seo } from "@presentation/components/Seo";
 import { useETicketDownload } from "@presentation/hooks/useETicketDownload";
-import { CheckIcon, MailIcon } from "@presentation/components/ArrowIcon";
+import {
+  CheckIcon,
+  MailIcon,
+  ArrowIcon,
+} from "@presentation/components/ArrowIcon";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 import { useSuccessTickets } from "@presentation/hooks/useSuccessTickets";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
-import { ArrowIcon } from "@presentation/components/ArrowIcon";
+
 import { useSessionStore } from "@presentation/stores/session-store";
 import { useAccountStore } from "@presentation/stores/account-store";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { designColors, withAlpha } from "@presentation/theme";
-import { successStyles, componentStyles } from "./style";
-import { styleForSuccessScreenView0 } from "./style";
+import {
+  successStyles,
+  componentStyles,
+  styleForSuccessScreenView0,
+} from "./style";
+
 import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 export interface SuccessScreenProps {
   readonly bookingId: string;
+}
+
+interface VerificationPanelProps {
+  readonly confirmed: boolean;
+  readonly hasError: boolean;
+  readonly isMobileWeb: boolean;
+  readonly isRetrying: boolean;
+  readonly message: string;
+  readonly error: unknown;
+  readonly onRetry: () => void;
+}
+
+function VerificationPanel({
+  confirmed,
+  hasError,
+  isMobileWeb,
+  isRetrying,
+  message,
+  error,
+  onRetry,
+}: VerificationPanelProps) {
+  const titleClass = isMobileWeb
+    ? "text-center text-base font-bold text-foreground"
+    : "text-center text-base font-bold text-v2-ground";
+  const detailClass = isMobileWeb
+    ? "text-center text-sm text-muted-foreground"
+    : "text-center text-sm text-v2-ground/70";
+  const loadingClass = isMobileWeb
+    ? "text-center text-base text-foreground"
+    : "text-center text-base text-v2-ground";
+  const loadingColor = isMobileWeb ? designColors.ink : designColors.ground;
+  const retryLabel = isRetrying ? "MEMERIKSA…" : "COBA LAGI";
+
+  if (confirmed) return null;
+  if (hasError) {
+    return (
+      <View
+        className="w-full max-w-sm items-center gap-4"
+        accessibilityLiveRegion="polite"
+        testID="success-verification-error"
+      >
+        <Text className={titleClass}>Pembayaran belum dapat diverifikasi.</Text>
+        <Text className={detailClass}>{apiErrorMessage(error)}</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Coba verifikasi pembayaran lagi"
+          accessibilityState={{ disabled: isRetrying }}
+          disabled={isRetrying}
+          onPress={onRetry}
+          testID="success-verification-retry"
+          className="border-2 border-card px-6 py-3"
+        >
+          <Text className="font-bold text-card">{retryLabel}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+  return (
+    <View
+      className="items-center gap-4"
+      accessibilityLiveRegion="polite"
+      testID="success-verifying"
+    >
+      <ActivityIndicator
+        size="large"
+        color={loadingColor}
+        accessibilityLabel="Memverifikasi pembayaran"
+      />
+      <Text className={loadingClass}>{message}</Text>
+    </View>
+  );
 }
 
 export function SuccessScreen({ bookingId }: SuccessScreenProps) {
@@ -138,286 +217,363 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
         path={`/success/${bookingId}`}
         noindex
       />
-      {!confirmed && verificationError ? (
+      <VerificationPanel
+        confirmed={confirmed}
+        hasError={Boolean(verificationError)}
+        isMobileWeb={isMobileWeb}
+        isRetrying={isRetryingVerification}
+        message={verificationMessage}
+        error={verificationFailure}
+        onRetry={() => void retryVerification()}
+      />
+      {confirmed ? (
+        <SuccessReceipt
+          bookingId={bookingId}
+          isMobileWeb={isMobileWeb}
+          isLoggedIn={Boolean(profile)}
+          ticketsQuery={ticketsQuery}
+          ticketCount={ticketCount}
+          amountMinor={amountMinor}
+          buyerNikMasked={buyerNikMasked}
+          event={event}
+          onDownload={handleDownload}
+          onHome={() => router.replace((profile ? "/my-tickets" : "/") as Href)}
+          downloadError={downloadError}
+        />
+      ) : null}
+    </View>
+  );
+}
+
+type SuccessTicketQuery = ReturnType<typeof useSuccessTickets>;
+type SuccessEvent = ReturnType<typeof useEventDetail>["data"];
+
+interface SuccessReceiptProps {
+  readonly bookingId: string;
+  readonly isMobileWeb: boolean;
+  readonly isLoggedIn: boolean;
+  readonly ticketsQuery: SuccessTicketQuery;
+  readonly ticketCount?: number;
+  readonly amountMinor?: number;
+  readonly buyerNikMasked?: string;
+  readonly event?: SuccessEvent;
+  readonly onDownload: () => Promise<void>;
+  readonly onHome: () => void;
+  readonly downloadError: string;
+}
+
+function SuccessReceipt({
+  bookingId,
+  isMobileWeb,
+  isLoggedIn,
+  ticketsQuery,
+  ticketCount,
+  amountMinor,
+  buyerNikMasked,
+  event,
+  onDownload,
+  onHome,
+  downloadError,
+}: SuccessReceiptProps) {
+  const issuedTickets = ticketsQuery.data?.tickets ?? [];
+  const count = issuedTickets.length;
+  return (
+    <ScrollView
+      className="w-full"
+      contentContainerClassName="w-full max-w-md self-center"
+      contentContainerStyle={successStyles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <SuccessHeading isMobileWeb={isMobileWeb} />
+      <SuccessSummary
+        bookingId={bookingId}
+        ticketsQuery={ticketsQuery}
+        ticketCount={ticketCount}
+        amountMinor={amountMinor}
+        buyerNikMasked={buyerNikMasked}
+        isMobileWeb={isMobileWeb}
+      />
+      <SuccessTicketList
+        bookingId={bookingId}
+        ticketsQuery={ticketsQuery}
+        issuedTickets={issuedTickets}
+        count={count}
+        event={event}
+      />
+      <SuccessReceiptActions
+        isLoggedIn={isLoggedIn}
+        isMobileWeb={isMobileWeb}
+        hasTickets={issuedTickets.length > 0}
+        onDownload={onDownload}
+        onHome={onHome}
+        downloadError={downloadError}
+      />
+      <SuccessEmailNote isMobileWeb={isMobileWeb} />
+    </ScrollView>
+  );
+}
+
+interface SuccessHeadingProps {
+  readonly isMobileWeb: boolean;
+}
+
+function SuccessHeading({ isMobileWeb }: SuccessHeadingProps) {
+  return (
+    <>
+      <View className="mb-4 items-center">
         <View
-          className="w-full max-w-sm items-center gap-4"
-          accessibilityLiveRegion="polite"
-          testID="success-verification-error"
+          className="h-20 w-20 items-center justify-center rounded-full"
+          style={[
+            componentStyles.elementBorderWidth1,
+            isMobileWeb && componentStyles.mobileWebSuccessRing,
+          ]}
         >
-          <Text
-            className={
-              isMobileWeb
-                ? "text-center text-base font-bold text-foreground"
-                : "text-center text-base font-bold text-v2-ground"
-            }
-          >
-            Pembayaran belum dapat diverifikasi.
-          </Text>
-          <Text
-            className={
-              isMobileWeb
-                ? "text-center text-sm text-muted-foreground"
-                : "text-center text-sm text-v2-ground/70"
-            }
-          >
-            {apiErrorMessage(verificationFailure)}
+          <CheckIcon
+            color={isMobileWeb ? designColors.success : designColors.ground}
+            size={32}
+          />
+        </View>
+      </View>
+      <Text
+        className="text-center text-2xs font-extrabold uppercase"
+        style={componentStyles.elementColor2}
+        testID="success-eyebrow"
+      >
+        Pembayaran berhasil
+      </Text>
+      <Text
+        className={
+          isMobileWeb
+            ? "mt-2 text-center text-2xl font-extrabold uppercase text-foreground"
+            : "mt-2 text-center text-2xl font-extrabold uppercase text-v2-ground"
+        }
+        style={[
+          componentStyles.elementLetterSpacing3,
+          isMobileWeb && componentStyles.mobileWebText,
+        ]}
+        accessibilityRole="header"
+      >
+        Tiket kamu sudah aktif
+      </Text>
+      <Text
+        className={
+          isMobileWeb
+            ? "mt-1.5 text-center text-xs leading-5 text-muted-foreground"
+            : "mt-2.5 text-center text-xs leading-5 text-v2-ground/70"
+        }
+      >
+        Simpan e-tiket ini. Tunjukkan QR di pintu masuk.
+      </Text>
+    </>
+  );
+}
+
+interface SuccessSummaryProps {
+  readonly bookingId: string;
+  readonly ticketsQuery: SuccessTicketQuery;
+  readonly ticketCount?: number;
+  readonly amountMinor?: number;
+  readonly buyerNikMasked?: string;
+  readonly isMobileWeb: boolean;
+}
+
+function SuccessSummary({
+  bookingId,
+  ticketsQuery,
+  ticketCount,
+  amountMinor,
+  buyerNikMasked,
+  isMobileWeb,
+}: SuccessSummaryProps) {
+  return (
+    <View
+      className={isMobileWeb ? "my-4 gap-1 p-3" : "my-6 gap-1 p-5"}
+      style={[
+        componentStyles.elementBackgroundColor4,
+        isMobileWeb && componentStyles.mobileWebSummary,
+      ]}
+    >
+      <SummaryRow
+        label="Nomor Pesanan"
+        value={bookingId}
+        isMobileWeb={isMobileWeb}
+      />
+      <SummaryRow
+        label="Jumlah tiket"
+        value={`${ticketsQuery.data?.ticketQuantity ?? ticketCount ?? 0} tiket`}
+        isMobileWeb={isMobileWeb}
+      />
+      <SummaryRow
+        label="Total dibayar"
+        value={minorToIDR(ticketsQuery.data?.amountMinor ?? amountMinor)}
+        isMobileWeb={isMobileWeb}
+      />
+      <SummaryRow
+        label="NIK pembeli"
+        value={ticketsQuery.data?.buyerNikMasked ?? buyerNikMasked ?? "••••"}
+        isMobileWeb={isMobileWeb}
+      />
+    </View>
+  );
+}
+
+interface SuccessTicketListProps {
+  readonly bookingId: string;
+  readonly ticketsQuery: SuccessTicketQuery;
+  readonly issuedTickets: NonNullable<SuccessTicketQuery["data"]>["tickets"];
+  readonly count: number;
+  readonly event?: SuccessEvent;
+}
+
+function SuccessTicketList({
+  bookingId,
+  ticketsQuery,
+  issuedTickets,
+  count,
+  event,
+}: SuccessTicketListProps) {
+  const retryLabel = ticketsQuery.isFetching ? "Memuat…" : "Coba Lagi";
+  return (
+    <View className="gap-6" testID="eticket-list">
+      {ticketsQuery.isLoading ? <Text>Memuat e-tiket…</Text> : null}
+      {ticketsQuery.isError ? (
+        <View
+          className="items-center gap-2"
+          accessibilityLiveRegion="polite"
+          testID="success-tickets-error"
+        >
+          <Text className="text-center">
+            {apiErrorMessage(
+              ticketsQuery.error,
+              "Gagal memuat e-tiket. Silakan coba lagi.",
+            )}
           </Text>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Coba verifikasi pembayaran lagi"
-            accessibilityState={{ disabled: isRetryingVerification }}
-            disabled={isRetryingVerification}
-            onPress={() => void retryVerification()}
-            testID="success-verification-retry"
-            className="border-2 border-card px-6 py-3"
+            accessibilityLabel="Coba muat e-tiket lagi"
+            accessibilityState={{ disabled: ticketsQuery.isFetching }}
+            disabled={ticketsQuery.isFetching}
+            onPress={() => void ticketsQuery.refetch()}
+            testID="success-tickets-retry"
           >
-            <Text className="font-bold text-card">
-              {isRetryingVerification ? "MEMERIKSA…" : "COBA LAGI"}
-            </Text>
+            <Text className="font-bold">{retryLabel}</Text>
           </Pressable>
         </View>
-      ) : !confirmed ? (
-        <View
-          className="items-center gap-4"
-          accessibilityLiveRegion="polite"
-          testID="success-verifying"
+      ) : null}
+      {issuedTickets.map((ticket, index) => (
+        <ETicketCard
+          key={`${bookingId}-ticket-${index}`}
+          bookingId={bookingId}
+          index={index}
+          total={count}
+          eventName={event?.name}
+          venue={event?.venue}
+          startsAt={event?.startsAt}
+          attendeeNikMasked={ticket.attendeeNikMasked}
+          attendeeName={ticket.attendeeName}
+          categoryCode={ticket.categoryCode}
+          qrPayload={ticket.qrPayload}
+          ticketCode={ticket.ticketCode}
+        />
+      ))}
+    </View>
+  );
+}
+
+interface SuccessReceiptActionsProps {
+  readonly isLoggedIn: boolean;
+  readonly isMobileWeb: boolean;
+  readonly hasTickets: boolean;
+  readonly onDownload: () => Promise<void>;
+  readonly onHome: () => void;
+  readonly downloadError: string;
+}
+
+function SuccessReceiptActions({
+  isLoggedIn,
+  isMobileWeb,
+  hasTickets,
+  onDownload,
+  onHome,
+  downloadError,
+}: SuccessReceiptActionsProps) {
+  return (
+    <>
+      <View className="mt-5 flex-row gap-3">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Unduh e-tiket"
+          testID="success-download"
+          disabled={!hasTickets}
+          onPress={() => void onDownload()}
+          className="flex-1 items-center py-4"
+          style={componentStyles.elementBackgroundColor5}
         >
-          <ActivityIndicator
-            size="large"
-            color={isMobileWeb ? designColors.ink : designColors.ground}
-            accessibilityLabel="Memverifikasi pembayaran"
-          />
+          <View className="flex-row items-center gap-2">
+            <ArrowIcon direction="download" color={designColors.ink} />
+            <Text
+              className="text-sm font-bold uppercase"
+              style={componentStyles.elementColor6}
+            >
+              Unduh E-Tiket
+            </Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={isLoggedIn ? "Tiket Saya" : "Ke Beranda"}
+          testID="success-home"
+          onPress={onHome}
+          className="flex-1 items-center py-4"
+          style={[
+            componentStyles.elementBorderWidth7,
+            isMobileWeb && componentStyles.mobileWebSecondaryButton,
+          ]}
+        >
           <Text
             className={
               isMobileWeb
-                ? "text-center text-base text-foreground"
-                : "text-center text-base text-v2-ground"
+                ? "text-sm font-bold uppercase text-foreground"
+                : "text-sm font-bold uppercase text-v2-ground"
             }
+            style={[
+              componentStyles.elementLetterSpacing8,
+              isMobileWeb && componentStyles.mobileWebText,
+            ]}
           >
-            {verificationMessage}
+            {isLoggedIn ? "Lihat Tiket" : "Ke Beranda"}
           </Text>
-        </View>
+        </Pressable>
+      </View>
+      {downloadError ? (
+        <Text
+          className="mt-3 text-center text-xs"
+          style={componentStyles.elementColor9}
+        >
+          {downloadError}
+        </Text>
       ) : null}
-      {confirmed && (
-        <>
-          <ScrollView
-            className="w-full"
-            contentContainerClassName="w-full max-w-md self-center"
-            contentContainerStyle={successStyles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Green success ring (prototype `.success-icon`). */}
-            <View className="mb-4 items-center">
-              <View
-                className="h-20 w-20 items-center justify-center rounded-full"
-                style={[
-                  componentStyles.elementBorderWidth1,
-                  isMobileWeb && componentStyles.mobileWebSuccessRing,
-                ]}
-              >
-                <CheckIcon
-                  color={
-                    isMobileWeb ? designColors.success : designColors.ground
-                  }
-                  size={32}
-                />
-              </View>
-            </View>
+    </>
+  );
+}
 
-            <Text
-              className="text-center text-2xs font-extrabold uppercase"
-              style={componentStyles.elementColor2}
-              testID="success-eyebrow"
-            >
-              Pembayaran berhasil
-            </Text>
-            <Text
-              className={
-                isMobileWeb
-                  ? "mt-2 text-center text-2xl font-extrabold uppercase text-foreground"
-                  : "mt-2 text-center text-2xl font-extrabold uppercase text-v2-ground"
-              }
-              style={[
-                componentStyles.elementLetterSpacing3,
-                isMobileWeb && componentStyles.mobileWebText,
-              ]}
-              accessibilityRole="header"
-            >
-              Tiket kamu sudah aktif
-            </Text>
-            <Text
-              className={
-                isMobileWeb
-                  ? "mt-1.5 text-center text-xs leading-5 text-muted-foreground"
-                  : "mt-2.5 text-center text-xs leading-5 text-v2-ground/70"
-              }
-            >
-              Simpan e-tiket ini. Tunjukkan QR di pintu masuk.
-            </Text>
-
-            {/* Summary card — translucent on the dark ground (prototype `.summary-card`). */}
-            <View
-              className={isMobileWeb ? "my-4 gap-1 p-3" : "my-6 gap-1 p-5"}
-              style={[
-                componentStyles.elementBackgroundColor4,
-                isMobileWeb && componentStyles.mobileWebSummary,
-              ]}
-            >
-              <SummaryRow
-                label="Nomor Pesanan"
-                value={bookingId}
-                isMobileWeb={isMobileWeb}
-              />
-              <SummaryRow
-                label="Jumlah tiket"
-                value={`${ticketsQuery.data?.ticketQuantity ?? ticketCount ?? 0} tiket`}
-                isMobileWeb={isMobileWeb}
-              />
-              <SummaryRow
-                label="Total dibayar"
-                value={minorToIDR(
-                  ticketsQuery.data?.amountMinor ?? amountMinor,
-                )}
-                isMobileWeb={isMobileWeb}
-              />
-              <SummaryRow
-                label="NIK pembeli"
-                value={
-                  ticketsQuery.data?.buyerNikMasked ?? buyerNikMasked ?? "••••"
-                }
-                isMobileWeb={isMobileWeb}
-              />
-            </View>
-
-            {/* One e-ticket card + QR per ticket (RBT-071). QR encodes a safe
-              reference, never PII. */}
-            <View className="gap-6" testID="eticket-list">
-              {ticketsQuery.isLoading ? <Text>Memuat e-tiket…</Text> : null}
-              {ticketsQuery.isError ? (
-                <View
-                  className="items-center gap-2"
-                  accessibilityLiveRegion="polite"
-                  testID="success-tickets-error"
-                >
-                  <Text className="text-center">
-                    {apiErrorMessage(
-                      ticketsQuery.error,
-                      "Gagal memuat e-tiket. Silakan coba lagi.",
-                    )}
-                  </Text>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Coba muat e-tiket lagi"
-                    accessibilityState={{ disabled: ticketsQuery.isFetching }}
-                    disabled={ticketsQuery.isFetching}
-                    onPress={() => void ticketsQuery.refetch()}
-                    testID="success-tickets-retry"
-                  >
-                    <Text className="font-bold">
-                      {ticketsQuery.isFetching ? "Memuat…" : "Coba Lagi"}
-                    </Text>
-                  </Pressable>
-                </View>
-              ) : null}
-              {issuedTickets.map((ticket, i) => (
-                // Static derived list (fixed length, never reordered): the
-                // booking id + ticket index IS the stable identity.
-                <ETicketCard
-                  key={`${bookingId}-ticket-${i}`}
-                  bookingId={bookingId}
-                  index={i}
-                  total={count}
-                  eventName={event?.name}
-                  venue={event?.venue}
-                  startsAt={event?.startsAt}
-                  attendeeNikMasked={ticket.attendeeNikMasked}
-                  attendeeName={ticket.attendeeName}
-                  categoryCode={ticket.categoryCode}
-                  qrPayload={ticket.qrPayload}
-                  ticketCode={ticket.ticketCode}
-                />
-              ))}
-            </View>
-
-            <View className="mt-5 flex-row gap-3">
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Unduh e-tiket"
-                testID="success-download"
-                disabled={issuedTickets.length === 0}
-                onPress={() => void handleDownload()}
-                className="flex-1 items-center py-4"
-                style={componentStyles.elementBackgroundColor5}
-              >
-                <View className="flex-row items-center gap-2">
-                  <ArrowIcon direction="download" color={designColors.ink} />
-                  <Text
-                    className="text-sm font-bold uppercase"
-                    style={componentStyles.elementColor6}
-                  >
-                    Unduh E-Tiket
-                  </Text>
-                </View>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={profile ? "Tiket Saya" : "Ke Beranda"}
-                testID="success-home"
-                onPress={() =>
-                  router.replace((profile ? "/my-tickets" : "/") as Href)
-                }
-                className="flex-1 items-center py-4"
-                style={[
-                  componentStyles.elementBorderWidth7,
-                  isMobileWeb && componentStyles.mobileWebSecondaryButton,
-                ]}
-              >
-                <Text
-                  className={
-                    isMobileWeb
-                      ? "text-sm font-bold uppercase text-foreground"
-                      : "text-sm font-bold uppercase text-v2-ground"
-                  }
-                  style={[
-                    componentStyles.elementLetterSpacing8,
-                    isMobileWeb && componentStyles.mobileWebText,
-                  ]}
-                >
-                  {profile ? "Lihat Tiket" : "Ke Beranda"}
-                </Text>
-              </Pressable>
-            </View>
-            {downloadError ? (
-              <Text
-                className="mt-3 text-center text-xs"
-                style={componentStyles.elementColor9}
-              >
-                {downloadError}
-              </Text>
-            ) : null}
-
-            {/* Email note (v2-mobile prototype 10-success.html `.email-note`) */}
-            <View className="mt-4 flex-row items-center justify-center gap-2">
-              <MailIcon
-                color={
-                  isMobileWeb
-                    ? designColors.gray
-                    : withAlpha(designColors.ground, 0.6)
-                }
-                size={16}
-              />
-              <Text
-                style={[
-                  componentStyles.elementFontSize10,
-                  isMobileWeb && componentStyles.mobileWebMutedText,
-                ]}
-              >
-                E-tiket juga dikirim ke email kamu
-              </Text>
-            </View>
-          </ScrollView>
-        </>
-      )}
+function SuccessEmailNote({ isMobileWeb }: SuccessHeadingProps) {
+  return (
+    <View className="mt-4 flex-row items-center justify-center gap-2">
+      <MailIcon
+        color={
+          isMobileWeb ? designColors.gray : withAlpha(designColors.ground, 0.6)
+        }
+        size={16}
+      />
+      <Text
+        style={[
+          componentStyles.elementFontSize10,
+          isMobileWeb && componentStyles.mobileWebMutedText,
+        ]}
+      >
+        E-tiket juga dikirim ke email kamu
+      </Text>
     </View>
   );
 }

@@ -24,8 +24,8 @@ import Animated, {
 
 import { designEasing, designDuration } from "@presentation/theme";
 import { pointerEventsNone } from "@presentation/utils/style";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   getCategoryImageStyle,
   styleForCategoryCardAnimatedView0,
   styleForCategoryCardAnimatedView1,
