@@ -19,8 +19,7 @@ export class ExpoAppUpdateAdapter implements AppUpdatePort {
     if (
       Platform.OS === "web" ||
       Constants.appOwnership === "expo" ||
-      Constants.executionEnvironment === "storeClient" ||
-      Constants.expoVersion !== null
+      Constants.executionEnvironment === "storeClient"
     ) {
       return false;
     }

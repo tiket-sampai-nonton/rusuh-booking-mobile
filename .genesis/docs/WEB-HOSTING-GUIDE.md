@@ -279,10 +279,12 @@ files should not create separate user-triggered pipelines.
 5. In the GitHub `development` environment, add secret `EXPO_TOKEN` and variable `EXPO_PROJECT_ID`.
    Add the same values in a protected GitHub `production` environment before enabling production
    OTA. Use an Expo access token intended for CI rather than an Expo account password.
-6. In the Expo project's **Environment variables** settings, configure the matching public app
-   values separately for `development` and `production`: `EXPO_PUBLIC_API_BASE_URL`,
-   `EXPO_PUBLIC_ENV`, `EXPO_PUBLIC_USE_MOCKS`, and `EXPO_PUBLIC_SITE_URL`. The release workflow
-   calls `eas update --environment ...`, so these values must exist in Expo as well as GitHub.
+6. Configure the matching public app values in the GitHub `development` and `production`
+   environments: `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_ENV`, `EXPO_PUBLIC_USE_MOCKS`, and
+   `EXPO_PUBLIC_SITE_URL`. The current release workflow injects those GitHub values directly into
+   the `eas update` process; it does not use Expo-hosted environment variables or pass
+   `--environment`. If the pipeline later switches to Expo-hosted variables, add the matching
+   `--environment` flag and verify the values before publishing.
 7. Because `expo-updates` and its channel/project settings are native build configuration, existing
    installed APKs/iOS builds will not receive OTA. After adding the Expo project ID, use the manual
    Firebase distribution path to build and install a fresh development APK. Its channel is set by

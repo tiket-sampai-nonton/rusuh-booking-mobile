@@ -304,10 +304,10 @@ Create a new native build instead of OTA when a change includes:
 | `SONAR_ORGANIZATION` | GitHub Actions variable | SonarCloud organization identifier |
 | `SONAR_PROJECT_KEY` | GitHub Actions variable | SonarCloud project identifier |
 | `EXPO_TOKEN` | EAS Update | CI authentication for OTA publication only |
-| `EXPO_PROJECT_ID` | EAS Update | Expo project attribution for OTA updates |
+| `EXPO_PROJECT_ID` | EAS Update and Firebase Android builds | Expo project attribution and native update URL for OTA-capable APKs |
 | `EAS_OTA_DEVELOPMENT_ENABLED` | Release Pipeline | Repository Actions variable; set to `true` only after development EAS settings and an OTA-capable QA build are verified |
 | `EAS_OTA_PRODUCTION_ENABLED` | Release Pipeline | Repository Actions variable; keep unset/false until production EAS and release settings are ready |
-| `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_ENV`, `EXPO_PUBLIC_USE_MOCKS`, `EXPO_PUBLIC_SITE_URL` | Web and Android builds | Non-secret environment-specific app configuration; development targets the development BE with mocks disabled, and production targets the production BE with mocks disabled |
+| `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_ENV`, `EXPO_PUBLIC_USE_MOCKS`, `EXPO_PUBLIC_SITE_URL` | Web, Android builds, and EAS Update | Non-secret GitHub Environment configuration injected into web builds, native builds, and OTA bundles; development targets the development BE with mocks disabled, and production targets the production BE with mocks disabled |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare Pages | Secret with Pages Edit access; configure separately in `development` and `production` Environments |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Pages | Cloudflare account identifier; configure per GitHub Environment |
 | `CLOUDFLARE_PAGES_PROJECT` | Cloudflare Pages | Pages project name; use distinct preprod and production projects |
