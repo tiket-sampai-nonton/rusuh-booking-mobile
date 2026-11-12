@@ -3,7 +3,7 @@
 > **Status:** Target delivery flow; automation rollout is in progress
 > **Scope:** Expo + React Native + React Native Web frontend
 > **CI:** GitHub Actions
-> **Static quality:** SonarCloud analysis and its quality gate run after the shared checks
+> **Static quality:** SonarCloud analysis runs on pull requests targeting `main`, after shared checks
 > **Native delivery:** Android QA APKs build on GitHub Actions and distribute through Firebase App Distribution; EAS is reserved for compatible OTA updates. iOS device builds use a separate macOS runner workflow when configured.
 > **Architecture reference:** `.genesis/docs/ARCHITECTURE.md`
 > **FE-BE contract:** `.genesis/docs/FE-BE-align-contract.md`
@@ -12,7 +12,7 @@ The repository package manager is **npm** and CI uses the committed `package-loc
 
 This pipeline is adapted from an internal CI/CD reference pipeline for the ticketing architecture: Android, iOS, web, native capabilities, React Native Web SEO, and OTA promotion through `develop` and `main`.
 
-**Implementation status (2026-11-12):** `origin/main` still has the legacy development-only workflow and does not currently define a production release. The updated Release Pipeline in `.github/workflows/deploy-web-dev.yml` runs shared quality checks and SonarCloud analysis and defines guarded `develop` and `main` release paths; the production path becomes active when this workflow is promoted to `main`. Production web and Android workflow jobs validate that real API mode and the API URL are configured. Android Firebase distribution remains a manual mode on the same orchestrator. EAS OTA remains guarded until the Expo project, channels, credentials, Expo environment variables, and a newly built OTA-capable native app are ready.
+**Implementation status (2026-11-12):** `origin/main` still has the legacy development-only workflow and does not currently define a production release. The updated Release Pipeline in `.github/workflows/deploy-web-dev.yml` runs shared quality checks for pull requests and release runs; SonarCloud analysis is limited to pull requests targeting `main`. It defines guarded `develop` and `main` release paths; the production path becomes active when this workflow is promoted to `main`. Production web and Android workflow jobs validate that real API mode and the API URL are configured. Android Firebase distribution remains a manual mode on the same orchestrator. EAS OTA remains guarded until the Expo project, channels, credentials, Expo environment variables, and a newly built OTA-capable native app are ready.
 
 ## 1. Delivery model
 
@@ -50,9 +50,10 @@ Preview builds are distribution artifacts for QA and product review, not a third
 
 | Git event | Pipeline behavior |
 |---|---|
-| Pull request opened, synchronized, reopened, or marked ready for review → `develop` or `main` | Run typecheck, lint/format, unit/component tests, dependency audit, and the SonarCloud quality gate. Stop before web build/deployment, OTA publication, and native distribution. |
+| Pull request opened, synchronized, reopened, or marked ready for review → `develop` | Run shared typecheck, lint/format, unit/component tests, and dependency audit. SonarCloud does not run for development PRs. Stop before deployment and distribution. |
+| Pull request opened, synchronized, reopened, or marked ready for review → `main` | Run shared checks and the SonarCloud quality gate. Stop before deployment and distribution. |
 | Successful push to `develop` after merge | Start the single release orchestrator. Run shared quality gates, then automatically build/validate and deploy the web app to the preprod Cloudflare Pages project and publish an EAS `development` OTA only when the change is runtime-compatible and has no native-affecting change. Do not distribute an APK automatically. |
-| Pull request opened or synchronized → `main` | Run full release validation. Require approval before merge. |
+| Review approval required → `main` | Require approval before merge after shared checks and the SonarCloud quality gate pass. |
 | Successful push to `main` after merge from `develop` | Start the same release orchestrator. Run shared release gates, then automatically build/validate and deploy the web app to the production Cloudflare Pages project and publish an EAS `production` OTA only when the change is runtime-compatible and has no native-affecting change. |
 | `workflow_dispatch` on the same orchestrator | Manually select Firebase APK distribution for the selected branch/environment: `develop` produces a preprod/development APK; `main` produces a production APK. The manual run validates that the selected ref and environment match. Reusable workflow files may separate implementation details, but only the orchestrator is independently triggered. |
 | Native-affecting change | Skip OTA for that change. A new native binary is required. Firebase APK distribution remains manually triggerable for the matching branch/environment; it is not silently substituted for an OTA. |
@@ -67,7 +68,7 @@ GitHub shows the **Run workflow** button only when the orchestrator file exists 
 
 ## 3. Job dependency graph
 
-The graph below shows the active triggers. Pull requests run quality gates, including SonarCloud, and stop there. A successful push to either release branch starts one coordinated automatic web + compatible OTA release. Firebase APK distribution is an optional manual mode exposed by the same orchestrator.
+The graph below shows the active triggers. Pull requests to `develop` run shared quality checks; pull requests to `main` also run SonarCloud. Both stop before deployment. A successful push to either release branch starts one coordinated automatic web + compatible OTA release. Firebase APK distribution is an optional manual mode exposed by the same orchestrator.
 
 ```mermaid
 flowchart LR
@@ -79,8 +80,10 @@ flowchart LR
     INSTALL --> TYPE["typecheck"]
     TYPE --> LINT["lint + format"]
     LINT --> UNIT["Jest + RNTL"]
-    UNIT --> AUDIT["npm audit"]
-    AUDIT --> SONAR["SonarCloud scan + quality gate"] --> GATES["quality gates passed"]
+    UNIT --> AUDIT["npm audit"] --> GATES["shared quality gates passed"]
+    GATES --> PRTARGET{"PR target?"}
+    PRTARGET -->|main| SONAR["SonarCloud scan + quality gate"]
+    PRTARGET -->|develop| PRDEV["checks only; stop"]
 
     GATES --> EVENT{"event + branch?"}
     EVENT -->|PR| PRDONE["checks only; stop"]
@@ -156,7 +159,7 @@ OpenAPI remains the FE-BE source of truth, but contract validation is not a clou
 
 ### 4.6 `sonarcloud`
 
-The Release Pipeline runs the SonarQube Scan GitHub Action after typecheck, lint/format, tests, and dependency audit. The scan uploads Jest `lcov` coverage and waits for the SonarCloud Quality Gate; a failed gate blocks release jobs. It uses `SONAR_TOKEN` from the `development` GitHub Environment and the Actions variables `SONAR_ORGANIZATION` and `SONAR_PROJECT_KEY`. Fork pull requests skip this step because GitHub does not expose repository secrets to fork workflows.
+The Release Pipeline runs the SonarQube Scan GitHub Action only for pull requests targeting `main`, after typecheck, lint/format, tests, and dependency audit. The scan uploads Jest `lcov` coverage and waits for the SonarCloud Quality Gate; a failed gate blocks that PR from merging. Development PRs, branch pushes, release jobs, and manual Firebase distribution do not run SonarCloud. It uses `SONAR_TOKEN` from the `development` GitHub Environment and the Actions variables `SONAR_ORGANIZATION` and `SONAR_PROJECT_KEY`. Fork pull requests skip this step because GitHub does not expose repository secrets to fork workflows.
 
 - Configure the SonarCloud project Quality Gate with the agreed new-code rules:
   - no new blocker/critical bugs;
@@ -260,7 +263,7 @@ Create a new native build instead of OTA when a change includes:
 - Name the development APK `rusuh-booking.preprod.apk`; name the production APK `rusuh-booking.apk`.
 - Keep persistent keystores in GitHub Environment secrets; never generate or commit signing keys in CI. Increment Android `versionCode` monotonically for each environment's distributed build.
 - Upload the APK as a workflow artifact, then distribute it to the configured Firebase App Distribution tester group.
-- Run typecheck, lint/format, Jest/RNTL, production dependency audit, and the SonarCloud quality gate before building or distributing.
+- Run shared typecheck, lint/format, Jest/RNTL, and production dependency audit before building or distributing. SonarCloud is limited to pull requests targeting `main`.
 
 ### 8.2 `build_ios`
 
@@ -397,7 +400,7 @@ Web rollback is separate from native OTA rollback:
 | Unit/component behavior | Jest + React Native Testing Library | Yes | Yes |
 | API compatibility | OpenAPI types and FE-BE review | No | No |
 | Dependency security | npm audit + secret scan | Yes | Yes |
-| Static analysis | SonarCloud scan + quality gate | Yes | Yes |
+| Static analysis | SonarCloud scan + quality gate on PRs to `main` | Yes for PRs to `main` | No; release jobs run separately |
 | SEO output | Expo export validation | Yes for web release | Yes for web release |
 | Web bundle budget | Bundle-size check | Yes for web release | Yes for web release |
 
