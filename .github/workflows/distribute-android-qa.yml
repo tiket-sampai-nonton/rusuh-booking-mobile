@@ -75,6 +75,14 @@ jobs:
             echo 'EXPO_PUBLIC_API_BASE_URL must be set for the selected environment.'
             exit 1
           }
+          test -n "$EXPO_PROJECT_ID" || {
+            echo 'EXPO_PROJECT_ID is required for Firebase builds so the APK can receive EAS OTA updates.'
+            exit 1
+          }
+          test "$EAS_CHANNEL" = "$TARGET_ENVIRONMENT" || {
+            echo 'EAS_CHANNEL must match the selected Firebase build environment.'
+            exit 1
+          }
       - name: Decode Android signing keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -103,10 +111,6 @@ jobs:
         run: npx expo prebuild --platform android --clean --no-install
       - name: Verify OTA settings in the generated Android project
         run: |
-          if [ -z "$EXPO_PROJECT_ID" ]; then
-            echo '::warning::EXPO_PROJECT_ID is not configured; this APK will not receive EAS OTA updates.'
-            exit 0
-          fi
           ANDROID_MANIFEST='android/app/src/main/AndroidManifest.xml'
           grep -F "https://u.expo.dev/$EXPO_PROJECT_ID" "$ANDROID_MANIFEST" >/dev/null || {
             echo 'The generated Android project is missing its EAS update URL.'
