@@ -1,7 +1,7 @@
 const { execFileSync } = require("node:child_process");
 const path = require("node:path");
 
-const cli = path.resolve("node_modules/@expo/fingerprint/bin/cli.js");
+const cli = path.resolve("node_modules/expo-updates/bin/cli.js");
 const base = {
   ...process.env,
   EXPO_PROJECT_ID: "00000000-0000-4000-8000-000000000000",
@@ -12,7 +12,14 @@ const base = {
 function fingerprint(platform, overrides) {
   const result = execFileSync(
     process.execPath,
-    [cli, "fingerprint:generate", "--platform", platform],
+    [
+      cli,
+      "fingerprint:generate",
+      "--platform",
+      platform,
+      "--workflow",
+      "managed",
+    ],
     { env: { ...base, ...overrides }, encoding: "utf8" },
   );
   return JSON.parse(result).hash;
