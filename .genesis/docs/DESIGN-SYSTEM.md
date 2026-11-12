@@ -13,7 +13,7 @@
 
 ## 2. Design tokens (`tailwind.config.js` + `presentation/theme` re-export)
 
-Tokens are platform-neutral values defined once in `apps/client/tailwind.config.js` (the single source of truth) and consumed via NativeWind classes on RN + RN Web; `presentation/theme` derives the same values for SVG/Canvas/QR/Reanimated. Follow the V5 balance of 45% black, 45% white, and 10% neon accent. The app brand palette uses electric fuchsia `#DE00A0`, deep plum `#730050`, and neon cyan `#00E5FF`; status and queue-zone colors remain semantic tokens. Tailwind theme values are excluded from the native fingerprint so JavaScript theme changes can ship by OTA; native shell backgrounds remain fixed in Expo config.
+Tokens are platform-neutral values defined once in `apps/client/tailwind.config.js` (the single source of truth) and consumed via NativeWind classes on RN + RN Web; `presentation/theme` derives the same values for SVG/Canvas/QR/Reanimated. Follow the V5 balance of 45% black, 45% white, and 10% neon accent. The app brand palette uses electric fuchsia `#DE00A0`, vivid fuchsia `#D600A0`, and neon cyan `#00E5FF`; status and queue-zone colors remain semantic tokens. Tailwind theme values are excluded from the native fingerprint so JavaScript theme changes can ship by OTA; native shell backgrounds remain fixed in Expo config.
 
 | Token group | Members |
 |---|---|
