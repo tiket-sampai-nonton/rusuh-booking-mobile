@@ -6,8 +6,8 @@
  * Reanimated easing), so those call sites import the value from here instead of a
  * className. `tailwind.config.js` stays the source of truth; this file mirrors it.
  *
- * Tailwind remains the color-token source of truth; this file mirrors colors
- * for SVG, QR, Canvas, and other raw drawing surfaces.
+ * Tailwind theme changes are JavaScript presentation changes. The fingerprint
+ * excludes `tailwind.config.js`; native project configuration remains included.
  */
 
 const tailwind = require("../../../tailwind.config.js");
@@ -19,6 +19,12 @@ export const brand = {
   primary: colors.brand.DEFAULT,
   deep: colors.brand.deep,
   ember: colors.brand.ember,
+} as const;
+
+/** Logo-only colors stay fixed when the app's brand palette changes. */
+export const brandMark = {
+  primary: "#EC1C24",
+  deep: "#A8111B",
 } as const;
 
 /** Status hues mirrored from Tailwind's semantic tokens. */
@@ -155,6 +161,7 @@ export const shadow = {
 /** The complete raw token bag — single object for ergonomic import. */
 export const tokens = {
   brand,
+  brandMark,
   status,
   neutral,
   zone,

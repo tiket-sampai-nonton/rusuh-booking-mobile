@@ -1,5 +1,5 @@
 const androidVersionCode = Number(process.env.ANDROID_VERSION_CODE || "1");
-const designTokens = require("./tailwind.config.js").theme.extend.colors;
+const nativeShellBackground = "#0A0A0C";
 const appVersion = require("./package.json").version;
 const buildEnvironment = process.env.EXPO_PUBLIC_ENV || "development";
 const otaRevision = process.env.EXPO_PUBLIC_OTA_REVISION || "0";
@@ -58,7 +58,7 @@ const config = {
   splash: {
     image: "./assets/brand-mark.png",
     resizeMode: "contain",
-    backgroundColor: designTokens.background.dark,
+    backgroundColor: nativeShellBackground,
   },
   newArchEnabled: true,
   // SDK 53 uses Hermes; validated with an iOS simulator smoke run after fixing
@@ -89,7 +89,7 @@ const config = {
     ],
     adaptiveIcon: {
       foregroundImage: "./assets/brand-mark.png",
-      backgroundColor: designTokens.background.dark,
+      backgroundColor: nativeShellBackground,
     },
   },
   web: {

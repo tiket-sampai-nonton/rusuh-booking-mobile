@@ -2,6 +2,7 @@ import tailwind from "../../../../tailwind.config.js";
 
 import {
   brand,
+  brandMark,
   fontFamily,
   fontSize,
   fontWeight,
@@ -24,10 +25,14 @@ const tailwindBrand = (
 ).theme?.extend?.colors?.brand;
 
 describe("RBT-003 raw tokens", () => {
-  it("exposes the black, white, and red brand palette", () => {
-    expect(brand.primary).toBe("#EC1C24");
-    expect(brand.deep).toBe("#A8111B");
-    expect(brand.ember).toBe("#FF5A2D");
+  it("exposes the black, white, and neon cyberpunk brand palette", () => {
+    expect(brand.primary).toBe("#DE00A0");
+    expect(brand.deep).toBe("#730050");
+    expect(brand.ember).toBe("#00E5FF");
+  });
+
+  it("keeps the existing ticket mark colors unchanged", () => {
+    expect(brandMark).toEqual({ primary: "#EC1C24", deep: "#A8111B" });
   });
 
   it("mirrors the Tailwind brand palette as the canonical token source", () => {
@@ -46,8 +51,8 @@ describe("RBT-003 raw tokens", () => {
       okDark: "#4ADE80",
       warn: "#FF6600",
       warnDark: "#F5B301",
-      error: "#EC1C24",
-      errorDark: "#FF5A2D",
+      error: "#C1121F",
+      errorDark: "#FF6B81",
     });
   });
 
@@ -79,9 +84,9 @@ describe("RBT-003 raw tokens", () => {
       text: "#E65100",
     });
     expect(zone.bad).toEqual({
-      bg: "#FDE8E8",
-      border: "#EC1C24",
-      text: "#A8111B",
+      bg: "#FCE8EA",
+      border: "#C1121F",
+      text: "#7F1D1D",
     });
   });
 
@@ -138,7 +143,7 @@ describe("RBT-003 raw tokens", () => {
   });
 
   it("shadow strings are present for the four prototype elevations", () => {
-    expect(shadow.brand).toContain("rgba(236,28,36,0.28)");
+    expect(shadow.brand).toContain("rgba(222,0,160,0.28)");
     expect(shadow.button).toContain("rgba(10,10,12,0.42)");
     expect(shadow.filter).toContain("rgba(18,18,23,0.5)");
     expect(shadow.ok).toContain("rgba(0,170,0,0.36)");
@@ -147,6 +152,7 @@ describe("RBT-003 raw tokens", () => {
   it("the tokens bag re-exports every group by reference", () => {
     expect(tokens).toEqual({
       brand,
+      brandMark,
       status,
       neutral,
       zone,
@@ -159,6 +165,7 @@ describe("RBT-003 raw tokens", () => {
       shadow,
     });
     expect(tokens.brand).toBe(brand);
+    expect(tokens.brandMark).toBe(brandMark);
     expect(tokens.motion).toBe(motion);
     expect(tokens.zone).toBe(zone);
   });

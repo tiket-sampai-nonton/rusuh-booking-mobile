@@ -1,7 +1,7 @@
 const palette = {
-  brandPrimary: "#EC1C24",
-  brandDeep: "#A8111B",
-  brandEmber: "#FF5A2D",
+  brandPrimary: "#DE00A0",
+  brandDeep: "#730050",
+  brandEmber: "#00E5FF",
   ground: "#FBFBFD",
   darkBackground: "#0A0A0C",
   ink: "#0A0A0C",
@@ -17,14 +17,14 @@ const palette = {
   successDark: "#4ADE80",
   warning: "#FF6600",
   warningDark: "#F5B301",
-  error: "#EC1C24",
-  errorDark: "#FF5A2D",
+  error: "#C1121F",
+  errorDark: "#FF6B81",
   zoneOk: "#E8F5E9",
   zoneOkText: "#1B5E20",
   zoneWarn: "#FFF3E0",
   zoneWarnText: "#E65100",
-  zoneBad: "#FDE8E8",
-  zoneBadText: "#A8111B",
+  zoneBad: "#FCE8EA",
+  zoneBadText: "#7F1D1D",
 };
 
 function withAlpha(hex, alpha) {
