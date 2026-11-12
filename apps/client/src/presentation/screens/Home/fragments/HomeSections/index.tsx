@@ -43,7 +43,7 @@ export function HomeSections({
       >
         <Reveal>
           <SectionHeader
-            title={isMobileWeb ? "Event populer" : "Daftar Event"}
+            title={isMobileWeb ? "Event populer" : "Jelajahi Event"}
             linkText="Lihat Semua"
             onLinkPress={onSeeAll}
             showFilter={!isNative}

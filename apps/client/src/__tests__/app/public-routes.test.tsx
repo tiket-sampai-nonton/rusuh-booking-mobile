@@ -91,7 +91,9 @@ describe("(public) routes", () => {
     // section header proves the real screen mounts.
     // Native and web share the same Indonesian Home section title.
     renderWithProviders(<HomeScreen />);
-    await waitFor(() => expect(screen.getByText("Daftar Event")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByText("Jelajahi Event")).toBeTruthy(),
+    );
     expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
   });
 
