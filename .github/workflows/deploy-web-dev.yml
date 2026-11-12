@@ -25,8 +25,63 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  release_context:
+    name: Validate release branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check manual release branch
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          case "$GITHUB_REF_NAME" in
+            develop|main) ;;
+            *) echo 'Manual Firebase distribution must select develop or main.'; exit 1 ;;
+          esac
+
   quality_gates:
-    name: Shared quality gates
+    name: "Quality / ${{ matrix.check }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [typecheck, lint, format, coverage, runtime]
+    defaults:
+      run:
+        working-directory: apps/client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        if: ${{ matrix.check == 'typecheck' }}
+        run: npm run typecheck
+      - name: Lint
+        if: ${{ matrix.check == 'lint' }}
+        run: npm run lint
+      - name: Format
+        if: ${{ matrix.check == 'format' }}
+        run: npm run format:check
+      - name: Tests and coverage
+        if: ${{ matrix.check == 'coverage' }}
+        run: npm run test:coverage -- --runInBand --ci
+      - name: Verify OTA fingerprint stability
+        if: ${{ matrix.check == 'runtime' }}
+        run: node scripts/verify-fingerprint.cjs
+      - name: Upload Jest coverage for SonarCloud
+        if: ${{ matrix.check == 'coverage' && github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: apps/client/coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 1
+
+  security_audit:
+    name: Production dependency audit
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,34 +93,12 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: apps/client/package-lock.json
-      - run: npm ci
-      - name: Validate manual release branch
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          case "$GITHUB_REF_NAME" in
-            develop|main) ;;
-            *)
-              echo 'Manual Firebase distribution must select develop or main.'
-              exit 1
-              ;;
-          esac
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run test:coverage -- --runInBand --ci
-      - name: Upload Jest coverage for SonarCloud
-        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: sonar-coverage-${{ github.run_id }}-${{ github.run_attempt }}
-          path: apps/client/coverage/lcov.info
-          if-no-files-found: error
-          retention-days: 1
-      - run: npm audit --omit=dev --audit-level=high
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
 
   sonarcloud:
     name: SonarCloud scan and quality gate
-    needs: quality_gates
+    needs: [quality_gates, security_audit]
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     environment: development
@@ -116,7 +149,7 @@ jobs:
   web_release:
     name: Build and deploy web
     if: ${{ github.event_name == 'push' }}
-    needs: quality_gates
+    needs: [quality_gates, security_audit, release_context]
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name == 'main' && 'production' || 'development' }}
@@ -172,8 +205,10 @@ jobs:
             echo 'Only develop and main can deploy web releases.'
             exit 1
           fi
-      - run: npx expo export --platform web
-      - run: npm run web:metadata
+      - name: Export web application
+        run: npx expo export --platform web
+      - name: Generate web metadata
+        run: npm run web:metadata
       - name: Generate verified app-link association files
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -198,8 +233,10 @@ jobs:
           fi
           ANDROID_CERT_SHA256_FINGERPRINT="$ANDROID_CERT_SHA256_FINGERPRINT" \
             node scripts/generate-link-associations.cjs
-      - run: npm run web:verify
-      - uses: actions/upload-artifact@v4
+      - name: Verify exported web artifact
+        run: npm run web:verify
+      - name: Upload verified web artifact
+        uses: actions/upload-artifact@v4
         with:
           name: web-dist-${{ github.ref_name }}-${{ github.run_id }}
           path: apps/client/dist/
@@ -229,7 +266,7 @@ jobs:
           github.ref_name == 'main'
         )
       }}
-    needs: [quality_gates, web_release]
+    needs: [quality_gates, security_audit, release_context, web_release]
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name == 'main' && 'production' || 'development' }}
@@ -282,7 +319,7 @@ jobs:
           printf '%s\n' "$CHANGED_FILES"
           NATIVE_CHANGE=false
           if printf '%s\n' "$CHANGED_FILES" | grep -Eq \
-            '^(apps/client/(app\.json|eas\.json|package\.json|package-lock\.json|plugins/|android/|ios/|assets/|google-services\.json|GoogleService-Info\.plist)|.*\.(entitlements|podspec)$)'; then
+            '^(apps/client/(fingerprint\.config\.(js|cjs)|app\.json|eas\.json|package\.json|package-lock\.json|plugins/|android/|ios/|assets/|google-services\.json|GoogleService-Info\.plist)|.*\.(entitlements|podspec)$)'; then
             NATIVE_CHANGE=true
           fi
 
@@ -346,7 +383,7 @@ jobs:
   firebase_distribution:
     name: Manual Firebase Android distribution
     if: ${{ github.event_name == 'workflow_dispatch' }}
-    needs: quality_gates
+    needs: [quality_gates, security_audit, release_context]
     uses: ./.github/workflows/distribute-android-qa.yml
     with:
       target_environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
@@ -356,7 +393,15 @@ jobs:
   notify:
     name: Notify Telegram
     if: ${{ always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
-    needs: [quality_gates, web_release, publish_ota, firebase_distribution]
+    needs:
+      [
+        quality_gates,
+        security_audit,
+        release_context,
+        web_release,
+        publish_ota,
+        firebase_distribution,
+      ]
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name == 'main' && 'production' || 'development' }}

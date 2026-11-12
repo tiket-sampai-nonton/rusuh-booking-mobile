@@ -6,7 +6,7 @@
  * PaymentRepository, records the selected method + attemptId in the session
  * store, then HANDS OFF to SNAP using the attempt's `redirectUrl`:
  *   • web   → navigate the browser to the SNAP page (redirectUrl)
- *   • native→ mint a backend page token and open it in the in-app WebView
+ *   • native→ open the validated SNAP URL in the in-app WebView
  * The FE never marks PAID from here — the callback is verified server-side
  * (RBT-063). TanStack is confined to this hook (D3); the platform open is
  * injected so it is deterministic in tests.
@@ -22,6 +22,10 @@ import type {
 } from "@domain/repositories/payment.repository";
 import { useServices } from "@providers/service-context";
 import { useSessionStore } from "@presentation/stores/session-store";
+import {
+  setPaymentHandoff,
+  type PaymentReturnUrls,
+} from "@presentation/stores/payment-handoff";
 
 export interface CreateAttemptInput {
   readonly bookingId: string;
@@ -30,12 +34,13 @@ export interface CreateAttemptInput {
 
 /**
  * Platform-aware SNAP handoff. Default: web assigns `window.location`, native
- * routes by booking ID on native; the BE supplies a one-time page token. Never
- * put a payment URL in route params. Overridable for tests.
+ * routes by booking ID on native. The SNAP URL is kept in memory and never put
+ * in route params. Overridable for tests.
  */
 export async function openSnapHandoff(
   url: string,
   bookingId?: string,
+  returns?: PaymentReturnUrls,
 ): Promise<void> {
   // An in-app relative path (the mock SNAP simulator route `/snap/...`, RBT-065)
   // is navigated with the router, NOT window.location / Linking. The real BE
@@ -56,9 +61,9 @@ export async function openSnapHandoff(
     }
     return;
   }
-  // Native: don't trust a URL in route params. The WebView obtains a
-  // one-time page token from the BE for this booking before opening content.
+  // Native: validate the backend-issued gateway URL and keep it in memory.
   if (bookingId) {
+    setPaymentHandoff(bookingId, url, returns);
     const { router } = require("expo-router") as typeof import("expo-router");
     router.push(
       `/payment-webview/${encodeURIComponent(bookingId)}` as import("expo-router").Href,
@@ -67,7 +72,11 @@ export async function openSnapHandoff(
 }
 
 export function usePayment(
-  handoff: (url: string, bookingId?: string) => Promise<void> = openSnapHandoff,
+  handoff: (
+    url: string,
+    bookingId?: string,
+    returns?: PaymentReturnUrls,
+  ) => Promise<void> = openSnapHandoff,
 ): {
   readonly createAttempt: UseMutationResult<
     PaymentAttempt,
@@ -88,14 +97,14 @@ export function usePayment(
     onSuccess: async (attempt, { method }) => {
       setPaymentMethod(method, attempt.attemptId);
       if (attempt.redirectUrl)
-        await handoff(attempt.redirectUrl, attempt.bookingId);
+        await handoff(attempt.redirectUrl, attempt.bookingId, attempt);
     },
   });
 
   // "Kembali ke SNAP" — re-open the handoff for an in-flight attempt (AC2).
   const resumeHandoff = async (attempt: PaymentAttempt): Promise<void> => {
     if (attempt.redirectUrl)
-      await handoff(attempt.redirectUrl, attempt.bookingId);
+      await handoff(attempt.redirectUrl, attempt.bookingId, attempt);
   };
 
   return { createAttempt, resumeHandoff };

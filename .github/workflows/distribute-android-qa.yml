@@ -123,7 +123,7 @@ jobs:
           cd android
           chmod +x gradlew
           if [ "$TARGET_ENVIRONMENT" = 'development' ]; then
-            RBT_BUNDLE_DEBUG=true NODE_ENV=production ./gradlew assembleDebug --no-daemon
+            RBT_BUNDLE_DEBUG=true EX_UPDATES_NATIVE_DEBUG=1 NODE_ENV=production ./gradlew assembleDebug --no-daemon
             APK_NAME='rusuh-booking.preprod.apk'
             APK_SOURCE='app/build/outputs/apk/debug/app-debug.apk'
           else
