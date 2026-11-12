@@ -39,7 +39,7 @@ export function HomeSections({
       <View
         style={homeSectionsStyles.featuredSection(isNative, isMobileWeb)}
         onLayout={(event) => onFeaturedLayout(event.nativeEvent.layout.y)}
-        testID="section-events"
+        testID="home-upcoming-events-section"
       >
         <Reveal>
           <SectionHeader
