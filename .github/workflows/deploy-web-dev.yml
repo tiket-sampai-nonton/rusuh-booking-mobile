@@ -107,6 +107,7 @@ jobs:
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
             -Dsonar.sources=apps/client/src
             -Dsonar.tests=apps/client/src/__tests__
+            -Dsonar.exclusions=apps/client/src/__tests__/**
             -Dsonar.javascript.lcov.reportPaths=apps/client/coverage/lcov.info
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=300
