@@ -237,9 +237,9 @@ function AnimatedEventCard({
   const disabled = badge.disabled || history;
   const dateTxt = formatDateID(event.startsAt);
   const image = eventImage(event.id, event.thumbnailUrl ?? event.imageUrl);
-  const imageUri = isNative
-    ? resizeNativeUnsplashImage(image, listMode)
-    : image;
+  const imageSource = isNative
+    ? { uri: resizeNativeUnsplashImage(image, listMode) }
+    : responsiveWebImageSource(image, compactListMode);
 
   // Mobile vs Desktop sizing
   const contentPadding = isMobileWeb
@@ -324,7 +324,7 @@ function AnimatedEventCard({
     // Web only: animate shadow (native shadow is static in containerStyle)
     ...(isWeb
       ? {
-          boxShadow: `${interpolate(hovered.value, [0, 1], [0, designShadows.lg.x])}px ${interpolate(hovered.value, [0, 1], [0, designShadows.lg.y])}px 0 ${withAlpha(designColors.overlay, interpolate(hovered.value, [0, 1], [0, 0.15]))}`,
+          boxShadow: `${interpolate(hovered.value, [0, 1], [0, designShadows.lg.x])}px ${interpolate(hovered.value, [0, 1], [0, designShadows.lg.y])}px 0 ${withAlpha(designColors.ink, interpolate(hovered.value, [0, 1], [0, 0.15]))}`,
         }
       : {}),
   }));
@@ -401,7 +401,7 @@ function AnimatedEventCard({
               style={[styleForEventCardAnimatedView3(), imageScaleStyle]}
             >
               <CachedImage
-                source={{ uri: imageUri }}
+                source={imageSource}
                 resizeMode="cover"
                 accessibilityIgnoresInvertColors
                 style={webImageStyle}
@@ -503,13 +503,27 @@ export default EventCard;
 function resizeNativeUnsplashImage(uri: string, listMode: boolean): string {
   if (!uri.includes("images.unsplash.com")) return uri;
 
+  return resizeUnsplashImage(uri, listMode ? 960 : 576, 75);
+}
+
+function responsiveWebImageSource(
+  uri: string,
+  listMode: boolean,
+): { uri: string; width: number }[] | { uri: string } {
+  if (!uri.includes("images.unsplash.com")) return { uri };
+
+  const widths = listMode ? [640, 960] : [480, 768];
+  return widths.map((width) => ({
+    uri: resizeUnsplashImage(uri, width, 56),
+    width,
+  }));
+}
+
+function resizeUnsplashImage(uri: string, width: number, quality: number) {
   const [path, query = ""] = uri.split("?", 2);
   const params = new URLSearchParams(query);
-  // Two-column cards render at roughly 480 physical pixels on the QA phone.
-  // Request a modestly larger source for density while avoiding oversized
-  // decodes during a fast scroll; a single-column card can use up to 960 px.
-  params.set("w", listMode ? "960" : "576");
-  params.set("q", "75");
+  params.set("w", String(width));
+  params.set("q", String(quality));
   return `${path}?${params.toString()}`;
 }
 

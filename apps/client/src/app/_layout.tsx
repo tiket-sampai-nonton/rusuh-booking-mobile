@@ -20,6 +20,7 @@ import { rootLayoutStyles } from "@presentation/layout/RootLayout/style";
 // Load the prototype's Plus Jakarta Sans family before rendering app content.
 export default function RootLayout() {
   const { fontsLoaded, fontError } = usePlusJakartaSansFonts();
+  const appReady = Platform.OS === "web" || fontsLoaded || fontError;
   const [showSplash, setShowSplash] = useState(Platform.OS !== "web");
   const [startupUpdateComplete, setStartupUpdateComplete] = useState(
     Platform.OS === "web",
@@ -35,7 +36,7 @@ export default function RootLayout() {
 
   return (
     <View style={rootLayoutStyles.root}>
-      {fontsLoaded || fontError ? (
+      {appReady ? (
         <AppProviders>
           <Fragment>
             {Platform.OS !== "web" ? (

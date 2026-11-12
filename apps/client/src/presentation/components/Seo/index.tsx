@@ -48,6 +48,7 @@ export function Seo({
   return (
     <Head>
       <title>{fullTitle}</title>
+      <link rel="preconnect" href="https://images.unsplash.com" />
       <meta name="description" content={description} />
       <link rel="canonical" href={canonical} />
       {noindex ? (

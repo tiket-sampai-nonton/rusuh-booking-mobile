@@ -7,7 +7,7 @@
  * - Logo: fontSize 18, fontWeight 800, uppercase
  * - Slide in from top on mount (translateY -100% → 0)
  * - border: 2px solid the shared ink token (bottom only)
- * - Black/white surfaces with the shared purple action accent, no rounding
+ * - Black/white surfaces with the shared red action accent, no rounding
  *
  * Mobile differences (v2-mobile/01-home.html):
  * - Height: 56px (vs 60px desktop)
@@ -17,7 +17,7 @@
  * - NO "Masuk / Daftar" text button on mobile — use icon buttons instead
  *
  * Links (desktop > 720px): center nav links with hover underline slide
- * CTA: "Masuk / Daftar" purple button with cyan hover accent (desktop only)
+ * CTA: "Masuk / Daftar" red button with red-orange hover accent (desktop only)
  */
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";

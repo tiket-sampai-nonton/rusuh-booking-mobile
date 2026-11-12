@@ -4,6 +4,7 @@ const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
 
 const config = getDefaultConfig(__dirname);
+config.resolver.assetExts = [...new Set([...config.resolver.assetExts, "woff2"])];
 
 // --- query-string CJS interop (RBT-020) ---------------------------------
 // `query-string@9` is pure ESM; `expo-router@4` requires it as CommonJS and

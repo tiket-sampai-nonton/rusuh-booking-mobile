@@ -39,6 +39,16 @@ function checkHtml(
   const html = read(file);
   if (!html) return;
 
+  const charset = html.match(/<meta\b[^>]*\bcharset\s*=\s*["']?utf-8[^>]*>/i);
+  if (
+    !charset ||
+    Buffer.byteLength(html.slice(0, charset.index), "utf8") > 1024
+  ) {
+    errors.push(
+      `${file}: UTF-8 charset declaration must appear within the first 1024 bytes`,
+    );
+  }
+
   requirePattern(html, /<title\b[^>]*>[^<]+<\/title>/i, `${file}: title`);
   requirePattern(
     html,

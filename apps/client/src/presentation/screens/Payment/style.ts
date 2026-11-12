@@ -4,7 +4,7 @@ import { StyleSheet, type DimensionValue } from "react-native";
 import { designColors } from "@presentation/theme";
 
 export const paymentStyles = StyleSheet.create({
-  //  brutalist: square timer dot + square method icon chip (neon cyan fill).
+  //  brutalist: square timer dot + square method icon chip (red-orange fill).
   timerDot: { width: 8, height: 8 },
   methodIcon: { width: 44, height: 30, backgroundColor: designColors.ember },
   tabularNum: { fontVariant: ["tabular-nums"] },

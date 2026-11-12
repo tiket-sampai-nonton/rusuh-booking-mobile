@@ -2,7 +2,7 @@
 
 > GENESIS Phase 2 output. Conforms to `GROOMING-DECISIONS.md` and `ARCHITECTURE.md`.
 > Scope: the shared cross-platform (Expo + RN + RN Web) design language in `apps/client/src/presentation/theme` (token re-exports) + `apps/client/src/presentation/components`, styled with **NativeWind**. The single token source of truth is `apps/client/tailwind.config.js` (generated from prototype V5).
-> Visual reference: shared black-and-white surfaces with electric purple and neon cyan accents, plus Plus Jakarta Sans. Platform split is presentation-only; tokens and primitives are shared.
+> Visual reference: shared black-and-white surfaces with red accents, plus Plus Jakarta Sans. Platform split is presentation-only; tokens and primitives are shared.
 
 ## 1. Principles
 
@@ -13,21 +13,21 @@
 
 ## 2. Design tokens (`tailwind.config.js` + `presentation/theme` re-export)
 
-Tokens are platform-neutral values defined once in `apps/client/tailwind.config.js` (the single source of truth) and consumed via NativeWind classes on RN + RN Web; `presentation/theme` derives the same values for SVG/Canvas/QR/Reanimated. Follow the V5 balance of 45% black, 45% white, and 10% neon accent. The UI palette uses electric purple `#8B00FF`, deep violet `#7000CC`, and neon cyan `#00E5FF`; the existing red ticket mark and semantic status colors remain fixed. Components consume shared tokens instead of declaring color literals. Tailwind theme values are excluded from the native fingerprint so JavaScript theme changes can ship by OTA; native shell backgrounds remain fixed in Expo config.
+Tokens are platform-neutral values defined once in `apps/client/tailwind.config.js` (the single source of truth) and consumed via NativeWind classes on RN + RN Web; `presentation/theme` derives the same values for SVG/Canvas/QR/Reanimated. Follow the V5 balance of 45% black, 45% white, and 10% red. The UI palette uses red `#EC1C24`, deep red `#A8111B`, and red-orange `#FF5A2D`; the ticket mark and semantic status colors remain tokenized. Components consume shared tokens instead of declaring color literals. All elevation and hard-offset shadows use the black `designColors.ink` token. Tailwind theme values are excluded from the native fingerprint so JavaScript theme changes can ship by OTA; native shell backgrounds remain fixed in Expo config.
 
-| Token group | Members |
-|---|---|
-| Color — brand | `brand.DEFAULT`, `brand.deep`, `brand.ember` |
-| Color — surface | `surface.base`, `surface.raised`, `surface.glass` (glassmorphism overlay), `surface.border` |
-| Color — text | `text.primary`, `text.secondary`, `text.onBrand`, `text.disabled` |
-| Color — status | `status.available`, `status.soldOut`, `status.warning`, `status.danger`, `status.info` |
-| Color — queue zone | `zone.guaranteed` (green), `zone.possible` (amber), `zone.notEnough` (red) |
-| Typography | family `Plus Jakarta Sans` across the app; scale `display/h1/h2/h3/body/caption`; weights 400/500/600/700/800 |
-| Spacing | 4-pt base scale: `space.1..10` (4,8,12,16,20,24,32,40,48,64) |
-| Radius | `radius.sm/md/lg/pill` |
-| Elevation | `elevation.0..3` (shadow tokens; web box-shadow / native elevation) |
-| Motion | `motion.fast/base/slow` durations + standard easing; all respect reduced-motion |
-| Z-index | `z.base/sticky/overlay/modal/toast` |
+| Token group        | Members                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| Color — brand      | `brand.DEFAULT`, `brand.deep`, `brand.ember`                                                                  |
+| Color — surface    | `surface.base`, `surface.raised`, `surface.glass` (glassmorphism overlay), `surface.border`                   |
+| Color — text       | `text.primary`, `text.secondary`, `text.onBrand`, `text.disabled`                                             |
+| Color — status     | `status.available`, `status.soldOut`, `status.warning`, `status.danger`, `status.info`                        |
+| Color — queue zone | `zone.guaranteed` (green), `zone.possible` (amber), `zone.notEnough` (red)                                    |
+| Typography         | family `Plus Jakarta Sans` across the app; scale `display/h1/h2/h3/body/caption`; weights 400/500/600/700/800 |
+| Spacing            | 4-pt base scale: `space.1..10` (4,8,12,16,20,24,32,40,48,64)                                                  |
+| Radius             | `radius.sm/md/lg/pill`                                                                                        |
+| Elevation          | `elevation.0..3` (shadow tokens; web box-shadow / native elevation)                                           |
+| Motion             | `motion.fast/base/slow` durations + standard easing; all respect reduced-motion                               |
+| Z-index            | `z.base/sticky/overlay/modal/toast`                                                                           |
 
 > **Theming rule:** always set a background together with its text color; never a fixed literal. A half-set pair breaks dark mode. A `theme.mode` (light/dark) flag selects token values.
 
@@ -35,23 +35,23 @@ Tokens are platform-neutral values defined once in `apps/client/tailwind.config.
 
 Each is a shared RN primitive with accessible labels, loading/empty/error/disabled states, and a web escape hatch only where DOM/keyboard/print needs it.
 
-| Component | Used on | Notes |
-|---|---|---|
-| `Button` / `IconButton` | all | variants: primary, secondary, ghost, danger; pressed + disabled + loading states |
-| `EventCard` | Home, Browse | status badge (Tersedia / Stok Menipis / Sold Out), price-from (`minorToIDR`), date `DD MMM YYYY`, disabled when sold out |
-| `StatusBadge` | Home, Event | icon+label+color triad, never color-only |
-| `Countdown` | Checkout, Payment | renders from `ServerClock.remaining()`; `aria-live="polite"`; reduced-motion safe; never drives logic |
-| `QueuePositionCard` | Waiting | "orang di depan" + "estimasi"; zone color + label; polite live region on change |
-| `TicketRow` | Checkout | category dropdown + attendee name + attendee NIK + "Gunakan NIK pembeli" single-use checkbox |
-| `NikField` | Checkout, Register | 16-digit mask, inline validation, debounced attendee-check status, never echoes full NIK in logs |
-| `ConsentCheckbox` | Register, Checkout | required NIK/email consent gate (D7.1) before collection |
-| `PaymentMethodSelector` | Payment | FE-built method-bucket picker (VA BCA/BNI/BRI/Permata · QRIS · GoPay) driven by server `page.methods`; selected row drives the "Bayar" CTA (D10). Instrument entry happens on SNAP, not here |
-| `OrderSummaryPanel` / `PaymentTimer` | Payment, Checkout | summary (total = `amountMinor`, no service-fee line) + server-authoritative countdown from `expiresAt`+`serverTime` |
-| `Toast` / `InlineError` | all | error-code → Bahasa mapping; no `alert`/`confirm` |
-| `Skeleton` | all lists | loading placeholder; no layout shift (CLS budget) |
-| `EmptyState` / `ErrorState` / `ExpiredState` | all | recoverable actions (retry / re-queue / home) |
-| `QrTicket` | Success | `react-native-svg` QR from BE `qrPayload`; never embeds raw NIK |
-| `Sheet` / `Modal` | Filter, confirm-leave | focus trap + ESC/back close on web; native sheet on mobile |
+| Component                                    | Used on               | Notes                                                                                                                                                                                        |
+| -------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button` / `IconButton`                      | all                   | variants: primary, secondary, ghost, danger; pressed + disabled + loading states                                                                                                             |
+| `EventCard`                                  | Home, Browse          | status badge (Tersedia / Stok Menipis / Sold Out), price-from (`minorToIDR`), date `DD MMM YYYY`, disabled when sold out                                                                     |
+| `StatusBadge`                                | Home, Event           | icon+label+color triad, never color-only                                                                                                                                                     |
+| `Countdown`                                  | Checkout, Payment     | renders from `ServerClock.remaining()`; `aria-live="polite"`; reduced-motion safe; never drives logic                                                                                        |
+| `QueuePositionCard`                          | Waiting               | "orang di depan" + "estimasi"; zone color + label; polite live region on change                                                                                                              |
+| `TicketRow`                                  | Checkout              | category dropdown + attendee name + attendee NIK + "Gunakan NIK pembeli" single-use checkbox                                                                                                 |
+| `NikField`                                   | Checkout, Register    | 16-digit mask, inline validation, debounced attendee-check status, never echoes full NIK in logs                                                                                             |
+| `ConsentCheckbox`                            | Register, Checkout    | required NIK/email consent gate (D7.1) before collection                                                                                                                                     |
+| `PaymentMethodSelector`                      | Payment               | FE-built method-bucket picker (VA BCA/BNI/BRI/Permata · QRIS · GoPay) driven by server `page.methods`; selected row drives the "Bayar" CTA (D10). Instrument entry happens on SNAP, not here |
+| `OrderSummaryPanel` / `PaymentTimer`         | Payment, Checkout     | summary (total = `amountMinor`, no service-fee line) + server-authoritative countdown from `expiresAt`+`serverTime`                                                                          |
+| `Toast` / `InlineError`                      | all                   | error-code → Bahasa mapping; no `alert`/`confirm`                                                                                                                                            |
+| `Skeleton`                                   | all lists             | loading placeholder; no layout shift (CLS budget)                                                                                                                                            |
+| `EmptyState` / `ErrorState` / `ExpiredState` | all                   | recoverable actions (retry / re-queue / home)                                                                                                                                                |
+| `QrTicket`                                   | Success               | `react-native-svg` QR from BE `qrPayload`; never embeds raw NIK                                                                                                                              |
+| `Sheet` / `Modal`                            | Filter, confirm-leave | focus trap + ESC/back close on web; native sheet on mobile                                                                                                                                   |
 
 ## 4. Layout & responsiveness
 

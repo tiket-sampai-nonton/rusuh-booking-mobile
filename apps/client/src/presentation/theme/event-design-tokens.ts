@@ -124,18 +124,18 @@ export const designBorders = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const designShadows = {
-  sm: { x: 2, y: 2, blur: 0, color: brand.deep },
-  md: { x: 4, y: 4, blur: 0, color: brand.deep },
-  lg: { x: 6, y: 6, blur: 0, color: brand.deep },
-  xl: { x: 8, y: 8, blur: 0, color: brand.deep },
+  sm: { x: 2, y: 2, blur: 0, color: neutral.ink },
+  md: { x: 4, y: 4, blur: 0, color: neutral.ink },
+  lg: { x: 6, y: 6, blur: 0, color: neutral.ink },
+  xl: { x: 8, y: 8, blur: 0, color: neutral.ink },
 } as const;
 
 // Shadow as CSS string helper
 export const designShadowCSS = {
-  sm: `2px 2px 0 ${brand.deep}`,
-  md: `4px 4px 0 ${brand.deep}`,
-  lg: `6px 6px 0 ${brand.deep}`,
-  xl: `8px 8px 0 ${brand.deep}`,
+  sm: `2px 2px 0 ${neutral.ink}`,
+  md: `4px 4px 0 ${neutral.ink}`,
+  lg: `6px 6px 0 ${neutral.ink}`,
+  xl: `8px 8px 0 ${neutral.ink}`,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════

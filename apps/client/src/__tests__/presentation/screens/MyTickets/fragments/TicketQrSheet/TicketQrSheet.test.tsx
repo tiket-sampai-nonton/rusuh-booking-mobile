@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import {
   TicketQrSheet,
   ticketQrBackdropStyle,
+  ticketQrCardPointerEvents,
 } from "../../../../../../presentation/screens/MyTickets/fragments/TicketQrSheet/index";
 
 const baseProps = {
@@ -93,6 +94,9 @@ describe("TicketQrSheet", () => {
     expect(screen.getByTestId("qr-code").props.accessibilityLabel).toBe(
       "safe-payload",
     );
+    expect(ticketQrCardPointerEvents("android")).toBe("none");
+    expect(ticketQrCardPointerEvents("ios")).toBe("none");
+    expect(ticketQrCardPointerEvents("web")).toBe("auto");
     fireEvent.press(screen.getByText("Unduh E-Tiket"));
     expect(onDownload).toHaveBeenCalledTimes(1);
   });
@@ -121,9 +125,12 @@ describe("TicketQrSheet", () => {
     expect(screen.queryByText("Unduh E-Tiket")).toBeNull();
   });
 
-  it("does not close when a tap stays inside the sheet and shows download errors", () => {
+  it("keeps sheet gestures separate from the backdrop press handler", () => {
     render(<TicketQrSheet {...baseProps} downloadError="Unduhan gagal." />);
 
+    expect(
+      screen.getByTestId("ticket-qr-scrollview").props.nestedScrollEnabled,
+    ).toBe(true);
     fireEvent.press(screen.getByTestId("ticket-qr-sheet"));
     expect(baseProps.onClose).not.toHaveBeenCalled();
     expect(screen.getByText("Unduhan gagal.")).toBeTruthy();

@@ -224,7 +224,7 @@ export const loginStyles = StyleSheet.create({
   },
 
   // ---------------------------------------------------------------------------
-  // Primary button — shared neon-purple action fill.
+  // Primary button — shared red action fill.
   // ---------------------------------------------------------------------------
   go: {
     flex: 1,
