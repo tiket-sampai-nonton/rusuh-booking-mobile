@@ -86,9 +86,9 @@ describe("EventCard style variants", () => {
     expect(
       styleForEventCardAnimatedView5(false, available).backgroundColor,
     ).toBeDefined();
-    expect(
-      styleForEventCardAnimatedView5(false, soldOut).backgroundColor,
-    ).toBe(styleForEventCardAnimatedView5(false, available).backgroundColor);
+    expect(styleForEventCardAnimatedView5(false, soldOut).backgroundColor).toBe(
+      styleForEventCardAnimatedView5(false, available).backgroundColor,
+    );
     expect(styleForEventCardText6(true).fontSize).toBe(10);
     expect(styleForEventCardText6(false).fontSize).toBe(12);
     expect(styleForEventCardText7(12, true).marginBottom).toBe(4);
