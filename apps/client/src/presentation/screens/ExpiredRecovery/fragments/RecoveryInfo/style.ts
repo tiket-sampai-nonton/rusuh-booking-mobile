@@ -1,10 +1,10 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorder } from "@presentation/theme";
+import { designColors, designBorders } from "@presentation/theme";
 
 export const styles = StyleSheet.create({
   container: {
     backgroundColor: designColors.field,
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
   },
   heading: { letterSpacing: 1.2, color: designColors.ink, marginBottom: 8 },

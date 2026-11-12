@@ -3,6 +3,7 @@ import {
   designColors,
   designSpacingSemantic,
   plusJakartaSansFonts,
+  withAlpha,
 } from "@presentation/theme";
 
 export const componentStyles = StyleSheet.create({
@@ -18,15 +19,7 @@ export const componentStyles = StyleSheet.create({
     marginBottom: designSpacingSemantic.xl,
   },
   elementFlex5: { flex: 1, minWidth: 280 },
-  elementColor6: {
-    color: designColors.ground,
-    fontSize: 20,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: -0.4,
-    fontFamily: plusJakartaSansFonts.bold,
-    marginBottom: designSpacingSemantic.m,
-  },
+  elementBrandMark: { marginBottom: designSpacingSemantic.m },
   elementColor7: {
     color: designColors.ground,
     fontSize: 14,
@@ -54,7 +47,7 @@ export const componentStyles = StyleSheet.create({
     paddingTop: designSpacingSemantic.l,
     paddingBottom: designSpacingSemantic.l,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.2)",
+    borderTopColor: withAlpha(designColors.ground, 0.2),
   },
   elementColor11: {
     color: designColors.ground,

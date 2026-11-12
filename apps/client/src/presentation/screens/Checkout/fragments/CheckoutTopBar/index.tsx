@@ -14,8 +14,7 @@ import { formatCountdown } from "@domain/services/date-format";
 import { ArrowIcon } from "@presentation/components/ArrowIcon";
 
 import type { CheckoutTopBarProps } from "../../interface";
-import { styles, componentStyles } from "./style";
-import { styleForCheckoutTopBarView0 } from "./style";
+import { styles, componentStyles, styleForCheckoutTopBarView0 } from "./style";
 
 export function CheckoutTopBar({
   remainingMs,
@@ -42,11 +41,7 @@ export function CheckoutTopBar({
         >
           <View style={componentStyles.elementFlexDirection0}>
             <ArrowIcon direction="left" />
-            <Text
-              style={[styles.backText, isMobileWeb && styles.mobileWebBackText]}
-            >
-              Kembali
-            </Text>
+            {!isMobileWeb && <Text style={styles.backText}>Kembali</Text>}
           </View>
         </Pressable>
 

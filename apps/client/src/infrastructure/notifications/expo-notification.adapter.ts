@@ -1,62 +1,195 @@
 /**
- * ExpoNotificationAdapter — native `NotificationPort` over expo-notifications
- * (RBT-072, E8, AC1). The ONLY layer that touches the native notification SDK.
- *
- * Bound at the composition root on native (iOS/Android); web uses the web-push
- * adapter (RBT-073) and dev uses the mock. The shared notification FLOW
- * (notification-flows rule) is platform-neutral — this adapter only delivers it:
- * requests OS permission, registers for remote push (Expo token), and schedules
- * a local notification carrying its `deepLink` in the payload so a tap can route
- * (the tap→route wiring lives in useNotifications).
+ * Native NotificationPort implementation. Notifee handles local notifications
+ * and local-notification taps; expo-notifications remains responsible for Expo
+ * remote-push tokens and remote response events. SDK details stay in this
+ * infrastructure adapter.
  */
 import type {
   LocalNotification,
   NotificationPort,
 } from "@domain/services/notification.port";
+import Constants from "expo-constants";
 
 type ExpoNotifications = typeof import("expo-notifications");
+type ExpoNotificationResponses =
+  typeof import("expo-notifications/build/NotificationsEmitter");
+type NotifeeModule = typeof import("@notifee/react-native");
+
+const ANDROID_CHANNEL_ID = "booking-updates";
+
+function isExpoGo(): boolean {
+  // `storeClient` also describes custom development builds. Only Expo Go has
+  // `appOwnership === "expo"`; custom dev clients include native Notifee.
+  return Constants.appOwnership === "expo";
+}
 
 export class ExpoNotificationAdapter implements NotificationPort {
-  // expo-notifications is required lazily so importing this module (e.g. on the
-  // composition-root type graph) never pulls the native SDK on web/test.
-  private get api(): ExpoNotifications {
+  private channelId?: Promise<string>;
+  private readonly localDeliveries = new Map<string, Promise<void>>();
+
+  constructor(private readonly remotePushEnabled = true) {}
+
+  private get notifeeApi(): NotifeeModule {
+    // Keep native module loading lazy so importing the composition root in web
+    // builds and tests does not load a native SDK.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("@notifee/react-native") as NotifeeModule;
+  }
+
+  private get expoApi(): ExpoNotifications {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require("expo-notifications") as ExpoNotifications;
   }
 
+  private get responsesApi(): ExpoNotificationResponses {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("expo-notifications/build/NotificationsEmitter") as ExpoNotificationResponses;
+  }
+
   async requestPermission(): Promise<boolean> {
-    const current = await this.api.getPermissionsAsync();
-    if (current.granted) return true;
-    const asked = await this.api.requestPermissionsAsync();
-    return asked.granted;
+    const { default: notifee, AuthorizationStatus } = this.notifeeApi;
+    const settings = await notifee.requestPermission();
+    return settings.authorizationStatus >= AuthorizationStatus.AUTHORIZED;
   }
 
   async registerForRemotePush(): Promise<string | null> {
-    if (!(await this.requestPermission())) return null;
+    // Expo Go does not include this project's custom Notifee native module.
+    // Development mock mode still requests local permission but skips remote
+    // token registration.
+    if (isExpoGo()) return null;
     try {
-      const token = await this.api.getExpoPushTokenAsync();
+      if (!(await this.requestPermission())) return null;
+      if (!this.remotePushEnabled) return null;
+      const token = await this.expoApi.getExpoPushTokenAsync();
       return token.data;
     } catch {
-      // No projectId / simulator / offline — degrade to no remote token; local
-      // notifications still work.
+      // Unsupported runtime, missing projectId, simulator, or offline.
       return null;
     }
   }
 
+  subscribeToResponses(
+    onResponse: (data: Readonly<Record<string, unknown>> | undefined) => void,
+  ): () => void {
+    let removeLocalListener = (): void => undefined;
+    let removeExpoListener = (): void => undefined;
+
+    try {
+      const { default: notifee, EventType } = this.notifeeApi;
+      removeLocalListener = notifee.onForegroundEvent(({ type, detail }) => {
+        if (type === EventType.PRESS || type === EventType.ACTION_PRESS) {
+          onResponse(
+            detail.notification?.data as
+              | Readonly<Record<string, unknown>>
+              | undefined,
+          );
+        }
+      });
+
+      // Android exposes cold-start notification data here. iOS sends the press
+      // through onForegroundEvent instead.
+      void notifee
+        .getInitialNotification()
+        .then((initial) => {
+          if (initial) {
+            onResponse(
+              initial.notification.data as
+                | Readonly<Record<string, unknown>>
+                | undefined,
+            );
+          }
+        })
+        .catch(() => undefined);
+    } catch {
+      // Expo Go and some simulator runtimes do not expose the Notifee module.
+    }
+
+    try {
+      const subscription =
+        this.responsesApi.addNotificationResponseReceivedListener(
+          (response) => {
+            const data = response.notification.request.content.data as
+              | Readonly<Record<string, unknown>>
+              | undefined;
+            onResponse(data);
+          },
+        );
+      removeExpoListener = () => subscription.remove();
+    } catch {
+      // Remote notification taps are optional in unsupported runtimes.
+    }
+
+    return () => {
+      removeLocalListener();
+      removeExpoListener();
+    };
+  }
+
   async scheduleLocal(notification: LocalNotification): Promise<void> {
+    const id = notification.notificationId;
+    const existing = id ? this.localDeliveries.get(id) : undefined;
+    if (existing) return existing;
+
+    const delivery = this.deliverLocal(notification);
+    if (!id) return delivery;
+
+    const inFlight = delivery.finally(() => {
+      if (this.localDeliveries.get(id) === inFlight) {
+        this.localDeliveries.delete(id);
+      }
+    });
+    this.localDeliveries.set(id, inFlight);
+    return inFlight;
+  }
+
+  async cancelLocal(notificationId: string): Promise<void> {
+    this.localDeliveries.delete(notificationId);
+    await this.notifeeApi.default.cancelNotification(notificationId);
+  }
+
+  private async deliverLocal(notification: LocalNotification): Promise<void> {
+    const {
+      default: notifee,
+      AndroidImportance,
+      TriggerType,
+    } = this.notifeeApi;
+    this.channelId ??= notifee.createChannel({
+      id: ANDROID_CHANNEL_ID,
+      name: "Informasi pemesanan",
+      description: "Pembaruan tiket dan pembayaran",
+      importance: AndroidImportance.DEFAULT,
+    });
+    const channelId = await this.channelId;
     const content = {
+      ...(notification.notificationId
+        ? { id: notification.notificationId }
+        : {}),
       title: notification.title,
       body: notification.body,
-      // The deep link + kind travel in data so the tap handler can route.
-      data: { deepLink: notification.deepLink, kind: notification.kind },
+      data: {
+        ...(notification.deepLink ? { deepLink: notification.deepLink } : {}),
+        kind: notification.kind,
+      },
+      android: {
+        channelId,
+        pressAction: { id: "default" },
+      },
+      ios: {
+        foregroundPresentationOptions: {
+          alert: true,
+          badge: false,
+          sound: true,
+        },
+      },
     };
+
     if (notification.scheduledAtMs && notification.scheduledAtMs > Date.now()) {
-      await this.api.scheduleNotificationAsync({
-        content,
-        trigger: { date: new Date(notification.scheduledAtMs) } as never,
+      await notifee.createTriggerNotification(content, {
+        type: TriggerType.TIMESTAMP,
+        timestamp: notification.scheduledAtMs,
       });
       return;
     }
-    // Immediate.
-    await this.api.scheduleNotificationAsync({ content, trigger: null });
+    await notifee.displayNotification(content);
   }
 }

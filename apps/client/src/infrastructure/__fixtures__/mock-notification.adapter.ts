@@ -12,6 +12,7 @@ import type {
 
 export class MockNotificationAdapter implements NotificationPort {
   readonly scheduled: LocalNotification[] = [];
+  readonly cancelled: string[] = [];
 
   async requestPermission(): Promise<boolean> {
     return true;
@@ -21,7 +22,15 @@ export class MockNotificationAdapter implements NotificationPort {
     this.scheduled.push(notification);
   }
 
+  async cancelLocal(notificationId: string): Promise<void> {
+    this.cancelled.push(notificationId);
+  }
+
   async registerForRemotePush(): Promise<string | null> {
     return "mock-push-token";
+  }
+
+  subscribeToResponses(): () => void {
+    return () => undefined;
   }
 }

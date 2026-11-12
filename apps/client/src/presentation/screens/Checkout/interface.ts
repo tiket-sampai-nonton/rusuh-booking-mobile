@@ -23,6 +23,8 @@ export interface FieldProps {
   readonly testID?: string;
   readonly invalid?: boolean;
   readonly editable?: boolean;
+  readonly errorMessage?: string;
+  readonly helperText?: string;
 }
 
 export interface CheckoutTopBarProps {
@@ -34,7 +36,10 @@ export interface CheckoutTopBarProps {
 
 export interface CheckoutHeroProps {
   readonly eventId: string;
+  readonly eventName?: string;
+  readonly eventNameError?: boolean;
   readonly isMobileWeb?: boolean;
+  readonly onRetryEventName?: () => void;
 }
 
 /** Per-row attendee-check status for the ticket row (RBT-052). */
@@ -55,19 +60,29 @@ export interface TicketItemProps {
   /** Attendee-NIK availability status for this row (RBT-052 AC2). */
   readonly status?: RowCheckStatus;
   readonly categories: readonly BookingCategory[];
+  readonly buyerName?: string;
+  readonly buyerNik?: string;
+  readonly categoryError?: string;
+  readonly attendeeNameError?: string;
+  readonly attendeeNikError?: string;
 }
 
 export interface ConsentGateProps {
   readonly checked: boolean;
   readonly onToggle: (on: boolean) => void;
+  readonly onOpenPrivacy: () => void;
+  readonly errorMessage?: string;
 }
 
 export interface CheckoutBarProps {
   readonly totalMinor: number;
-  readonly ready: boolean;
+  /** @deprecated Kept for compatibility; invalid forms remain actionable to show errors. */
+  readonly ready?: boolean;
   readonly pending: boolean;
   readonly expired: boolean;
   readonly errorMessage?: string;
+  readonly errorActionLabel?: string;
+  readonly onErrorAction?: () => void;
   readonly onSubmit: () => void;
   readonly bottomInset: number;
 }

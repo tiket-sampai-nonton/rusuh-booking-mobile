@@ -26,7 +26,7 @@ export const componentStyles = StyleSheet.create({
   elementFontSize3: {
     fontSize: 12,
     fontFamily: plusJakartaSansFonts.bold,
-    color: "#ff0000",
+    color: designColors.danger,
     textTransform: "uppercase",
   },
   elementMarginTop4: {
@@ -55,6 +55,12 @@ export const componentStyles = StyleSheet.create({
     fontSize: 13,
     fontFamily: plusJakartaSansFonts.regular,
     color: designColors.ink,
+  },
+  validationError: {
+    color: designColors.danger,
+    marginTop: 6,
+    fontSize: 12,
+    fontFamily: plusJakartaSansFonts.medium,
   },
 });
 

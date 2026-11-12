@@ -66,7 +66,7 @@ export interface UseAuthResult {
   /** The registration error (typed DomainError, e.g. NIK_INVALID), if any. */
   readonly registerError: Error | null;
 
-  /** Reset all auth state (used by "Ganti email" and when the modal closes). */
+  /** Reset the modal's auth flow state without clearing the app session. */
   readonly reset: () => void;
 }
 
@@ -75,8 +75,9 @@ export interface UseAuthResult {
  * `userRepository`. The use cases are memoized per repository instance.
  */
 export function useAuth(): UseAuthResult {
-  const { userRepository, tokenStorage } = useServices();
+  const { userRepository, tokenStorage, buyerEmailStorage } = useServices();
   const setAccountProfile = useAccountStore((s) => s.setProfile);
+  const setBuyerEmail = useAccountStore((s) => s.setBuyerEmail);
 
   const { requestOtp, verifyOtp, completeRegistration, persistSession } =
     useMemo(
@@ -101,8 +102,14 @@ export function useAuth(): UseAuthResult {
     { email: string; code: string }
   >({
     mutationFn: ({ email, code }) => verifyOtp.execute(email, code),
-    onSuccess: async (result) => {
+    onSuccess: async (result, variables) => {
       await persistSession.execute(result.token);
+      // The OTP address is the only unmasked email available to the client.
+      // Persist it through the platform adapter so Checkout can refill it after
+      // refresh/restart. Storage failure must not turn a valid login into an
+      // apparent auth failure; the current session still keeps it in memory.
+      setBuyerEmail(variables.email);
+      await buyerEmailStorage.save(variables.email).catch(() => undefined);
       // Returning user → fetch the masked profile for the signed-in panel.
       // New user → RBT-021 completes registration before a profile exists.
       if (result.isNew) {
@@ -112,7 +119,7 @@ export function useAuth(): UseAuthResult {
       try {
         const currentProfile = await userRepository.getMe();
         setProfile(currentProfile);
-        setAccountProfile(currentProfile);
+        setAccountProfile(currentProfile, variables.email);
       } catch {
         // Profile fetch is best-effort for the visual panel; a failure here
         // does not break the (optional) sign-in. The raw token is never logged.

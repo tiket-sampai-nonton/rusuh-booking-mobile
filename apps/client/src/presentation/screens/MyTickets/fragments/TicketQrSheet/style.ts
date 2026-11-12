@@ -1,29 +1,35 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, type ViewStyle, Platform } from "react-native";
 import {
   designBorders,
   designColors,
   plusJakartaSansFonts,
+  withAlpha,
 } from "@presentation/theme";
 import { hardShadowStyle } from "@presentation/utils/style";
-
-import type { ViewStyle } from "react-native";
-import { Platform } from "react-native";
 
 export const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.72)",
+    position: "relative",
+    backgroundColor: withAlpha(designColors.overlay, 0.72),
     alignItems: "center",
+  },
+  backdropDismiss: {
+    ...StyleSheet.absoluteFillObject,
   },
   sheet: {
     width: "100%",
     maxWidth: 480,
     maxHeight: "90%",
+    flexShrink: 1,
+    zIndex: 1,
+    elevation: 1,
     backgroundColor: designColors.ground,
     borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     ...hardShadowStyle(4, 4, designColors.ink, 5),
   },
+  scroll: { flexGrow: 0, flexShrink: 1 },
   title: {
     color: designColors.ink,
     fontFamily: plusJakartaSansFonts.extraBold,
@@ -31,8 +37,14 @@ export const styles = StyleSheet.create({
     textTransform: "uppercase",
     textAlign: "center",
   },
+  sectionTitle: {
+    color: designColors.ink,
+    fontFamily: plusJakartaSansFonts.extraBold,
+    fontSize: 18,
+    textTransform: "uppercase",
+  },
   message: { marginTop: 24 },
-  error: { marginTop: 24, color: "#b91c1c" },
+  error: { marginTop: 24, color: designColors.danger },
   ticketQr: {
     marginTop: 20,
     padding: 16,
@@ -44,6 +56,27 @@ export const styles = StyleSheet.create({
     marginTop: 8,
     color: designColors.ink,
     fontFamily: plusJakartaSansFonts.bold,
+  },
+  ticketDetails: {
+    marginTop: 6,
+    color: designColors.inkMuted,
+    fontFamily: plusJakartaSansFonts.medium,
+    fontSize: 12,
+    textAlign: "center",
+  },
+  bookingSummary: {
+    marginTop: 20,
+    width: "100%",
+    padding: 16,
+    alignItems: "center",
+    gap: 8,
+    borderWidth: designBorders.standard,
+    borderColor: designColors.ink,
+  },
+  bookingAmount: {
+    color: designColors.ink,
+    fontFamily: plusJakartaSansFonts.bold,
+    fontSize: 16,
   },
   fallbackQr: {
     marginTop: 24,
@@ -75,7 +108,7 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: "uppercase",
   },
-  errorText: { marginTop: 8, color: "#b91c1c", fontSize: 12 },
+  errorText: { marginTop: 8, color: designColors.danger, fontSize: 12 },
   close: {
     marginTop: 20,
     minHeight: 44,

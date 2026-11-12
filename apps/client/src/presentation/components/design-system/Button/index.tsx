@@ -7,13 +7,13 @@
  * - fontWeight: 700
  * - textTransform: uppercase
  * - letterSpacing: 0.04em
- * - border: 2px solid #000
+ * - border: 2px solid the shared ink token
  *
- * GHOST: bg transparent, text #000
- * GHOST hover: bg #000, text #fff (fill animation from bottom)
+ * GHOST: paper surface, ink text
+ * GHOST hover: red fill from the bottom
  *
- * PRIMARY: bg #000, text #fff
- * PRIMARY hover: bg #fff, text #000 (reveal animation from top)
+ * PRIMARY: red background with light text
+ * PRIMARY hover: red-orange reveal with ink text
  */
 import { useCallback } from "react";
 import type { ReactNode } from "react";
@@ -51,7 +51,7 @@ export interface ButtonProps {
   readonly label: string;
   /** Press handler */
   readonly onPress?: () => void;
-  /** Visual variant: primary (black bg), ghost (transparent bg), danger (red bg) */
+  /** Visual variant: primary (red), ghost (outlined), danger (semantic red) */
   readonly variant?: ButtonVariant;
   /** Disabled state */
   readonly disabled?: boolean;
@@ -70,11 +70,11 @@ export interface ButtonProps {
 function getPalette(variant: ButtonVariant) {
   switch (variant) {
     case "ghost":
-      // Ghost: transparent → ink fill from bottom
+      // Ghost: white surface → red fill from bottom
       return {
         bg: designColors.ground,
         fg: designColors.ink,
-        fill: designColors.ink,
+        fill: designColors.accent,
         filledFg: designColors.ground,
       };
     case "danger":
@@ -87,11 +87,11 @@ function getPalette(variant: ButtonVariant) {
       };
     case "primary":
     default:
-      // Primary: ink bg → ground reveal from top
+      // Primary: red bg → red-orange reveal from top
       return {
-        bg: designColors.ink,
+        bg: designColors.accent,
         fg: designColors.ground,
-        fill: designColors.ground,
+        fill: designColors.ember,
         filledFg: designColors.ink,
       };
   }

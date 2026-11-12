@@ -1,0 +1,220 @@
+name: Firebase Android distribution (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      target_environment:
+        description: GitHub Environment matching the selected release branch
+        required: true
+        type: string
+      release_notes:
+        description: Notes shown to Firebase testers
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build_apk:
+    name: Build signed Android APK
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.target_environment }}
+    defaults:
+      run:
+        working-directory: apps/client
+    env:
+      TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
+      EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+      EXPO_PUBLIC_USE_MOCKS: ${{ vars.EXPO_PUBLIC_USE_MOCKS }}
+      EXPO_PUBLIC_ENV: ${{ vars.EXPO_PUBLIC_ENV }}
+      EXPO_PUBLIC_SITE_URL: ${{ vars.EXPO_PUBLIC_SITE_URL }}
+      EXPO_PUBLIC_OTA_REVISION: ${{ github.run_number }}
+      EXPO_PROJECT_ID: ${{ vars.EXPO_PROJECT_ID }}
+      EAS_CHANNEL: ${{ inputs.target_environment }}
+      ANDROID_VERSION_CODE: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/client/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v4
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --install \
+            'platforms;android-35' \
+            'build-tools;35.0.0' \
+            'ndk;27.1.12297006' \
+            'cmake;3.22.1'
+      - run: npm ci
+      - name: Validate branch and build configuration
+        run: |
+          if [ "$GITHUB_REF_NAME" = 'develop' ] && [ "$TARGET_ENVIRONMENT" = 'development' ]; then
+            test "$EXPO_PUBLIC_ENV" = 'development' &&
+              test "$EXPO_PUBLIC_USE_MOCKS" = 'false' || {
+                echo 'develop APK must target the development BE with mocks disabled.'
+                exit 1
+              }
+          elif [ "$GITHUB_REF_NAME" = 'main' ] && [ "$TARGET_ENVIRONMENT" = 'production' ]; then
+            test "$EXPO_PUBLIC_ENV" = 'production' &&
+              test "$EXPO_PUBLIC_USE_MOCKS" = 'false' || {
+                echo 'main APK must use production configuration with mocks disabled.'
+                exit 1
+              }
+          else
+            echo 'Firebase distribution requires develop/development or main/production.'
+            exit 1
+          fi
+          test -n "$EXPO_PUBLIC_API_BASE_URL" || {
+            echo 'EXPO_PUBLIC_API_BASE_URL must be set for the selected environment.'
+            exit 1
+          }
+          test -n "$EXPO_PROJECT_ID" || {
+            echo 'EXPO_PROJECT_ID is required for Firebase builds so the APK can receive EAS OTA updates.'
+            exit 1
+          }
+          test "$EAS_CHANNEL" = "$TARGET_ENVIRONMENT" || {
+            echo 'EAS_CHANNEL must match the selected Firebase build environment.'
+            exit 1
+          }
+      - name: Decode Android signing keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$ANDROID_KEYSTORE_BASE64" || {
+            echo 'ANDROID_KEYSTORE_BASE64 is missing from this GitHub Environment.'
+            exit 1
+          }
+          KEYSTORE_PATH="$RUNNER_TEMP/rusuh-booking-${TARGET_ENVIRONMENT}.jks"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          test -s "$KEYSTORE_PATH" || {
+            echo 'The decoded Android keystore is empty.'
+            exit 1
+          }
+          chmod 600 "$KEYSTORE_PATH"
+          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+      - name: Capture clean Android OTA fingerprint
+        run: |
+          # Compute before prebuild and Gradle generate files inside dependencies.
+          # Expo's Gradle plugin accepts this override when creating its fingerprint asset.
+          FINGERPRINT="$(npx --no-install expo-updates fingerprint:generate --platform android --workflow managed | node -e 'let input=""; process.stdin.on("data", chunk => input += chunk); process.stdin.on("end", () => { const hash = JSON.parse(input).hash; if (!/^[a-f0-9]{40}$/.test(hash)) process.exit(1); process.stdout.write(hash); });')"
+          test -n "$FINGERPRINT" || { echo 'Unable to calculate the Android OTA fingerprint.'; exit 1; }
+          echo "EXPO_UPDATES_FINGERPRINT_OVERRIDE=$FINGERPRINT" >> "$GITHUB_ENV"
+          echo "Android OTA runtime: $FINGERPRINT"
+      - name: Generate Android project
+        run: npx expo prebuild --platform android --clean --no-install
+      - name: Verify OTA settings in the generated Android project
+        run: |
+          ANDROID_MANIFEST='android/app/src/main/AndroidManifest.xml'
+          grep -F "https://u.expo.dev/$EXPO_PROJECT_ID" "$ANDROID_MANIFEST" >/dev/null || {
+            echo 'The generated Android project is missing its EAS update URL.'
+            exit 1
+          }
+          grep -F 'expo-channel-name' "$ANDROID_MANIFEST" | grep -F "$EAS_CHANNEL" >/dev/null || {
+            echo "The generated Android project is missing the $EAS_CHANNEL update channel."
+            exit 1
+          }
+      - name: Build development debug or production release APK
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          test -n "$ANDROID_KEYSTORE_PASSWORD" &&
+            test -n "$ANDROID_KEY_ALIAS" &&
+            test -n "$ANDROID_KEY_PASSWORD" || {
+              echo 'Android signing secrets are incomplete in this GitHub Environment.'
+              exit 1
+            }
+          cd android
+          chmod +x gradlew
+          if [ "$TARGET_ENVIRONMENT" = 'development' ]; then
+            RBT_BUNDLE_DEBUG=true EX_UPDATES_NATIVE_DEBUG=1 NODE_ENV=production ./gradlew assembleDebug --no-daemon
+            APK_NAME='rusuh-booking.preprod.apk'
+            APK_SOURCE='app/build/outputs/apk/debug/app-debug.apk'
+          else
+            ./gradlew assembleRelease --no-daemon
+            APK_NAME='rusuh-booking.apk'
+            APK_SOURCE='app/build/outputs/apk/release/app-release.apk'
+          fi
+          APK_DIR="$(dirname "$APK_SOURCE")"
+          mv "$APK_SOURCE" "$APK_DIR/$APK_NAME"
+          APK_RUNTIME="$(unzip -p "$APK_DIR/$APK_NAME" assets/fingerprint)"
+          if [ "$APK_RUNTIME" != "$EXPO_UPDATES_FINGERPRINT_OVERRIDE" ]; then
+            echo 'The APK fingerprint does not match the clean OTA fingerprint.'
+            exit 1
+          fi
+          echo "Verified APK OTA runtime: $APK_RUNTIME"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rusuh-booking${{ inputs.target_environment == 'development' && '.preprod' || '' }}.apk
+          path: apps/client/android/app/build/outputs/apk/${{ inputs.target_environment == 'development' && 'debug' || 'release' }}/rusuh-booking${{ inputs.target_environment == 'development' && '.preprod' || '' }}.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  distribute_firebase:
+    name: Distribute APK to Firebase testers
+    needs: build_apk
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_environment }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: rusuh-booking${{ inputs.target_environment == 'development' && '.preprod' || '' }}.apk
+          path: apk
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate Firebase settings
+        env:
+          FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_TESTER_GROUPS: ${{ vars.FIREBASE_TESTER_GROUPS }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          test -n "$FIREBASE_ANDROID_APP_ID" || {
+            echo 'FIREBASE_ANDROID_APP_ID is missing from this GitHub Environment.'
+            exit 1
+          }
+          case "$FIREBASE_ANDROID_APP_ID" in
+            1:*:android:*) ;;
+            *)
+              echo 'FIREBASE_ANDROID_APP_ID does not look like a Firebase Android App ID.'
+              exit 1
+              ;;
+          esac
+          test -n "$FIREBASE_TESTER_GROUPS" || {
+            echo 'FIREBASE_TESTER_GROUPS is missing from this GitHub Environment.'
+            exit 1
+          }
+          test -n "$FIREBASE_SERVICE_ACCOUNT_JSON" || {
+            echo 'FIREBASE_SERVICE_ACCOUNT_JSON is missing from this GitHub Environment.'
+            exit 1
+          }
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+      - name: Upload APK to Firebase App Distribution
+        env:
+          FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_TESTER_GROUPS: ${{ vars.FIREBASE_TESTER_GROUPS }}
+          TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          if [ "$TARGET_ENVIRONMENT" = 'development' ]; then
+            APK_NAME='rusuh-booking.preprod.apk'
+            APK_VARIANT='preprod'
+          else
+            APK_NAME='rusuh-booking.apk'
+            APK_VARIANT='production'
+          fi
+          RELEASE_NOTES="${RELEASE_NOTES:-${APK_VARIANT} APK from ${GITHUB_REF_NAME} (${GITHUB_SHA::7}).}"
+          npx --yes firebase-tools@latest appdistribution:distribute "apk/$APK_NAME" \
+            --app "$FIREBASE_ANDROID_APP_ID" \
+            --groups "$FIREBASE_TESTER_GROUPS" \
+            --release-notes "$RELEASE_NOTES"

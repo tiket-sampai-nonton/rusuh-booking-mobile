@@ -23,7 +23,7 @@ export const trustStyles = StyleSheet.create({
   check: {
     fontFamily: plusJakartaSansFonts.extraBold,
     fontSize: designFontSizes.s,
-    color: designColors.success, // #00aa00 per Design Palette Guide
+    color: designColors.success,
     lineHeight: designFontSizes.s * 1.5,
   },
   text: {

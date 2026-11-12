@@ -20,9 +20,11 @@ import { SuccessScreen } from "@presentation/screens/Success";
 import { useSessionStore } from "@presentation/stores/session-store";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
+const mockNavigation = { addListener: jest.fn(() => jest.fn()) };
 const mockDownloadTickets = jest.fn(async () => undefined);
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
+  useNavigation: () => mockNavigation,
 }));
 jest.mock("@presentation/hooks/useETicketDownload", () => ({
   useETicketDownload: () => ({ downloadTickets: mockDownloadTickets }),
@@ -129,7 +131,7 @@ describe("SuccessScreen (RBT-070)", () => {
   });
 
   it("renders the order summary ONLY when verified PAID (orderId/qty/amount/masked NIK)", async () => {
-    useSessionStore.getState().setBooking("bk-1", 45000000);
+    useSessionStore.getState().setBooking("bk-1", 450000);
     useSessionStore.getState().setOrderDetail("31****89", 2);
     const screen = renderScreen("PAID");
     await waitFor(() =>
@@ -228,7 +230,7 @@ describe("SuccessScreen (RBT-070)", () => {
     renderScreen("FAILED");
     await waitFor(() =>
       expect(mockRouter.replace).toHaveBeenCalledWith(
-        "/expired/bk-1?reason=payment&bookingId=bk-1",
+        "/failed/bk-1?reason=payment&bookingId=bk-1",
       ),
     );
   });

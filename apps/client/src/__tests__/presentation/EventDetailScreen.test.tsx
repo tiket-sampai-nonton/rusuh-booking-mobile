@@ -1,13 +1,14 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
-import { Animated, Platform } from "react-native";
+import { Animated, Platform, Share } from "react-native";
 
 import type {
   EventDetail,
   EventRepository,
 } from "@domain/repositories/event.repository";
+import type { QueueRepository } from "@domain/repositories/queue.repository";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
-const mockRouter = { push: jest.fn() };
+const mockRouter = { push: jest.fn(), navigate: jest.fn() };
 const originalNavigator = globalThis.navigator;
 const originalWindow = globalThis.window;
 const originalPlatform = Platform.OS;
@@ -19,6 +20,7 @@ const completedAnimation = {
 };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
+  useFocusEffect: jest.fn(),
 }));
 
 // eslint-disable-next-line import/first
@@ -33,7 +35,7 @@ const available: EventDetail = {
   salesStartsAt: "2026-11-01T00:00:00.000Z",
   salesEndsAt: "2026-11-30T23:59:59.000Z",
   status: "AVAILABLE",
-  minPriceMinor: 45000000,
+  minPriceMinor: 450000,
   maxTicketsPerBuyerNik: 3,
   remainingTickets: 120,
   description: {
@@ -47,8 +49,8 @@ const available: EventDetail = {
     ],
     terms: "Wajib membawa KTP.",
     categories: [
-      { code: "VIP", name: "VIP", priceMinor: 75000000, available: 10 },
-      { code: "REG", name: "Reguler", priceMinor: 45000000, available: 0 },
+      { code: "VIP", name: "VIP", priceMinor: 750000, available: 10 },
+      { code: "REG", name: "Reguler", priceMinor: 450000, available: 0 },
     ],
   },
 };
@@ -63,6 +65,7 @@ function repo(detail: EventDetail): EventRepository {
 describe("EventDetailScreen", () => {
   beforeEach(() => {
     mockRouter.push.mockReset();
+    mockRouter.navigate.mockReset();
     jest
       .spyOn(Animated, "timing")
       .mockReturnValue(
@@ -119,7 +122,7 @@ describe("EventDetailScreen", () => {
     const failing: EventRepository = {
       listEvents: async () => [],
       getEventDetail: async () => {
-        throw new Error("Event tidak ditemukan.");
+        throw new Error("NOT_FOUND: event is missing");
       },
     };
     renderWithProviders(<EventDetailScreen eventId="nope" />, {
@@ -128,7 +131,33 @@ describe("EventDetailScreen", () => {
     await waitFor(() =>
       expect(screen.getByTestId("detail-error")).toBeTruthy(),
     );
-    expect(screen.getByText("Event tidak ditemukan.")).toBeTruthy();
+    expect(screen.getByText("Data yang diminta tidak ditemukan.")).toBeTruthy();
+    expect(screen.getByTestId("event-detail-retry")).toBeTruthy();
+  });
+
+  it("retries a failed event load from the error state", async () => {
+    let attempts = 0;
+    const retrying: EventRepository = {
+      listEvents: async () => [],
+      getEventDetail: async () => {
+        attempts += 1;
+        if (attempts === 1) throw new TypeError("Failed to fetch");
+        return available;
+      },
+    };
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: { eventRepository: retrying },
+    });
+
+    await waitFor(() => screen.getByTestId("event-detail-retry"));
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
+    fireEvent.press(screen.getByTestId("event-detail-retry"));
+    await waitFor(() => screen.getAllByText("Rusuh Fest 2026"));
+    expect(attempts).toBe(2);
   });
 
   it("renders hero, facts, description, categories and CTA for an available event", async () => {
@@ -150,10 +179,32 @@ describe("EventDetailScreen", () => {
     expect(screen.getByText("Reguler")).toBeTruthy();
     expect(screen.getByText("Habis")).toBeTruthy();
     // compact min price in the buy box
-    expect(screen.getByText("Rp 450rb")).toBeTruthy();
+    expect(screen.getAllByText("Rp 450.000").length).toBeGreaterThan(0);
     // hero ticket-count chip is web-only (hidden on native per v2-mobile prototype)
     // active CTA
     expect(screen.getByText("Masuk Antrean")).toBeTruthy();
+  });
+
+  it("shows the normalized minimum category price in both ticket list and CTA", async () => {
+    const paidEvent: EventDetail = {
+      ...available,
+      minPriceMinor: 185000,
+      description: {
+        categories: [
+          { code: "REG", name: "Reguler", priceMinor: 185000, available: 299 },
+          { code: "PREM", name: "Premium", priceMinor: 350000, available: 60 },
+        ],
+      },
+    };
+
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: { eventRepository: repo(paidEvent) },
+    });
+
+    await waitFor(() => expect(screen.getByTestId("join-cta")).toBeTruthy());
+    // One amount is in the category row and the other is the floating CTA.
+    expect(screen.getAllByText("Rp 185.000")).toHaveLength(2);
+    expect(screen.queryByText("Rp 0")).toBeNull();
   });
 
   it("joins the queue and navigates to the waiting room with the issued queueId on an active CTA press (RBT-041)", async () => {
@@ -170,6 +221,52 @@ describe("EventDetailScreen", () => {
         "/waiting/evt-1?queueId=q-evt-1",
       ),
     );
+  });
+
+  it("shows a safe retryable message when queue join fails due to network or CORS", async () => {
+    const queueRepository: QueueRepository = {
+      join: jest
+        .fn()
+        .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+        .mockResolvedValueOnce({
+          queueId: "q-evt-1",
+          eventId: "evt-1",
+          position: 3,
+          status: "WAITING",
+        }),
+      getStatus: async () => ({
+        queueId: "q-evt-1",
+        eventId: "evt-1",
+        position: 3,
+        status: "WAITING",
+      }),
+      getQueueStatus: async () => ({}),
+      leave: async () => undefined,
+      claim: async () => "token",
+      heartbeat: async () => undefined,
+    };
+    renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
+      container: { eventRepository: repo(available), queueRepository },
+    });
+    await waitFor(() => screen.getByTestId("join-cta"));
+
+    fireEvent.press(screen.getByTestId("join-cta"));
+    await waitFor(() => screen.getByTestId("join-queue-error"));
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText("Failed to fetch")).toBeNull();
+    expect(screen.getByRole("button", { name: "Coba Lagi" })).toBeTruthy();
+
+    fireEvent.press(screen.getByRole("button", { name: "Coba Lagi" }));
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith(
+        "/waiting/evt-1?queueId=q-evt-1",
+      ),
+    );
+    expect(queueRepository.join).toHaveBeenCalledTimes(2);
   });
 
   it("disables the CTA and shows 'Tiket Habis' for a sold-out event", async () => {
@@ -207,7 +304,9 @@ describe("EventDetailScreen", () => {
       container: { eventRepository: repo(bare) },
     });
     await waitFor(() => screen.getByTestId("join-cta"));
-    expect(screen.getByText("Deskripsi event belum tersedia.")).toBeTruthy();
+    expect(
+      screen.getByText("Informasi tentang acara ini belum tersedia."),
+    ).toBeTruthy();
     //  shows "Menyusul" for price in FloatingCTA when minPriceMinor is present
     // but categories have no price data - since this test has available which has
     // minPriceMinor, we should see the price formatted
@@ -227,7 +326,7 @@ describe("EventDetailScreen", () => {
       description: {
         longDesc: "x",
         categories: [
-          { code: "REG", name: "Reguler", priceMinor: 30000000, available: 12 },
+          { code: "REG", name: "Reguler", priceMinor: 300000, available: 12 },
         ],
       },
     };
@@ -237,7 +336,9 @@ describe("EventDetailScreen", () => {
     await waitFor(() => screen.getByTestId("join-cta"));
     expect(screen.getByText("Sisa 12")).toBeTruthy();
     expect(screen.getByText("Menyusul")).toBeTruthy();
-    expect(screen.getByText("Lokasi akan diumumkan.")).toBeTruthy();
+    expect(
+      screen.getByText("Informasi lokasi akan diumumkan penyelenggara."),
+    ).toBeTruthy();
     expect(screen.queryByText(/Jakarta International Stadium/)).toBeNull();
   });
 
@@ -269,7 +370,7 @@ describe("EventDetailScreen", () => {
     await waitFor(() => screen.getByTestId("join-cta"));
     //  back button uses "Kembali" label instead of "Kembali ke beranda"
     fireEvent.press(screen.getByLabelText("Kembali"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
   });
 
   it("updates the native header on scroll and opens, navigates, and closes the gallery", async () => {
@@ -302,7 +403,11 @@ describe("EventDetailScreen", () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     Object.defineProperty(globalThis, "window", {
       configurable: true,
-      value: { location: { href: "https://example.invalid/events/evt-1" } },
+      value: {
+        location: {
+          href: "https://example.invalid/events/evt-1?source=history#tickets",
+        },
+      },
     });
     Object.defineProperty(globalThis.navigator, "share", {
       configurable: true,
@@ -315,9 +420,9 @@ describe("EventDetailScreen", () => {
       await waitFor(() => screen.getByTestId("join-cta"));
       expect(screen.getByText("120 tiket tersedia")).toBeTruthy();
       fireEvent.press(screen.getByLabelText("Bagikan"));
-      expect(share).toHaveBeenCalledWith(
-        expect.objectContaining({ title: available.name }),
-      );
+      expect(share).toHaveBeenCalledWith({
+        url: "https://rusuh-booking.pages.dev/events/evt-1",
+      });
     } finally {
       Object.defineProperty(Platform, "OS", {
         configurable: true,
@@ -346,17 +451,21 @@ describe("EventDetailScreen", () => {
     );
   });
 
+  it("hides the queue CTA when opened from history", async () => {
+    renderWithProviders(<EventDetailScreen eventId="evt-1" hideQueueCta />, {
+      container: { eventRepository: repo({ ...available, status: "CLOSED" }) },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("event-detail-screen")).toBeTruthy(),
+    );
+    expect(screen.queryByTestId("join-cta")).toBeNull();
+  });
+
   it("uses a safe label for unknown status, supports native sharing, and handles scrolling", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "ios" });
-    const share = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(globalThis, "navigator", {
-      configurable: true,
-      value: { share },
-    });
-    Object.defineProperty(globalThis, "window", {
-      configurable: true,
-      value: { location: { href: "https://example.test/events/evt-1" } },
-    });
+    const share = jest
+      .spyOn(Share, "share")
+      .mockResolvedValue({ action: Share.sharedAction });
     const unknown = {
       ...available,
       status: "MYSTERY" as unknown as EventDetail["status"],
@@ -369,8 +478,7 @@ describe("EventDetailScreen", () => {
     expect(screen.getByText("MYSTERY")).toBeTruthy();
     fireEvent.press(screen.getByRole("button", { name: "Bagikan" }));
     expect(share).toHaveBeenCalledWith({
-      title: "Rusuh Fest 2026",
-      url: "https://example.test/events/evt-1",
+      message: "https://rusuh-booking.pages.dev/events/evt-1",
     });
     const scrollHandler = screen.getByTestId("detail-scroll").props.onScroll as
       | ((event: { nativeEvent: { contentOffset: { y: number } } }) => void)
@@ -380,15 +488,23 @@ describe("EventDetailScreen", () => {
 
   it("keeps the web header static on scroll and safely skips an unavailable share API", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    const writeText = jest.fn().mockResolvedValue(undefined);
     Object.defineProperty(globalThis, "navigator", {
       configurable: true,
-      value: {},
+      value: { clipboard: { writeText } },
+    });
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { location: { href: "https://example.test/events/evt-1" } },
     });
     renderWithProviders(<EventDetailScreen eventId="evt-1" />, {
       container: { eventRepository: repo(available) },
     });
     await waitFor(() => expect(screen.getByTestId("join-cta")).toBeTruthy());
     fireEvent.press(screen.getByRole("button", { name: "Bagikan" }));
+    expect(writeText).toHaveBeenCalledWith(
+      "https://rusuh-booking.pages.dev/events/evt-1",
+    );
     const scrollHandler = screen.getByTestId("detail-scroll").props.onScroll as
       | ((event: { nativeEvent: { contentOffset: { y: number } } }) => void)
       | undefined;

@@ -1,0 +1,459 @@
+===== CYCLE 1 (6.14s) =====
+Applications Graphics Acceleration Info:
+Uptime: 1278524627 Realtime: 2337331230
+
+** Graphics info for pid 10436 [com.tiketsampainonton.rusuhbooking.rbt130] **
+
+Stats since: 1278518453140875ns
+Total frames rendered: 514
+Janky frames: 33 (6.42%)
+Janky frames (legacy): 30 (5.84%)
+50th percentile: 6ms
+90th percentile: 13ms
+95th percentile: 17ms
+99th percentile: 28ms
+Number Missed Vsync: 20
+Number High input latency: 619
+Number Slow UI thread: 32
+Number Slow bitmap uploads: 1
+Number Slow issue draw commands: 3
+Number Frame deadline missed: 33
+Number Frame deadline missed (legacy): 0
+HISTOGRAM: 5ms=162 6ms=152 7ms=58 8ms=16 9ms=5 10ms=13 11ms=28 12ms=20 13ms=13 14ms=4 15ms=6 16ms=5 17ms=9 18ms=7 19ms=4 20ms=2 21ms=1 22ms=0 23ms=1 24ms=0 25ms=0 26ms=0 27ms=2 28ms=2 29ms=0 30ms=0 31ms=0 32ms=0 34ms=0 36ms=0 38ms=0 40ms=0 42ms=0 44ms=1 46ms=0 48ms=1 53ms=0 57ms=0 61ms=0 65ms=0 69ms=0 73ms=2 77ms=0 81ms=0 85ms=0 89ms=0 93ms=0 97ms=0 101ms=0 105ms=0 109ms=0 113ms=0 117ms=0 121ms=0 125ms=0 129ms=0 133ms=0 150ms=0 200ms=0 250ms=0 300ms=0 350ms=0 400ms=0 450ms=0 500ms=0 550ms=0 600ms=0 650ms=0 700ms=0 750ms=0 800ms=0 850ms=0 900ms=0 950ms=0 1000ms=0 1050ms=0 1100ms=0 1150ms=0 1200ms=0 1250ms=0 1300ms=0 1350ms=0 1400ms=0 1450ms=0 1500ms=0 1550ms=0 1600ms=0 1650ms=0 1700ms=0 1750ms=0 1800ms=0 1850ms=0 1900ms=0 1950ms=0 2000ms=0 2050ms=0 2100ms=0 2150ms=0 2200ms=0 2250ms=0 2300ms=0 2350ms=0 2400ms=0 2450ms=0 2500ms=0 2550ms=0 2600ms=0 2650ms=0 2700ms=0 2750ms=0 2800ms=0 2850ms=0 2900ms=0 2950ms=0 3000ms=0 3050ms=0 3100ms=0 3150ms=0 3200ms=0 3250ms=0 3300ms=0 3350ms=0 3400ms=0 3450ms=0 3500ms=0 3550ms=0 3600ms=0 3650ms=0 3700ms=0 3750ms=0 3800ms=0 3850ms=0 3900ms=0 3950ms=0 4000ms=0 4050ms=0 4100ms=0 4150ms=0 4200ms=0 4250ms=0 4300ms=0 4350ms=0 4400ms=0 4450ms=0 4500ms=0 4550ms=0 4600ms=0 4650ms=0 4700ms=0 4750ms=0 4800ms=0 4850ms=0 4900ms=0 4950ms=0
+50th gpu percentile: 2ms
+90th gpu percentile: 3ms
+95th gpu percentile: 3ms
+99th gpu percentile: 4ms
+GPU HISTOGRAM: 1ms=33 2ms=347 3ms=123 4ms=7 5ms=1 6ms=0 7ms=1 8ms=2 9ms=0 10ms=0 11ms=0 12ms=0 13ms=0 14ms=0 15ms=0 16ms=0 17ms=0 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=0 24ms=0 25ms=0 4950ms=0
+
+Pipeline=Skia (OpenGL)
+Memory policy:
+  Max surface area: 2592000
+  Max resource usage: 124.42MB (x48)
+  Background retention: 50% (altUiHidden = true)
+  GPU Context timeout: 10
+Contexts: 1 (stopped = 0)
+CPU Caches:
+  Glyph Cache: 367.07 KB (1 entry)
+  Glyph Count: 36 
+Total CPU memory usage:
+  375878 bytes, 367.07 KB (0.00 bytes is purgeable)
+GPU Caches:
+  Other:
+    Other: 6.73 KB (1 entry)
+    Buffer Object: 464.00 bytes (2 entries)
+    StencilAttachment: 384.00 KB (4 entries)
+  Image:
+    Texture: 38.48 MB (112 entries)
+  Scratch:
+    RenderTarget: 9.92 MB (5 entries)
+    Texture: 2.28 MB (5 entries)
+    Buffer Object: 78.00 KB (2 entries)
+Total GPU memory usage:
+  53624388 bytes, 51.14 MB (18.91 MB is purgeable)
+
+GraphicBufferAllocator buffers:
+            Handle |         Size |     W (Stride) x H | Layers |   Format |      Usage | Requestor
+0xb400007a91a98830 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91a98b90 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa6c00 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa6e40 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa7bc0 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa8280 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+Total allocated by GraphicBufferAllocator (estimate): 61200.00 KB
+Imported gralloc buffers:
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909304, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909303, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909302, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909299, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909301, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909300, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
+Total imported by gralloc: 61656.00KiB
+
+Profile data in ms:
+
+	com.tiketsampainonton.rusuhbooking.rbt130/com.tiketsampainonton.rusuhbooking.MainActivity/android.view.ViewRootImpl@183afe1 (visibility=0)
+View hierarchy:
+
+  com.tiketsampainonton.rusuhbooking.rbt130/com.tiketsampainonton.rusuhbooking.MainActivity/android.view.ViewRootImpl@183afe1
+  370 views, 725.53 kB of render nodes
+
+
+Total ViewRootImpl   : 1
+Total attached Views : 370
+Total RenderNode     : 725.53 kB (used) / 2397.52 kB (capacity)
+
+
+===== CYCLE 2 (6.12s) =====
+Applications Graphics Acceleration Info:
+Uptime: 1278531180 Realtime: 2337337783
+
+** Graphics info for pid 10436 [com.tiketsampainonton.rusuhbooking.rbt130] **
+
+Stats since: 1278525017719831ns
+Total frames rendered: 601
+Janky frames: 4 (0.67%)
+Janky frames (legacy): 5 (0.83%)
+50th percentile: 6ms
+90th percentile: 11ms
+95th percentile: 13ms
+99th percentile: 15ms
+Number Missed Vsync: 0
+Number High input latency: 854
+Number Slow UI thread: 3
+Number Slow bitmap uploads: 2
+Number Slow issue draw commands: 1
+Number Frame deadline missed: 4
+Number Frame deadline missed (legacy): 0
+HISTOGRAM: 5ms=218 6ms=143 7ms=104 8ms=27 9ms=6 10ms=13 11ms=43 12ms=11 13ms=17 14ms=8 15ms=5 16ms=1 17ms=0 18ms=1 19ms=0 20ms=0 21ms=0 22ms=0 23ms=0 24ms=0 25ms=0 26ms=0 27ms=0 28ms=0 29ms=1 30ms=0 31ms=0 32ms=1 34ms=1 36ms=0 38ms=1 40ms=0 42ms=0 44ms=0 46ms=0 48ms=0 53ms=0 57ms=0 61ms=0 65ms=0 69ms=0 73ms=0 77ms=0 81ms=0 85ms=0 89ms=0 93ms=0 97ms=0 101ms=0 105ms=0 109ms=0 113ms=0 117ms=0 121ms=0 125ms=0 129ms=0 133ms=0 150ms=0 200ms=0 250ms=0 300ms=0 350ms=0 400ms=0 450ms=0 500ms=0 550ms=0 600ms=0 650ms=0 700ms=0 750ms=0 800ms=0 850ms=0 900ms=0 950ms=0 1000ms=0 1050ms=0 1100ms=0 1150ms=0 1200ms=0 1250ms=0 1300ms=0 1350ms=0 1400ms=0 1450ms=0 1500ms=0 1550ms=0 1600ms=0 1650ms=0 1700ms=0 1750ms=0 1800ms=0 1850ms=0 1900ms=0 1950ms=0 2000ms=0 2050ms=0 2100ms=0 2150ms=0 2200ms=0 2250ms=0 2300ms=0 2350ms=0 2400ms=0 2450ms=0 2500ms=0 2550ms=0 2600ms=0 2650ms=0 2700ms=0 2750ms=0 2800ms=0 2850ms=0 2900ms=0 2950ms=0 3000ms=0 3050ms=0 3100ms=0 3150ms=0 3200ms=0 3250ms=0 3300ms=0 3350ms=0 3400ms=0 3450ms=0 3500ms=0 3550ms=0 3600ms=0 3650ms=0 3700ms=0 3750ms=0 3800ms=0 3850ms=0 3900ms=0 3950ms=0 4000ms=0 4050ms=0 4100ms=0 4150ms=0 4200ms=0 4250ms=0 4300ms=0 4350ms=0 4400ms=0 4450ms=0 4500ms=0 4550ms=0 4600ms=0 4650ms=0 4700ms=0 4750ms=0 4800ms=0 4850ms=0 4900ms=0 4950ms=0
+50th gpu percentile: 2ms
+90th gpu percentile: 3ms
+95th gpu percentile: 3ms
+99th gpu percentile: 4ms
+GPU HISTOGRAM: 1ms=1 2ms=466 3ms=127 4ms=3 5ms=1 6ms=0 7ms=1 8ms=2 9ms=0 10ms=0 11ms=0 12ms=0 13ms=0 14ms=0 15ms=0 16ms=0 17ms=0 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=0 24ms=0 25ms=0 4950ms=0
+
+Pipeline=Skia (OpenGL)
+Memory policy:
+  Max surface area: 2592000
+  Max resource usage: 124.42MB (x48)
+  Background retention: 50% (altUiHidden = true)
+  GPU Context timeout: 10
+Contexts: 1 (stopped = 0)
+CPU Caches:
+  Glyph Cache: 401.72 KB (1 entry)
+  Glyph Count: 36 
+Total CPU memory usage:
+  411361 bytes, 401.72 KB (0.00 bytes is purgeable)
+GPU Caches:
+  Other:
+    Other: 6.73 KB (1 entry)
+    Buffer Object: 464.00 bytes (2 entries)
+    StencilAttachment: 384.00 KB (4 entries)
+  Image:
+    Texture: 43.65 MB (146 entries)
+  Scratch:
+    RenderTarget: 9.92 MB (5 entries)
+    Texture: 2.00 MB (2 entries)
+    Buffer Object: 78.00 KB (2 entries)
+Total GPU memory usage:
+  58756052 bytes, 56.03 MB (23.80 MB is purgeable)
+
+GraphicBufferAllocator buffers:
+            Handle |         Size |     W (Stride) x H | Layers |   Format |      Usage | Requestor
+0xb400007a91a98830 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91a98b90 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa6c00 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa6e40 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa7bc0 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa8280 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+Total allocated by GraphicBufferAllocator (estimate): 61200.00 KB
+Imported gralloc buffers:
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909304, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909303, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909302, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909299, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909301, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909300, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
+Total imported by gralloc: 61656.00KiB
+
+Profile data in ms:
+
+	com.tiketsampainonton.rusuhbooking.rbt130/com.tiketsampainonton.rusuhbooking.MainActivity/android.view.ViewRootImpl@183afe1 (visibility=0)
+View hierarchy:
+
+  com.tiketsampainonton.rusuhbooking.rbt130/com.tiketsampainonton.rusuhbooking.MainActivity/android.view.ViewRootImpl@183afe1
+  370 views, 725.53 kB of render nodes
+
+
+Total ViewRootImpl   : 1
+Total attached Views : 370
+Total RenderNode     : 725.53 kB (used) / 2397.52 kB (capacity)
+
+
+===== CYCLE 3 (6.15s) =====
+Applications Graphics Acceleration Info:
+Uptime: 1278537752 Realtime: 2337344355
+
+** Graphics info for pid 10436 [com.tiketsampainonton.rusuhbooking.rbt130] **
+
+Stats since: 1278531554961287ns
+Total frames rendered: 609
+Janky frames: 3 (0.49%)
+Janky frames (legacy): 4 (0.66%)
+50th percentile: 5ms
+90th percentile: 7ms
+95th percentile: 7ms
+99th percentile: 11ms
+Number Missed Vsync: 1
+Number High input latency: 610
+Number Slow UI thread: 3
+Number Slow bitmap uploads: 2
+Number Slow issue draw commands: 0
+Number Frame deadline missed: 3
+Number Frame deadline missed (legacy): 0
+HISTOGRAM: 5ms=425 6ms=88 7ms=79 8ms=6 9ms=3 10ms=0 11ms=4 12ms=0 13ms=0 14ms=0 15ms=0 16ms=0 17ms=0 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=1 24ms=0 25ms=0 26ms=0 27ms=0 28ms=0 29ms=0 30ms=0 31ms=1 32ms=0 34ms=1 36ms=1 38ms=0 40ms=0 42ms=0 44ms=0 46ms=0 48ms=0 53ms=0 57ms=0 61ms=0 65ms=0 69ms=0 73ms=0 77ms=0 81ms=0 85ms=0 89ms=0 93ms=0 97ms=0 101ms=0 105ms=0 109ms=0 113ms=0 117ms=0 121ms=0 125ms=0 129ms=0 133ms=0 150ms=0 200ms=0 250ms=0 300ms=0 350ms=0 400ms=0 450ms=0 500ms=0 550ms=0 600ms=0 650ms=0 700ms=0 750ms=0 800ms=0 850ms=0 900ms=0 950ms=0 1000ms=0 1050ms=0 1100ms=0 1150ms=0 1200ms=0 1250ms=0 1300ms=0 1350ms=0 1400ms=0 1450ms=0 1500ms=0 1550ms=0 1600ms=0 1650ms=0 1700ms=0 1750ms=0 1800ms=0 1850ms=0 1900ms=0 1950ms=0 2000ms=0 2050ms=0 2100ms=0 2150ms=0 2200ms=0 2250ms=0 2300ms=0 2350ms=0 2400ms=0 2450ms=0 2500ms=0 2550ms=0 2600ms=0 2650ms=0 2700ms=0 2750ms=0 2800ms=0 2850ms=0 2900ms=0 2950ms=0 3000ms=0 3050ms=0 3100ms=0 3150ms=0 3200ms=0 3250ms=0 3300ms=0 3350ms=0 3400ms=0 3450ms=0 3500ms=0 3550ms=0 3600ms=0 3650ms=0 3700ms=0 3750ms=0 3800ms=0 3850ms=0 3900ms=0 3950ms=0 4000ms=0 4050ms=0 4100ms=0 4150ms=0 4200ms=0 4250ms=0 4300ms=0 4350ms=0 4400ms=0 4450ms=0 4500ms=0 4550ms=0 4600ms=0 4650ms=0 4700ms=0 4750ms=0 4800ms=0 4850ms=0 4900ms=0 4950ms=0
+50th gpu percentile: 2ms
+90th gpu percentile: 3ms
+95th gpu percentile: 3ms
+99th gpu percentile: 4ms
+GPU HISTOGRAM: 1ms=1 2ms=475 3ms=123 4ms=6 5ms=1 6ms=0 7ms=0 8ms=3 9ms=0 10ms=0 11ms=0 12ms=0 13ms=0 14ms=0 15ms=0 16ms=0 17ms=0 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=0 24ms=0 25ms=0 4950ms=0
+
+Pipeline=Skia (OpenGL)
+Memory policy:
+  Max surface area: 2592000
+  Max resource usage: 124.42MB (x48)
+  Background retention: 50% (altUiHidden = true)
+  GPU Context timeout: 10
+Contexts: 1 (stopped = 0)
+CPU Caches:
+  Glyph Cache: 401.72 KB (1 entry)
+  Glyph Count: 36 
+Total CPU memory usage:
+  411361 bytes, 401.72 KB (0.00 bytes is purgeable)
+GPU Caches:
+  Other:
+    Other: 6.73 KB (1 entry)
+    Buffer Object: 464.00 bytes (2 entries)
+    StencilAttachment: 384.00 KB (4 entries)
+  Image:
+    Texture: 43.65 MB (146 entries)
+  Scratch:
+    RenderTarget: 9.89 MB (4 entries)
+    Texture: 2.00 MB (2 entries)
+    Buffer Object: 78.00 KB (2 entries)
+Total GPU memory usage:
+  58723284 bytes, 56.00 MB (23.90 MB is purgeable)
+
+GraphicBufferAllocator buffers:
+            Handle |         Size |     W (Stride) x H | Layers |   Format |      Usage | Requestor
+0xb400007a91a98830 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91a98b90 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa6c00 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa6e40 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa7bc0 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa8280 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+Total allocated by GraphicBufferAllocator (estimate): 61200.00 KB
+Imported gralloc buffers:
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909304, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909303, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909302, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909299, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909301, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909300, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
+Total imported by gralloc: 61656.00KiB
+
+Profile data in ms:
+
+	com.tiketsampainonton.rusuhbooking.rbt130/com.tiketsampainonton.rusuhbooking.MainActivity/android.view.ViewRootImpl@183afe1 (visibility=0)
+View hierarchy:
+
+  com.tiketsampainonton.rusuhbooking.rbt130/com.tiketsampainonton.rusuhbooking.MainActivity/android.view.ViewRootImpl@183afe1
+  370 views, 725.53 kB of render nodes
+
+
+Total ViewRootImpl   : 1
+Total attached Views : 370
+Total RenderNode     : 725.53 kB (used) / 2397.52 kB (capacity)
+
+
+===== CYCLE 4 (6.14s) =====
+Applications Graphics Acceleration Info:
+Uptime: 1278544320 Realtime: 2337350923
+
+** Graphics info for pid 10436 [com.tiketsampainonton.rusuhbooking.rbt130] **
+
+Stats since: 1278538138190451ns
+Total frames rendered: 612
+Janky frames: 4 (0.65%)
+Janky frames (legacy): 4 (0.65%)
+50th percentile: 5ms
+90th percentile: 7ms
+95th percentile: 7ms
+99th percentile: 11ms
+Number Missed Vsync: 1
+Number High input latency: 645
+Number Slow UI thread: 2
+Number Slow bitmap uploads: 2
+Number Slow issue draw commands: 1
+Number Frame deadline missed: 4
+Number Frame deadline missed (legacy): 0
+HISTOGRAM: 5ms=414 6ms=106 7ms=79 8ms=5 9ms=0 10ms=0 11ms=2 12ms=0 13ms=1 14ms=1 15ms=0 16ms=0 17ms=0 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=1 24ms=0 25ms=0 26ms=0 27ms=0 28ms=0 29ms=1 30ms=1 31ms=1 32ms=0 34ms=0 36ms=0 38ms=0 40ms=0 42ms=0 44ms=0 46ms=0 48ms=0 53ms=0 57ms=0 61ms=0 65ms=0 69ms=0 73ms=0 77ms=0 81ms=0 85ms=0 89ms=0 93ms=0 97ms=0 101ms=0 105ms=0 109ms=0 113ms=0 117ms=0 121ms=0 125ms=0 129ms=0 133ms=0 150ms=0 200ms=0 250ms=0 300ms=0 350ms=0 400ms=0 450ms=0 500ms=0 550ms=0 600ms=0 650ms=0 700ms=0 750ms=0 800ms=0 850ms=0 900ms=0 950ms=0 1000ms=0 1050ms=0 1100ms=0 1150ms=0 1200ms=0 1250ms=0 1300ms=0 1350ms=0 1400ms=0 1450ms=0 1500ms=0 1550ms=0 1600ms=0 1650ms=0 1700ms=0 1750ms=0 1800ms=0 1850ms=0 1900ms=0 1950ms=0 2000ms=0 2050ms=0 2100ms=0 2150ms=0 2200ms=0 2250ms=0 2300ms=0 2350ms=0 2400ms=0 2450ms=0 2500ms=0 2550ms=0 2600ms=0 2650ms=0 2700ms=0 2750ms=0 2800ms=0 2850ms=0 2900ms=0 2950ms=0 3000ms=0 3050ms=0 3100ms=0 3150ms=0 3200ms=0 3250ms=0 3300ms=0 3350ms=0 3400ms=0 3450ms=0 3500ms=0 3550ms=0 3600ms=0 3650ms=0 3700ms=0 3750ms=0 3800ms=0 3850ms=0 3900ms=0 3950ms=0 4000ms=0 4050ms=0 4100ms=0 4150ms=0 4200ms=0 4250ms=0 4300ms=0 4350ms=0 4400ms=0 4450ms=0 4500ms=0 4550ms=0 4600ms=0 4650ms=0 4700ms=0 4750ms=0 4800ms=0 4850ms=0 4900ms=0 4950ms=0
+50th gpu percentile: 2ms
+90th gpu percentile: 3ms
+95th gpu percentile: 3ms
+99th gpu percentile: 3ms
+GPU HISTOGRAM: 1ms=0 2ms=473 3ms=134 4ms=2 5ms=0 6ms=0 7ms=0 8ms=3 9ms=0 10ms=0 11ms=0 12ms=0 13ms=0 14ms=0 15ms=0 16ms=0 17ms=0 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=0 24ms=0 25ms=0 4950ms=0
+
+Pipeline=Skia (OpenGL)
+Memory policy:
+  Max surface area: 2592000
+  Max resource usage: 124.42MB (x48)
+  Background retention: 50% (altUiHidden = true)
+  GPU Context timeout: 10
+Contexts: 1 (stopped = 0)
+CPU Caches:
+  Glyph Cache: 401.72 KB (1 entry)
+  Glyph Count: 36 
+Total CPU memory usage:
+  411361 bytes, 401.72 KB (0.00 bytes is purgeable)
+GPU Caches:
+  Other:
+    Other: 6.73 KB (1 entry)
+    Buffer Object: 464.00 bytes (2 entries)
+    StencilAttachment: 384.00 KB (4 entries)
+  Image:
+    Texture: 43.65 MB (146 entries)
+  Scratch:
+    RenderTarget: 9.86 MB (3 entries)
+    Texture: 2.00 MB (2 entries)
+    Buffer Object: 78.00 KB (2 entries)
+Total GPU memory usage:
+  58690516 bytes, 55.97 MB (23.99 MB is purgeable)
+
+GraphicBufferAllocator buffers:
+            Handle |         Size |     W (Stride) x H | Layers |   Format |      Usage | Requestor
+0xb400007a91a98830 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91a98b90 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa6c00 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa6e40 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa7bc0 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa8280 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+Total allocated by GraphicBufferAllocator (estimate): 61200.00 KB
+Imported gralloc buffers:
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909304, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909303, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909302, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909299, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909301, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909300, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
+Total imported by gralloc: 61656.00KiB
+
+Profile data in ms:
+
+	com.tiketsampainonton.rusuhbooking.rbt130/com.tiketsampainonton.rusuhbooking.MainActivity/android.view.ViewRootImpl@183afe1 (visibility=0)
+View hierarchy:
+
+  com.tiketsampainonton.rusuhbooking.rbt130/com.tiketsampainonton.rusuhbooking.MainActivity/android.view.ViewRootImpl@183afe1
+  370 views, 725.53 kB of render nodes
+
+
+Total ViewRootImpl   : 1
+Total attached Views : 370
+Total RenderNode     : 725.53 kB (used) / 2397.52 kB (capacity)
+
+
+===== CYCLE 5 (6.13s) =====
+Applications Graphics Acceleration Info:
+Uptime: 1278550878 Realtime: 2337357481
+
+** Graphics info for pid 10436 [com.tiketsampainonton.rusuhbooking.rbt130] **
+
+Stats since: 1278544699850605ns
+Total frames rendered: 609
+Janky frames: 4 (0.66%)
+Janky frames (legacy): 3 (0.49%)
+50th percentile: 5ms
+90th percentile: 10ms
+95th percentile: 11ms
+99th percentile: 13ms
+Number Missed Vsync: 1
+Number High input latency: 774
+Number Slow UI thread: 2
+Number Slow bitmap uploads: 1
+Number Slow issue draw commands: 2
+Number Frame deadline missed: 4
+Number Frame deadline missed (legacy): 0
+HISTOGRAM: 5ms=335 6ms=102 7ms=72 8ms=7 9ms=2 10ms=45 11ms=34 12ms=5 13ms=1 14ms=2 15ms=0 16ms=0 17ms=2 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=0 24ms=0 25ms=0 26ms=0 27ms=0 28ms=0 29ms=0 30ms=0 31ms=0 32ms=1 34ms=0 36ms=0 38ms=1 40ms=0 42ms=0 44ms=0 46ms=0 48ms=0 53ms=0 57ms=0 61ms=0 65ms=0 69ms=0 73ms=0 77ms=0 81ms=0 85ms=0 89ms=0 93ms=0 97ms=0 101ms=0 105ms=0 109ms=0 113ms=0 117ms=0 121ms=0 125ms=0 129ms=0 133ms=0 150ms=0 200ms=0 250ms=0 300ms=0 350ms=0 400ms=0 450ms=0 500ms=0 550ms=0 600ms=0 650ms=0 700ms=0 750ms=0 800ms=0 850ms=0 900ms=0 950ms=0 1000ms=0 1050ms=0 1100ms=0 1150ms=0 1200ms=0 1250ms=0 1300ms=0 1350ms=0 1400ms=0 1450ms=0 1500ms=0 1550ms=0 1600ms=0 1650ms=0 1700ms=0 1750ms=0 1800ms=0 1850ms=0 1900ms=0 1950ms=0 2000ms=0 2050ms=0 2100ms=0 2150ms=0 2200ms=0 2250ms=0 2300ms=0 2350ms=0 2400ms=0 2450ms=0 2500ms=0 2550ms=0 2600ms=0 2650ms=0 2700ms=0 2750ms=0 2800ms=0 2850ms=0 2900ms=0 2950ms=0 3000ms=0 3050ms=0 3100ms=0 3150ms=0 3200ms=0 3250ms=0 3300ms=0 3350ms=0 3400ms=0 3450ms=0 3500ms=0 3550ms=0 3600ms=0 3650ms=0 3700ms=0 3750ms=0 3800ms=0 3850ms=0 3900ms=0 3950ms=0 4000ms=0 4050ms=0 4100ms=0 4150ms=0 4200ms=0 4250ms=0 4300ms=0 4350ms=0 4400ms=0 4450ms=0 4500ms=0 4550ms=0 4600ms=0 4650ms=0 4700ms=0 4750ms=0 4800ms=0 4850ms=0 4900ms=0 4950ms=0
+50th gpu percentile: 2ms
+90th gpu percentile: 3ms
+95th gpu percentile: 3ms
+99th gpu percentile: 4ms
+GPU HISTOGRAM: 1ms=0 2ms=476 3ms=125 4ms=3 5ms=2 6ms=0 7ms=1 8ms=2 9ms=0 10ms=0 11ms=0 12ms=0 13ms=0 14ms=0 15ms=0 16ms=0 17ms=0 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=0 24ms=0 25ms=0 4950ms=0
+
+Pipeline=Skia (OpenGL)
+Memory policy:
+  Max surface area: 2592000
+  Max resource usage: 124.42MB (x48)
+  Background retention: 50% (altUiHidden = true)
+  GPU Context timeout: 10
+Contexts: 1 (stopped = 0)
+CPU Caches:
+  Glyph Cache: 401.72 KB (1 entry)
+  Glyph Count: 36 
+Total CPU memory usage:
+  411361 bytes, 401.72 KB (0.00 bytes is purgeable)
+GPU Caches:
+  Other:
+    Other: 6.73 KB (1 entry)
+    Buffer Object: 464.00 bytes (2 entries)
+    StencilAttachment: 384.00 KB (4 entries)
+  Image:
+    Texture: 43.65 MB (146 entries)
+  Scratch:
+    RenderTarget: 9.86 MB (3 entries)
+    Texture: 2.00 MB (2 entries)
+    Buffer Object: 78.00 KB (2 entries)
+Total GPU memory usage:
+  58690516 bytes, 55.97 MB (23.99 MB is purgeable)
+
+GraphicBufferAllocator buffers:
+            Handle |         Size |     W (Stride) x H | Layers |   Format |      Usage | Requestor
+0xb400007a91a98830 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91a98b90 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa6c00 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa6e40 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa7bc0 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+0xb400007a91aa8280 | 10200.00 KiB | 1080 (1088) x 2400 |      1 |        1 | 0x10000900 | VRI[MainActivity]#0(BLAST Consumer)0
+Total allocated by GraphicBufferAllocator (estimate): 61200.00 KB
+Imported gralloc buffers:
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909304, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909303, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909302, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909299, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909301, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
++ name:VRI[MainActivity]#0(BLAST Consumer)0, id:909300, size:10276.00KiB, w/h:1080x2400, usage: 0x10000900, req fmt:1, fourcc/mod:875708993/0, dataspace: 0x0, compressed: true
+	planes: R/G/B/A:	 w/h:1080x2400, stride:4352 bytes, size:10522624
+Total imported by gralloc: 61656.00KiB
+
+Profile data in ms:
+
+	com.tiketsampainonton.rusuhbooking.rbt130/com.tiketsampainonton.rusuhbooking.MainActivity/android.view.ViewRootImpl@183afe1 (visibility=0)
+View hierarchy:
+
+  com.tiketsampainonton.rusuhbooking.rbt130/com.tiketsampainonton.rusuhbooking.MainActivity/android.view.ViewRootImpl@183afe1
+  370 views, 725.53 kB of render nodes
+
+
+Total ViewRootImpl   : 1
+Total attached Views : 370
+Total RenderNode     : 725.53 kB (used) / 2397.52 kB (capacity)
+

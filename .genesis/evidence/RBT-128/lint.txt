@@ -1,0 +1,3 @@
+Targeted ESLint passed for the booking-session hook, container, booking DTO/repository, domain port, restore use case, and their focused tests.
+
+Prettier check passed for `useBookingSession.ts` and `useBookingSession.test.tsx`.

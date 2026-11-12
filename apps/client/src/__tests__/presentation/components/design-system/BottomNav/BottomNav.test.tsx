@@ -56,9 +56,9 @@ describe("BottomNav", () => {
 
   it.each<[BottomNavRoute, string]>([
     ["home", "Beranda"],
-    ["browse", "Jelajahi"],
-    ["tickets", "Tiket"],
-    ["profile", "Akun"],
+    ["browse", "Jelajah"],
+    ["tickets", "Ticket"],
+    ["profile", "Profil"],
   ])(
     "renders the %s icon and active tab for an authenticated user",
     (activeRoute, label) => {

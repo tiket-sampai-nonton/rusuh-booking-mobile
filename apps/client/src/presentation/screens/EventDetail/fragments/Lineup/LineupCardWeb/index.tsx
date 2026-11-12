@@ -1,21 +1,17 @@
 import { useState } from "react";
-import {
-  Image,
-  Platform,
-  Pressable,
-  Text,
-  type ImageStyle,
-} from "react-native";
+import { Platform, Pressable, Text, type ImageStyle } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { lineupStyles } from "../style";
 import type { LineupItem } from "../types";
 import { lineupWebImageStyle } from "./style";
+import { neutral } from "@presentation/theme";
 
 export function LineupCardWeb({ name, role, avatar }: LineupItem) {
   const [isHovered, setIsHovered] = useState(false);
   const avatarUri =
     avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=000&color=fff&bold=true&size=160`;
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${neutral.ink.slice(1)}&color=${neutral.paper.slice(1)}&bold=true&size=160`;
 
   return (
     <Pressable
@@ -23,7 +19,7 @@ export function LineupCardWeb({ name, role, avatar }: LineupItem) {
       onHoverIn={() => setIsHovered(true)}
       onHoverOut={() => setIsHovered(false)}
     >
-      <Image
+      <CachedImage
         source={{ uri: avatarUri }}
         style={[
           lineupStyles.avatar,

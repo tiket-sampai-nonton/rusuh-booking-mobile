@@ -27,6 +27,7 @@ export interface ParsedDescription {
   readonly longDesc: string;
   readonly lineup: readonly ParsedLineupItem[];
   readonly terms: readonly string[];
+  readonly location?: ParsedEventLocation;
   readonly bannerImage?: string;
   readonly categories: readonly EventCategory[];
   /** : Optional subtitle shown below hero title. */
@@ -42,10 +43,20 @@ export interface ParsedLineupItem {
   readonly avatar?: string;
 }
 
+export interface ParsedEventLocation {
+  readonly name?: string;
+  readonly address?: string;
+  readonly mapsUrl?: string;
+  readonly latitude?: number;
+  readonly longitude?: number;
+  readonly mapImage?: string;
+}
+
 const EMPTY: ParsedDescription = {
   longDesc: "",
   lineup: [],
   terms: [],
+  location: undefined,
   bannerImage: undefined,
   categories: [],
   subtitle: undefined,
@@ -61,7 +72,11 @@ function asString(v: unknown): string {
 }
 
 function asFiniteNumber(v: unknown): number {
-  return typeof v === "number" && isFinite(v) ? v : 0;
+  return typeof v === "number" && Number.isFinite(v) ? v : 0;
+}
+
+function optionalFiniteNumber(v: unknown): number | undefined {
+  return typeof v === "number" && Number.isFinite(v) ? v : undefined;
 }
 
 /** Normalise supported lineup records without inventing performer data. */
@@ -134,6 +149,36 @@ function parseGallery(v: unknown): string[] | undefined {
   return urls.length > 0 ? urls : undefined;
 }
 
+function parseLocation(v: unknown): ParsedEventLocation | undefined {
+  if (!isRecord(v)) return undefined;
+  const name = asString(v.name).trim();
+  const address = asString(v.address).trim();
+  const mapsUrl = asString(v.mapsUrl).trim();
+  const mapImage = asString(v.mapImage).trim();
+  const latitude = optionalFiniteNumber(v.latitude);
+  const longitude = optionalFiniteNumber(v.longitude);
+
+  if (
+    !name &&
+    !address &&
+    !mapsUrl &&
+    !mapImage &&
+    latitude === undefined &&
+    longitude === undefined
+  ) {
+    return undefined;
+  }
+
+  return {
+    ...(name ? { name } : {}),
+    ...(address ? { address } : {}),
+    ...(mapsUrl ? { mapsUrl } : {}),
+    ...(latitude !== undefined ? { latitude } : {}),
+    ...(longitude !== undefined ? { longitude } : {}),
+    ...(mapImage ? { mapImage } : {}),
+  };
+}
+
 /**
  * Parse the opaque `EventDetail.description` into a safe, typed view. A nullish
  * or non-object value yields all-empty defaults (the screen renders its
@@ -149,6 +194,7 @@ export function parseDescription(
     longDesc: asString(description.longDesc),
     lineup: parseLineup(description.lineup),
     terms: parseTerms(description.terms),
+    location: parseLocation(description.location),
     bannerImage: banner.length > 0 ? banner : undefined,
     categories: parseCategories(description.categories),
     subtitle: subtitle.length > 0 ? subtitle : undefined,

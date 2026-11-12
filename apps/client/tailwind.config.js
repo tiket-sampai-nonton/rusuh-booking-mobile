@@ -1,19 +1,117 @@
+const palette = {
+  brandPrimary: "#EC1C24",
+  brandDeep: "#A8111B",
+  brandEmber: "#FF5A2D",
+  brandMarkPrimary: "#EC1C24",
+  brandMarkDeep: "#A8111B",
+  brandMarkWhite: "#FFFFFF",
+  brandMarkStroke: "#F3F0F0",
+  transparent: "transparent",
+  ground: "#FFFFFF",
+  darkBackground: "#0A0A0C",
+  ink: "#000000",
+  inkSoft: "#121217",
+  card: "#FFFFFF",
+  darkCard: "#121217",
+  darkForeground: "#FFFFFF",
+  muted: "#666666",
+  mutedDark: "rgba(255,255,255,0.62)",
+  gray: "#888888",
+  field: "#F5F5F5",
+  success: "#00AA00",
+  successDark: "#4ADE80",
+  warning: "#FF6600",
+  warningDark: "#F5B301",
+  error: "#EC1C24",
+  errorDark: "#FF6A4C",
+  zoneOk: "#E8F5E9",
+  zoneOkText: "#1B5E20",
+  zoneWarn: "#FFF3E0",
+  zoneWarnText: "#E65100",
+  zoneBad: "#FFEBEE",
+  zoneBadText: "#B71C1C",
+};
+
+function withAlpha(hex, alpha) {
+  const value = hex.replace("#", "");
+  const red = Number.parseInt(value.slice(0, 2), 16);
+  const green = Number.parseInt(value.slice(2, 4), 16);
+  const blue = Number.parseInt(value.slice(4, 6), 16);
+  return `rgba(${red},${green},${blue},${alpha})`;
+}
+
+const colorTokens = {
+  brand: {
+    DEFAULT: palette.brandPrimary,
+    deep: palette.brandDeep,
+    ember: palette.brandEmber,
+  },
+  brandMark: {
+    primary: palette.brandMarkPrimary,
+    deep: palette.brandMarkDeep,
+    white: palette.brandMarkWhite,
+    stroke: palette.brandMarkStroke,
+  },
+  transparent: palette.transparent,
+  background: { DEFAULT: palette.ground, dark: palette.darkBackground },
+  foreground: { DEFAULT: palette.ink, dark: palette.darkForeground },
+  card: {
+    DEFAULT: palette.card,
+    foreground: palette.ink,
+    dark: palette.darkCard,
+    "dark-foreground": palette.darkForeground,
+  },
+  muted: {
+    DEFAULT: palette.muted,
+    foreground: palette.muted,
+    dark: palette.mutedDark,
+  },
+  line: {
+    DEFAULT: withAlpha(palette.ink, 0.14),
+    dark: withAlpha(palette.darkForeground, 0.18),
+  },
+  ink: { DEFAULT: palette.ink, 2: palette.inkSoft },
+  paper: palette.ground,
+  ok: { DEFAULT: palette.success, dark: palette.successDark },
+  warn: { DEFAULT: palette.warning, dark: palette.warningDark },
+  error: { DEFAULT: palette.error, dark: palette.errorDark },
+  v2: {
+    ink: palette.ink,
+    ground: palette.ground,
+    overlay: palette.darkBackground,
+    muted: palette.muted,
+    gray: palette.gray,
+    field: palette.field,
+    accent: palette.brandPrimary,
+    ember: palette.brandEmber,
+    danger: palette.error,
+    success: palette.success,
+    warn: palette.warning,
+    info: palette.brandDeep,
+    "zone-ok": palette.zoneOk,
+    "zone-ok-border": palette.success,
+    "zone-ok-text": palette.zoneOkText,
+    "zone-warn": palette.zoneWarn,
+    "zone-warn-border": palette.warning,
+    "zone-warn-text": palette.zoneWarnText,
+    "zone-bad": palette.zoneBad,
+    "zone-bad-border": palette.error,
+    "zone-bad-text": palette.zoneBadText,
+  },
+};
+
 /**
  * SINGLE design-token source of truth (NativeWind) — RBT-003.
  *
- * Tokens are ported verbatim from the prototype V5 design system
- * (`.genesis/prototype/Final/*.html` `:root` blocks). See ARCHITECTURE.md §6.5.
- * `src/presentation/theme/` re-exports the SAME raw values for contexts
+ * Layout and typography follow the prototype V5 design system. The visual balance
+ * targets 45% black, 45% white, and 10% red accents, with separate semantic
+ * status colors.
+ * `src/presentation/theme/` derives values from this palette for contexts
  * NativeWind cannot style (SVG / Canvas / QR / Reanimated) — it mirrors this
  * file and is never an independent source.
  *
- * Light values come straight from the prototype. The prototype ships NO full
- * dark palette (it is a light design), so dark values are DERIVED:
- *   - brand/status hues reuse the prototype's dark-context tweaks found in
- *     `waiting.html` (`--muted:rgba(255,255,255,.62)`, `--ok:#4ade80`,
- *     `--amber:#f5b301`) where they exist;
- *   - surface/ink/line dark values are a sensible inversion of the light set.
- * Every DERIVED (non-prototype) value is marked `DERIVED (flag)` below.
+ * The `palette` object below is the only place raw color values are declared.
+ * Runtime tokens and Tailwind aliases derive from it; token tests verify parity.
  *
  * @type {import('tailwindcss').Config}
  */
@@ -25,94 +123,7 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
-      colors: {
-        // ---- Brand (prototype: --red / --red-deep / --ember) ----
-        brand: {
-          DEFAULT: "#EC1C24", // --red
-          deep: "#a8111b", //    --red-deep
-          ember: "#ff5a2d", //   --ember
-        },
-
-        // ---- Semantic surface PAIRS (AC2: bg+text always paired) ----
-        // light = prototype --paper/--ink/--card/--muted/--line
-        // dark  = DERIVED (flag): prototype has no dark surfaces.
-        background: {
-          DEFAULT: "#fbfbfd", //          --paper
-          dark: "#0a0a0c", //             DERIVED (flag): = light --ink
-        },
-        foreground: {
-          DEFAULT: "#0a0a0c", //          --ink
-          dark: "#fbfbfd", //             DERIVED (flag): = light --paper
-        },
-        card: {
-          DEFAULT: "#ffffff", //          --card
-          foreground: "#0a0a0c", //       pairs with card (--ink)
-          dark: "#121217", //             DERIVED (flag): = --ink-2
-          "dark-foreground": "#fbfbfd", // DERIVED (flag)
-        },
-        muted: {
-          DEFAULT: "#6b6b76", //          --muted (used as muted-foreground text)
-          foreground: "#6b6b76", //       --muted
-          dark: "rgba(255,255,255,0.62)", // prototype waiting.html dark --muted
-        },
-        line: {
-          DEFAULT: "rgba(10,10,12,0.08)", // --line
-          dark: "rgba(255,255,255,0.12)", // DERIVED (flag)
-        },
-        ink: {
-          DEFAULT: "#0a0a0c", //          --ink
-          2: "#121217", //                --ink-2
-        },
-        paper: "#fbfbfd", //              --paper (raw alias)
-
-        // ---- Status (prototype --ok / --warn, + dark-context hues) ----
-        ok: {
-          DEFAULT: "#17a34a", //          --ok
-          dark: "#4ade80", //             waiting.html dark --ok
-        },
-        warn: {
-          DEFAULT: "#e8830c", //          --warn (index); detail/payment use #e8830c
-          dark: "#f5b301", //             waiting.html --amber
-        },
-        // No explicit --err token in the prototype; error reuses brand red.
-        // DERIVED (flag): dedicated error hue mapped to brand for clarity.
-        error: {
-          DEFAULT: "#EC1C24", //          DERIVED (flag): = --red
-          dark: "#ff6a4c", //             DERIVED (flag): lightened red for dark bg
-        },
-
-        // ============================================================
-        // V2 "Brutalist Mono" palette (RBT-086) — the redesign token set.
-        // Unifies the prototype's TWO systems into ONE:
-        //   home/event-detail  --ground/--ink/--ink-muted/--field/--accent/--danger
-        //   flow screens       --black/--white/--gray/--red/--green
-        // Resolution: pure #000/#fff base; one muted gray; one accent red; one
-        // success green; danger = the accent red. Prototype-specific accents
-        // (live-dot, warn/amber, info blue) kept as named tokens, not literals.
-        // ============================================================
-        v2: {
-          ink: "#000000", //        --ink / --black  (pure black)
-          ground: "#ffffff", //     --ground / --white (pure white)
-          muted: "#666666", //      --ink-muted (home) — the readable gray
-          gray: "#888888", //       --gray (flow screens) — secondary gray
-          field: "#f5f5f5", //      --field (input/elevated surface)
-          accent: "#ff0000", //     --red (flow) brutalist accent / live red
-          danger: "#dc2626", //     --danger (home) destructive
-          success: "#00aa00", //    --green (flow success); draw-check uses it
-          warn: "#ff6600", //       offline/warning (waiting status badge)
-          info: "#3b82f6", //       --info (browse b-soon blue), prototype accent
-          // Waiting-room zone banner tints (prototype 06 .zone.*)
-          "zone-ok": "#e8f5e9",
-          "zone-ok-border": "#2e7d32",
-          "zone-ok-text": "#1b5e20",
-          "zone-warn": "#fff3e0",
-          "zone-warn-border": "#f57c00",
-          "zone-warn-text": "#e65100",
-          "zone-bad": "#ffebee",
-          "zone-bad-border": "#c62828",
-          "zone-bad-text": "#b71c1c",
-        },
-      },
+      colors: colorTokens,
 
       // ---- Typography (prototype font-size scale, px → rem @16) ----
       fontFamily: {
@@ -210,10 +221,10 @@ module.exports = {
 
       // ---- Shadows (prototype box-shadows on cards/buttons) ----
       boxShadow: {
-        brand: "0 4px 12px -2px rgba(236,28,36,0.5)", //  brand mark
-        button: "0 14px 40px -12px rgba(0,0,0,0.5)", //   primary button
-        filter: "0 12px 30px -24px rgba(10,10,12,0.5)", // filter/ghost
-        ok: "0 16px 40px -14px rgba(23,163,74,0.7)", //   success check
+        brand: `0 4px 16px -2px ${withAlpha(palette.ink, 0.28)}`,
+        button: `0 14px 40px -12px ${withAlpha(palette.ink, 0.42)}`,
+        filter: `0 12px 30px -24px ${withAlpha(palette.ink, 0.5)}`,
+        ok: `0 16px 40px -14px ${withAlpha(palette.ink, 0.36)}`,
       },
     },
   },

@@ -80,19 +80,19 @@ export const ZONE_COPY: Readonly<Record<QueueZone, ZoneCopy>> = {
     tone: "ok",
     icon: "lock",
     label: "Zona Aman",
-    body: "Tiket Anda terjamin saat giliran tiba. Posisi Anda tidak akan didahului.",
+    body: "Tiketmu tetap tersedia sampai giliranmu tiba.",
   },
   POSSIBLE: {
     tone: "warn",
     icon: "warning",
     label: "Zona kemungkinan",
-    body: "Peluang masuk bergantung pada sisa tiket.",
+    body: "Kesempatan masuk bergantung pada sisa tiket.",
   },
   NOT_ENOUGH: {
     tone: "error",
     icon: "alert",
     label: "Peluang Terbatas",
-    body: "Posisi Anda melewati perkiraan stok. Tetap mengantre, tiket mungkin tersedia jika ada pembatalan.",
+    body: "Posisimu sudah melewati perkiraan jumlah tiket. Tetap di antrean; tiket bisa tersedia lagi jika ada pembatalan.",
   },
 };
 
@@ -115,92 +115,119 @@ export function terminalTitle(status: QueueStatus): string {
 /** Terminal-state body copy (recovery hint). */
 export function terminalBody(status: QueueStatus): string {
   return status === "SOLD_OUT"
-    ? "Maaf, semua tiket event ini habis terjual saat Anda mengantre."
+    ? "Maaf, tiket untuk acara ini habis saat kamu mengantre."
     : "Masa penjualan tiket event ini telah berakhir.";
 }
 
+export type ClaimErrorDisplayState =
+  | "TURN_MISSED"
+  | "EVENT_SOLD_OUT"
+  | "ADMISSION_TOKEN_INVALID"
+  | "UNKNOWN";
+
 /** Claim-error (RBT-044) title mirrors the terminal titles. */
-export function claimErrorTitle(
-  errorState: "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN",
-): string {
+export function claimErrorTitle(errorState: ClaimErrorDisplayState): string {
   if (errorState === "EVENT_SOLD_OUT") return "Tiket Habis";
+  if (errorState === "ADMISSION_TOKEN_INVALID")
+    return "Sesi antrean sudah tidak berlaku";
   if (errorState === "UNKNOWN") return "Gagal menghubungkan";
   return "Giliran Berakhir";
 }
 
-/** Claim-error body copy. */
-export function claimErrorBody(
-  errorState: "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN",
+export function claimErrorBadgeLabel(
+  errorState: ClaimErrorDisplayState,
 ): string {
+  if (errorState === "EVENT_SOLD_OUT") return "Tiket Habis";
+  if (errorState === "UNKNOWN") return "Koneksi Bermasalah";
+  if (errorState === "ADMISSION_TOKEN_INVALID") return "Sesi Antrean Berakhir";
+  return "Giliran Berakhir";
+}
+
+export function claimErrorActionLabel(
+  errorState: ClaimErrorDisplayState,
+): string {
+  if (
+    errorState === "EVENT_SOLD_OUT" ||
+    errorState === "UNKNOWN" ||
+    errorState === "ADMISSION_TOKEN_INVALID"
+  )
+    return "Jelajahi Event Lain";
+  return "Bergabung Kembali";
+}
+
+/** Claim-error body copy. */
+export function claimErrorBody(errorState: ClaimErrorDisplayState): string {
   if (errorState === "EVENT_SOLD_OUT") {
-    return "Semua tiket habis saat giliran Anda. Jelajahi event lainnya.";
+    return "Maaf, tiketnya habis saat giliranmu tiba. Coba lihat acara lainnya.";
   }
   if (errorState === "UNKNOWN")
-    return "Tidak dapat menyiapkan sesi. Periksa koneksi, lalu kembali ke event.";
-  return "Anda belum memilih tiket tepat waktu. Giliran diberikan kepada orang berikutnya dalam antrean.";
+    return "Kami belum bisa menyiapkan sesi tiket. Periksa koneksi, lalu coba lagi.";
+  if (errorState === "ADMISSION_TOKEN_INVALID")
+    return "Sesi antrean sebelumnya masih tercatat di server. Untuk saat ini, silakan pilih event lain.";
+  return "Waktu untuk memilih tiket sudah habis. Kamu bisa bergabung lagi dari awal.";
 }
 
 /** Verbatim copy constants reused across fragments. */
 export const COPY = {
-  eyebrow: "Ruang Tunggu Virtual",
-  positionLabel: "Posisi Anda",
-  title: "Anda sedang mengantre",
+  eyebrow: "Antrean Tiket",
+  positionLabel: "Posisimu",
+  title: "Kamu sedang mengantre",
   persistenceSub:
-    "Posisi Anda tersimpan dengan aman di server. Memuat ulang atau menutup halaman tidak akan menghapus antrean Anda.",
-  aheadLabel: "Orang di depan Anda",
-  etaLabel: "Perkiraan waktu tunggu",
-  admitTitle: "Giliran Anda!",
-  admitSub: "Menyiapkan halaman pemilihan tiket…",
+    "Posisimu tersimpan. Kalau halaman tertutup, buka lagi tautan antrean ini untuk melanjutkan.",
+  aheadLabel: "Orang di depanmu",
+  etaLabel: "Perkiraan waktu",
+  admitTitle: "Giliranmu tiba!",
+  admitSub: "Menyiapkan pilihan tiket…",
   leave: "Keluar dari Antrean",
-  noQueueTitle: "Tidak Ada Antrean Aktif",
-  noQueueSub: "Anda belum bergabung ke antrean event mana pun.",
-  errorTitle: "Antrean Gagal Dimuat",
-  errorSub: "Terjadi kendala. Silakan coba lagi.",
-  loadingSub: "Menghubungkan…",
+  noQueueTitle: "Belum ada antrean",
+  noQueueSub: "Kamu belum bergabung ke antrean acara ini.",
+  errorTitle: "Antrean belum bisa dibuka",
+  errorSub: "Ada kendala saat memuat antrean. Coba lagi sebentar.",
+  loadingSub: "Memuat antrean…",
   footnote:
-    "Antrean dilayani sesuai urutan kedatangan. Token antrean diterbitkan dan divalidasi server. Pembaruan mengikuti jadwal dari server.",
+    "Antrean berjalan sesuai urutan bergabung. Posisi diperbarui otomatis.",
 
   //  info text
   infoText:
-    "Jangan tutup halaman ini. Posisi antrean diperbarui otomatis. Jangan muat ulang atau tinggalkan halaman agar posisi Anda tetap terjaga.",
+    "Tetap di halaman ini. Kami akan memperbarui posisi antrean secara otomatis.",
 
   //  warning messages
-  backgroundWarningTitle: "Halaman di Latar Belakang",
+  backgroundWarningTitle: "Kamu sedang di halaman lain",
   backgroundWarningText:
-    "Posisi antrean Anda tetap tersimpan. Biarkan halaman ini aktif agar perpindahan berjalan lancar saat giliran tiba.",
-  longWaitWarningTitle: "Antrean Diperkirakan Lama",
+    "Posisimu tetap tersimpan. Kembali ke halaman antrean supaya tidak melewatkan giliran.",
+  longWaitWarningTitle: "Antrean masih panjang",
   longWaitWarningText:
-    "Waktu tunggu dapat berubah. Biarkan halaman ini terbuka; kami akan memberi tahu saat giliran Anda hampir tiba.",
-  turnExpiryTitle: "Giliran Anda Berakhir Dalam",
+    "Waktu tunggu bisa berubah. Kami akan memperbarui perkiraannya di sini.",
+  turnExpiryTitle: "Waktu giliranmu tersisa",
 
   //  redirect countdown
-  redirectTitle: "Giliran Anda!",
-  redirectText: "Membuka halaman pemilihan tiket…",
+  redirectTitle: "Giliranmu tiba!",
+  redirectText: "Membuka pilihan tiket…",
 
   //  modal
-  leaveModalTitle: "Keluar dari Antrean?",
+  leaveModalTitle: "Keluar dari antrean?",
   leaveModalText:
-    "Jika Anda keluar sekarang, posisi antrean akan hilang dan Anda harus bergabung kembali dari belakang.",
-  stayInQueue: "Tetap Mengantre",
-  leaveQueue: "Keluar dari Antrean",
+    "Kalau keluar sekarang, posisimu akan hilang dan kamu harus mengantre lagi dari awal.",
+  stayInQueue: "Tetap di antrean",
+  leaveQueue: "Keluar dari antrean",
 
   //  error states
   soldOutTitle: "Tiket Habis",
-  soldOutText: "Maaf, semua tiket event ini habis terjual saat Anda mengantre.",
-  saleEndedTitle: "Penjualan Berakhir",
-  saleEndedText: "Masa penjualan tiket event ini telah berakhir.",
-  sessionExpiredTitle: "Sesi Kedaluwarsa",
+  soldOutText: "Maaf, tiketnya habis saat kamu mengantre.",
+  saleEndedTitle: "Penjualan tiket selesai",
+  saleEndedText: "Masa penjualan tiket acara ini sudah berakhir.",
+  sessionExpiredTitle: "Sesi antrean berakhir",
   sessionExpiredText:
-    "Sesi antrean Anda berakhir karena tidak aktif. Silakan bergabung kembali.",
-  turnExpiredTitle: "Giliran Berakhir",
+    "Sesi antreanmu berakhir. Kamu bisa bergabung lagi dari halaman acara.",
+  turnExpiredTitle: "Waktu giliran habis",
   turnExpiredText:
-    "Anda belum memilih tiket tepat waktu. Giliran diberikan kepada orang berikutnya dalam antrean.",
+    "Waktu untuk memilih tiket sudah habis. Kamu bisa bergabung lagi dari awal.",
 
   //  buttons
-  browseEvents: "Jelajahi Event Lain",
-  rejoinQueue: "Bergabung Kembali",
+  browseEvents: "Lihat acara lain",
+  rejoinQueue: "Antre lagi",
 
   //  network status
-  connectionLost: "Koneksi terputus. Posisi antrean Anda tetap tersimpan…",
-  reconnected: "Koneksi tersambung kembali. Memperbarui antrean…",
+  connectionLost: "Koneksi terputus. Posisimu tetap tersimpan…",
+  reconnected: "Koneksi tersambung lagi. Memperbarui antrean…",
 } as const;

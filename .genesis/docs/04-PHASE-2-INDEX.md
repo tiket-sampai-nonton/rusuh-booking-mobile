@@ -5,6 +5,8 @@
 > **Layout (2026-10-29):** the ENTIRE implementation-ready documentation set lives in **`.genesis/docs/`** — one folder, one source of truth. `.genesis/requirement/` holds only the raw requirement PDF; the stale sibling `assessment/tickets/` tree is not used.
 > **STOP at Gate H2** — human reviews this set.
 
+> **Current as-built status:** this file records the Phase 2 review state from 2026-10-29. For current code-to-doc alignment and live BE verification, see [`AS-BUILT-ALIGNMENT-2026-11-12.md`](AS-BUILT-ALIGNMENT-2026-11-12.md); the original gate decisions and supplied API snapshots remain preserved as historical records.
+
 ## Document manifest
 
 | Doc | Status | Location |

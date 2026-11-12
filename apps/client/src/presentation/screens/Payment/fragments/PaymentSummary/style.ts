@@ -1,13 +1,13 @@
 import { StyleSheet } from "react-native";
 
-import { designColors, designBorder } from "@presentation/theme";
+import { designColors, designBorders } from "@presentation/theme";
 
 export const paymentSummaryStyles = StyleSheet.create({
   holdBanner: {
     backgroundColor: designColors.ink,
   },
   container: {
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     backgroundColor: designColors.ground,
   },
@@ -15,7 +15,7 @@ export const paymentSummaryStyles = StyleSheet.create({
   heading: {
     color: designColors.gray,
     letterSpacing: 2,
-    borderBottomWidth: designBorder.base,
+    borderBottomWidth: designBorders.standard,
     borderBottomColor: designColors.ink,
   },
   bookingId: {

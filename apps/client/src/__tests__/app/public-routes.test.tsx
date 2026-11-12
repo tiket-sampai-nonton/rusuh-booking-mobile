@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react-native";
+import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { Animated } from "react-native";
 
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
@@ -9,7 +9,15 @@ import { renderWithProviders } from "@shared/test-fixtures/render-with-providers
 // stub both.
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => ({ eventId: "evt-1" }),
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
+  __mockRouter: {
+    push: jest.fn(),
+    replace: jest.fn(),
+    navigate: jest.fn(),
+    canGoBack: jest.fn(() => true),
+    back: jest.fn(),
+  },
+  useRouter: () => jest.requireMock("expo-router").__mockRouter,
+  useFocusEffect: jest.fn(),
 }));
 
 jest.mock("react-native-reanimated", () => {
@@ -18,9 +26,9 @@ jest.mock("react-native-reanimated", () => {
 });
 
 // eslint-disable-next-line import/first
-import HomeScreen from "../../app/(public)/index";
+import HomeScreen from "../../app/(public)/(tabs)/index";
 // eslint-disable-next-line import/first
-import BrowseScreen from "../../app/(public)/browse";
+import BrowseScreen from "../../app/(public)/(tabs)/browse";
 // eslint-disable-next-line import/first
 import HistoryScreen from "../../app/(public)/history";
 // eslint-disable-next-line import/first
@@ -29,6 +37,8 @@ import MyTicketsScreen from "../../app/(public)/my-tickets";
 import ProfileScreen from "../../app/(public)/profile";
 // eslint-disable-next-line import/first
 import EventDetailScreen from "../../app/(public)/events/[eventId]";
+// eslint-disable-next-line import/first
+import PrivacyScreen from "../../app/(public)/privacy";
 
 const completedAnimation = {
   start: (callback?: (result: { finished: boolean }) => void) =>
@@ -73,6 +83,7 @@ describe("(public) routes", () => {
     expect(typeof MyTicketsScreen).toBe("function");
     expect(typeof ProfileScreen).toBe("function");
     expect(typeof EventDetailScreen).toBe("function");
+    expect(typeof PrivacyScreen).toBe("function");
   });
 
   it("renders the Home screen (RBT-030: real event catalog, not a placeholder)", async () => {
@@ -80,7 +91,9 @@ describe("(public) routes", () => {
     // section header proves the real screen mounts.
     // Native and web share the same Indonesian Home section title.
     renderWithProviders(<HomeScreen />);
-    await waitFor(() => expect(screen.getByText("Daftar Event")).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByText("Jelajahi Event")).toBeTruthy(),
+    );
     expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
   });
 
@@ -112,5 +125,25 @@ describe("(public) routes", () => {
         screen.getAllByText("Rusuh Fest 2026").length,
       ).toBeGreaterThanOrEqual(1),
     );
+  });
+
+  it("renders the privacy policy as a public route", () => {
+    renderWithProviders(<PrivacyScreen />);
+    expect(screen.getByText("Kebijakan Privasi")).toBeTruthy();
+    expect(screen.getByText("Informasi yang diproses")).toBeTruthy();
+  });
+
+  it("returns to Home when privacy is opened with no navigation history", () => {
+    const routerMock = jest.requireMock("expo-router").__mockRouter as {
+      canGoBack: jest.Mock;
+      replace: jest.Mock;
+    };
+    routerMock.canGoBack.mockReturnValue(false);
+    renderWithProviders(<PrivacyScreen />);
+
+    fireEvent.press(screen.getByLabelText("Kembali"));
+
+    expect(routerMock.replace).toHaveBeenCalledWith("/");
+    routerMock.canGoBack.mockReturnValue(true);
   });
 });

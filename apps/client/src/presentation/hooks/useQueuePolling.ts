@@ -7,8 +7,9 @@
  * `setInterval`, so there is no request storm and no leaked timer (NFR-05/06).
  * The cadence is the SERVER's `nextPollAfterMs` turned into a wait by the pure
  * `pollIntervalMs` rule (RBT-042) with an anti-storm floor + additive jitter.
- * Polling STOPS (returns `false`) the moment the entry is terminal or admitted
- * — a settled entry never polls again.
+ * Polling STOPS (returns `false`) when the entry is terminal, admitted, or
+ * already claimed. A claimed token is one-use and cannot authorize another
+ * checkout, so a waiting-room route must not keep polling it indefinitely.
  *
  * TanStack Query is confined to this hook (the D3 swap seam). The hook reaches
  * the backend ONLY through the `ObserveQueue` use case → the frozen
@@ -17,7 +18,7 @@
  * §4.3). Admission/claim is a SEPARATE ticket (RBT-044) and the waiting SCREEN
  * is RBT-043 — neither is built here.
  */
-import { useQuery, type Query } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type Query } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ObserveQueue } from "@application/queue/observe-queue.use-case";
@@ -38,6 +39,8 @@ export interface QueuePollingView {
   /** Event-level throughput from the public server status document. */
   readonly admissionRatePerMin?: number;
   readonly isLoading: boolean;
+  /** True only after a successful status fetch for this mount. Cached status is not authoritative. */
+  readonly isStatusAuthoritative: boolean;
   readonly isError: boolean;
   /** A poll failed after retries; cached position remains renderable. */
   readonly isConnectionLost: boolean;
@@ -45,8 +48,8 @@ export interface QueuePollingView {
   readonly isReconnected: boolean;
   readonly error: Error | null;
   /**
-   * True once the entry has settled (terminal OR admitted) — the poller has
-   * stopped. The screen (RBT-043) / claim (RBT-044) react to this.
+   * True once the entry has settled (terminal, admitted, or claimed) — the
+   * poller has stopped. The screen (RBT-043) / claim (RBT-044) react to this.
    */
   readonly isSettled: boolean;
   /** Leave the waiting room (abandons the slot). */
@@ -91,7 +94,7 @@ export function isRecoverableConnectionError(error: Error | null): boolean {
 /**
  * The adaptive `refetchInterval` decision, factored out of the hook so it is
  * unit-testable WITHOUT timers: return `false` (stop polling) when there is a
- * settled entry (terminal OR admitted); otherwise the jittered adaptive wait
+ * settled entry (terminal, admitted, or claimed); otherwise the jittered wait
  * from the pure rule. With no data yet, poll at the floor to get the first real
  * `nextPollAfterMs`.
  *
@@ -103,7 +106,12 @@ export function computeRefetchInterval(
   reducedMotion = false,
   random?: () => number,
 ): number | false {
-  if (entry && (isTerminal(entry.status) || isAdmitted(entry.status))) {
+  if (
+    entry &&
+    (isTerminal(entry.status) ||
+      isAdmitted(entry.status) ||
+      entry.status === "CLAIMED")
+  ) {
     return false;
   }
   return pollIntervalMs(entry ?? {}, reducedMotion, random);
@@ -119,8 +127,10 @@ export function useQueuePolling(
   queueId: string,
   reducedMotion = false,
   eventId?: string,
+  isScreenFocused = true,
 ): QueuePollingView {
-  const { queueRepository, pushSubscription } = useServices();
+  const { queueRepository, queueMembership, pushSubscription } = useServices();
+  const queryClient = useQueryClient();
   const hadConnectionError = useRef(false);
   const nextHeartbeatAt = useRef(0);
   const [isReconnected, setIsReconnected] = useState(false);
@@ -135,10 +145,22 @@ export function useQueuePolling(
     [queueRepository],
   );
 
+  const queryKey = ["queue", queueId, eventId] as const;
   const query = useQuery<QueuePollData, Error>({
-    queryKey: ["queue", queueId, eventId],
+    queryKey,
     queryFn: async () => {
-      const entry = await observe.execute(queueId, eventId);
+      const observedEntry = await observe.execute(queueId, eventId);
+      // Queue state is monotonic after a claim. A delayed read may briefly
+      // report ADMITTED while cancellation cleanup is being propagated; never
+      // downgrade the locally confirmed CLAIMED state and replay its one-use
+      // admission token. A one-use CLAIMED entry is no longer a waiting room;
+      // stop its poller and show the recovery state instead of waiting forever.
+      const cachedEntry =
+        queryClient.getQueryData<QueuePollData>(queryKey)?.entry;
+      const entry =
+        cachedEntry?.status === "CLAIMED" && observedEntry.status === "ADMITTED"
+          ? { ...observedEntry, status: "CLAIMED" as const }
+          : observedEntry;
       if (!eventId) return { entry };
 
       if (entry.status === "WAITING" && Date.now() >= nextHeartbeatAt.current) {
@@ -161,8 +183,8 @@ export function useQueuePolling(
         return { entry };
       }
     },
-    enabled: queueId.length > 0,
-    // The SINGLE adaptive poller. Stop on terminal/admitted; else the jittered
+    enabled: queueId.length > 0 && isScreenFocused,
+    // The SINGLE adaptive poller. Stop on terminal/admitted/claimed; else the jittered
     // server-honoured wait. TanStack cancels this interval on unmount.
     refetchInterval: (query: Query<QueuePollData, Error>) => {
       const interval = computeRefetchInterval(
@@ -178,6 +200,10 @@ export function useQueuePolling(
     // Web can immediately resume after an `online` event. Native keeps the
     // server-paced interval active and catches up on the next successful poll.
     refetchOnReconnect: true,
+    // A cached ADMITTED status may already have been claimed and consumed by
+    // Booking. Reconcile with the server whenever this screen remounts before
+    // allowing the one-shot claim side effect to run again.
+    refetchOnMount: "always",
   });
 
   const isConnectionLost =
@@ -203,12 +229,19 @@ export function useQueuePolling(
   const entry = query.data?.entry;
   const isSettled =
     entry !== undefined &&
-    (isTerminal(entry.status) || isAdmitted(entry.status));
+    (isTerminal(entry.status) ||
+      isAdmitted(entry.status) ||
+      entry.status === "CLAIMED");
 
   return {
     entry,
     admissionRatePerMin: query.data?.admissionRatePerMin,
     isLoading: query.isLoading,
+    isStatusAuthoritative:
+      query.isFetchedAfterMount &&
+      query.isSuccess &&
+      !query.isRefetchError &&
+      !query.isFetching,
     isError: query.isError,
     isConnectionLost,
     isReconnected,
@@ -216,6 +249,7 @@ export function useQueuePolling(
     isSettled,
     leave: async () => {
       await leaveQueue.execute(queueId, eventId);
+      await queueMembership.clear();
       if (eventId) await pushSubscription.remove(eventId).catch(() => {});
     },
     refetch: query.refetch,

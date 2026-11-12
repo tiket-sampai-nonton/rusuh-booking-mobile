@@ -6,14 +6,14 @@
  * PaymentRepository, records the selected method + attemptId in the session
  * store, then HANDS OFF to SNAP using the attempt's `redirectUrl`:
  *   • web   → navigate the browser to the SNAP page (redirectUrl)
- *   • native→ open the SNAP page in the in-app browser / WebView (Linking)
+ *   • native→ open the validated SNAP URL in the in-app WebView
  * The FE never marks PAID from here — the callback is verified server-side
  * (RBT-063). TanStack is confined to this hook (D3); the platform open is
  * injected so it is deterministic in tests.
  */
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { Linking, Platform } from "react-native";
+import { Platform } from "react-native";
 
 import { CreatePaymentAttempt } from "@application/payment/create-payment-attempt.use-case";
 import type {
@@ -22,6 +22,10 @@ import type {
 } from "@domain/repositories/payment.repository";
 import { useServices } from "@providers/service-context";
 import { useSessionStore } from "@presentation/stores/session-store";
+import {
+  setPaymentHandoff,
+  type PaymentReturnUrls,
+} from "@presentation/stores/payment-handoff";
 
 export interface CreateAttemptInput {
   readonly bookingId: string;
@@ -30,12 +34,13 @@ export interface CreateAttemptInput {
 
 /**
  * Platform-aware SNAP handoff. Default: web assigns `window.location`, native
- * opens the URL via `Linking`. Overridable for tests. Returns a promise so a
- * caller can await the open.
+ * routes by booking ID on native. The SNAP URL is kept in memory and never put
+ * in route params. Overridable for tests.
  */
-export async function openSnapHandoff(
+export function openSnapHandoff(
   url: string,
   bookingId?: string,
+  returns?: PaymentReturnUrls,
 ): Promise<void> {
   // An in-app relative path (the mock SNAP simulator route `/snap/...`, RBT-065)
   // is navigated with the router, NOT window.location / Linking. The real BE
@@ -45,7 +50,7 @@ export async function openSnapHandoff(
   if (url.startsWith("/")) {
     const { router } = require("expo-router") as typeof import("expo-router");
     router.push(url as import("expo-router").Href);
-    return;
+    return Promise.resolve();
   }
   if (Platform.OS === "web") {
     // Full-page redirect to the external SNAP gateway (D10.2).
@@ -54,21 +59,25 @@ export async function openSnapHandoff(
         globalThis as { location: { assign: (u: string) => void } }
       ).location.assign(url);
     }
-    return;
+    return Promise.resolve();
   }
-  // Native: open the external SNAP page in the in-app browser / WebView.
+  // Native: validate the backend-issued gateway URL and keep it in memory.
   if (bookingId) {
+    setPaymentHandoff(bookingId, url, returns);
     const { router } = require("expo-router") as typeof import("expo-router");
     router.push(
       `/payment-webview/${encodeURIComponent(bookingId)}` as import("expo-router").Href,
     );
-    return;
   }
-  await Linking.openURL(url);
+  return Promise.resolve();
 }
 
 export function usePayment(
-  handoff: (url: string, bookingId?: string) => Promise<void> = openSnapHandoff,
+  handoff: (
+    url: string,
+    bookingId?: string,
+    returns?: PaymentReturnUrls,
+  ) => Promise<void> = openSnapHandoff,
 ): {
   readonly createAttempt: UseMutationResult<
     PaymentAttempt,
@@ -89,14 +98,14 @@ export function usePayment(
     onSuccess: async (attempt, { method }) => {
       setPaymentMethod(method, attempt.attemptId);
       if (attempt.redirectUrl)
-        await handoff(attempt.redirectUrl, attempt.bookingId);
+        await handoff(attempt.redirectUrl, attempt.bookingId, attempt);
     },
   });
 
   // "Kembali ke SNAP" — re-open the handoff for an in-flight attempt (AC2).
   const resumeHandoff = async (attempt: PaymentAttempt): Promise<void> => {
     if (attempt.redirectUrl)
-      await handoff(attempt.redirectUrl, attempt.bookingId);
+      await handoff(attempt.redirectUrl, attempt.bookingId, attempt);
   };
 
   return { createAttempt, resumeHandoff };

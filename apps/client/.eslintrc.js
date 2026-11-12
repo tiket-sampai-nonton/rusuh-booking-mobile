@@ -72,10 +72,26 @@ module.exports = {
           "error",
           {
             paths: [
-              { name: "react", message: "domain/application must be framework-free (RBT-004 AC2)." },
-              { name: "react-dom", message: "domain/application must be framework-free (RBT-004 AC2)." },
-              { name: "react-native", message: "domain/application must be framework-free (RBT-004 AC2)." },
-              { name: "react-native-web", message: "domain/application must be framework-free (RBT-004 AC2)." },
+              {
+                name: "react",
+                message:
+                  "domain/application must be framework-free (RBT-004 AC2).",
+              },
+              {
+                name: "react-dom",
+                message:
+                  "domain/application must be framework-free (RBT-004 AC2).",
+              },
+              {
+                name: "react-native",
+                message:
+                  "domain/application must be framework-free (RBT-004 AC2).",
+              },
+              {
+                name: "react-native-web",
+                message:
+                  "domain/application must be framework-free (RBT-004 AC2).",
+              },
             ],
             patterns: [
               {
@@ -93,6 +109,27 @@ module.exports = {
                 ],
                 message:
                   "domain/application must not import React Native / Expo / native / browser packages (RBT-004 AC2).",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    // ARCHITECTURE §2.2b: TanStack Query is confined to presentation hooks.
+    // Screens and components consume those hooks so server-state orchestration
+    // stays behind one presentation seam.
+    {
+      files: ["src/presentation/**/*.{ts,tsx}"],
+      excludedFiles: ["src/presentation/hooks/**/*.{ts,tsx}"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "@tanstack/react-query",
+                message:
+                  "Use a presentation hook for TanStack Query bindings (ARCHITECTURE §2.2b).",
               },
             ],
           },

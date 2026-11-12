@@ -1,41 +1,79 @@
 /**
- * RBT-003 — Raw design-token VALUES (prototype V5).
+ * Shared color and layout values mirrored by `apps/client/tailwind.config.js`.
  *
  * These mirror `apps/client/tailwind.config.js` exactly. NativeWind cannot style
  * raw drawing surfaces (react-native-svg, Canvas, QR code `color`/`backgroundColor`,
  * Reanimated easing), so those call sites import the value from here instead of a
  * className. `tailwind.config.js` stays the source of truth; this file mirrors it.
  *
- * Every DERIVED (non-prototype) value is marked `DERIVED (flag)`.
+ * Tailwind theme changes are JavaScript presentation changes. The fingerprint
+ * excludes `tailwind.config.js`; native project configuration remains included.
  */
 
-/** Brand hues — prototype `--red` / `--red-deep` / `--ember`. */
+const tailwind = require("../../../tailwind.config.js");
+const colors = tailwind.theme.extend.colors;
+const shadows = tailwind.theme.extend.boxShadow;
+
+/** Brand hues derived from Tailwind's canonical palette. */
 export const brand = {
-  red: "#EC1C24", //      --red
-  redDeep: "#a8111b", //  --red-deep
-  ember: "#ff5a2d", //    --ember
+  primary: colors.brand.DEFAULT,
+  deep: colors.brand.deep,
+  ember: colors.brand.ember,
 } as const;
 
-/** Status hues — prototype `--ok` / `--warn` (+ dark-context from waiting.html). */
+/** Logo-only colors stay fixed when the app's brand palette changes. */
+export const brandMark = {
+  primary: colors.brandMark.primary,
+  deep: colors.brandMark.deep,
+  white: colors.brandMark.white,
+  stroke: colors.brandMark.stroke,
+} as const;
+
+/** Status hues mirrored from Tailwind's semantic tokens. */
 export const status = {
-  ok: "#17a34a", //       --ok
-  okDark: "#4ade80", //   waiting.html dark --ok
-  warn: "#e8830c", //     --warn
-  warnDark: "#f5b301", // waiting.html --amber
-  error: "#EC1C24", //    DERIVED (flag): no --err token; reuses --red
-  errorDark: "#ff6a4c", // DERIVED (flag): lightened red for dark surfaces
+  ok: colors.ok.DEFAULT,
+  okDark: colors.ok.dark,
+  warn: colors.warn.DEFAULT,
+  warnDark: colors.warn.dark,
+  error: colors.error.DEFAULT,
+  errorDark: colors.error.dark,
 } as const;
 
-/** Neutral / surface hues — prototype `--ink*` / `--paper` / `--card` / `--muted` / `--line`. */
+/** Neutral and field surfaces mirrored from Tailwind's semantic tokens. */
 export const neutral = {
-  ink: "#0a0a0c", //      --ink
-  ink2: "#121217", //     --ink-2
-  paper: "#fbfbfd", //    --paper
-  card: "#ffffff", //     --card
-  muted: "#6b6b76", //    --muted
-  line: "rgba(10,10,12,0.08)", // --line
-  mutedDark: "rgba(255,255,255,0.62)", // waiting.html dark --muted
-  lineDark: "rgba(255,255,255,0.12)", // DERIVED (flag)
+  ink: colors.ink.DEFAULT,
+  ink2: colors.ink[2],
+  paper: colors.paper,
+  card: colors.card.DEFAULT,
+  darkBackground: colors.background.dark,
+  darkCard: colors.card.dark,
+  darkForeground: colors.foreground.dark,
+  overlay: colors.v2.overlay,
+  muted: colors.muted.DEFAULT,
+  line: colors.line.DEFAULT,
+  mutedDark: colors.muted.dark,
+  lineDark: colors.line.dark,
+  field: colors.v2.field,
+  transparent: colors.transparent,
+} as const;
+
+/** Waiting-room status surfaces mirrored from Tailwind's `v2` tokens. */
+export const zone = {
+  ok: {
+    bg: colors.v2["zone-ok"],
+    border: colors.v2["zone-ok-border"],
+    text: colors.v2["zone-ok-text"],
+  },
+  warn: {
+    bg: colors.v2["zone-warn"],
+    border: colors.v2["zone-warn-border"],
+    text: colors.v2["zone-warn-text"],
+  },
+  bad: {
+    bg: colors.v2["zone-bad"],
+    border: colors.v2["zone-bad-border"],
+    text: colors.v2["zone-bad-text"],
+  },
 } as const;
 
 /** Border radii in px — prototype `border-radius` values. */
@@ -117,17 +155,19 @@ export const motion = {
 
 /** Elevation shadows — prototype `box-shadow` values (CSS strings). */
 export const shadow = {
-  brand: "0 4px 12px -2px rgba(236,28,36,0.5)",
-  button: "0 14px 40px -12px rgba(0,0,0,0.5)",
-  filter: "0 12px 30px -24px rgba(10,10,12,0.5)",
-  ok: "0 16px 40px -14px rgba(23,163,74,0.7)",
+  brand: shadows.brand,
+  button: shadows.button,
+  filter: shadows.filter,
+  ok: shadows.ok,
 } as const;
 
 /** The complete raw token bag — single object for ergonomic import. */
 export const tokens = {
   brand,
+  brandMark,
   status,
   neutral,
+  zone,
   radius,
   spacing,
   fontSize,

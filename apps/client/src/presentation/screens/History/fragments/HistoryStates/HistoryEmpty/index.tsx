@@ -10,7 +10,7 @@ export function HistoryEmpty() {
   const router = useRouter();
 
   const handleBrowse = () => {
-    router.push("/browse" as Href);
+    router.navigate("/browse" as Href);
   };
 
   return (

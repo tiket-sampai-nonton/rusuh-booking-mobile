@@ -5,6 +5,8 @@
 > **Gate model: 6 human gates** — H1 Grooming → H2 Docs → H3 Tasks → H4 Skills/Rules → H5 Go/No-Go → H6 Project-Setup.
 > **Authoritative order when docs disagree:** `03-GROOMING-DECISIONS.md` → OpenAPI contracts → `docs/FE-BE-align-contract.md` → `docs/FE-Flow-Diagrams.md` → prototype V5.
 
+> **Current code/docs audit (2026-11-12):** see [`AS-BUILT-ALIGNMENT-2026-11-12.md`](AS-BUILT-ALIGNMENT-2026-11-12.md) for the latest implementation status, live BE smoke evidence, unresolved device verification, and the disposition of every file under this documentation set. Phase/gate reports retain their original dates as historical records.
+
 ---
 
 ## Process trail (phase order)
@@ -21,7 +23,7 @@
 | 08 | `08-RULES.md` | 4 — Project rules (MUST/NEVER/ASK) | **H4** | ✅ PASSED |
 | — | `../../AGENTS.md` (repo root) | 4 — Agent manifest | **H4** | ✅ PASSED |
 | 09 | `09-IMPLEMENTATION-READINESS.md` | 5 — Readiness check | **H5** | ✅ GO (2026-10-30) |
-| 10 | `10-PROJECT-SETUP.md` | 5.5 — Project setup (repo·CI·Sonar·husky·secrets·scaffold) | **H6** | ⏳ pending (RBT-001/005) |
+| 10 | `10-PROJECT-SETUP.md` | 5.5 — Project setup (repo·CI·Sonar·husky·secrets·scaffold) | **H6** | Historical gate checklist; see current `PIPELINE.md` and as-built audit |
 
 ---
 
@@ -40,6 +42,7 @@
 | `docs/SECURITY.md` | generated |
 | `docs/OBSERVABILITY.md` | generated |
 | `docs/TESTING-STRATEGY.md` | generated |
+| `docs/AS-BUILT-ALIGNMENT-2026-11-12.md` | current code/API contract reconciliation and full document-set audit |
 
 ---
 
@@ -52,7 +55,9 @@
 
 ---
 
-## Key open dependencies (cross-team, non-blocking — FE mocks behind the real port)
+## Original Phase 1 open dependencies (historical snapshot)
+
+See the 2026-11-12 as-built audit for current status. The original items are retained here as grooming history.
 
 | ID | Blocks |
 |----|--------|

@@ -1,5 +1,8 @@
+import tailwind from "../../../../tailwind.config.js";
+
 import {
   brand,
+  brandMark,
   fontFamily,
   fontSize,
   fontWeight,
@@ -10,35 +13,86 @@ import {
   spacing,
   status,
   tokens,
+  zone,
 } from "../../../presentation/theme/tokens";
 
+const tailwindBrand = (
+  tailwind as {
+    theme?: {
+      extend?: { colors?: { brand?: Record<string, string> } };
+    };
+  }
+).theme?.extend?.colors?.brand;
+
 describe("RBT-003 raw tokens", () => {
-  it("exposes the exact prototype brand hues", () => {
-    expect(brand.red).toBe("#EC1C24");
-    expect(brand.redDeep).toBe("#a8111b");
-    expect(brand.ember).toBe("#ff5a2d");
+  it("exposes the black, white, and red brand palette", () => {
+    expect(brand.primary).toBe("#EC1C24");
+    expect(brand.deep).toBe("#A8111B");
+    expect(brand.ember).toBe("#FF5A2D");
+  });
+
+  it("keeps the existing ticket mark colors unchanged", () => {
+    expect(brandMark).toEqual({
+      primary: "#EC1C24",
+      deep: "#A8111B",
+      white: "#FFFFFF",
+      stroke: "#F3F0F0",
+    });
+  });
+
+  it("mirrors the Tailwind brand palette as the canonical token source", () => {
+    if (!tailwindBrand) {
+      throw new Error("Tailwind brand color tokens are unavailable");
+    }
+
+    expect(brand.primary).toBe(tailwindBrand.DEFAULT);
+    expect(brand.deep).toBe(tailwindBrand.deep);
+    expect(brand.ember).toBe(tailwindBrand.ember);
   });
 
   it("exposes light + dark status hues", () => {
     expect(status).toMatchObject({
-      ok: "#17a34a",
-      okDark: "#4ade80",
-      warn: "#e8830c",
-      warnDark: "#f5b301",
+      ok: "#00AA00",
+      okDark: "#4ADE80",
+      warn: "#FF6600",
+      warnDark: "#F5B301",
       error: "#EC1C24",
-      errorDark: "#ff6a4c",
+      errorDark: "#FF6A4C",
     });
   });
 
   it("exposes prototype neutral/surface hues", () => {
-    expect(neutral.ink).toBe("#0a0a0c");
+    expect(neutral.ink).toBe("#000000");
     expect(neutral.ink2).toBe("#121217");
-    expect(neutral.paper).toBe("#fbfbfd");
-    expect(neutral.card).toBe("#ffffff");
-    expect(neutral.muted).toBe("#6b6b76");
-    expect(neutral.line).toBe("rgba(10,10,12,0.08)");
+    expect(neutral.paper).toBe("#FFFFFF");
+    expect(neutral.card).toBe("#FFFFFF");
+    expect(neutral.darkBackground).toBe("#0A0A0C");
+    expect(neutral.darkCard).toBe("#121217");
+    expect(neutral.darkForeground).toBe("#FFFFFF");
+    expect(neutral.overlay).toBe("#0A0A0C");
+    expect(neutral.muted).toBe("#666666");
+    expect(neutral.line).toBe("rgba(0,0,0,0.14)");
     expect(neutral.mutedDark).toBe("rgba(255,255,255,0.62)");
-    expect(neutral.lineDark).toBe("rgba(255,255,255,0.12)");
+    expect(neutral.lineDark).toBe("rgba(255,255,255,0.18)");
+    expect(neutral.field).toBe("#F5F5F5");
+  });
+
+  it("mirrors waiting-room zone colors from Tailwind", () => {
+    expect(zone.ok).toEqual({
+      bg: "#E8F5E9",
+      border: "#00AA00",
+      text: "#1B5E20",
+    });
+    expect(zone.warn).toEqual({
+      bg: "#FFF3E0",
+      border: "#FF6600",
+      text: "#E65100",
+    });
+    expect(zone.bad).toEqual({
+      bg: "#FFEBEE",
+      border: "#EC1C24",
+      text: "#B71C1C",
+    });
   });
 
   it("radius set has every prototype step and the pill", () => {
@@ -94,17 +148,19 @@ describe("RBT-003 raw tokens", () => {
   });
 
   it("shadow strings are present for the four prototype elevations", () => {
-    expect(shadow.brand).toContain("rgba(236,28,36,0.5)");
-    expect(shadow.button).toContain("rgba(0,0,0,0.5)");
-    expect(shadow.filter).toContain("rgba(10,10,12,0.5)");
-    expect(shadow.ok).toContain("rgba(23,163,74,0.7)");
+    expect(shadow.brand).toContain("rgba(0,0,0,0.28)");
+    expect(shadow.button).toContain("rgba(0,0,0,0.42)");
+    expect(shadow.filter).toContain("rgba(0,0,0,0.5)");
+    expect(shadow.ok).toContain("rgba(0,0,0,0.36)");
   });
 
   it("the tokens bag re-exports every group by reference", () => {
     expect(tokens).toEqual({
       brand,
+      brandMark,
       status,
       neutral,
+      zone,
       radius,
       spacing,
       fontSize,
@@ -114,6 +170,8 @@ describe("RBT-003 raw tokens", () => {
       shadow,
     });
     expect(tokens.brand).toBe(brand);
+    expect(tokens.brandMark).toBe(brandMark);
     expect(tokens.motion).toBe(motion);
+    expect(tokens.zone).toBe(zone);
   });
 });

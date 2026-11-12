@@ -1,14 +1,8 @@
 /**
- * RBT-096 —  "Brutalist Mono" Design Tokens (Re-implementation)
- *
- * Single source of truth: `.genesis/prototype/v2/MASTER-SPEC.md` + `design-tokens.json`
- *
- * RULES (MASTER-SPEC §1 + §7):
- * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000, #00aa00, #ff6600
- * - Borders: 2px solid black (3px for waiting room ONLY)
- * - Shadows: hard offset, NO blur (e.g. 4px 4px 0 #000)
- * - Fonts: Plus Jakarta Sans across the app
+ * Event design tokens. Color values mirror the canonical Tailwind palette
+ * through the shared runtime tokens in `tokens.ts`.
  */
+import { brand, neutral, status, zone } from "./tokens";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // COLORS
@@ -16,27 +10,31 @@
 
 export const designColors = {
   // Core palette (semantic naming)
-  ground: "#ffffff", // Page background - WHITE ONLY
-  ink: "#000000", // Primary text/borders - BLACK ONLY
-  inkMuted: "#666666", // Secondary text - THIS GRAY ONLY
-  field: "#f5f5f5", // Input backgrounds, subtle surfaces
+  ground: neutral.paper,
+  card: neutral.card,
+  transparent: neutral.transparent,
+  ink: neutral.ink,
+  overlay: neutral.overlay,
+  inkMuted: neutral.muted,
+  field: neutral.field,
 
   // Functional colors
-  danger: "#ff0000", // Errors, warnings, urgent states - PURE RED
-  success: "#00aa00", // Success states, confirmations
-  warning: "#ff6600", // Warnings, caution states
+  danger: status.error,
+  success: status.ok,
+  warning: status.warn,
 
   // Legacy aliases (for backwards compatibility in components)
-  black: "#000000",
-  white: "#ffffff",
-  gray: "#666666", // Legacy alias - uses inkMuted per Design Palette Guide (NO arbitrary grays)
-  red: "#ff0000",
-  green: "#00aa00",
-  accent: "#000000", // CTAs same as ink for brutalist
+  black: neutral.ink,
+  white: neutral.paper,
+  gray: neutral.muted,
+  ember: brand.ember,
+  accentDeep: brand.deep,
+  green: status.ok,
+  accent: brand.primary,
 
   // Additional aliases for backwards compatibility
-  muted: "#666666", // Alias for inkMuted
-  warn: "#ff6600", // Alias for warning
+  muted: neutral.muted,
+  warn: status.warn,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -126,18 +124,18 @@ export const designBorders = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const designShadows = {
-  sm: { x: 2, y: 2, blur: 0, color: "#000000" },
-  md: { x: 4, y: 4, blur: 0, color: "#000000" },
-  lg: { x: 6, y: 6, blur: 0, color: "#000000" },
-  xl: { x: 8, y: 8, blur: 0, color: "#000000" },
+  sm: { x: 2, y: 2, blur: 0, color: neutral.ink },
+  md: { x: 4, y: 4, blur: 0, color: neutral.ink },
+  lg: { x: 6, y: 6, blur: 0, color: neutral.ink },
+  xl: { x: 8, y: 8, blur: 0, color: neutral.ink },
 } as const;
 
 // Shadow as CSS string helper
 export const designShadowCSS = {
-  sm: "2px 2px 0 #000000",
-  md: "4px 4px 0 #000000",
-  lg: "6px 6px 0 #000000",
-  xl: "8px 8px 0 #000000",
+  sm: `2px 2px 0 ${neutral.ink}`,
+  md: `4px 4px 0 ${neutral.ink}`,
+  lg: `6px 6px 0 ${neutral.ink}`,
+  xl: `8px 8px 0 ${neutral.ink}`,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -268,21 +266,9 @@ export const designModal = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const designZoneBanners = {
-  guaranteed: {
-    bg: "#e8f5e9",
-    border: "#2e7d32",
-    text: "#1b5e20",
-  },
-  possible: {
-    bg: "#fff3e0",
-    border: "#f57c00",
-    text: "#e65100",
-  },
-  notEnough: {
-    bg: "#ffebee",
-    border: "#c62828",
-    text: "#b71c1c",
-  },
+  guaranteed: zone.ok,
+  possible: zone.warn,
+  notEnough: zone.bad,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════

@@ -2,6 +2,7 @@ import { useRouter, type Href } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { BrandMark } from "@presentation/components/BrandMark";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import { headerInsetStyle, styles } from "../../style";
@@ -22,11 +23,9 @@ export function Header({ status = "MENUNGGU" }: { readonly status?: string }) {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Beranda Rusuh Tiket"
-        onPress={() => router.push("/" as Href)}
+        onPress={() => router.replace("/" as Href)}
       >
-        <Text style={[styles.logo, isDesktop && styles.logoDesktop]}>
-          RUSUH TIKET
-        </Text>
+        <BrandMark size={isDesktop ? 32 : 28} />
       </Pressable>
       <Text style={[styles.headerMeta, isDesktop && styles.headerMetaDesktop]}>
         {isDesktop ? `RUANG TUNGGU / STATUS ${status}` : "ANTREAN / 01"}

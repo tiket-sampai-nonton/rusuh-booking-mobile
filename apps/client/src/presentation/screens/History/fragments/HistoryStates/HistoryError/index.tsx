@@ -1,12 +1,20 @@
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import { historyStateStyles, historyStyles } from "../../../style";
+import { apiErrorMessage } from "@presentation/utils/api-error-message";
+import { designColors } from "@presentation/theme";
 
 export interface HistoryErrorProps {
-  readonly message?: string;
+  readonly error?: unknown;
+  readonly onRetry: () => void;
+  readonly isRetrying: boolean;
 }
 
-export function HistoryError({ message }: HistoryErrorProps) {
+export function HistoryError({
+  error,
+  onRetry,
+  isRetrying,
+}: HistoryErrorProps) {
   return (
     <View style={[historyStyles.main, historyStateStyles.main]}>
       <View
@@ -16,8 +24,28 @@ export function HistoryError({ message }: HistoryErrorProps) {
       >
         <Text style={historyStateStyles.errorTitle}>Gagal Memuat Event</Text>
         <Text style={historyStateStyles.errorText}>
-          {message || "Terjadi kesalahan. Silakan coba lagi."}
+          {apiErrorMessage(error)}
         </Text>
+        <Pressable
+          style={{
+            alignSelf: "center",
+            marginTop: 16,
+            borderWidth: 2,
+            borderColor: designColors.ink,
+            paddingHorizontal: 20,
+            paddingVertical: 12,
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Coba muat arsip event lagi"
+          accessibilityState={{ disabled: isRetrying }}
+          disabled={isRetrying}
+          onPress={onRetry}
+          testID="history-retry"
+        >
+          <Text style={historyStateStyles.errorTitle}>
+            {isRetrying ? "Memuat…" : "Coba Lagi"}
+          </Text>
+        </Pressable>
       </View>
     </View>
   );

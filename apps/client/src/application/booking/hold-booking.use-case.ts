@@ -2,7 +2,7 @@
  * HoldBooking use case (application layer — framework-free) — RBT-054.
  *
  * Maps the checkout form rows to the contract `BookingItemInput[]` (resolving a
- * "use buyer NIK" row to the buyer's NIK), mints ONE Idempotency-Key for the
+ * "use buyer NIK" row to the buyer's selected identity), mints ONE Idempotency-Key for the
  * action and REUSES it across retry/refresh (RBT-012/FR-25) so a double-submit
  * cannot create a second booking, then calls the port's idempotent `hold`. The
  * key is cleared on success (terminal for this action). No React / RN / Expo
@@ -60,6 +60,8 @@ export class HoldBooking {
         cause instanceof DomainError
           ? cause
           : mapFailure(cause, "DEPENDENCY_UNAVAILABLE");
+      // A rejected idempotency key cannot be replayed. Temporary dependency
+      // failures intentionally retain the same key for safe retries.
       if (error.code === "IDEMPOTENCY_KEY_REUSED") this.keys.clear(actionId);
       throw error;
     }

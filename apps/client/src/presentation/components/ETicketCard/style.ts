@@ -1,7 +1,7 @@
 /**  e-ticket styles — the dashed perforation divider (prototype `.ticket-divider`). */
 import { StyleSheet } from "react-native";
 
-import { designColors, designBorder } from "@presentation/theme";
+import { designColors, designBorders } from "@presentation/theme";
 
 export const eTicketStyles = StyleSheet.create({
   divider: {
@@ -13,7 +13,7 @@ export const eTicketStyles = StyleSheet.create({
 
 export const componentStyles = StyleSheet.create({
   elementBorderWidth0: {
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ink,
     backgroundColor: designColors.ground,
   },
@@ -22,7 +22,7 @@ export const componentStyles = StyleSheet.create({
   elementBackgroundColor3: { backgroundColor: designColors.ink },
   elementColor4: { color: designColors.ink, letterSpacing: 1.5 },
   elementBorderTopWidth5: {
-    borderTopWidth: designBorder.base,
+    borderTopWidth: designBorders.standard,
     borderTopColor: designColors.ink,
     paddingTop: 16,
   },

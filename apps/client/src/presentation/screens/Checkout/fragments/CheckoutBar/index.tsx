@@ -12,20 +12,36 @@ import { useResponsive } from "@presentation/hooks/useResponsive";
 import { minorToIDR } from "@domain/services/money";
 
 import type { CheckoutBarProps } from "../../interface";
-import { styles } from "./style";
-import { styleForCheckoutBarView0, styleForCheckoutBarButton0 } from "./style";
+import {
+  styles,
+  styleForCheckoutBarView0,
+  styleForCheckoutBarButton0,
+} from "./style";
 
 export function CheckoutBar({
   totalMinor,
-  ready,
   pending,
   expired,
   errorMessage,
+  errorActionLabel,
+  onErrorAction,
   onSubmit,
   bottomInset,
 }: CheckoutBarProps) {
   const { isMobileWeb } = useResponsive();
-  const canSubmit = ready && !pending && !expired;
+  // Keep the button actionable when fields are invalid so a tap can reveal
+  // field-level validation messages instead of silently doing nothing.
+  const canSubmit = !pending && !expired;
+  const errorAction =
+    errorActionLabel && onErrorAction ? (
+      <Pressable
+        accessibilityRole="button"
+        onPress={onErrorAction}
+        testID="checkout-error-action"
+      >
+        <Text style={styles.errorText}>{errorActionLabel}</Text>
+      </Pressable>
+    ) : null;
 
   return (
     <View
@@ -37,9 +53,12 @@ export function CheckoutBar({
     >
       {/* Error message */}
       {errorMessage ? (
-        <Text style={styles.errorText} accessibilityLiveRegion="polite">
-          {errorMessage}
-        </Text>
+        <View>
+          <Text style={styles.errorText} accessibilityLiveRegion="polite">
+            {errorMessage}
+          </Text>
+          {errorAction}
+        </View>
       ) : null}
 
       <View style={[styles.content, isMobileWeb && styles.mobileWebContent]}>

@@ -1,11 +1,11 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorder } from "@presentation/theme";
+import { designColors, designBorders } from "@presentation/theme";
 
 export const componentStyles = StyleSheet.create({
   elementAlignItems0: {
     alignItems: "center",
     paddingBottom: 24,
-    borderBottomWidth: designBorder.base,
+    borderBottomWidth: designBorders.standard,
     borderBottomColor: designColors.ink,
   },
   elementColor1: {

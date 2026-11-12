@@ -1,7 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
-const mockPush = jest.fn();
-jest.mock("expo-router", () => ({ useRouter: () => ({ push: mockPush }) }));
+const mockNavigate = jest.fn();
+jest.mock("expo-router", () => ({
+  useRouter: () => ({ navigate: mockNavigate }),
+}));
 
 // eslint-disable-next-line import/first
 import {
@@ -11,7 +13,7 @@ import {
 } from "../../../../../../presentation/screens/History/fragments/HistoryStates/index";
 
 describe("History states", () => {
-  beforeEach(() => mockPush.mockReset());
+  beforeEach(() => mockNavigate.mockReset());
 
   it("renders the loading placeholder", () => {
     render(<HistoryLoading />);
@@ -23,15 +25,22 @@ describe("History states", () => {
     render(<HistoryEmpty />);
     expect(screen.getByText("Belum Ada Arsip")).toBeTruthy();
     fireEvent.press(screen.getByRole("button", { name: "Jelajahi event" }));
-    expect(mockPush).toHaveBeenCalledWith("/browse");
+    expect(mockNavigate).toHaveBeenCalledWith("/browse");
   });
 
   it("shows the fallback and a supplied error message", () => {
-    const { rerender } = render(<HistoryError />);
+    const props = { onRetry: jest.fn(), isRetrying: false };
+    const { rerender } = render(<HistoryError {...props} />);
     expect(
       screen.getByText("Terjadi kesalahan. Silakan coba lagi."),
     ).toBeTruthy();
-    rerender(<HistoryError message="Layanan tidak tersedia" />);
-    expect(screen.getByText("Layanan tidak tersedia")).toBeTruthy();
+    rerender(
+      <HistoryError {...props} error={new TypeError("Failed to fetch")} />,
+    );
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
   });
 });

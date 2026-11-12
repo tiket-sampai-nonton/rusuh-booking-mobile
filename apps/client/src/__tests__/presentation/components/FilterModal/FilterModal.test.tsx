@@ -22,12 +22,12 @@ describe("FilterModal", () => {
     const onClose = jest.fn();
     render(<FilterModal visible onApply={onApply} onClose={onClose} />);
 
-    fireEvent.press(screen.getByTestId("filter-genre-Jazz"));
+    fireEvent.press(screen.getByTestId("filter-genre-festival"));
     fireEvent.press(screen.getByTestId("filter-time-week"));
     fireEvent.press(screen.getByTestId("filter-sort-furthest"));
     fireEvent.press(screen.getByTestId("filter-apply"));
     expect(onApply).toHaveBeenCalledWith({
-      genre: "Jazz",
+      category: "festival",
       time: "week",
       sort: "furthest",
     });

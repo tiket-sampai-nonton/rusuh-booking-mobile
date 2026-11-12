@@ -21,18 +21,19 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef } from "react";
 import {
   Animated,
-  Image,
   Platform,
   StyleSheet,
   Text,
   View,
   type ImageStyle,
 } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import {
   designColors,
   designDuration,
 } from "@presentation/theme/event-design-tokens";
+import { withAlpha } from "@presentation/theme";
 import {
   CalendarIcon,
   ClockIcon,
@@ -42,8 +43,8 @@ import {
 import type { DetailHeroProps } from "../../interface";
 import { designDetailStyles as styles } from "../../style";
 import { nativeDriverSupported } from "@presentation/utils/style";
-import { heroStyles } from "./style";
 import {
+  heroStyles,
   styleForDetailHeroAnimatedView0,
   styleForDetailHeroImage1,
   styleForDetailHeroAnimatedView2,
@@ -65,19 +66,24 @@ export function DetailHero({
   chips,
   subtitle,
   isMobileWeb = false,
-}: DetailHeroProps & { subtitle?: string }) {
+  isActive = true,
+}: DetailHeroProps & { subtitle?: string; isActive?: boolean }) {
   // Ken Burns zoom animation (web only)
   const scaleAnim = useRef(new Animated.Value(1.1)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
   const isNative = Platform.OS !== "web";
+  const metaItems = meta.split(" · ");
+  const webOverlayStyle = isMobileWeb
+    ? heroStyles.mobileWebOverlay
+    : heroStyles.overlayWeb;
 
   useEffect(() => {
     // Entrance animations
     const entranceDuration = isMobileWeb ? 160 : designDuration.slow;
     const entranceDelay = isMobileWeb ? 0 : 500;
-    Animated.parallel([
+    const entrance = Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: entranceDuration,
@@ -90,33 +96,39 @@ export function DetailHero({
         delay: entranceDelay,
         useNativeDriver: nativeDriverSupported(),
       }),
-    ]).start();
+    ]);
+    entrance.start();
+    return () => entrance.stop();
+  }, [fadeAnim, isMobileWeb, slideAnim]);
 
-    // Ken Burns zoom (web only, infinite)
-    if (Platform.OS === "web") {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(scaleAnim, {
-            toValue: 1,
-            duration: 20000,
+  useEffect(() => {
+    if (!isActive) return;
+
+    const motion =
+      Platform.OS === "web"
+        ? Animated.loop(
+            Animated.sequence([
+              Animated.timing(scaleAnim, {
+                toValue: 1,
+                duration: 20000,
+                useNativeDriver: nativeDriverSupported(),
+              }),
+              Animated.timing(scaleAnim, {
+                toValue: 1.1,
+                duration: 20000,
+                useNativeDriver: nativeDriverSupported(),
+              }),
+            ]),
+          )
+        : Animated.timing(scaleAnim, {
+            toValue: 1.05,
+            duration: 1200,
             useNativeDriver: nativeDriverSupported(),
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1.1,
-            duration: 20000,
-            useNativeDriver: nativeDriverSupported(),
-          }),
-        ]),
-      ).start();
-    } else {
-      // Native: settle animation (scale 1.1 → 1.05)
-      Animated.timing(scaleAnim, {
-        toValue: 1.05,
-        duration: 1200,
-        useNativeDriver: nativeDriverSupported(),
-      }).start();
-    }
-  }, [fadeAnim, isMobileWeb, scaleAnim, slideAnim]);
+          });
+
+    motion.start();
+    return () => motion.stop();
+  }, [isActive, scaleAnim]);
 
   const isLive =
     statusLabel.toLowerCase().includes("live") ||
@@ -132,7 +144,7 @@ export function DetailHero({
           styleForDetailHeroAnimatedView0(scaleAnim),
         ]}
       >
-        <Image
+        <CachedImage
           source={{ uri: banner }}
           style={[
             StyleSheet.absoluteFill,
@@ -157,14 +169,14 @@ export function DetailHero({
       </Animated.View>
 
       {/* Gradient Overlay */}
-      {/* Native: linear-gradient(to top, ground 0%, rgba(0,0,0,0.3) 50%, transparent 100%) */}
+      {/* Native: ground-to-overlay gradient from the shared color tokens */}
       {/* Web: linear-gradient(to top, ground 0%, 0.8 30%, 0.3 60%, transparent 100%) */}
       {isNative ? (
         <LinearGradient
           colors={[
             designColors.ground, // 0% - ground at bottom
-            "rgba(0,0,0,0.3)", // 50% - dark overlay
-            "transparent", // 100% - transparent at top
+            withAlpha(designColors.overlay, 0.3), // 50% - dark overlay
+            designColors.transparent, // 100% - transparent at top
           ]}
           locations={[0, 0.5, 1]}
           start={{ x: 0.5, y: 1 }} // from bottom
@@ -172,12 +184,7 @@ export function DetailHero({
           style={StyleSheet.absoluteFill}
         />
       ) : (
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            isMobileWeb ? heroStyles.mobileWebOverlay : heroStyles.overlayWeb,
-          ]}
-        />
+        <View style={[StyleSheet.absoluteFill, webOverlayStyle]} />
       )}
 
       {/* Scan Lines (web only) */}
@@ -188,23 +195,25 @@ export function DetailHero({
         style={[styles.heroContent, isMobileWeb && styles.mobileWebHeroContent]}
       >
         {/* Badge */}
-        <Animated.View
-          style={[
-            styles.heroBadge,
-            isMobileWeb && styles.mobileWebHeroBadge,
-            styleForDetailHeroAnimatedView2(fadeAnim, slideAnim),
-          ]}
-        >
-          {isLive && <View style={styles.liveDot} />}
-          <Text
+        {!isMobileWeb && (
+          <Animated.View
             style={[
-              styles.heroBadgeText,
-              isMobileWeb && styles.mobileWebHeroBadgeText,
+              styles.heroBadge,
+              isMobileWeb && styles.mobileWebHeroBadge,
+              styleForDetailHeroAnimatedView2(fadeAnim, slideAnim),
             ]}
           >
-            {statusLabel}
-          </Text>
-        </Animated.View>
+            {isLive && <View style={styles.liveDot} />}
+            <Text
+              style={[
+                styles.heroBadgeText,
+                isMobileWeb && styles.mobileWebHeroBadgeText,
+              ]}
+            >
+              {statusLabel}
+            </Text>
+          </Animated.View>
+        )}
 
         {/* Title */}
         <Animated.Text
@@ -241,9 +250,9 @@ export function DetailHero({
               styleForDetailHeroAnimatedView5(fadeAnim, slideAnim),
             ]}
           >
-            {meta.split(" · ").map((item, i) => (
-              <View key={i} style={styles.heroMetaItem}>
-                {getMetaIcon(i)}
+            {metaItems.map((item, index) => (
+              <View key={item} style={styles.heroMetaItem}>
+                {getMetaIcon(index)}
                 <Text
                   style={[
                     styles.heroMetaText,

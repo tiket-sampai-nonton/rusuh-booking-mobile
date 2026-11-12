@@ -25,6 +25,7 @@ export interface ETicketCardProps {
   readonly startsAt?: string;
   readonly attendeeName?: string;
   readonly attendeeNikMasked?: string;
+  readonly categoryCode?: string;
   readonly qrPayload?: string;
   readonly ticketCode?: string;
 }
@@ -35,6 +36,7 @@ export function ticketRef(bookingId: string, index: number): string {
 }
 
 export function ETicketCard({
+  bookingId,
   index,
   total,
   eventName,
@@ -42,6 +44,7 @@ export function ETicketCard({
   startsAt,
   attendeeName,
   attendeeNikMasked,
+  categoryCode,
   qrPayload,
   ticketCode,
 }: ETicketCardProps) {
@@ -50,7 +53,7 @@ export function ETicketCard({
     <View
       style={componentStyles.elementBorderWidth0}
       testID={`eticket-${index}`}
-      accessibilityLabel={`E-tiket ${index + 1} dari ${total}`}
+      accessibilityLabel={`E-tiket ${index + 1} dari ${total} untuk pesanan ${bookingId}`}
     >
       {/* Black top strip (prototype `.ticket-top`). */}
       <View
@@ -58,7 +61,7 @@ export function ETicketCard({
         style={componentStyles.elementBackgroundColor1}
       >
         <Text
-          className="text-sm font-extrabold uppercase text-white"
+          className="text-sm font-extrabold uppercase text-v2-ground"
           style={componentStyles.elementLetterSpacing2}
         >
           E-Tiket {index + 1} / {total}
@@ -88,31 +91,33 @@ export function ETicketCard({
         >
           {ticketCode ?? "Tiket belum tersedia"}
         </Text>
-        {eventName ? (
-          <View
-            className="mt-5 w-full gap-2"
-            style={componentStyles.elementBorderTopWidth5}
-          >
+        <View
+          className="mt-5 w-full gap-2"
+          style={componentStyles.elementBorderTopWidth5}
+        >
+          {eventName ? (
             <Text
               className="text-lg font-extrabold uppercase"
               style={componentStyles.elementColor6}
             >
               {eventName}
             </Text>
-            <Text className="text-xs" style={componentStyles.elementColor7}>
-              {attendeeName ?? "Pemegang tiket"} · {attendeeNikMasked ?? "••••"}
-            </Text>
+          ) : null}
+          <Text className="text-xs" style={componentStyles.elementColor7}>
+            {attendeeName || "Pemegang tiket"} · {attendeeNikMasked || "••••"}
+          </Text>
+          {eventName || startsAt || venue ? (
             <Text className="text-xs" style={componentStyles.elementColor8}>
               {startsAt ?? "Tanggal menyusul"} · {venue ?? "Lokasi menyusul"}
             </Text>
-            <Text
-              className="text-xs font-bold uppercase"
-              style={componentStyles.elementColor9}
-            >
-              Tiket Umum · Kode tiket {ticketCode ?? "—"}
-            </Text>
-          </View>
-        ) : null}
+          ) : null}
+          <Text
+            className="text-xs font-bold uppercase"
+            style={componentStyles.elementColor9}
+          >
+            Kategori {categoryCode || "—"} · Kode tiket {ticketCode ?? "—"}
+          </Text>
+        </View>
         <Text className="mt-1 text-2xs" style={componentStyles.elementColor10}>
           Tunjukkan QR ini di gerbang masuk.
         </Text>

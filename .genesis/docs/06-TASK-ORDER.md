@@ -26,8 +26,10 @@
 
 ## Run Next
 
-**Current wave:** `Wave 3 — Feature epics (E3/E4/E5)` — Wave 2 Core API COMPLETE, ports FROZEN.
-**Run next:** `E3 Auth (Ray) · E4 Events (Ray) · E5 Queue (Eld)` — unblocked now the domain ports are frozen; disjoint feature areas, parallel across owners. (Wave 1 ✅; Wave 2 ✅ RBT-010/011/012/013/014; RBT-005b CI deferred post-E2E.)
+**Current wave:** `Wave 7 — Hardening / QA` — the feature code for booking, payment, and issued tickets is present; use the status rows below and the dated alignment report for current verification gaps.
+**Run next:** complete the active QA work for per-ticket category/attendee labels and the native payment WebView path, then attach evidence before marking those stories Done. This working-tree task is not yet merged.
+
+**RBT-128 — Align FE HTTP adapters with BE API:** merged in PR #144 on 7 November 2026; details and checks are in `api-contract/07-11/INTEGRATION-RBT-128.md`.
 
 ---
 
@@ -95,20 +97,20 @@
 
 | Task group | Owner | Domain | Depends On | Shared reason | Parallel | Status | Delivered |
 |------|-------|--------|-----------|---------------|----------|--------|-----------|
-| E6 (RBT-050…054) | Eld | Booking | E3, E5 | booking state machine + checkout route | ❌ serialize | Backlog | ☐ |
+| E6 (RBT-050…054) | Eld | Booking | E3, E5 | booking state machine + checkout route | ❌ serialize | QA | ☐ |
 
 ### Wave 5 — Payment (E7) + Notifications start (E8 partial) — mostly sequential
 
 | Task group | Owner | Domain | Depends On | Shared reason | Parallel | Status | Delivered |
 |------|-------|--------|-----------|---------------|----------|--------|-----------|
-| E7 (RBT-060…065) | Ray | Payment | E6 | payment state machine + SNAP handoff; mock adapter at composition root | ❌ serialize | Backlog | ☐ |
+| E7 (RBT-060…065) | Ray | Payment | E6 | payment state machine + SNAP handoff; mock/real adapter at composition root | ❌ serialize | In Progress | ☐ |
 | E8 notif (RBT-072/073) | Riz | Ticket/notif | E2 (DI port only) | can run parallel with E7 — needs only the notification port | ✅ | Backlog | ☐ |
 
 ### Wave 6 — E-ticket (E8 rest) — sequential on payment
 
 | Task group | Owner | Domain | Depends On | Shared reason | Parallel | Status | Delivered |
 |------|-------|--------|-----------|---------------|----------|--------|-----------|
-| E8 ticket (RBT-070/071) | Riz | Ticket | E7 (PAID) | success screen + QR need a paid booking | ❌ serialize | Backlog | ☐ |
+| E8 ticket (RBT-070/071) | Riz | Ticket | E7 (PAID) | success screen + QR need a paid booking | ❌ serialize | In Progress | ☐ |
 
 ### Wave 7 — Hardening (E9) — cross-cutting, finalizes all
 
@@ -120,6 +122,7 @@
 | RBT-083 QA suites | Ray | Hardening | features | Playwright + Maestro across flows | ❌ serialize | Backlog | ☐ |
 | RBT-084 release readiness | Ray | Hardening | RBT-005/081/082/083 | OTA/rollback/summary | ❌ serialize | Backlog | ☐ |
 | RBT-119 client refactor | Riz | Hardening | E2 + existing feature flows | `apps/client/**` | ❌ serialize | Done | ☑ |
+| RBT-128 FE-BE API integration | Riz | Core API | RBT-010 + queue/booking/payment | adapters, composition root, contracts | ❌ serialize | Done | ✅ |
 
 ---
 
@@ -170,3 +173,5 @@ flowchart LR
 |------|--------|-----|
 | 2026-10-29 | Initial decomposition at Phase 3 (H3 PASSED) | agent |
 | 2026-10-30 | TASK-ORDER run reference added; docset renumbered to 01–10 to match the 6-gate PLAYBOOK | agent |
+| 2026-11-09 | Added ad hoc FE-BE integration task RBT-128 (GitHub #165) | agent |
+| 2026-11-12 | Reconciled current run pointer: RBT-128 is merged; E6–E8 remain in QA/in progress pending current native/payment and ticket evidence | agent |

@@ -12,7 +12,13 @@ import { useAccountStore } from "@presentation/stores/account-store";
 import { useSessionStore } from "@presentation/stores/session-store";
 import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 
-const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
+const mockRouter = {
+  push: jest.fn(),
+  replace: jest.fn(),
+  navigate: jest.fn(),
+  dismissTo: jest.fn(),
+  back: jest.fn(),
+};
 const mockDownloadTickets = jest.fn(async () => undefined);
 const mockShareTickets = jest.fn(async () => undefined);
 const mockResponsiveState = {
@@ -74,6 +80,7 @@ describe("MyTicketsScreen", () => {
 
   beforeEach(() => {
     mockRouter.push.mockReset();
+    mockRouter.navigate.mockReset();
     mockDownloadTickets.mockClear();
     mockShareTickets.mockClear();
     Object.assign(mockResponsiveState, {
@@ -101,7 +108,7 @@ describe("MyTicketsScreen", () => {
       expect(screen.getByTestId("my-tickets-empty")).toBeTruthy(),
     );
     fireEvent.press(screen.getByText("Jelajahi Event"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/browse");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/browse");
     fireEvent.press(screen.getByTestId("header-cta"));
     expect(screen.getByTestId("login-card")).toBeTruthy();
     fireEvent.press(screen.getByTestId("login-close"));
@@ -109,7 +116,7 @@ describe("MyTicketsScreen", () => {
     fireEvent.press(screen.getByTestId("bottom-nav-home"));
     fireEvent.press(screen.getByTestId("bottom-nav-browse"));
     fireEvent.press(screen.getByTestId("bottom-nav-profile"));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/profile");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/profile");
   });
 
   it("loads account tickets and opens the selected booking QR sheet", async () => {
@@ -153,9 +160,9 @@ describe("MyTicketsScreen", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("account-ticket-qr-booking-1")).toBeTruthy(),
+      expect(screen.getByTestId("account-ticket-booking-1")).toBeTruthy(),
     );
-    fireEvent.press(screen.getByTestId("account-ticket-qr-booking-1"));
+    fireEvent.press(screen.getByTestId("account-ticket-booking-1"));
     expect(await screen.findByTestId("ticket-qr-sheet")).toBeTruthy();
     expect(await screen.findByText("TICKET-1")).toBeTruthy();
     expect(screen.getByTestId("qr-code").props.accessibilityLabel).toBe(
@@ -176,8 +183,8 @@ describe("MyTicketsScreen", () => {
     );
     fireEvent.press(screen.getByText("Unduh E-Tiket"));
     expect(
-      (await screen.findAllByText("Penyimpanan tidak tersedia")).length,
-    ).toBe(2);
+      await screen.findAllByText("Penyimpanan tidak tersedia"),
+    ).toHaveLength(2);
 
     fireEvent.press(screen.getByTestId("ticket-qr-close"));
     await waitFor(() =>
@@ -310,15 +317,23 @@ describe("MyTicketsScreen", () => {
               ],
               nextCursor: "cursor-1",
             },
-      getBookingTickets: async () => ({
-        bookingId: "unused",
-        orderId: "unused",
-        publicRef: "unused",
+      getBookingTickets: jest.fn(async (bookingId: string) => ({
+        bookingId,
+        orderId: "order-past",
+        publicRef: "OLD",
         amountMinor: 100,
-        ticketQuantity: 0,
-        buyerNikMasked: "",
-        tickets: [],
-      }),
+        ticketQuantity: 1,
+        buyerNikMasked: "31****89",
+        tickets: [
+          {
+            ticketCode: "OLD-TICKET-1",
+            categoryCode: "REG",
+            attendeeName: "Rizky Rachmawan",
+            attendeeNikMasked: "31****89",
+            qrPayload: "old-ticket-payload",
+          },
+        ],
+      })),
     };
     renderWithProviders(<MyTicketsScreen />, {
       container: { eventRepository, ticketHistoryRepository },
@@ -337,7 +352,24 @@ describe("MyTicketsScreen", () => {
     expect(
       screen.getByTestId("account-ticket-booking-event-past"),
     ).toBeTruthy();
+    expect(screen.getAllByText("Lihat Detail Tiket")).toHaveLength(3);
     expect(screen.queryByTestId("account-ticket-booking-paid")).toBeNull();
+    fireEvent.press(screen.getByTestId("account-ticket-booking-event-past"));
+    expect(await screen.findByTestId("ticket-qr-sheet")).toBeTruthy();
+    expect(await screen.findByText("OLD-TICKET-1")).toBeTruthy();
+    expect(screen.getByText("Kategori REG")).toBeTruthy();
+    expect(screen.getByText("Rizky Rachmawan · 31****89")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("ticket-qr-close"));
+
+    fireEvent.press(screen.getByTestId("account-ticket-booking-expired"));
+    expect(await screen.findByTestId("booking-order-summary")).toBeTruthy();
+    expect(screen.getByText("Referensi EXP")).toBeTruthy();
+    expect(screen.queryByTestId("qr-code")).toBeNull();
+    expect(ticketHistoryRepository.getBookingTickets).toHaveBeenCalledTimes(1);
+    expect(ticketHistoryRepository.getBookingTickets).toHaveBeenCalledWith(
+      "booking-event-past",
+    );
+    fireEvent.press(screen.getByTestId("ticket-qr-close"));
 
     fireEvent.press(screen.getByTestId("tickets-tab-upcoming"));
     await waitFor(() =>
@@ -367,14 +399,14 @@ describe("MyTicketsScreen", () => {
     fireEvent.press(screen.getByTestId("nav-browse"));
     fireEvent.press(screen.getByTestId("nav-tickets"));
     fireEvent.press(screen.getByTestId("nav-profile"));
-    expect(mockRouter.push.mock.calls).toEqual([
+    expect(mockRouter.navigate.mock.calls).toEqual([
       ["/"],
       ["/browse"],
       ["/profile"],
     ]);
   });
 
-  it("shows a loading then error message when ticket history fails", async () => {
+  it("shows safe connection guidance and retry when ticket history fails", async () => {
     useAccountStore
       .getState()
       .setProfile({ emailMasked: "r***@example.com", hasNik: true });
@@ -402,8 +434,11 @@ describe("MyTicketsScreen", () => {
     expect(await screen.findByText("Memuat tiket…")).toBeTruthy();
     await act(async () => rejectHistory(new Error("offline")));
     expect(
-      await screen.findByText("Tiket gagal dimuat. Silakan coba lagi."),
+      await screen.findByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
     ).toBeTruthy();
+    expect(screen.getByTestId("booking-history-retry")).toBeTruthy();
   });
 
   it("closes the QR overlay on Android hardware back", async () => {
@@ -455,11 +490,9 @@ describe("MyTicketsScreen", () => {
     });
 
     await waitFor(() =>
-      expect(
-        screen.getByTestId("account-ticket-qr-booking-android"),
-      ).toBeTruthy(),
+      expect(screen.getByTestId("account-ticket-booking-android")).toBeTruthy(),
     );
-    fireEvent.press(screen.getByTestId("account-ticket-qr-booking-android"));
+    fireEvent.press(screen.getByTestId("account-ticket-booking-android"));
     await screen.findByText("ANDROID-1");
     expect(backHandlerSpy).toHaveBeenCalledWith(
       "hardwareBackPress",
@@ -520,9 +553,9 @@ describe("MyTicketsScreen", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("account-ticket-qr-booking-web")).toBeTruthy(),
+      expect(screen.getByTestId("account-ticket-booking-web")).toBeTruthy(),
     );
-    fireEvent.press(screen.getByTestId("account-ticket-qr-booking-web"));
+    fireEvent.press(screen.getByTestId("account-ticket-booking-web"));
     expect(await screen.findByTestId("ticket-qr-sheet")).toBeTruthy();
     expect(await screen.findByText("WEB-1")).toBeTruthy();
     fireEvent.press(screen.getByText("Unduh E-Tiket"));

@@ -1,10 +1,16 @@
 import { useCallback } from "react";
 import { toString as renderQrSvg } from "qrcode";
 
+import { designColors } from "@presentation/theme";
 import { useServices } from "@providers/service-context";
 
 function utf8Base64(value: string): string {
-  return btoa(unescape(encodeURIComponent(value)));
+  const binary = encodeURIComponent(value).replace(
+    /%([0-9A-F]{2})|([^%])/gi,
+    (_match, hex: string | undefined, character: string | undefined) =>
+      hex ? String.fromCodePoint(Number.parseInt(hex, 16)) : (character ?? ""),
+  );
+  return btoa(binary);
 }
 
 const htmlEscapes: Record<string, string> = {
@@ -57,7 +63,7 @@ export function useETicketDownload() {
           <p>Tunjukkan QR ini di gerbang masuk.</p>
         </article>`,
         ).join("");
-        const content = `<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>E-Tiket ${escapeHtml(bookingId)}</title><style>body{font:16px Arial,sans-serif;color:#111;margin:24px}.ticket{max-width:420px;border:2px solid #111;margin:0 auto 24px;page-break-after:always;padding:20px;text-align:center}.ticket h2{margin:-20px -20px 20px;padding:14px;background:#111;color:#fff;text-align:left;font-size:16px}.ticket img{width:240px;height:240px}.ticket h3{text-transform:uppercase}.code{font:700 13px monospace;letter-spacing:1px} @media print{body{margin:0}}</style><body>${tickets}</body></html>`;
+        const content = `<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>E-Tiket ${escapeHtml(bookingId)}</title><style>body{font:16px Arial,sans-serif;color:${designColors.ink};margin:24px}.ticket{max-width:420px;border:2px solid ${designColors.ink};margin:0 auto 24px;page-break-after:always;padding:20px;text-align:center}.ticket h2{margin:-20px -20px 20px;padding:14px;background:${designColors.ink};color:${designColors.ground};text-align:left;font-size:16px}.ticket img{width:240px;height:240px}.ticket h3{text-transform:uppercase}.code{font:700 13px monospace;letter-spacing:1px} @media print{body{margin:0}}</style><body>${tickets}</body></html>`;
         await fileShare.save({
           fileName: `eticket-${safeFileId(bookingId)}.html`,
           mimeType: "text/html",

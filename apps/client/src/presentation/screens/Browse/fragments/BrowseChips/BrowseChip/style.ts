@@ -10,6 +10,9 @@ export const browseChipStyles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
+  selectedContainer: {
+    borderColor: designColors.ember,
+  },
   label: {
     color: designColors.muted,
     letterSpacing: 0.5,

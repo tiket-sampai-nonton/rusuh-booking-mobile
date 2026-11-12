@@ -33,7 +33,7 @@ export function HistoryGrid({
   return (
     <View style={historyGridRow} testID="history-grid">
       {events.map((ev) => (
-        <View key={ev.id} style={historyGridCell(columns)}>
+        <View key={ev.id} style={historyGridCell}>
           <EventCard event={ev} onPress={onPress} history />
         </View>
       ))}

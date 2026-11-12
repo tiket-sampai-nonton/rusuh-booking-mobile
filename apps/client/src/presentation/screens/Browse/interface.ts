@@ -6,13 +6,17 @@ export interface BrowseChipsProps {
   readonly time: string;
   readonly sort: string;
   readonly isFiltered: boolean;
-  readonly onRefine: () => void;
-  readonly onReset: () => void;
+  readonly showCategory?: boolean;
+  readonly showRefine?: boolean;
+  readonly showReset?: boolean;
+  readonly onRefine?: () => void;
+  readonly onReset?: () => void;
 }
 
 export interface BrowseChipProps {
   readonly label: string;
   readonly value: string;
+  readonly selected?: boolean;
 }
 
 export interface BrowseGridProps {

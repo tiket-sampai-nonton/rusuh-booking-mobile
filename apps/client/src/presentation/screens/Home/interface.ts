@@ -2,7 +2,9 @@
 import type { EventSummary } from "@domain/repositories/event.repository";
 
 export interface HomeErrorProps {
-  readonly message?: string;
+  readonly error?: unknown;
+  readonly onRetry: () => void;
+  readonly isRetrying: boolean;
 }
 
 export interface HomeSectionsProps {
@@ -13,6 +15,7 @@ export interface HomeSectionsProps {
   readonly isDesktop: boolean;
   readonly columns: 1 | 2 | 3;
   readonly onPressEvent: (eventId: string) => void;
+  readonly onPressHistoryEvent: (eventId: string) => void;
   readonly onFilter: () => void;
   readonly onFeaturedLayout: (y: number) => void;
   readonly onHistoryLayout: (y: number) => void;

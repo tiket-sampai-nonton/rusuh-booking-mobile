@@ -8,8 +8,8 @@ import { designColors } from "@presentation/theme";
 
 import type { PaymentTopBarProps } from "../../interface";
 import { paymentStyles, paymentTopBar } from "../../style";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForPaymentTopBarView0,
   styleForPaymentTopBarView1,
 } from "./style";
@@ -18,6 +18,7 @@ export function PaymentTopBar({
   remainingMs,
   warn,
   expired,
+  isMobileWeb = false,
   onBack,
 }: PaymentTopBarProps) {
   const insets = useSafeAreaInsets();
@@ -35,22 +36,29 @@ export function PaymentTopBar({
       >
         <View className="flex-row items-center gap-1.5">
           <ArrowIcon direction="left" color={designColors.ink} />
-          <Text
-            className="text-sm font-bold uppercase tracking-tag"
-            style={componentStyles.elementColor0}
-          >
-            Kembali
-          </Text>
+          {!isMobileWeb && (
+            <Text
+              className="text-sm font-bold uppercase tracking-tag"
+              style={componentStyles.elementColor0}
+            >
+              Kembali
+            </Text>
+          )}
         </View>
       </Pressable>
       <View
         className="flex-row items-center gap-2.25 px-3.5 py-2"
         style={styleForPaymentTopBarView1(danger)}
       >
-        <View style={paymentStyles.timerDot} className="bg-white" />
+        <View
+          style={[
+            paymentStyles.timerDot,
+            { backgroundColor: designColors.ground },
+          ]}
+        />
         <Text
-          className="text-md font-extrabold text-white"
-          style={paymentStyles.tabularNum}
+          className="text-md font-extrabold"
+          style={[paymentStyles.tabularNum, { color: designColors.ground }]}
           accessibilityLabel={`Sisa waktu pembayaran ${formatCountdown(remainingMs)}`}
           accessibilityLiveRegion="polite"
           testID="payment-timer"

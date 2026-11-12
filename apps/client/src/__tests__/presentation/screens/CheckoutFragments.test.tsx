@@ -4,6 +4,7 @@ import { BOOKING_CATEGORY_FIXTURE } from "@shared/test-fixtures/booking-categori
 
 import { CheckoutBar } from "@presentation/screens/Checkout/fragments/CheckoutBar";
 import { ConsentGate } from "@presentation/screens/Checkout/fragments/ConsentGate";
+import { CheckoutHero } from "@presentation/screens/Checkout/fragments/CheckoutHero";
 import { LeaveConfirm } from "@presentation/screens/Checkout/fragments/LeaveConfirm";
 import { TicketItem } from "@presentation/screens/Checkout/fragments/TicketItem";
 import {
@@ -48,6 +49,23 @@ describe("checkout shared form fragments", () => {
   });
 });
 
+describe("CheckoutHero event name loading", () => {
+  it("shows a recoverable error instead of a permanent loading label", () => {
+    const onRetry = jest.fn();
+    render(
+      <CheckoutHero
+        eventId="event-1"
+        eventNameError
+        onRetryEventName={onRetry}
+      />,
+    );
+
+    expect(screen.getByText("Nama event tidak tersedia")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("checkout-event-retry"));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("CheckoutBar (RBT-051)", () => {
   it("renders total + enabled submit when ready and not expired", () => {
     const onSubmit = jest.fn();
@@ -68,7 +86,7 @@ describe("CheckoutBar (RBT-051)", () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  it("disables submit and shows the error message when provided", () => {
+  it("keeps submit actionable and shows the error message when provided", () => {
     const onSubmit = jest.fn();
     render(
       <CheckoutBar
@@ -85,9 +103,9 @@ describe("CheckoutBar (RBT-051)", () => {
     expect(screen.getByText("Lanjut Bayar")).toBeTruthy();
     expect(
       screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
-    ).toBe(true);
+    ).toBe(false);
     fireEvent.press(screen.getByTestId("checkout-submit"));
-    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
   it("shows 'Memproses…' while pending and does not fire submit", () => {
@@ -156,13 +174,19 @@ describe("ConsentGate (RBT-052 AC3)", () => {
   it("toggles the consent checkbox on press", () => {
     const onToggle = jest.fn();
     const { rerender } = render(
-      <ConsentGate checked={false} onToggle={onToggle} />,
+      <ConsentGate
+        checked={false}
+        onToggle={onToggle}
+        onOpenPrivacy={jest.fn()}
+      />,
     );
     const box = screen.getByTestId("checkout-consent");
     expect(box.props.accessibilityState.checked).toBe(false);
     fireEvent.press(box);
     expect(onToggle).toHaveBeenCalledWith(true);
-    rerender(<ConsentGate checked onToggle={onToggle} />);
+    rerender(
+      <ConsentGate checked onToggle={onToggle} onOpenPrivacy={jest.fn()} />,
+    );
     expect(
       screen.getByTestId("checkout-consent").props.accessibilityState.checked,
     ).toBe(true);

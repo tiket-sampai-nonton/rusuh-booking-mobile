@@ -10,11 +10,12 @@ import { Pressable, Switch, Text, View } from "react-native";
 
 import { isValidNik } from "@domain/rules/checkout";
 import { designColors } from "@presentation/theme";
+import { minorToIDR } from "@domain/services/money";
 
 import { Field } from ".././common";
 import type { TicketItemProps } from "../../interface";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForTicketItemPressable0,
   styleForTicketItemText1,
   styleForTicketItemText2,
@@ -23,7 +24,10 @@ import {
 const STATUS_TEXT: Record<string, { label: string; color: string }> = {
   checking: { label: "Mengecek ketersediaan NIK…", color: designColors.gray },
   available: { label: "NIK tersedia", color: designColors.success },
-  blocked: { label: "NIK sudah terdaftar untuk event ini.", color: "#ff0000" },
+  blocked: {
+    label: "NIK sudah terdaftar untuk event ini.",
+    color: designColors.danger,
+  },
   warning: {
     label: "Batas pengecekan tercapai — lanjut, server memvalidasi.",
     color: designColors.warning,
@@ -39,6 +43,11 @@ export function TicketItem({
   onUseBuyer,
   status = "idle",
   categories,
+  buyerName = "",
+  buyerNik = "",
+  categoryError,
+  attendeeNameError,
+  attendeeNikError,
 }: TicketItemProps) {
   const statusInfo = STATUS_TEXT[status];
   return (
@@ -68,30 +77,38 @@ export function TicketItem({
             <Pressable
               key={category.categoryId}
               accessibilityRole="button"
-              accessibilityLabel={`Kategori ${category.name}`}
+              accessibilityLabel={`Kategori ${category.name}, ${minorToIDR(category.priceMinor)}`}
               accessibilityState={{ selected }}
               onPress={() => onPatch({ categoryId: category.categoryId })}
               testID={`cat-${index}-${category.code}`}
               style={styleForTicketItemPressable0(selected)}
             >
               <Text style={styleForTicketItemText1(selected)}>
-                {category.name}
+                {category.name} · {minorToIDR(category.priceMinor)}
               </Text>
             </Pressable>
           );
         })}
       </View>
+      {categoryError ? (
+        <Text style={componentStyles.validationError} accessibilityRole="alert">
+          {categoryError}
+        </Text>
+      ) : null}
 
       <Field
         label="Nama Penonton"
-        value={row.attendeeName}
+        value={row.useBuyerNik ? buyerName : row.attendeeName}
         onChangeText={(t) => onPatch({ attendeeName: t })}
         placeholder="Nama sesuai KTP"
+        editable={!row.useBuyerNik}
+        invalid={Boolean(attendeeNameError)}
+        errorMessage={attendeeNameError}
         testID={`attendee-name-${index}`}
       />
       <Field
         label="NIK Penonton (16 digit)"
-        value={row.useBuyerNik ? "" : row.attendeeNik}
+        value={row.useBuyerNik ? buyerNik : row.attendeeNik}
         onChangeText={(t) =>
           onPatch({ attendeeNik: t.replace(/\D/g, "").slice(0, 16) })
         }
@@ -99,10 +116,12 @@ export function TicketItem({
         keyboardType="number-pad"
         editable={!row.useBuyerNik}
         invalid={
-          !row.useBuyerNik &&
-          row.attendeeNik.length > 0 &&
-          !isValidNik(row.attendeeNik)
+          Boolean(attendeeNikError) ||
+          (!row.useBuyerNik &&
+            row.attendeeNik.length > 0 &&
+            !isValidNik(row.attendeeNik))
         }
+        errorMessage={attendeeNikError}
         testID={`attendee-nik-${index}`}
       />
 
@@ -118,10 +137,10 @@ export function TicketItem({
 
       <View style={componentStyles.elementMarginTop6}>
         <Text style={componentStyles.elementFlex7}>
-          Gunakan NIK pembeli (pembeli ikut nonton)
+          "Gunakan data pembeli (pembeli ikut nonton)"
         </Text>
         <Switch
-          accessibilityLabel={`Gunakan NIK pembeli untuk tiket ${index + 1}`}
+          accessibilityLabel={`Gunakan data pembeli untuk tiket ${index + 1}`}
           value={row.useBuyerNik}
           onValueChange={onUseBuyer}
           trackColor={{ false: designColors.field, true: designColors.ink }} // Use field per Design Palette Guide

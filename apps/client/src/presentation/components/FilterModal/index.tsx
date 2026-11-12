@@ -27,14 +27,14 @@ import { CloseIcon } from "@presentation/components/ArrowIcon";
 import { designColors } from "@presentation/theme";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { PillGroup } from "./PillGroup";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForFilterModalPressable0,
   styleForFilterModalView1,
 } from "./style";
 
 export interface FilterValue {
-  readonly genre: string;
+  readonly category: string;
   readonly time: string;
   readonly sort: string;
 }
@@ -42,20 +42,18 @@ export interface FilterValue {
 export interface FilterModalProps {
   readonly visible: boolean;
   readonly onClose: () => void;
+  /** Current applied filters; restored each time the modal opens. */
+  readonly value?: FilterValue;
   /** Apply — receives the chosen filter (the screen navigates to /browse). */
   readonly onApply: (value: FilterValue) => void;
-  readonly genres?: readonly string[];
 }
 
-const GENRES = [
-  "Semua",
-  "Festival",
-  "Jazz",
-  "Rock",
-  "Elektronik",
-  "Folk",
-  "Orkestra",
-];
+const CATEGORIES = [
+  { v: "all", l: "Semua" },
+  { v: "concert", l: "Konser" },
+  { v: "festival", l: "Festival" },
+  { v: "sports", l: "Olahraga" },
+] as const;
 const TIMES = [
   { v: "all", l: "Semua waktu" },
   { v: "week", l: "Minggu ini" },
@@ -69,18 +67,25 @@ const SORTS = [
 
 export function FilterModal({
   visible,
+  value,
   onClose,
   onApply,
-  genres,
 }: FilterModalProps) {
   const insets = useSafeAreaInsets();
   const { isMobileWeb } = useResponsive();
-  const [genre, setGenre] = useState("Semua");
-  const [time, setTime] = useState("all");
-  const [sort, setSort] = useState("closest");
+  const [category, setCategory] = useState(value?.category ?? "all");
+  const [time, setTime] = useState(value?.time ?? "all");
+  const [sort, setSort] = useState(value?.sort ?? "closest");
+
+  useEffect(() => {
+    if (!visible) return;
+    setCategory(value?.category ?? "all");
+    setTime(value?.time ?? "all");
+    setSort(value?.sort ?? "closest");
+  }, [value?.category, value?.sort, value?.time, visible]);
 
   const apply = (): void => {
-    onApply({ genre, time, sort });
+    onApply({ category, time, sort });
   };
 
   useEffect(() => {
@@ -145,13 +150,10 @@ export function FilterModal({
           keyboardShouldPersistTaps="handled"
         >
           <PillGroup
-            label="Kategori Musik"
-            options={(genres
-              ? ["Semua", ...genres.filter((g) => g.toLowerCase() !== "semua")]
-              : GENRES
-            ).map((g) => ({ v: g, l: g }))}
-            value={genre}
-            onPick={setGenre}
+            label="Kategori acara"
+            options={CATEGORIES}
+            value={category}
+            onPick={setCategory}
             testPrefix="filter-genre"
           />
           <PillGroup

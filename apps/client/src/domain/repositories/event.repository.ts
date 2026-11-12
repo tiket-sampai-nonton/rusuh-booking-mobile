@@ -46,10 +46,7 @@ export interface EventDetail extends EventSummary {
   readonly maxTicketsPerBuyerNik?: number;
   readonly allowMixedCategories?: boolean;
   readonly published?: boolean;
-  /**
-   * Mock-only rich event content (long description, lineup, terms and gallery).
-   * These fields are not part of the supplied public EventDetail contract.
-   */
+  /** Rich event content returned by the event detail response. */
   readonly description?: Readonly<Record<string, unknown>>;
 }
 
@@ -65,6 +62,8 @@ export interface EventQuery {
 
 export interface EventRepository {
   readonly supportsServerFilters?: boolean;
+  /** Optional synchronous catalog seed for a static/mock first render. */
+  getInitialEvents?(): readonly EventSummary[];
   /** List the event catalog (upcoming + history derived by the caller). */
   listEvents(query?: EventQuery): Promise<readonly EventSummary[]>;
   getFacets?(query?: EventQuery): Promise<{

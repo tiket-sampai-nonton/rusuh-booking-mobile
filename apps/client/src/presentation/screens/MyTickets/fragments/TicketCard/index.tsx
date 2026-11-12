@@ -1,4 +1,5 @@
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { eventImage } from "@domain/rules/event-image";
 import { formatDateID } from "@domain/services/date-format";
@@ -17,6 +18,10 @@ interface TicketCardProps {
   readonly bookingId: string;
   readonly amountMinor: number;
   readonly ticketCount: number;
+  readonly categoryCounts?: readonly {
+    readonly categoryCode: string;
+    readonly count: number;
+  }[];
   readonly onOpenQr: () => void;
   readonly onDownload: () => void;
   readonly onShare: () => void;
@@ -28,6 +33,7 @@ export function TicketCard({
   bookingId,
   amountMinor,
   ticketCount,
+  categoryCounts = [],
   onOpenQr,
   onDownload,
   onShare,
@@ -38,7 +44,7 @@ export function TicketCard({
       style={[styles.card, past && styles.past]}
       testID={`ticket-card-${bookingId}`}
     >
-      <Image
+      <CachedImage
         source={{
           uri: eventImage(event.id, event.thumbnailUrl ?? event.imageUrl),
         }}
@@ -63,11 +69,17 @@ export function TicketCard({
         <View style={styles.details}>
           <View>
             <Text style={styles.ticketLabel}>Tiket</Text>
-            <Text style={styles.ticketCount}>{ticketCount} × Tiket Umum</Text>
+            <Text style={styles.ticketCount}>
+              {categoryCounts.length > 0
+                ? categoryCounts
+                    .map(
+                      ({ categoryCode, count }) => `${count} × ${categoryCode}`,
+                    )
+                    .join(" · ")
+                : `${ticketCount} tiket`}
+            </Text>
           </View>
-          <Text style={styles.amount}>
-            {minorToIDR(amountMinor, { compact: true })}
-          </Text>
+          <Text style={styles.amount}>{minorToIDR(amountMinor)}</Text>
         </View>
         <View style={styles.actions}>
           <Pressable

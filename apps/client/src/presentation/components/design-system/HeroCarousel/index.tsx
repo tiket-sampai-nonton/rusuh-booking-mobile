@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Platform, View } from "react-native";
+import Head from "expo-router/head";
+import FastImage from "react-native-fast-image";
 import {
   cancelAnimation,
   Easing,
@@ -30,8 +32,8 @@ import {
   componentStyles,
   styleForHeroCarouselView12,
   styleForHeroCarouselView13,
+  heroInfoColumnStyle,
 } from "./style";
-import { heroInfoColumnStyle } from "./style";
 
 export interface HeroCarouselProps {
   readonly events: readonly EventSummary[];
@@ -39,6 +41,8 @@ export interface HeroCarouselProps {
   readonly onSeeAll: () => void;
   /** Mobile Home prototype uses one static featured hero. */
   readonly autoPlay?: boolean;
+  /** Pause visual work while its route is covered by another screen. */
+  readonly isActive?: boolean;
 }
 
 export function HeroCarousel({
@@ -46,15 +50,22 @@ export function HeroCarousel({
   onBook,
   onSeeAll,
   autoPlay = true,
+  isActive = true,
 }: HeroCarouselProps) {
   const { serverClock } = useServices();
   const reducedMotion = useReducedMotion();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [glitchIndex, setGlitchIndex] = useState<number | null>(null);
-  const top = events.slice(0, autoPlay ? 3 : 1);
+  const [heroImagesReady, setHeroImagesReady] = useState(false);
+  const [initialHeroImageReady, setInitialHeroImageReady] = useState(
+    Platform.OS === "web",
+  );
   const zoom = useSharedValue(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const {
     width: screenWidth,
     height: screenHeight,
@@ -62,6 +73,74 @@ export function HeroCarousel({
     isNative,
     isMobileWeb,
   } = useResponsive();
+  // Keep the active native slide stable when its route blurs. `autoPlay` is
+  // focus-driven by Home; shrinking `top` to one item on blur invalidated a
+  // previously selected slide and could temporarily blank the whole hero.
+  const top = useMemo(
+    () => events.slice(0, autoPlay || isNative ? 3 : 1),
+    [events, autoPlay, isNative],
+  );
+  const imageUris = useMemo(
+    () =>
+      top.map((event) => {
+        const uri = eventImage(event.id, event.bannerUrl ?? event.imageUrl);
+        return Platform.OS === "web"
+          ? resizeWebHeroImage(uri, screenWidth)
+          : uri;
+      }),
+    [screenWidth, top],
+  );
+
+  // Warm the same image cache used by CachedImage before a slide can become
+  // active. Disk-only preloading avoids decoding every large banner into RAM.
+  useEffect(() => {
+    let cancelled = false;
+    if (imageUris.length === 0) {
+      setHeroImagesReady(false);
+      setInitialHeroImageReady(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+    setHeroImagesReady(false);
+    const preload = FastImage.preload;
+    if (typeof preload !== "function") {
+      setHeroImagesReady(true);
+      setInitialHeroImageReady(true);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const sources = imageUris.map((uri) => ({ uri, memoryCache: false }));
+    void (async () => {
+      try {
+        if (Platform.OS !== "web") {
+          await preload(sources);
+          if (!cancelled) {
+            setHeroImagesReady(true);
+            setInitialHeroImageReady(true);
+          }
+          return;
+        }
+
+        await preload(sources.slice(0, 1));
+        if (cancelled) return;
+        setInitialHeroImageReady(true);
+        const remainingSources = sources.slice(1);
+        if (remainingSources.length > 0) await preload(remainingSources);
+        if (!cancelled) setHeroImagesReady(true);
+      } catch {
+        if (!cancelled) {
+          setHeroImagesReady(true);
+          setInitialHeroImageReady(true);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [imageUris]);
 
   // The approved mobile web hero is a compact image-led banner below the site
   // header. Native and desktop keep their existing viewport-based layouts.
@@ -72,10 +151,42 @@ export function HeroCarousel({
   // Responsive: single column on narrow screens (<900px per prototype @media query)
   // For native: ALWAYS use mobile layout regardless of screen width
   const isNarrow = screenWidth < 900 || isNative;
+  const shouldAnimateZoom = !reducedMotion && isActive && !isNative;
+
+  const scheduleTransitionReset = useCallback(() => {
+    if (transitionTimeoutRef.current !== null) {
+      clearTimeout(transitionTimeoutRef.current);
+    }
+    transitionTimeoutRef.current = setTimeout(() => {
+      transitionTimeoutRef.current = null;
+      setPrevIndex(null);
+      setGlitchIndex(null);
+    }, FADE_DURATION_MS);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (transitionTimeoutRef.current !== null) {
+        clearTimeout(transitionTimeoutRef.current);
+        transitionTimeoutRef.current = null;
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (isActive) return;
+    if (transitionTimeoutRef.current !== null) {
+      clearTimeout(transitionTimeoutRef.current);
+      transitionTimeoutRef.current = null;
+    }
+    setPrevIndex(null);
+    setGlitchIndex(null);
+  }, [isActive]);
 
   // Ken Burns zoom loop (20s): scale 1 → 1.05 → 1
   useEffect(() => {
-    if (reducedMotion) return;
+    if (!shouldAnimateZoom) return;
     zoom.value = withRepeat(
       withTiming(1, {
         duration: ZOOM_DURATION_MS,
@@ -85,84 +196,83 @@ export function HeroCarousel({
       true,
     );
     return () => cancelAnimation(zoom);
-  }, [reducedMotion, zoom]);
+  }, [shouldAnimateZoom, zoom]);
 
   // Show slide with glitch effect
   const showSlide = (index: number) => {
-    if (index === currentIndex) return;
+    if (index === currentIndex || index < 0 || index >= top.length) return;
     setPrevIndex(currentIndex);
     setGlitchIndex(index);
     setCurrentIndex(index);
-
-    setTimeout(() => {
-      setPrevIndex(null);
-      setGlitchIndex(null);
-    }, FADE_DURATION_MS);
+    scheduleTransitionReset();
   };
 
   // Auto-advance slides (6s interval)
   useEffect(() => {
-    if (!autoPlay || top.length <= 1) return;
+    if (!autoPlay || !isActive || !heroImagesReady || top.length <= 1) return;
     intervalRef.current = setInterval(() => {
-      setCurrentIndex((prev) => {
-        const next = (prev + 1) % top.length;
-        if (!reducedMotion) {
-          setPrevIndex(prev);
-          setGlitchIndex(next);
-          setTimeout(() => {
-            setPrevIndex(null);
-            setGlitchIndex(null);
-          }, FADE_DURATION_MS);
-        }
-        return next;
-      });
+      const previous = currentIndex % top.length;
+      const next = (previous + 1) % top.length;
+      if (!reducedMotion) {
+        setPrevIndex(previous);
+        setGlitchIndex(next);
+        scheduleTransitionReset();
+      }
+      setCurrentIndex(next);
     }, SLIDE_DURATION_MS);
     return () => {
       clearInterval(intervalRef.current as ReturnType<typeof setInterval>);
       intervalRef.current = null;
     };
-  }, [autoPlay, reducedMotion, top.length]);
+  }, [
+    autoPlay,
+    currentIndex,
+    heroImagesReady,
+    isActive,
+    reducedMotion,
+    scheduleTransitionReset,
+    top.length,
+  ]);
 
   const handleDotPress = (index: number) => {
     showSlide(index);
-    // Reset timer
-    clearInterval(intervalRef.current as ReturnType<typeof setInterval>);
-    intervalRef.current = setInterval(() => {
-      setCurrentIndex((prev) => {
-        const next = (prev + 1) % top.length;
-        if (!reducedMotion) {
-          setPrevIndex(prev);
-          setGlitchIndex(next);
-          setTimeout(() => {
-            setPrevIndex(null);
-            setGlitchIndex(null);
-          }, FADE_DURATION_MS);
-        }
-        return next;
-      });
-    }, SLIDE_DURATION_MS);
   };
 
-  const currentEvent = top[currentIndex];
+  const activeIndex = currentIndex % top.length;
+  const currentEvent = top[activeIndex];
   if (!currentEvent) return null;
 
   const targetDateIso = currentEvent.startsAt;
 
   return (
     <View style={styleForHeroCarouselView12(heroHeight)} testID="v2-hero">
+      {Platform.OS === "web" && imageUris[0] ? (
+        <Head>
+          <link rel="preconnect" href="https://images.unsplash.com" />
+          <link
+            rel="preload"
+            as="image"
+            href={imageUris[0]}
+            fetchPriority="high"
+          />
+        </Head>
+      ) : null}
       {/* Background slides (prototype .hero-slides) */}
       <View style={componentStyles.elementPosition32}>
-        {top.map((ev, i) => (
-          <HeroSlide
-            key={ev.id}
-            uri={eventImage(ev.id, ev.bannerUrl ?? ev.imageUrl)}
-            active={i === currentIndex}
-            isPrev={i === prevIndex}
-            isGlitching={i === glitchIndex}
-            zoomValue={zoom}
-            reduced={Boolean(reducedMotion)}
-          />
-        ))}
+        {(Platform.OS === "web" ? initialHeroImageReady : heroImagesReady) &&
+          top.map((ev, i) =>
+            i === activeIndex || i === prevIndex ? (
+              <HeroSlide
+                key={ev.id}
+                uri={imageUris[i]}
+                active={i === activeIndex}
+                isPrev={i === prevIndex}
+                isGlitching={i === glitchIndex}
+                zoomValue={zoom}
+                reduced={Boolean(reducedMotion)}
+              />
+            ) : null,
+          )}
       </View>
 
       {/* Gradient overlay (prototype .hero-slide-overlay) */}
@@ -191,7 +301,6 @@ export function HeroCarousel({
           <HeroInfoMobile
             event={currentEvent}
             onBook={onBook}
-            onSeeAll={onSeeAll}
             isMobileWeb={isMobileWeb}
           />
         ) : (
@@ -226,9 +335,23 @@ export function HeroCarousel({
       )}
 
       {/* Scroll indicator (prototype .scroll-indicator) - bottom left, desktop only */}
-      {!isNarrow && <ScrollIndicator />}
+      {!isNarrow && isActive && <ScrollIndicator />}
     </View>
   );
+}
+
+function resizeWebHeroImage(uri: string, viewportWidth: number): string {
+  if (!uri.includes("images.unsplash.com")) return uri;
+
+  const [path, query = ""] = uri.split("?", 2);
+  const params = new URLSearchParams(query);
+  // On mobile, match the first event-card candidate so the browser reuses the
+  // same cached image instead of downloading a second, larger hero variant.
+  const requestedWidth =
+    viewportWidth <= 900 ? 640 : Math.min(1600, Math.ceil(viewportWidth * 1.5));
+  params.set("w", String(requestedWidth));
+  params.set("q", viewportWidth <= 900 ? "56" : "68");
+  return `${path}?${params.toString()}`;
 }
 
 export default HeroCarousel;

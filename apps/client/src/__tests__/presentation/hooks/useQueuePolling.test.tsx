@@ -49,6 +49,10 @@ describe("RBT-042 computeRefetchInterval", () => {
     expect(computeRefetchInterval(entry("ADMITTED"))).toBe(false);
   });
 
+  it("stops polling a CLAIMED one-use admission", () => {
+    expect(computeRefetchInterval(entry("CLAIMED"))).toBe(false);
+  });
+
   it("keeps polling on WAITING at the server-honoured adaptive wait", () => {
     const wait = computeRefetchInterval(entry("WAITING", 2000), false, () => 0);
     expect(wait).toBe(2000);
@@ -141,10 +145,17 @@ class CountingQueueRepository implements QueueRepository {
   }
 }
 
+const mockMembershipClear = jest.fn(async () => undefined);
+
 function makeContainer(repo: QueueRepository): Container {
-  // Only queueRepository is exercised; the rest are never touched by the hook.
+  // Only queueRepository and membership cleanup are exercised by this hook.
   return {
     queueRepository: repo,
+    queueMembership: {
+      save: async () => undefined,
+      load: async () => null,
+      clear: mockMembershipClear,
+    },
     pushSubscription: { remove: async () => {} },
   } as unknown as Container;
 }
@@ -283,6 +294,67 @@ describe("RBT-042 useQueuePolling render seam", () => {
     unmount(); // TanStack cancels the query on unmount (cancel-on-unmount AC).
   });
 
+  it("reconciles cached ADMITTED status before exposing it as authoritative", async () => {
+    const repo = new CountingQueueRepository("CLAIMED");
+    let finishStatus: ((value: QueueEntry) => void) | undefined;
+    repo.getStatus = async (queueId: string) => {
+      repo.getStatusCalls += 1;
+      return new Promise((resolve) => {
+        finishStatus = (value) => resolve({ ...value, queueId });
+      });
+    };
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+    });
+    client.setQueryData(["queue", "q-1", "evt-1"], {
+      entry: entry("ADMITTED"),
+      admissionRatePerMin: 1200,
+    });
+    let last: ReturnType<typeof useQueuePolling> | undefined;
+    render(
+      <QueryClientProvider client={client}>
+        <ServiceProvider container={makeContainer(repo)}>
+          <Harness repo={repo} onView={(view) => (last = view)} />
+        </ServiceProvider>
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => expect(repo.getStatusCalls).toBe(1));
+    expect(last?.entry?.status).toBe("ADMITTED");
+    expect(last?.isStatusAuthoritative).toBe(false);
+
+    await act(async () => {
+      finishStatus?.(entry("CLAIMED"));
+    });
+    await waitFor(() => expect(last?.entry?.status).toBe("CLAIMED"));
+    expect(last?.isStatusAuthoritative).toBe(true);
+  });
+
+  it("keeps a claimed entry from authorizing again and stops its waiting poller", async () => {
+    const repo = new CountingQueueRepository("ADMITTED");
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+    });
+    client.setQueryData(["queue", "q-1", "evt-1"], {
+      entry: entry("CLAIMED"),
+      admissionRatePerMin: 1200,
+    });
+    let last: ReturnType<typeof useQueuePolling> | undefined;
+    render(
+      <QueryClientProvider client={client}>
+        <ServiceProvider container={makeContainer(repo)}>
+          <Harness repo={repo} onView={(view) => (last = view)} />
+        </ServiceProvider>
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => expect(repo.getStatusCalls).toBe(1));
+    await waitFor(() => expect(last?.isStatusAuthoritative).toBe(true));
+    expect(last?.entry?.status).toBe("CLAIMED");
+    expect(last?.isSettled).toBe(true);
+    expect(computeRefetchInterval(last?.entry)).toBe(false);
+  });
+
   it("exposes isSettled=false while WAITING (poller active)", async () => {
     const repo = new CountingQueueRepository("WAITING");
     let last: ReturnType<typeof useQueuePolling> | undefined;
@@ -293,6 +365,7 @@ describe("RBT-042 useQueuePolling render seam", () => {
   });
 
   it("leave() delegates to the port through LeaveQueue", async () => {
+    mockMembershipClear.mockClear();
     let leaveId: string | undefined;
     const repo = new CountingQueueRepository("ADMITTED");
     repo.leave = async (id: string) => {
@@ -303,6 +376,7 @@ describe("RBT-042 useQueuePolling render seam", () => {
     await waitFor(() => expect(last?.isSettled).toBe(true));
     await last!.leave();
     expect(leaveId).toBe("q-1");
+    expect(mockMembershipClear).toHaveBeenCalledTimes(1);
     unmount();
   });
 });

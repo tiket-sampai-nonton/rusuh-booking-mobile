@@ -37,10 +37,39 @@ const eventPages = fs
 if (!eventPages.length)
   throw new Error("Expo export has no generated event detail pages.");
 
+function htmlFiles(directory) {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const filePath = path.join(directory, entry.name);
+    if (entry.isDirectory()) return htmlFiles(filePath);
+    return entry.isFile() && entry.name.endsWith(".html") ? [filePath] : [];
+  });
+}
+
+function ensureEarlyCharset(filePath) {
+  const html = fs.readFileSync(filePath, "utf8");
+  const charset = html.match(/<meta\b[^>]*\bcharset\s*=\s*["']?utf-8[^>]*>/i);
+  if (!charset)
+    throw new Error(`Missing UTF-8 charset declaration: ${filePath}`);
+  const withoutCharset = html.replace(charset[0], "");
+  if (!/<head\b[^>]*>/i.test(withoutCharset)) {
+    throw new Error(`Missing document head: ${filePath}`);
+  }
+  fs.writeFileSync(
+    filePath,
+    withoutCharset.replace(/<head\b[^>]*>/i, (head) => `${head}${charset[0]}`),
+  );
+}
+
+// Expo Router injects route metadata before its root HTML boilerplate. Keep
+// the encoding declaration ahead of that metadata so browsers can decode the
+// document correctly from its first kilobyte.
+for (const htmlPath of htmlFiles(dist)) ensureEarlyCharset(htmlPath);
+
 const publicPaths = [
   "/",
   "/browse",
   "/history",
+  "/privacy",
   ...eventPages.map((name) => `/events/${name.slice(0, -5)}`),
 ];
 const escapeXml = (value) =>

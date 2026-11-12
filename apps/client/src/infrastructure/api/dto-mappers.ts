@@ -9,6 +9,7 @@
  */
 
 import type {
+  BookingAvailabilitySnapshot,
   Booking,
   BookingSession,
   AttendeeCheck,
@@ -31,6 +32,7 @@ import type {
 } from "@domain/repositories/queue.repository";
 import type {
   AuthSession,
+  CheckoutUserDetails,
   UserProfile,
 } from "@domain/repositories/user.repository";
 
@@ -57,6 +59,7 @@ interface WireEventSummary {
 interface WireEventDetail {
   event: WireEventSummary;
   categories: BookingSession["categories"];
+  description?: Readonly<Record<string, unknown>>;
   maxTicketsPerOrder?: number;
   maxTicketsPerBuyerNik?: number;
   allowMixedCategories?: boolean;
@@ -67,7 +70,7 @@ interface WireQueueEntry {
   eventId: string;
   position: number;
   status: QueueStatus;
-  zone?: QueueEntry["zone"];
+  zone?: NonNullable<QueueEntry["zone"]>;
   nextPollAfterMs?: number;
   serverTime?: string;
 }
@@ -94,11 +97,11 @@ interface WireBookingSession {
   serverTime?: string;
   maxSelectable?: number;
   categories: BookingSession["categories"];
-  phase?: BookingSession["phase"];
-  booking?: BookingSession["booking"];
+  phase?: NonNullable<BookingSession["phase"]>;
+  booking?: NonNullable<BookingSession["booking"]>;
 }
 interface WireAttendeeCheck {
-  nikMasked: string;
+  nikMasked?: string;
   result: AttendeeCheck["result"];
   checksRemaining?: number;
 }
@@ -116,8 +119,10 @@ interface WireAuthSession {
   account: WireUserProfile;
 }
 interface WireUserProfile {
+  email?: string;
   emailMasked: string;
   fullName?: string;
+  nik?: string;
   nikMasked?: string;
   hasNik: boolean;
 }
@@ -141,15 +146,38 @@ export function toEventSummary(dto: WireEventSummary): EventSummary {
 }
 
 export function toEventDetail(dto: WireEventDetail): EventDetail {
+  // The event summary's minPriceMinor can be stale or default to zero while
+  // the detail response carries the actual ticket prices. Prefer the minimum
+  // valid category price when categories are present (including a real free
+  // category at zero); fall back to the summary only when no usable category
+  // price was provided.
+  const categoryPrices = dto.categories
+    .map((category) => category.priceMinor)
+    .filter(
+      (price): price is number => Number.isSafeInteger(price) && price >= 0,
+    );
+  const minCategoryPrice =
+    categoryPrices.length > 0 ? Math.min(...categoryPrices) : undefined;
+  const summaryPrice =
+    Number.isSafeInteger(dto.event.minPriceMinor) &&
+    (dto.event.minPriceMinor ?? -1) >= 0
+      ? dto.event.minPriceMinor
+      : undefined;
+
   return {
     ...toEventSummary(dto.event),
+    minPriceMinor: minCategoryPrice ?? summaryPrice,
     maxTicketsPerOrder: dto.maxTicketsPerOrder,
     maxTicketsPerBuyerNik: dto.maxTicketsPerBuyerNik,
     allowMixedCategories: dto.allowMixedCategories,
     published: dto.published,
     description: {
+      ...dto.description,
       categories: dto.categories,
-      bannerImage: dto.event.bannerUrl ?? dto.event.imageUrl,
+      bannerImage:
+        dto.description?.bannerImage ??
+        dto.event.bannerUrl ??
+        dto.event.imageUrl,
     },
   };
 }
@@ -211,6 +239,34 @@ export function toBookingSession(dto: WireBookingSession): BookingSession {
   };
 }
 
+/** Parse the untrusted SSE availability payload into the domain port shape. */
+export function toBookingAvailability(
+  value: unknown,
+): BookingAvailabilitySnapshot | null {
+  if (typeof value !== "object" || value === null) return null;
+  const categories = (value as { categories?: unknown }).categories;
+  if (!Array.isArray(categories)) return null;
+
+  const mapped: BookingAvailabilitySnapshot["categories"][number][] = [];
+  for (const item of categories) {
+    if (typeof item !== "object" || item === null) continue;
+    const category = item as { categoryId?: unknown; available?: unknown };
+    if (
+      typeof category.categoryId === "string" &&
+      category.categoryId.length > 0 &&
+      typeof category.available === "number" &&
+      Number.isInteger(category.available) &&
+      category.available >= 0
+    ) {
+      mapped.push({
+        categoryId: category.categoryId,
+        available: category.available,
+      });
+    }
+  }
+  return { categories: mapped };
+}
+
 export function toAttendeeCheck(dto: WireAttendeeCheck): AttendeeCheck {
   return {
     nikMasked: dto.nikMasked,
@@ -245,5 +301,20 @@ export function toUserProfile(dto: WireUserProfile): UserProfile {
     fullName: dto.fullName,
     nikMasked: dto.nikMasked,
     hasNik: dto.hasNik,
+  };
+}
+
+/**
+ * Map authenticated GET /me values for the checkout screen only. Callers must
+ * keep this value transient; `toUserProfile` remains the safe account-store
+ * projection and deliberately drops the real email/NIK.
+ */
+export function toCheckoutUserDetails(
+  dto: WireUserProfile,
+): CheckoutUserDetails {
+  return {
+    email: dto.email ?? "",
+    fullName: dto.fullName,
+    nik: dto.nik,
   };
 }

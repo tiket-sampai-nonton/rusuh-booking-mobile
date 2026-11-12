@@ -1,250 +1,138 @@
-import { screen, waitFor } from "@testing-library/react-native";
-
-import type {
-  PageToken,
-  PaymentAttempt,
-  PaymentMethod,
-  PaymentPage,
-  PaymentRepository,
-} from "@domain/repositories/payment.repository";
+import { screen } from "@testing-library/react-native";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
-
-const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
-jest.mock("expo-router", () => ({
-  useRouter: () => mockRouter,
-}));
-
-// eslint-disable-next-line import/first, @typescript-eslint/no-require-imports
-const RN = require("react-native") as typeof import("react-native");
-// eslint-disable-next-line import/first
+import { setPaymentHandoff } from "@presentation/stores/payment-handoff";
 import {
   PaymentWebViewScreen,
+  isBackendPaymentReturn,
   resolveWebViewNav,
 } from "@presentation/screens/PaymentWebView";
 
-function repo(over: Partial<PaymentRepository> = {}): PaymentRepository {
-  return {
-    getPaymentPage: async (bookingId): Promise<PaymentPage> => ({
-      bookingId,
-      methods: ["QRIS"],
-      amountMinor: 1,
-      paymentExpiresAt: "",
-      serverTime: "",
-    }),
-    createAttempt: async (
-      bookingId: string,
-      _m: PaymentMethod,
-      _k: string,
-    ): Promise<PaymentAttempt> => ({
-      attemptId: "a",
-      bookingId,
-      status: "AWAITING_PAYMENT",
-    }),
-    getStatus: async (): Promise<PaymentAttempt> => ({
-      attemptId: "a",
-      bookingId: "b",
-      status: "PAID",
-    }),
-    createPageToken: async (bookingId: string): Promise<PageToken> => ({
-      pageToken: "pgt_1",
-      pageUrl: `/payment/${bookingId}?rb_pay_token=pgt_1`,
-    }),
-    exchangePageToken: async (): Promise<void> => {},
-    snapCallback: async (attemptId: string): Promise<PaymentAttempt> => ({
-      attemptId,
-      bookingId: "b",
-      status: "PAID",
-    }),
-    ...over,
-  };
-}
+jest.mock("expo-router", () => ({
+  useRouter: () => ({ replace: jest.fn(), back: jest.fn() }),
+}));
+const RN = require("react-native") as typeof import("react-native");
 
-describe("PaymentWebViewScreen (RBT-062)", () => {
-  const origOS = RN.Platform.OS;
-  const originalMocks = process.env.EXPO_PUBLIC_USE_MOCKS;
-  const originalBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
-  const webViewMock = require("react-native-webview") as {
-    __setExchangeResult: (value: string) => void;
-    __injections: string[];
-  };
-  afterEach(() => {
+describe("native SNAP WebView", () => {
+  const originalOS = RN.Platform.OS;
+  afterEach(() =>
     Object.defineProperty(RN.Platform, "OS", {
-      value: origOS,
+      value: originalOS,
       configurable: true,
-    });
-    mockRouter.replace.mockReset();
-    if (originalMocks === undefined) delete process.env.EXPO_PUBLIC_USE_MOCKS;
-    else process.env.EXPO_PUBLIC_USE_MOCKS = originalMocks;
-    if (originalBaseUrl === undefined)
-      delete process.env.EXPO_PUBLIC_API_BASE_URL;
-    else process.env.EXPO_PUBLIC_API_BASE_URL = originalBaseUrl;
-    webViewMock.__setExchangeResult("rb-pay-exchanged");
-    webViewMock.__injections.length = 0;
-  });
+    }),
+  );
 
-  it("native: mints a token, mounts the WebView, exchanges on load", async () => {
-    process.env.EXPO_PUBLIC_USE_MOCKS = "false";
-    process.env.EXPO_PUBLIC_API_BASE_URL = "https://api.example.com/api/v1";
+  it("opens the backend SNAP redirect directly in the WebView", () => {
     Object.defineProperty(RN.Platform, "OS", {
       value: "ios",
       configurable: true,
     });
-    const exchanged: string[] = [];
-    renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
-      container: {
-        paymentRepository: repo({
-          exchangePageToken: async (t) => {
-            exchanged.push(t);
-          },
-        }),
-      },
-    });
-    await waitFor(() =>
-      expect(screen.getByTestId("paywv-webview")).toBeTruthy(),
+    setPaymentHandoff(
+      "booking-1",
+      "https://app.sandbox.midtrans.com/snap/v4/redirection/test",
     );
-    await waitFor(() => expect(webViewMock.__injections.length).toBe(1));
-    expect(webViewMock.__injections[0]).toContain("payment-page-sessions");
-    expect(webViewMock.__injections[0]).toContain("pgt_1");
-    expect(exchanged).toEqual([]);
-  });
-
-  it("native: shows an error when the token mint fails", async () => {
-    Object.defineProperty(RN.Platform, "OS", {
-      value: "ios",
-      configurable: true,
-    });
-    renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
-      container: {
-        paymentRepository: repo({
-          createPageToken: async () => {
-            throw new Error("boom");
-          },
-        }),
-      },
-    });
-    await waitFor(() => expect(screen.getByTestId("paywv-error")).toBeTruthy());
-  });
-
-  it("web: renders the no-WebView notice (handoff not needed on web)", async () => {
-    Object.defineProperty(RN.Platform, "OS", {
-      value: "web",
-      configurable: true,
-    });
-    renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
-      container: { paymentRepository: repo() },
-    });
-    await waitFor(() => expect(screen.getByTestId("paywv-web")).toBeTruthy());
-  });
-
-  it("native: a SNAP success return routes to the verify gate, not /success (RBT-063)", async () => {
-    Object.defineProperty(RN.Platform, "OS", {
-      value: "ios",
-      configurable: true,
-    });
-    renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
-      container: {
-        paymentRepository: repo({
-          createPageToken: async (bookingId: string): Promise<PageToken> => ({
-            pageToken: "pgt_1",
-            // The mock WebView fires onNavigationStateChange with this url.
-            pageUrl: `/payment/${bookingId}?rbtest_nav=${encodeURIComponent("/success/bk-1")}`,
-          }),
-        }),
-      },
-    });
-    await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/payment-result/bk-1"),
+    renderWithProviders(<PaymentWebViewScreen bookingId="booking-1" />);
+    expect(screen.getByTestId("paywv-webview").props.accessibilityLabel).toBe(
+      "https://app.sandbox.midtrans.com/snap/v4/redirection/test",
     );
   });
 
-  it("native: an intermediate SNAP URL does not navigate", async () => {
-    Object.defineProperty(RN.Platform, "OS", {
-      value: "ios",
-      configurable: true,
-    });
-    renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
-      container: {
-        paymentRepository: repo({
-          createPageToken: async (bookingId: string): Promise<PageToken> => ({
-            pageToken: "pgt_1",
-            pageUrl: `/payment/${bookingId}?rbtest_nav=${encodeURIComponent("https://snap.mock/step")}`,
-          }),
-        }),
-      },
-    });
-    await waitFor(() =>
-      expect(screen.getByTestId("paywv-webview")).toBeTruthy(),
-    );
-    expect(mockRouter.replace).not.toHaveBeenCalled(); // route === null → stay
+  it("rejects non-Midtrans and insecure payment URLs", () => {
+    expect(() =>
+      setPaymentHandoff("booking-1", "https://attacker.example/snap"),
+    ).toThrow();
+    expect(() =>
+      setPaymentHandoff("booking-1", "http://app.midtrans.com/snap"),
+    ).toThrow();
   });
 
-  it("native: unmounting mid-mint does not set state (cleanup guard)", async () => {
+  it("shows recovery when no matching handoff exists", () => {
     Object.defineProperty(RN.Platform, "OS", {
-      value: "ios",
+      value: "android",
       configurable: true,
     });
-    let release!: () => void;
-    const gate = new Promise<void>((r) => (release = r));
-    const { unmount } = renderWithProviders(
-      <PaymentWebViewScreen bookingId="bk-1" />,
-      {
-        container: {
-          paymentRepository: repo({
-            createPageToken: async (bookingId: string): Promise<PageToken> => {
-              await gate; // hold the mint until after unmount
-              return { pageToken: "pgt_1", pageUrl: `/payment/${bookingId}` };
-            },
-          }),
-        },
-      },
-    );
-    unmount(); // cancelled = true
-    release(); // mint resolves after unmount → guarded, no state set / no throw
-    await Promise.resolve();
+    renderWithProviders(<PaymentWebViewScreen bookingId="other-booking" />);
+    expect(screen.getByTestId("paywv-error")).toBeTruthy();
   });
 
-  it("native: an exchange failure surfaces the error state", async () => {
-    process.env.EXPO_PUBLIC_USE_MOCKS = "false";
-    process.env.EXPO_PUBLIC_API_BASE_URL = "https://api.example.com/api/v1";
-    webViewMock.__setExchangeResult("rb-pay-error");
-    Object.defineProperty(RN.Platform, "OS", {
-      value: "ios",
-      configurable: true,
-    });
-    renderWithProviders(<PaymentWebViewScreen bookingId="bk-1" />, {
-      container: {
-        paymentRepository: repo({
-          exchangePageToken: async () => {
-            throw new Error("expired token");
-          },
-        }),
-      },
-    });
-    await waitFor(() => expect(screen.getByTestId("paywv-error")).toBeTruthy());
+  it("recognizes backend-provided callback URLs without trusting query status", () => {
+    const returns = {
+      successReturnUrl: "https://example.com/payment/success",
+      failedReturnUrl: "https://example.com/payment/failed",
+    };
+    expect(
+      isBackendPaymentReturn(
+        "https://example.com/payment/success?transaction_status=pending",
+        returns,
+      ),
+    ).toBe(true);
+    expect(
+      isBackendPaymentReturn("https://example.com/payment/failed", returns),
+    ).toBe(true);
+    expect(
+      isBackendPaymentReturn(
+        "https://attacker.example/payment/success",
+        returns,
+      ),
+    ).toBe(false);
   });
 });
 
 describe("resolveWebViewNav (RBT-062)", () => {
   it("routes a success return to the result GATE, not straight to /success (RBT-063)", () => {
     // never trust the callback — it must go through the authoritative verify.
-    expect(resolveWebViewNav("https://app/success/bk-1", "bk-1")).toBe(
-      "/payment-result/bk-1",
-    );
+    expect(
+      resolveWebViewNav(
+        "https://app/success/bk-1",
+        "bk-1",
+        undefined,
+        "https://app",
+      ),
+    ).toBe("/payment-result/bk-1");
   });
   it("carries attemptId into the result gate when known", () => {
-    expect(resolveWebViewNav("https://app/success/bk-1", "bk-1", "a7")).toBe(
-      "/payment-result/bk-1?attemptId=a7",
-    );
+    expect(
+      resolveWebViewNav(
+        "https://app/success/bk-1",
+        "bk-1",
+        "a7",
+        "https://app",
+      ),
+    ).toBe("/payment-result/bk-1?attemptId=a7");
   });
-  it("routes a failed or expired return straight to /expired", () => {
-    expect(resolveWebViewNav("https://app/failed?x=1", "bk-1")).toBe(
-      "/expired/bk-1",
-    );
-    expect(resolveWebViewNav("https://app/expired/bk-1", "bk-1")).toBe(
-      "/expired/bk-1",
-    );
+  it("verifies a failed or expired return", () => {
+    expect(
+      resolveWebViewNav(
+        "https://app/failed?x=1",
+        "bk-1",
+        undefined,
+        "https://app",
+      ),
+    ).toBe("/payment-result/bk-1");
+    expect(
+      resolveWebViewNav(
+        "https://app/expired/bk-1",
+        "bk-1",
+        undefined,
+        "https://app",
+      ),
+    ).toBe("/payment-result/bk-1");
   });
   it("stays (null) for an intermediate SNAP URL", () => {
-    expect(resolveWebViewNav("https://snap.mock/bk-1/step", "bk-1")).toBeNull();
+    expect(
+      resolveWebViewNav(
+        "https://snap.mock/bk-1/step",
+        "bk-1",
+        undefined,
+        "https://app",
+      ),
+    ).toBeNull();
+    expect(
+      resolveWebViewNav(
+        "https://attacker.example/success/bk-1",
+        "bk-1",
+        undefined,
+        "https://app",
+      ),
+    ).toBeNull();
   });
 });

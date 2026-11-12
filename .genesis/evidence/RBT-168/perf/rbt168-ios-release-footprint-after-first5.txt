@@ -1,0 +1,38 @@
+======================================================================
+RusuhBooking [50414]: 64-bit    Footprint: 234 MB (16384 bytes per page)
+======================================================================
+
+  Dirty      Clean  Reclaimable    Regions    Category
+    ---        ---          ---        ---    ---
+  78 MB        0 B      4096 KB         35    MALLOC_SMALL
+  43 MB        0 B          0 B         39    untagged (VM_ALLOCATE)
+  39 MB        0 B          0 B        148    CG raster data
+  38 MB        0 B          0 B        261    CoreAnimation
+  17 MB        0 B          0 B         74    dyld private memory
+9015 KB      32 KB          0 B        953    __DATA
+7237 KB      16 KB          0 B        981    __DATA_CONST
+1747 KB        0 B          0 B          1    page table
+1030 KB        0 B          0 B       1001    unused dyld shared cache area
+ 848 KB        0 B          0 B         10    MALLOC metadata
+ 384 KB        0 B          0 B         16    stack
+ 176 KB        0 B          0 B          1    MALLOC_TINY
+ 155 KB        0 B          0 B         14    __DATA_DIRTY
+ 128 KB        0 B          0 B          1    Accelerate image backing stores
+  68 KB        0 B          0 B          3    __TPRO_CONST
+  32 KB        0 B          0 B          1    __AUTH_CONST
+  32 KB        0 B          0 B          1    Activity Tracing
+  32 KB        0 B          0 B          1    MALLOC_NANO
+  16 KB        0 B          0 B          1    Foundation
+  16 KB        0 B          0 B          1    os_alloc_once
+    0 B      11 MB          0 B        995    __TEXT
+    0 B    8544 KB          0 B         20    mapped file
+    0 B     192 KB          0 B         81    __LINKEDIT
+    0 B        0 B          0 B          1    __FONT_DATA
+    0 B        0 B          0 B          3    SQLite page cache
+    ---        ---          ---        ---    ---
+ 234 MB      19 MB      4096 KB       4645    TOTAL
+
+Auxiliary data:
+    phys_footprint: 234 MB
+    phys_footprint_peak: 246 MB
+

@@ -12,7 +12,12 @@ import { useAccountStore } from "@presentation/stores/account-store";
 
 // Hold the router push spy in a mock-prefixed object so the jest.mock factory
 // (hoisted above imports) may legally reference it.
-const mockRouter = { push: jest.fn() };
+const mockRouter = {
+  push: jest.fn(),
+  navigate: jest.fn(),
+  dismissTo: jest.fn(),
+};
+let mockHeroAutoPlay: boolean | undefined;
 const mockResponsive = { width: 393, height: 852 };
 function mockGridColumnsForWidth(width: number): number {
   if (width > 900) return 3;
@@ -22,6 +27,7 @@ function mockGridColumnsForWidth(width: number): number {
 
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
+  useFocusEffect: jest.fn(),
 }));
 jest.mock("@presentation/hooks/useResponsive", () => ({
   useResponsive: () => {
@@ -62,12 +68,15 @@ jest.mock("@presentation/components/design-system/HeroCarousel", () => {
       events,
       onBook,
       onSeeAll,
+      autoPlay,
     }: {
       events: readonly { id: string; name: string }[];
       onBook: (eventId: string) => void;
       onSeeAll: () => void;
-    }) =>
-      ReactMock.createElement(
+      autoPlay?: boolean;
+    }) => {
+      mockHeroAutoPlay = autoPlay;
+      return ReactMock.createElement(
         View,
         { testID: "v2-hero" },
         ReactMock.createElement(
@@ -80,7 +89,8 @@ jest.mock("@presentation/components/design-system/HeroCarousel", () => {
           { testID: "hero-see-all", onPress: onSeeAll },
           ReactMock.createElement(Text, null, "Lihat Semua"),
         ),
-      ),
+      );
+    },
   };
 });
 
@@ -95,11 +105,29 @@ function repoReturning(events: readonly EventSummary[]): EventRepository {
   };
 }
 
+function catalogEvent(id: string, daysFromNow: number): EventSummary {
+  const day = 24 * 60 * 60 * 1000;
+  return {
+    id,
+    slug: id,
+    name: `Event ${id}`,
+    venue: "Jakarta",
+    startsAt: new Date(Date.now() + daysFromNow * day).toISOString(),
+    salesStartsAt: new Date(Date.now() - day).toISOString(),
+    salesEndsAt: new Date(Date.now() + day).toISOString(),
+    status: "AVAILABLE",
+    minPriceMinor: 100000,
+  };
+}
+
 describe("HomeScreen", () => {
   const originalPlatform = Platform.OS;
 
   beforeEach(() => {
     mockRouter.push.mockReset();
+    mockRouter.navigate.mockReset();
+    mockRouter.dismissTo.mockReset();
+    mockHeroAutoPlay = undefined;
     mockResponsive.width = 393;
     mockResponsive.height = 852;
     act(() => useAccountStore.getState().clearProfile());
@@ -137,8 +165,8 @@ describe("HomeScreen", () => {
     // Settle the query so the suite leaves no pending work behind.
     release([]);
     await waitFor(() =>
-      // : Once loaded, letters disappear and section-events appears
-      expect(screen.queryByTestId("section-events")).toBeTruthy(),
+      // : Once loaded, letters disappear and the upcoming events section appears
+      expect(screen.queryByTestId("home-upcoming-events-section")).toBeTruthy(),
     );
   });
 
@@ -146,12 +174,12 @@ describe("HomeScreen", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    // : testID is section-events instead of section-upcoming
+    // : The upcoming events section has a stable semantic test ID.
     await waitFor(() =>
-      expect(screen.getByTestId("section-events")).toBeTruthy(),
+      expect(screen.getByTestId("home-upcoming-events-section")).toBeTruthy(),
     );
     // Native and web use the same Indonesian Home section title.
-    expect(screen.getByText("Daftar Event")).toBeTruthy();
+    expect(screen.getByText("Jelajahi Event")).toBeTruthy();
     expect(screen.queryByTestId("home-mobile-stats")).toBeNull();
     // "Rusuh Fest 2026" shows in the static hero and catalog card.
     expect(
@@ -159,12 +187,50 @@ describe("HomeScreen", () => {
     ).toBeGreaterThanOrEqual(1);
     // History is rendered on Home when the repository provides past events.
     expect(screen.getByTestId("section-history")).toBeTruthy();
-    fireEvent(screen.getByTestId("section-events"), "layout", {
+    fireEvent(screen.getByTestId("home-upcoming-events-section"), "layout", {
       nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
     });
     fireEvent(screen.getByTestId("section-history"), "layout", {
       nativeEvent: { layout: { x: 0, y: 1420, width: 393, height: 420 } },
     });
+  });
+
+  it("bounds Home previews and links to the full event and history lists", async () => {
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "web",
+    });
+    const events = [
+      ...Array.from({ length: 20 }, (_, index) =>
+        catalogEvent(`upcoming-${index}`, index + 1),
+      ),
+      ...Array.from({ length: 12 }, (_, index) =>
+        catalogEvent(`history-${index}`, -(index + 1)),
+      ),
+    ];
+
+    renderWithProviders(<HomeScreen />, {
+      container: { eventRepository: repoReturning(events) },
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("v2-event-card-upcoming-0")).toBeTruthy(),
+    );
+    expect(screen.getByTestId("v2-event-card-upcoming-7")).toBeTruthy();
+    expect(screen.queryByTestId("v2-event-card-upcoming-8")).toBeNull();
+    expect(screen.getByTestId("v2-event-card-history-3")).toBeTruthy();
+    expect(screen.queryByTestId("v2-event-card-history-4")).toBeNull();
+
+    fireEvent.press(screen.getByTestId("v2-event-card-history-0"));
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      "/events/history-0?source=history",
+    );
+
+    const seeAllLinks = screen.getAllByRole("link", { name: "Lihat Semua" });
+    fireEvent.press(seeAllLinks[0]);
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/browse");
+    fireEvent.press(seeAllLinks[1]);
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/history");
   });
 
   it("navigates to the event detail on an enterable card press", async () => {
@@ -184,8 +250,8 @@ describe("HomeScreen", () => {
     // : testID is v2-hero instead of home-hero
     await waitFor(() => screen.getByTestId("v2-hero"));
     // Fire onLayout so the featured-section Y is measured (scroll target).
-    // : testID is section-events instead of section-upcoming
-    fireEvent(screen.getByTestId("section-events"), "layout", {
+    // : The upcoming events section has a stable semantic test ID.
+    fireEvent(screen.getByTestId("home-upcoming-events-section"), "layout", {
       nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
     });
     // Each hero slide carries its own CTAs (prototype .slide-body).
@@ -196,10 +262,11 @@ describe("HomeScreen", () => {
       expect.stringMatching(/^\/events\//),
     );
     fireEvent.press(screen.getAllByTestId("hero-see-all")[0]);
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/browse");
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/browse");
+    expect(mockHeroAutoPlay).toBe(true);
   });
 
-  it("handles desktop header routes, section links, and scroll events", async () => {
+  it("handles desktop header routes and section links", async () => {
     Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
     mockResponsive.width = 1280;
     useAccountStore.getState().setProfile({
@@ -217,16 +284,9 @@ describe("HomeScreen", () => {
     fireEvent.press(screen.getByTestId("nav-browse"));
     fireEvent.press(screen.getByTestId("nav-tickets"));
     fireEvent.press(screen.getByTestId("nav-profile"));
-    fireEvent.press(screen.getByLabelText("Konser"));
-    const scrollHandler = screen.getByTestId("home-scroll").props.onScroll as
-      | ((event: { contentOffset: { y: number } }) => void)
-      | undefined;
-    act(() => scrollHandler?.({ contentOffset: { y: 240 } }));
-
-    expect(mockRouter.push).toHaveBeenCalledWith("/browse");
-    expect(mockRouter.push).toHaveBeenCalledWith("/my-tickets");
-    expect(mockRouter.push).toHaveBeenCalledWith("/profile");
-    expect(mockRouter.push).toHaveBeenCalledWith("/browse?genre=concert");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/browse");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/profile");
   });
 
   it("opens and applies the web filter sheet", async () => {
@@ -240,11 +300,11 @@ describe("HomeScreen", () => {
     fireEvent.press(screen.getByTestId("login-cancel"));
     fireEvent.press(screen.getByTestId("filter-btn"));
     expect(screen.getByText("Saring Event")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("filter-genre-Festival"));
+    fireEvent.press(screen.getByTestId("filter-genre-festival"));
     fireEvent.press(screen.getByTestId("filter-time-month"));
     fireEvent.press(screen.getByTestId("filter-apply"));
-    expect(mockRouter.push).toHaveBeenCalledWith(
-      "/browse?genre=Festival&time=month&sort=closest",
+    expect(mockRouter.navigate).toHaveBeenCalledWith(
+      "/browse?category=festival&time=month&sort=closest",
     );
   });
 
@@ -257,14 +317,14 @@ describe("HomeScreen", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    await waitFor(() => screen.getByRole("tab", { name: "Tiket" }));
+    await waitFor(() => screen.getByRole("tab", { name: "Ticket" }));
 
-    fireEvent.press(screen.getByRole("tab", { name: "Jelajahi" }));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/browse");
-    fireEvent.press(screen.getByRole("tab", { name: "Tiket" }));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/my-tickets");
-    fireEvent.press(screen.getByRole("tab", { name: "Akun" }));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/profile");
+    fireEvent.press(screen.getByRole("tab", { name: "Jelajah" }));
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/browse");
+    fireEvent.press(screen.getByRole("tab", { name: "Ticket" }));
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/my-tickets");
+    fireEvent.press(screen.getByRole("tab", { name: "Profil" }));
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith("/profile");
   });
 
   it("renders empty states when the catalog is empty", async () => {
@@ -292,7 +352,11 @@ describe("HomeScreen", () => {
     });
     await waitFor(() => expect(screen.getByTestId("home-error")).toBeTruthy());
     expect(screen.getByText("Gagal memuat event")).toBeTruthy();
-    expect(screen.getByText("jaringan bermasalah")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
   });
 
   it("falls back to a generic message when the error has no message", async () => {

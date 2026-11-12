@@ -25,8 +25,9 @@ import { SnapActions } from "./fragments/SnapActions";
 import { SnapLogo } from "./fragments/SnapLogo";
 import { SnapSummary } from "./fragments/SnapSummary";
 import type { SnapSimulatorScreenProps } from "./interface";
-import { snapStyles, componentStyles } from "./style";
 import {
+  snapStyles,
+  componentStyles,
   styleForSnapSimulatorScreenView0,
   styleForSnapSimulatorScreenView1,
   styleForSnapSimulatorScreenView2,
@@ -233,7 +234,7 @@ function paymentResultRoute(
   attemptId?: string,
 ): string {
   if (outcome === "FAILED") {
-    return `/expired/${bookingId}?reason=payment&bookingId=${bookingId}`;
+    return `/failed/${bookingId}?reason=payment&bookingId=${bookingId}`;
   }
   if (attemptId) return `/payment-result/${bookingId}?attemptId=${attemptId}`;
   return `/payment-result/${bookingId}`;

@@ -15,7 +15,7 @@ const PROFILE: UserProfile = {
 
 describe("presentation/account-store", () => {
   beforeEach(() => {
-    useAccountStore.setState({ profile: undefined });
+    useAccountStore.setState({ profile: undefined, buyerEmail: undefined });
   });
 
   it("starts as a guest (no profile)", () => {
@@ -42,21 +42,28 @@ describe("selectCheckoutPrefill", () => {
     const state: AccountState = {
       profile: undefined,
       setProfile: () => {},
+      setBuyerEmail: () => {},
       clearProfile: () => {},
     };
-    expect(selectCheckoutPrefill(state)).toEqual({ fromAccount: false });
+    expect(selectCheckoutPrefill(state)).toEqual({
+      fromAccount: false,
+      hasNik: false,
+    });
   });
 
   it("returns masked buyer fields + fromAccount:true when signed in", () => {
     const state: AccountState = {
       profile: PROFILE,
       setProfile: () => {},
+      setBuyerEmail: () => {},
       clearProfile: () => {},
     };
     const prefill = selectCheckoutPrefill(state);
     expect(prefill).toEqual({
       fromAccount: true,
+      hasNik: true,
       fullName: "Rizky R.",
+      email: undefined,
       emailMasked: "r***@gmail.com",
       nikMasked: "3171********1234",
     });
@@ -70,17 +77,32 @@ describe("selectCheckoutPrefill", () => {
     expect(prefill.fromAccount).toBe(true);
     expect(prefill.nikMasked).toBe("3171********1234");
   });
+
+  it("prefills the full email only when it is available in the current session", () => {
+    useAccountStore.getState().setBuyerEmail("rizky@example.com");
+    useAccountStore.getState().setProfile(PROFILE);
+    expect(selectCheckoutPrefill(useAccountStore.getState()).email).toBe(
+      "rizky@example.com",
+    );
+    useAccountStore.getState().clearProfile();
+    expect(useAccountStore.getState().buyerEmail).toBeUndefined();
+  });
 });
 
 describe("prefillFromProfile (stable-reference derivation, RBT-053)", () => {
   it("returns fromAccount:false for an undefined profile", () => {
-    expect(prefillFromProfile(undefined)).toEqual({ fromAccount: false });
+    expect(prefillFromProfile(undefined)).toEqual({
+      fromAccount: false,
+      hasNik: false,
+    });
   });
 
   it("maps a profile to the masked prefill", () => {
     expect(prefillFromProfile(PROFILE)).toEqual({
       fromAccount: true,
+      hasNik: true,
       fullName: "Rizky R.",
+      email: undefined,
       emailMasked: "r***@gmail.com",
       nikMasked: "3171********1234",
     });

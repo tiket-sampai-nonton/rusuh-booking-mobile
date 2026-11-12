@@ -3,6 +3,10 @@ import "@testing-library/react-native/extend-expect";
 import { act } from "@testing-library/react-native";
 import { notifyManager } from "@tanstack/react-query";
 
+// Native FastImage view managers are unavailable in Jest. Use RN Image for
+// component assertions; device builds cover native caching/rendering.
+jest.mock("react-native-fast-image", () => require("react-native").Image);
+
 // TanStack Query flushes observer updates in a scheduled callback. Treat that
 // callback as a React update so async query and mutation tests stay inside act.
 notifyManager.setNotifyFunction((notify) => act(notify));
@@ -36,26 +40,16 @@ jest.mock("expo-router/head", () => {
 });
 
 // react-native-webview renders a native view with no jsdom/RN-test backing.
-// Stub it as a plain View that forwards testID + source, and fires onLoadEnd
-// once on mount so the page-token exchange path (RBT-062) is exercised. The
-// real WebView render is verified on-device/manually, not in the unit runner.
+// Stub it as a plain View that forwards testID + source. The page-token
+// exchange is covered by PaymentPageBootstrap tests; WebView rendering is
+// verified on-device/manually, not in the unit runner.
 jest.mock("react-native-webview", () => {
   const ReactMock = require("react");
   const RNMock = require("react-native");
-  let exchangeResult = "rb-pay-exchanged";
-  const injections = [];
+  let currentProps = {};
   const WebViewMock = ReactMock.forwardRef((props, ref) => {
-    ReactMock.useImperativeHandle(ref, () => ({
-      injectJavaScript: (script) => {
-        injections.push(script);
-        Promise.resolve().then(() =>
-          props.onMessage?.({ nativeEvent: { data: exchangeResult } }),
-        );
-      },
-      reload: () => {},
-    }));
+    currentProps = props;
     ReactMock.useEffect(() => {
-      if (typeof props.onLoadEnd === "function") props.onLoadEnd();
       // Drive a navigation event when the test asks for one via a magic uri
       // query (?rbtest_nav=<url>), so the onNavigationStateChange branch runs.
       const uri = props.source ? props.source.uri : "";
@@ -74,10 +68,8 @@ jest.mock("react-native-webview", () => {
     __esModule: true,
     WebView: WebViewMock,
     default: WebViewMock,
-    __setExchangeResult: (value) => {
-      exchangeResult = value;
-    },
-    __injections: injections,
+    __sendMessage: (data) =>
+      currentProps.onMessage?.({ nativeEvent: { data } }),
   };
 });
 

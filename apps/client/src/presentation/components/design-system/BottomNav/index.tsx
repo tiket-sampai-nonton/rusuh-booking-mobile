@@ -32,13 +32,14 @@ import { ProfileIcon } from "./NavItem/icons/ProfileIcon";
 import { NavItem } from "./NavItem";
 import type { BottomNavIconProps, BottomNavRoute } from "./types";
 import { bottomNavBarStyle } from "./style";
+import { PRIMARY_NAV_LABELS } from "../primary-navigation";
 
 const EASE = Easing.bezier(...designEasing.primary);
 export type { BottomNavRoute } from "./types";
 
 export interface BottomNavProps {
   /** Currently active route */
-  readonly activeRoute: BottomNavRoute;
+  readonly activeRoute: BottomNavRoute | null;
   /** Navigation handler */
   readonly onNavigate: (route: BottomNavRoute) => void;
   readonly isLoggedIn?: boolean;
@@ -51,10 +52,10 @@ const NAV_ITEMS: readonly {
   label: string;
   Icon: React.ComponentType<BottomNavIconProps>;
 }[] = [
-  { route: "home", label: "Beranda", Icon: HomeIcon },
-  { route: "browse", label: "Jelajahi", Icon: BrowseIcon },
-  { route: "tickets", label: "Tiket", Icon: TicketsIcon },
-  { route: "profile", label: "Akun", Icon: ProfileIcon },
+  { route: "home", label: PRIMARY_NAV_LABELS.home, Icon: HomeIcon },
+  { route: "browse", label: PRIMARY_NAV_LABELS.browse, Icon: BrowseIcon },
+  { route: "tickets", label: PRIMARY_NAV_LABELS.tickets, Icon: TicketsIcon },
+  { route: "profile", label: PRIMARY_NAV_LABELS.profile, Icon: ProfileIcon },
 ];
 
 /**

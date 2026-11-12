@@ -1,19 +1,8 @@
-/**
- * LoginModal  Brutalist Mono styles
- *
- * MATCHES: `.genesis/prototype/v2/01-home.html` lines ~1359-1520
- *
- *  Design Rules:
- * - Colors: ONLY #000, #fff, #666, #f5f5f5, #ff0000
- * - Borders: 2px solid black (NO border-radius)
- * - Shadows: hard offset, NO blur (4px 4px 0 #000)
- * - Fonts: Plus Jakarta Sans (weight 800 for titles, 700 for labels)
- * - Spacing: 48px modal padding (--space-l), 24px (--space-m) for fields
- */
-import { Platform, StyleSheet, type TextStyle } from "react-native";
+/** Login modal layout and behavior styles. Colors come from shared theme tokens. */
+import { Animated, Platform, StyleSheet, type TextStyle } from "react-native";
 
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
-import { hardShadowStyle } from "@presentation/utils/style";
+import { withAlpha } from "@presentation/theme";
 import {
   designBorders,
   designColors,
@@ -23,16 +12,14 @@ import {
 } from "@presentation/theme/event-design-tokens";
 
 /**
- * Modal overlay — prototype rgba(0,0,0,0.8) + backdrop-filter blur(4px).
- * Note: blur is web-only; native uses plain dark overlay.
+ * Modal overlay color is derived from the shared neutral overlay token.
  */
-import type { DynamicStyle } from "@presentation/utils/style";
-import { Animated } from "react-native";
+import { hardShadowStyle, type DynamicStyle } from "@presentation/utils/style";
 
-export const SCRIM = "rgba(0,0,0,0.8)";
+export const SCRIM = withAlpha(designColors.overlay, 0.8);
 
 /**
- * Success green - use designColors.success (#00aa00) per Design Palette Guide.
+ * Success state uses the shared semantic success token.
  */
 export const DONE_GREEN = designColors.success;
 
@@ -40,8 +27,9 @@ export const DONE_GREEN = designColors.success;
  * OTP input box dimensions (prototype: 48x56px).
  */
 export const OTP_BOX = {
-  width: 48,
-  height: 56,
+  // Six boxes plus gaps must fit inside the desktop modal's 300px content area.
+  width: 40,
+  height: 48,
 };
 
 export const loginStyles = StyleSheet.create({
@@ -124,7 +112,7 @@ export const loginStyles = StyleSheet.create({
   sub: {
     fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.s, // 14px (--text-s)
-    color: designColors.inkMuted, // #666
+    color: designColors.inkMuted,
     lineHeight: designFontSizes.s * 1.5, // 21px
     marginBottom: designSpacingSemantic.m, // 24px
   },
@@ -161,7 +149,7 @@ export const loginStyles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: designBorders.standard, // 2px
     borderColor: designColors.ink,
-    backgroundColor: designColors.field, // #f5f5f5
+    backgroundColor: designColors.field,
     borderRadius: 0, // Brutalist: NO border-radius
     // RN Web inherits the browser's blue focus ring unless explicitly reset.
     outlineWidth: 0,
@@ -171,14 +159,14 @@ export const loginStyles = StyleSheet.create({
     backgroundColor: designColors.ground,
     // Shadow offset effect
     ...(hardShadowStyle(4, 4, designColors.ink, 0) as TextStyle),
-    transform: [{ translateX: -2 }, { translateY: -2 }],
+    transform: [{ translateY: -2 }],
   },
   inputReadonly: {
     backgroundColor: designColors.field,
     color: designColors.inkMuted,
   },
   inputError: {
-    borderColor: designColors.danger, // #ff0000
+    borderColor: designColors.danger,
   },
   inputValid: {
     borderColor: DONE_GREEN,
@@ -190,14 +178,14 @@ export const loginStyles = StyleSheet.create({
   err: {
     fontFamily: plusJakartaSansFonts.semiBold,
     fontSize: designFontSizes.xs, // 12px
-    color: designColors.danger, // #ff0000
+    color: designColors.danger,
     marginTop: designSpacingSemantic.xs, // 8px
     minHeight: 16,
   },
   hint: {
     fontFamily: plusJakartaSansFonts.regular,
     fontSize: designFontSizes.xs, // 12px
-    color: designColors.inkMuted, // #666
+    color: designColors.inkMuted,
     marginTop: designSpacingSemantic.xs, // 8px
   },
 
@@ -234,7 +222,7 @@ export const loginStyles = StyleSheet.create({
   },
 
   // ---------------------------------------------------------------------------
-  // Primary button — prototype .btn-primary (ink fill with arrow)
+  // Primary button — shared red action fill.
   // ---------------------------------------------------------------------------
   go: {
     flex: 1,
@@ -242,9 +230,9 @@ export const loginStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: designColors.danger,
+    backgroundColor: designColors.accent,
     borderWidth: designBorders.standard,
-    borderColor: designColors.danger,
+    borderColor: designColors.accent,
     borderRadius: 0, // Brutalist: NO border-radius
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -313,7 +301,7 @@ export const loginStyles = StyleSheet.create({
     color: designColors.inkMuted,
   },
   resendBtn: {
-    backgroundColor: "transparent",
+    backgroundColor: designColors.transparent,
     padding: 4,
   },
   resendBtnText: {
@@ -450,10 +438,12 @@ export function styleForLoginModalAnimatedView1(
   arg2: Animated.Value,
   isMobileWeb = false,
 ): DynamicStyle {
+  let maxHeight: DynamicStyle["maxHeight"] = "92%";
+  if (!isMobileWeb && Platform.OS === "web") maxHeight = undefined;
   return {
     width: "100%",
     maxWidth: isMobileWeb ? "100%" : 400,
-    maxHeight: isMobileWeb ? "92%" : Platform.OS === "web" ? undefined : "92%",
+    maxHeight,
     opacity: arg0,
     transform: [{ scale: arg1 }, { translateY: arg2 }],
   } as DynamicStyle;

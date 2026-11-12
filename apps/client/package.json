@@ -1,6 +1,6 @@
 {
   "name": "rusuh-booking-client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
@@ -13,7 +13,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "gen:api": "sh ./scripts/gen-api.sh",
-    "format:check": "prettier --check --ignore-path ../../.gitignore \"src/**/*.{ts,tsx}\" \"scripts/**/*.cjs\" app.config.js \"../../.github/workflows/*.yml\"",
+    "format:check": "prettier --check --ignore-path ../../.gitignore \"src/**/*.{ts,tsx}\" \"scripts/**/*.cjs\" \"plugins/**/*.cjs\" app.config.js \"../../.github/workflows/*.yml\"",
     "web:metadata": "node scripts/generate-web-metadata.cjs",
     "web:verify": "node scripts/verify-web.cjs",
     "postinstall": "node scripts/patch-transitive-security.cjs",
@@ -29,6 +29,8 @@
     ]
   },
   "dependencies": {
+    "@notifee/react-native": "^9.1.8",
+    "@react-navigation/bottom-tabs": "^7.21.0",
     "@tanstack/react-query": "5.105.0",
     "expo": "~53.0.0",
     "expo-asset": "~11.1.7",
@@ -42,12 +44,14 @@
     "expo-secure-store": "~14.2.4",
     "expo-sharing": "~13.1.5",
     "expo-status-bar": "~2.2.3",
+    "expo-updates": "~0.28.18",
     "nativewind": "^4.1.23",
     "qrcode": "^1.5.4",
     "query-string": "^9.5.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.6",
+    "react-native-fast-image": "9.4.0",
     "react-native-qrcode-svg": "^6.3.49",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",

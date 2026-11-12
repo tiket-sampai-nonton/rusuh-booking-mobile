@@ -45,6 +45,11 @@ export function webPushSupported(
 }
 
 export class WebPushNotificationAdapter implements NotificationPort {
+  subscribeToResponses(): () => void {
+    // Web taps are routed by the service worker's notificationclick handler.
+    return () => undefined;
+  }
+
   constructor(private readonly env: WebPushEnv = defaultWebPushEnv()) {}
 
   async requestPermission(): Promise<boolean> {
@@ -74,6 +79,10 @@ export class WebPushNotificationAdapter implements NotificationPort {
       tag: notification.kind,
     });
   }
+
+  async cancelLocal(): Promise<void> {
+    // Browser-local future timers are not managed here; web uses server push.
+  }
 }
 
 /** Real browser environment (web runtime). Guards every global access. */
@@ -95,9 +104,9 @@ export function defaultWebPushEnv(): WebPushEnv {
     };
     PushManager?: unknown;
   };
-  const hasNotification = typeof g.Notification !== "undefined";
+  const hasNotification = g.Notification !== undefined;
   const hasServiceWorker = !!g.navigator?.serviceWorker;
-  const hasPushManager = typeof g.PushManager !== "undefined";
+  const hasPushManager = g.PushManager !== undefined;
   return {
     hasNotification,
     hasServiceWorker,

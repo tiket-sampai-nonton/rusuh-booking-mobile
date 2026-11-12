@@ -1,0 +1,6 @@
+Tasks: 1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
+  Mem:  4014920K total,  3285404K used,   729516K free,    37852K buffers
+ Swap:  3011184K total,  1067512K used,  1943672K free,  1623192K cached
+400%cpu 136%user  25%nice 154%sys  50%idle   0%iow  32%irq   4%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+ 2265 u0_a216      10 -10  39G 413M 149M R  121  10.5   1:18.02 com.tiketsampainonton.rusuhbooking

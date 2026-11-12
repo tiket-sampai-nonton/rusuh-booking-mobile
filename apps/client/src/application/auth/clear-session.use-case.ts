@@ -6,12 +6,16 @@
  * constructor-injected port, domain-only imports. Thin by design.
  */
 import type { TokenStorage } from "@domain/auth/token-storage.port";
+import type { BuyerEmailStorage } from "@domain/auth/buyer-email-storage.port";
 
 export class ClearSession {
-  constructor(private readonly storage: TokenStorage) {}
+  constructor(
+    private readonly storage: TokenStorage,
+    private readonly buyerEmailStorage?: BuyerEmailStorage,
+  ) {}
 
   /** Clear the persisted session token (sign-out). Resolves once removed. */
   async execute(): Promise<void> {
-    await this.storage.clear();
+    await Promise.all([this.storage.clear(), this.buyerEmailStorage?.clear()]);
   }
 }

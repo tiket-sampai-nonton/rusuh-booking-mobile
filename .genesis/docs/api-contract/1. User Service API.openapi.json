@@ -617,8 +617,18 @@
           "emailMasked": {
             "type": "string"
           },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email asli akun; hanya dikirim oleh GET /api/v1/me."
+          },
           "fullName": {
             "type": "string"
+          },
+          "nik": {
+            "type": "string",
+            "pattern": "^[0-9]{16}$",
+            "description": "NIK asli akun; hanya dikirim oleh GET /api/v1/me jika sudah tersimpan."
           },
           "nikMasked": {
             "type": "string",

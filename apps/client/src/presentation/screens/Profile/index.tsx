@@ -1,19 +1,26 @@
 import { useRouter, type Href } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CompleteRegistration } from "@application/auth/complete-registration.use-case";
 import { ClearSession } from "@application/auth/clear-session.use-case";
 import { DomainError } from "@domain/errors/domain-error";
 import { ScreenFade } from "@presentation/components/ScreenFade";
-import { BottomNav, Header } from "@presentation/components/design-system";
+import {
+  BottomNav,
+  Header,
+  navigateBottomTab,
+} from "@presentation/components/design-system";
+import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
 
 import { useServices } from "@providers/service-context";
 
 import { LoginModal } from "@presentation/components/auth/LoginModal";
+import { useToast } from "@presentation/components/design-system/Toast";
 import { GuestAccountCard } from "./fragments/GuestAccountCard";
 import { SignedInProfile } from "./fragments/SignedInProfile";
 import { profileContentContainerStyle, styles } from "./style";
@@ -24,13 +31,21 @@ export function ProfileScreen() {
   const { isWeb, isMobileWeb, width } = useResponsive();
   const profile = useAccountStore((state) => state.profile);
   const clearProfile = useAccountStore((state) => state.clearProfile);
-  const { userRepository, tokenStorage } = useServices();
+  const { userRepository, tokenStorage, buyerEmailStorage } = useServices();
+  const { show: showToast } = useToast();
   const [loginOpen, setLoginOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [fullName, setFullName] = useState(profile?.fullName ?? "");
   const [nik, setNik] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const navLinks = createPrimaryNavLinks({
+    onHome: () => router.navigate("/" as Href),
+    onBrowse: () => router.navigate("/browse" as Href),
+    onTickets: () => router.navigate("/my-tickets" as Href),
+    onProfile: () => undefined,
+    isLoggedIn: Boolean(profile),
+  });
 
   const saveProfile = async () => {
     if (!fullName.trim() || !/^\d{16}$/.test(nik)) {
@@ -58,11 +73,13 @@ export function ProfileScreen() {
   const signOut = async () => {
     try {
       await userRepository.logout?.();
-      await new ClearSession(tokenStorage).execute();
+      await new ClearSession(tokenStorage, buyerEmailStorage).execute();
       clearProfile();
       setEditing(false);
+      showToast("Berhasil keluar dari akun.", "success");
     } catch {
       setError("Gagal keluar. Silakan coba lagi.");
+      showToast("Gagal keluar. Silakan coba lagi.", "error");
     }
   };
 
@@ -72,52 +89,9 @@ export function ProfileScreen() {
         <Header
           topInset={insets.top}
           showLinks={isWeb && width > 768}
-          links={[
-            {
-              label: "Beranda",
-              onPress: () => router.push("/" as Href),
-              testID: "nav-home",
-            },
-            {
-              label: "Jelajahi",
-              onPress: () => router.push("/browse" as Href),
-              testID: "nav-browse",
-            },
-            ...(profile
-              ? [
-                  {
-                    label: "Tiket Saya",
-                    onPress: () => router.push("/my-tickets" as Href),
-                    testID: "nav-tickets",
-                  },
-                  { label: "Profil", onPress: () => {}, testID: "nav-profile" },
-                ]
-              : []),
-          ]}
-          mobileMenuLinks={[
-            {
-              label: "Beranda",
-              onPress: () => router.push("/" as Href),
-              testID: "nav-home",
-            },
-            {
-              label: "Cari Event",
-              onPress: () => router.push("/browse" as Href),
-              testID: "nav-browse",
-            },
-            {
-              label: "Tiket Saya",
-              onPress: () => router.push("/my-tickets" as Href),
-              testID: "nav-tickets",
-            },
-            {
-              label: "Arsip Event",
-              onPress: () => router.push("/history" as Href),
-              testID: "nav-history",
-            },
-            { label: "Profil", onPress: () => {}, testID: "nav-profile" },
-          ]}
-          onLogoPress={() => router.push("/" as Href)}
+          links={navLinks}
+          mobileMenuLinks={navLinks}
+          onLogoPress={() => router.navigate("/" as Href)}
           onCtaPress={() => setLoginOpen(true)}
           isLoggedIn={Boolean(profile)}
         />
@@ -129,51 +103,78 @@ export function ProfileScreen() {
             isMobileWeb,
           )}
         >
-          <Text
-            accessibilityRole="header"
-            style={[styles.heading, isMobileWeb && styles.mobileWebHeading]}
-          >
-            Profil
-          </Text>
-          {profile ? (
-            <SignedInProfile
-              profile={profile}
-              editing={editing}
-              fullName={fullName}
-              nik={nik}
-              error={error}
-              saving={saving}
-              onEdit={() => {
-                setFullName(profile.fullName ?? "");
-                setEditing(true);
-              }}
-              onFullNameChange={setFullName}
-              onNikChange={(value) =>
-                setNik(value.replace(/\D/g, "").slice(0, 16))
-              }
-              onSave={() => void saveProfile()}
-              onCancel={() => {
-                setEditing(false);
-                setNik("");
-                setError("");
-              }}
-              onSignOut={() => void signOut()}
-            />
-          ) : (
-            <GuestAccountCard onLogin={() => setLoginOpen(true)} />
-          )}
+          <View style={styles.content}>
+            <View style={[styles.hero, isMobileWeb && styles.mobileWebHero]}>
+              <CachedImage
+                source={require("../../../../assets/brand-mark.png")}
+                resizeMode="contain"
+                style={styles.heroWatermark}
+                accessible={false}
+              />
+              <View style={styles.heroContent}>
+                <Text style={styles.heroEyebrow}>RUSUH BOOKING</Text>
+                <Text
+                  accessibilityRole="header"
+                  style={[
+                    styles.heroHeading,
+                    isMobileWeb && styles.mobileWebHeading,
+                  ]}
+                >
+                  Profil
+                </Text>
+                <Text style={styles.heroDescription}>
+                  {profile
+                    ? "Kelola informasi akun dan akses tiketmu di sini."
+                    : "Masuk untuk mengelola profil dan melihat tiket di berbagai perangkat."}
+                </Text>
+                <View style={styles.heroStatus}>
+                  <View style={styles.heroStatusDot} />
+                  <Text style={styles.heroStatusText}>
+                    {profile ? "Akun aktif" : "Akun tamu"}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            {profile ? (
+              <SignedInProfile
+                profile={profile}
+                editing={editing}
+                fullName={fullName}
+                nik={nik}
+                error={error}
+                saving={saving}
+                onEdit={() => {
+                  setFullName(profile.fullName ?? "");
+                  setEditing(true);
+                }}
+                onFullNameChange={setFullName}
+                onNikChange={(value) =>
+                  setNik(value.replace(/\D/g, "").slice(0, 16))
+                }
+                onSave={() => void saveProfile()}
+                onCancel={() => {
+                  setEditing(false);
+                  setNik("");
+                  setError("");
+                }}
+                onSignOut={() => void signOut()}
+              />
+            ) : (
+              <GuestAccountCard onLogin={() => setLoginOpen(true)} />
+            )}
+          </View>
         </ScrollView>
 
         <BottomNav
           activeRoute="profile"
           isLoggedIn={Boolean(profile)}
-          onNavigate={(route) => {
-            if (route === "home") router.push("/" as Href);
-            if (route === "browse") router.push("/browse" as Href);
-            if (route === "tickets") router.push("/my-tickets" as Href);
-          }}
+          onNavigate={(route) => navigateBottomTab(router, "profile", route)}
         />
-        <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
+        <LoginModal
+          visible={loginOpen}
+          onClose={() => setLoginOpen(false)}
+          onOpenPrivacy={() => router.push("/privacy" as Href)}
+        />
       </View>
     </ScreenFade>
   );

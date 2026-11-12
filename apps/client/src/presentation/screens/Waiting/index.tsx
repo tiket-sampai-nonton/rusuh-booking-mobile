@@ -17,21 +17,35 @@
  * no infrastructure import, no TanStack here (it lives in the hooks). Status is
  * never color-only: every zone/state carries an icon + text label (RBT-080 a11y).
  */
-import { useRouter, type Href } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { useFocusEffect, useRouter, type Href } from "expo-router";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import { ScrollView, View, type StyleProp, type ViewStyle } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   isAdmitted,
   isTerminal,
 } from "@domain/state-machines/queue-state-machine";
-import { useAutoClaim } from "@presentation/hooks/useAutoClaim";
+import type { QueueEntry } from "@domain/repositories/queue.repository";
+import {
+  useAutoClaim,
+  type ClaimErrorState,
+} from "@presentation/hooks/useAutoClaim";
+import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
 import { useQueuePolling } from "@presentation/hooks/useQueuePolling";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import {
   claimErrorBody,
+  claimErrorActionLabel,
+  claimErrorBadgeLabel,
   claimErrorTitle,
   COPY,
   terminalBody,
@@ -47,6 +61,14 @@ import { NetworkStatusBar } from "./fragments/NetworkStatusBar";
 import { StatusBadge } from "./fragments/StatusBadge";
 import { WaitingActive } from "./fragments/WaitingActive";
 import { YourTurnState } from "./fragments/YourTurnState";
+import { LeaveButton } from "./fragments/LeaveButton";
+import {
+  queueTimeout,
+  waitingRoomLeft,
+} from "@domain/rules/notification-flows";
+import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
+import { useServices } from "@providers/service-context";
+import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 // MAIN SCREEN
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -60,38 +82,79 @@ export function WaitingRoomScreen({
   eventId,
 }: WaitingRoomScreenProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const reducedMotion = useReducedMotion() ?? false;
-  const { isDesktop, isMobileWeb } = useResponsive();
+  const { isDesktop, isMobileWeb, isNative } = useResponsive();
+  const { notification } = useServices();
+  const scheduleNotification = useMemo(
+    () => new ScheduleLocalNotification(notification),
+    [notification],
+  );
   const shellStyle = [styles.shell, isMobileWeb && styles.mobileWebShell];
 
   // Modal state
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [isScreenFocused, setIsScreenFocused] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsScreenFocused(true);
+      return () => setIsScreenFocused(false);
+    }, []),
+  );
 
   const {
     entry,
     admissionRatePerMin,
     isLoading,
+    isStatusAuthoritative,
     isError,
     isConnectionLost,
     isReconnected,
     error,
     leave,
     refetch,
-  } = useQueuePolling(queueId, reducedMotion, eventId);
+  } = useQueuePolling(queueId, reducedMotion, eventId, isScreenFocused);
 
   // Only ADMITTED authorizes the claim (RBT-040). The hook fires it once.
   const admitted = entry !== undefined && isAdmitted(entry.status);
   const { claiming, claimedSessionId, errorState } = useAutoClaim({
     eventId,
     queueId,
-    status: admitted ? entry.status : undefined,
+    status: admitted && isStatusAuthoritative ? entry.status : undefined,
   });
+  useEffect(() => {
+    if (
+      isNative &&
+      isStatusAuthoritative &&
+      (entry?.status === "MISSED" || errorState === "TURN_MISSED") &&
+      eventId
+    ) {
+      void scheduleNotification
+        .execute(queueTimeout(queueId, eventId))
+        .catch(() => undefined);
+    }
+  }, [
+    entry?.status,
+    eventId,
+    errorState,
+    isNative,
+    isStatusAuthoritative,
+    queueId,
+    scheduleNotification,
+  ]);
+  const claimed = entry?.status === "CLAIMED";
+  const restoredBooking = useRestoreBookingSession(
+    Boolean(claimed && !claiming && !claimedSessionId),
+    undefined,
+    eventId,
+  );
 
   // A successful, server-authorized claim proceeds immediately to checkout.
   useEffect(() => {
-    if (claimedSessionId)
-      router.replace(`/checkout/${claimedSessionId}` as Href);
-  }, [claimedSessionId, router]);
+    const sessionId = claimedSessionId ?? restoredBooking.session?.sessionId;
+    if (sessionId) router.replace(`/checkout/${sessionId}` as Href);
+  }, [claimedSessionId, restoredBooking.session?.sessionId, router]);
 
   const handleLeavePress = useCallback(() => {
     setShowLeaveModal(true);
@@ -105,16 +168,25 @@ export function WaitingRoomScreen({
     void leave()
       .then(() => {
         setShowLeaveModal(false);
+        if (eventId) {
+          void scheduleNotification
+            .execute(waitingRoomLeft(eventId))
+            .catch(() => undefined);
+        }
         router.replace("/" as Href);
       })
       .catch(() => {
         setShowLeaveModal(false);
         void refetch();
       });
-  }, [leave, refetch, router]);
+  }, [eventId, leave, refetch, router, scheduleNotification]);
 
   const handleBrowseEvents = useCallback(() => {
     router.replace("/browse" as Href);
+  }, [router]);
+
+  const handleHome = useCallback(() => {
+    router.replace("/" as Href);
   }, [router]);
 
   const handleRejoinQueue = useCallback(() => {
@@ -129,260 +201,468 @@ export function WaitingRoomScreen({
     void refetch();
   }, [refetch]);
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // LOADING STATE
-  // ─────────────────────────────────────────────────────────────────────────────
-  if (isLoading) {
-    return (
-      <View style={styles.root} testID="waiting-loading">
-        <Header />
-        <LoadingOverlay />
-      </View>
-    );
-  }
+  const viewState = resolveWaitingViewState({
+    isLoading,
+    isError,
+    isConnectionLost,
+    queueId,
+    entry,
+    claimed,
+    claiming,
+    claimedSessionId,
+    isRestoringClaimedSession: restoredBooking.isLoading,
+    admitted,
+    errorState,
+  });
 
-  // Keep a queue with a transient network error mounted. The query retains
-  // the server's last known position and continues its single adaptive poller;
-  // a retry updates that same queue before admission/claim handling proceeds.
-  if (isConnectionLost && !entry) {
-    return (
-      <View style={styles.root} testID="waiting-reconnecting">
-        <Header />
-        <View style={shellStyle}>
-          <View style={styles.waitingContainer}>
-            <ErrorState
-              icon="warning"
-              title="Menghubungkan Kembali"
-              message="Posisi antrean tetap tersimpan. Kami akan memperbarui antrean saat koneksi pulih."
-              buttonText="Coba Lagi"
-              onPress={handleRetryConnection}
-              testID="waiting-reconnecting-state"
-            />
-          </View>
-        </View>
-        <NetworkStatusBar isOffline isReconnected={false} />
-      </View>
-    );
-  }
+  return (
+    <WaitingStateView
+      state={viewState}
+      queueId={queueId}
+      eventId={eventId}
+      entry={entry}
+      error={error}
+      errorState={errorState}
+      restoredBooking={restoredBooking}
+      admissionRatePerMin={admissionRatePerMin}
+      claiming={claiming}
+      isDesktop={isDesktop}
+      isMobileWeb={isMobileWeb}
+      isConnectionLost={isConnectionLost}
+      isReconnected={isReconnected}
+      shellStyle={shellStyle}
+      bottomInset={insets.bottom}
+      showLeaveModal={showLeaveModal}
+      onRetryConnection={handleRetryConnection}
+      onBrowseEvents={handleBrowseEvents}
+      onHome={handleHome}
+      onRejoinQueue={handleRejoinQueue}
+      onLeavePress={handleLeavePress}
+      onStay={handleStay}
+      onConfirmLeave={handleConfirmLeave}
+    />
+  );
+}
 
-  if (isError && !isConnectionLost) {
-    return (
-      <View style={styles.root} testID="waiting-error">
-        <Header />
-        <View style={shellStyle}>
-          <View style={styles.waitingContainer}>
-            <ErrorState
-              icon="warning"
-              title={COPY.errorTitle}
-              message={error?.message ?? COPY.errorSub}
-              buttonText="Coba Lagi"
-              onPress={handleRejoinQueue}
-              testID="waiting-error-state"
-            />
-          </View>
-        </View>
-      </View>
-    );
-  }
+type WaitingViewState =
+  | "loading"
+  | "reconnecting"
+  | "error"
+  | "no-queue"
+  | "claimed-recovering"
+  | "claimed-recovery"
+  | "terminal"
+  | "claim-error"
+  | "admitted"
+  | "waiting";
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // NO QUEUE ID
-  // ─────────────────────────────────────────────────────────────────────────────
-  if (!queueId) {
-    return (
-      <View style={styles.root} testID="waiting-noqueue">
-        <Header />
-        <View style={shellStyle}>
-          <View style={styles.waitingContainer}>
-            <ErrorState
-              icon="warning"
-              title={COPY.noQueueTitle}
-              message={COPY.noQueueSub}
-              buttonText="Jelajahi Event"
-              onPress={handleBrowseEvents}
-              testID="waiting-noqueue-error"
-            />
-          </View>
-        </View>
-      </View>
-    );
-  }
+interface WaitingViewStateInput {
+  readonly isLoading: boolean;
+  readonly isError: boolean;
+  readonly isConnectionLost: boolean;
+  readonly queueId: string;
+  readonly entry?: QueueEntry;
+  readonly claimed: boolean;
+  readonly claiming: boolean;
+  readonly claimedSessionId?: string;
+  readonly isRestoringClaimedSession: boolean;
+  readonly admitted: boolean;
+  readonly errorState: ClaimErrorState | null;
+}
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // ERROR STATE
-  // ─────────────────────────────────────────────────────────────────────────────
-  if (!entry) {
-    return (
-      <View style={styles.root} testID="waiting-error">
-        <Header />
-        <View style={shellStyle}>
-          <View style={styles.waitingContainer}>
-            <ErrorState
-              icon="warning"
-              title={COPY.errorTitle}
-              message={error?.message ?? COPY.errorSub}
-              buttonText="Coba Lagi"
-              onPress={handleRejoinQueue}
-              testID="waiting-error-state"
-            />
-          </View>
-        </View>
-      </View>
-    );
-  }
+function resolveWaitingViewState(
+  input: WaitingViewStateInput,
+): WaitingViewState {
+  if (input.isLoading) return "loading";
+  return resolveQueueAvailabilityState(input);
+}
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // TERMINAL STATE (sold-out, ended)
-  // ─────────────────────────────────────────────────────────────────────────────
-  if (isTerminal(entry.status)) {
-    const isSoldOut = entry.status === "SOLD_OUT";
-    return (
-      <View style={styles.root} testID="waiting-terminal">
-        <Header />
-        <View style={shellStyle}>
-          <View style={styles.waitingContainer}>
-            <StatusBadge
-              variant={isSoldOut ? "soldOut" : "expired"}
-              label={isSoldOut ? "Tiket Habis" : "Penjualan Berakhir"}
-            />
-            <ErrorState
-              icon={isSoldOut ? "ticket" : "clock"}
-              title={terminalTitle(entry.status)}
-              message={terminalBody(entry.status)}
-              buttonText="Jelajahi Event Lain"
-              onPress={handleBrowseEvents}
-              testID={`waiting-${isSoldOut ? "soldout" : "ended"}-state`}
-            />
-          </View>
-        </View>
-      </View>
-    );
-  }
+function resolveQueueAvailabilityState(
+  input: WaitingViewStateInput,
+): WaitingViewState {
+  if (input.isConnectionLost && !input.entry) return "reconnecting";
+  if (input.isError && !input.isConnectionLost && !input.claimed)
+    return "error";
+  if (!input.queueId) return "no-queue";
+  if (!input.entry) return "error";
+  return resolvePresentQueueState(input, input.entry);
+}
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // ADMITTED STATE (your turn - with auto-redirect)
-  // ─────────────────────────────────────────────────────────────────────────────
-  if (admitted) {
-    // Check for claim error
-    if (errorState) {
-      const isSoldOut = errorState === "EVENT_SOLD_OUT";
+function resolvePresentQueueState(
+  input: WaitingViewStateInput,
+  entry: QueueEntry,
+): WaitingViewState {
+  if (entry.status === "CLAIMED") {
+    if (
+      input.claiming ||
+      input.claimedSessionId ||
+      input.isRestoringClaimedSession
+    ) {
+      return "claimed-recovering";
+    }
+    return "claimed-recovery";
+  }
+  if (isTerminal(entry.status)) return "terminal";
+  if (input.admitted && input.errorState) return "claim-error";
+  if (input.admitted) return "admitted";
+  return "waiting";
+}
+
+interface WaitingStateViewProps {
+  readonly state: WaitingViewState;
+  readonly queueId: string;
+  readonly eventId: string;
+  readonly entry?: QueueEntry;
+  readonly error: Error | null;
+  readonly errorState: ClaimErrorState | null;
+  readonly restoredBooking: ReturnType<typeof useRestoreBookingSession>;
+  readonly admissionRatePerMin?: number;
+  readonly claiming: boolean;
+  readonly isDesktop: boolean;
+  readonly isMobileWeb: boolean;
+  readonly isConnectionLost: boolean;
+  readonly isReconnected: boolean;
+  readonly shellStyle: StyleProp<ViewStyle>;
+  readonly bottomInset: number;
+  readonly showLeaveModal: boolean;
+  readonly onRetryConnection: () => void;
+  readonly onBrowseEvents: () => void;
+  readonly onHome: () => void;
+  readonly onRejoinQueue: () => void;
+  readonly onLeavePress: () => void;
+  readonly onStay: () => void;
+  readonly onConfirmLeave: () => void;
+}
+
+function WaitingStateView(props: WaitingStateViewProps) {
+  switch (props.state) {
+    case "loading":
       return (
-        <View style={styles.root} testID="waiting-claim-error">
+        <View style={styles.root} testID="waiting-loading">
           <Header />
-          <View style={shellStyle}>
-            <View style={styles.waitingContainer}>
-              <StatusBadge
-                variant={isSoldOut ? "soldOut" : "expired"}
-                label={
-                  isSoldOut
-                    ? "Tiket Habis"
-                    : errorState === "UNKNOWN"
-                      ? "Koneksi Bermasalah"
-                      : "Giliran Berakhir"
-                }
-              />
-              <ErrorState
-                icon={isSoldOut ? "ticket" : "clock"}
-                title={claimErrorTitle(errorState)}
-                message={claimErrorBody(errorState)}
-                buttonText={
-                  isSoldOut
-                    ? "Jelajahi Event Lain"
-                    : errorState === "UNKNOWN"
-                      ? "Kembali ke Event"
-                      : "Bergabung Kembali"
-                }
-                onPress={isSoldOut ? handleBrowseEvents : handleRejoinQueue}
-                testID="waiting-claim-error-state"
-              />
-            </View>
-          </View>
+          <LoadingOverlay />
         </View>
       );
-    }
-
-    return (
-      <View style={styles.root} testID="waiting-admitted">
-        <Header status="GILIRAN ANDA" />
-        <ScrollView
-          style={styles.waitingScrollView}
-          contentContainerStyle={[
-            styles.waitingScroll,
-            isDesktop && styles.waitingScrollDesktop,
-            isMobileWeb && styles.mobileWebWaitingScroll,
-          ]}
-          showsVerticalScrollIndicator={false}
-        >
-          <View
-            style={[
-              styles.waitingPage,
-              isDesktop && styles.waitingPageDesktop,
-              isMobileWeb && styles.mobileWebWaitingPage,
-            ]}
-          >
-            <YourTurnState
-              onLeavePress={handleLeavePress}
-              claiming={claiming}
-              eventId={eventId}
-              isDesktop={isDesktop}
-              isMobileWeb={isMobileWeb}
-            />
-          </View>
-        </ScrollView>
-        <LeaveModal
-          visible={showLeaveModal}
-          onStay={handleStay}
-          onLeave={handleConfirmLeave}
+    case "reconnecting":
+      return (
+        <ErrorPage
+          testID="waiting-reconnecting"
+          shellStyle={props.shellStyle}
+          title="Menghubungkan Kembali"
+          message="Posisi antrean tetap tersimpan. Kami akan memperbarui antrean saat koneksi pulih."
+          buttonText="Coba Lagi"
+          onPress={props.onRetryConnection}
+          errorTestID="waiting-reconnecting-state"
+          networkStatus={<NetworkStatusBar isOffline isReconnected={false} />}
         />
-        <NetworkStatusBar
-          isOffline={isConnectionLost}
-          isReconnected={isReconnected}
+      );
+    case "error":
+      return (
+        <ErrorPage
+          testID="waiting-error"
+          shellStyle={props.shellStyle}
+          title={COPY.errorTitle}
+          message={apiErrorMessage(props.error, COPY.errorSub)}
+          buttonText="Coba Lagi"
+          onPress={props.onRejoinQueue}
+          errorTestID="waiting-error-state"
         />
-      </View>
-    );
+      );
+    case "no-queue":
+      return (
+        <ErrorPage
+          testID="waiting-noqueue"
+          shellStyle={props.shellStyle}
+          title={COPY.noQueueTitle}
+          message={COPY.noQueueSub}
+          buttonText="Jelajahi Event"
+          onPress={props.onBrowseEvents}
+          errorTestID="waiting-noqueue-error"
+        />
+      );
+    case "claimed-recovering":
+      return (
+        <View style={styles.root} testID="waiting-claim-recovering">
+          <Header />
+          <LoadingOverlay />
+        </View>
+      );
+    case "claimed-recovery":
+      return (
+        <ClaimedRecoveryPage
+          shellStyle={props.shellStyle}
+          restoredBooking={props.restoredBooking}
+          onHome={props.onHome}
+        />
+      );
+    case "terminal":
+      return (
+        <TerminalQueuePage
+          shellStyle={props.shellStyle}
+          entry={props.entry}
+          onBrowseEvents={props.onBrowseEvents}
+        />
+      );
+    case "claim-error":
+      return (
+        <ClaimErrorPage
+          shellStyle={props.shellStyle}
+          errorState={props.errorState ?? "UNKNOWN"}
+          onBrowseEvents={props.onBrowseEvents}
+          onRejoinQueue={props.onRejoinQueue}
+        />
+      );
+    case "admitted":
+    case "waiting":
+      return (
+        <ActiveQueuePage {...props} admitted={props.state === "admitted"} />
+      );
   }
+}
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // ACTIVE WAITING STATE
-  // ─────────────────────────────────────────────────────────────────────────────
+interface ErrorPageProps {
+  readonly testID: string;
+  readonly shellStyle: StyleProp<ViewStyle>;
+  readonly title: string;
+  readonly message: string;
+  readonly buttonText: string;
+  readonly onPress: () => void;
+  readonly errorTestID: string;
+  readonly networkStatus?: ReactNode;
+}
+
+function ErrorPage({
+  testID,
+  shellStyle,
+  title,
+  message,
+  buttonText,
+  onPress,
+  errorTestID,
+  networkStatus,
+}: ErrorPageProps) {
   return (
-    <View style={styles.root} testID="waiting-active">
+    <View style={styles.root} testID={testID}>
       <Header />
-      <ScrollView
-        style={styles.waitingScrollView}
-        contentContainerStyle={[
-          styles.waitingScroll,
-          isDesktop && styles.waitingScrollDesktop,
-          isMobileWeb && styles.mobileWebWaitingScroll,
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
-        <View
-          style={[
-            styles.waitingPage,
-            isDesktop && styles.waitingPageDesktop,
-            isMobileWeb && styles.mobileWebWaitingPage,
-          ]}
-        >
-          <WaitingActive
-            position={entry.position}
-            admissionRatePerMin={admissionRatePerMin}
-            zone={entry.zone ?? "GUARANTEED"}
-            onLeavePress={handleLeavePress}
-            eventId={eventId}
-            isDesktop={isDesktop}
-            isMobileWeb={isMobileWeb}
+      <View style={shellStyle}>
+        <View style={styles.waitingContainer}>
+          <ErrorState
+            icon="warning"
+            title={title}
+            message={message}
+            buttonText={buttonText}
+            onPress={onPress}
+            testID={errorTestID}
           />
         </View>
+      </View>
+      {networkStatus}
+    </View>
+  );
+}
+
+interface ClaimedRecoveryPageProps {
+  readonly shellStyle: StyleProp<ViewStyle>;
+  readonly restoredBooking: ReturnType<typeof useRestoreBookingSession>;
+  readonly onHome: () => void;
+}
+
+function ClaimedRecoveryPage({
+  shellStyle,
+  restoredBooking,
+  onHome,
+}: ClaimedRecoveryPageProps) {
+  const hasError = Boolean(restoredBooking.error);
+  let message =
+    "Sesi antrean sudah diklaim, tetapi tidak ada sesi checkout aktif untuk event ini.";
+  if (restoredBooking.error) {
+    message = apiErrorMessage(
+      restoredBooking.error,
+      "Sesi checkout belum dapat dipulihkan. Periksa koneksi lalu coba lagi.",
+    );
+  }
+  const onPress = () => {
+    if (restoredBooking.error) void restoredBooking.retry();
+    else onHome();
+  };
+  return (
+    <View style={styles.root} testID="waiting-claimed-recovery">
+      <Header />
+      <View style={shellStyle}>
+        <View style={styles.waitingContainer}>
+          <StatusBadge variant="expired" label="Antrean perlu diperbarui" />
+          <ErrorState
+            icon="clock"
+            title={
+              hasError
+                ? "Gagal memulihkan checkout"
+                : "Sesi checkout tidak tersedia"
+            }
+            message={message}
+            buttonText={hasError ? "Coba Lagi" : "Kembali ke Beranda"}
+            onPress={onPress}
+            testID="waiting-claimed-state"
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+interface TerminalQueuePageProps {
+  readonly shellStyle: StyleProp<ViewStyle>;
+  readonly entry?: QueueEntry;
+  readonly onBrowseEvents: () => void;
+}
+
+function TerminalQueuePage({
+  shellStyle,
+  entry,
+  onBrowseEvents,
+}: TerminalQueuePageProps) {
+  const isSoldOut = entry?.status === "SOLD_OUT";
+  const status = entry?.status ?? "ENDED";
+  return (
+    <View style={styles.root} testID="waiting-terminal">
+      <Header />
+      <View style={shellStyle}>
+        <View style={styles.waitingContainer}>
+          <StatusBadge
+            variant={isSoldOut ? "soldOut" : "expired"}
+            label={isSoldOut ? "Tiket Habis" : "Penjualan Berakhir"}
+          />
+          <ErrorState
+            icon={isSoldOut ? "ticket" : "clock"}
+            title={terminalTitle(status)}
+            message={terminalBody(status)}
+            buttonText="Jelajahi Event Lain"
+            onPress={onBrowseEvents}
+            testID={`waiting-${isSoldOut ? "soldout" : "ended"}-state`}
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+interface ClaimErrorPageProps {
+  readonly shellStyle: StyleProp<ViewStyle>;
+  readonly errorState: ClaimErrorState;
+  readonly onBrowseEvents: () => void;
+  readonly onRejoinQueue: () => void;
+}
+
+function ClaimErrorPage({
+  shellStyle,
+  errorState,
+  onBrowseEvents,
+  onRejoinQueue,
+}: ClaimErrorPageProps) {
+  const isSoldOut = errorState === "EVENT_SOLD_OUT";
+  const onPress =
+    isSoldOut || errorState === "ADMISSION_TOKEN_INVALID"
+      ? onBrowseEvents
+      : onRejoinQueue;
+  return (
+    <View style={styles.root} testID="waiting-claim-error">
+      <Header />
+      <View style={shellStyle}>
+        <View style={styles.waitingContainer}>
+          <StatusBadge
+            variant={isSoldOut ? "soldOut" : "expired"}
+            label={claimErrorBadgeLabel(errorState)}
+          />
+          <ErrorState
+            icon={isSoldOut ? "ticket" : "clock"}
+            title={claimErrorTitle(errorState)}
+            message={claimErrorBody(errorState)}
+            buttonText={claimErrorActionLabel(errorState)}
+            onPress={onPress}
+            testID="waiting-claim-error-state"
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+interface ActiveQueuePageProps {
+  readonly entry?: QueueEntry;
+  readonly eventId: string;
+  readonly admissionRatePerMin?: number;
+  readonly claiming: boolean;
+  readonly isDesktop: boolean;
+  readonly isMobileWeb: boolean;
+  readonly isConnectionLost: boolean;
+  readonly isReconnected: boolean;
+  readonly bottomInset: number;
+  readonly showLeaveModal: boolean;
+  readonly onLeavePress: () => void;
+  readonly onStay: () => void;
+  readonly onConfirmLeave: () => void;
+  readonly admitted: boolean;
+}
+
+function ActiveQueuePage(props: ActiveQueuePageProps) {
+  const pageStyle = [
+    styles.waitingPage,
+    props.isDesktop && styles.waitingPageDesktop,
+    !props.isDesktop && styles.waitingPageMobile,
+    props.isMobileWeb && styles.mobileWebWaitingPage,
+  ];
+  const scrollContentStyle = [
+    styles.waitingScroll,
+    props.isDesktop && styles.waitingScrollDesktop,
+    props.isMobileWeb && styles.mobileWebWaitingScroll,
+  ];
+  const entry = props.entry;
+  const content = props.admitted ? (
+    <YourTurnState
+      onLeavePress={props.onLeavePress}
+      claiming={props.claiming}
+      eventId={props.eventId}
+      isDesktop={props.isDesktop}
+      isMobileWeb={props.isMobileWeb}
+    />
+  ) : (
+    <WaitingActive
+      position={entry?.position ?? 0}
+      admissionRatePerMin={props.admissionRatePerMin}
+      zone={entry?.zone ?? "GUARANTEED"}
+      onLeavePress={props.onLeavePress}
+      eventId={props.eventId}
+      isDesktop={props.isDesktop}
+      isMobileWeb={props.isMobileWeb}
+    />
+  );
+  return (
+    <View
+      style={styles.root}
+      testID={props.admitted ? "waiting-admitted" : "waiting-active"}
+    >
+      <Header status={props.admitted ? "GILIRAN ANDA" : undefined} />
+      <ScrollView
+        style={styles.waitingScrollView}
+        contentContainerStyle={scrollContentStyle}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={pageStyle}>{content}</View>
       </ScrollView>
+      {!props.isDesktop && (
+        <View
+          style={[styles.mobilePinnedLeave, { bottom: props.bottomInset + 12 }]}
+        >
+          <LeaveButton onPress={props.onLeavePress} />
+        </View>
+      )}
       <LeaveModal
-        visible={showLeaveModal}
-        onStay={handleStay}
-        onLeave={handleConfirmLeave}
+        visible={props.showLeaveModal}
+        onStay={props.onStay}
+        onLeave={props.onConfirmLeave}
       />
       <NetworkStatusBar
-        isOffline={isConnectionLost}
-        isReconnected={isReconnected}
+        isOffline={props.isConnectionLost}
+        isReconnected={props.isReconnected}
       />
     </View>
   );

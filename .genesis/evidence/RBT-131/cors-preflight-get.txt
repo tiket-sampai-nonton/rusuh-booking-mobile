@@ -1,0 +1,18 @@
+HTTP/2 204
+date: Wed, 11 Nov 2026 06:04:14 GMT
+access-control-allow-credentials: true
+access-control-allow-headers: Content-Type, Authorization, X-Visitor-Token, X-Visitor-ID, X-Queue-Token, X-Client-Type, Idempotency-Key, X-Request-ID
+access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+access-control-allow-origin: http://localhost:8081
+access-control-expose-headers: X-Request-ID, Set-Cookie
+alt-svc: h3=":443"; ma=86400
+referrer-policy: strict-origin-when-cross-origin
+strict-transport-security: max-age=31536000
+vary: Origin
+via: 1.1 Caddy
+x-content-type-options: nosniff
+cf-cache-status: DYNAMIC
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=vANx%2BeAkqsfKLst1Pahu%2BU0%2BDY%2FSmpe2iEmc8m7NrD6wy3aID6%2BdZb%2FCbsTq1Xz6CE7gSsKcAbfgHdqNqA8fpfkShp%2FvbtAN0fGFvBECyTUxq%2FejhNWP8zSmCmrE9oH21wN4Q9bT3xEHVcEep17WmbADLvQR"}]}
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+server: cloudflare
+cf-ray: a58b192ccffbf8cc-SIN

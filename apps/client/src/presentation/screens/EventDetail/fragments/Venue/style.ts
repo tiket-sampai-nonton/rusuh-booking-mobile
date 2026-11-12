@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
+import { withAlpha } from "@presentation/theme";
 import {
   designBorders,
   designColors,
@@ -21,13 +22,27 @@ export const venueStyles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  mapUnavailable: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: designSpacingSemantic.s,
+    backgroundColor: designColors.card,
+    padding: designSpacingSemantic.m,
+  },
+  mapUnavailableText: {
+    fontFamily: plusJakartaSansFonts.regular,
+    fontSize: designFontSizes.s,
+    color: designColors.inkMuted,
+    textAlign: "center",
+  },
   mapOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: withAlpha(designColors.overlay, 0.5),
     alignItems: "center",
     justifyContent: "center",
   },

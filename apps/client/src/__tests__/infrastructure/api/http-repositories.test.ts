@@ -76,6 +76,7 @@ describe("HttpEventRepository", () => {
           salesStartsAt: "x",
           salesEndsAt: "y",
           status: "SOLD_OUT",
+          minPriceMinor: 0,
           bannerUrl: "https://example.com/banner.jpg",
         },
         maxTicketsPerOrder: 4,
@@ -106,11 +107,101 @@ describe("HttpEventRepository", () => {
       maxTicketsPerBuyerNik: 2,
       allowMixedCategories: false,
       published: true,
+      minPriceMinor: 1000,
       description: {
         bannerImage: "https://example.com/banner.jpg",
         categories: [{ code: "REG", available: 2 }],
       },
     });
+  });
+
+  it("keeps a real free category at zero instead of falling back to a paid summary price", async () => {
+    const http = new FakeHttpClient();
+    http.queueResponse(
+      ok({
+        event: {
+          eventId: "free-event",
+          slug: "free-event",
+          name: "Free event",
+          salesStartsAt: "x",
+          salesEndsAt: "y",
+          status: "AVAILABLE",
+          minPriceMinor: 2000,
+        },
+        categories: [
+          {
+            categoryId: "free",
+            code: "FREE",
+            name: "Free",
+            priceMinor: 0,
+            available: 10,
+          },
+          {
+            categoryId: "paid",
+            code: "PAID",
+            name: "Paid",
+            priceMinor: 1000,
+            available: 10,
+          },
+        ],
+      }),
+    );
+
+    const repo = new HttpEventRepository(
+      http,
+      new ServerClock({ now: () => Date.parse("2030-01-01T00:00:00Z") }),
+    );
+    const out = await repo.getEventDetail("free-event");
+
+    expect(out.minPriceMinor).toBe(0);
+  });
+
+  it("ignores negative, fractional, and unsafe category prices", async () => {
+    const http = new FakeHttpClient();
+    http.queueResponse(
+      ok({
+        event: {
+          eventId: "invalid-prices",
+          slug: "invalid-prices",
+          name: "Invalid prices",
+          salesStartsAt: "x",
+          salesEndsAt: "y",
+          status: "AVAILABLE",
+          minPriceMinor: 5000,
+        },
+        categories: [
+          {
+            categoryId: "negative",
+            code: "NEG",
+            name: "Negative",
+            priceMinor: -100,
+            available: 1,
+          },
+          {
+            categoryId: "fractional",
+            code: "FRAC",
+            name: "Fractional",
+            priceMinor: 0.5,
+            available: 1,
+          },
+          {
+            categoryId: "unsafe",
+            code: "UNSAFE",
+            name: "Unsafe",
+            priceMinor: Number.MAX_SAFE_INTEGER + 1,
+            available: 1,
+          },
+        ],
+      }),
+    );
+
+    const repo = new HttpEventRepository(
+      http,
+      new ServerClock({ now: () => Date.parse("2030-01-01T00:00:00Z") }),
+    );
+    const out = await repo.getEventDetail("invalid-prices");
+
+    expect(out.minPriceMinor).toBe(5000);
   });
 });
 
@@ -127,7 +218,10 @@ describe("HttpQueueRepository", () => {
     http.queueResponse({
       status: 200,
       headers: {},
-      data: { admissionRatePerMin: 875 },
+      data: {
+        meta: { code: 200 },
+        data: { admissionRatePerMin: 875, nextPollAfterMs: 2400 },
+      },
     });
     http.queueResponse({ status: 204, headers: {}, data: null });
     const repo = new HttpQueueRepository(http);
@@ -148,6 +242,7 @@ describe("HttpQueueRepository", () => {
       url: "queue-status/event%201",
     });
     expect(queueStatus.admissionRatePerMin).toBe(875);
+    expect(queueStatus.nextPollAfterMs).toBe(2400);
 
     await expect(repo.leave("q1", "e1")).resolves.toBeUndefined();
     expect(http.calls[3]).toMatchObject({
@@ -245,7 +340,7 @@ describe("HttpBookingRepository", () => {
     };
     http.queueResponse(ok(session));
     http.queueResponse(ok(session));
-    http.queueResponse(ok({ nikMasked: "32****89", result: "AVAILABLE" }));
+    http.queueResponse(ok({ result: "AVAILABLE", checksRemaining: 5 }));
     http.queueResponse(
       ok({ bookingId: "b1", sessionId: "s1", status: "HELD", amountMinor: 5 }),
     );
@@ -255,11 +350,17 @@ describe("HttpBookingRepository", () => {
       sessionId: "s1",
       categories: BOOKING_CATEGORY_FIXTURE,
     });
-    expect(await repo.getCurrentSession()).toMatchObject({
+    expect(await repo.getCurrentSession("e1")).toMatchObject({
       sessionId: "s1",
       categories: BOOKING_CATEGORY_FIXTURE,
     });
-    expect((await repo.checkAttendee("s1", "x")).result).toBe("AVAILABLE");
+    expect(http.calls[1].url).toBe("booking-sessions/current?eventId=e1");
+    const attendeeCheck = await repo.checkAttendee("s1", "x");
+    expect(attendeeCheck).toMatchObject({
+      result: "AVAILABLE",
+      checksRemaining: 5,
+    });
+    expect(attendeeCheck.nikMasked).toBeUndefined();
     const booking = await repo.hold(
       "s1",
       [{ categoryId: "c1", attendeeName: "A", attendeeNik: "n" }],
@@ -295,7 +396,7 @@ describe("HttpBookingRepository", () => {
     const http = new FakeHttpClient();
     http.queueResponse({ status: 404, headers: {}, data: null });
     const repo = new HttpBookingRepository(http);
-    expect(await repo.getCurrentSession()).toBeNull();
+    expect(await repo.getCurrentSession("e1")).toBeNull();
   });
 
   it("returns null when the 404 arrives as an error envelope", async () => {
@@ -306,7 +407,7 @@ describe("HttpBookingRepository", () => {
       data: { meta: { code: 1404 }, data: null },
     });
     const repo = new HttpBookingRepository(http);
-    expect(await repo.getCurrentSession()).toBeNull();
+    expect(await repo.getCurrentSession("e1")).toBeNull();
   });
 
   it("returns null when the transport rejects with a 404", async () => {
@@ -315,7 +416,7 @@ describe("HttpBookingRepository", () => {
       .spyOn(http, "request")
       .mockRejectedValue(new TransportError({ code: 1404, httpStatus: 404 }));
     const repo = new HttpBookingRepository(http);
-    await expect(repo.getCurrentSession()).resolves.toBeNull();
+    await expect(repo.getCurrentSession("e1")).resolves.toBeNull();
   });
 
   it("re-throws a non-404 transport error from current session", async () => {
@@ -326,7 +427,7 @@ describe("HttpBookingRepository", () => {
       data: { meta: { code: 1500 }, data: null },
     });
     const repo = new HttpBookingRepository(http);
-    await expect(repo.getCurrentSession()).rejects.toBeInstanceOf(
+    await expect(repo.getCurrentSession("e1")).rejects.toBeInstanceOf(
       TransportError,
     );
   });
@@ -337,7 +438,14 @@ describe("HttpBookingRepository", () => {
     // which is NOT 404, so it must propagate (covers the non-404 guard branch).
     http.queueResponse({ status: 200, headers: {}, data: { nope: true } });
     const repo = new HttpBookingRepository(http);
-    await expect(repo.getCurrentSession()).rejects.toThrow();
+    await expect(repo.getCurrentSession("e1")).rejects.toThrow();
+  });
+
+  it("does not call the current-session endpoint without event context", async () => {
+    const http = new FakeHttpClient();
+    const repo = new HttpBookingRepository(http);
+    await expect(repo.getCurrentSession()).resolves.toBeNull();
+    expect(http.calls).toHaveLength(0);
   });
 });
 

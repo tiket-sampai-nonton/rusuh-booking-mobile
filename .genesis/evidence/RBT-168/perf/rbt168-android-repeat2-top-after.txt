@@ -1,0 +1,6 @@
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  4014920K total,  3182576K used,   832344K free,    34284K buffers
+ Swap:  3011184K total,   490840K used,  2520344K free,  1510460K cached
+400%cpu 124%user  10%nice 103%sys 131%idle   0%iow  28%irq   3%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+31581 u0_a233      10 -10  46G 685M 187M S 86.2  17.4   5:23.68 host.exp.exponent

@@ -24,6 +24,8 @@ export function Field({
   testID,
   invalid = false,
   editable = true,
+  errorMessage,
+  helperText,
 }: FieldProps) {
   const { isMobileWeb } = useResponsive();
   const [isFocused, setIsFocused] = useState(false);
@@ -43,6 +45,7 @@ export function Field({
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: shakeX.value }],
   }));
+  const errorTestID = testID ? `${testID}-error` : undefined;
 
   return (
     <View
@@ -79,9 +82,16 @@ export function Field({
         />
       </Animated.View>
       {invalid ? (
-        <Text style={checkoutFieldStyles.error}>
-          NIK harus {NIK_LENGTH} digit.
+        <Text
+          style={checkoutFieldStyles.error}
+          accessibilityRole="alert"
+          testID={errorTestID}
+        >
+          {errorMessage ?? `NIK harus ${NIK_LENGTH} digit.`}
         </Text>
+      ) : null}
+      {!invalid && helperText ? (
+        <Text style={checkoutFieldStyles.helper}>{helperText}</Text>
       ) : null}
     </View>
   );

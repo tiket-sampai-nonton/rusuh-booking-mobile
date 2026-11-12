@@ -4,6 +4,7 @@ import {
   designColors,
   designZIndex,
   plusJakartaSansFonts,
+  withAlpha,
 } from "@presentation/theme";
 
 export const loaderStyles = StyleSheet.create({
@@ -34,7 +35,7 @@ export const loaderStyles = StyleSheet.create({
     marginTop: 24,
     width: 200,
     height: 4,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: withAlpha(designColors.ground, 0.2),
     overflow: "hidden",
   },
   reducedProgress: {

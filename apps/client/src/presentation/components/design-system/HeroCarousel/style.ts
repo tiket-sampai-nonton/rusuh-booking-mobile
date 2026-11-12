@@ -27,17 +27,8 @@ export const componentStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "#000000",
-    opacity: 0.25,
-  },
-  elementPosition1: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: designColors.inkMuted, // #666666 - per Design Palette Guide
-    opacity: 0.65,
+    backgroundColor: designColors.ink,
+    opacity: 0.08,
   },
   elementPosition2: {
     position: "absolute",
@@ -111,9 +102,9 @@ export const componentStyles = StyleSheet.create({
     flexWrap: "wrap",
   },
   elementBackgroundColor16: {
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.accentDeep,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
+    borderColor: designColors.ember,
     paddingVertical: 16, // .btn-large: 1rem
     paddingHorizontal: 32, // .btn-large: 2rem
   },
@@ -183,9 +174,9 @@ export const componentStyles = StyleSheet.create({
   },
   elementAlignSelf27: {
     alignSelf: "flex-start",
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.accent,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
+    borderColor: designColors.ember,
     ...hardShadowStyle(4, 4, designColors.ink, 4),
   },
   elementFlexDirection28: {
@@ -193,7 +184,7 @@ export const componentStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.accent,
     paddingVertical: 14,
     paddingHorizontal: 24,
     minHeight: 44,
@@ -278,7 +269,7 @@ export function styleForPulsingDotAnimatedView5(): DynamicStyle {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#ff0000", // --danger
+    backgroundColor: designColors.accent,
   } as DynamicStyle;
 }
 
@@ -301,7 +292,7 @@ export function styleForNavDotPressable7(arg0: boolean): DynamicStyle {
   return {
     width: arg0 ? 60 : 40, // active: 60px, default: 40px
     height: 4,
-    backgroundColor: designColors.inkMuted,
+    backgroundColor: arg0 ? designColors.accent : designColors.inkMuted,
     overflow: "hidden",
     position: "relative",
   } as DynamicStyle;
@@ -314,7 +305,7 @@ export function styleForNavDotAnimatedView8(): DynamicStyle {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: designColors.ink,
+    backgroundColor: designColors.ember,
     transformOrigin: "left",
   } as DynamicStyle;
 }
@@ -357,6 +348,9 @@ export function styleForHeroCarouselView13(
   arg1: boolean,
   arg2 = false,
 ): DynamicStyle {
+  let gap = SPACE_L;
+  if (arg1) gap = SPACE_M;
+  if (arg2) gap = SPACE_XS;
   return {
     position: "absolute",
     bottom: arg0 || arg2 ? SPACE_S : SPACE_L + 40,
@@ -366,7 +360,7 @@ export function styleForHeroCarouselView13(
     // Desktop: row layout with title + info side by side
     // Native: single column (mobile prototype has Badge→Title→Meta→CTA stacked)
     flexDirection: arg0 || arg1 || arg2 ? "column" : "row",
-    gap: arg2 ? SPACE_XS : arg1 ? SPACE_M : SPACE_L,
+    gap,
     alignItems: arg1 || arg2 ? "flex-start" : "flex-end",
   } as DynamicStyle;
 }

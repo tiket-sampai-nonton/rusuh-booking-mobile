@@ -50,14 +50,17 @@ export class HttpQueueRepository implements QueueRepository {
   }
 
   async getQueueStatus(eventId: string): Promise<QueueStatusSnapshot> {
-    const res = await this.http.request<{
+    const res = await this.http.request({
+      method: "GET",
+      url: `queue-status/${encodeURIComponent(eventId)}`,
+    });
+    const data = unwrap<{
       admissionRatePerMin?: number;
       nextPollAfterMs?: number;
-    }>({ method: "GET", url: `queue-status/${encodeURIComponent(eventId)}` });
-    assertOk(res);
+    }>(res);
     return {
-      admissionRatePerMin: res.data.admissionRatePerMin,
-      nextPollAfterMs: res.data.nextPollAfterMs,
+      admissionRatePerMin: data.admissionRatePerMin,
+      nextPollAfterMs: data.nextPollAfterMs,
     };
   }
 
@@ -87,18 +90,17 @@ export class HttpQueueRepository implements QueueRepository {
   }
 
   private toEntry(data: QueueWire, eventId: string): QueueEntry {
+    let status: QueueStatus = data.status;
+    if (data.state === "STALE") status = "WAITING";
+    else if (data.state === "ENDED" && data.reason === "CLAIM_WINDOW_EXPIRED")
+      status = "MISSED";
+    else if (data.state === "ENDED" && data.reason === "LEFT") status = "LEFT";
+    else if (data.state) status = data.state;
     return {
       queueId: data.entryId,
       eventId,
-      position: data.exactPosition ?? NaN,
-      status:
-        data.state === "STALE"
-          ? "WAITING"
-          : data.state === "ENDED" && data.reason === "CLAIM_WINDOW_EXPIRED"
-            ? "MISSED"
-            : data.state === "ENDED" && data.reason === "LEFT"
-              ? "LEFT"
-              : (data.state ?? data.status),
+      position: data.exactPosition ?? Number.NaN,
+      status,
       zone: data.zone,
       serverTime: data.serverTime,
     };

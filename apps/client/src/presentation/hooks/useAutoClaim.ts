@@ -19,18 +19,25 @@
  * DI container via `useServices()`. No concrete adapter is named; no
  * infrastructure import.
  */
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ClaimAdmission } from "@application/queue/claim-admission.use-case";
 import { DomainError } from "@domain/errors/domain-error";
 import type { BookingSession } from "@domain/repositories/booking.repository";
-import type { QueueStatus } from "@domain/repositories/queue.repository";
+import type {
+  QueueEntry,
+  QueueStatus,
+} from "@domain/repositories/queue.repository";
 import { authorizes } from "@domain/state-machines/queue-state-machine";
 import { useServices } from "@providers/service-context";
 
 /** The error states RBT-044 surfaces in the waiting room (FR-08). */
-export type ClaimErrorState = "TURN_MISSED" | "EVENT_SOLD_OUT" | "UNKNOWN";
+export type ClaimErrorState =
+  | "TURN_MISSED"
+  | "EVENT_SOLD_OUT"
+  | "ADMISSION_TOKEN_INVALID"
+  | "UNKNOWN";
 
 export interface UseAutoClaimParams {
   /** The event whose admitted slot is being claimed. */
@@ -66,6 +73,8 @@ function toErrorState(error: Error | null): ClaimErrorState | null {
   if (error instanceof DomainError) {
     if (error.code === "TURN_MISSED") return "TURN_MISSED";
     if (error.code === "EVENT_SOLD_OUT") return "EVENT_SOLD_OUT";
+    if (error.code === "ADMISSION_TOKEN_INVALID")
+      return "ADMISSION_TOKEN_INVALID";
   }
   return "UNKNOWN";
 }
@@ -81,6 +90,7 @@ export function useAutoClaim({
   onClaimed,
 }: UseAutoClaimParams): UseAutoClaimResult {
   const { bookingRepository, queueRepository } = useServices();
+  const queryClient = useQueryClient();
 
   const claim = useMemo(
     () => new ClaimAdmission(bookingRepository, queueRepository),
@@ -101,6 +111,20 @@ export function useAutoClaim({
     mutationFn: (admitted: QueueStatus) =>
       claim.execute(eventId, admitted, queueId),
     onSuccess: (session) => {
+      // Keep the cached queue status in sync with the successful one-use claim.
+      // The waiting route can remount before cancellation events reach Queue;
+      // it must never replay a cached ADMITTED status and consume the token twice.
+      queryClient.setQueryData(
+        ["queue", queueId, eventId],
+        (
+          current:
+            | { entry: QueueEntry; admissionRatePerMin?: number }
+            | undefined,
+        ) =>
+          current
+            ? { ...current, entry: { ...current.entry, status: "CLAIMED" } }
+            : current,
+      );
       setClaimedSessionId(session.sessionId);
       onClaimedRef.current?.(session.sessionId);
     },

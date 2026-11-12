@@ -39,6 +39,16 @@ function checkHtml(
   const html = read(file);
   if (!html) return;
 
+  const charset = html.match(/<meta\b[^>]*\bcharset\s*=\s*["']?utf-8[^>]*>/i);
+  if (
+    !charset ||
+    Buffer.byteLength(html.slice(0, charset.index), "utf8") > 1024
+  ) {
+    errors.push(
+      `${file}: UTF-8 charset declaration must appear within the first 1024 bytes`,
+    );
+  }
+
   requirePattern(html, /<title\b[^>]*>[^<]+<\/title>/i, `${file}: title`);
   requirePattern(
     html,
@@ -158,7 +168,12 @@ if (!/output\s*:\s*["']static["']/.test(appConfig)) {
 
 const maxInitialJsGzipBytes = 1_000_000;
 
-for (const file of ["index.html", "browse.html", "history.html"]) {
+for (const file of [
+  "index.html",
+  "browse.html",
+  "history.html",
+  "privacy.html",
+]) {
   checkHtml(file, maxInitialJsGzipBytes, { publicPage: true });
 }
 
@@ -187,12 +202,14 @@ for (const eventFile of eventFiles) {
 const transactionSegments = new Set([
   "checkout",
   "payment",
+  "pay",
   "payment-result",
   "payment-webview",
   "snap",
   "success",
   "waiting",
   "expired",
+  "failed",
 ]);
 function walkHtml(dir, relative = "") {
   if (!fs.existsSync(dir)) return [];

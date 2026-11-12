@@ -66,6 +66,16 @@ describe("session lifecycle use cases", () => {
     expect(await new RestoreSession(storage).execute()).toBeNull();
   });
 
+  it("ClearSession also removes the persisted checkout email", async () => {
+    const buyerEmailStorage = {
+      save: jest.fn().mockResolvedValue(undefined),
+      load: jest.fn().mockResolvedValue("buyer@example.com"),
+      clear: jest.fn().mockResolvedValue(undefined),
+    };
+    await new ClearSession(storage, buyerEmailStorage).execute();
+    expect(buyerEmailStorage.clear).toHaveBeenCalledTimes(1);
+  });
+
   it("full lifecycle: persist → restore → clear → restore(null)", async () => {
     const persist = new PersistSession(storage);
     const restore = new RestoreSession(storage);

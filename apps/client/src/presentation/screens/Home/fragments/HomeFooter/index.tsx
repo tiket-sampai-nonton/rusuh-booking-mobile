@@ -4,7 +4,7 @@
  * MASTER-SPEC + prototype 01-home.html EXACT COPY:
  *
  * FOOTER (.footer):
- * - Background: ink (#000), text: ground (#fff)
+ * - Background and text use shared ink and ground tokens
  * - footer-grid: 4 columns (brand + 3 link sections)
  * - footer-brand: logo + description paragraph
  * - footer-title: text-s, font-800, uppercase, letter-spacing 0.08em, margin-bottom space-m
@@ -18,7 +18,9 @@
  */
 import { Text, View } from "react-native";
 
+import { BrandMark } from "@presentation/components/BrandMark";
 import { Reveal } from "@presentation/components/design-system";
+import { designColors } from "@presentation/theme";
 
 import { FooterLink } from "./FooterLink";
 import { SocialLink } from "./SocialLink";
@@ -30,30 +32,12 @@ import { componentStyles } from "./style";
 
 const LINK_COLUMNS = [
   {
-    title: "Event",
-    links: [
-      { label: "Konser", href: "/browse?genre=concert" },
-      { label: "Festival", href: "/browse?genre=festival" },
-      { label: "Olahraga", href: "/browse?genre=sports" },
-      { label: "Teater", href: "/browse?genre=theater" },
-    ],
-  },
-  {
     title: "Bantuan",
     links: [
-      { label: "Pusat Bantuan", href: "#" },
-      { label: "Cara Beli", href: "#" },
-      { label: "Pembayaran", href: "#" },
-      { label: "Pengembalian Dana", href: "#" },
-    ],
-  },
-  {
-    title: "Perusahaan",
-    links: [
-      { label: "Tentang Kami", href: "#" },
-      { label: "Karir", href: "#" },
-      { label: "Media", href: "#" },
-      { label: "Kontak", href: "#" },
+      {
+        label: "Pusat Bantuan",
+        href: `https://wa.me/628113663068?text=${encodeURIComponent("Halo, saya butuh bantuan terkait Rusuh Booking. Bisa dibantu?")}`,
+      },
     ],
   },
 ] as const;
@@ -81,11 +65,14 @@ export function HomeFooter({
         {/* Brand Column */}
         <Reveal>
           <View style={componentStyles.elementFlex5}>
-            <Text style={componentStyles.elementColor6}>Rusuh Tiket</Text>
+            <BrandMark
+              size={32}
+              color={designColors.ground}
+              style={componentStyles.elementBrandMark}
+            />
 
             <Text style={componentStyles.elementColor7}>
-              Platform tiket event terpercaya di Indonesia. Beli tiket konser,
-              festival, olahraga, dan teater dengan mudah dan aman.
+              Temukan acara favoritmu dan pesan tiket dengan mudah.
             </Text>
           </View>
         </Reveal>

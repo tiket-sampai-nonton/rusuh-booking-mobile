@@ -1,18 +1,18 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Animated } from "react-native";
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
+import { withAlpha } from "@presentation/theme";
 import {
   designColors,
   designFontSizes,
   designSpacingSemantic,
 } from "@presentation/theme/event-design-tokens";
 
-import { Animated } from "react-native";
 import type { DynamicStyle } from "@presentation/utils/style";
 
 export const lightboxStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.95)",
+    backgroundColor: withAlpha(designColors.overlay, 0.95),
     alignItems: "center",
     justifyContent: "center",
   },

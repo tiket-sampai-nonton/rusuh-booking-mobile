@@ -1,0 +1,82 @@
+appId: com.tiketsampainonton.rusuhbooking
+---
+- extendedWaitUntil:
+    visible:
+      id: bottom-nav-browse
+    timeout: 10000
+- tapOn:
+    id: bottom-nav-home
+- extendedWaitUntil:
+    visible:
+      id: home-scroll
+    timeout: 10000
+- tapOn:
+    id: bottom-nav-browse
+- extendedWaitUntil:
+    visible:
+      text: SEMUA
+    timeout: 10000
+- swipe:
+    direction: UP
+- tapOn:
+    id: bottom-nav-home
+- extendedWaitUntil:
+    visible:
+      id: home-scroll
+    timeout: 10000
+- tapOn:
+    id: bottom-nav-browse
+- extendedWaitUntil:
+    visible:
+      text: SEMUA
+    timeout: 10000
+- swipe:
+    direction: UP
+- tapOn:
+    id: bottom-nav-home
+- extendedWaitUntil:
+    visible:
+      id: home-scroll
+    timeout: 10000
+- tapOn:
+    id: bottom-nav-browse
+- extendedWaitUntil:
+    visible:
+      text: SEMUA
+    timeout: 10000
+- swipe:
+    direction: UP
+- tapOn:
+    id: bottom-nav-home
+- extendedWaitUntil:
+    visible:
+      id: home-scroll
+    timeout: 10000
+- tapOn:
+    id: bottom-nav-browse
+- extendedWaitUntil:
+    visible:
+      text: SEMUA
+    timeout: 10000
+- swipe:
+    direction: UP
+- tapOn:
+    id: bottom-nav-home
+- extendedWaitUntil:
+    visible:
+      id: home-scroll
+    timeout: 10000
+- tapOn:
+    id: bottom-nav-browse
+- extendedWaitUntil:
+    visible:
+      text: SEMUA
+    timeout: 10000
+- swipe:
+    direction: UP
+- tapOn:
+    id: bottom-nav-home
+- extendedWaitUntil:
+    visible:
+      id: home-scroll
+    timeout: 10000

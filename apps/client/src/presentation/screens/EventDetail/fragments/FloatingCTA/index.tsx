@@ -18,10 +18,12 @@
  */
 import { useEffect, useRef } from "react";
 import { Animated, Platform, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { EventDetail } from "@domain/repositories/event.repository";
 import { minorToIDR } from "@domain/services/money";
 import { designDuration } from "@presentation/theme/event-design-tokens";
+import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 import { designDetailStyles as styles } from "../../style";
 import { nativeDriverSupported } from "@presentation/utils/style";
@@ -40,6 +42,9 @@ interface FloatingCTAProps {
   readonly ctaLabel: string;
   readonly onJoin: () => void;
   readonly isMobileWeb?: boolean;
+  readonly isActive?: boolean;
+  readonly isJoining?: boolean;
+  readonly errorMessage?: unknown;
 }
 
 export function FloatingCTA({
@@ -48,8 +53,12 @@ export function FloatingCTA({
   ctaLabel,
   onJoin,
   isMobileWeb = false,
+  isActive = true,
+  isJoining = false,
+  errorMessage,
 }: FloatingCTAProps) {
   const isNative = Platform.OS !== "web";
+  const insets = useSafeAreaInsets();
 
   // Entrance slide-up animation
   const slideAnim = useRef(new Animated.Value(100)).current;
@@ -57,48 +66,73 @@ export function FloatingCTA({
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Slide up entrance
-    Animated.timing(slideAnim, {
+    const entrance = Animated.timing(slideAnim, {
       toValue: 0,
       duration: designDuration.slow,
       delay: 800,
       useNativeDriver: nativeDriverSupported(),
-    }).start();
+    });
+    entrance.start();
+    return () => entrance.stop();
+  }, [slideAnim]);
 
-    // Pulse animation loop (only when enabled)
-    if (canJoin) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: isNative, // Native can use scale, web uses shadow
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 0,
-            duration: 1000,
-            useNativeDriver: isNative,
-          }),
-        ]),
-      ).start();
+  useEffect(() => {
+    if (!canJoin || isJoining || !isActive) {
+      pulseAnim.stopAnimation();
+      pulseAnim.setValue(0);
+      return;
     }
-  }, [slideAnim, pulseAnim, canJoin, isNative]);
+
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: isNative,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: isNative,
+        }),
+      ]),
+    );
+    pulse.start();
+    return () => {
+      pulse.stop();
+      pulseAnim.stopAnimation();
+    };
+  }, [canJoin, isActive, isJoining, isNative, pulseAnim]);
 
   const priceText =
     typeof event.minPriceMinor === "number"
-      ? minorToIDR(event.minPriceMinor, { compact: true })
+      ? minorToIDR(event.minPriceMinor)
       : "Menyusul";
 
-  const disabled = !canJoin;
+  const disabled = !canJoin || isJoining;
+  let buttonLabel = ctaLabel;
+  if (errorMessage) buttonLabel = "Coba Lagi";
+  if (isJoining) buttonLabel = "Memproses…";
 
   return (
     <Animated.View
       style={[
         styles.floatingCta,
+        isNative && { paddingBottom: Math.max(4, insets.bottom + 4) },
         isMobileWeb && styles.mobileWebFloatingCta,
         floatingCtaEntranceStyle(slideAnim),
       ]}
     >
+      {errorMessage ? (
+        <Text
+          accessibilityRole="alert"
+          accessibilityLiveRegion="assertive"
+          testID="join-queue-error"
+          style={styles.apiErrorMessage}
+        >
+          {apiErrorMessage(errorMessage)}
+        </Text>
+      ) : null}
       <View style={styles.floatingCtaInner}>
         {/* Left: Price Info */}
         <View
@@ -131,17 +165,17 @@ export function FloatingCTA({
         {/* Right: CTA Button */}
         {isNative ? (
           <NativeCTAButton
-            label={ctaLabel}
+            label={buttonLabel}
             disabled={disabled}
-            canJoin={canJoin}
+            canJoin={canJoin && !isJoining}
             onJoin={onJoin}
             pulseAnim={pulseAnim}
           />
         ) : (
           <WebCTAButton
-            label={ctaLabel}
+            label={buttonLabel}
             disabled={disabled}
-            canJoin={canJoin}
+            canJoin={canJoin && !isJoining}
             onJoin={onJoin}
             pulseAnim={pulseAnim}
             isMobileWeb={isMobileWeb}

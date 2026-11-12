@@ -1,37 +1,36 @@
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, Animated } from "react-native";
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
 import { designColors } from "@presentation/theme/event-design-tokens";
+import { withAlpha } from "@presentation/theme";
 
-import { Animated } from "react-native";
 import type { DynamicStyle } from "@presentation/utils/style";
 
 export const heroStyles = StyleSheet.create({
   // Web: gradient from white at bottom
   overlayWeb: {
-    backgroundColor: "transparent",
+    backgroundColor: designColors.transparent,
     ...(Platform.OS === "web" && {
       backgroundImage: `linear-gradient(
         to top,
         ${designColors.ground} 0%,
-        rgba(255,255,255,0.8) 30%,
-        rgba(255,255,255,0.3) 60%,
-        rgba(255,255,255,0) 100%
+        ${withAlpha(designColors.ground, 0.8)} 30%,
+        ${withAlpha(designColors.ground, 0.3)} 60%,
+        ${withAlpha(designColors.ground, 0)} 100%
       )`,
     }),
   },
   mobileWebOverlay: {
-    backgroundColor: "transparent",
+    backgroundColor: designColors.transparent,
     ...(Platform.OS === "web" && {
-      backgroundImage:
-        "linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.42) 42%, rgba(0,0,0,.08) 100%)",
+      backgroundImage: `linear-gradient(to top, ${withAlpha(designColors.overlay, 0.92)} 0%, ${withAlpha(designColors.overlay, 0.42)} 42%, ${withAlpha(designColors.overlay, 0.08)} 100%)`,
     }),
   },
   // Native grayscale layers (simulates grayscale filter)
   nativeGrayscaleDark: {
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    backgroundColor: withAlpha(designColors.overlay, 0.25),
   },
   nativeGrayscaleGray: {
-    backgroundColor: "rgba(128, 128, 128, 0.65)",
+    backgroundColor: withAlpha(designColors.inkMuted, 0.65),
   },
   metaIcon: {
     fontSize: 16,
@@ -77,42 +76,10 @@ export function styleForDetailHeroAnimatedView2(
   } as DynamicStyle;
 }
 
-export function styleForDetailHeroAnimatedText3(
-  arg0: Animated.Value,
-  arg1: Animated.Value,
-): DynamicStyle {
-  return {
-    opacity: arg0,
-    transform: [{ translateY: arg1 }],
-  } as DynamicStyle;
-}
+export const styleForDetailHeroAnimatedText3 = styleForDetailHeroAnimatedView2;
 
-export function styleForDetailHeroAnimatedText4(
-  arg0: Animated.Value,
-  arg1: Animated.Value,
-): DynamicStyle {
-  return {
-    opacity: arg0,
-    transform: [{ translateY: arg1 }],
-  } as DynamicStyle;
-}
+export const styleForDetailHeroAnimatedText4 = styleForDetailHeroAnimatedText3;
 
-export function styleForDetailHeroAnimatedView5(
-  arg0: Animated.Value,
-  arg1: Animated.Value,
-): DynamicStyle {
-  return {
-    opacity: arg0,
-    transform: [{ translateY: arg1 }],
-  } as DynamicStyle;
-}
+export const styleForDetailHeroAnimatedView5 = styleForDetailHeroAnimatedText3;
 
-export function styleForDetailHeroAnimatedView6(
-  arg0: Animated.Value,
-  arg1: Animated.Value,
-): DynamicStyle {
-  return {
-    opacity: arg0,
-    transform: [{ translateY: arg1 }],
-  } as DynamicStyle;
-}
+export const styleForDetailHeroAnimatedView6 = styleForDetailHeroAnimatedText3;

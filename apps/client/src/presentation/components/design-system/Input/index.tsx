@@ -3,20 +3,19 @@
  *
  * MASTER-SPEC §2.2:
  * - padding: 16px
- * - border: 2px solid #000
+ * - border: 2px solid the shared ink token
  * - fontSize: 16
  * - fontWeight: 500
  *
  * FOCUS STATE:
- * - boxShadow: 4px 4px 0 #000
+ * - boxShadow: 4px 4px 0 using the shared ink token
  * - transform: translate(-2px, -2px)
  *
- * VALID STATE: borderColor: #00aa00
- * ERROR STATE: borderColor: #ff0000
+ * VALID and error states use semantic success and danger tokens.
  */
 import { forwardRef, useState, useCallback } from "react";
-import type { TextInputProps } from "react-native";
-import { TextInput, View, Text } from "react-native";
+import { type TextInputProps, TextInput, View, Text } from "react-native";
+
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -30,8 +29,8 @@ import {
   designEasing,
   designDuration,
 } from "@presentation/theme";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForComponentAnimatedView0,
   styleForComponentAnimatedTextInput1,
 } from "./style";
@@ -59,14 +58,14 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
 /**
  * Get border color based on validation state.
  */
-function getBorderColor(state: InputState): string {
+function getBorderColor(state: InputState, focused: boolean): string {
   switch (state) {
     case "valid":
       return designColors.success;
     case "error":
       return designColors.danger;
     default:
-      return designColors.ink;
+      return focused ? designColors.accent : designColors.ink;
   }
 }
 
@@ -118,7 +117,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
     ],
   }));
 
-  const borderColor = getBorderColor(state);
+  const borderColor = getBorderColor(state, isFocused);
 
   // Show error message only when in error state
   const showError = state === "error" && error;

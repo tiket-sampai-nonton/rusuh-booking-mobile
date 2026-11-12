@@ -261,7 +261,7 @@ Type: Story · P0 · M · Deps: RBT-020
 
 #### RBT-030: Home — event list + status + nearby/history
 Type: Story · P0 · L · Deps: RBT-010
-- AC1: `listEvents()`; status enum → badge (Tersedia/Stok Menipis/Sold Out, disabled when sold out); price-from `minorToIDR`; date `DD-MMM-YYYY`. (FR-01/02/03)
+- AC1: `listEvents()`; status enum → badge (Tersedia/Stok Menipis/Sold Out, disabled when sold out); price-from `minorToIDR`; date `DD MMM YYYY`. (FR-01/02/03)
 - AC2: skeletons + empty state; defensive null-checks.
 - Skills: RN lists, design system.
 
@@ -272,7 +272,7 @@ Type: Story · P1 · M · Deps: RBT-030
 
 #### RBT-032: Event detail — categories + availability + queue CTA
 Type: Story · P0 · M · Deps: RBT-030
-- AC1: `getEvent()` → categories + `priceMinor` + available; rich description JSON (FE-NEED O1, mock until delivered). (FR-11/12)
+- AC1: `getEvent()` → categories + `priceMinor` + available; parse rich `description` fields (`longDesc`, `lineup`, `location`, `gallery`, `terms`) defensively. The live runtime provides these fields; the 07-11 machine-readable schema still needs updating. (FR-11/12)
 - AC2: "Masuk Antrean" CTA → anonymous join.
 - Skills: RN, contracts.
 
@@ -358,7 +358,7 @@ Type: Story · P0 · L · Deps: RBT-053, RBT-012
 
 **Delivers:** FE-built payment page (order summary + method selection + server timer) → create-attempt → SNAP handoff → verify → recovery, per **prototype `payment.html`/`snap.html`**. **P0. Deps:** E6.
 
-> **Mock-first behind the real architecture (D10.5):** every story below is **production code built against the `PaymentRepository` port**. Because the BE payment service is still in progress, v1 binds a **mock adapter** (RBT-065) at the composition root; integrating real BE later swaps only that binding (Liskov-substitutable), changing no UI / domain / use-case code.
+> **Planning baseline (D10.5, 2026-10-29):** every story below is production code built against the `PaymentRepository` port; the initial implementation used a mock adapter. The live BE payment adapter is now integrated. Current native page-token routing and verification status are recorded in `AS-BUILT-ALIGNMENT-2026-11-12.md`.
 
 #### RBT-060: Payment page (summary + method selection + timer)
 Type: Story · P0 · L · Deps: RBT-054, RBT-011
@@ -368,13 +368,13 @@ Type: Story · P0 · L · Deps: RBT-054, RBT-011
 
 #### RBT-061: Create-attempt + SNAP handoff (web redirect / mobile WebView)
 Type: Story · P0 · L · Deps: RBT-060, RBT-012
-- AC1: "Bayar" → `createAttempt(bookingId, method, Idempotency-Key)` → BE `redirectUrl`; web redirects, mobile opens WebView/in-app browser. (FR-24, D10.2) — O2 contract detail flagged.
+- AC1: "Bayar" → `createAttempt(bookingId, method, Idempotency-Key)` → BE `redirectUrl`; web redirects, mobile opens the page-token WebView. O2 endpoints are implemented; sandbox/native device verification remains a QA item. (FR-24, D10.2)
 - AC2: refresh-safe — `currentAttempt.status==='PENDING'` restores selected method + SNAP redirect state ("Kembali ke SNAP").
 - Skills: payment integration, platform adapters, WebView.
 
 #### RBT-062: Page-token WebView reuse (mobile)
 Type: Story · P0 · M · Deps: RBT-061
-- AC1: mobile path `POST /payments/{id}/page-tokens` → `pageUrl`+one-time `pageToken` → WebView loads page → `POST /payment-page-sessions {pageToken}` sets `rb_pay` cookie → **same FE payment page reused**, timer still server-authoritative across handoff. (FR-24, D10.3) — O2 endpoints flagged.
+- AC1: mobile path `POST /payments/{id}/page-tokens` → one-time `pageToken` and site-relative `/pay/{id}` URL → resolve against `EXPO_PUBLIC_SITE_URL` → WebView loads the same-origin HTTPS payment page → exchange token once to set `rb_pay`. Do not inject the token on another origin/path; preserve the server-authoritative timer. (FR-24, D10.3)
 - Skills: WebView, platform adapters, session handoff.
 
 #### RBT-063: Callback verify + result routing
@@ -407,7 +407,7 @@ Type: Story · P0 · M · Deps: RBT-063
 
 #### RBT-071: E-ticket QR + download/share
 Type: Story · P0 · M · Deps: RBT-070
-- AC1: `getTickets` → one card/ticket with QR (`react-native-svg`, no raw NIK); native file-system+share, web Blob/print.
+- AC1: `getTickets` → one card/ticket with QR (`react-native-svg`, no raw NIK); show each ticket's `categoryCode`, `attendeeName`, and masked attendee NIK on Success and in the My Tickets QR sheet; native file-system+share, web Blob/print.
 - Skills: QR, platform file adapters.
 
 #### RBT-072: Native notifications (`expo-notifications`)
@@ -477,6 +477,18 @@ Type: Chore · P1 · XL · Scope: `apps/client` (web, iOS, Android)
 - **Organization interpretation:** “More than 1 component per file” means each screen composes multiple fragment components; each component declaration remains in its own file/folder.
 - Skills: React, React Native, frontend design, testing/evidence, architecture, performance.
 
+#### RBT-128: Align FE HTTP adapters with BE API
+Type: Story · P0 · L · Deps: RBT-010, E5/E6/E7 ports
+
+> Post-H3 integration task, tracked in [GitHub #165](https://github.com/tiket-sampai-nonton/rusuh-booking-mobile/issues/165). FE only. The FE branch is based on `develop`; the available BE repository currently has no `develop` branch, so its `main` implementation and OpenAPI contracts are the reference.
+
+- **AC1 — Wire alignment:** FE paths, request bodies, headers, envelopes, and DTO mappings match current BE handlers/contracts across catalog, queue, booking, payment, auth, and tickets.
+- **AC2 — Visitor identity:** Native requests identify as mobile and reuse the stored visitor token; web continues to use HttpOnly cookies without exposing visitor credentials to JavaScript.
+- **AC3 — Safe composition:** Mock adapters remain the default and usable; real HTTP adapters remain selected only when `EXPO_PUBLIC_USE_MOCKS=false|0`.
+- **AC4 — No invented contract:** Unsupported rich event description shapes and environment/backend gaps are documented; no BE code or BE-consumed contract assumptions are changed.
+- **AC5 — Verification:** Targeted adapter tests, typecheck, and lint pass. Live read-only API checks and any blocked full-flow verification are recorded in `api-contract/07-11/INTEGRATION-RBT-128.md`.
+- **Skills:** No added dependencies; TypeScript/Expo integration and repository workflow.
+
 ---
 
 ## Milestones
@@ -498,7 +510,7 @@ Type: Chore · P1 · XL · Scope: `apps/client` (web, iOS, Android)
 | Story | Risk | Impact | Mitigation |
 |-------|------|--------|------------|
 | RBT-041/042 | Queue correctness + no request storm under flash crowd | H | Domain unit tests + load test (RBT-080); honor nextPollAfterMs; one poller/session |
-| RBT-061/062/065 | Payment/page-token contract (O2) unconfirmed; BE payment service still in progress | M | **Mock `PaymentRepository` adapter (RBT-065) keeps FE fully unblocked** — all payment UI/flow is production code against the port; swap to real BE at composition root. Confirm createAttempt + page-token shapes before M4 |
+| RBT-061/062/065 | Payment WebView rollout requires the matching `/pay/[bookingId]` route on the configured site, plus device-level cookie/SNAP QA | M | `PaymentRepository` owns token exchange; deploy the web route before testing native handoff. Confirm cookie persistence and callback routing on physical iOS/Android devices. |
 | RBT-073 | Web push browser support/permissions | M | Feature-detect + graceful degrade; test across browsers |
 | RBT-050/054 | Hold/timer race on refresh/expiry | H | Server-authoritative only; reconcile with BE; acceptance scenarios 1/3/6 |
 | O1 FE-NEED gaps | BE endpoints not delivered in time | M | Mock adapter keeps FE unblocked; track delivery |

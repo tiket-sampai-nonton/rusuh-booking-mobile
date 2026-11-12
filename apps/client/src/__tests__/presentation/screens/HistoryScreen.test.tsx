@@ -15,7 +15,7 @@ import type {
 } from "@domain/repositories/event.repository";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
-const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockRouter = { push: jest.fn(), replace: jest.fn(), navigate: jest.fn() };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
@@ -80,6 +80,7 @@ describe("HistoryScreen", () => {
   beforeEach(() => {
     mockRouter.push.mockReset();
     mockRouter.replace.mockReset();
+    mockRouter.navigate.mockReset();
     mockResponsive.current = {
       isWeb: false,
       isDesktop: false,
@@ -120,7 +121,11 @@ describe("HistoryScreen", () => {
     await waitFor(() => screen.getByTestId("history-error"));
     // : error title is "Gagal Memuat Event"
     expect(screen.getByText("Gagal Memuat Event")).toBeTruthy();
-    expect(screen.getByText("Jaringan bermasalah")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.",
+      ),
+    ).toBeTruthy();
   });
 
   it("renders the empty state when there are no past events", async () => {
@@ -153,13 +158,13 @@ describe("HistoryScreen", () => {
     expect(screen.getByText("Riwayat")).toBeTruthy();
   });
 
-  it("past event cards are disabled (not navigable)", async () => {
+  it("opens a past event's informational detail without changing purchase availability", async () => {
     renderWithProviders(<HistoryScreen />, {
       container: { eventRepository: repo(CATALOG) },
     });
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
     fireEvent.press(screen.getByTestId("v2-event-card-rock"));
-    expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(mockRouter.push).toHaveBeenCalledWith("/events/rock?source=history");
   });
 
   it("navigates home from the top bar", async () => {
@@ -169,7 +174,7 @@ describe("HistoryScreen", () => {
     //  uses header-logo testID for home navigation
     await waitFor(() => screen.getByTestId("header-logo"));
     fireEvent.press(screen.getByTestId("header-logo"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
   });
 
   it("renders the multi-column grid on desktop web", async () => {
@@ -187,9 +192,9 @@ describe("HistoryScreen", () => {
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
     expect(screen.getByTestId("history-grid")).toBeTruthy();
     expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("history-nav-browse"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/browse");
-    fireEvent.press(screen.getByTestId("history-nav-tickets"));
-    expect(mockRouter.push).toHaveBeenCalledTimes(1);
+    fireEvent.press(screen.getByTestId("nav-browse"));
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/browse");
+    expect(screen.queryByTestId("nav-tickets")).toBeNull();
+    expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
   });
 });

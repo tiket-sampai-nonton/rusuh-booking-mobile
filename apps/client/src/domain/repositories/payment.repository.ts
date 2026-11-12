@@ -69,7 +69,7 @@ export interface PaymentPage {
  * A one-time page token + the WebView URL it unlocks (contract `PageToken`,
  * RBT-062). The mobile app opens `pageUrl` in a WebView, then exchanges
  * `pageToken` for an `rb_pay` session cookie so the SAME FE payment page is
- * reused inside the WebView (D10.3). FE-NEED (O2): endpoints proposed, mocked.
+ * reused inside the WebView (D10.3).
  */
 export interface PageToken {
   readonly pageToken: string;
@@ -84,12 +84,13 @@ export interface PaymentRepository {
   getPaymentPage(bookingId: string): Promise<PaymentPage>;
   /**
    * Mint a one-time page token + WebView URL (`POST /payments/{id}/page-tokens`,
-   * RBT-062, FE-NEED O2). The mobile WebView loads `pageUrl`.
+   * RBT-062). The mobile WebView loads `pageUrl`; its same-origin FE bootstrap
+   * route exchanges the token through this repository before opening payment.
    */
   createPageToken(bookingId: string): Promise<PageToken>;
   /**
    * Exchange a page token for the `rb_pay` session cookie
-   * (`POST /payment-page-sessions {pageToken}`, RBT-062, FE-NEED O2) so the FE
+   * (`POST /payment-page-sessions {pageToken}`, RBT-062) so the FE
    * payment page is reused inside the WebView. Throws on an invalid/expired
    * token (PAYMENT_PAGE_TOKEN_INVALID).
    */

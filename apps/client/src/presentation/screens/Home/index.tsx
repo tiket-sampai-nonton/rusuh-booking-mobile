@@ -11,15 +11,10 @@
  * - Header: slides in from top, fixed position
  * - All animations exactly as prototype
  */
-import { useRouter, type Href } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { useServices } from "@providers/service-context";
-import { useRef, useState } from "react";
+import { useFocusEffect, useRouter, type Href } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import { View } from "react-native";
-import Animated, {
-  useAnimatedScrollHandler,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LoginModal } from "@presentation/components/auth/LoginModal";
@@ -34,7 +29,9 @@ import {
   Header,
   HeroCarousel,
   BottomNav,
+  navigateBottomTab,
 } from "@presentation/components/design-system";
+import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
@@ -45,7 +42,14 @@ import { homeScrollContent, componentStyles } from "./style";
 
 export function HomeScreen() {
   const router = useRouter();
-  const { data, isLoading, isError, error } = useEvents();
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch: retryEvents,
+    isFetching,
+  } = useEvents();
   const scrollRef = useRef<Animated.ScrollView>(null);
   const {
     isWeb,
@@ -68,36 +72,57 @@ export function HomeScreen() {
     ? bottomBarHeight + insets.bottom
     : insets.bottom;
 
-  // Scroll offset drives the hero parallax + scroll progress.
-  const scrollY = useSharedValue(0);
-  const onScroll = useAnimatedScrollHandler((e) => {
-    scrollY.value = e.contentOffset.y;
-  });
-
   // Modals (prototype: CTA → login modal; Filter → filter popup).
   const [loginOpen, setLoginOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const { eventRepository } = useServices();
-  const facets = useQuery({
-    queryKey: ["event-facets", "home"],
-    queryFn: () => eventRepository.getFacets!(),
-    enabled: filterOpen && Boolean(eventRepository.getFacets),
+  const [isScreenFocused, setIsScreenFocused] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsScreenFocused(true);
+      return () => setIsScreenFocused(false);
+    }, []),
+  );
+
+  const goToEvent = useCallback(
+    (eventId: string): void => router.push(`/events/${eventId}` as Href),
+    [router],
+  );
+  const goToHistoryEvent = useCallback(
+    (eventId: string): void =>
+      router.push(`/events/${eventId}?source=history` as Href),
+    [router],
+  );
+  const goBrowse = useCallback(
+    (): void => router.navigate("/browse" as Href),
+    [router],
+  );
+  const openFilter = useCallback(() => setFilterOpen(true), []);
+  const onNavigate = useCallback(
+    (href: string) => router.navigate(href as Href),
+    [router],
+  );
+  const navLinks = createPrimaryNavLinks({
+    onHome: () => scrollRef.current?.scrollTo({ y: 0, animated: true }),
+    onBrowse: goBrowse,
+    onTickets: () => router.navigate("/my-tickets" as Href),
+    onProfile: () => router.navigate("/profile" as Href),
+    isLoggedIn: Boolean(profile),
   });
 
-  const goToEvent = (eventId: string): void =>
-    router.push(`/events/${eventId}` as Href);
-  const goBrowse = (): void => router.push("/browse" as Href);
-
   // Filter "Terapkan" → /browse with the chosen params.
-  const applyFilter = (f: FilterValue): void => {
-    setFilterOpen(false);
-    const qs = new URLSearchParams({
-      genre: f.genre,
-      time: f.time,
-      sort: f.sort,
-    }).toString();
-    router.push(`/browse?${qs}` as Href);
-  };
+  const applyFilter = useCallback(
+    (f: FilterValue): void => {
+      setFilterOpen(false);
+      const qs = new URLSearchParams({
+        category: f.category,
+        time: f.time,
+        sort: f.sort,
+      }).toString();
+      router.navigate(`/browse?${qs}` as Href);
+    },
+    [router],
+  );
 
   // Show loading screen (prototype loader with bouncing letters)
   if (isLoading) {
@@ -117,11 +142,15 @@ export function HomeScreen() {
             bottomPadding,
             isMobileWeb ? insets.top + headerHeight : 0,
           )}
-          onScroll={onScroll}
-          scrollEventThrottle={16}
           testID="home-scroll"
         >
-          {isError && <HomeError message={error?.message} />}
+          {isError && (
+            <HomeError
+              error={error}
+              onRetry={() => void retryEvents()}
+              isRetrying={isFetching}
+            />
+          )}
 
           {/* Hero Carousel - Full viewport (prototype .hero) */}
           {data && data.upcoming.length > 0 && (
@@ -129,7 +158,10 @@ export function HomeScreen() {
               events={data.upcoming.slice(0, 3)}
               onBook={goToEvent}
               onSeeAll={goBrowse}
-              autoPlay
+              // Rotate the featured events on every platform, and pause while
+              // Home is covered so the native carousel does no background work.
+              autoPlay={isScreenFocused}
+              isActive={isScreenFocused}
             />
           )}
 
@@ -140,11 +172,12 @@ export function HomeScreen() {
               isDesktop={isDesktop}
               columns={gridColumns}
               onPressEvent={goToEvent}
-              onFilter={() => setFilterOpen(true)}
+              onPressHistoryEvent={goToHistoryEvent}
+              onFilter={openFilter}
               onSeeAll={goBrowse}
               onFeaturedLayout={() => undefined}
               onHistoryLayout={() => undefined}
-              onNavigate={(href) => router.push(href as Href)}
+              onNavigate={onNavigate}
             />
           )}
         </Animated.ScrollView>
@@ -153,53 +186,8 @@ export function HomeScreen() {
         <Header
           topInset={insets.top}
           showLinks={showNavLinks}
-          links={[
-            {
-              label: "Beranda",
-              onPress: () =>
-                scrollRef.current?.scrollTo({ y: 0, animated: true }),
-              testID: "nav-home",
-            },
-            { label: "Jelajahi", onPress: goBrowse, testID: "nav-browse" },
-            ...(profile
-              ? [
-                  {
-                    label: "Tiket Saya",
-                    onPress: () => router.push("/my-tickets" as Href),
-                    testID: "nav-tickets",
-                  },
-                  {
-                    label: "Profil",
-                    onPress: () => router.push("/profile" as Href),
-                    testID: "nav-profile",
-                  },
-                ]
-              : []),
-          ]}
-          mobileMenuLinks={[
-            {
-              label: "Beranda",
-              onPress: () =>
-                scrollRef.current?.scrollTo({ y: 0, animated: true }),
-              testID: "nav-home",
-            },
-            { label: "Cari Event", onPress: goBrowse, testID: "nav-browse" },
-            {
-              label: "Tiket Saya",
-              onPress: () => router.push("/my-tickets" as Href),
-              testID: "nav-tickets",
-            },
-            {
-              label: "Arsip Event",
-              onPress: () => router.push("/history" as Href),
-              testID: "nav-history",
-            },
-            {
-              label: "Profil",
-              onPress: () => router.push("/profile" as Href),
-              testID: "nav-profile",
-            },
-          ]}
+          links={navLinks}
+          mobileMenuLinks={navLinks}
           isLoggedIn={Boolean(profile)}
           onCtaPress={() => setLoginOpen(true)}
           onLogoPress={() =>
@@ -209,24 +197,22 @@ export function HomeScreen() {
         />
 
         {/* Login/OTP + Filter modals */}
-        <LoginModal visible={loginOpen} onClose={() => setLoginOpen(false)} />
+        <LoginModal
+          visible={loginOpen}
+          onClose={() => setLoginOpen(false)}
+          onOpenPrivacy={() => router.push("/privacy" as Href)}
+        />
         <FilterModal
           visible={filterOpen}
           onClose={() => setFilterOpen(false)}
           onApply={applyFilter}
-          genres={facets.data?.genres}
         />
 
         {/* Bottom Navigation (native only, handled internally by BottomNav) */}
         <BottomNav
           activeRoute="home"
           isLoggedIn={Boolean(profile)}
-          onNavigate={(route) => {
-            if (route === "browse") router.push("/browse" as Href);
-            else if (route === "tickets") router.push("/my-tickets" as Href);
-            else if (route === "profile") router.push("/profile" as Href);
-            // home = current screen, no-op
-          }}
+          onNavigate={(route) => navigateBottomTab(router, "home", route)}
         />
       </View>
     </ToastProvider>

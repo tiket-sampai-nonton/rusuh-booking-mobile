@@ -1,0 +1,78 @@
+Process:         RusuhBooking [94161]
+Path:            /Users/rizkyrachmawan/Library/Developer/CoreSimulator/Devices/E80F96A4-1DF0-42CC-85EC-DE5B27B0333E/data/Containers/Bundle/Application/D2BE7AC6-15BD-42FD-AFE3-94E9D70DD53C/RusuhBooking.app/RusuhBooking
+Load Address:    0x100480000
+Identifier:      com.tiketsampainonton.rusuhbooking
+Version:         0.1.0 (1)
+Code Type:       ARM64
+Platform:        iOS Simulator
+Parent Process:  launchd_sim [77000]
+Target Type:     corpse
+
+Date/Time:       2026-11-11 08:34:02.187 +0700
+Launch Time:     2026-11-11 08:27:55.544 +0700
+OS Version:      macOS 26.5 (25F71)
+Report Version:  7
+Analysis Tool:   /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/bin/vmmap
+Analysis Tool Version:  iOS Simulator 26.5 (23F77)
+
+Physical footprint:         384.8M
+Physical footprint (peak):  384.8M
+Idle exit:                  untracked
+----
+
+ReadOnly portion of Libraries: Total=1.9G resident=275.1M(14%) swapped_out_or_unallocated=1.6G(86%)
+Writable regions: Total=384.3M written=1811K(0%) resident=106.8M(28%) swapped_out=288.3M(75%) unallocated=16777216.0T(4577915043840%)
+
+                                VIRTUAL RESIDENT    DIRTY  SWAPPED VOLATILE   NONVOL    EMPTY   REGION 
+REGION TYPE                        SIZE     SIZE     SIZE     SIZE     SIZE     SIZE     SIZE    COUNT (non-coalesced) 
+===========                     ======= ========    =====  ======= ========   ======    =====  ======= 
+Accelerate framework               128K     128K       0K     128K       0K     128K       0K        1 
+Activity Tracing                   256K      48K      48K       0K       0K      48K       0K        1 
+CG image                          15.4M      16K      16K    15.4M       0K       0K       0K       19 
+CG raster data                    11.3M       0K       0K    9824K       0K       0K       0K       24 
+CoreAnimation                     20.4M    2960K    1936K    16.3M       0K    2960K    1872K      209 
+Foundation                        6096K      48K      48K    6048K       0K       0K       0K       21 
+Image IO                          68.3M    68.0M      32K    68.0M       0K    68.0M       0K       34 
+Kernel Alloc Once                   32K      16K      16K       0K       0K       0K       0K        1 
+MALLOC                            1024K       0K       0K      64K       0K       0K       0K        1 
+MALLOC guard page                   32K       0K       0K       0K       0K       0K       0K        2 
+MALLOC metadata                   1456K     704K     704K     464K       0K       0K       0K        6 
+MALLOC_LARGE                      17.2M    2032K    2032K    15.2M       0K       0K       0K        3         see MALLOC ZONE table below
+MALLOC_NANO metadata                32K      32K      32K       0K       0K       0K       0K        1         see MALLOC ZONE table below
+MALLOC_SMALL                     200.3M    23.5M    23.4M   153.5M       0K       0K       0K      151         see MALLOC ZONE table below
+MALLOC_SMALL (empty)              7888K      16K      16K      32K       0K       0K       0K        5         see MALLOC ZONE table below
+MALLOC_TINY                       4096K     112K     112K      80K       0K       0K       0K        1         see MALLOC ZONE table below
+SQLite page cache                  384K       0K       0K       0K       0K       0K     384K        3 
+STACK GUARD                       56.2M       0K       0K       0K       0K       0K       0K       11 
+Stack                             13.8M     384K     384K     288K       0K       0K       0K       11 
+VM_ALLOCATE                       42.0M    7504K    7504K    28.1M       0K       0K       0K       33 
+__AUTH_CONST                        32K       0K       0K      32K       0K       0K       0K        1 
+__DATA                            54.3M    16.9M    1586K    7535K       0K       0K       0K      948 
+__DATA_CONST                     117.0M    63.5M    1210K    11.4M       0K       0K       0K      980 
+__DATA_DIRTY                       155K     123K     123K      32K       0K       0K       0K       13 
+__FONT_DATA                        2352       0K       0K       0K       0K       0K       0K        1 
+__LINKEDIT                       752.4M    8704K       0K       0K       0K       0K       0K       81 
+__OBJC_RO                         55.6M    29.2M       0K       0K       0K       0K       0K        1 
+__OBJC_RW                         2332K    1868K      28K      16K       0K       0K       0K        1 
+__TEXT                             1.1G   266.6M       0K       0K       0K       0K       0K      994 
+__TPRO_CONST                       164K       4K       4K      64K       0K       0K       0K        3 
+dyld private memory                3.0G     496K     496K    15.7M       0K       0K       0K       78 
+mapped file                      225.8M    6304K       0K       0K       0K       0K       0K       23 
+page table in kernel              1811K    1811K    1811K       0K       0K       0K       0K        1 
+shared memory                       48K      16K      16K       0K       0K       0K       0K        2 
+unused but dirty shlib __DATA     28.5M    11.7M      73K    4137K       0K       0K       0K      560 
+===========                     ======= ========    =====  ======= ========   ======    =====  ======= 
+TOTAL                              5.8G   511.9M    41.2M   351.7M       0K    71.1M    2256K     4225 
+
+                                         VIRTUAL   RESIDENT      DIRTY    SWAPPED ALLOCATION      BYTES DIRTY+SWAP          REGION
+MALLOC ZONE                                 SIZE       SIZE       SIZE       SIZE      COUNT  ALLOCATED  FRAG SIZE  % FRAG   COUNT
+===========                              =======  =========  =========  =========  =========  =========  =========  ======  ======
+DefaultMallocZone_0x100bcc000             229.3M      25.8M      25.8M     168.5M     384460     185.2M      9241K      5%     112
+QuartzCore_0x100c88000                     1104K       384K       384K       640K       6092       555K       469K     46%      50
+AttributeGraph_0x10d6515e0                 1024K         0K         0K        64K       1304        43K        21K     33%       1
+AttributeGraph graph data_0x103394000        80K         0K         0K        80K         21         5K        75K     95%       2
+===========                              =======  =========  =========  =========  =========  =========  =========  ======  ======
+TOTAL                                     231.5M      26.2M      26.2M     169.2M     391877     185.8M      9806K      5%     165
+
+  PID STAT    RSS COMMAND
+94161 Ss   184304 /Users/rizkyrachmawan/Library/Developer/CoreSimulator/Devices/E80F96A4-1DF0-42CC-85EC-DE5B27B0333E/data/Containers/Bundle/Application/D2BE7AC6-15BD-42FD-AFE3-94E9D70DD53C/RusuhBooking.app/RusuhBooking

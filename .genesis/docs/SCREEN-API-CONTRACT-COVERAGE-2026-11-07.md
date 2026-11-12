@@ -2,6 +2,8 @@
 
 Reviewed 7 November 2026 against the supplied contract snapshot in [`api-contract/07-11/`](api-contract/07-11/) and the current client implementation on `codex/new-api-contract-07-11`. This is a source-level review. It does not prove that an endpoint is deployed, that credentials/CORS are configured, or that a native payment WebView works against the live service. Contract copies are unchanged from the supplied exports; the existing generated OpenAPI artifacts were not regenerated because the exports are Markdown, not machine-readable schemas.
 
+> **Historical baseline:** this report remains the 7 November source-level snapshot. Live development-host checks and code changes recorded on 12 November supersede its statements about the Pages CORS allowlist and rich event description. See [`AS-BUILT-ALIGNMENT-2026-11-12.md`](AS-BUILT-ALIGNMENT-2026-11-12.md) and [`api-contract/07-11/IMPLEMENTATION-NOTES.md`](api-contract/07-11/IMPLEMENTATION-NOTES.md) for current findings. Native cookie persistence and SNAP routing are still not device-verified.
+
 ## Status key
 
 - **Contract: ✓** endpoint and response needed for this action are specified; **partial** some required screen data/behavior is absent; **missing** no applicable public endpoint was found.

@@ -18,9 +18,8 @@ import { trustStyles } from "./style";
 
 const TRUST_LINES = [
   "Tiket resmi & terverifikasi",
-  "Antrean adil (FCFS)",
+  "Antrean mengikuti urutan bergabung",
   "Tiket elektronik langsung ke pintu masuk",
-  "Pengembalian dana sesuai ketentuan penyelenggara",
 ] as const;
 
 export function TrustBox() {

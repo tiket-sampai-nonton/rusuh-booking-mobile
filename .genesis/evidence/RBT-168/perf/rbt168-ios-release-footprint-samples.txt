@@ -1,0 +1,64 @@
+2026-11-10 00:33:32 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 170 MB (16384 bytes per page)
+2026-11-10 00:33:37 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 173 MB (16384 bytes per page)
+2026-11-10 00:33:42 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 183 MB (16384 bytes per page)
+2026-11-10 00:33:47 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 202 MB (16384 bytes per page)
+2026-11-10 00:33:52 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 210 MB (16384 bytes per page)
+2026-11-10 00:33:57 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 154 MB (16384 bytes per page)
+2026-11-10 00:34:02 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 153 MB (16384 bytes per page)
+2026-11-10 00:34:07 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 156 MB (16384 bytes per page)
+2026-11-10 00:34:13 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 184 MB (16384 bytes per page)
+2026-11-10 00:34:18 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 185 MB (16384 bytes per page)
+2026-11-10 00:34:23 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 167 MB (16384 bytes per page)
+2026-11-10 00:34:28 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 167 MB (16384 bytes per page)
+2026-11-10 00:34:33 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 167 MB (16384 bytes per page)
+2026-11-10 00:34:38 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 168 MB (16384 bytes per page)
+2026-11-10 00:34:43 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 190 MB (16384 bytes per page)
+2026-11-10 00:34:48 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 219 MB (16384 bytes per page)
+2026-11-10 00:34:53 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 196 MB (16384 bytes per page)
+2026-11-10 00:34:58 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 197 MB (16384 bytes per page)
+2026-11-10 00:35:04 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 197 MB (16384 bytes per page)
+2026-11-10 00:35:09 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 198 MB (16384 bytes per page)
+2026-11-10 00:35:14 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 200 MB (16384 bytes per page)
+2026-11-10 00:35:19 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 185 MB (16384 bytes per page)
+2026-11-10 00:35:24 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 185 MB (16384 bytes per page)
+2026-11-10 00:35:29 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 185 MB (16384 bytes per page)
+2026-11-10 00:35:34 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 211 MB (16384 bytes per page)
+2026-11-10 00:35:39 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 212 MB (16384 bytes per page)
+2026-11-10 00:35:44 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 200 MB (16384 bytes per page)
+2026-11-10 00:35:49 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 201 MB (16384 bytes per page)
+2026-11-10 00:35:55 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 203 MB (16384 bytes per page)
+2026-11-10 00:36:00 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 223 MB (16384 bytes per page)
+2026-11-10 00:36:05 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 224 MB (16384 bytes per page)
+2026-11-10 00:36:10 UTC
+RusuhBooking [50414]: 64-bit    Footprint: 226 MB (16384 bytes per page)

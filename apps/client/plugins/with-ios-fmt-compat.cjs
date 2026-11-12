@@ -1,8 +1,8 @@
 // Temporary fmt 11 compatibility for Xcode 26.4+ / React Native 0.79.
 // Remove when the bundled fmt version is upgraded to an upstream fixed version.
-const { withPodfile } = require('expo/config-plugins');
+const { withPodfile } = require("expo/config-plugins");
 
-const marker = '# RBT fmt Xcode 26 compatibility';
+const marker = "# RBT fmt Xcode 26 compatibility";
 const patch = `
     ${marker}
     fmt_base = File.join(installer.sandbox.pod_dir('fmt'), 'include', 'fmt', 'base.h')
@@ -18,12 +18,18 @@ const patch = `
     end
 `;
 
-module.exports = (config) => withPodfile(config, (result) => {
-  if (result.modResults.contents.includes(marker)) return result;
-  const anchor = '  post_install do |installer|';
-  if (!result.modResults.contents.includes(anchor)) {
-    throw new Error('Podfile post_install not found; cannot apply fmt compatibility patch');
-  }
-  result.modResults.contents = result.modResults.contents.replace(anchor, anchor + '\n' + patch);
-  return result;
-});
+module.exports = (config) =>
+  withPodfile(config, (result) => {
+    if (result.modResults.contents.includes(marker)) return result;
+    const anchor = "  post_install do |installer|";
+    if (!result.modResults.contents.includes(anchor)) {
+      throw new Error(
+        "Podfile post_install not found; cannot apply fmt compatibility patch",
+      );
+    }
+    result.modResults.contents = result.modResults.contents.replace(
+      anchor,
+      anchor + "\n" + patch,
+    );
+    return result;
+  });

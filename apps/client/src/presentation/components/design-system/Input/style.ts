@@ -1,9 +1,12 @@
 import { StyleSheet } from "react-native";
-import { designColors, plusJakartaSansFonts } from "@presentation/theme";
+import {
+  designColors,
+  plusJakartaSansFonts,
+  designInput,
+  designBorders,
+} from "@presentation/theme";
 
-import type { DynamicStyle } from "@presentation/utils/style";
-import { hardShadowStyle } from "@presentation/utils/style";
-import { designInput, designBorders } from "@presentation/theme";
+import { type DynamicStyle, hardShadowStyle } from "@presentation/utils/style";
 
 export const componentStyles = StyleSheet.create({
   elementGap0: { gap: 8 },
@@ -30,11 +33,11 @@ export const componentStyles = StyleSheet.create({
 
 export function styleForComponentAnimatedView0(arg0: boolean): DynamicStyle {
   return {
-    // Shadow only when focused (4px 4px 0 #000)
+    // Cyan hard shadow marks focus while keeping the field surface neutral.
     ...hardShadowStyle(
       arg0 ? 4 : 0,
       arg0 ? 4 : 0,
-      designColors.ink,
+      designColors.ember,
       arg0 ? 4 : 0,
     ),
   } as DynamicStyle;

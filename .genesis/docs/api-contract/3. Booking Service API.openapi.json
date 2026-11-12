@@ -1463,10 +1463,40 @@
             "type": "string",
             "format": "uuid"
           },
+          "buyer": {
+            "type": "object",
+            "description": "Buyer identity must include the NIK. Authenticated clients may prefill it from GET /api/v1/me.",
+            "properties": {
+              "nik": {
+                "type": "string",
+                "pattern": "^[0-9]{16}$",
+                "description": "Buyer NIK; required."
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "emailConfirmation": {
+                "type": "string",
+                "format": "email"
+              },
+              "consent": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "nik",
+              "email",
+              "emailConfirmation",
+              "consent"
+            ]
+          },
           "items": {
             "type": "array",
             "minItems": 1,
             "maxItems": 3,
+            "description": "One item per ticket. The server authoritatively validates duplicate NIK and quota constraints.",
             "items": {
               "type": "object",
               "properties": {
@@ -1476,15 +1506,16 @@
                 },
                 "attendee": {
                   "type": "object",
+                  "description": "Every attendee must include a NIK. The client may prefill the buyer's NIK for a ticket where the buyer will attend.",
                   "properties": {
                     "nik": {
                       "type": "string",
                       "pattern": "^[0-9]{16}$",
-                      "description": "NIK 16 digit (dicek strukturnya; tidak pernah disimpan plaintext)"
+                      "description": "Attendee NIK; required."
                     },
                     "fullName": {
                       "type": "string",
-                      "minLength": 1,
+                      "minLength": 2,
                       "maxLength": 100
                     }
                   },
@@ -1503,6 +1534,7 @@
         },
         "required": [
           "sessionId",
+          "buyer",
           "items"
         ]
       },

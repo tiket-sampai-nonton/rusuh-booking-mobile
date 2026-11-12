@@ -19,8 +19,12 @@ import { EVENT_FIXTURES } from "@shared/test-fixtures/events.fixture";
 const SEED: readonly EventDetail[] = EVENT_FIXTURES;
 
 export class MockEventRepository implements EventRepository {
-  async listEvents(): Promise<readonly EventSummary[]> {
+  getInitialEvents(): readonly EventSummary[] {
     return SEED.map(({ description: _description, ...summary }) => summary);
+  }
+
+  async listEvents(): Promise<readonly EventSummary[]> {
+    return this.getInitialEvents();
   }
 
   async getEventDetail(eventId: string): Promise<EventDetail> {

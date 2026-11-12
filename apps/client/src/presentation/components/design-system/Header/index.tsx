@@ -6,8 +6,8 @@
  * - Fixed top, height 60px (desktop) / 56px (mobile)
  * - Logo: fontSize 18, fontWeight 800, uppercase
  * - Slide in from top on mount (translateY -100% → 0)
- * - border: 2px solid #000 (bottom only)
- * - Pure black/white, no shadows, no rounding
+ * - border: 2px solid the shared ink token (bottom only)
+ * - Black/white surfaces with the shared red action accent, no rounding
  *
  * Mobile differences (v2-mobile/01-home.html):
  * - Height: 56px (vs 60px desktop)
@@ -17,7 +17,7 @@
  * - NO "Masuk / Daftar" text button on mobile — use icon buttons instead
  *
  * Links (desktop > 720px): center nav links with hover underline slide
- * CTA: "Masuk / Daftar" black button with ink-spread hover (desktop only)
+ * CTA: "Masuk / Daftar" red button with red-orange hover accent (desktop only)
  */
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -39,6 +39,7 @@ import {
   pointerEventsBoxNone,
   pointerEventsNone,
 } from "@presentation/utils/style";
+import { BrandMark } from "@presentation/components/BrandMark";
 import { IconButton } from "./IconButton";
 import { NavLink } from "./NavLink";
 import { LoginModal } from "@presentation/components/auth/LoginModal";
@@ -50,8 +51,6 @@ import {
   headerRowStyle,
   headerMobileMenuBackdrop,
   headerMobileMenuPanel,
-} from "./style";
-import {
   styleForHeaderAnimatedView2,
   styleForHeaderAnimatedText3,
 } from "./style";
@@ -176,7 +175,7 @@ export function Header({
             onPress={onLogoPress}
             testID="header-logo"
           >
-            <Text style={componentStyles.elementColor2}>Rusuh Tiket</Text>
+            <BrandMark size={32} color={designColors.ink} />
           </Pressable>
 
           {/* Center nav links (desktop only) */}
@@ -307,7 +306,7 @@ export function Header({
                   setMenuOpen(false);
                   link.onPress();
                 }}
-                testID={link.testID ? `mobile-${link.testID}` : undefined}
+                testID={mobileMenuItemTestId(link.testID)}
                 style={componentStyles.mobileMenuItem}
               >
                 <Text style={componentStyles.mobileMenuLabel}>
@@ -332,4 +331,9 @@ export default Header;
 function formatActionCount(count: number): string {
   if (count > 99) return "99+";
   return String(count);
+}
+
+function mobileMenuItemTestId(testID: string | undefined): string | undefined {
+  if (!testID) return undefined;
+  return `mobile-${testID}`;
 }

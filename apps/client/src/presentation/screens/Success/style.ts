@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { designColors, designBorder } from "@presentation/theme";
+import { designColors, designBorders, withAlpha } from "@presentation/theme";
 
 import type { EdgeInsets } from "react-native-safe-area-context";
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -13,20 +13,26 @@ export const componentStyles = StyleSheet.create({
   elementColor2: { color: designColors.success, letterSpacing: 2 },
   elementLetterSpacing3: { letterSpacing: -1 },
   elementBackgroundColor4: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: withAlpha(designColors.ground, 0.05),
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: withAlpha(designColors.ground, 0.1),
   },
   elementBackgroundColor5: {
     backgroundColor: designColors.ground,
-    borderWidth: designBorder.base,
+    borderWidth: designBorders.standard,
     borderColor: designColors.ground,
   },
   elementColor6: { color: designColors.ink, letterSpacing: 0.5 },
-  elementBorderWidth7: { borderWidth: 1, borderColor: "rgba(255,255,255,0.3)" },
+  elementBorderWidth7: {
+    borderWidth: 1,
+    borderColor: withAlpha(designColors.ground, 0.3),
+  },
   elementLetterSpacing8: { letterSpacing: 0.5 },
   elementColor9: { color: designColors.accent },
-  elementFontSize10: { fontSize: 14, color: "rgba(255,255,255,0.6)" },
+  elementFontSize10: {
+    fontSize: 14,
+    color: withAlpha(designColors.ground, 0.6),
+  },
   mobileWebSuccessRing: { borderColor: designColors.success },
   mobileWebSummary: {
     backgroundColor: designColors.field,

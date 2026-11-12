@@ -10,10 +10,15 @@ import type {
 } from "@domain/repositories/user.repository";
 import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
+import { ToastProvider } from "@presentation/components/design-system/Toast";
 import { ProfileScreen } from "@presentation/screens/Profile";
 import { useAccountStore } from "@presentation/stores/account-store";
 
-const mockRouter = { push: jest.fn() };
+const mockRouter = {
+  push: jest.fn(),
+  navigate: jest.fn(),
+  dismissTo: jest.fn(),
+};
 const mockResponsive = { isWeb: false, isNative: true, width: 393 };
 jest.mock("expo-router", () => ({ useRouter: () => mockRouter }));
 jest.mock("@presentation/hooks/useResponsive", () => ({
@@ -38,11 +43,13 @@ function renderProfile(
   overrides: {
     completeRegistration?: UserRepository["completeRegistration"];
     clearToken?: TokenStorage["clear"];
+    logout?: UserRepository["logout"];
   } = {},
 ) {
   const base = createContainer({ useMocks: true });
   const userRepository: UserRepository = {
     ...base.userRepository,
+    logout: overrides.logout ?? base.userRepository.logout,
     completeRegistration:
       overrides.completeRegistration ??
       jest.fn().mockResolvedValue(returningProfile),
@@ -60,7 +67,9 @@ function renderProfile(
   const screen = render(
     <QueryClientProvider client={queryClient}>
       <ServiceProvider container={{ ...base, userRepository, tokenStorage }}>
-        <ProfileScreen />
+        <ToastProvider>
+          <ProfileScreen />
+        </ToastProvider>
       </ServiceProvider>
     </QueryClientProvider>,
   );
@@ -71,6 +80,8 @@ describe("ProfileScreen", () => {
   beforeEach(() => {
     useAccountStore.getState().clearProfile();
     mockRouter.push.mockReset();
+    mockRouter.navigate.mockReset();
+    mockRouter.dismissTo.mockReset();
     mockResponsive.isWeb = false;
     mockResponsive.isNative = true;
     mockResponsive.width = 393;
@@ -166,8 +177,23 @@ describe("ProfileScreen", () => {
     fireEvent.press(getByTestId("profile-sign-out"));
 
     await waitFor(() => expect(getByText("Akun Tamu")).toBeTruthy());
+    expect(getByText("Berhasil keluar dari akun.")).toBeTruthy();
     expect(clearToken).toHaveBeenCalledTimes(1);
     expect(useAccountStore.getState().profile).toBeUndefined();
+  });
+
+  it("shows a failure toast and keeps the account when logout fails", async () => {
+    useAccountStore.getState().setProfile(returningProfile);
+    const { getByTestId, getAllByText } = renderProfile({
+      logout: jest.fn().mockRejectedValue(new Error("offline")),
+    });
+
+    fireEvent.press(getByTestId("profile-sign-out"));
+
+    await waitFor(() =>
+      expect(getAllByText("Gagal keluar. Silakan coba lagi.")).toHaveLength(1),
+    );
+    expect(useAccountStore.getState().profile).toEqual(returningProfile);
   });
 
   it("supports desktop navigation and cancels an incomplete profile edit", () => {
@@ -185,10 +211,10 @@ describe("ProfileScreen", () => {
     fireEvent.changeText(getByTestId("profile-nik-input"), "123456");
     fireEvent.press(getByTestId("profile-cancel"));
 
-    expect(mockRouter.push).toHaveBeenNthCalledWith(1, "/");
-    expect(mockRouter.push).toHaveBeenNthCalledWith(2, "/");
-    expect(mockRouter.push).toHaveBeenNthCalledWith(3, "/browse");
-    expect(mockRouter.push).toHaveBeenNthCalledWith(4, "/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(1, "/");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(2, "/");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(3, "/browse");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(4, "/my-tickets");
     expect(queryByTestId("profile-nik-input")).toBeNull();
   });
 
@@ -197,12 +223,12 @@ describe("ProfileScreen", () => {
     const { getByRole } = renderProfile();
 
     fireEvent.press(getByRole("tab", { name: "Beranda" }));
-    fireEvent.press(getByRole("tab", { name: "Jelajahi" }));
-    fireEvent.press(getByRole("tab", { name: "Tiket" }));
+    fireEvent.press(getByRole("tab", { name: "Jelajah" }));
+    fireEvent.press(getByRole("tab", { name: "Ticket" }));
 
-    expect(mockRouter.push).toHaveBeenNthCalledWith(1, "/");
-    expect(mockRouter.push).toHaveBeenNthCalledWith(2, "/browse");
-    expect(mockRouter.push).toHaveBeenNthCalledWith(3, "/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(1, "/");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(2, "/browse");
+    expect(mockRouter.navigate).toHaveBeenNthCalledWith(3, "/my-tickets");
   });
 
   it("opens sign-in from the guest desktop header action", () => {

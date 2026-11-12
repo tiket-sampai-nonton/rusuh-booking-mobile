@@ -8,6 +8,8 @@ import {
   designTokens,
   designZone,
   designBorders,
+  designShadows,
+  designShadowCSS,
   designFonts,
   designEasing,
   designEasingCSS,
@@ -23,23 +25,26 @@ const tw = (
 ).theme?.extend?.colors?.v2 as Record<string, string> | undefined;
 
 describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
-  describe("designColors (new API)", () => {
-    it("exposes the core palette per MASTER-SPEC §1", () => {
+  describe("designColors", () => {
+    it("exposes the black, white, and red brand palette", () => {
       expect(designColors).toMatchObject({
-        ground: "#ffffff",
+        ground: "#FFFFFF",
         ink: "#000000",
+        overlay: "#0A0A0C",
         inkMuted: "#666666",
-        field: "#f5f5f5",
-        danger: "#ff0000",
-        success: "#00aa00",
-        warning: "#ff6600",
+        field: "#F5F5F5",
+        danger: "#EC1C24",
+        success: "#00AA00",
+        warning: "#FF6600",
       });
     });
 
     it("includes legacy aliases for backwards compatibility", () => {
       expect(designColors.muted).toBe("#666666");
-      expect(designColors.warn).toBe("#ff6600");
-      expect(designColors.accent).toBe("#000000");
+      expect(designColors.warn).toBe("#FF6600");
+      expect(designColors.accent).toBe("#EC1C24");
+      expect(designColors.accentDeep).toBe("#A8111B");
+      expect(designColors.ember).toBe("#FF5A2D");
     });
   });
 
@@ -48,6 +53,21 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
       expect(designBorders.standard).toBe(2);
       expect(designBorders.thick).toBe(3); // Waiting room only
       expect(designBorders.thin).toBe(1);
+    });
+  });
+
+  describe("designShadows", () => {
+    it("uses the shared black ink token for every shadow", () => {
+      expect(
+        Object.values(designShadows).every(
+          ({ color }) => color === designColors.ink,
+        ),
+      ).toBe(true);
+      expect(
+        Object.values(designShadowCSS).every((value) =>
+          value.endsWith(designColors.ink),
+        ),
+      ).toBe(true);
     });
   });
 
@@ -96,19 +116,19 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
   describe("designZoneBanners (new API)", () => {
     it("defines waiting room zone banner colors per MASTER-SPEC §3.3", () => {
       expect(designZoneBanners.guaranteed).toEqual({
-        bg: "#e8f5e9",
-        border: "#2e7d32",
-        text: "#1b5e20",
+        bg: "#E8F5E9",
+        border: "#00AA00",
+        text: "#1B5E20",
       });
       expect(designZoneBanners.possible).toEqual({
-        bg: "#fff3e0",
-        border: "#f57c00",
-        text: "#e65100",
+        bg: "#FFF3E0",
+        border: "#FF6600",
+        text: "#E65100",
       });
       expect(designZoneBanners.notEnough).toEqual({
-        bg: "#ffebee",
-        border: "#c62828",
-        text: "#b71c1c",
+        bg: "#FFEBEE",
+        border: "#EC1C24",
+        text: "#B71C1C",
       });
     });
   });
@@ -137,11 +157,13 @@ describe("RBT-096  Brutalist Mono tokens (Re-implementation)", () => {
     describe("Tailwind sync", () => {
       it("MIRRORS the tailwind.config.js v2 namespace for core colors", () => {
         // Every core raw token equals its tailwind counterpart — no drift.
-        (["ink", "ground", "field"] as const).forEach((k) => {
-          if (tw[k]) {
-            expect(designColors[k]).toBe(tw[k]);
-          }
-        });
+        (["ink", "ground", "field", "overlay", "accent"] as const).forEach(
+          (k) => {
+            if (tw[k]) {
+              expect(designColors[k]).toBe(tw[k]);
+            }
+          },
+        );
       });
     });
   }

@@ -8,8 +8,8 @@ import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import type { PaymentBarProps } from "../../interface";
 import { paymentBar } from "../../style";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   styleForPaymentBarView0,
   styleForPaymentBarPressable1,
   styleForPaymentBarText2,
@@ -26,6 +26,7 @@ export function PaymentBar({
   bottomInset,
 }: PaymentBarProps) {
   const { isMobileWeb } = useResponsive();
+  const payIconColor = isMobileWeb ? designColors.ground : designColors.ink;
   return (
     <View
       style={[
@@ -78,12 +79,7 @@ export function PaymentBar({
           >
             {paymentButtonLabel(pending, expired, resumeLabel)}
           </Text>
-          {canPay ? (
-            <ExternalLinkIcon
-              color={isMobileWeb ? designColors.ground : designColors.ink}
-              size={16}
-            />
-          ) : null}
+          {canPay ? <ExternalLinkIcon color={payIconColor} size={16} /> : null}
         </Pressable>
       </View>
     </View>

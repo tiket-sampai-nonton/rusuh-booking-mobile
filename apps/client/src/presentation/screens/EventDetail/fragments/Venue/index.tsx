@@ -9,9 +9,8 @@
  * - Color reveal on hover
  * - Venue name + address info below
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Image,
   Linking,
   Platform,
   Pressable,
@@ -19,11 +18,11 @@ import {
   View,
   type ImageStyle,
 } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { designColors } from "@presentation/theme/event-design-tokens";
 import { PinIcon } from "@presentation/components/ArrowIcon";
-import { venueStyles } from "./style";
-import { styleForVenueImage0, styleForVenueView1 } from "./style";
+import { venueStyles, styleForVenueImage0, styleForVenueView1 } from "./style";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // VENUE COMPONENT
@@ -38,6 +37,9 @@ interface VenueProps {
 
 export function Venue({ name, address, mapImage, mapsUrl }: VenueProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [mapImageFailed, setMapImageFailed] = useState(false);
+
+  useEffect(() => setMapImageFailed(false), [mapImage]);
 
   const handleOpenMap = () => {
     if (mapsUrl) {
@@ -51,11 +53,6 @@ export function Venue({ name, address, mapImage, mapsUrl }: VenueProps) {
     }
   };
 
-  // Default map image (Jakarta stadium)
-  const imageUri =
-    mapImage ||
-    "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&q=80";
-
   return (
     <View>
       {/* Map Container */}
@@ -67,17 +64,30 @@ export function Venue({ name, address, mapImage, mapsUrl }: VenueProps) {
         accessibilityRole="button"
         accessibilityLabel={`Buka lokasi ${name} di maps`}
       >
-        <Image
-          source={{ uri: imageUri }}
-          style={[
-            venueStyles.mapImage,
-            // Web-only grayscale filter
-            Platform.OS === "web" &&
-              (styleForVenueImage0(isHovered) as unknown as ImageStyle),
-          ]}
-          resizeMode="cover"
-          accessibilityIgnoresInvertColors
-        />
+        {mapImage && !mapImageFailed ? (
+          <CachedImage
+            source={{ uri: mapImage }}
+            style={[
+              venueStyles.mapImage,
+              // Web-only grayscale filter
+              Platform.OS === "web" &&
+                (styleForVenueImage0(isHovered) as unknown as ImageStyle),
+            ]}
+            resizeMode="cover"
+            accessibilityIgnoresInvertColors
+            onError={() => setMapImageFailed(true)}
+          />
+        ) : (
+          <View
+            style={venueStyles.mapUnavailable}
+            testID="venue-map-unavailable"
+          >
+            <PinIcon color={designColors.inkMuted} size={28} />
+            <Text style={venueStyles.mapUnavailableText}>
+              Pratinjau peta tidak tersedia
+            </Text>
+          </View>
+        )}
 
         {/* Hover Overlay */}
         <View style={[venueStyles.mapOverlay, styleForVenueView1(isHovered)]}>

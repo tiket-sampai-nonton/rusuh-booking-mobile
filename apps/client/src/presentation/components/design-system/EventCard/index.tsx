@@ -3,11 +3,11 @@
  * RBT-097 — Mobile: stagger animation (FadeInUp.delay(index * 100))
  *
  * MASTER-SPEC §3.1 Event Card:
- * - Background: #fff
+ * - Background: shared ground token
  * - Hover: translateY(-8px) rotateX(2deg), shadow
  * - Image: grayscale 100% → 0% on hover (CSS filter on web)
  * - Badge slides in from left on hover
- * - border: 2px solid #000
+ * - border: 2px solid the shared ink token
  * - Gap: 2px creates border effect (handled by parent grid)
  *
  * Mobile prototype v2-mobile/01-home.html differences:
@@ -17,10 +17,11 @@
  * - Title: 16px, weight 700, NOT uppercase, line-height 1.3
  * - Venue: 12px with icon
  * - Footer: 1px dashed border (not 2px solid), 32x32 icon btn
- * - Badge: 10px, red bg (danger)
+ * - Badge: 10px, shared status/brand token background
  */
-import { useCallback, useEffect, useState } from "react";
-import { Image, Platform, Pressable, Text, View } from "react-native";
+import { memo, useCallback, useEffect, useState } from "react";
+import { Platform, Pressable, Text, View } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 import Animated, {
   Easing,
   interpolate,
@@ -42,12 +43,13 @@ import {
   designDuration,
   designSpacingSemantic,
   designShadows,
+  withAlpha,
 } from "@presentation/theme";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { pointerEventsNone } from "@presentation/utils/style";
 import { ArrowIcon, PinIcon } from "@presentation/components/ArrowIcon";
-import { componentStyles } from "./style";
 import {
+  componentStyles,
   eventCardContainerStyle,
   eventCardImageContainerStyle,
   eventCardImageStyle,
@@ -57,7 +59,6 @@ import {
   styleForEventCardAnimatedView1,
   styleForEventCardPressable2,
   styleForEventCardAnimatedView3,
-  styleForEventCardAnimatedView4,
   styleForEventCardAnimatedView5,
   styleForEventCardText6,
   styleForEventCardText7,
@@ -88,14 +89,12 @@ const DESKTOP_VENUE_SIZE = 14; // --text-s
 export interface EventCardProps {
   readonly event: EventSummary;
   readonly onPress: (eventId: string) => void;
-  /** History/archive mode: dimmed, disabled */
+  /** History/archive mode: dimmed but still opens its informational detail. */
   readonly history?: boolean;
   /** Index for stagger animation (mobile: delay(index * 100ms)) */
   readonly staggerIndex?: number;
   /** List view mode: use 16:9 aspect ratio instead of 1:1 */
   readonly listMode?: boolean;
-  /** Native Home carousel: reveal the color layer when the card enters view. */
-  readonly isImageVisible?: boolean;
 }
 
 /** Badge label per tone */
@@ -107,58 +106,164 @@ const BADGE_LABEL: Record<BadgeTone, string> = {
   done: "Selesai",
 };
 
-export function EventCard({
+function EventCardComponent(props: EventCardProps) {
+  const isNative = Platform.OS !== "web";
+  return isNative ? (
+    <NativeEventCard
+      event={props.event}
+      onPress={props.onPress}
+      history={props.history}
+      listMode={props.listMode}
+    />
+  ) : (
+    <AnimatedEventCard {...props} />
+  );
+}
+
+/** Native event cards are static while scrolling; avoid per-cell Reanimated worklets. */
+type NativeEventCardProps = Pick<
+  EventCardProps,
+  "event" | "onPress" | "history" | "listMode"
+>;
+
+function NativeEventCard({
+  event,
+  onPress,
+  history = false,
+  listMode = false,
+}: NativeEventCardProps) {
+  const badge = badgeFor(event);
+  const disabled = badge.disabled || history;
+  const dateTxt = formatDateID(event.startsAt);
+  const image = eventImage(event.id, event.thumbnailUrl ?? event.imageUrl);
+  const imageUri = resizeNativeUnsplashImage(image, listMode);
+
+  return (
+    <View style={styleForEventCardView0()}>
+      <View style={[styleForEventCardAnimatedView1(), pointerEventsNone]} />
+      <View style={eventCardContainerStyle(false, disabled, true)}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${event.name}, ${event.venue ?? ""}, ${dateTxt}`}
+          accessibilityState={{ disabled: false }}
+          onPress={() => onPress(event.id)}
+          testID={`v2-event-card-${event.id}`}
+        >
+          <View style={eventCardImageContainerStyle(true, listMode, false)}>
+            <View style={styleForEventCardAnimatedView3()}>
+              <CachedImage
+                source={{ uri: imageUri }}
+                resizeMode="cover"
+                accessibilityIgnoresInvertColors
+                style={eventCardImageStyle(false, false)}
+              />
+            </View>
+            <View
+              style={[
+                styleForEventCardAnimatedView5(true, badge),
+                {
+                  opacity: 1,
+                  transform: [{ translateX: 0 }],
+                },
+              ]}
+            >
+              <Text style={styleForEventCardText6(true)}>
+                {BADGE_LABEL[badge.tone]}
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={eventCardContentStyle(
+              MOBILE_CONTENT_PADDING,
+              true,
+              false,
+              listMode,
+            )}
+          >
+            <View>
+              {Boolean(dateTxt) && (
+                <Text style={styleForEventCardText7(MOBILE_DATE_SIZE, true)}>
+                  {dateTxt}
+                </Text>
+              )}
+              <Text
+                style={styleForEventCardAnimatedText8(MOBILE_TITLE_SIZE, true)}
+                numberOfLines={2}
+              >
+                {event.name}
+              </Text>
+              {event.venue && (
+                <View style={styleForEventCardView9(true)}>
+                  <PinIcon color={designColors.inkMuted} size={12} />
+                  <Text
+                    style={styleForEventCardText10(MOBILE_VENUE_SIZE)}
+                    numberOfLines={1}
+                  >
+                    {event.venue}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View style={eventCardFooterStyle(true)}>
+              <View>
+                <Text style={componentStyles.elementColor1}>Mulai dari</Text>
+                <Text style={styleForEventCardText11(true)}>
+                  {minorToIDR(event.minPriceMinor)}
+                </Text>
+              </View>
+              <View style={styleForEventCardView12(disabled)}>
+                <ArrowIcon
+                  direction="right"
+                  color={eventCardArrowColor(disabled, false)}
+                  size={16}
+                />
+              </View>
+            </View>
+          </View>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+function AnimatedEventCard({
   event,
   onPress,
   history = false,
   staggerIndex = 0,
   listMode = false,
-  isImageVisible = true,
 }: EventCardProps) {
   const reducedMotion = useReducedMotion();
   const { isNative, isMobileWeb } = useResponsive();
   const isMobileLayout = isNative || isMobileWeb;
   const compactListMode = listMode || isMobileWeb;
   const hovered = useSharedValue(0);
-  const colorReveal = useSharedValue(isNative ? 0 : 1);
-  const staggerOpacity = useSharedValue(reducedMotion ? 1 : 0);
-  const staggerTranslateY = useSharedValue(reducedMotion ? 0 : 20);
+  const staggerOpacity = useSharedValue(reducedMotion || isNative ? 1 : 0);
+  const staggerTranslateY = useSharedValue(reducedMotion || isNative ? 0 : 20);
   const [isHovered, setIsHovered] = useState(false); // For web CSS filter
   const badge = badgeFor(event);
   const disabled = badge.disabled || history;
   const dateTxt = formatDateID(event.startsAt);
   const image = eventImage(event.id, event.thumbnailUrl ?? event.imageUrl);
-  const grayscaleImage = grayscaleImageUrl(image);
-
-  useEffect(() => {
-    if (!isNative) return;
-    if (!isImageVisible) {
-      colorReveal.value = 0;
-      return;
-    }
-    if (reducedMotion) {
-      colorReveal.value = 1;
-      return;
-    }
-    colorReveal.value = withTiming(1, { duration: 900, easing: EASE });
-  }, [colorReveal, isImageVisible, isNative, reducedMotion]);
-  const colorLayerStyle = useAnimatedStyle(() => ({
-    opacity: colorReveal.value,
-  }));
+  const imageSource = isNative
+    ? { uri: resizeNativeUnsplashImage(image, listMode) }
+    : responsiveWebImageSource(image, compactListMode);
 
   // Mobile vs Desktop sizing
-  const contentPadding = isMobileWeb
-    ? 10
-    : isNative
-      ? MOBILE_CONTENT_PADDING
-      : DESKTOP_CONTENT_PADDING;
+  let contentPadding: number = DESKTOP_CONTENT_PADDING;
+  if (isNative) contentPadding = MOBILE_CONTENT_PADDING;
+  if (isMobileWeb) contentPadding = 10;
   const dateSize = isMobileLayout ? MOBILE_DATE_SIZE : DESKTOP_DATE_SIZE;
   const titleSize = isMobileLayout ? MOBILE_TITLE_SIZE : DESKTOP_TITLE_SIZE;
   const venueSize = isMobileLayout ? MOBILE_VENUE_SIZE : DESKTOP_VENUE_SIZE;
 
   // Stagger animation on mount (mobile: FadeInUp.delay(index * 100))
   useEffect(() => {
-    if (reducedMotion) {
+    // Virtualized native cells can mount repeatedly while scrolling. Keep them
+    // static there; web retains the stagger entrance motion.
+    if (reducedMotion || isNative) {
       staggerOpacity.value = 1;
       staggerTranslateY.value = 0;
       return;
@@ -172,12 +277,19 @@ export function EventCard({
       delay,
       withTiming(0, { duration: 500, easing: EASE }),
     );
-  }, [reducedMotion, staggerIndex, staggerOpacity, staggerTranslateY]);
+  }, [
+    isNative,
+    reducedMotion,
+    staggerIndex,
+    staggerOpacity,
+    staggerTranslateY,
+  ]);
 
   const setHovered = useCallback(
     (v: boolean) => {
       if (disabled) return;
-      setIsHovered(v); // For web CSS
+      if (isWeb) setIsHovered(v); // Web hover styles only.
+      if (isNative) return; // Native cards stay static during fast scrolling.
       if (reducedMotion) {
         hovered.value = v ? 1 : 0;
         return;
@@ -187,7 +299,7 @@ export function EventCard({
         easing: EASE,
       });
     },
-    [disabled, reducedMotion, hovered],
+    [disabled, isNative, reducedMotion, hovered],
   );
 
   // Card hover: translateY(-8px) rotateX(2deg) + shadow
@@ -220,7 +332,7 @@ export function EventCard({
     // Web only: animate shadow (native shadow is static in containerStyle)
     ...(isWeb
       ? {
-          boxShadow: `${interpolate(hovered.value, [0, 1], [0, designShadows.lg.x])}px ${interpolate(hovered.value, [0, 1], [0, designShadows.lg.y])}px 0 rgba(0, 0, 0, ${interpolate(hovered.value, [0, 1], [0, 0.15])})`,
+          boxShadow: `${interpolate(hovered.value, [0, 1], [0, designShadows.lg.x])}px ${interpolate(hovered.value, [0, 1], [0, designShadows.lg.y])}px 0 ${withAlpha(designColors.ink, interpolate(hovered.value, [0, 1], [0, 0.15]))}`,
         }
       : {}),
   }));
@@ -233,18 +345,10 @@ export function EventCard({
     transform: [{ scale: interpolate(hovered.value, [0, 1], [1, 1.05]) }],
   }));
 
-  // Badge slides in from left on hover (or always visible for certain states)
-  const badgeAlwaysShow =
-    badge.tone === "soldout" || badge.tone === "done" || badge.tone === "low";
+  // Availability is visible without hover so users can scan cards on touch devices.
   const badgeStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: badgeAlwaysShow
-          ? 0
-          : interpolate(hovered.value, [0, 1], [-110, 0]),
-      },
-    ],
-    opacity: badgeAlwaysShow ? 1 : hovered.value,
+    transform: [{ translateX: 0 }],
+    opacity: 1,
   }));
 
   // Title letter-spacing: 0 → 0.02em on hover
@@ -284,10 +388,9 @@ export function EventCard({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${event.name}, ${event.venue ?? ""}, ${dateTxt}`}
-          // Availability controls purchase styling, not access to event details.
-          // Historical cards remain informational and intentionally non-interactive.
-          accessibilityState={{ disabled: history }}
-          disabled={history}
+          // Availability and history control styling; event details remain
+          // accessible after ticket sales have ended.
+          accessibilityState={{ disabled: false }}
           onPress={() => onPress(event.id)}
           onHoverIn={() => setHovered(true)}
           onHoverOut={() => setHovered(false)}
@@ -305,28 +408,12 @@ export function EventCard({
             <Animated.View
               style={[styleForEventCardAnimatedView3(), imageScaleStyle]}
             >
-              <Image
-                source={{ uri: isNative ? grayscaleImage : image }}
+              <CachedImage
+                source={imageSource}
                 resizeMode="cover"
                 accessibilityIgnoresInvertColors
                 style={webImageStyle}
               />
-              {isNative ? (
-                <Animated.View
-                  style={[
-                    styleForEventCardAnimatedView4(),
-                    colorLayerStyle,
-                    pointerEventsNone,
-                  ]}
-                >
-                  <Image
-                    source={{ uri: image }}
-                    resizeMode="cover"
-                    accessibilityIgnoresInvertColors
-                    style={componentStyles.elementWidth0}
-                  />
-                </Animated.View>
-              ) : null}
             </Animated.View>
 
             {/* Badge */}
@@ -347,7 +434,7 @@ export function EventCard({
             {/* Top section: date, title, venue */}
             <View>
               {/* Date: Mobile: 12px uppercase, Desktop: 14px */}
-              {dateTxt && (
+              {Boolean(dateTxt) && (
                 <Text style={styleForEventCardText7(dateSize, isMobileLayout)}>
                   {dateTxt}
                 </Text>
@@ -388,7 +475,7 @@ export function EventCard({
                   <Text style={componentStyles.elementColor1}>Mulai dari</Text>
                 )}
                 <Text style={styleForEventCardText11(isMobileLayout)}>
-                  {minorToIDR(event.minPriceMinor, { compact: true })}
+                  {minorToIDR(event.minPriceMinor)}
                 </Text>
               </View>
 
@@ -418,12 +505,34 @@ export function EventCard({
   );
 }
 
+export const EventCard = memo(EventCardComponent);
 export default EventCard;
 
-function grayscaleImageUrl(image: string): string {
-  if (!image.includes("images.unsplash.com")) return image;
-  const separator = image.includes("?") ? "&" : "?";
-  return `${image}${separator}sat=-100`;
+function resizeNativeUnsplashImage(uri: string, listMode: boolean): string {
+  if (!uri.includes("images.unsplash.com")) return uri;
+
+  return resizeUnsplashImage(uri, listMode ? 960 : 576, 75);
+}
+
+function responsiveWebImageSource(
+  uri: string,
+  listMode: boolean,
+): { uri: string; width: number }[] | { uri: string } {
+  if (!uri.includes("images.unsplash.com")) return { uri };
+
+  const widths = listMode ? [640, 960] : [480, 768];
+  return widths.map((width) => ({
+    uri: resizeUnsplashImage(uri, width, 56),
+    width,
+  }));
+}
+
+function resizeUnsplashImage(uri: string, width: number, quality: number) {
+  const [path, query = ""] = uri.split("?", 2);
+  const params = new URLSearchParams(query);
+  params.set("w", String(width));
+  params.set("q", String(quality));
+  return `${path}?${params.toString()}`;
 }
 
 function eventCardArrowColor(disabled: boolean, isHovered: boolean): string {

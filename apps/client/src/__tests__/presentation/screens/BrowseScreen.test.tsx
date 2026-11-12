@@ -14,7 +14,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react-native";
-import { Dimensions, Platform } from "react-native";
+import { Dimensions, FlatList, Platform } from "react-native";
 
 import type {
   EventDetail,
@@ -28,7 +28,12 @@ import { useAccountStore } from "@presentation/stores/account-store";
 // spies — held in mock-prefixed names so the hoisted jest.mock factory may
 // legally reference them.
 const mockParams: { current: Record<string, string> } = { current: {} };
-const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockRouter = {
+  push: jest.fn(),
+  replace: jest.fn(),
+  navigate: jest.fn(),
+  dismissTo: jest.fn(),
+};
 const originalPlatform = Platform.OS;
 const originalWindow = Dimensions.get("window");
 const originalScreen = Dimensions.get("screen");
@@ -77,6 +82,8 @@ describe("BrowseScreen — URL-driven filters", () => {
     mockParams.current = {};
     mockRouter.push.mockReset();
     mockRouter.replace.mockReset();
+    mockRouter.navigate.mockReset();
+    mockRouter.dismissTo.mockReset();
     useAccountStore.getState().clearProfile();
   });
 
@@ -113,6 +120,18 @@ describe("BrowseScreen — URL-driven filters", () => {
     expect(screen.getByTestId("browse-count")).toBeTruthy();
   });
 
+  it("keeps native browse scrolling virtualized without viewability rerenders", async () => {
+    const { UNSAFE_getByType } = renderWithProviders(<BrowseScreen />, {
+      container: { eventRepository: repo(CATALOG) },
+    });
+    await waitFor(() => screen.getByTestId("v2-event-card-rock"));
+
+    const list = UNSAFE_getByType(FlatList);
+    expect(list.props.windowSize).toBe(3);
+    expect(list.props.maxToRenderPerBatch).toBe(4);
+    expect(list.props.onViewableItemsChanged).toBeUndefined();
+  });
+
   it("treats the all-genres URL value as the unfiltered category", async () => {
     mockParams.current = { genre: "Semua", time: "month", sort: "closest" };
     renderWithProviders(<BrowseScreen />, {
@@ -140,10 +159,20 @@ describe("BrowseScreen — URL-driven filters", () => {
     await waitFor(() => screen.getByTestId("v2-event-card-rock"));
 
     fireEvent.scroll(screen.getByTestId("browse-scroll"), {
-      nativeEvent: { contentOffset: { y: 120 } },
+      nativeEvent: {
+        contentOffset: { y: 120 },
+        contentSize: { height: 2000, width: 1024 },
+        layoutMeasurement: { height: 900, width: 1024 },
+      },
     });
-    fireEvent.press(screen.getByTestId("category-concert"));
-    fireEvent.press(screen.getByTestId("category-festival"));
+    expect(screen.getByTestId("category-all")).toBeTruthy();
+    expect(screen.queryByTestId("category-concert")).toBeNull();
+    expect(screen.queryByLabelText("Urutkan event")).toBeNull();
+    fireEvent.press(screen.getByTestId("browse-filter"));
+    fireEvent.press(screen.getByTestId("filter-genre-festival"));
+    fireEvent.press(screen.getByTestId("filter-apply"));
+    expect(screen.getByTestId("category-festival")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("category-all"));
     fireEvent.press(screen.getByTestId("view-list"));
     fireEvent.press(screen.getByTestId("view-grid"));
     fireEvent.press(screen.getByTestId("nav-home"));
@@ -153,15 +182,13 @@ describe("BrowseScreen — URL-driven filters", () => {
     fireEvent.press(screen.getByTestId("browse-filter"));
     fireEvent.press(screen.getByTestId("filter-close"));
     fireEvent.press(screen.getByTestId("browse-filter"));
+    fireEvent.press(screen.getByTestId("filter-sort-furthest"));
     fireEvent.press(screen.getByTestId("filter-apply"));
-    expect(mockRouter.push).toHaveBeenCalledWith(
+    expect(mockRouter.replace).toHaveBeenCalledWith(
       expect.stringMatching(/^\/browse\?/),
     );
 
-    const sortSelect = screen.getByLabelText("Urutkan event");
-    fireEvent(sortSelect, "change", { target: { value: "price-low" } });
-    fireEvent.press(screen.getByTestId("load-more-btn"));
-    expect(screen.getByText("Semua Event Ditampilkan")).toBeTruthy();
+    expect(screen.queryByTestId("load-more-btn")).toBeNull();
   });
 
   it("opens filters from an icon-only accessible control", async () => {
@@ -221,7 +248,7 @@ describe("BrowseScreen — URL-driven filters", () => {
     //  uses Header with header-logo testID
     await waitFor(() => screen.getByTestId("header-logo"));
     fireEvent.press(screen.getByTestId("header-logo"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
   });
 
   it("keeps the guest desktop header CTA inert on Browse", async () => {
@@ -236,6 +263,7 @@ describe("BrowseScreen — URL-driven filters", () => {
     await waitFor(() => screen.getByTestId("header-cta"));
     fireEvent.press(screen.getByTestId("header-cta"));
     expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
   });
 
   it("routes logged-in native bottom navigation to Home, tickets, and profile", async () => {
@@ -250,12 +278,12 @@ describe("BrowseScreen — URL-driven filters", () => {
     await waitFor(() => screen.getByRole("tab", { name: "Beranda" }));
 
     fireEvent.press(screen.getByRole("tab", { name: "Beranda" }));
-    fireEvent.press(screen.getByRole("tab", { name: "Tiket" }));
-    fireEvent.press(screen.getByRole("tab", { name: "Akun" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Ticket" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Profil" }));
 
-    expect(mockRouter.push).toHaveBeenCalledWith("/");
-    expect(mockRouter.push).toHaveBeenCalledWith("/my-tickets");
-    expect(mockRouter.push).toHaveBeenCalledWith("/profile");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/my-tickets");
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/profile");
   });
 
   it("shows the Loader before data resolves", async () => {

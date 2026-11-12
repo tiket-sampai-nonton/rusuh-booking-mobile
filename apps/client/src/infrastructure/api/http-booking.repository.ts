@@ -7,6 +7,7 @@
  */
 
 import type {
+  BookingAvailabilitySnapshot,
   AttendeeCheck,
   Booking,
   BookingItemInput,
@@ -27,7 +28,7 @@ export class HttpBookingRepository implements BookingRepository {
     private readonly http: HttpClient,
     private readonly openAvailabilityStream?: (
       sessionId: string,
-      onChange: () => void,
+      onAvailability: (snapshot: BookingAvailabilitySnapshot) => void,
     ) => () => void,
   ) {}
 
@@ -42,11 +43,14 @@ export class HttpBookingRepository implements BookingRepository {
     );
   }
 
-  async getCurrentSession(): Promise<BookingSession | null> {
+  async getCurrentSession(eventId?: string): Promise<BookingSession | null> {
+    // BE requires eventId to scope the visitor's active session. Without event
+    // context, report no restorable session instead of issuing a guaranteed 400.
+    if (!eventId) return null;
     try {
       const res = await this.http.request({
         method: "GET",
-        url: "booking-sessions/current",
+        url: `booking-sessions/current?eventId=${encodeURIComponent(eventId)}`,
       });
       if (res.status === 404) return null;
       return toBookingSession(
@@ -80,10 +84,18 @@ export class HttpBookingRepository implements BookingRepository {
       headers: { "idempotency-key": idempotencyKey },
       body: {
         sessionId,
-        buyer,
+        buyer: {
+          nik: buyer.nik,
+          email: buyer.email,
+          emailConfirmation: buyer.emailConfirmation,
+          consent: buyer.consent,
+        },
         items: items.map((item) => ({
           categoryId: item.categoryId,
-          attendee: { nik: item.attendeeNik, fullName: item.attendeeName },
+          attendee: {
+            nik: item.attendeeNik,
+            fullName: item.attendeeName,
+          },
         })),
       },
     });
@@ -108,8 +120,13 @@ export class HttpBookingRepository implements BookingRepository {
     );
   }
 
-  subscribeAvailability(sessionId: string, onChange: () => void): () => void {
-    return this.openAvailabilityStream?.(sessionId, onChange) ?? (() => {});
+  subscribeAvailability(
+    sessionId: string,
+    onAvailability: (snapshot: BookingAvailabilitySnapshot) => void,
+  ): () => void {
+    return (
+      this.openAvailabilityStream?.(sessionId, onAvailability) ?? (() => {})
+    );
   }
 
   async getBooking(bookingId: string): Promise<Booking> {

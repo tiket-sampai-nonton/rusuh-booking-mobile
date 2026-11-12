@@ -1,0 +1,20 @@
+appId: com.tiketsampainonton.rusuhbooking
+---
+- assertVisible:
+    id: home-scroll
+- tapOn:
+    id: bottom-nav-browse
+- assertVisible:
+    id: browse-scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- tapOn:
+    id: bottom-nav-home
+- assertVisible:
+    id: home-scroll
+- assertNotVisible:
+    id: browse-scroll

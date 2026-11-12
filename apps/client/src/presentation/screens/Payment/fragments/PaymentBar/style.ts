@@ -1,8 +1,7 @@
 import { StyleSheet } from "react-native";
-import { designColors } from "@presentation/theme";
+import { designColors, designBorders } from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
-import { designBorder } from "@presentation/theme";
 
 export const componentStyles = StyleSheet.create({
   elementColor0: { color: designColors.accent },
@@ -12,7 +11,7 @@ export const componentStyles = StyleSheet.create({
 
 export function styleForPaymentBarView0(isMobileWeb = false): DynamicStyle {
   return {
-    borderTopWidth: designBorder.base,
+    borderTopWidth: designBorders.standard,
     borderTopColor: designColors.ink,
     ...(isMobileWeb && { paddingTop: 8 }),
   } as DynamicStyle;
@@ -23,8 +22,8 @@ export function styleForPaymentBarPressable1(
   isMobileWeb = false,
 ): DynamicStyle {
   return {
-    backgroundColor: canPay ? designColors.danger : designColors.inkMuted,
-    borderColor: canPay ? designColors.danger : designColors.inkMuted,
+    backgroundColor: canPay ? designColors.accent : designColors.inkMuted,
+    borderColor: canPay ? designColors.accent : designColors.inkMuted,
     minHeight: 48,
     paddingHorizontal: isMobileWeb ? 14 : 24,
     paddingVertical: isMobileWeb ? 10 : 14,

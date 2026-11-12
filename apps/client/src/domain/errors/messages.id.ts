@@ -22,6 +22,11 @@ export const ERROR_SPECS: Readonly<Record<string, ErrorSpec>> = {
     kind: "validation",
     message: "NIK tidak valid. Pastikan 16 digit sesuai KTP.",
   },
+  NIK_NOT_LINKED: {
+    kind: "validation",
+    message:
+      "Belum ada NIK yang tertaut ke akun Anda. Gunakan NIK manual untuk melanjutkan.",
+  },
   UNAUTHORIZED: {
     kind: "auth",
     message: "Sesi Anda tidak sah. Silakan masuk kembali.",

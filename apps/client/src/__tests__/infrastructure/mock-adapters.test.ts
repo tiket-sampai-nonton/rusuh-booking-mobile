@@ -117,7 +117,7 @@ describe("MockPaymentRepository", () => {
     const a = await repo.createAttempt("book-7", "QRIS", "k7");
     expect(a.redirectUrl).toBe("/snap/book-7");
     expect(a.successReturnUrl).toBe("/payment-result/book-7");
-    expect(a.failedReturnUrl).toContain("/expired/book-7");
+    expect(a.failedReturnUrl).toContain("/failed/book-7");
   });
 
   it("snapCallback PAID/FAILED set terminal status; UNKNOWN stays pending (RBT-065)", async () => {
@@ -151,7 +151,7 @@ describe("MockPaymentRepository", () => {
     const repo = new MockPaymentRepository();
     const p = await repo.getPaymentPage("book-1");
     expect(p.bookingId).toBe("book-1");
-    expect(p.amountMinor).toBe(45000000);
+    expect(p.amountMinor).toBe(450000);
     expect(p.methods).toContain("QRIS");
     expect(p.methods).not.toContain("CREDIT_CARD" as never);
     // paymentExpiresAt is ~10 min after serverTime.

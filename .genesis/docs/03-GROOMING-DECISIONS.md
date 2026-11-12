@@ -142,6 +142,10 @@
 | O3 | **ARCHITECTURE.md §6.1 correction**: make web push v1 (per D8.2). | FE (us) | Do in Phase 2 |
 | O4 | `/browse` server-side filter/sort params + event history/archive endpoint. | BE team | Tracked dependency |
 
+### Runtime status addendum — 2026-11-12
+
+The O1/O2 rows above preserve the original grooming state from 2026-10-29. Since then, the live BE provides event-detail rich content and the payment service implements page-token issuance/exchange. FE now consumes rich content and includes a `/pay/[bookingId]` same-origin bootstrap route for the returned site-relative URL. O1 is partially resolved (catalog-level `remainingTickets` still needs a contract decision); O2 is implemented in code, with a web deployment and physical iOS/Android cookie/SNAP verification still outstanding. See [`AS-BUILT-ALIGNMENT-2026-11-12.md`](AS-BUILT-ALIGNMENT-2026-11-12.md) for evidence and remaining schema/device gaps.
+
 ## Phase 2 instructions derived from this document
 
 Phase 2 **verifies + adopts** the existing strong material rather than generating from scratch:

@@ -11,6 +11,7 @@ import Animated, {
 import type { EventSummary } from "@domain/repositories/event.repository";
 import type { ServerClock } from "@domain/services/server-clock";
 import { formatDateID } from "@domain/services/date-format";
+import { minorToIDR } from "@domain/services/money";
 import { INFO_FADE_DELAY_MS, EASE } from "../../constants";
 import { componentStyles } from "../../style";
 import { CalendarIcon } from "../CalendarIcon";
@@ -92,7 +93,7 @@ export function HeroInfo({
       <Text style={componentStyles.elementColor13}>
         Mulai{" "}
         <Text style={componentStyles.elementFontFamily14}>
-          Rp {((event.minPriceMinor ?? 0) / 100).toLocaleString("id-ID")}
+          {minorToIDR(event.minPriceMinor)}
         </Text>
       </Text>
 

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react-native";
+import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 
 const mockUseLocalSearchParams = jest.fn(
   (): { eventId?: string; sessionId?: string; bookingId?: string } => ({
@@ -11,6 +12,7 @@ const mockUseLocalSearchParams = jest.fn(
 jest.mock("expo-router", () => ({
   Stack: () => null,
   useRouter: () => ({ replace: jest.fn() }),
+  useFocusEffect: jest.fn(),
   useLocalSearchParams: () => mockUseLocalSearchParams(),
 }));
 jest.mock("@presentation/components/Seo", () => ({ Seo: () => null }));
@@ -42,6 +44,7 @@ jest.mock("@presentation/hooks/useQueuePolling", () => ({
   useQueuePolling: () => ({
     entry: undefined,
     isLoading: false,
+    isStatusAuthoritative: false,
     isError: false,
     error: null,
     isSettled: false,
@@ -112,10 +115,10 @@ describe("(booking) routes", () => {
   });
 
   it("renders the Waiting room (no-queue guard without a queueId)", () => {
-    render(<WaitingScreen />);
+    renderWithProviders(<WaitingScreen />);
     //  uses the localized no-queue message.
     expect(screen.getByTestId("waiting-noqueue")).toHaveTextContent(
-      "Tidak Ada Antrean Aktif",
+      "Belum ada antrean",
       { exact: false },
     );
   });

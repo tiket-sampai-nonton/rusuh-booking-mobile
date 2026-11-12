@@ -8,10 +8,15 @@
  * base URL and backend behavior for the documented integration gaps.
  */
 import { Platform } from "react-native";
+import { trimTrailingSlashes } from "@shared/utils/trim-slashes";
 
 import type { TokenStorage } from "@domain/auth/token-storage.port";
+import type { BuyerEmailStorage } from "@domain/auth/buyer-email-storage.port";
 import type { QueueMembershipStorage } from "@domain/queue/queue-membership.port";
-import type { BookingRepository } from "@domain/repositories/booking.repository";
+import type {
+  BookingAvailabilitySnapshot,
+  BookingRepository,
+} from "@domain/repositories/booking.repository";
 import type { EventRepository } from "@domain/repositories/event.repository";
 import type { PaymentRepository } from "@domain/repositories/payment.repository";
 import type { QueueRepository } from "@domain/repositories/queue.repository";
@@ -22,11 +27,13 @@ import { InMemoryIdempotencyStore } from "@infrastructure/__fixtures__/in-memory
 import { DurableIdempotencyStore } from "@infrastructure/idempotency/durable-idempotency-store";
 import type { ClockPort } from "@domain/services/clock.port";
 import type { FileSharePort } from "@domain/services/file-share.port";
+import type { AppUpdatePort } from "@domain/services/app-update.port";
 import type { NotificationPort } from "@domain/services/notification.port";
 import type { PushSubscriptionPort } from "@domain/services/push-subscription.port";
 import { HttpPushSubscriptionAdapter } from "@infrastructure/notifications/http-push-subscription.adapter";
 import { ServerClock } from "@domain/services/server-clock";
 import { HttpBookingRepository } from "@infrastructure/api/http-booking.repository";
+import { toBookingAvailability } from "@infrastructure/api/dto-mappers";
 import { HttpEventRepository } from "@infrastructure/api/http-event.repository";
 import { HttpPaymentRepository } from "@infrastructure/api/http-payment.repository";
 import { HttpQueueRepository } from "@infrastructure/api/http-queue.repository";
@@ -43,8 +50,12 @@ import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.rep
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
 import { MockTicketHistoryRepository } from "@infrastructure/__fixtures__/mock-ticket-history.repository";
 import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-token-storage";
+import { InMemoryBuyerEmailStorage } from "@infrastructure/__fixtures__/in-memory-buyer-email-storage";
 import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
+import { WebLocalStorageTokenStorage } from "@infrastructure/auth/web-local-storage-token-storage";
+import { SecureStoreBuyerEmailStorage } from "@infrastructure/auth/secure-store-buyer-email-storage";
+import { WebLocalStorageBuyerEmailStorage } from "@infrastructure/auth/web-local-storage-buyer-email-storage";
 import { SecureStoreQueueMembership } from "@infrastructure/queue/secure-store-queue-membership";
 import { WebQueueMembership } from "@infrastructure/queue/web-queue-membership";
 import { ExpoFileShareAdapter } from "@infrastructure/files/expo-file-share.adapter";
@@ -53,6 +64,7 @@ import { FetchHttpClient } from "@infrastructure/http/fetch-http-client";
 import { RefreshingHttpClient } from "@infrastructure/http/refreshing-http-client";
 import type { HttpClient } from "@infrastructure/http/http-client";
 import { SystemClock } from "@infrastructure/time/system-clock";
+import { ExpoAppUpdateAdapter } from "@infrastructure/updates/expo-app-update.adapter";
 
 /**
  * The container: every domain port bound to one concrete adapter. Hooks read
@@ -76,7 +88,10 @@ export interface Container {
   readonly notification: NotificationPort;
   readonly pushSubscription: PushSubscriptionPort;
   readonly fileShare: FileSharePort;
+  readonly appUpdate: AppUpdatePort;
   readonly tokenStorage: TokenStorage;
+  /** Persisted signed-in email used to refill checkout after refresh. */
+  readonly buyerEmailStorage: BuyerEmailStorage;
   /**
    * Anonymous waiting-room membership persistence (RBT-041). Like
    * {@link tokenStorage} it is a platform primitive: native binds the
@@ -92,19 +107,28 @@ export interface Container {
 }
 
 /**
- * Pick the TokenStorage adapter for the current platform (RBT-023). SecureStore
- * is native-only, so native binds {@link SecureStoreTokenStorage} (OS keychain /
- * KeyStore) while web binds the in-memory fallback — on web the token lives in
- * memory only and does NOT survive a reload (SECURITY.md tradeoff). Jest runs
- * under the `jest-expo` web-ish default, so tests also get the in-memory store,
- * which keeps the composition root deterministic without touching a keychain.
+ * Pick TokenStorage for the current platform. Native uses SecureStore. Real web
+ * uses localStorage for access/refresh tokens; mock web and tests stay in-memory.
  */
 export function createTokenStorage(
   platformOs: typeof Platform.OS = Platform.OS,
+  persistWeb = false,
 ): TokenStorage {
-  return platformOs === "web"
-    ? new InMemoryTokenStorage()
-    : new SecureStoreTokenStorage();
+  if (platformOs !== "web") return new SecureStoreTokenStorage();
+  return persistWeb
+    ? new WebLocalStorageTokenStorage()
+    : new InMemoryTokenStorage();
+}
+
+/** Pick secure native storage or web localStorage for the checkout email. */
+export function createBuyerEmailStorage(
+  platformOs: typeof Platform.OS = Platform.OS,
+  persistWeb = false,
+): BuyerEmailStorage {
+  if (platformOs !== "web") return new SecureStoreBuyerEmailStorage();
+  return persistWeb
+    ? new WebLocalStorageBuyerEmailStorage()
+    : new InMemoryBuyerEmailStorage();
 }
 
 /**
@@ -146,10 +170,107 @@ export interface ContainerOptions {
  * the dev/demo default; real mode is opt-in and requires an API base URL.
  */
 export function readUseMocksFlag(
-  env: Record<string, string | undefined> = process.env,
+  env?: Record<string, string | undefined>,
 ): boolean {
-  const raw = env.EXPO_PUBLIC_USE_MOCKS;
+  // Expo replaces EXPO_PUBLIC_ variables only when referenced directly as
+  // `process.env.NAME`; routing through the process.env object leaves the
+  // production bundle with an undefined flag, which silently selects mocks.
+  const raw =
+    env === undefined
+      ? process.env.EXPO_PUBLIC_USE_MOCKS
+      : env.EXPO_PUBLIC_USE_MOCKS;
   return raw !== "false" && raw !== "0";
+}
+
+/** Build BE identity headers without exposing the web visitor cookie to JS. */
+export function createApiHeaders(
+  platformOs: typeof Platform.OS,
+  accessToken?: string | null,
+  visitorToken?: string | null,
+): Readonly<Record<string, string>> {
+  return {
+    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    ...(platformOs !== "web" ? { "X-Client-Type": "mobile" } : {}),
+    ...(platformOs !== "web" && visitorToken
+      ? { "X-Visitor-Token": visitorToken }
+      : {}),
+  };
+}
+
+function createNotificationAdapter(useMocks: boolean): NotificationPort {
+  if (Platform.OS === "web") {
+    return useMocks
+      ? new MockNotificationAdapter()
+      : new WebPushNotificationAdapter();
+  }
+  return new ExpoNotificationAdapter(!useMocks);
+}
+
+function createFileShareAdapter(): FileSharePort {
+  return Platform.OS === "web"
+    ? new WebFileShareAdapter()
+    : new ExpoFileShareAdapter();
+}
+
+function createQueueMembershipAdapter(
+  useMocks: boolean,
+): QueueMembershipStorage {
+  if (!useMocks && Platform.OS === "web") return new WebQueueMembership();
+  return createQueueMembershipStorage();
+}
+
+function createIdempotencyKeys(useMocks: boolean): IdempotencyKeys {
+  return new IdempotencyKeys(
+    useMocks
+      ? new InMemoryIdempotencyStore()
+      : new DurableIdempotencyStore(Platform.OS),
+  );
+}
+
+function createVisitorTokenStorage(): TokenStorage {
+  return Platform.OS === "web"
+    ? new InMemoryTokenStorage()
+    : new SecureStoreTokenStorage("rusuh.visitor.token");
+}
+
+function createRefreshTokenStorage(useMocks: boolean): TokenStorage {
+  if (Platform.OS !== "web") {
+    return new SecureStoreTokenStorage("rusuh.auth.refresh");
+  }
+  return useMocks
+    ? new InMemoryTokenStorage()
+    : new WebLocalStorageTokenStorage("rusuh.auth.refresh");
+}
+
+type BookingAvailabilityStream = NonNullable<
+  ConstructorParameters<typeof HttpBookingRepository>[1]
+>;
+
+function createBookingAvailabilityStream(
+  baseUrl: string,
+): BookingAvailabilityStream | undefined {
+  if (Platform.OS !== "web" || globalThis.EventSource === undefined) {
+    return undefined;
+  }
+  return (sessionId, onAvailability) => {
+    const stream = new EventSource(
+      `${trimTrailingSlashes(baseUrl)}/booking-sessions/${encodeURIComponent(sessionId)}/stream`,
+      { withCredentials: true },
+    );
+    stream.addEventListener("availability", (event) => {
+      try {
+        const payload = JSON.parse(
+          (event as MessageEvent<string>).data,
+        ) as unknown;
+        const snapshot: BookingAvailabilitySnapshot | null =
+          toBookingAvailability(payload);
+        if (snapshot) onAvailability(snapshot);
+      } catch {
+        // Ignore malformed SSE frames; the session GET remains authoritative.
+      }
+    });
+    return () => stream.close();
+  };
 }
 
 /**
@@ -164,37 +285,25 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // ClockPort is a platform primitive (not a backend capability): the real
   // system clock is bound in both modes. Tests inject a fake ClockPort directly.
   const clock: ClockPort = new SystemClock();
-  // Notification delivery is platform-specific; mock mode replaces it below.
-  const notificationAdapter: NotificationPort =
-    Platform.OS === "web"
-      ? new WebPushNotificationAdapter()
-      : new ExpoNotificationAdapter();
-  const fileShareAdapter: FileSharePort =
-    Platform.OS === "web"
-      ? new WebFileShareAdapter()
-      : new ExpoFileShareAdapter();
+  // Local native notifications are a device capability, independent of whether
+  // API repositories use mocks. Mock mode disables remote push registration.
+  const notificationAdapter = createNotificationAdapter(useMocks);
+  const fileShareAdapter = createFileShareAdapter();
   // Server-authoritative clock layered over the device clock. Unsynced until a
   // server timestamp arrives (offset 0 → serverNow === device now); the catalog
   // split + timers read through it so a later sync corrects everything at once.
   const serverClock = new ServerClock(clock);
 
-  // TokenStorage is a platform primitive (like the clock): the native secure
-  // store vs web in-memory choice is driven by Platform.OS, not the mock flag,
-  // so it is bound in BOTH modes (RBT-023).
-  const tokenStorage: TokenStorage = createTokenStorage();
+  // Native tokens always use SecureStore. Web real-mode tokens use localStorage
+  // per the approved RBT-132 decision; mock mode remains in-memory.
+  const tokenStorage: TokenStorage = createTokenStorage(Platform.OS, !useMocks);
+  const buyerEmailStorage = createBuyerEmailStorage(Platform.OS, !useMocks);
   // Queue membership persistence is also a platform primitive (native secure
   // store vs web in-memory, driven by Platform.OS) → bound in BOTH modes (RBT-041).
-  const queueMembership: QueueMembershipStorage =
-    !useMocks && Platform.OS === "web"
-      ? new WebQueueMembership()
-      : createQueueMembershipStorage();
+  const queueMembership = createQueueMembershipAdapter(useMocks);
   // Idempotency keys are a client-side primitive over an in-memory store →
   // bound in BOTH modes (RBT-012/054).
-  const idempotencyKeys = new IdempotencyKeys(
-    useMocks
-      ? new InMemoryIdempotencyStore()
-      : new DurableIdempotencyStore(Platform.OS),
-  );
+  const idempotencyKeys = createIdempotencyKeys(useMocks);
 
   if (useMocks) {
     const mockBooking = new MockBookingRepository();
@@ -203,6 +312,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
       clock,
       serverClock,
       tokenStorage,
+      buyerEmailStorage,
       queueMembership,
       idempotencyKeys,
       httpClient: new MockHttpClient(),
@@ -219,9 +329,10 @@ export function createContainer(options: ContainerOptions = {}): Container {
             : undefined;
         },
       ),
-      notification: new MockNotificationAdapter(),
+      notification: notificationAdapter,
       pushSubscription: { register: async () => {}, remove: async () => {} },
       fileShare: fileShareAdapter,
+      appUpdate: new ExpoAppUpdateAdapter(),
     };
   }
 
@@ -234,14 +345,8 @@ export function createContainer(options: ContainerOptions = {}): Container {
         "(or set EXPO_PUBLIC_USE_MOCKS=true for mock wiring).",
     );
   }
-  const visitorTokenStorage =
-    Platform.OS === "web"
-      ? new InMemoryTokenStorage()
-      : new SecureStoreTokenStorage("rusuh.visitor.token");
-  const refreshTokenStorage =
-    Platform.OS === "web"
-      ? new InMemoryTokenStorage()
-      : new SecureStoreTokenStorage("rusuh.auth.refresh");
+  const visitorTokenStorage = createVisitorTokenStorage();
+  const refreshTokenStorage = createRefreshTokenStorage(useMocks);
   const transport: HttpClient = new FetchHttpClient({
     baseUrl,
     getHeaders: async () => {
@@ -249,12 +354,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
         tokenStorage.load(),
         visitorTokenStorage.load(),
       ]);
-      return {
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        ...(Platform.OS !== "web" && visitorToken
-          ? { "X-Visitor-Token": visitorToken }
-          : {}),
-      };
+      return createApiHeaders(Platform.OS, accessToken, visitorToken);
     },
   });
   const httpClient: HttpClient = new RefreshingHttpClient(
@@ -266,6 +366,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
     clock,
     serverClock,
     tokenStorage,
+    buyerEmailStorage,
     queueMembership,
     idempotencyKeys,
     httpClient,
@@ -273,16 +374,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
     queueRepository: new HttpQueueRepository(httpClient, visitorTokenStorage),
     bookingRepository: new HttpBookingRepository(
       httpClient,
-      Platform.OS === "web" && typeof globalThis.EventSource !== "undefined"
-        ? (sessionId, onChange) => {
-            const stream = new EventSource(
-              `${baseUrl.replace(/\/+$/, "")}/booking-sessions/${encodeURIComponent(sessionId)}/stream`,
-              { withCredentials: true },
-            );
-            stream.addEventListener("availability", onChange);
-            return () => stream.close();
-          }
-        : undefined,
+      createBookingAvailabilityStream(baseUrl),
     ),
     paymentRepository: new HttpPaymentRepository(httpClient),
     userRepository: new HttpUserRepository(
@@ -298,5 +390,6 @@ export function createContainer(options: ContainerOptions = {}): Container {
     notification: notificationAdapter,
     pushSubscription: new HttpPushSubscriptionAdapter(httpClient),
     fileShare: fileShareAdapter,
+    appUpdate: new ExpoAppUpdateAdapter(),
   };
 }

@@ -1,14 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
-import { designDuration } from "@presentation/theme/event-design-tokens";
+import { designDuration, neutral } from "@presentation/theme";
 import { nativeDriverSupported } from "@presentation/utils/style";
 
 import { lineupStyles } from "../style";
@@ -30,7 +24,7 @@ export function LineupCardNative({
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const avatarUri =
     avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=000&color=fff&bold=true&size=160&format=png`;
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${neutral.ink.slice(1)}&color=${neutral.paper.slice(1)}&bold=true&size=160&format=png`;
 
   useEffect(() => {
     const delay = 1100 + index * 100;
@@ -61,7 +55,7 @@ export function LineupCardNative({
         onPressOut={() => setIsPressed(false)}
       >
         <View style={lineupStyles.avatarContainer}>
-          <Image
+          <CachedImage
             source={{ uri: avatarUri }}
             style={lineupStyles.avatar}
             resizeMode="cover"

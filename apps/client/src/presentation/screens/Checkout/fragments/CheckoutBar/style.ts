@@ -3,6 +3,7 @@ import {
   designColors,
   designBorders,
   plusJakartaSansFonts,
+  withAlpha,
 } from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
@@ -22,7 +23,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   errorText: {
-    color: "#ff4444",
+    color: designColors.danger,
     fontSize: 12,
     fontFamily: plusJakartaSansFonts.medium,
     textAlign: "center",
@@ -35,7 +36,7 @@ export const styles = StyleSheet.create({
   },
   mobileWebContent: { gap: 12 },
   totalLabel: {
-    color: "rgba(255,255,255,0.5)",
+    color: withAlpha(designColors.ground, 0.5),
     fontSize: 10,
     fontFamily: plusJakartaSansFonts.bold,
     textTransform: "uppercase",
@@ -55,8 +56,8 @@ export const styles = StyleSheet.create({
   mobileWebTotalValue: { color: designColors.ink, fontSize: 16 },
   payButton: {
     borderWidth: designBorders.standard,
-    borderColor: designColors.danger,
-    backgroundColor: designColors.danger,
+    borderColor: designColors.accent,
+    backgroundColor: designColors.accent,
     paddingVertical: 16,
     paddingHorizontal: 32,
   },
@@ -64,8 +65,8 @@ export const styles = StyleSheet.create({
     minHeight: 48,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: designColors.danger,
-    borderColor: designColors.danger,
+    backgroundColor: designColors.accent,
+    borderColor: designColors.accent,
   },
   payButtonNative: {
     minWidth: 160,
@@ -75,8 +76,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   payButtonPressed: {
-    backgroundColor: designColors.danger,
-    borderColor: designColors.danger,
+    backgroundColor: designColors.accentDeep,
+    borderColor: designColors.ember,
   },
   payButtonDisabled: {
     opacity: 0.5,

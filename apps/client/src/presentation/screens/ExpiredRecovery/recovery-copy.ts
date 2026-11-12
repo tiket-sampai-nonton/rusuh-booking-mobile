@@ -9,9 +9,10 @@ export interface ExpiryCopy {
 
 export const EXPIRY_COPY: Readonly<Record<ExpiryReason, ExpiryCopy>> = {
   payment: {
-    title: "Pembayaran Timeout",
-    body: "Batas waktu pembayaran sudah lewat. Silakan coba lagi.",
-    infoText: "Selesaikan pembayaran sebelum batas waktu berakhir.",
+    title: "Pembayaran gagal",
+    body: "Pembayaranmu tidak berhasil. Kamu bisa coba lagi jika tiket masih tersedia.",
+    infoText:
+      "Status pembayaran akan mengikuti konfirmasi dari penyedia pembayaran.",
     infoList: [
       "Tidak ada biaya yang dikenakan",
       "Tiket dikembalikan ke inventori",
@@ -19,8 +20,8 @@ export const EXPIRY_COPY: Readonly<Record<ExpiryReason, ExpiryCopy>> = {
     ],
   },
   hold: {
-    title: "Pemesanan Kedaluwarsa",
-    body: "Batas waktu pemesanan telah berakhir. Tiket sudah dilepas.",
+    title: "Waktu pemesanan habis",
+    body: "Waktu untuk menyelesaikan pemesanan sudah habis. Silakan pilih tiket lagi.",
     infoText:
       "Sesi pemesanan dibatasi untuk memastikan akses yang adil bagi semua pengguna.",
     infoList: [
@@ -30,9 +31,9 @@ export const EXPIRY_COPY: Readonly<Record<ExpiryReason, ExpiryCopy>> = {
     ],
   },
   queue: {
-    title: "Sesi Antrean Berakhir",
-    body: "Kamu meninggalkan antrean atau sesi terganggu.",
-    infoText: "Meninggalkan halaman antrean akan melepaskan posisi kamu.",
+    title: "Sesi antrean berakhir",
+    body: "Sesi antreanmu sudah berakhir. Kamu bisa masuk antrean lagi dari halaman event.",
+    infoText: "Jika kamu keluar dari antrean, posisimu tidak bisa dipulihkan.",
     infoList: [
       "Posisi kamu diberikan ke orang berikutnya",
       "Tidak ada tiket yang dipesan",
@@ -40,9 +41,10 @@ export const EXPIRY_COPY: Readonly<Record<ExpiryReason, ExpiryCopy>> = {
     ],
   },
   turn: {
-    title: "Giliran Terlewat",
-    body: "Giliran kamu tiba tapi kamu tidak melanjutkan tepat waktu.",
-    infoText: "Saat giliran tiba, lanjutkan sebelum kesempatan berakhir.",
+    title: "Giliranmu sudah lewat",
+    body: "Maaf, waktunya sudah lewat. Kamu bisa kembali ke antrean dari halaman event.",
+    infoText:
+      "Saat mendapat giliran, lanjutkan sebelum waktu yang diberikan habis.",
     infoList: [
       "Giliran kamu dilewati",
       "Posisi diberikan ke orang berikutnya dalam antrean",

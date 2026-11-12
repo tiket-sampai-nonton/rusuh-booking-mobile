@@ -1,12 +1,6 @@
 import { useState } from "react";
-import {
-  Image,
-  Platform,
-  Pressable,
-  Text,
-  View,
-  type ImageStyle,
-} from "react-native";
+import { Platform, Pressable, Text, View, type ImageStyle } from "react-native";
+import { CachedImage } from "@presentation/components/design-system/CachedImage";
 
 import { galleryStyles } from "../style";
 import {
@@ -17,6 +11,7 @@ import {
 
 interface GalleryItemProps {
   readonly uri: string;
+  readonly fallbackUri?: string;
   readonly index: number;
   readonly columns: number;
   readonly onPress: () => void;
@@ -24,6 +19,7 @@ interface GalleryItemProps {
 
 export function GalleryItem({
   uri,
+  fallbackUri,
   index,
   columns,
   onPress,
@@ -42,8 +38,9 @@ export function GalleryItem({
       accessibilityRole="button"
       accessibilityLabel={`Lihat gambar ${index + 1}`}
     >
-      <Image
+      <CachedImage
         source={{ uri }}
+        fallbackSource={fallbackUri ? { uri: fallbackUri } : undefined}
         style={[
           galleryStyles.image,
           Platform.OS === "web" &&

@@ -3,19 +3,17 @@
  *
  * MASTER-SPEC §2.4:
  * OVERLAY:
- * - background: rgba(0,0,0,0.8)
+ * - background: shared overlay token with alpha
  * - backdropFilter: blur(4px)
  *
  * MODAL:
- * - background: #fff
- * - border: 2px solid #000
+ * - background and border use the shared ground and ink tokens
  * - padding: 48px
  * - maxWidth: 400
  *
  * ENTRANCE: opacity 0→1, translateY 20→0, scale 0.95→1, 0.4s
  */
-import { useEffect } from "react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import {
   Modal as NativeModal,
   Platform,
@@ -32,8 +30,9 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { designEasing } from "@presentation/theme";
-import { styles } from "./style";
+import { NativeStatusBarBackdrop } from "@presentation/components/NativeStatusBarBackdrop";
 import {
+  styles,
   styleForModalPressable0,
   styleForModalPressable1,
   styleForModalAnimatedView2,
@@ -97,8 +96,9 @@ export function Modal({
       transparent
       animationType="fade"
       onRequestClose={onClose}
-      statusBarTranslucent
+      statusBarTranslucent={false}
     >
+      <NativeStatusBarBackdrop />
       {/* Backdrop */}
       <Pressable
         testID={testID ? `${testID}-backdrop` : "v2-modal-backdrop"}

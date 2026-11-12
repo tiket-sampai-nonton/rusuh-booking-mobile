@@ -1,7 +1,4 @@
-/**
- * RBT-072 — useNotifications: registers on mount + routes a notification tap to
- * its deep link. routeForTap is the pure tap→route resolver.
- */
+/** RBT-072 — notification taps route through the framework-free port. */
 import { renderHook, waitFor } from "@testing-library/react-native";
 import React from "react";
 
@@ -17,16 +14,8 @@ jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const Notifications = require("expo-notifications") as {
-  addNotificationResponseReceivedListener: jest.Mock;
-  getPermissionsAsync: jest.Mock;
-  requestPermissionsAsync: jest.Mock;
-  getExpoPushTokenAsync: jest.Mock;
-};
-
 describe("routeForTap (RBT-072, pure)", () => {
-  it("routes to the deep link, else null", () => {
+  it("routes only supported in-app deep links", () => {
     expect(routeForTap({ deepLink: "/checkout/s-1" })).toBe("/checkout/s-1");
     expect(routeForTap({ deepLink: "https://x" })).toBeNull();
     expect(routeForTap(undefined)).toBeNull();
@@ -34,91 +23,65 @@ describe("routeForTap (RBT-072, pure)", () => {
 });
 
 describe("useNotifications (RBT-072)", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    Notifications.getPermissionsAsync.mockResolvedValue({ granted: true });
-    Notifications.getExpoPushTokenAsync.mockResolvedValue({
-      data: "ExpoPushToken[xyz]",
-    });
-  });
+  beforeEach(() => jest.clearAllMocks());
 
-  function wrapper({ children }: { children: React.ReactNode }) {
-    return (
-      <ServiceProvider container={createContainer({ useMocks: true })}>
-        {children}
-      </ServiceProvider>
+  it("registers on mount and routes a response through NotificationPort", async () => {
+    const container = createContainer({ useMocks: true });
+    let handler:
+      | ((data: Readonly<Record<string, unknown>> | undefined) => void)
+      | undefined;
+    const subscribe = jest
+      .spyOn(container.notification, "subscribeToResponses")
+      .mockImplementation((onResponse) => {
+        handler = onResponse;
+        return jest.fn();
+      });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <ServiceProvider container={container}>{children}</ServiceProvider>
     );
-  }
 
-  it("registers a tap listener on mount and routes the tap's deep link", async () => {
-    let handler: ((r: unknown) => void) | undefined;
-    Notifications.addNotificationResponseReceivedListener.mockImplementation(
-      (h: (r: unknown) => void) => {
-        handler = h;
-        return { remove: jest.fn() };
-      },
-    );
     renderHook(() => useNotifications(), { wrapper });
-    await waitFor(() =>
-      expect(
-        Notifications.addNotificationResponseReceivedListener,
-      ).toHaveBeenCalled(),
-    );
-    // simulate a tap on a payment-success notification
-    handler?.({
-      notification: {
-        request: {
-          content: {
-            data: { deepLink: "/success/bk-1", kind: "payment_success" },
-          },
-        },
-      },
-    });
+    await waitFor(() => expect(subscribe).toHaveBeenCalledTimes(1));
+    handler?.({ deepLink: "/success/bk-1", kind: "payment_success" });
     expect(mockRouter.push).toHaveBeenCalledWith("/success/bk-1");
   });
 
-  it("is a no-op on web (web push is RBT-073)", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const RN = require("react-native") as typeof import("react-native");
-    const orig = RN.Platform.OS;
-    Object.defineProperty(RN.Platform, "OS", {
-      value: "web",
-      configurable: true,
-    });
+  it("still listens for notification taps when optional push registration fails", async () => {
     const container = createContainer({ useMocks: true });
-    const register = jest.spyOn(
+    const register = jest
+      .spyOn(container.notification, "registerForRemotePush")
+      .mockRejectedValue(new Error("Remote notifications unavailable"));
+    const subscribe = jest.spyOn(
       container.notification,
-      "registerForRemotePush",
+      "subscribeToResponses",
     );
-    const webWrapper = ({ children }: { children: React.ReactNode }) => (
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
       <ServiceProvider container={container}>{children}</ServiceProvider>
     );
-    renderHook(() => useNotifications(), { wrapper: webWrapper });
+
+    renderHook(() => useNotifications(), { wrapper });
     await waitFor(() => expect(register).toHaveBeenCalled());
-    expect(
-      Notifications.addNotificationResponseReceivedListener,
-    ).not.toHaveBeenCalled();
-    Object.defineProperty(RN.Platform, "OS", {
-      value: orig,
-      configurable: true,
-    });
+    expect(subscribe).toHaveBeenCalledTimes(1);
   });
 
-  it("a tap with no deep link does not navigate", async () => {
-    let handler: ((r: unknown) => void) | undefined;
-    Notifications.addNotificationResponseReceivedListener.mockImplementation(
-      (h: (r: unknown) => void) => {
-        handler = h;
-        return { remove: jest.fn() };
-      },
+  it("ignores taps without a valid deep link", async () => {
+    const container = createContainer({ useMocks: true });
+    let handler:
+      | ((data: Readonly<Record<string, unknown>> | undefined) => void)
+      | undefined;
+    jest
+      .spyOn(container.notification, "subscribeToResponses")
+      .mockImplementation((onResponse) => {
+        handler = onResponse;
+        return jest.fn();
+      });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <ServiceProvider container={container}>{children}</ServiceProvider>
     );
+
     renderHook(() => useNotifications(), { wrapper });
-    await waitFor(() =>
-      expect(
-        Notifications.addNotificationResponseReceivedListener,
-      ).toHaveBeenCalled(),
-    );
-    handler?.({ notification: { request: { content: { data: {} } } } });
+    await waitFor(() => expect(handler).toBeDefined());
+    handler?.({});
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,8 @@
 import { Platform } from "react-native";
 import {
   createContainer,
+  createApiHeaders,
+  createBuyerEmailStorage,
   createQueueMembershipStorage,
   createTokenStorage,
   readUseMocksFlag,
@@ -8,6 +10,10 @@ import {
 import { InMemoryTokenStorage } from "@infrastructure/__fixtures__/in-memory-token-storage";
 import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 import { SecureStoreTokenStorage } from "@infrastructure/auth/secure-store-token-storage";
+import { WebLocalStorageTokenStorage } from "@infrastructure/auth/web-local-storage-token-storage";
+import { InMemoryBuyerEmailStorage } from "@infrastructure/__fixtures__/in-memory-buyer-email-storage";
+import { SecureStoreBuyerEmailStorage } from "@infrastructure/auth/secure-store-buyer-email-storage";
+import { WebLocalStorageBuyerEmailStorage } from "@infrastructure/auth/web-local-storage-buyer-email-storage";
 import { SecureStoreQueueMembership } from "@infrastructure/queue/secure-store-queue-membership";
 import { MockBookingRepository } from "@infrastructure/__fixtures__/mock-booking.repository";
 import { MockEventRepository } from "@infrastructure/__fixtures__/mock-event.repository";
@@ -15,6 +21,7 @@ import { MockQueueRepository } from "@infrastructure/__fixtures__/mock-queue.rep
 import { MockPaymentRepository } from "@infrastructure/__fixtures__/mock-payment.repository";
 import { MockUserRepository } from "@infrastructure/__fixtures__/mock-user.repository";
 import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notification.adapter";
+import { ExpoNotificationAdapter } from "@infrastructure/notifications/expo-notification.adapter";
 import { MockTicketHistoryRepository } from "@infrastructure/__fixtures__/mock-ticket-history.repository";
 import { ExpoFileShareAdapter } from "@infrastructure/files/expo-file-share.adapter";
 import { WebFileShareAdapter } from "@infrastructure/files/web-file-share.adapter";
@@ -37,7 +44,7 @@ describe("providers/container — readUseMocksFlag", () => {
     expect(readUseMocksFlag({ EXPO_PUBLIC_USE_MOCKS: "1" })).toBe(true);
   });
 
-  it("is true when unset (fixtures are the dev default until RBT-010)", () => {
+  it("uses fixtures when unset", () => {
     expect(readUseMocksFlag({})).toBe(true);
   });
 
@@ -61,6 +68,24 @@ describe("providers/container — readUseMocksFlag", () => {
   });
 });
 
+describe("providers/container — API identity headers", () => {
+  it("identifies native requests and attaches the stored visitor token", () => {
+    expect(
+      createApiHeaders("android", "access-token", "visitor-token"),
+    ).toEqual({
+      Authorization: "Bearer access-token",
+      "X-Client-Type": "mobile",
+      "X-Visitor-Token": "visitor-token",
+    });
+  });
+
+  it("uses the browser cookie for web visitor identity", () => {
+    expect(createApiHeaders("web", "access-token", "visitor-token")).toEqual({
+      Authorization: "Bearer access-token",
+    });
+  });
+});
+
 describe("providers/container — createContainer (mock mode)", () => {
   const c = createContainer({ useMocks: true });
 
@@ -70,7 +95,9 @@ describe("providers/container — createContainer (mock mode)", () => {
     expect(c.bookingRepository).toBeInstanceOf(MockBookingRepository);
     expect(c.paymentRepository).toBeInstanceOf(MockPaymentRepository);
     expect(c.userRepository).toBeInstanceOf(MockUserRepository);
-    expect(c.notification).toBeInstanceOf(MockNotificationAdapter);
+    expect(c.notification).toBeInstanceOf(
+      Platform.OS === "web" ? MockNotificationAdapter : ExpoNotificationAdapter,
+    );
     expect(c.fileShare).toBeInstanceOf(
       Platform.OS === "web" ? WebFileShareAdapter : ExpoFileShareAdapter,
     );
@@ -132,6 +159,12 @@ describe("providers/container — createTokenStorage (RBT-023)", () => {
     expect(createTokenStorage("web")).toBeInstanceOf(InMemoryTokenStorage);
   });
 
+  it("binds localStorage for real web auth sessions", () => {
+    expect(createTokenStorage("web", true)).toBeInstanceOf(
+      WebLocalStorageTokenStorage,
+    );
+  });
+
   it("binds the secure-store adapter on iOS", () => {
     expect(createTokenStorage("ios")).toBeInstanceOf(SecureStoreTokenStorage);
   });
@@ -139,6 +172,26 @@ describe("providers/container — createTokenStorage (RBT-023)", () => {
   it("binds the secure-store adapter on Android", () => {
     expect(createTokenStorage("android")).toBeInstanceOf(
       SecureStoreTokenStorage,
+    );
+  });
+});
+
+describe("providers/container — createBuyerEmailStorage", () => {
+  it("uses in-memory storage for mock web", () => {
+    expect(createBuyerEmailStorage("web")).toBeInstanceOf(
+      InMemoryBuyerEmailStorage,
+    );
+  });
+
+  it("uses localStorage for real web", () => {
+    expect(createBuyerEmailStorage("web", true)).toBeInstanceOf(
+      WebLocalStorageBuyerEmailStorage,
+    );
+  });
+
+  it.each(["ios", "android"] as const)("uses SecureStore on %s", (platform) => {
+    expect(createBuyerEmailStorage(platform)).toBeInstanceOf(
+      SecureStoreBuyerEmailStorage,
     );
   });
 });
@@ -167,7 +220,7 @@ describe("providers/container — createContainer (real mode, RBT-010 wired)", (
   it("binds HTTP repositories when a base URL is configured", () => {
     const c = createContainer({
       useMocks: false,
-      baseUrl: "https://api.test/v1",
+      baseUrl: "https://api.test/api/v1",
     });
     expect(c.eventRepository).toBeInstanceOf(HttpEventRepository);
     expect(c.queueRepository).toBeInstanceOf(HttpQueueRepository);

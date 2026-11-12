@@ -42,7 +42,7 @@ export class MockPaymentRepository implements PaymentRepository {
     return {
       bookingId,
       methods: MOCK_METHODS,
-      amountMinor: 45000000,
+      amountMinor: 450000,
       paymentExpiresAt: new Date(now + 600_000).toISOString(),
       serverTime: new Date(now).toISOString(),
       currentAttempt: this.attemptByBooking.get(bookingId),
@@ -68,7 +68,7 @@ export class MockPaymentRepository implements PaymentRepository {
       paymentExpiresAt: new Date(Date.now() + 600_000).toISOString(),
       serverTime: new Date().toISOString(),
       successReturnUrl: `/payment-result/${bookingId}`,
-      failedReturnUrl: `/expired/${bookingId}?reason=payment&bookingId=${bookingId}`,
+      failedReturnUrl: `/failed/${bookingId}?reason=payment&bookingId=${bookingId}`,
     };
     this.attemptsByKey.set(idempotencyKey, attempt);
     this.attemptsById.set(attempt.attemptId, attempt);
@@ -145,7 +145,7 @@ export class MockPaymentRepository implements PaymentRepository {
     this.liveTokens.add(pageToken);
     return {
       pageToken,
-      pageUrl: `/payment/${bookingId}?rb_pay_token=${pageToken}`,
+      pageUrl: `/pay/${encodeURIComponent(bookingId)}?ppt=${encodeURIComponent(pageToken)}&embedded=1`,
     };
   }
 

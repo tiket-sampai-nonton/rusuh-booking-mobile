@@ -11,25 +11,32 @@ const booking: MyBookingSummary = {
 };
 
 describe("AccountBookingCard", () => {
-  it("shows booking details and exposes the QR action for a paid booking", () => {
+  it("shows booking details and exposes the ticket detail action for a paid booking", () => {
     const onOpenQr = jest.fn();
     render(<AccountBookingCard booking={booking} onOpenQr={onOpenQr} />);
 
     expect(screen.getByText("Stadium Tour Jakarta")).toBeTruthy();
     expect(screen.getByText("RBT-2026-001 · Lunas")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("account-ticket-qr-booking-1"));
+    expect(screen.getByText("Lihat Detail Tiket")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("account-ticket-booking-1"));
     expect(onOpenQr).toHaveBeenCalledWith(booking);
   });
 
-  it("does not expose QR access before payment is complete", () => {
+  it("opens order details before payment is complete without exposing a QR", () => {
+    const onOpenQr = jest.fn();
     render(
       <AccountBookingCard
         booking={{ ...booking, status: "PENDING_PAYMENT" }}
-        onOpenQr={jest.fn()}
+        onOpenQr={onOpenQr}
       />,
     );
 
     expect(screen.getByText(/Menunggu Pembayaran/)).toBeTruthy();
-    expect(screen.queryByTestId("account-ticket-qr-booking-1")).toBeNull();
+    fireEvent.press(screen.getByTestId("account-ticket-booking-1"));
+    expect(onOpenQr).toHaveBeenCalledWith({
+      ...booking,
+      status: "PENDING_PAYMENT",
+    });
+    expect(screen.getByText("Lihat Detail Tiket")).toBeTruthy();
   });
 });

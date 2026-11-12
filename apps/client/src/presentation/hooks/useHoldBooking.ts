@@ -16,8 +16,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { HoldBooking } from "@application/booking/hold-booking.use-case";
-import type { Booking } from "@domain/repositories/booking.repository";
-import type { BookingBuyerInput } from "@domain/repositories/booking.repository";
+import type {
+  Booking,
+  BookingBuyerInput,
+} from "@domain/repositories/booking.repository";
+
 import type { DomainError } from "@domain/errors/domain-error";
 import type { TicketRow } from "@domain/rules/checkout";
 import { useServices } from "@providers/service-context";
@@ -34,6 +37,7 @@ export function useHoldBooking(): {
   hold: (input: HoldInput) => Promise<Booking>;
   isHolding: boolean;
   error: DomainError | null;
+  resetError: () => void;
 } {
   const { bookingRepository, idempotencyKeys } = useServices();
   const setBooking = useSessionStore((s) => s.setBooking);
@@ -50,5 +54,6 @@ export function useHoldBooking(): {
     hold: mutation.mutateAsync,
     isHolding: mutation.isPending,
     error: mutation.error,
+    resetError: mutation.reset,
   };
 }

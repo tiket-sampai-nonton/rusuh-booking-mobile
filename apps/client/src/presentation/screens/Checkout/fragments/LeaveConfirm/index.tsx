@@ -2,7 +2,7 @@
  * RBT-092 —  Brutalist Mono Leave Confirm Modal
  *
  * PROTOTYPE 03-checkout.html .modal EXACT COPY:
- * - Dark overlay (rgba(0,0,0,0.8))
+ * - Token-based overlay color with alpha
  * - 2px solid border, no rounded corners
  * - Uppercase button labels
  * - Black/white color scheme
@@ -10,13 +10,18 @@
 import { Modal, Platform, Pressable, Text, View } from "react-native";
 
 import type { LeaveConfirmProps } from "../../interface";
-import { styles } from "./style";
 import {
+  styles,
   styleForLeaveConfirmPressable0,
   styleForLeaveConfirmPressable1,
 } from "./style";
 
-export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
+export function LeaveConfirm({
+  visible,
+  onStay,
+  onLeave,
+  variant = "checkout",
+}: LeaveConfirmProps & { readonly variant?: "checkout" | "payment" }) {
   return (
     <Modal
       visible={visible}
@@ -42,11 +47,14 @@ export function LeaveConfirm({ visible, onStay, onLeave }: LeaveConfirmProps) {
           testID="checkout-leave-modal"
         >
           <Text style={styles.title} accessibilityRole="header">
-            Tinggalkan halaman?
+            {variant === "payment"
+              ? "Tinggalkan pembayaran?"
+              : "Tinggalkan halaman?"}
           </Text>
           <Text style={styles.body}>
-            Kalau kamu keluar sekarang, sesi pemilihan tiket dilepas dan kamu
-            harus mengulang antrean dari awal. Yakin mau keluar?
+            {variant === "payment"
+              ? "Kamu akan keluar dari proses pembayaran. Status transaksi tetap perlu dikonfirmasi sebelum mencoba lagi. Yakin mau keluar?"
+              : "Kalau kamu keluar sekarang, sesi pemilihan tiket dilepas dan kamu harus mengulang antrean dari awal. Yakin mau keluar?"}
           </Text>
           <View style={styles.actions}>
             <Pressable

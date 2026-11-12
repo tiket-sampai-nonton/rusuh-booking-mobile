@@ -26,25 +26,25 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     salesStartsAt: "2026-11-01T00:00:00.000Z",
     salesEndsAt: "2026-11-30T23:59:59.000Z",
     status: "AVAILABLE",
-    minPriceMinor: 45000000,
+    minPriceMinor: 450000,
     remainingTickets: 120,
     description: {
       longDesc: "Festival musik tahunan terbesar dengan line-up lintas genre.",
       lineup: ["Band A", "Band B", "DJ C"],
       gallery: MOCK_EVENT_GALLERY,
-      terms: "Tiket tidak dapat dikembalikan. Wajib membawa KTP sesuai NIK.",
+      terms: "Wajib membawa KTP sesuai NIK.",
       bannerImage:
         "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80&auto=format&fit=crop",
       // FE-NEED (O2): pricing categories + availability, mocked until the BE
       // typed `priceMinor`/`available` contract lands. Read defensively by the
       // detail screen (parseDescription).
       categories: [
-        { code: "FEST", name: "Festival", priceMinor: 45000000, available: 90 },
-        { code: "VIP", name: "VIP", priceMinor: 120000000, available: 20 },
+        { code: "FEST", name: "Festival", priceMinor: 450000, available: 90 },
+        { code: "VIP", name: "VIP", priceMinor: 1200000, available: 20 },
         {
           code: "CAT1",
           name: "Tribun Cat 1",
-          priceMinor: 65000000,
+          priceMinor: 650000,
           available: 10,
         },
       ],
@@ -59,7 +59,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     salesStartsAt: "2026-11-15T00:00:00.000Z",
     salesEndsAt: "2026-12-19T23:59:59.000Z",
     status: "AVAILABLE",
-    minPriceMinor: 30000000,
+    minPriceMinor: 300000,
     remainingTickets: 8,
     description: {
       longDesc: "Nobar final dengan layar raksasa dan zona komunitas.",
@@ -94,8 +94,8 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       bannerImage:
         "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=1200&q=80&auto=format&fit=crop",
       categories: [
-        { code: "REG", name: "Reguler", priceMinor: 30000000, available: 8 },
-        { code: "VIP", name: "VIP Lounge", priceMinor: 75000000, available: 0 },
+        { code: "REG", name: "Reguler", priceMinor: 300000, available: 8 },
+        { code: "VIP", name: "VIP Lounge", priceMinor: 750000, available: 0 },
       ],
     },
   },
@@ -108,7 +108,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     salesStartsAt: "2026-12-20T00:00:00.000Z",
     salesEndsAt: "2027-01-09T23:59:59.000Z",
     status: "NOT_STARTED", // sales window not open yet
-    minPriceMinor: 20000000,
+    minPriceMinor: 200000,
     remainingTickets: 500,
     description: {
       longDesc: "Malam musik indie dengan 12 penampil.",
@@ -128,7 +128,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     salesStartsAt: "2026-10-01T00:00:00.000Z",
     salesEndsAt: "2026-11-27T23:59:59.000Z",
     status: "SOLD_OUT", // no tickets left
-    minPriceMinor: 75000000,
+    minPriceMinor: 750000,
     remainingTickets: 0,
     description: {
       longDesc: "Konser stadion dengan kapasitas penuh.",
@@ -138,8 +138,8 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
       bannerImage:
         "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80&auto=format&fit=crop",
       categories: [
-        { code: "REG", name: "Reguler", priceMinor: 75000000, available: 0 },
-        { code: "VIP", name: "VIP", priceMinor: 150000000, available: 0 },
+        { code: "REG", name: "Reguler", priceMinor: 750000, available: 0 },
+        { code: "VIP", name: "VIP", priceMinor: 1500000, available: 0 },
       ],
     },
   },
@@ -152,7 +152,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     salesStartsAt: "2025-07-01T00:00:00.000Z",
     salesEndsAt: "2025-08-14T23:59:59.000Z",
     status: "CLOSED", // past event — shows in History
-    minPriceMinor: 25000000,
+    minPriceMinor: 250000,
     remainingTickets: 0,
     description: {
       longDesc: "Acara jazz tahunan (telah berlalu).",
@@ -172,7 +172,7 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
     salesStartsAt: "2027-01-01T00:00:00.000Z",
     salesEndsAt: "2027-02-13T23:59:59.000Z",
     status: "AVAILABLE",
-    minPriceMinor: 35000000,
+    minPriceMinor: 350000,
     remainingTickets: 300,
     description: {
       longDesc: "Pesta musik elektronik dengan panggung 360°.",
@@ -185,13 +185,13 @@ export const EVENT_FIXTURES: readonly EventDetail[] = [
         {
           code: "GA",
           name: "General Admission",
-          priceMinor: 35000000,
+          priceMinor: 350000,
           available: 300,
         },
         {
           code: "FRONT",
           name: "Front of Stage",
-          priceMinor: 90000000,
+          priceMinor: 900000,
           available: 40,
         },
       ],

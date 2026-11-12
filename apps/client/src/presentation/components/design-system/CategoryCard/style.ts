@@ -1,9 +1,11 @@
-import { StyleSheet } from "react-native";
-import { designColors, designSpacingSemantic } from "@presentation/theme";
+import { StyleSheet, type ImageStyle } from "react-native";
+import {
+  designColors,
+  designSpacingSemantic,
+  plusJakartaSansFonts,
+} from "@presentation/theme";
 
-import type { ImageStyle } from "react-native";
 import type { DynamicStyle } from "@presentation/utils/style";
-import { plusJakartaSansFonts } from "@presentation/theme";
 
 export const componentStyles = StyleSheet.create({
   container: {
@@ -48,7 +50,7 @@ export function styleForCategoryCardAnimatedView1(): DynamicStyle {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "#808080",
+    backgroundColor: designColors.inkMuted,
   } as DynamicStyle;
 }
 

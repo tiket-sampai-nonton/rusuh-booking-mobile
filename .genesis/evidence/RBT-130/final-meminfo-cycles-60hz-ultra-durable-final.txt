@@ -1,0 +1,394 @@
+===== CYCLE 1 =====
+Applications Memory Usage (in Kilobytes):
+Uptime: 1278231945 Realtime: 2337038548
+
+** MEMINFO in pid 6403 [com.tiketsampainonton.rusuhbooking.rbt130] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   250651   250640        0       21   252760   271276   253307    13269
+  Dalvik Heap    24065    21516     2472       13    27948    58685    14671    44014
+ Dalvik Other    18870     7236        8        0    30868                           
+        Stack     3648     3648        0        0     3656                           
+       Ashmem       13        0        0        0      764                           
+      Gfx dev     3764     3764        0        0     3768                           
+    Other dev       24        0       24        0      488                           
+     .so mmap     2082      216      392        2    43592                           
+    .jar mmap     2370        0      600        0    51736                           
+    .apk mmap    41927    37424      152        0    58096                           
+    .ttf mmap      787      580       44        0     5592                           
+    .dex mmap    35808    35780        0        0    36712                           
+    .oat mmap       16        0        0        0     1928                           
+    .art mmap     8096     7840      100        7    21868                           
+   Other mmap      862      100      576        0     5460                           
+   EGL mtrack    30828    30828        0        0    30828                           
+    GL mtrack     2392     2392        0        0     2392                           
+      Unknown    34044    33752      284        1    34984                           
+        TOTAL   460291   435716     4652       44   613440   329961   267978    57283
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:    29456                          49816
+         Native Heap:   250640                         252760
+                Code:    75448                         221164
+               Stack:     3648                           3656
+            Graphics:    36984                          36988
+       Private Other:    44192
+              System:    19923
+             Unknown:                                   49056
+ 
+           TOTAL PSS:   460291            TOTAL RSS:   613440       TOTAL SWAP PSS:       44
+ 
+ Objects
+               Views:      748         ViewRootImpl:        1
+         AppContexts:        5           Activities:        1
+              Assets:       38        AssetManagers:        0
+       Local Binders:       29        Proxy Binders:       65
+       Parcel memory:       11         Parcel count:       44
+    Death Recipients:        1             WebViews:        0
+             Bitmaps:       81              Threads:       70
+ 
+ Native Allocations
+                         Count                       Total(kB)
+                        ------                         ------
+   Bitmap (malloced):       81                          45304
+    Other (malloced):     4182                            398
+ Other (nonmalloced):       96                             68
+ 
+ SQL
+         MEMORY_USED:      593
+  PAGECACHE_OVERFLOW:      201          MALLOC_SIZE:       47
+ 
+ DATABASES
+      pgsz     dbsz   Lookaside(b) cache hits cache misses cache size  Dbname
+PER CONNECTION STATS
+         4     1844             48    11    44     5  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/chucker.db
+         4        8                    0     0     0    (attached) temp
+         4       24             23     0    25     2  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database
+         4        8                    0     0     0    (attached) temp
+         4       24             31     1    17     2  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database (2)
+         4      100            123     8    46    10  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb
+         4        8                    0     0     0    (attached) temp
+         4      100             32     4    18     3  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb (2)
+POOL STATS
+     cache hits  cache misses    cache size  Dbname
+             13            64            77  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/chucker.db
+              3            63            66  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database
+             14            86           100  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb
+
+===== CYCLE 2 =====
+Applications Memory Usage (in Kilobytes):
+Uptime: 1278238636 Realtime: 2337045239
+
+** MEMINFO in pid 6403 [com.tiketsampainonton.rusuhbooking.rbt130] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   260939   260928        0       21   263048   281812   254937    21666
+  Dalvik Heap    22965    20416     2472       13    26848    59133    14783    44350
+ Dalvik Other    18898     7228        8        0    30932                           
+        Stack     3660     3660        0        0     3668                           
+       Ashmem       13        0        0        0      764                           
+      Gfx dev     3956     3956        0        0     3960                           
+    Other dev       24        0       24        0      488                           
+     .so mmap     2082      216      392        2    43592                           
+    .jar mmap     2370        0      600        0    51736                           
+    .apk mmap    41927    37424      152        0    58096                           
+    .ttf mmap      787      580       44        0     5592                           
+    .dex mmap    35808    35780        0        0    36712                           
+    .oat mmap       16        0        0        0     1928                           
+    .art mmap     8096     7840      100        7    21868                           
+   Other mmap      638      100      352        0     5236                           
+   EGL mtrack    30828    30828        0        0    30828                           
+    GL mtrack     2748     2748        0        0     2748                           
+      Unknown    37624    37340      276        1    38564                           
+        TOTAL   473423   449044     4420       44   626608   340945   269720    66016
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:    28356                          48716
+         Native Heap:   260928                         263048
+                Code:    75456                         221244
+               Stack:     3660                           3668
+            Graphics:    37532                          37536
+       Private Other:    47532
+              System:    19959
+             Unknown:                                   52396
+ 
+           TOTAL PSS:   473423            TOTAL RSS:   626608       TOTAL SWAP PSS:       44
+ 
+ Objects
+               Views:      792         ViewRootImpl:        1
+         AppContexts:        5           Activities:        1
+              Assets:       38        AssetManagers:        0
+       Local Binders:       29        Proxy Binders:       63
+       Parcel memory:       11         Parcel count:       44
+    Death Recipients:        1             WebViews:        0
+             Bitmaps:       99              Threads:       70
+ 
+ Native Allocations
+                         Count                       Total(kB)
+                        ------                         ------
+   Bitmap (malloced):      145                          50800
+    Other (malloced):     4494                            428
+ Other (nonmalloced):       95                             67
+ 
+ SQL
+         MEMORY_USED:      593
+  PAGECACHE_OVERFLOW:      201          MALLOC_SIZE:       47
+ 
+ DATABASES
+      pgsz     dbsz   Lookaside(b) cache hits cache misses cache size  Dbname
+PER CONNECTION STATS
+         4     1844             48    11    49     5  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/chucker.db
+         4        8                    0     0     0    (attached) temp
+         4       24             23     0    30     2  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database
+         4        8                    0     0     0    (attached) temp
+         4       24             31     1    20     2  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database (2)
+         4      100            123     8    51    10  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb
+         4        8                    0     0     0    (attached) temp
+         4      100             32     4    21     3  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb (2)
+POOL STATS
+     cache hits  cache misses    cache size  Dbname
+             13            69            82  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/chucker.db
+              3            71            74  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database
+             14            94           108  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb
+
+===== CYCLE 3 =====
+Applications Memory Usage (in Kilobytes):
+Uptime: 1278245343 Realtime: 2337051946
+
+** MEMINFO in pid 6403 [com.tiketsampainonton.rusuhbooking.rbt130] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   257255   257244        0       18   259364   281812   255450    21360
+  Dalvik Heap    19458    16908     2472       13    23340    57549    14387    43162
+ Dalvik Other    18922     7244        8        0    30964                           
+        Stack     3660     3660        0        0     3668                           
+       Ashmem       13        0        0        0      764                           
+      Gfx dev     4080     4080        0        0     4084                           
+    Other dev       24        0       24        0      488                           
+     .so mmap     2083      216      392        2    43592                           
+    .jar mmap     2382        0      600        0    51736                           
+    .apk mmap    41927     1500    36076        0    58096                           
+    .ttf mmap      787      580       44        0     5592                           
+    .dex mmap    35809    35780        0        0    36712                           
+    .oat mmap       17        0        0        0     1928                           
+    .art mmap     8097     7840      100        7    21868                           
+   Other mmap      440      100      152        0     5036                           
+   EGL mtrack    30828    30828        0        0    30828                           
+    GL mtrack     2748     2748        0        0     2748                           
+      Unknown    37624    37340      276        1    38564                           
+        TOTAL   466195   406068    40144       41   619372   339361   269837    64522
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:    24848                          45208
+         Native Heap:   257244                         259364
+                Code:    75456                         221260
+               Stack:     3660                           3668
+            Graphics:    37656                          37660
+       Private Other:    47348
+              System:    19983
+             Unknown:                                   52212
+ 
+           TOTAL PSS:   466195            TOTAL RSS:   619372       TOTAL SWAP PSS:       41
+ 
+ Objects
+               Views:      792         ViewRootImpl:        1
+         AppContexts:        5           Activities:        1
+              Assets:       38        AssetManagers:        0
+       Local Binders:       29        Proxy Binders:       62
+       Parcel memory:       11         Parcel count:       44
+    Death Recipients:        1             WebViews:        0
+             Bitmaps:       99              Threads:       70
+ 
+ Native Allocations
+                         Count                       Total(kB)
+                        ------                         ------
+   Bitmap (malloced):       99                          50473
+    Other (malloced):     4218                            402
+ Other (nonmalloced):       95                             67
+ 
+ SQL
+         MEMORY_USED:      593
+  PAGECACHE_OVERFLOW:      201          MALLOC_SIZE:       47
+ 
+ DATABASES
+      pgsz     dbsz   Lookaside(b) cache hits cache misses cache size  Dbname
+PER CONNECTION STATS
+         4     1844             48    11    54     5  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/chucker.db
+         4        8                    0     0     0    (attached) temp
+         4       24             23     0    35     2  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database
+         4        8                    0     0     0    (attached) temp
+         4       24             31     1    23     2  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database (2)
+         4      100            123     8    56    10  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb
+         4        8                    0     0     0    (attached) temp
+         4      100             32     4    24     3  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb (2)
+POOL STATS
+     cache hits  cache misses    cache size  Dbname
+             13            74            87  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/chucker.db
+              3            79            82  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database
+             14           102           116  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb
+
+===== CYCLE 4 =====
+Applications Memory Usage (in Kilobytes):
+Uptime: 1278252038 Realtime: 2337058641
+
+** MEMINFO in pid 6403 [com.tiketsampainonton.rusuhbooking.rbt130] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   260483   260472        0       19   262592   281812   260060    16795
+  Dalvik Heap    19099    16548     2472       13    22980    57565    14391    43174
+ Dalvik Other    18946     7252        8        0    31004                           
+        Stack     3548     3548        0        0     3556                           
+       Ashmem       14        0        0        0      764                           
+      Gfx dev     4084     4084        0        0     4088                           
+    Other dev       24        0       24        0      488                           
+     .so mmap     2083      216      388        2    43592                           
+    .jar mmap     2390        0      600        0    51736                           
+    .apk mmap    41928     1500    36076        0    58096                           
+    .ttf mmap      788      580       44        0     5592                           
+    .dex mmap    35809    35780        0        0    36712                           
+    .oat mmap       17        0        0        0     1928                           
+    .art mmap     8099     7840      100        7    21868                           
+   Other mmap      441      100      152        0     5036                           
+   EGL mtrack    30828    30828        0        0    30828                           
+    GL mtrack     2748     2748        0        0     2748                           
+      Unknown    40132    39848      276        1    41072                           
+        TOTAL   471503   411344    40140       42   624680   339377   274451    59969
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:    24488                          44848
+         Native Heap:   260472                         262592
+                Code:    75452                         221292
+               Stack:     3548                           3556
+            Graphics:    37660                          37664
+       Private Other:    49864
+              System:    20019
+             Unknown:                                   54728
+ 
+           TOTAL PSS:   471503            TOTAL RSS:   624680       TOTAL SWAP PSS:       42
+ 
+ Objects
+               Views:      792         ViewRootImpl:        1
+         AppContexts:        5           Activities:        1
+              Assets:       38        AssetManagers:        0
+       Local Binders:       29        Proxy Binders:       62
+       Parcel memory:       11         Parcel count:       44
+    Death Recipients:        1             WebViews:        0
+             Bitmaps:       99              Threads:       65
+ 
+ Native Allocations
+                         Count                       Total(kB)
+                        ------                         ------
+   Bitmap (malloced):       99                          50473
+    Other (malloced):     4218                            402
+ Other (nonmalloced):       95                             67
+ 
+ SQL
+         MEMORY_USED:      593
+  PAGECACHE_OVERFLOW:      201          MALLOC_SIZE:       47
+ 
+ DATABASES
+      pgsz     dbsz   Lookaside(b) cache hits cache misses cache size  Dbname
+PER CONNECTION STATS
+         4     1844             48    11    59     5  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/chucker.db
+         4        8                    0     0     0    (attached) temp
+         4       24             23     0    40     2  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database
+         4        8                    0     0     0    (attached) temp
+         4       24             31     1    26     2  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database (2)
+         4      100            123     8    61    10  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb
+         4        8                    0     0     0    (attached) temp
+         4      100             32     4    27     3  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb (2)
+POOL STATS
+     cache hits  cache misses    cache size  Dbname
+             13            79            92  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/chucker.db
+              3            87            90  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database
+             14           110           124  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb
+
+===== CYCLE 5 =====
+Applications Memory Usage (in Kilobytes):
+Uptime: 1278258685 Realtime: 2337065289
+
+** MEMINFO in pid 6403 [com.tiketsampainonton.rusuhbooking.rbt130] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   264307   264296        0       19   266416   283860   249858    29269
+  Dalvik Heap    19059    16508     2472       13    22940    57549    14387    43162
+ Dalvik Other    18982     7208        8        0    31120                           
+        Stack     3576     3576        0        0     3584                           
+       Ashmem       14        0        0        0      764                           
+      Gfx dev     4084     4084        0        0     4088                           
+    Other dev       24        0       24        0      488                           
+     .so mmap     2083      216      388        2    43592                           
+    .jar mmap     2390        0      600        0    51736                           
+    .apk mmap    41928     1500    36076        0    58096                           
+    .ttf mmap      788      580       44        0     5592                           
+    .dex mmap    35809    35780        0        0    36712                           
+    .oat mmap       17        0        0        0     1928                           
+    .art mmap     8099     7840      100        7    21868                           
+   Other mmap      441      100      152        0     5036                           
+   EGL mtrack    30828    30828        0        0    30828                           
+    GL mtrack     2748     2748        0        0     2748                           
+      Unknown    43872    43588      276        1    44812                           
+        TOTAL   479091   418852    40140       42   632348   341409   264245    72431
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:    24448                          44808
+         Native Heap:   264296                         266416
+                Code:    75412                         221412
+               Stack:     3576                           3584
+            Graphics:    37660                          37664
+       Private Other:    53600
+              System:    20099
+             Unknown:                                   58464
+ 
+           TOTAL PSS:   479091            TOTAL RSS:   632348       TOTAL SWAP PSS:       42
+ 
+ Objects
+               Views:      792         ViewRootImpl:        1
+         AppContexts:        5           Activities:        1
+              Assets:       38        AssetManagers:        0
+       Local Binders:       29        Proxy Binders:       62
+       Parcel memory:       11         Parcel count:       46
+    Death Recipients:        1             WebViews:        0
+             Bitmaps:       99              Threads:       66
+ 
+ Native Allocations
+                         Count                       Total(kB)
+                        ------                         ------
+   Bitmap (malloced):      146                          50815
+    Other (malloced):     4273                            407
+ Other (nonmalloced):       95                             67
+ 
+ SQL
+         MEMORY_USED:      593
+  PAGECACHE_OVERFLOW:      201          MALLOC_SIZE:       47
+ 
+ DATABASES
+      pgsz     dbsz   Lookaside(b) cache hits cache misses cache size  Dbname
+PER CONNECTION STATS
+         4     1844             48    11    64     5  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/chucker.db
+         4        8                    0     0     0    (attached) temp
+         4       24             23     0    45     2  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database
+         4        8                    0     0     0    (attached) temp
+         4       24             31     1    29     2  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database (2)
+         4      100            123     8    66    10  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb
+         4        8                    0     0     0    (attached) temp
+         4      100             32     4    30     3  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb (2)
+POOL STATS
+     cache hits  cache misses    cache size  Dbname
+             13            84            97  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/chucker.db
+              3            95            98  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/databases/notifee_core_database
+             14           118           132  /data/user/0/com.tiketsampainonton.rusuhbooking.rbt130/no_backup/androidx.work.workdb

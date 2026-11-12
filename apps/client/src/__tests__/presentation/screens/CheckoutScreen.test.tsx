@@ -13,8 +13,10 @@ import { renderWithProviders } from "@shared/test-fixtures/render-with-providers
 import { BOOKING_CATEGORY_FIXTURE } from "@shared/test-fixtures/booking-categories.fixture";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockNavigation = { addListener: jest.fn(() => jest.fn()) };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
+  useNavigation: () => mockNavigation,
 }));
 jest.mock("@presentation/hooks/useServerCountdown", () => {
   const { useEffect, useRef } = jest.requireActual("react");
@@ -235,17 +237,17 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     });
   });
 
-  it("selecting a category + filling valid buyer/attendee enables Lanjut Bayar", async () => {
+  it("keeps Lanjut Bayar actionable while buyer/attendee fields are incomplete", async () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
     await waitFor(() =>
       expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
     );
-    // Submit starts disabled (empty buyer/attendee).
+    // Submit stays actionable so an attempt can reveal inline validation errors.
     expect(
       screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
-    ).toBe(true);
+    ).toBe(false);
 
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
     fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
@@ -380,8 +382,10 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
-    // : CheckoutHero shows "Pilih Tiketmu" (uppercase T)
-    await waitFor(() => expect(screen.getByText("Pilih Tiketmu")).toBeTruthy());
+    // The restored session's event identity is now shown in the checkout hero.
+    await waitFor(() =>
+      expect(screen.getByText("Rusuh Fest 2026")).toBeTruthy(),
+    );
   });
 
   it("offers recovery when no session is restored", async () => {
@@ -438,7 +442,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     });
     await waitFor(() =>
       expect(mockRouter.replace).toHaveBeenCalledWith(
-        "/expired/sess-expired?reason=hold",
+        "/failed/sess-expired?reason=hold",
       ),
     );
   });
@@ -450,11 +454,13 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     await waitFor(() => expect(screen.getByTestId("buyer-nik")).toBeTruthy());
     fireEvent.changeText(screen.getByTestId("buyer-nik"), "123"); // < 16 digits
     await waitFor(() =>
-      expect(screen.getByText("NIK harus 16 digit.")).toBeTruthy(),
+      expect(
+        screen.getByText("NIK pembeli harus terdiri dari 16 digit."),
+      ).toBeTruthy(),
     );
   });
 
-  it("redirects to /expired when the server countdown elapses", async () => {
+  it("redirects to /failed when the server countdown elapses", async () => {
     const past: BookingSession = {
       ...SESSION,
       expiresAt: "2026-12-01T00:00:00.000Z",
@@ -465,7 +471,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     });
     await waitFor(() =>
       expect(mockRouter.replace).toHaveBeenCalledWith(
-        "/expired/sess-1?reason=hold&eventId=evt-1",
+        "/failed/sess-1?reason=hold&eventId=evt-1",
       ),
     );
   });

@@ -1,0 +1,36 @@
+193:    NotificationRecord(0x084c8a50: pkg=com.tiketsampainonton.rusuhbooking.rbt130 user=UserHandle{0} id=187077583 tag=null importance=3 key=0|com.tiketsampainonton.rusuhbooking.rbt130|187077583|null|10288: Notification(channel=booking-updates shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=AUTO_CANCEL color=0x00000000 vis=PRIVATE))
+194-      uid=10288 userId=0
+195-      opPkg=com.tiketsampainonton.rusuhbooking.rbt130
+196-      icon=Icon(typ=RESOURCE pkg=com.tiketsampainonton.rusuhbooking.rbt130 id=0x7f0f0001)
+197-      flags=AUTO_CANCEL
+198-      originalFlags=AUTO_CANCEL
+199-      pri=0
+200-      key=0|com.tiketsampainonton.rusuhbooking.rbt130|187077583|null|10288
+201-      seen=true
+202-      groupKey=0|com.tiketsampainonton.rusuhbooking.rbt130|187077583|null|10288
+203-      notification=
+204-            fullscreenIntent=null
+205-            contentIntent=PendingIntent{49b7449: PendingIntentRecord{966bc94 com.tiketsampainonton.rusuhbooking.rbt130 startActivity (allowlist: 6702111:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}}
+206-            deleteIntent=PendingIntent{d14f14e: PendingIntentRecord{fe8e7 com.tiketsampainonton.rusuhbooking.rbt130 startService (allowlist: 6702111:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}}
+207-            number=0
+208-            groupAlertBehavior=0
+209-            when=1794355728346/1794355728346
+210-            tickerText=null
+211-            vis=0
+212-            contentView=null
+213-            bigContentView=null
+214-            headsUpContentView=null
+215-            color=0x00000000
+216-            timeout=PT72H
+217-            extras={
+218-                android.title=SpannableString (Kamu sudah keluar dari antrean)
+219-                android.reduced.images=Boolean (true)
+220-                android.chronometerCountDown=Boolean (false)
+221-                android.subText=null
+222-                android.showChronometer=Boolean (false)
+223-                android.text=SpannableString (Tidak apa-apa, kamu bisa pilih event lain atau antre lagi kapan saja.)
+224-                android.progress=Integer (0)
+225-                android.progressMax=Integer (0)
+226-                android.appInfo=ApplicationInfo (ApplicationInfo{3c4b26f com.tiketsampainonton.rusuhbooking.rbt130})
+227-                android.showWhen=Boolean (false)
+228-                android.largeIcon=null

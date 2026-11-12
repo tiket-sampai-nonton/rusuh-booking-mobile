@@ -1,10 +1,65 @@
+const androidVersionCode = Number(process.env.ANDROID_VERSION_CODE || "1");
+const nativeShellBackground = "#0A0A0C";
+const appVersion = require("./package.json").version;
+const buildEnvironment = process.env.EXPO_PUBLIC_ENV || "development";
+const otaRevision = process.env.EXPO_PUBLIC_OTA_REVISION || "0";
+const siteUrl = new URL(
+  process.env.EXPO_PUBLIC_SITE_URL || "https://rusuh-booking.pages.dev",
+);
+const expoProjectId = process.env.EXPO_PROJECT_ID;
+const easChannel = process.env.EAS_CHANNEL;
+if (
+  !Number.isSafeInteger(androidVersionCode) ||
+  androidVersionCode < 1 ||
+  androidVersionCode > 2100000000
+) {
+  throw new Error(
+    "ANDROID_VERSION_CODE must be an integer between 1 and 2100000000.",
+  );
+}
+if (expoProjectId && !["development", "production"].includes(easChannel)) {
+  throw new Error(
+    "EAS_CHANNEL must be development or production when EXPO_PROJECT_ID is set.",
+  );
+}
 const config = {
   name: "Rusuh Booking",
-  slug: "rusuh-booking-mobile",
+  owner: "chelseacry",
+  slug: "rusuh-booking",
   scheme: "rusuhbooking",
-  version: "0.1.0",
+  version: appVersion,
+  // Native directories are generated with Expo Prebuild. Derive the OTA
+  // runtime from the native project so a later JS-only update cannot reach a
+  // binary that predates a native dependency or config-plugin change.
+  runtimeVersion: { policy: "fingerprint" },
+  ...(expoProjectId
+    ? {
+        updates: {
+          url: `https://u.expo.dev/${expoProjectId}`,
+          requestHeaders: { "expo-channel-name": easChannel },
+          // The startup bridge performs a bounded manual check and reload. Keep
+          // Expo's automatic check only for recovery from a failed update.
+          checkAutomatically: "ON_ERROR_RECOVERY",
+        },
+      }
+    : {}),
+  extra: {
+    ...(expoProjectId ? { eas: { projectId: expoProjectId } } : {}),
+    buildInfo: { environment: buildEnvironment, otaRevision },
+  },
   orientation: "portrait",
   userInterfaceStyle: "automatic",
+  androidStatusBar: {
+    backgroundColor: "#FFFFFF",
+    barStyle: "dark-content",
+    translucent: false,
+  },
+  icon: "./assets/app-icon.png",
+  splash: {
+    image: "./assets/brand-mark.png",
+    resizeMode: "contain",
+    backgroundColor: nativeShellBackground,
+  },
   newArchEnabled: true,
   // SDK 53 uses Hermes; validated with an iOS simulator smoke run after fixing
   // the required QueryClient provider wiring.
@@ -12,8 +67,31 @@ const config = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.tiketsampainonton.rusuhbooking",
+    buildNumber: process.env.IOS_BUILD_NUMBER || "1",
+    associatedDomains: [`applinks:${siteUrl.host}`],
   },
-  android: { package: "com.tiketsampainonton.rusuhbooking" },
+  android: {
+    package: "com.tiketsampainonton.rusuhbooking",
+    versionCode: androidVersionCode,
+    intentFilters: [
+      {
+        action: "VIEW",
+        autoVerify: true,
+        data: [
+          {
+            scheme: "https",
+            host: siteUrl.host,
+            pathPrefix: "/events/",
+          },
+        ],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
+    ],
+    adaptiveIcon: {
+      foregroundImage: "./assets/brand-mark.png",
+      backgroundColor: nativeShellBackground,
+    },
+  },
   web: {
     bundler: "metro",
     favicon: "./assets/favicon.png",
@@ -36,6 +114,15 @@ const config = {
     ],
     "expo-asset",
     "expo-font",
+    "expo-updates",
+    [
+      "react-native-fast-image",
+      { maxDiskSize: 536870912, maxMemorySize: 134217728, maxDiskAge: 2592000 },
+    ],
+    "./plugins/with-android-qa-signing.cjs",
+    "./plugins/with-android-qa-bundle.cjs",
+    "./plugins/with-android-chucker.cjs",
+    "./plugins/with-notifee-android-maven.cjs",
     "./plugins/with-ios-fmt-compat.cjs",
   ],
   experiments: { typedRoutes: true },

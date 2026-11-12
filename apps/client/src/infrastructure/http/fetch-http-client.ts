@@ -16,6 +16,10 @@ import type {
   HttpRequest,
   HttpResponse,
 } from "@infrastructure/http/http-client";
+import {
+  trimLeadingSlashes,
+  trimTrailingSlashes,
+} from "@shared/utils/trim-slashes";
 
 export interface FetchHttpClientOptions {
   /** Absolute base URL, e.g. `https://gateway/api/v1`. */
@@ -31,25 +35,25 @@ export class FetchHttpClient implements HttpClient {
   private readonly baseUrl: string;
   private readonly defaultHeaders: Readonly<Record<string, string>>;
   private readonly fetchFn: typeof fetch;
-  private readonly getHeaders?: FetchHttpClientOptions["getHeaders"];
+  private readonly getHeaders: FetchHttpClientOptions["getHeaders"];
 
   constructor(options: FetchHttpClientOptions) {
-    this.baseUrl = options.baseUrl.replace(/\/+$/, "");
+    this.baseUrl = trimTrailingSlashes(options.baseUrl);
     this.defaultHeaders = options.defaultHeaders ?? {};
-    this.fetchFn = options.fetchFn ?? globalThis.fetch;
+    this.fetchFn = options.fetchFn ?? globalThis.fetch.bind(globalThis);
     this.getHeaders = options.getHeaders;
   }
 
   async request<T = unknown>(req: HttpRequest): Promise<HttpResponse<T>> {
     const url = req.url.startsWith("http")
       ? req.url
-      : `${this.baseUrl}/${req.url.replace(/^\/+/, "")}`;
+      : `${this.baseUrl}/${trimLeadingSlashes(req.url)}`;
 
     const headers: Record<string, string> = {
       "content-type": "application/json",
       ...this.defaultHeaders,
       ...(!req.url.startsWith("http") ? await this.getHeaders?.() : {}),
-      ...(req.headers ?? {}),
+      ...req.headers,
     };
 
     const response = await this.fetchFn(url, {

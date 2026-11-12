@@ -382,11 +382,24 @@ export interface components {
     HoldRequest: {
       /** Format: uuid */
       sessionId: string;
+      /** @description Buyer identity must include the NIK. Authenticated clients may prefill it from GET /api/v1/me. */
+      buyer: {
+        /** @description Buyer NIK; required. */
+        nik: string;
+        /** Format: email */
+        email: string;
+        /** Format: email */
+        emailConfirmation: string;
+        /** @constant */
+        consent: true;
+      };
+      /** @description One item per ticket. The server authoritatively validates duplicate NIK and quota constraints. */
       items: {
         /** Format: uuid */
         categoryId: string;
+        /** @description Every attendee must include a NIK. The client may prefill the buyer's NIK for a ticket where the buyer will attend. */
         attendee: {
-          /** @description NIK 16 digit (dicek strukturnya; tidak pernah disimpan plaintext) */
+          /** @description Attendee NIK; required. */
           nik: string;
           fullName: string;
         };

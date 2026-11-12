@@ -17,6 +17,7 @@ import {
 } from "react-native";
 
 import {
+  brand,
   designColors,
   designBorders,
   designSpacingSemantic,
@@ -107,6 +108,18 @@ export const browseCategoryGrid: ViewStyle = {
   flexWrap: "wrap",
   gap: 16,
 };
+export const browseCategoryControls: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 16,
+};
+export const browseCategoryControlsCompact: ViewStyle = {
+  flexDirection: "column",
+  flexWrap: "nowrap",
+  alignItems: "stretch",
+  gap: 12,
+};
 export const browseCategoryLabel = (isActive: boolean): TextStyle => ({
   color: isActive ? designColors.ground : designColors.ink,
   fontFamily: plusJakartaSansFonts.bold,
@@ -163,29 +176,21 @@ export const browseViewDivider: ViewStyle = {
 };
 export const browseSortControl = {
   borderWidth: 0,
-  backgroundColor: "transparent",
+  backgroundColor: designColors.transparent,
   fontFamily: plusJakartaSansFonts.medium,
   fontWeight: "500",
   fontSize: 14,
   cursor: "pointer",
   outlineWidth: 0,
 };
-export const browseLoadMorePressed: ViewStyle = {
-  backgroundColor: designColors.ink,
-};
-export const browseLoadMoreDisabled: ViewStyle = { opacity: 0.5 };
-export const browseLoadMoreLabel = (disabled: boolean): TextStyle => ({
-  color: disabled ? designColors.inkMuted : designColors.ink,
-  fontFamily: plusJakartaSansFonts.bold,
-  fontSize: 14,
-  textTransform: "uppercase",
-});
+export const BROWSE_NATIVE_CATEGORY_BAR_HEIGHT = 92;
+
 export const browseNativeCategoryBar: ViewStyle = {
   position: "absolute",
   left: 0,
   right: 0,
   zIndex: 98,
-  height: 52,
+  height: BROWSE_NATIVE_CATEGORY_BAR_HEIGHT,
   backgroundColor: designColors.ground,
   borderBottomWidth: 2,
   borderBottomColor: designColors.ink,
@@ -198,13 +203,20 @@ export const browseNativeCategoryScrollContent: ViewStyle = {
   paddingVertical: 8,
   gap: 8,
 };
+export const browseNativeCategorySummary: ViewStyle = {
+  paddingHorizontal: 16,
+  paddingBottom: 8,
+};
+export const browseNativeCategoryScroll: ViewStyle = {
+  height: 52,
+};
 export const browseNativeCategoryButton = (active: boolean): ViewStyle => ({
   paddingHorizontal: 16,
   minHeight: 34,
   justifyContent: "center",
   borderWidth: 2,
-  borderColor: designColors.ink,
-  backgroundColor: active ? designColors.ink : designColors.ground,
+  borderColor: active ? designColors.ember : designColors.ink,
+  backgroundColor: active ? brand.deep : designColors.ground,
 });
 export const browseNativeCategoryLabel = (active: boolean): TextStyle => ({
   color: active ? designColors.ground : designColors.ink,
@@ -277,7 +289,8 @@ export const browseCategoryBtn: ViewStyle = {
 
 export const browseCategoryBtnActive: ViewStyle = {
   ...browseCategoryBtn,
-  backgroundColor: designColors.ink,
+  backgroundColor: brand.deep,
+  borderColor: designColors.ember,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -328,7 +341,7 @@ export const browseViewBtn: ViewStyle = {
 
 export const browseViewBtnActive: ViewStyle = {
   ...browseViewBtn,
-  backgroundColor: designColors.ink,
+  backgroundColor: designColors.accentDeep,
 };
 
 export const browseSortSelect: ViewStyle = {
@@ -369,13 +382,25 @@ export const browseGridRow = (isNative = false): ViewStyle => {
   };
 };
 
+/** Inset native grid rows so their cards do not touch the device edge. */
+export const browseNativeGridRowInset: ViewStyle = { marginHorizontal: 8 };
+
+/** Inset native single-column cards without changing the toolbar spacing. */
+export const browseNativeListItem: ViewStyle = {
+  alignSelf: "stretch",
+  marginHorizontal: 16,
+};
+
 /** Single-column grid (list view) */
 export const browseGridList = (
   isNative = false,
   isMobileWeb = false,
-): ViewStyle => ({
-  gap: isMobileWeb ? 8 : isNative ? GAP_MOBILE : 16,
-});
+): ViewStyle => {
+  let gap = 16;
+  if (isNative) gap = GAP_MOBILE;
+  if (isMobileWeb) gap = 8;
+  return { gap };
+};
 
 /** One cell in the multi-column grid */
 export const browseGridCell = (
@@ -389,32 +414,6 @@ export const browseGridCell = (
     marginBottom: gap,
   };
 };
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// LOAD MORE (prototype .load-more)
-// ═══════════════════════════════════════════════════════════════════════════════
-
-export const browseLoadMore: ViewStyle = {
-  alignItems: "center",
-  marginTop: 48,
-};
-
-export const browseLoadMoreBtn: ViewStyle = {
-  paddingVertical: 16,
-  paddingHorizontal: 48,
-  backgroundColor: designColors.ground,
-  borderWidth: designBorders.standard,
-  borderColor: designColors.ink,
-};
-
-export const browseLoadMoreButtonStyle = (
-  pressed: boolean,
-  disabled: boolean,
-): ViewStyle[] => [
-  browseLoadMoreBtn,
-  ...(pressed ? [browseLoadMorePressed] : []),
-  ...(disabled ? [browseLoadMoreDisabled] : []),
-];
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // EMPTY / LOADING STATES
