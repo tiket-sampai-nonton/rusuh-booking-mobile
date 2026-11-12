@@ -36,7 +36,6 @@ statements, 83.53% branches, and 91.28% functions.
 
 ## SonarCloud status
 
-The hosted SonarCloud re-scan runs only on a pull request targeting `main`.
-It cannot be confirmed by local checks. After this branch is merged into
-`develop`, PR #194 will receive the updated `develop` head and trigger the
-authoritative SonarCloud scan. The hosted gate result is pending that run.
+This file records local checks only. The hosted SonarCloud result is tracked on
+GitHub PR #194; its live check and comments are authoritative for the current
+promotion head.

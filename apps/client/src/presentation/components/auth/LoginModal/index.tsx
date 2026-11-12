@@ -133,6 +133,64 @@ interface LoginStepContentProps {
   readonly close: () => void;
 }
 
+type LoginPhoneStepProps = Pick<
+  LoginStepContentProps,
+  | "email"
+  | "setEmail"
+  | "emailError"
+  | "setEmailError"
+  | "emailFocused"
+  | "setEmailFocused"
+  | "emailInputRef"
+  | "auth"
+  | "onSendOtp"
+  | "close"
+>;
+
+type LoginOtpStepProps = Pick<
+  LoginStepContentProps,
+  | "email"
+  | "otpDigits"
+  | "otpRefs"
+  | "handleOtpChange"
+  | "handleOtpKeyPress"
+  | "isMobileWeb"
+  | "resendTimer"
+  | "auth"
+  | "canVerify"
+  | "onResendOtp"
+  | "backToPhone"
+  | "onVerify"
+>;
+
+type LoginRegistrationStepProps = Pick<
+  LoginStepContentProps,
+  | "email"
+  | "regName"
+  | "setRegName"
+  | "regNameInputRef"
+  | "regNik"
+  | "onChangeNik"
+  | "regNikError"
+  | "regConsent"
+  | "setRegConsent"
+  | "auth"
+  | "canRegister"
+  | "onSubmitRegister"
+  | "openPrivacyPolicy"
+  | "backToPhone"
+>;
+
+type LoginSignedStepProps = Pick<
+  LoginStepContentProps,
+  "auth" | "email" | "close"
+>;
+
+type LoginSuccessStepProps = Pick<
+  LoginStepContentProps,
+  "regDoneName" | "close"
+>;
+
 function LoginStepContent(props: LoginStepContentProps) {
   switch (props.step) {
     case "phone":
@@ -161,7 +219,7 @@ function LoginPhoneStep({
   auth,
   onSendOtp,
   close,
-}: LoginStepContentProps) {
+}: LoginPhoneStepProps) {
   return (
     <View>
       <Text accessibilityRole="header" style={styles.title}>
@@ -229,7 +287,7 @@ function LoginOtpStep({
   onResendOtp,
   backToPhone,
   onVerify,
-}: LoginStepContentProps) {
+}: LoginOtpStepProps) {
   return (
     <View>
       <Text accessibilityRole="header" style={styles.title}>
@@ -322,7 +380,7 @@ function LoginRegistrationStep({
   onSubmitRegister,
   openPrivacyPolicy,
   backToPhone,
-}: LoginStepContentProps) {
+}: LoginRegistrationStepProps) {
   return (
     <View>
       <Text accessibilityRole="header" style={styles.title}>
@@ -435,7 +493,7 @@ function LoginRegistrationStep({
   );
 }
 
-function LoginSignedStep({ auth, email, close }: LoginStepContentProps) {
+function LoginSignedStep({ auth, email, close }: LoginSignedStepProps) {
   const fullName = auth.profile?.fullName;
   const emailMasked = auth.profile?.emailMasked ?? email;
   return (
@@ -472,7 +530,7 @@ function LoginSignedStep({ auth, email, close }: LoginStepContentProps) {
   );
 }
 
-function LoginSuccessStep({ regDoneName, close }: LoginStepContentProps) {
+function LoginSuccessStep({ regDoneName, close }: LoginSuccessStepProps) {
   return (
     <View style={styles.doneContainer}>
       <View style={styles.doneCheck}>

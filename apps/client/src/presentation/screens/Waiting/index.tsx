@@ -586,7 +586,20 @@ function ClaimErrorPage({
   );
 }
 
-interface ActiveQueuePageProps extends WaitingStateViewProps {
+interface ActiveQueuePageProps {
+  readonly entry?: QueueEntry;
+  readonly eventId: string;
+  readonly admissionRatePerMin?: number;
+  readonly claiming: boolean;
+  readonly isDesktop: boolean;
+  readonly isMobileWeb: boolean;
+  readonly isConnectionLost: boolean;
+  readonly isReconnected: boolean;
+  readonly bottomInset: number;
+  readonly showLeaveModal: boolean;
+  readonly onLeavePress: () => void;
+  readonly onStay: () => void;
+  readonly onConfirmLeave: () => void;
   readonly admitted: boolean;
 }
 
