@@ -79,6 +79,10 @@ export class WebPushNotificationAdapter implements NotificationPort {
       tag: notification.kind,
     });
   }
+
+  async cancelLocal(): Promise<void> {
+    // Browser-local future timers are not managed here; web uses server push.
+  }
 }
 
 /** Real browser environment (web runtime). Guards every global access. */

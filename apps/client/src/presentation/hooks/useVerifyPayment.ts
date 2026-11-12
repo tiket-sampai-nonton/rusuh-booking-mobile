@@ -26,6 +26,7 @@ import {
   CreatePaymentAttempt,
 } from "@application/payment/create-payment-attempt.use-case";
 import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
+import { CancelLocalNotification } from "@application/notifications/cancel-local-notification.use-case";
 import { useSessionStore } from "@presentation/stores/session-store";
 import type { PaymentAttempt } from "@domain/repositories/payment.repository";
 import {
@@ -37,6 +38,7 @@ import {
 } from "@domain/rules/payment-verify";
 import {
   paymentFailure,
+  paymentTimeout,
   paymentSuccess,
 } from "@domain/rules/notification-flows";
 import { useServices } from "@providers/service-context";
@@ -89,6 +91,10 @@ export function useVerifyPayment(
     () => new ScheduleLocalNotification(notification),
     [notification],
   );
+  const cancelNotification = useMemo(
+    () => new CancelLocalNotification(notification),
+    [notification],
+  );
 
   const query = useQuery<PaymentAttempt, Error>({
     queryKey: ["payment", "verify", bookingId, attemptId],
@@ -134,11 +140,17 @@ export function useVerifyPayment(
     const message =
       attemptStatus === "PAID"
         ? paymentSuccess(bookingId)
-        : paymentFailure(bookingId);
+        : attemptStatus === "EXPIRED"
+          ? paymentTimeout(bookingId)
+          : paymentFailure(bookingId);
     // Payment status comes from VerifyPayment (the BE-authoritative read).
     // Delivery errors must never block the result route.
-    void scheduleNotification.execute(message).catch(() => undefined);
-  }, [attemptStatus, bookingId, scheduleNotification]);
+    void cancelNotification
+      .execute(`payment-timeout-${bookingId}`)
+      .catch(() => undefined)
+      .then(() => scheduleNotification.execute(message))
+      .catch(() => undefined);
+  }, [attemptStatus, bookingId, cancelNotification, scheduleNotification]);
 
   // Server-authoritative remaining time for the pending deadline reconcile.
   let remainingMs = Number.POSITIVE_INFINITY;

@@ -11,6 +11,8 @@ import {
   paymentCancelled,
   paymentFailure,
   paymentSuccess,
+  paymentTimeout,
+  queueTimeout,
   waitingRoomLeft,
 } from "@domain/rules/notification-flows";
 
@@ -35,6 +37,21 @@ describe("required notification flows (RBT-072 AC1)", () => {
     expect(n.kind).toBe("payment_failure");
     expect(n.deepLink).toBe("/payment/bk-1");
     expect(n.body).toContain("bisa coba lagi");
+  });
+
+  it("payment timeout links to the order and can be scheduled", () => {
+    const n = paymentTimeout("bk-2", 1234);
+    expect(n.kind).toBe("payment_timeout");
+    expect(n.notificationId).toBe("payment-timeout-bk-2");
+    expect(n.deepLink).toBe("/payment/bk-2");
+    expect(n.scheduledAtMs).toBe(1234);
+  });
+
+  it("queue timeout is tied to the queue and event", () => {
+    const n = queueTimeout("queue-3", "evt-3");
+    expect(n.kind).toBe("queue_timeout");
+    expect(n.notificationId).toBe("queue-timeout-queue-3");
+    expect(n.deepLink).toBe("/events/evt-3");
   });
 
   it("payment leave copy does not claim the provider cancelled the payment", () => {
@@ -68,8 +85,10 @@ describe("required notification flows (RBT-072 AC1)", () => {
       "expiry_reminder",
       "payment_success",
       "payment_failure",
+      "payment_timeout",
       "payment_cancelled",
       "waiting_room_left",
+      "queue_timeout",
       "admission",
       "event_reminder",
     ]);

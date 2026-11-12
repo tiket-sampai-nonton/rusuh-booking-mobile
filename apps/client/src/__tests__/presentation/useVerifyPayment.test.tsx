@@ -100,6 +100,7 @@ describe("useVerifyPayment (RBT-063)", () => {
         }),
       ]),
     );
+    expect(notification.cancelled).toEqual(["payment-timeout-bk-1"]);
   });
 
   it("FAILED → verdict failed, route /expired", async () => {
@@ -119,6 +120,24 @@ describe("useVerifyPayment (RBT-063)", () => {
         }),
       ),
     );
+  });
+
+  it("EXPIRED → timeout notification with a payment status route", async () => {
+    const notification = new MockNotificationAdapter();
+    const { result } = renderHook(() => useVerifyPayment("a1", "bk-1"), {
+      wrapper: wrapper(new StatusRepo(attempt("EXPIRED")), notification),
+    });
+    await waitFor(() => expect(result.current.verdict).toBe("failed"));
+    await waitFor(() =>
+      expect(notification.scheduled[0]).toEqual(
+        expect.objectContaining({
+          kind: "payment_timeout",
+          notificationId: "payment-timeout-bk-1",
+          deepLink: "/payment/bk-1",
+        }),
+      ),
+    );
+    expect(notification.cancelled).toEqual(["payment-timeout-bk-1"]);
   });
 
   it("pending with time left → verdict pending, route null (keep polling)", async () => {

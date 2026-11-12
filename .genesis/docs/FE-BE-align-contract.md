@@ -12,7 +12,12 @@ Dokumen ini dipakai sebagai acuan bersama FE dan BE agar implementasi layar FE h
 
 ### Addendum — RBT-128 integration check (2026-11-09)
 
-For the current BE implementation check and remaining runtime gaps, see [`api-contract/07-11/INTEGRATION-RBT-128.md`](api-contract/07-11/INTEGRATION-RBT-128.md). It records the supplied development API root, the FE adapter fixes, and the live CORS/description gaps. This addendum supplements the earlier screen mapping below; the service OpenAPI files remain authoritative for wire details.
+For the historical RBT-128 integration check, see [`api-contract/07-11/INTEGRATION-RBT-128.md`](api-contract/07-11/INTEGRATION-RBT-128.md). Its dated findings are retained; the live-runtime addendum below supersedes its earlier CORS, description, and payment-route observations.
+
+### Addendum — live runtime confirmation (2026-11-12)
+
+- The live event-detail response for event `ec2f4c95-6247-4ee7-9524-2e5530edbfe4` includes `imageUrl`, `bannerUrl`, `thumbnailUrl`, categories, and a `description` object with `longDesc`, `lineup`, `location`, `gallery`, and `terms`. FE parses these fields defensively in `domain/rules/event-description.ts`; event-detail content is no longer an outstanding runtime gap. The 07-11 generated public contract snapshot does not yet describe this `description` shape, so BE schema documentation still needs alignment.
+- The payment service returns a site-relative `pageUrl` (`/pay/{bookingId}?ppt=…&embedded=1`). The configured API origin does not host `/pay`. Browser inspection on 2026-11-12 found the currently deployed Pages app returned its Expo "Unmatched Route" screen for `/pay`; this branch adds the missing `/pay/[bookingId]` bootstrap route. That route must be included in a web deployment before a native app can use it. A credentialed OPTIONS preflight from `https://rusuh-booking.pages.dev` to `POST /api/v1/payment-page-sessions` returned 204 and allowed that origin. Physical iOS/Android cookie persistence and SNAP return behavior remain unverified.
 
 Hierarki sumber kebenaran (urutan otoritas, atas menang atas bawah):
 
@@ -72,7 +77,7 @@ Arti status: ✅ sudah ada di contract · ⚠️ ada tapi belum lengkap · ❌ b
 
 | Screen | Data diminta `requirement.md` | Field/Endpoint Contract yang memenuhi | Status | Catatan |
 |---|---|---|---|---|
-| **1. Landing** | Card banner image | — | ❌ **FE NEED THIS** | `EventSummary` **tidak** punya field gambar/banner. Usulan: tambah `bannerUrl`/`thumbnailUrl` ke `EventSummary`. Di prototype dipakai asset mock. |
+| **1. Landing** | Card banner image | `EventSummary.imageUrl`, `bannerUrl`, `thumbnailUrl` | ✅ | All URLs are optional in the wire response; FE uses an image fallback when they are absent. |
 | **1. Landing** | Card: tanggal format **DD MMM YYYY** | `EventSummary.startsAt` (`GET /api/v1/events`) | ✅ | Format DD MMM YYYY **diderivasi FE** dari `startsAt` (ISO-8601). Tidak butuh perubahan contract. |
 | **1. Landing** | Card: place | `EventSummary.venue` | ⚠️ | Hanya `venue` (string bebas). Tidak ada field kota/alamat terstruktur. |
 | **1. Landing** | Card: **jumlah tiket tersedia** (remainingTickets) | — (di level list) | ❌ **FE NEED THIS** | Di level list `EventSummary` hanya beri `status` + `minPriceMinor`; **tidak ada** jumlah sisa. Usulan: tambah `remainingTickets` (integer) ke `EventSummary`. Di prototype dipakai mock `remainingTickets`. |
@@ -83,12 +88,13 @@ Arti status: ✅ sudah ada di contract · ⚠️ ada tapi belum lengkap · ❌ b
 | **1. Landing** | Seksi **"History Event"** (event yang SUDAH berlalu, sort by tanggal **desc**) | — (tidak ada endpoint arsip/riwayat event publik) | ❌ **FE NEED THIS** | Menggantikan seksi "Selling Fast/stok habis". V5 menurunkan history **client-side** dari event ber-`status CLOSED` / `startsAt < serverTime`, lalu sort desc. Production membutuhkan `GET /events?filter=past` atau endpoint arsip + `sort`/`limit`, terutama bila catalog dipaginasi. |
 | **1. Landing** | Status (live/upcoming) | `EventSummary.status` (`NOT_STARTED|AVAILABLE|SOLD_OUT|CLOSED`) | ⚠️ | Enum tidak punya "LIVE"; FE menurunkan "upcoming vs live" dari `salesStartsAt`/`startsAt` vs `serverTime`. |
 | **1. Landing** | Footer | — (statis) | ✅ | Konten statis FE; tidak butuh API. |
-| **2. Detail Event** | Lokasi | `EventSummary.venue` | ⚠️ | String bebas; tidak ada koordinat/kota terstruktur. |
+| **2. Detail Event** | Lokasi | `event.venue` + optional `description.location` | ✅ | Venue is the display fallback; rich location may provide a name, address, maps URL, coordinates, and map image. |
 | **2. Detail Event** | Date | `EventSummary.startsAt` | ✅ | — |
-| **2. Detail Event** | Description JSON: **long desc** | — (usulan `EventDetail.description.longDesc`) | ❌ **FE NEED THIS** | FE mengharapkan `description` ber-format JSON di `EventDetail`. Di prototype sudah di-mock. Lihat blok usulan di bawah tabel. |
-| **2. Detail Event** | Description JSON: **S&K** | — (usulan `EventDetail.description.terms[]`) | ❌ **FE NEED THIS** | Bagian `terms: [string]` dari `description` JSON. Di prototype sudah di-mock. |
-| **2. Detail Event** | Description JSON: **line up** | — (usulan `EventDetail.description.lineup[]`) | ❌ **FE NEED THIS** | Bagian `lineup: [{stage, acts}]` dari `description` JSON. Di prototype sudah di-mock. |
-| **2. Detail Event** | **Banner image** | — (usulan `EventDetail.description.bannerImage` atau `EventDetail.bannerImage`) | ❌ **FE NEED THIS** | FE mengharapkan `bannerImage` (url) datang dinamis bersama `description`. Di prototype sudah di-mock. |
+| **2. Detail Event** | Description JSON: **long desc** | `EventDetail.description.longDesc` | ✅ | Present in the live detail API and rendered by the event-detail screen. |
+| **2. Detail Event** | Description JSON: **S&K** | `EventDetail.description.terms[]` | ✅ | Returned as strings; the parser also tolerates one legacy string. |
+| **2. Detail Event** | Description JSON: **line up** | `EventDetail.description.lineup[]` | ✅ | Live records use `{name, role, avatar?}`; the parser also tolerates prototype `{stage, acts}` records. |
+| **2. Detail Event** | Gallery | `EventDetail.description.gallery[]` | ✅ | Optional image URL array; missing or invalid URLs degrade to no gallery items. |
+| **2. Detail Event** | **Banner image** | `event.bannerUrl` / optional `description.bannerImage` | ✅ | The event response carries media URLs at the event level; `description.bannerImage` remains optional. |
 | **2. Detail Event** | Category tiket | `EventDetail.categories[]` (`categoryId, code, name, priceMinor, available`) | ✅ | — |
 | **2. Detail Event** | Ticket max | `EventDetail.maxTicketsPerOrder`, `maxTicketsPerBuyerNik`, `allowMixedCategories` | ✅ | `maxTicketsPerOrder` membatasi 1 order; `maxTicketsPerBuyerNik` lintas sesi/perangkat. |
 | **2. Detail Event** | Ticket now (sisa) | `EventDetail.categories[].available` | ✅ | Angka momentary (cache 2 detik); real-time pakai queue-status/SSE. |
@@ -114,16 +120,20 @@ Arti status: ✅ sudah ada di contract · ⚠️ ada tapi belum lengkap · ❌ b
 | **Opsional: Quick Form / Profiling (auto-fill)** | Isi cepat + profil untuk auto-fill | `GET/PATCH /api/v1/me` (`fullName`, `nik`→`nikMasked`, `hasNik`, `emailMasked`) | ✅ | Dipakai untuk **fast-track auto-fill** di `detail.html` (bukan di antrean). NIK plaintext tidak pernah dikirim BE ke FE; auto-fill nyata memakai data yang user sendiri simpan/isi (prototype menyederhanakan). NIK penumpang tetap diisi per order. |
 | **Opsional: History Purchasement** | Riwayat pembelian | `GET /api/v1/me/bookings` (butuh login, cursor+limit) | ✅ | Hanya untuk user login; guest tidak punya riwayat. |
 
-> **FE NEED THIS — struktur `description` JSON (Detail Event).** FE mengharapkan konten dinamis (long desc, line-up, S&K, banner) dikirim BE sebagai satu field `description` berformat JSON pada `EventDetail`:
+> **Current runtime shape — `description` JSON (Detail Event).** Live BE detail data provides these fields; the parser remains tolerant of missing or legacy values:
 >
 > ```json
 > "description": {
 >   "longDesc": "string",
->   "lineup": [{ "stage": "string", "acts": ["string"] }],
+>   "lineup": [{ "name": "string", "role": "string", "avatar": "https://..." }],
+>   "location": { "name": "string", "address": "string", "mapsUrl": "https://...", "latitude": -6.9, "longitude": 107.6, "mapImage": "https://..." },
+>   "gallery": ["https://..."],
 >   "terms": ["string"],
->   "bannerImage": "https://cdn.example/..."
+>   "bannerImage": "https://..."
 > }
 > ```
+
+> The 07-11 OpenAPI/Markdown snapshot still treats this field as absent/opaque. BE should add the live shape to its published schema before FE regenerates contract types.
 >
 > Alternatif: endpoint konten CMS terpisah (mis. `GET /events/{id}/content`). Prototype sudah mem-mock `description` JSON ini, sehingga gap P0 (deskripsi/S&K/line-up) ditutup **secara desain** — tinggal implementasi BE.
 
@@ -272,7 +282,7 @@ Prioritas: **P0** = memblok alur inti / keputusan produk mendesak · **P1** = pe
 
 | Prio | Gap | Dampak | Rekomendasi |
 |---|---|---|---|
-| **P0** | **FE NEED THIS** — `description` **JSON terstruktur** + `bannerImage` di `EventDetail` (long desc, line-up, S&K, banner). | Layar Detail Event menampilkan konten utama produk secara dinamis. | Tambah field `description = { longDesc, lineup:[{stage,acts}], terms:[string], bannerImage }` pada `EventDetail` **atau** endpoint konten CMS (`GET /events/{id}/content`). **Prototype sudah mem-mock `description` JSON** → gap ditutup secara **desain**, pending implementasi BE. |
+| **Resolved in live runtime; schema docs pending** | **`description` JSON terstruktur** dan event media detail. | Isi bagian tentang, pengisi acara, lokasi, galeri, S&K, dan hero/banner. | Live response has `longDesc`, `lineup`, `location`, `gallery`, `terms`, and event media URLs; FE parser consumes them. BE should publish the shape in the 07-11 OpenAPI/Markdown contract before FE regenerates types. |
 | **P0** | **FE NEED THIS / PERUBAHAN CONTRACT** — `JoinRequest` **anonim**. Saat ini mewajibkan `buyerNik`+`email`+`emailConfirmation`+`consentNik`. | Keputusan baru: antrean anonim (masuk dulu tanpa input). | Buat `JoinRequest` **opsional** (tanpa NIK/email) atau izinkan join **tanpa body**; pindahkan NIK/email ke tahap booking/detail. |
 | **P0** | **FE NEED THIS** — **set-buyer pada sesi**. Contract belum punya tempat menaruh `buyerNik`+`email` pada booking-session. | NIK/email pembeli kini diisi di `detail.html` tapi tak ada target field. | Usulan `POST /booking-sessions/{sessionId}/buyer { buyerNik, email }` **atau** sertakan `buyerNik`+`email` di body `POST /bookings`. Prototype memakai mock `setBuyer`. |
 | **P0** | **FE NEED THIS / PERUBAHAN CONTRACT** — idempotency untuk queue join/claim. | Queue `503 DEPENDENCY_UNAVAILABLE` menyuruh FE retry dengan key yang sama, tetapi OpenAPI queue belum mendefinisikan `Idempotency-Key` pada join/claim. V5 tidak dapat membuktikan retry-safe behavior untuk queue. | Tambahkan header, aturan rekonsiliasi response, dan retention policy; atau hapus instruksi retry-key dari error contract dan definisikan query pemulihan yang jelas. |
@@ -280,7 +290,7 @@ Prioritas: **P0** = memblok alur inti / keputusan produk mendesak · **P1** = pe
 | **Resolved (contract update)** | **SNAP redirect URL dan callback return contract** | FE perlu membuka payment provider setelah membuat attempt dan memverifikasi success/failed callback. | `Attempt` kini mendefinisikan `redirectUrl`, `successReturnUrl`, `failedReturnUrl`, dan `expiresAt`; `PaymentStatus` membawa `paymentExpiresAt`. FE tidak menangani kartu atau settlement. |
 | **P1** | **FE NEED THIS** — `remainingTickets` (integer) di **`EventSummary`** (level list). | Card landing wajib menampilkan jumlah tiket tersedia & badge "Stok Menipis" (perlu ambang angka). | Tambah `remainingTickets` ke `EventSummary`. Prototype memakai mock `remainingTickets`. |
 | **P1** | **FE NEED THIS** — catalog filter contract untuk V5: `genre`, `province`, `time`, `sort`, pagination, dan field genre/lokasi terstruktur. | Browse V5 memakai URL `genre`, `province`, `time`, `sort`; Home juga membutuhkan event terdekat dan History Event. | Jangka pendek: filter/sort **client-side** dari list penuh dengan batas ukuran yang disetujui. Jangka menengah: tambah query params server-side; **arsip history** idealnya `GET /events?filter=past` atau endpoint arsip. |
-| **P1** | **FE NEED THIS** — **Banner/image event** di `EventSummary`/`EventDetail`. | Card katalog & hero tak punya sumber gambar resmi. | Tambah `bannerUrl`/`thumbnailUrl` pada `EventSummary`, dan `bannerImage` pada `EventDetail.description` (lihat P0 description). |
+| **Resolved in contract/runtime** | **Event image URLs** on summary/detail. | Card catalog and event hero use official event media. | The 07-11 contract includes optional `imageUrl`, `bannerUrl`, and `thumbnailUrl`; FE maps them and uses a fallback when absent. |
 | **P1** | **History Event** publik (seksi landing menggantikan "Selling Fast"). | Seksi "History Event" butuh data event lampau. | Jangka pendek: turunkan **client-side** dari `status CLOSED`/`startsAt < serverTime`, sort desc. Jangka menengah: **FE NEED THIS** `GET /events?filter=past`/endpoint arsip + `sort`/`limit`. |
 | **P1** | **Phone number** data reservation tidak disimpan contract. | Field telepon di checkout tak punya target. | Hilangkan field telepon (kontak = email), **atau** usulkan penambahan ke PDF bila wajib secara bisnis. |
 | **P2** | **Biaya layanan (service fee)** tidak ada di contract/PDF. | Breakdown harga tak bisa menampilkan fee. | Tampilkan `amountMinor` sebagai total tunggal; tambah field breakdown hanya bila PDF mengharuskan. |

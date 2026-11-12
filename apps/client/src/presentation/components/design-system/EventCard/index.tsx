@@ -124,8 +124,6 @@ function NativeEventCard({
 }: EventCardProps) {
   const badge = badgeFor(event);
   const disabled = badge.disabled || history;
-  const badgeAlwaysShow =
-    badge.tone === "soldout" || badge.tone === "done" || badge.tone === "low";
   const dateTxt = formatDateID(event.startsAt);
   const image = eventImage(event.id, event.thumbnailUrl ?? event.imageUrl);
   const imageUri = resizeNativeUnsplashImage(image, listMode);
@@ -154,8 +152,8 @@ function NativeEventCard({
               style={[
                 styleForEventCardAnimatedView5(true, badge),
                 {
-                  opacity: badgeAlwaysShow ? 1 : 0,
-                  transform: [{ translateX: badgeAlwaysShow ? 0 : -110 }],
+                  opacity: 1,
+                  transform: [{ translateX: 0 }],
                 },
               ]}
             >
@@ -339,18 +337,10 @@ function AnimatedEventCard({
     transform: [{ scale: interpolate(hovered.value, [0, 1], [1, 1.05]) }],
   }));
 
-  // Badge slides in from left on hover (or always visible for certain states)
-  const badgeAlwaysShow =
-    badge.tone === "soldout" || badge.tone === "done" || badge.tone === "low";
+  // Availability is visible without hover so users can scan cards on touch devices.
   const badgeStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: badgeAlwaysShow
-          ? 0
-          : interpolate(hovered.value, [0, 1], [-110, 0]),
-      },
-    ],
-    opacity: badgeAlwaysShow ? 1 : hovered.value,
+    transform: [{ translateX: 0 }],
+    opacity: 1,
   }));
 
   // Title letter-spacing: 0 → 0.02em on hover

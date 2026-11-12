@@ -3,7 +3,7 @@
 > **Status:** Target delivery flow; automation rollout is in progress
 > **Scope:** Expo + React Native + React Native Web frontend
 > **CI:** GitHub Actions
-> **Static quality:** SonarCloud is temporarily skipped by explicit project decision
+> **Static quality:** SonarCloud analysis runs on pull requests targeting `main`, after shared checks
 > **Native delivery:** Android QA APKs build on GitHub Actions and distribute through Firebase App Distribution; EAS is reserved for compatible OTA updates. iOS device builds use a separate macOS runner workflow when configured.
 > **Architecture reference:** `.genesis/docs/ARCHITECTURE.md`
 > **FE-BE contract:** `.genesis/docs/FE-BE-align-contract.md`
@@ -12,7 +12,7 @@ The repository package manager is **npm** and CI uses the committed `package-loc
 
 This pipeline is adapted from an internal CI/CD reference pipeline for the ticketing architecture: Android, iOS, web, native capabilities, React Native Web SEO, and OTA promotion through `develop` and `main`.
 
-**Implementation status (2026-11-07):** The single Release Pipeline in `.github/workflows/deploy-web-dev.yml` is on the default `main` branch. Merges to `develop` trigger its preprod web path; Android Firebase distribution is a manual mode on the same orchestrator, with no independent trigger. SonarCloud is temporarily skipped. EAS OTA remains guarded until the Expo project, channels, credentials, Expo environment variables, and a newly built OTA-capable native app are ready. The production Cloudflare Pages environment is also pending, so the target production behavior below is not live yet.
+**Implementation status (2026-11-12):** `origin/main` still has the legacy development-only workflow and does not currently define a production release. The updated Release Pipeline in `.github/workflows/deploy-web-dev.yml` runs shared quality checks for pull requests and release runs; SonarCloud analysis is limited to pull requests targeting `main`. It defines guarded `develop` and `main` release paths; the production path becomes active when this workflow is promoted to `main`. Production web and Android workflow jobs validate that real API mode and the API URL are configured. Android Firebase distribution remains a manual mode on the same orchestrator. EAS OTA remains guarded until the Expo project, channels, credentials, Expo environment variables, and a newly built OTA-capable native app are ready.
 
 ## 1. Delivery model
 
@@ -50,9 +50,10 @@ Preview builds are distribution artifacts for QA and product review, not a third
 
 | Git event | Pipeline behavior |
 |---|---|
-| Pull request opened, synchronized, reopened, or marked ready for review → `develop` | Run typecheck, lint/format, unit/component tests, and dependency audit. SonarCloud is temporarily skipped. Stop before web build/deployment, OTA publication, and native distribution. |
+| Pull request opened, synchronized, reopened, or marked ready for review → `develop` | Run shared typecheck, lint/format, unit/component tests, and dependency audit. SonarCloud does not run for development PRs. Stop before deployment and distribution. |
+| Pull request opened, synchronized, reopened, or marked ready for review → `main` | Run shared checks and the SonarCloud quality gate. Stop before deployment and distribution. |
 | Successful push to `develop` after merge | Start the single release orchestrator. Run shared quality gates, then automatically build/validate and deploy the web app to the preprod Cloudflare Pages project and publish an EAS `development` OTA only when the change is runtime-compatible and has no native-affecting change. Do not distribute an APK automatically. |
-| Pull request opened or synchronized → `main` | Run full release validation. Require approval before merge. |
+| Review approval required → `main` | Require approval before merge after shared checks and the SonarCloud quality gate pass. |
 | Successful push to `main` after merge from `develop` | Start the same release orchestrator. Run shared release gates, then automatically build/validate and deploy the web app to the production Cloudflare Pages project and publish an EAS `production` OTA only when the change is runtime-compatible and has no native-affecting change. |
 | `workflow_dispatch` on the same orchestrator | Manually select Firebase APK distribution for the selected branch/environment: `develop` produces a preprod/development APK; `main` produces a production APK. The manual run validates that the selected ref and environment match. Reusable workflow files may separate implementation details, but only the orchestrator is independently triggered. |
 | Native-affecting change | Skip OTA for that change. A new native binary is required. Firebase APK distribution remains manually triggerable for the matching branch/environment; it is not silently substituted for an OTA. |
@@ -67,7 +68,7 @@ GitHub shows the **Run workflow** button only when the orchestrator file exists 
 
 ## 3. Job dependency graph
 
-The graph below shows the target triggers. Pull requests run quality gates and stop there. A successful push to either release branch starts one coordinated automatic web + compatible OTA release. Firebase APK distribution is an optional manual mode exposed by the same orchestrator. SonarCloud is temporarily omitted from the gates.
+The graph below shows the active triggers. Pull requests to `develop` run shared quality checks; pull requests to `main` also run SonarCloud. Both stop before deployment. A successful push to either release branch starts one coordinated automatic web + compatible OTA release. Firebase APK distribution is an optional manual mode exposed by the same orchestrator.
 
 ```mermaid
 flowchart LR
@@ -79,8 +80,10 @@ flowchart LR
     INSTALL --> TYPE["typecheck"]
     TYPE --> LINT["lint + format"]
     LINT --> UNIT["Jest + RNTL"]
-    UNIT --> AUDIT["npm audit"]
-    AUDIT --> GATES["quality gates passed"]
+    UNIT --> AUDIT["npm audit"] --> GATES["shared quality gates passed"]
+    GATES --> PRTARGET{"PR target?"}
+    PRTARGET -->|main| SONAR["SonarCloud scan + quality gate"]
+    PRTARGET -->|develop| PRDEV["checks only; stop"]
 
     GATES --> EVENT{"event + branch?"}
     EVENT -->|PR| PRDONE["checks only; stop"]
@@ -156,18 +159,16 @@ OpenAPI remains the FE-BE source of truth, but contract validation is not a clou
 
 ### 4.6 `sonarcloud`
 
-Temporarily skipped by explicit project decision while the SonarCloud scan is unavailable in GitHub Actions. When the connection and branch-analysis configuration are ready, restore this gate with the following requirements:
+The Release Pipeline runs the SonarQube Scan GitHub Action only for pull requests targeting `main`, after typecheck, lint/format, tests, and dependency audit. The scan uploads Jest `lcov` coverage and waits for the SonarCloud Quality Gate; a failed gate blocks that PR from merging. Development PRs, branch pushes, release jobs, and manual Firebase distribution do not run SonarCloud. It uses `SONAR_TOKEN` from the `development` GitHub Environment and the Actions variables `SONAR_ORGANIZATION` and `SONAR_PROJECT_KEY`. Fork pull requests skip this step because GitHub does not expose repository secrets to fork workflows.
 
-- Run after typecheck, lint, unit tests, and vulnerability scanning.
-- Upload Jest `lcov` coverage.
-- Enforce the SonarCloud quality gate for new code:
+- Configure the SonarCloud project Quality Gate with the agreed new-code rules:
   - no new blocker/critical bugs;
   - no new security vulnerabilities;
   - no unacceptable new code smells;
   - duplication within the approved threshold;
   - shared domain/application coverage target of **at least 90%** unless explicitly waived.
 
-When restored, SonarCloud is a static analysis gate. It does not replace Jest or the agreed QA strategy.
+SonarCloud is a static analysis gate. It does not replace Jest or the agreed QA strategy.
 
 ## 5. Web build artifacts
 
@@ -262,7 +263,7 @@ Create a new native build instead of OTA when a change includes:
 - Name the development APK `rusuh-booking.preprod.apk`; name the production APK `rusuh-booking.apk`.
 - Keep persistent keystores in GitHub Environment secrets; never generate or commit signing keys in CI. Increment Android `versionCode` monotonically for each environment's distributed build.
 - Upload the APK as a workflow artifact, then distribute it to the configured Firebase App Distribution tester group.
-- Run typecheck, lint/format, Jest/RNTL, and production dependency audit before building or distributing. SonarCloud is temporarily skipped by explicit project decision.
+- Run shared typecheck, lint/format, Jest/RNTL, and production dependency audit before building or distributing. SonarCloud is limited to pull requests targeting `main`.
 
 ### 8.2 `build_ios`
 
@@ -299,9 +300,9 @@ Create a new native build instead of OTA when a change includes:
 
 | Secret/variable | Used by | Purpose |
 |---|---|---|
-| `SONAR_TOKEN` | SonarCloud | Authentication for analysis and quality gate |
-| `SONAR_ORGANIZATION` | SonarCloud | SonarCloud organization identifier |
-| `SONAR_PROJECT_KEY` | SonarCloud | SonarCloud project identifier |
+| `SONAR_TOKEN` | `development` GitHub Environment secret | Authentication for analysis and quality gate |
+| `SONAR_ORGANIZATION` | GitHub Actions variable | SonarCloud organization identifier |
+| `SONAR_PROJECT_KEY` | GitHub Actions variable | SonarCloud project identifier |
 | `EXPO_TOKEN` | EAS Update | CI authentication for OTA publication only |
 | `EXPO_PROJECT_ID` | EAS Update | Expo project attribution for OTA updates |
 | `EAS_OTA_DEVELOPMENT_ENABLED` | Release Pipeline | Repository Actions variable; set to `true` only after development EAS settings and an OTA-capable QA build are verified |
@@ -399,7 +400,7 @@ Web rollback is separate from native OTA rollback:
 | Unit/component behavior | Jest + React Native Testing Library | Yes | Yes |
 | API compatibility | OpenAPI types and FE-BE review | No | No |
 | Dependency security | npm audit + secret scan | Yes | Yes |
-| Static analysis | SonarCloud (temporarily skipped) | No, until restored | No, until restored |
+| Static analysis | SonarCloud scan + quality gate on PRs to `main` | Yes for PRs to `main` | No; release jobs run separately |
 | SEO output | Expo export validation | Yes for web release | Yes for web release |
 | Web bundle budget | Bundle-size check | Yes for web release | Yes for web release |
 

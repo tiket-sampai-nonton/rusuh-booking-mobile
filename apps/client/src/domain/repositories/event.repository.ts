@@ -46,10 +46,7 @@ export interface EventDetail extends EventSummary {
   readonly maxTicketsPerBuyerNik?: number;
   readonly allowMixedCategories?: boolean;
   readonly published?: boolean;
-  /**
-   * Mock-only rich event content (long description, lineup, terms and gallery).
-   * These fields are not part of the supplied public EventDetail contract.
-   */
+  /** Rich event content returned by the event detail response. */
   readonly description?: Readonly<Record<string, unknown>>;
 }
 

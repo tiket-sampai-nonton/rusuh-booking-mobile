@@ -50,7 +50,10 @@ import { StatusBadge } from "./fragments/StatusBadge";
 import { WaitingActive } from "./fragments/WaitingActive";
 import { YourTurnState } from "./fragments/YourTurnState";
 import { LeaveButton } from "./fragments/LeaveButton";
-import { waitingRoomLeft } from "@domain/rules/notification-flows";
+import {
+  queueTimeout,
+  waitingRoomLeft,
+} from "@domain/rules/notification-flows";
 import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
 import { useServices } from "@providers/service-context";
 import { apiErrorMessage } from "@presentation/utils/api-error-message";
@@ -69,7 +72,7 @@ export function WaitingRoomScreen({
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const reducedMotion = useReducedMotion() ?? false;
-  const { isDesktop, isMobileWeb } = useResponsive();
+  const { isDesktop, isMobileWeb, isNative } = useResponsive();
   const { notification } = useServices();
   const scheduleNotification = useMemo(
     () => new ScheduleLocalNotification(notification),
@@ -108,6 +111,26 @@ export function WaitingRoomScreen({
     queueId,
     status: admitted && isStatusAuthoritative ? entry.status : undefined,
   });
+  useEffect(() => {
+    if (
+      isNative &&
+      isStatusAuthoritative &&
+      (entry?.status === "MISSED" || errorState === "TURN_MISSED") &&
+      eventId
+    ) {
+      void scheduleNotification
+        .execute(queueTimeout(queueId, eventId))
+        .catch(() => undefined);
+    }
+  }, [
+    entry?.status,
+    eventId,
+    errorState,
+    isNative,
+    isStatusAuthoritative,
+    queueId,
+    scheduleNotification,
+  ]);
   const claimed = entry?.status === "CLAIMED";
   const restoredBooking = useRestoreBookingSession(
     Boolean(claimed && !claiming && !claimedSessionId),

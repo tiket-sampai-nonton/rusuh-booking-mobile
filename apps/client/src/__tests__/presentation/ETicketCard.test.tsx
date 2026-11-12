@@ -30,6 +30,7 @@ describe("ETicketCard (RBT-071)", () => {
     // QR mock carries the encoded value as accessibilityLabel
     expect(screen.getByLabelText("issued-payload")).toBeTruthy();
     expect(screen.getByText("E-Tiket 1 / 3")).toBeTruthy();
+    expect(screen.getByText("Kategori — · Kode tiket TKT-1")).toBeTruthy();
   });
 
   it("the rendered card never contains a raw 16-digit NIK", () => {
@@ -62,9 +63,11 @@ describe("ETicketCard (RBT-071)", () => {
         startsAt="15 November 2026"
         attendeeName="Penonton QA"
         attendeeNikMasked="31****99"
+        categoryCode="VIP"
       />,
     );
     expect(screen.getByText("Penonton QA · 31****99")).toBeTruthy();
+    expect(screen.getByText("Kategori VIP · Kode tiket —")).toBeTruthy();
     expect(
       screen.getByText("15 November 2026 · Gelora Bung Karno"),
     ).toBeTruthy();

@@ -2,13 +2,11 @@
  * usePaymentWebView — mobile page-token WebView seam (RBT-062).
  *
  * Mints the one-time page token + WebView URL (createToken), and exchanges the
- * token for the rb_pay session cookie (exchange) once the WebView reports it
- * loaded `pageUrl`. TanStack/the port are reached via the frozen
- * PaymentRepository (useServices); no infrastructure import. The actual
- * <WebView> component lives in the Payment WebView screen — this hook is the
- * framework-light data seam it drives.
+ * token for the rb_pay session cookie (exchange) from the same-origin `/pay`
+ * bootstrap route. The port is reached through PaymentRepository; no
+ * infrastructure import.
  */
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { OpenPaymentWebView } from "@application/payment/open-payment-webview.use-case";
 import type { PageToken } from "@domain/repositories/payment.repository";
@@ -23,8 +21,16 @@ export function usePaymentWebView(): {
     () => new OpenPaymentWebView(paymentRepository),
     [paymentRepository],
   );
+  const createToken = useCallback(
+    (bookingId: string) => usecase.createToken(bookingId),
+    [usecase],
+  );
+  const exchange = useCallback(
+    (pageToken: string) => usecase.exchange(pageToken),
+    [usecase],
+  );
   return {
-    createToken: (bookingId) => usecase.createToken(bookingId),
-    exchange: (pageToken) => usecase.exchange(pageToken),
+    createToken,
+    exchange,
   };
 }

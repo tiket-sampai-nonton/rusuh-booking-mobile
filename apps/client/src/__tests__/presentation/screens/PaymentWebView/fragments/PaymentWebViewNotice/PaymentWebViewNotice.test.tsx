@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react-native";
+import { fireEvent, render, screen } from "@testing-library/react-native";
 
 import { PaymentWebViewNotice } from "../../../../../../presentation/screens/PaymentWebView/fragments/PaymentWebViewNotice/index";
 
@@ -12,5 +12,17 @@ describe("PaymentWebViewNotice", () => {
 
     expect(screen.getByTestId(testID)).toBeTruthy();
     expect(screen.getByText(message)).toBeTruthy();
+  });
+
+  it("offers a retry action for recoverable native page-load failures", () => {
+    const onRetry = jest.fn();
+    render(<PaymentWebViewNotice variant="error" onRetry={onRetry} />);
+
+    fireEvent.press(
+      screen.getByRole("button", {
+        name: "Coba buka halaman pembayaran lagi",
+      }),
+    );
+    expect(onRetry).toHaveBeenCalledTimes(1);
   });
 });

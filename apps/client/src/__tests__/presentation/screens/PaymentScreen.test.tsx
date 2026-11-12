@@ -254,12 +254,19 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     fireEvent.press(screen.getByTestId("checkout-leave-confirm"));
 
     await waitFor(() =>
-      expect(notification.scheduled).toEqual([
-        expect.objectContaining({
-          kind: "payment_cancelled",
-          deepLink: "/payment/bk-1",
-        }),
-      ]),
+      expect(notification.scheduled).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            kind: "payment_timeout",
+            notificationId: "payment-timeout-bk-1",
+            deepLink: "/payment/bk-1",
+          }),
+          expect.objectContaining({
+            kind: "payment_cancelled",
+            deepLink: "/payment/bk-1",
+          }),
+        ]),
+      ),
     );
     expect(mockRouter.replace).toHaveBeenCalledWith("/");
   });

@@ -17,6 +17,7 @@ import {
 } from "react-native";
 
 import {
+  brand,
   designColors,
   designBorders,
   designSpacingSemantic,
@@ -107,6 +108,18 @@ export const browseCategoryGrid: ViewStyle = {
   flexWrap: "wrap",
   gap: 16,
 };
+export const browseCategoryControls: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 16,
+};
+export const browseCategoryControlsCompact: ViewStyle = {
+  flexDirection: "column",
+  flexWrap: "nowrap",
+  alignItems: "stretch",
+  gap: 12,
+};
 export const browseCategoryLabel = (isActive: boolean): TextStyle => ({
   color: isActive ? designColors.ground : designColors.ink,
   fontFamily: plusJakartaSansFonts.bold,
@@ -170,12 +183,14 @@ export const browseSortControl = {
   cursor: "pointer",
   outlineWidth: 0,
 };
+export const BROWSE_NATIVE_CATEGORY_BAR_HEIGHT = 92;
+
 export const browseNativeCategoryBar: ViewStyle = {
   position: "absolute",
   left: 0,
   right: 0,
   zIndex: 98,
-  height: 52,
+  height: BROWSE_NATIVE_CATEGORY_BAR_HEIGHT,
   backgroundColor: designColors.ground,
   borderBottomWidth: 2,
   borderBottomColor: designColors.ink,
@@ -188,13 +203,20 @@ export const browseNativeCategoryScrollContent: ViewStyle = {
   paddingVertical: 8,
   gap: 8,
 };
+export const browseNativeCategorySummary: ViewStyle = {
+  paddingHorizontal: 16,
+  paddingBottom: 8,
+};
+export const browseNativeCategoryScroll: ViewStyle = {
+  height: 52,
+};
 export const browseNativeCategoryButton = (active: boolean): ViewStyle => ({
   paddingHorizontal: 16,
   minHeight: 34,
   justifyContent: "center",
   borderWidth: 2,
   borderColor: designColors.ink,
-  backgroundColor: active ? designColors.ink : designColors.ground,
+  backgroundColor: active ? brand.deep : designColors.ground,
 });
 export const browseNativeCategoryLabel = (active: boolean): TextStyle => ({
   color: active ? designColors.ground : designColors.ink,
@@ -267,7 +289,7 @@ export const browseCategoryBtn: ViewStyle = {
 
 export const browseCategoryBtnActive: ViewStyle = {
   ...browseCategoryBtn,
-  backgroundColor: designColors.ink,
+  backgroundColor: brand.deep,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════

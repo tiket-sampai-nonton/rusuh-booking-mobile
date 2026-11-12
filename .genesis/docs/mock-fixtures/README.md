@@ -45,13 +45,13 @@ QUANTITY_EXCEEDS_LIMIT, MIXED_CATEGORIES_NOT_ALLOWED, BOOKING_LOCKED, BOOKING_VE
 EDIT_LIMIT_REACHED, BOOKING_NOT_PAYABLE, PAYMENT_METHOD_UNAVAILABLE, PAYMENT_PROVIDER_UNAVAILABLE,
 PAYMENT_PAGE_TOKEN_INVALID, DEPENDENCY_UNAVAILABLE, UNAUTHORIZED`
 
-## FE-NEED (O1) gaps — mocked here, not yet in the contract
+## Remaining FE-NEED (O1) gaps — mocked here
 
-The contracts do **not** yet expose these; the fixtures model the *expected* shape so the FE is unblocked (track O1 with BE):
+The supplied 07-11 machine-readable contract snapshot does **not** expose all of these; the fixtures model the expected shapes for deterministic offline use. Live runtime status is in `../AS-BUILT-ALIGNMENT-2026-11-12.md`:
 - **Anonymous `JoinRequest`** — the contract's `JoinRequest` requires `buyerNik`+`email`+`emailConfirmation`+`consentNik`. The "fully anonymous, no-NIK join" FE-NEED is represented by the WAITING fixture; confirm final body with BE.
 - **Set-buyer endpoint** (`POST /booking-sessions/{id}/buyer`) — not in the contract; buyer NIK currently rides on queue join. Mock treats buyer as already set on the session.
 - **`remainingTickets`** on event detail — present on `StatusDocument` (queue) but not `EventDetail`; mock uses category `available`.
-- **`EventDetail.description` JSON** — not in the contract; add when BE delivers.
+- **`EventDetail.description` JSON** — present in the live event-detail response and consumed by FE, but not modeled in the 07-11 OpenAPI snapshot; request an updated schema from BE.
 - **profile-complete indicator on verify** — modeled via `account.hasNik` in the verify fixture.
 
 ## How the adapters consume this (RBT-014 / RBT-065)

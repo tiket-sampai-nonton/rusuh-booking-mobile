@@ -77,7 +77,6 @@ export const historyStyles = StyleSheet.create({
   },
   /** Main content container */
   main: {
-    maxWidth: 1200,
     width: "100%" as DimensionValue,
     alignSelf: "center" as const,
     paddingHorizontal: designSpacingSemantic.m,
@@ -92,6 +91,63 @@ export const historyStyles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.56, // 0.04em
     marginBottom: designSpacingSemantic.m,
+  },
+  resultsToolbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 32,
+    flexWrap: "wrap",
+    gap: 16,
+  },
+  resultsCount: {
+    color: designColors.inkMuted,
+    fontFamily: plusJakartaSansFonts.regular,
+    fontSize: 14,
+  },
+  resultsCountValue: {
+    color: designColors.ink,
+    fontFamily: plusJakartaSansFonts.bold,
+  },
+  viewToggle: {
+    flexDirection: "row",
+    borderWidth: designBorders.standard,
+    borderColor: designColors.ink,
+  },
+  viewButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: designColors.ground,
+  },
+  viewButtonActive: {
+    backgroundColor: designColors.ink,
+  },
+  viewDivider: {
+    width: designBorders.standard,
+    backgroundColor: designColors.ink,
+  },
+  nativeGridCell: {
+    width: "50%",
+    paddingHorizontal: 8,
+    marginBottom: 16,
+  },
+  nativeListCell: {
+    alignSelf: "stretch",
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  webGridRow: {
+    flexDirection: "row",
+    marginHorizontal: designSpacingSemantic.m,
+  },
+  webListCell: {
+    width: "100%",
+    marginBottom: 16,
+  },
+  mobileWebGridCell: {
+    paddingHorizontal: 16,
   },
   /** Grid container — ink background creates 2px borders via gap */
   gridContainer: {
@@ -190,19 +246,10 @@ export const historyStateStyles = StyleSheet.create({
   },
 });
 
-/** Virtualized list content with the same centered desktop width. */
-export const historyListContent = (
-  bottom: number,
-  isDesktop: boolean,
-): ViewStyle => ({
+/** Virtualized list content, inset like the Home screen. */
+export const historyListContent = (bottom: number): ViewStyle => ({
   paddingBottom: bottom + 64,
-  ...(isDesktop
-    ? {
-        maxWidth: 1200,
-        width: "100%" as DimensionValue,
-        alignSelf: "center" as const,
-      }
-    : {}),
+  width: "100%" as DimensionValue,
 });
 
 /** Multi-column grid row (desktop) — using ink background for borders. */

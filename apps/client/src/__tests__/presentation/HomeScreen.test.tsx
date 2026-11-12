@@ -263,7 +263,7 @@ describe("HomeScreen", () => {
     );
     fireEvent.press(screen.getAllByTestId("hero-see-all")[0]);
     expect(mockRouter.navigate).toHaveBeenLastCalledWith("/browse");
-    expect(mockHeroAutoPlay).toBe(Platform.OS === "web");
+    expect(mockHeroAutoPlay).toBe(true);
   });
 
   it("handles desktop header routes and section links", async () => {

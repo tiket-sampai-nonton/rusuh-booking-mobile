@@ -109,14 +109,9 @@ export function HeroSlide({
         />
       </Animated.View>
 
-      {/* Native: grayscale approximation with stronger desaturation */}
+      {/* Native uses a subtle dark tint to preserve image detail and text contrast. */}
       {!isWeb && (
-        <>
-          {/* Dark layer for contrast reduction */}
-          <View style={[componentStyles.elementPosition0, pointerEventsNone]} />
-          {/* Gray layer for desaturation */}
-          <View style={[componentStyles.elementPosition1, pointerEventsNone]} />
-        </>
+        <View style={[componentStyles.elementPosition0, pointerEventsNone]} />
       )}
     </Animated.View>
   );

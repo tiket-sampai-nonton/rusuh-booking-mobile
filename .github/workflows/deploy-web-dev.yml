@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: release-pipeline-${{ github.ref }}
@@ -52,8 +53,65 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm run test:coverage -- --runInBand --ci
+      - name: Upload Jest coverage for SonarCloud
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: apps/client/coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 1
       - run: npm audit --omit=dev --audit-level=high
-      # SonarCloud remains temporarily skipped by project decision.
+
+  sonarcloud:
+    name: SonarCloud scan and quality gate
+    needs: quality_gates
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    environment: development
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: sonar-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: apps/client/coverage
+      - name: Validate SonarCloud configuration
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
+        run: |
+          test -n "$SONAR_TOKEN" || {
+            echo 'SONAR_TOKEN is missing from GitHub Actions secrets.'
+            exit 1
+          }
+          test -n "$SONAR_ORGANIZATION" || {
+            echo 'SONAR_ORGANIZATION is missing from GitHub Actions variables.'
+            exit 1
+          }
+          test -n "$SONAR_PROJECT_KEY" || {
+            echo 'SONAR_PROJECT_KEY is missing from GitHub Actions variables.'
+            exit 1
+          }
+      - name: Run SonarCloud scan and wait for quality gate
+        uses: SonarSource/sonarqube-scan-action@v8.3.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >-
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=apps/client/src
+            -Dsonar.tests=apps/client/src/__tests__
+            -Dsonar.exclusions=apps/client/src/__tests__/**
+            -Dsonar.javascript.lcov.reportPaths=apps/client/coverage/lcov.info
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=300
 
   web_release:
     name: Build and deploy web

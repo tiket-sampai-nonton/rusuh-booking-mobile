@@ -7,6 +7,8 @@
 > **Added 2026-10-30:** aligns this project to the 6-gate GENESIS model (H1 Grooming → H2 Docs →
 > H3 Tasks → H4 Skills/Rules → H5 Go/No-Go → **H6 Project-Setup verify**).
 
+> **Historical gate checklist:** this file records the original H6 acceptance checklist and its status at the time. Use `PIPELINE.md`, `WEB-HOSTING-GUIDE.md`, and [`AS-BUILT-ALIGNMENT-2026-11-12.md`](AS-BUILT-ALIGNMENT-2026-11-12.md) for current setup and implementation status; do not interpret the original pending gate marker as a current CI result.
+
 ---
 
 ## How this runs (reads with `WORKFLOW.md`)

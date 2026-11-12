@@ -1,4 +1,5 @@
 import { Text, View } from "react-native";
+import { Pressable } from "react-native";
 
 export type PaymentWebViewNoticeVariant = "web" | "error" | "loading";
 
@@ -27,8 +28,10 @@ const NOTICE_COPY: Readonly<
 
 export function PaymentWebViewNotice({
   variant,
+  onRetry,
 }: {
   readonly variant: PaymentWebViewNoticeVariant;
+  readonly onRetry?: () => void;
 }) {
   const copy = NOTICE_COPY[variant];
   const textClass = variant === "loading" ? "text-sm" : "text-center text-sm";
@@ -39,6 +42,17 @@ export function PaymentWebViewNotice({
       testID={copy.testID}
     >
       <Text className={`${textClass} ${copy.textClassName}`}>{copy.text}</Text>
+      {variant === "error" && onRetry ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Coba buka halaman pembayaran lagi"
+          onPress={onRetry}
+          className="mt-4 min-h-11 items-center justify-center border-2 border-foreground px-6"
+          testID="paywv-retry"
+        >
+          <Text className="text-sm font-bold text-foreground">COBA LAGI</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }

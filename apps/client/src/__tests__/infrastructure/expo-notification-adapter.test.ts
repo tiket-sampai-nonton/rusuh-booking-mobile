@@ -25,6 +25,7 @@ jest.mock("@notifee/react-native", () => ({
   default: {
     requestPermission: jest.fn().mockResolvedValue({ authorizationStatus: 1 }),
     createChannel: jest.fn().mockResolvedValue("booking-updates"),
+    cancelNotification: jest.fn().mockResolvedValue(undefined),
     displayNotification: jest.fn().mockResolvedValue("notification-id"),
     createTriggerNotification: jest.fn().mockResolvedValue("trigger-id"),
     onForegroundEvent: jest.fn().mockImplementation((handler) => {
@@ -48,6 +49,7 @@ const Notifee = jest.requireMock("@notifee/react-native") as {
   default: {
     requestPermission: jest.Mock;
     createChannel: jest.Mock;
+    cancelNotification: jest.Mock;
     displayNotification: jest.Mock;
     createTriggerNotification: jest.Mock;
     onForegroundEvent: jest.Mock;
@@ -72,6 +74,7 @@ describe("ExpoNotificationAdapter (Notifee local notifications)", () => {
       authorizationStatus: 1,
     });
     Notifee.default.createChannel.mockResolvedValue("booking-updates");
+    Notifee.default.cancelNotification.mockResolvedValue(undefined);
     Notifee.default.displayNotification.mockResolvedValue("notification-id");
     Notifee.default.createTriggerNotification.mockResolvedValue("trigger-id");
     Notifee.default.getInitialNotification.mockResolvedValue(null);
@@ -147,8 +150,10 @@ describe("ExpoNotificationAdapter (Notifee local notifications)", () => {
       body: "Tiketmu aktif.",
       deepLink: "/success/bk-1",
     } as const;
-    await adapter.scheduleLocal(message);
-    await adapter.scheduleLocal(message);
+    await Promise.all([
+      adapter.scheduleLocal(message),
+      adapter.scheduleLocal(message),
+    ]);
 
     expect(Notifee.default.createChannel).toHaveBeenCalledWith(
       expect.objectContaining({ id: "booking-updates" }),
@@ -168,6 +173,14 @@ describe("ExpoNotificationAdapter (Notifee local notifications)", () => {
       }),
     );
     expect(Notifee.default.displayNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it("cancels scheduled or displayed notifications by their stable ID", async () => {
+    const adapter = new ExpoNotificationAdapter();
+    await adapter.cancelLocal("payment-timeout-bk-1");
+    expect(Notifee.default.cancelNotification).toHaveBeenCalledWith(
+      "payment-timeout-bk-1",
+    );
   });
 
   it("schedules future notifications through a Notifee timestamp trigger", async () => {

@@ -158,9 +158,9 @@ export function HomeScreen() {
               events={data.upcoming.slice(0, 3)}
               onBook={goToEvent}
               onSeeAll={goBrowse}
-              // Native prototype has one static featured hero. Avoid rotating
-              // three full-bleed images (and their decode work) every 6s.
-              autoPlay={!isNative && isScreenFocused}
+              // Rotate the featured events on every platform, and pause while
+              // Home is covered so the native carousel does no background work.
+              autoPlay={isScreenFocused}
               isActive={isScreenFocused}
             />
           )}

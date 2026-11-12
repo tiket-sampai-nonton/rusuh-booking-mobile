@@ -316,7 +316,7 @@ describe("WaitingRoomScreen — terminal + error states", () => {
     );
   });
 
-  it("renders the TURN_MISSED claim-error state ('Giliran Berakhir')", () => {
+  it("notifies the user when the server confirms their queue turn timed out", async () => {
     mockUseQueuePolling.mockReturnValue(
       polling({
         entry: entry({ status: "ADMITTED", position: 0 }),
@@ -330,6 +330,15 @@ describe("WaitingRoomScreen — terminal + error states", () => {
     expect(screen.getByTestId("waiting-claim-error")).toHaveTextContent(
       "Giliran Berakhir",
       { exact: false },
+    );
+    await waitFor(() =>
+      expect(mockScheduleLocal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: "queue_timeout",
+          notificationId: "queue-timeout-q-1",
+          deepLink: "/events/evt-1",
+        }),
+      ),
     );
   });
 

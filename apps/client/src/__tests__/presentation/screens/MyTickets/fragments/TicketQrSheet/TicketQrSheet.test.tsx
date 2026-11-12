@@ -74,17 +74,51 @@ describe("TicketQrSheet", () => {
     render(
       <TicketQrSheet
         {...baseProps}
-        bookingTickets={[{ ticketCode: "T-1", qrPayload: "safe-payload" }]}
+        bookingTickets={[
+          {
+            ticketCode: "T-1",
+            qrPayload: "safe-payload",
+            categoryCode: "VIP",
+            attendeeName: "Rizky",
+            attendeeNikMasked: "31****89",
+          },
+        ]}
         onDownload={onDownload}
       />,
     );
 
     expect(screen.getByText("T-1")).toBeTruthy();
+    expect(screen.getByText("Kategori VIP")).toBeTruthy();
+    expect(screen.getByText("Rizky · 31****89")).toBeTruthy();
     expect(screen.getByTestId("qr-code").props.accessibilityLabel).toBe(
       "safe-payload",
     );
     fireEvent.press(screen.getByText("Unduh E-Tiket"));
     expect(onDownload).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows booking details for an expired order without requesting or inventing a QR", () => {
+    render(
+      <TicketQrSheet
+        {...baseProps}
+        bookingSummary={{
+          bookingId: "expired-1",
+          publicRef: "RBT-EXPIRED-1",
+          eventName: "Stadium Tour Jakarta",
+          status: "EXPIRED",
+          amountMinor: 275000,
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Detail Tiket")).toBeTruthy();
+    expect(screen.getByTestId("booking-order-summary")).toBeTruthy();
+    expect(screen.getByText("Referensi RBT-EXPIRED-1")).toBeTruthy();
+    expect(screen.getByText("Status EXPIRED")).toBeTruthy();
+    expect(screen.getByText("Rp 275.000")).toBeTruthy();
+    expect(screen.getByText(/e-tiket tidak diterbitkan/)).toBeTruthy();
+    expect(screen.queryByTestId("qr-code")).toBeNull();
+    expect(screen.queryByText("Unduh E-Tiket")).toBeNull();
   });
 
   it("does not close when a tap stays inside the sheet and shows download errors", () => {

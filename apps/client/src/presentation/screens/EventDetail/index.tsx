@@ -224,7 +224,7 @@ export function EventDetailScreen({
   const galleryImages = desc.gallery ?? [];
 
   // Use venue details from the event. Missing venue data stays visibly missing.
-  const venueInfo = createVenueInfo(event.venue);
+  const venueInfo = createVenueInfo(event.venue, desc.location);
 
   return (
     <ScreenFade>
@@ -391,13 +391,25 @@ export function EventDetailScreen({
   );
 }
 
-function createVenueInfo(venue?: string) {
-  if (!venue) return undefined;
-  const [venueName, ...addressParts] = venue.split("·");
+function createVenueInfo(
+  venue?: string,
+  location?: ReturnType<typeof parseDescription>["location"],
+) {
+  if (!venue && !location) return undefined;
+  const [venueName = "", ...addressParts] = (venue ?? "").split("·");
+  const coordinateQuery =
+    typeof location?.latitude === "number" &&
+    typeof location.longitude === "number"
+      ? `${location.latitude},${location.longitude}`
+      : undefined;
   return {
-    name: venueName.trim(),
-    address: addressParts.join("·").trim(),
-    mapImage: undefined as string | undefined,
-    mapsUrl: undefined as string | undefined,
+    name: location?.name ?? venueName.trim(),
+    address: location?.address ?? addressParts.join("·").trim(),
+    mapImage: location?.mapImage,
+    mapsUrl:
+      location?.mapsUrl ??
+      (coordinateQuery
+        ? `https://maps.google.com/?q=${encodeURIComponent(coordinateQuery)}`
+        : undefined),
   };
 }
