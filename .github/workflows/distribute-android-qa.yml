@@ -91,6 +91,14 @@ jobs:
           }
           chmod 600 "$KEYSTORE_PATH"
           echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+      - name: Capture clean Android OTA fingerprint
+        run: |
+          # Compute before prebuild and Gradle generate files inside dependencies.
+          # Expo's Gradle plugin accepts this override when creating its fingerprint asset.
+          FINGERPRINT="$(npx --no-install expo-updates fingerprint:generate --platform android --workflow managed | node -e 'let input=""; process.stdin.on("data", chunk => input += chunk); process.stdin.on("end", () => { const hash = JSON.parse(input).hash; if (!/^[a-f0-9]{40}$/.test(hash)) process.exit(1); process.stdout.write(hash); });')"
+          test -n "$FINGERPRINT" || { echo 'Unable to calculate the Android OTA fingerprint.'; exit 1; }
+          echo "EXPO_UPDATES_FINGERPRINT_OVERRIDE=$FINGERPRINT" >> "$GITHUB_ENV"
+          echo "Android OTA runtime: $FINGERPRINT"
       - name: Generate Android project
         run: npx expo prebuild --platform android --clean --no-install
       - name: Verify OTA settings in the generated Android project
@@ -133,6 +141,12 @@ jobs:
           fi
           APK_DIR="$(dirname "$APK_SOURCE")"
           mv "$APK_SOURCE" "$APK_DIR/$APK_NAME"
+          APK_RUNTIME="$(unzip -p "$APK_DIR/$APK_NAME" assets/fingerprint)"
+          if [ "$APK_RUNTIME" != "$EXPO_UPDATES_FINGERPRINT_OVERRIDE" ]; then
+            echo 'The APK fingerprint does not match the clean OTA fingerprint.'
+            exit 1
+          fi
+          echo "Verified APK OTA runtime: $APK_RUNTIME"
       - uses: actions/upload-artifact@v4
         with:
           name: rusuh-booking${{ inputs.target_environment == 'development' && '.preprod' || '' }}.apk
