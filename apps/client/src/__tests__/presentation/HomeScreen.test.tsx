@@ -165,8 +165,8 @@ describe("HomeScreen", () => {
     // Settle the query so the suite leaves no pending work behind.
     release([]);
     await waitFor(() =>
-      // : Once loaded, letters disappear and section-events appears
-      expect(screen.queryByTestId("section-events")).toBeTruthy(),
+      // : Once loaded, letters disappear and the upcoming events section appears
+      expect(screen.queryByTestId("home-upcoming-events-section")).toBeTruthy(),
     );
   });
 
@@ -174,9 +174,9 @@ describe("HomeScreen", () => {
     renderWithProviders(<HomeScreen />, {
       container: { eventRepository: repoReturning(EVENT_FIXTURES) },
     });
-    // : testID is section-events instead of section-upcoming
+    // : The upcoming events section has a stable semantic test ID.
     await waitFor(() =>
-      expect(screen.getByTestId("section-events")).toBeTruthy(),
+      expect(screen.getByTestId("home-upcoming-events-section")).toBeTruthy(),
     );
     // Native and web use the same Indonesian Home section title.
     expect(screen.getByText("Jelajahi Event")).toBeTruthy();
@@ -187,7 +187,7 @@ describe("HomeScreen", () => {
     ).toBeGreaterThanOrEqual(1);
     // History is rendered on Home when the repository provides past events.
     expect(screen.getByTestId("section-history")).toBeTruthy();
-    fireEvent(screen.getByTestId("section-events"), "layout", {
+    fireEvent(screen.getByTestId("home-upcoming-events-section"), "layout", {
       nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
     });
     fireEvent(screen.getByTestId("section-history"), "layout", {
@@ -250,8 +250,8 @@ describe("HomeScreen", () => {
     // : testID is v2-hero instead of home-hero
     await waitFor(() => screen.getByTestId("v2-hero"));
     // Fire onLayout so the featured-section Y is measured (scroll target).
-    // : testID is section-events instead of section-upcoming
-    fireEvent(screen.getByTestId("section-events"), "layout", {
+    // : The upcoming events section has a stable semantic test ID.
+    fireEvent(screen.getByTestId("home-upcoming-events-section"), "layout", {
       nativeEvent: { layout: { x: 0, y: 760, width: 393, height: 600 } },
     });
     // Each hero slide carries its own CTAs (prototype .slide-body).
