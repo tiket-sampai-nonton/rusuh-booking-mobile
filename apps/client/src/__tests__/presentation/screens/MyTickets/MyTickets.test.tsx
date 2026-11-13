@@ -142,6 +142,7 @@ describe("MyTicketsScreen", () => {
         amountMinor: 45000000,
         ticketQuantity: 1,
         buyerNikMasked: "31****89",
+        eventStartsAt: "2026-11-15T12:30:00Z",
         tickets: [
           {
             ticketCode: "TICKET-1",
@@ -165,18 +166,23 @@ describe("MyTicketsScreen", () => {
     fireEvent.press(screen.getByTestId("account-ticket-booking-1"));
     expect(await screen.findByTestId("ticket-qr-sheet")).toBeTruthy();
     expect(await screen.findByText("TICKET-1")).toBeTruthy();
+    expect(screen.getByText("15 Nov 2026")).toBeTruthy();
+    expect(screen.getByText("19:30 WIB")).toBeTruthy();
     expect(screen.getByTestId("qr-code").props.accessibilityLabel).toBe(
       "signed-ticket-payload",
     );
     fireEvent.press(screen.getByText("Unduh E-Tiket"));
     await waitFor(() =>
-      expect(mockDownloadTickets).toHaveBeenCalledWith(
-        "booking-1",
-        1,
-        ["signed-ticket-payload"],
-        "Rusuh Fest 2026",
-        ["TICKET-1"],
-      ),
+      expect(mockDownloadTickets).toHaveBeenCalledWith("booking-1", [
+        expect.objectContaining({
+          qrPayload: "signed-ticket-payload",
+          ticketCode: "TICKET-1",
+          categoryCode: "FEST",
+          attendeeName: "Rizky",
+          attendeeNikMasked: "31****89",
+          startsAt: "2026-11-15T12:30:00Z",
+        }),
+      ]),
     );
     mockDownloadTickets.mockRejectedValueOnce(
       new Error("Penyimpanan tidak tersedia"),
@@ -246,13 +252,13 @@ describe("MyTicketsScreen", () => {
 
     fireEvent.press(screen.getByTestId("ticket-download-booking-session"));
     await waitFor(() =>
-      expect(mockDownloadTickets).toHaveBeenCalledWith(
-        "booking-session",
-        1,
-        ["issued-qr"],
-        expect.any(String),
-        ["TKT-1"],
-      ),
+      expect(mockDownloadTickets).toHaveBeenCalledWith("booking-session", [
+        expect.objectContaining({
+          qrPayload: "issued-qr",
+          ticketCode: "TKT-1",
+          eventName: "Rusuh Fest 2026",
+        }),
+      ]),
     );
     mockDownloadTickets.mockRejectedValueOnce("disk unavailable");
     fireEvent.press(screen.getByTestId("ticket-download-booking-session"));
@@ -357,8 +363,9 @@ describe("MyTicketsScreen", () => {
     fireEvent.press(screen.getByTestId("account-ticket-booking-event-past"));
     expect(await screen.findByTestId("ticket-qr-sheet")).toBeTruthy();
     expect(await screen.findByText("OLD-TICKET-1")).toBeTruthy();
-    expect(screen.getByText("Kategori REG")).toBeTruthy();
-    expect(screen.getByText("Rizky Rachmawan · 31****89")).toBeTruthy();
+    expect(screen.getByText("REG")).toBeTruthy();
+    expect(screen.getByText("Rizky Rachmawan")).toBeTruthy();
+    expect(screen.getByText("31****89")).toBeTruthy();
     fireEvent.press(screen.getByTestId("ticket-qr-close"));
 
     fireEvent.press(screen.getByTestId("account-ticket-booking-expired"));
@@ -560,13 +567,13 @@ describe("MyTicketsScreen", () => {
     expect(await screen.findByText("WEB-1")).toBeTruthy();
     fireEvent.press(screen.getByText("Unduh E-Tiket"));
     await waitFor(() =>
-      expect(mockDownloadTickets).toHaveBeenCalledWith(
-        "booking-web",
-        1,
-        ["web-payload"],
-        "Rusuh Fest 2026",
-        ["WEB-1"],
-      ),
+      expect(mockDownloadTickets).toHaveBeenCalledWith("booking-web", [
+        expect.objectContaining({
+          qrPayload: "web-payload",
+          ticketCode: "WEB-1",
+          eventName: "Rusuh Fest 2026",
+        }),
+      ]),
     );
     view.unmount();
     platformSpy.restore();

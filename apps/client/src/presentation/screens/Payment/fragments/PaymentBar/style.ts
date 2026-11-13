@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { designColors, designBorders } from "@presentation/theme";
 
-import type { DynamicStyle } from "@presentation/utils/style";
+import { hardShadowStyle, type DynamicStyle } from "@presentation/utils/style";
 
 export const componentStyles = StyleSheet.create({
   elementColor0: { color: designColors.accent },
@@ -23,7 +23,9 @@ export function styleForPaymentBarPressable1(
 ): DynamicStyle {
   return {
     backgroundColor: canPay ? designColors.accent : designColors.inkMuted,
-    borderColor: canPay ? designColors.accent : designColors.inkMuted,
+    borderWidth: designBorders.standard,
+    borderColor: canPay ? designColors.ink : designColors.inkMuted,
+    ...(canPay ? hardShadowStyle(4, 4, designColors.ink) : {}),
     minHeight: 48,
     paddingHorizontal: isMobileWeb ? 14 : 24,
     paddingVertical: isMobileWeb ? 10 : 14,

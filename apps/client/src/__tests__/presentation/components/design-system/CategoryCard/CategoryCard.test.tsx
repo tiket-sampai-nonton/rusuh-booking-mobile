@@ -7,7 +7,7 @@ jest.mock("react-native-reanimated", () => {
 });
 
 // eslint-disable-next-line import/first
-import { CategoryCard } from "../../../../../presentation/components/design-system/CategoryCard/index";
+import { CategoryCard } from "../../../../../presentation/components/CategoryCard/index";
 
 describe("CategoryCard", () => {
   afterEach(() => {

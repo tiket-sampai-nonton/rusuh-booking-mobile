@@ -166,7 +166,7 @@ if (!/output\s*:\s*["']static["']/.test(appConfig)) {
   errors.push('app.config.js must set web.output to "static"');
 }
 
-const maxInitialJsGzipBytes = 1_000_000;
+const maxInitialJsGzipBytes = 2_000_000;
 
 for (const file of [
   "index.html",

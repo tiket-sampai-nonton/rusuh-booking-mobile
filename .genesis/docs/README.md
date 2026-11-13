@@ -5,7 +5,7 @@
 > **Gate model: 6 human gates** — H1 Grooming → H2 Docs → H3 Tasks → H4 Skills/Rules → H5 Go/No-Go → H6 Project-Setup.
 > **Authoritative order when docs disagree:** `03-GROOMING-DECISIONS.md` → OpenAPI contracts → `docs/FE-BE-align-contract.md` → `docs/FE-Flow-Diagrams.md` → prototype V5.
 
-> **Current code/docs audit (2026-11-12):** see [`AS-BUILT-ALIGNMENT-2026-11-12.md`](AS-BUILT-ALIGNMENT-2026-11-12.md) for the latest implementation status, live BE smoke evidence, unresolved device verification, and the disposition of every file under this documentation set. Phase/gate reports retain their original dates as historical records.
+> **Current code/docs audit (2026-11-13):** see [`AS-BUILT-ALIGNMENT-2026-11-13.md`](AS-BUILT-ALIGNMENT-2026-11-13.md) for RBT-140 behavior, Lighthouse results, current BE constraints, issue inventory, and the disposition of every file under this documentation set. The 2026-11-12 audit and phase/gate reports retain their original dates as historical records.
 
 ---
 
@@ -42,7 +42,8 @@
 | `docs/SECURITY.md` | generated |
 | `docs/OBSERVABILITY.md` | generated |
 | `docs/TESTING-STRATEGY.md` | generated |
-| `docs/AS-BUILT-ALIGNMENT-2026-11-12.md` | current code/API contract reconciliation and full document-set audit |
+| `docs/AS-BUILT-ALIGNMENT-2026-11-12.md` | prior dated code/API reconciliation and document-set audit |
+| `docs/AS-BUILT-ALIGNMENT-2026-11-13.md` | current RBT-140 code/API reconciliation, test evidence, Lighthouse results, and document-set audit |
 
 ---
 
@@ -57,7 +58,7 @@
 
 ## Original Phase 1 open dependencies (historical snapshot)
 
-See the 2026-11-12 as-built audit for current status. The original items are retained here as grooming history.
+See the latest dated as-built audit (`AS-BUILT-ALIGNMENT-2026-11-13.md`) for current status. The original items are retained here as grooming history.
 
 | ID | Blocks |
 |----|--------|

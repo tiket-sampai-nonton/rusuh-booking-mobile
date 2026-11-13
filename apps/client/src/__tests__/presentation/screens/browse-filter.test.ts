@@ -8,20 +8,18 @@
  */
 import type { EventSummary } from "@domain/repositories/event.repository";
 import {
-  GENRES,
   SORTS,
   TIMES,
   filterEvents,
   hasBrowseQueryParams,
   inTimeBucket,
   isFiltered,
-  matchesCategory,
   readGenre,
   readParam,
 } from "@presentation/screens/Browse/filter";
 
 const DAY = 86_400_000;
-const NOW = Date.parse("2026-11-01T00:00:00.000Z");
+const NOW = Date.parse("2026-11-02T00:00:00.000Z"); // Monday in WIB
 
 /** Build a minimal EventSummary with an offset-from-now start. */
 function ev(id: string, name: string, daysFromNow: number): EventSummary {
@@ -34,6 +32,10 @@ function ev(id: string, name: string, daysFromNow: number): EventSummary {
     status: "AVAILABLE",
     startsAt: new Date(NOW + daysFromNow * DAY).toISOString(),
     remainingTickets: 300,
+    genres:
+      name === "Rock Fest Jakarta"
+        ? ["Festival", "Rock"]
+        : [name.split(" ")[0]],
   };
 }
 
@@ -81,17 +83,17 @@ describe("hasBrowseQueryParams", () => {
 
 describe("readGenre (case-insensitive, user-controlled URL)", () => {
   it("accepts the canonical capitalized genre", () => {
-    expect(readGenre("Rock")).toBe("Rock");
+    expect(readGenre("Rock")).toBe("ROCK");
   });
 
   it("normalizes a lowercase URL genre to the canonical form", () => {
     // Home navigates /browse?genre=rock — the screen must still filter Rock.
-    expect(readGenre("rock")).toBe("Rock");
-    expect(readGenre("elektronik")).toBe("Elektronik");
+    expect(readGenre("rock")).toBe("ROCK");
+    expect(readGenre("elektronik")).toBe("ELEKTRONIK");
   });
 
   it("falls back to 'Semua' for an unknown genre", () => {
-    expect(readGenre("polka")).toBe("polka");
+    expect(readGenre("polka")).toBe("POLKA");
   });
 
   it("falls back to 'Semua' for undefined", () => {
@@ -99,7 +101,7 @@ describe("readGenre (case-insensitive, user-controlled URL)", () => {
   });
 
   it("reads the first element of an array param", () => {
-    expect(readGenre(["jazz", "rock"])).toBe("Jazz");
+    expect(readGenre(["jazz", "rock"])).toBe("JAZZ");
   });
 });
 
@@ -108,17 +110,35 @@ describe("inTimeBucket", () => {
     expect(inTimeBucket(ev("x", "X", 400), "all", NOW)).toBe(true);
   });
 
-  it("keeps only events within 7 days for 'week'", () => {
+  it("uses the Monday–Sunday WIB calendar week", () => {
     expect(inTimeBucket(ev("x", "X", 3), "week", NOW)).toBe(true);
     expect(inTimeBucket(ev("x", "X", 20), "week", NOW)).toBe(false);
   });
 
-  it("keeps only events within 30 days for 'month'", () => {
+  it("uses WIB boundaries instead of a rolling week or month", () => {
+    const sunday = Date.parse("2026-11-01T16:59:59Z");
+    const nextMonday = Date.parse("2026-11-01T17:00:00Z");
+    const sundayEvent = {
+      ...ev("s", "S", 0),
+      startsAt: new Date(sunday).toISOString(),
+    };
+    const mondayEvent = {
+      ...ev("m", "M", 0),
+      startsAt: new Date(nextMonday).toISOString(),
+    };
+    expect(inTimeBucket(sundayEvent, "week", sunday)).toBe(true);
+    expect(inTimeBucket(mondayEvent, "week", sunday)).toBe(false);
+    expect(inTimeBucket(mondayEvent, "week", nextMonday)).toBe(true);
+    const nextMonth = { ...mondayEvent, startsAt: "2026-11-30T17:00:00Z" };
+    expect(inTimeBucket(nextMonth, "month", nextMonday)).toBe(false);
+  });
+
+  it("uses the WIB calendar month", () => {
     expect(inTimeBucket(ev("x", "X", 20), "month", NOW)).toBe(true);
     expect(inTimeBucket(ev("x", "X", 60), "month", NOW)).toBe(false);
   });
 
-  it("keeps only events within 90 days for 'quarter'", () => {
+  it("uses three calendar months for 'quarter'", () => {
     expect(inTimeBucket(ev("x", "X", 60), "quarter", NOW)).toBe(true);
     expect(inTimeBucket(ev("x", "X", 120), "quarter", NOW)).toBe(false);
   });
@@ -149,19 +169,6 @@ describe("filterEvents — genre", () => {
   it("returns everything for 'Semua'", () => {
     const out = filterEvents(CATALOG, "Semua", "all", "closest", NOW);
     expect(out).toHaveLength(CATALOG.length);
-  });
-});
-
-describe("matchesCategory", () => {
-  it("matches common category aliases in event names", () => {
-    expect(matchesCategory(CATALOG[0], "festival")).toBe(true);
-    expect(matchesCategory(ev("concert", "Jakarta Konser", 1), "concert")).toBe(
-      true,
-    );
-  });
-
-  it("does not match unrelated categories", () => {
-    expect(matchesCategory(CATALOG[0], "theater")).toBe(false);
   });
 });
 
@@ -225,13 +232,5 @@ describe("isFiltered", () => {
     expect(isFiltered("Rock", "all", "closest")).toBe(true);
     expect(isFiltered("Semua", "week", "closest")).toBe(true);
     expect(isFiltered("Semua", "all", "furthest")).toBe(true);
-  });
-});
-
-describe("constants", () => {
-  it("exposes the prototype genres (Semua first)", () => {
-    expect(GENRES[0]).toBe("Semua");
-    expect(GENRES).toContain("Rock");
-    expect(GENRES).toContain("Orkestra");
   });
 });

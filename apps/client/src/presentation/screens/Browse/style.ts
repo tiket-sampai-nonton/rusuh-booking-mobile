@@ -23,6 +23,7 @@ import {
   designSpacingSemantic,
 } from "@presentation/theme";
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
+import { hardShadowStyle } from "@presentation/utils/style";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LAYOUT
@@ -183,7 +184,7 @@ export const browseSortControl = {
   cursor: "pointer",
   outlineWidth: 0,
 };
-export const BROWSE_NATIVE_CATEGORY_BAR_HEIGHT = 92;
+export const BROWSE_NATIVE_CATEGORY_BAR_HEIGHT = 52;
 
 export const browseNativeCategoryBar: ViewStyle = {
   position: "absolute",
@@ -200,23 +201,23 @@ export const browseNativeCategoryBarPosition = (top: number): ViewStyle => ({
 });
 export const browseNativeCategoryScrollContent: ViewStyle = {
   paddingHorizontal: 16,
-  paddingVertical: 8,
+  alignItems: "center",
   gap: 8,
 };
 export const browseNativeCategorySummary: ViewStyle = {
-  paddingHorizontal: 16,
-  paddingBottom: 8,
+  alignSelf: "center",
 };
 export const browseNativeCategoryScroll: ViewStyle = {
-  height: 52,
+  height: BROWSE_NATIVE_CATEGORY_BAR_HEIGHT,
 };
 export const browseNativeCategoryButton = (active: boolean): ViewStyle => ({
   paddingHorizontal: 16,
   minHeight: 34,
   justifyContent: "center",
   borderWidth: 2,
-  borderColor: active ? designColors.ember : designColors.ink,
+  borderColor: designColors.ink,
   backgroundColor: active ? brand.deep : designColors.ground,
+  ...(active ? hardShadowStyle(3, 3, designColors.ink) : {}),
 });
 export const browseNativeCategoryLabel = (active: boolean): TextStyle => ({
   color: active ? designColors.ground : designColors.ink,
@@ -267,8 +268,8 @@ export const browseCategoryGridCompactStyle: ViewStyle = {
 };
 
 export const browseCategoryBtnCompactStyle: ViewStyle = {
-  minHeight: 38,
-  paddingVertical: 8,
+  minHeight: 34,
+  paddingVertical: 5,
   paddingHorizontal: 12,
 };
 
@@ -279,18 +280,19 @@ export const browseCategoriesInner = (isDesktop: boolean): ViewStyle => ({
 });
 
 export const browseCategoryBtn: ViewStyle = {
-  paddingVertical: 16,
-  paddingHorizontal: 24,
+  minHeight: 34,
+  paddingVertical: 5,
+  paddingHorizontal: 12,
   borderWidth: designBorders.standard,
   borderColor: designColors.ink,
   backgroundColor: designColors.ground,
-  overflow: "hidden",
 };
 
 export const browseCategoryBtnActive: ViewStyle = {
   ...browseCategoryBtn,
   backgroundColor: brand.deep,
-  borderColor: designColors.ember,
+  borderColor: designColors.ink,
+  ...hardShadowStyle(3, 3, designColors.ink),
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -342,6 +344,9 @@ export const browseViewBtn: ViewStyle = {
 export const browseViewBtnActive: ViewStyle = {
   ...browseViewBtn,
   backgroundColor: designColors.accentDeep,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
+  ...hardShadowStyle(3, 3, designColors.ink),
 };
 
 export const browseSortSelect: ViewStyle = {

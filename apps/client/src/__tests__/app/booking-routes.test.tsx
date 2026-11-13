@@ -153,6 +153,7 @@ describe("(booking) routes", () => {
     render(<PaymentScreen />);
     expect((MockPaymentScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({
       bookingId: "bk-1",
+      eventId: "evt-1",
     });
 
     render(<PaymentResultRoute />);
@@ -168,6 +169,7 @@ describe("(booking) routes", () => {
     render(<SuccessScreen />);
     expect((MockSuccessScreen as jest.Mock).mock.calls.at(-1)?.[0]).toEqual({
       bookingId: "bk-1",
+      eventId: "evt-1",
     });
   });
 

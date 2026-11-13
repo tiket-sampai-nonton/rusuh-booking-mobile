@@ -41,7 +41,7 @@ import type { EventDetail as EventDetailData } from "@domain/repositories/event.
 import { trimTrailingSlashes } from "@shared/utils/trim-slashes";
 import { parseDescription } from "@domain/rules/event-description";
 import { eventImage } from "@domain/rules/event-image";
-import { formatDateID, formatTimeID } from "@domain/services/date-format";
+import { formatWIBDateID, formatWIBTimeID } from "@domain/services/date-format";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
 import { useJoinQueue } from "@presentation/hooks/useJoinQueue";
@@ -55,6 +55,7 @@ import { DetailError, DetailLoading } from "./fragments/DetailStates";
 import { FloatingCTA } from "./fragments/FloatingCTA";
 import { Gallery } from "./fragments/Gallery";
 import { InfoCard } from "./fragments/InfoCard";
+import { SalesPeriod } from "./fragments/SalesPeriod";
 import { Lightbox } from "./fragments/Lightbox";
 import { Lineup } from "./fragments/Lineup";
 import { TrustBox } from "./fragments/TrustBox";
@@ -64,7 +65,7 @@ import {
   designDetailScrollContent,
   designDetailStyles as styles,
 } from "./style";
-import { CheckIcon } from "@presentation/components/ArrowIcon";
+import { CheckIcon } from "@presentation/components/Icon";
 import { designColors } from "@presentation/theme";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -90,25 +91,38 @@ function heroStatusLabel(status: string): string {
 interface EventDetailMobileStatsProps {
   readonly remainingTicketsText: string;
   readonly purchaseLimitText: string;
+  readonly salesStartsAt?: string;
+  readonly salesEndsAt?: string;
 }
 
 function EventDetailMobileStats({
   remainingTicketsText,
   purchaseLimitText,
+  salesStartsAt,
+  salesEndsAt,
 }: EventDetailMobileStatsProps) {
   return (
-    <View style={styles.mobileWebTicketStats}>
-      <View style={styles.mobileWebTicketStat}>
-        <Text style={styles.mobileWebTicketStatLabel}>Tiket tersedia</Text>
-        <Text style={styles.mobileWebTicketStatValue}>
-          {remainingTicketsText}
-        </Text>
+    <>
+      <View style={styles.mobileWebTicketStats}>
+        <View style={styles.mobileWebTicketStat}>
+          <Text style={styles.mobileWebTicketStatLabel}>Tiket tersedia</Text>
+          <Text style={styles.mobileWebTicketStatValue}>
+            {remainingTicketsText}
+          </Text>
+        </View>
+        <View style={styles.mobileWebTicketStat}>
+          <Text style={styles.mobileWebTicketStatLabel}>Maks. pembelian</Text>
+          <Text style={styles.mobileWebTicketStatValue}>
+            {purchaseLimitText}
+          </Text>
+        </View>
       </View>
-      <View style={styles.mobileWebTicketStat}>
-        <Text style={styles.mobileWebTicketStatLabel}>Maks. pembelian</Text>
-        <Text style={styles.mobileWebTicketStatValue}>{purchaseLimitText}</Text>
-      </View>
-    </View>
+      {salesStartsAt || salesEndsAt ? (
+        <View style={styles.mobileWebSalesPeriod}>
+          <SalesPeriod startsAt={salesStartsAt} endsAt={salesEndsAt} />
+        </View>
+      ) : null}
+    </>
   );
 }
 
@@ -140,6 +154,15 @@ function EventDetailContent({
 }: EventDetailContentProps) {
   return (
     <View style={[styles.content, isMobileWeb && styles.mobileWebContent]}>
+      {isNative && (event.salesStartsAt || event.salesEndsAt) ? (
+        <View style={styles.infoCard}>
+          <SalesPeriod
+            startsAt={event.salesStartsAt}
+            endsAt={event.salesEndsAt}
+            variant="card"
+          />
+        </View>
+      ) : null}
       <InfoCard
         date={date}
         time={time}
@@ -309,8 +332,8 @@ export function EventDetailScreen({
   // Parse event description (categories, lineup, terms, gallery from opaque bag)
   const desc = parseDescription(event.description);
   const cta = ctaFor(event.status);
-  const dateTxt = formatDateID(event.startsAt);
-  const timeTxt = formatTimeID(event.startsAt);
+  const dateTxt = formatWIBDateID(event.startsAt);
+  const timeTxt = formatWIBTimeID(event.startsAt);
   const banner = eventImage(event.id, desc.bannerImage);
   const meta = [dateTxt, timeTxt, event.venue].filter(Boolean).join(" · ");
 
@@ -389,6 +412,8 @@ export function EventDetailScreen({
             name={event.name}
             meta={meta}
             chips={chips}
+            salesStartsAt={event.salesStartsAt}
+            salesEndsAt={event.salesEndsAt}
             subtitle={desc.subtitle}
             isMobileWeb={isMobileWeb}
             isActive={isScreenFocused}
@@ -398,6 +423,8 @@ export function EventDetailScreen({
             <EventDetailMobileStats
               remainingTicketsText={remainingTicketsText}
               purchaseLimitText={purchaseLimitText}
+              salesStartsAt={event.salesStartsAt}
+              salesEndsAt={event.salesEndsAt}
             />
           ) : null}
           <EventDetailContent

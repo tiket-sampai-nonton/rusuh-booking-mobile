@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { Pressable, Text } from "react-native";
 
-import { ArrowIcon } from "@presentation/components/ArrowIcon";
+import { Icon } from "@presentation/components/Icon";
 import { designColors } from "@presentation/theme";
 
 import { loginStyles } from "../style";
@@ -28,7 +28,7 @@ export function PrimaryButton({
       ]}
     >
       <Text style={loginStyles.goText}>{label}</Text>
-      {variant !== "danger" && <ArrowIcon color={designColors.ground} />}
+      {variant !== "danger" && <Icon color={designColors.ground} />}
     </Pressable>
   );
 }

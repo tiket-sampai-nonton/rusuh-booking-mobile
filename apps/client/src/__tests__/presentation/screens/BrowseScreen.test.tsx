@@ -21,7 +21,11 @@ import type {
   EventRepository,
   EventSummary,
 } from "@domain/repositories/event.repository";
-import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
+import {
+  makeTestQueryClient,
+  renderWithProviders,
+} from "@shared/test-fixtures/render-with-providers";
+import { AppProviders } from "@providers/providers";
 import { useAccountStore } from "@presentation/stores/account-store";
 
 // Mutable param box the mocked useLocalSearchParams reads from, plus router
@@ -60,6 +64,7 @@ function ev(id: string, name: string, daysFromNow: number): EventSummary {
     startsAt: new Date(now + daysFromNow * DAY).toISOString(),
     minPriceMinor: 30000000,
     remainingTickets: 300,
+    genres: [name.split(" ")[0]],
   };
 }
 
@@ -72,6 +77,10 @@ const CATALOG: readonly EventSummary[] = [
 function repo(events: readonly EventSummary[]): EventRepository {
   return {
     listEvents: async () => events,
+    getFacets: async () => ({
+      cities: [],
+      genres: ["FESTIVAL", "ROCK", "JAZZ"],
+    }),
     getEventDetail: async (id) =>
       events.find((e) => e.id === id) as EventDetail,
   };
@@ -96,6 +105,104 @@ describe("BrowseScreen — URL-driven filters", () => {
     act(() =>
       Dimensions.set({ window: originalWindow, screen: originalScreen }),
     );
+  });
+
+  it("sends a direct URL's genre, calendar timeframe and sort to the catalog", async () => {
+    mockParams.current = {
+      category: "festival",
+      genre: "rock",
+      time: "week",
+      sort: "furthest",
+    };
+    const listEvents = jest.fn().mockResolvedValue([CATALOG[0]]);
+    renderWithProviders(<BrowseScreen />, {
+      container: {
+        eventRepository: {
+          ...repo(CATALOG),
+          supportsServerFilters: true,
+          listEvents,
+        },
+      },
+    });
+    await waitFor(() =>
+      expect(listEvents).toHaveBeenCalledWith({
+        genres: ["ROCK"],
+        timeframe: "THIS_WEEK",
+        sort: "DATE_DESC",
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("v2-event-card-rock")).toBeTruthy(),
+    );
+    expect(screen.getByText("ROCK")).toBeTruthy();
+  });
+
+  it("ignores the obsolete category query instead of filtering locally", async () => {
+    mockParams.current = {
+      category: "festival",
+      time: "month",
+      sort: "closest",
+    };
+    const listEvents = jest.fn().mockResolvedValue(CATALOG);
+    renderWithProviders(<BrowseScreen />, {
+      container: {
+        eventRepository: {
+          ...repo(CATALOG),
+          supportsServerFilters: true,
+          listEvents,
+        },
+      },
+    });
+    await waitFor(() =>
+      expect(listEvents).toHaveBeenCalledWith({
+        timeframe: "THIS_MONTH",
+        sort: "DATE_ASC",
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("v2-event-card-rock")).toBeTruthy(),
+    );
+    expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy();
+  });
+
+  it("refetches and displays the new results when route filters change", async () => {
+    mockParams.current = { genre: "rock", time: "week" };
+    const listEvents = jest
+      .fn()
+      .mockImplementation(async (query) =>
+        query.genres?.[0] === "ROCK" ? [CATALOG[0]] : [CATALOG[1]],
+      );
+    const queryClient = makeTestQueryClient();
+    const { rerender, container } = renderWithProviders(<BrowseScreen />, {
+      queryClient,
+      container: {
+        eventRepository: {
+          ...repo(CATALOG),
+          supportsServerFilters: true,
+          listEvents,
+        },
+      },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("v2-event-card-rock")).toBeTruthy(),
+    );
+    mockParams.current = { genre: "jazz", time: "month" };
+    rerender(
+      <AppProviders container={container} queryClient={queryClient}>
+        <BrowseScreen />
+      </AppProviders>,
+    );
+    await waitFor(() =>
+      expect(listEvents).toHaveBeenCalledWith({
+        genres: ["JAZZ"],
+        timeframe: "THIS_MONTH",
+        sort: "DATE_ASC",
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("v2-event-card-jazz")).toBeTruthy(),
+    );
+    expect(screen.queryByTestId("v2-event-card-rock")).toBeNull();
   });
 
   it("hydrates the UI from the URL query (genre=rock → filtered by category)", async () => {
@@ -169,10 +276,12 @@ describe("BrowseScreen — URL-driven filters", () => {
     expect(screen.queryByTestId("category-concert")).toBeNull();
     expect(screen.queryByLabelText("Urutkan event")).toBeNull();
     fireEvent.press(screen.getByTestId("browse-filter"));
-    fireEvent.press(screen.getByTestId("filter-genre-festival"));
+    await waitFor(() => screen.getByTestId("filter-genre-FESTIVAL"));
+    fireEvent.press(screen.getByTestId("filter-genre-FESTIVAL"));
     fireEvent.press(screen.getByTestId("filter-apply"));
-    expect(screen.getByTestId("category-festival")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("category-all"));
+    expect(mockRouter.replace).toHaveBeenCalledWith(
+      "/browse?genre=FESTIVAL&time=all&sort=closest",
+    );
     fireEvent.press(screen.getByTestId("view-list"));
     fireEvent.press(screen.getByTestId("view-grid"));
     fireEvent.press(screen.getByTestId("nav-home"));

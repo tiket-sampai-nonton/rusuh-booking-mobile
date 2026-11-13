@@ -38,10 +38,12 @@ export const heroStyles = StyleSheet.create({
   chipRow: {
     flexDirection: "row",
     flexWrap: "wrap",
+    alignItems: "stretch",
     gap: 8,
     marginTop: 15,
   },
   chip: {
+    justifyContent: "center",
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderWidth: 2,

@@ -25,9 +25,9 @@ jest.mock("react-native/Libraries/Utilities/Platform", () => ({
 // Import the two web-only primitives DIRECTLY (not via the index barrel, which
 // would drag in Button/Loader/Modal and their heavier reanimated usage).
 // eslint-disable-next-line import/first -- must follow jest.mock (hoisting)
-import { Cursor } from "@presentation/components/design-system/Cursor";
+import { Cursor } from "@presentation/components/Cursor";
 // eslint-disable-next-line import/first -- must follow jest.mock (hoisting)
-import { ScrollProgress } from "@presentation/components/design-system/ScrollProgress";
+import { ScrollProgress } from "@presentation/components/ScrollProgress";
 
 afterEach(() => {
   mockMotionReduced = false;
@@ -82,7 +82,7 @@ describe("Cursor (web, fine pointer)", () => {
   it("renders nothing under reduced motion", () => {
     mockMotionReduced = true;
     render(<Cursor />);
-    expect(document.body.querySelectorAll("div").length).toBe(0);
+    expect(document.body.querySelectorAll("div")).toHaveLength(0);
   });
 
   it("renders nothing on a coarse pointer", () => {
@@ -90,13 +90,13 @@ describe("Cursor (web, fine pointer)", () => {
       matches: false,
     }) as unknown as typeof window.matchMedia;
     render(<Cursor />);
-    expect(document.body.querySelectorAll("div").length).toBe(0);
+    expect(document.body.querySelectorAll("div")).toHaveLength(0);
   });
 
   it("renders nothing when the browser has no matchMedia support", () => {
     window.matchMedia = undefined as unknown as typeof window.matchMedia;
     const { unmount } = render(<Cursor />);
-    expect(document.body.querySelectorAll("div").length).toBe(0);
+    expect(document.body.querySelectorAll("div")).toHaveLength(0);
     unmount();
   });
 });

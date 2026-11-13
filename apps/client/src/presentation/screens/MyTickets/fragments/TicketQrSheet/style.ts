@@ -47,10 +47,7 @@ export const styles = StyleSheet.create({
   error: { marginTop: 24, color: designColors.danger },
   ticketQr: {
     marginTop: 20,
-    padding: 16,
-    alignItems: "center",
-    borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
+    width: "100%",
   },
   ticketCode: {
     marginTop: 8,
@@ -99,8 +96,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: designBorders.standard,
-    borderColor: designColors.danger,
+    borderColor: designColors.ink,
     backgroundColor: designColors.danger,
+    ...hardShadowStyle(4, 4, designColors.ink),
   },
   downloadText: {
     color: designColors.ground,

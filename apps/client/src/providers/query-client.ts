@@ -22,6 +22,7 @@ export const queryClientConfig = {
       retryDelay: (attempt: number) => Math.min(1000 * 2 ** attempt, 30_000),
       staleTime: 30_000,
       refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
     },
     mutations: {
       // Idempotency-Key is minted in the use case/domain (§4.3), never by Query.

@@ -11,7 +11,7 @@
  */
 import { Platform, View } from "react-native";
 
-import { EventCard, Reveal } from "@presentation/components/design-system";
+import { EventCard, Reveal } from "@presentation/components";
 
 import type { BrowseGridProps } from "../../interface";
 import { useResponsive } from "@presentation/hooks/useResponsive";

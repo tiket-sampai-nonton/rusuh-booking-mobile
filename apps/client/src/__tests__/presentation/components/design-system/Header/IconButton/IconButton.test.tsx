@@ -8,7 +8,7 @@ jest.mock("react-native-reanimated", () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { IconButton } from "@presentation/components/design-system/Header/IconButton";
+import { IconButton } from "@presentation/components/Header/IconButton";
 
 describe("Header IconButton platform and motion states", () => {
   const originalPlatform = Platform.OS;

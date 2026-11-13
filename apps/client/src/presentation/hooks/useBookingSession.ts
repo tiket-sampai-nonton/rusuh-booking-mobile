@@ -17,6 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
 import { CreateBookingSession } from "@application/booking/create-booking-session.use-case";
+import { CancelBookingSession } from "@application/booking/cancel-booking-session.use-case";
 import { RestoreBookingSession } from "@application/booking/restore-booking-session.use-case";
 import type {
   BookingAvailabilitySnapshot,
@@ -46,6 +47,22 @@ export function useCreateBookingSession(): {
     isCreating: mutation.isPending,
     error: mutation.error,
   };
+}
+
+/** Cancellation of an unsubmitted checkout session through its application use case. */
+export function useCancelBookingSession(): {
+  readonly cancel: (sessionId: string) => Promise<void>;
+  readonly isCancelling: boolean;
+} {
+  const { bookingRepository } = useServices();
+  const usecase = useMemo(
+    () => new CancelBookingSession(bookingRepository),
+    [bookingRepository],
+  );
+  const mutation = useMutation<void, Error, string>({
+    mutationFn: (sessionId) => usecase.execute(sessionId),
+  });
+  return { cancel: mutation.mutateAsync, isCancelling: mutation.isPending };
 }
 
 /**

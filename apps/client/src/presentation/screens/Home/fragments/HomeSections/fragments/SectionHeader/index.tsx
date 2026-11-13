@@ -1,9 +1,9 @@
 import { Pressable, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { ArrowIcon } from "@presentation/components/ArrowIcon";
+import { Icon } from "@presentation/components/Icon";
 import { designColors } from "@presentation/theme";
-import { styles } from "./style";
 import {
+  styles,
   sectionHeaderContainerStyle,
   sectionHeaderTitleStyle,
   sectionLinkStyle,
@@ -80,7 +80,7 @@ export function SectionHeader({
             >
               {linkText}
             </Text>
-            <ArrowIcon
+            <Icon
               color={sectionArrowColor(isNative)}
               size={sectionArrowSize(isNative)}
             />

@@ -3,6 +3,11 @@ import { designColors, plusJakartaSansFonts } from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
 
+export const buyerDataSwitchTrackColor = {
+  false: designColors.gray,
+  true: designColors.ink,
+} as const;
+
 export const componentStyles = StyleSheet.create({
   elementMarginTop0: {
     marginTop: 16,
@@ -43,11 +48,16 @@ export const componentStyles = StyleSheet.create({
     gap: 8,
     flexWrap: "wrap",
   },
-  elementMarginTop6: {
+  buyerDataControl: {
     marginTop: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: designColors.ink,
+    backgroundColor: designColors.ground,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   elementFlex7: {
     flex: 1,

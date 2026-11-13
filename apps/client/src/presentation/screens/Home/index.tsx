@@ -30,9 +30,10 @@ import {
   HeroCarousel,
   BottomNav,
   navigateBottomTab,
-} from "@presentation/components/design-system";
-import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
+} from "@presentation/components";
+import { createPrimaryNavLinks } from "@presentation/components/primary-navigation";
 import { useEvents } from "@presentation/hooks/useEvents";
+import { useEventFacets } from "@presentation/hooks/useEventFacets";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
 
@@ -75,6 +76,8 @@ export function HomeScreen() {
   // Modals (prototype: CTA → login modal; Filter → filter popup).
   const [loginOpen, setLoginOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [facetTime, setFacetTime] = useState("all");
+  const facets = useEventFacets(facetTime, filterOpen);
   const [isScreenFocused, setIsScreenFocused] = useState(true);
 
   useFocusEffect(
@@ -97,7 +100,10 @@ export function HomeScreen() {
     (): void => router.navigate("/browse" as Href),
     [router],
   );
-  const openFilter = useCallback(() => setFilterOpen(true), []);
+  const openFilter = useCallback(() => {
+    setFacetTime("all");
+    setFilterOpen(true);
+  }, []);
   const onNavigate = useCallback(
     (href: string) => router.navigate(href as Href),
     [router],
@@ -115,7 +121,7 @@ export function HomeScreen() {
     (f: FilterValue): void => {
       setFilterOpen(false);
       const qs = new URLSearchParams({
-        category: f.category,
+        ...(f.genre !== "all" ? { genre: f.genre } : {}),
         time: f.time,
         sort: f.sort,
       }).toString();
@@ -204,6 +210,11 @@ export function HomeScreen() {
         />
         <FilterModal
           visible={filterOpen}
+          genres={facets.data?.genres}
+          genresLoading={facets.isLoading}
+          genresError={facets.isError}
+          onRetryGenres={() => void facets.refetch()}
+          onTimeChange={setFacetTime}
           onClose={() => setFilterOpen(false)}
           onApply={applyFilter}
         />

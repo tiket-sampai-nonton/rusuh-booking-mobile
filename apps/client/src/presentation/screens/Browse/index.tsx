@@ -3,7 +3,7 @@
  * regions are composed from fragments in this directory.
  */
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -22,14 +22,15 @@ import {
   Header,
   ToastProvider,
   EventCard,
-} from "@presentation/components/design-system";
-import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
+} from "@presentation/components";
+import { createPrimaryNavLinks } from "@presentation/components/primary-navigation";
 import {
   FilterModal,
   type FilterValue,
 } from "@presentation/components/FilterModal";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useEvents } from "@presentation/hooks/useEvents";
+import { useEventFacets } from "@presentation/hooks/useEventFacets";
 import { useAccountStore } from "@presentation/stores/account-store";
 import { useServices } from "@providers/service-context";
 import type { EventSummary } from "@domain/repositories/event.repository";
@@ -42,18 +43,7 @@ import { BrowseEmpty, BrowseLoading } from "./fragments/BrowseStates";
 import { BrowseHero } from "./fragments/BrowseHero";
 import { BrowseNativeCategoryBar } from "./fragments/BrowseNativeCategoryBar";
 import { BrowseResultsToolbar } from "./fragments/BrowseResultsToolbar";
-import {
-  readBrowseCategory,
-  type BrowseCategoryKey,
-} from "./fragments/categories";
-import {
-  filterEvents,
-  matchesCategory,
-  readGenre,
-  readParam,
-  SORTS,
-  TIMES,
-} from "./filter";
+import { filterEvents, readGenre, readParam, SORTS, TIMES } from "./filter";
 import {
   BROWSE_NATIVE_CATEGORY_BAR_HEIGHT,
   browseMain,
@@ -145,17 +135,11 @@ function isTabletWebViewport(isWeb: boolean, width: number): boolean {
 }
 
 function hasActiveBrowseFilters(
-  category: BrowseCategoryKey | null,
   genre: string,
   time: string,
   sort: string,
 ): boolean {
-  return (
-    (category !== null && category !== "all") ||
-    genre !== "Semua" ||
-    time !== "all" ||
-    sort !== "closest"
-  );
+  return genre !== "Semua" || time !== "all" || sort !== "closest";
 }
 
 function browseTimeframe(time: string): "THIS_WEEK" | "THIS_MONTH" | undefined {
@@ -205,11 +189,11 @@ interface BrowseListHeaderProps {
   readonly isNative: boolean;
   readonly isDesktop: boolean;
   readonly isMobileWeb: boolean;
-  readonly activeCategory: BrowseCategoryKey | null;
+  readonly genre: string;
   readonly time: string;
   readonly sort: string;
   readonly isFiltered: boolean;
-  readonly onSelectCategory: (category: BrowseCategoryKey | null) => void;
+  readonly onSelectCategory: () => void;
   readonly onReset: () => void;
   readonly isError: boolean;
   readonly error: unknown;
@@ -228,7 +212,7 @@ function BrowseListHeader({
   isNative,
   isDesktop,
   isMobileWeb,
-  activeCategory,
+  genre,
   time,
   sort,
   isFiltered,
@@ -256,7 +240,7 @@ function BrowseListHeader({
       ) : null}
       {!isNative ? (
         <BrowseCategoriesSection
-          activeCategory={activeCategory}
+          genre={genre}
           isDesktop={isDesktop}
           isMobileWeb={isMobileWeb}
           time={time}
@@ -383,7 +367,6 @@ export function BrowseScreen() {
     useResponsive();
   const isTabletWeb = isTabletWebViewport(isWeb, width);
   const params = useLocalSearchParams<{
-    category?: string;
     genre?: string;
     time?: string;
     sort?: string;
@@ -392,22 +375,14 @@ export function BrowseScreen() {
   const { serverClock, eventRepository } = useServices();
   const showNavLinks = isWeb && width > 768;
 
-  const [activeCategory, setActiveCategory] =
-    useState<BrowseCategoryKey | null>(
-      () =>
-        readBrowseCategory(params.category) ?? readBrowseCategory(params.genre),
-    );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [facetTime, setFacetTime] = useState("all");
+  const facets = useEventFacets(facetTime, filterOpen);
   const genre = readGenre(params.genre);
-  useEffect(() => {
-    setActiveCategory(
-      readBrowseCategory(params.category) ?? readBrowseCategory(params.genre),
-    );
-  }, [params.category, params.genre]);
   const time = readParam(params.time, TIMES, "all");
   const sort = readParam(params.sort, SORTS, "closest");
-  const isFiltered = hasActiveBrowseFilters(activeCategory, genre, time, sort);
+  const isFiltered = hasActiveBrowseFilters(genre, time, sort);
   const eventQuery = browseEventQuery(genre, time, sort);
   const {
     data,
@@ -416,18 +391,18 @@ export function BrowseScreen() {
     error,
     refetch: retryEvents,
     isFetching,
-  } = useEvents(eventQuery);
+  } = useEvents(eventQuery, time === "quarter");
   const allResults = useMemo(
     () =>
-      filterEvents(
-        data?.upcoming ?? [],
-        eventRepository.supportsServerFilters ? "Semua" : genre,
-        eventRepository.supportsServerFilters && time !== "quarter"
-          ? "all"
-          : time,
-        sort,
-        serverClock.serverNow(),
-      ),
+      eventRepository.supportsServerFilters
+        ? (data?.upcoming ?? [])
+        : filterEvents(
+            data?.upcoming ?? [],
+            genre,
+            time,
+            sort,
+            serverClock.serverNow(),
+          ),
     [
       data,
       genre,
@@ -437,10 +412,7 @@ export function BrowseScreen() {
       eventRepository.supportsServerFilters,
     ],
   );
-  const results = useMemo(() => {
-    if (!activeCategory || activeCategory === "all") return allResults;
-    return allResults.filter((event) => matchesCategory(event, activeCategory));
-  }, [activeCategory, allResults]);
+  const results = allResults;
   const goToEvent = useCallback(
     (eventId: string): void => router.push(`/events/${eventId}` as Href),
     [router],
@@ -455,18 +427,21 @@ export function BrowseScreen() {
   });
   const applyFilter = (value: FilterValue): void => {
     setFilterOpen(false);
-    setActiveCategory(readBrowseCategory(value.category));
     const query = new URLSearchParams({
-      category: value.category,
+      ...(value.genre !== "all" ? { genre: value.genre } : {}),
       time: value.time,
       sort: value.sort,
     }).toString();
     router.replace(`/browse?${query}` as Href);
   };
 
+  const openFilter = (): void => {
+    setFacetTime(time);
+    setFilterOpen(true);
+  };
+
   const changeSort = (value: string): void => {
     const query = new URLSearchParams({
-      ...(activeCategory ? { category: activeCategory } : {}),
       ...(genre !== "Semua" ? { genre } : {}),
       time,
       sort: value,
@@ -475,7 +450,6 @@ export function BrowseScreen() {
   };
 
   const resetFilters = (): void => {
-    setActiveCategory("all");
     router.replace("/browse" as Href);
   };
 
@@ -517,11 +491,11 @@ export function BrowseScreen() {
       isNative={isNative}
       isDesktop={isDesktop}
       isMobileWeb={isMobileWeb}
-      activeCategory={activeCategory}
+      genre={genre}
       time={time}
       sort={sort}
       isFiltered={isFiltered}
-      onSelectCategory={setActiveCategory}
+      onSelectCategory={openFilter}
       onReset={resetFilters}
       isError={isError}
       error={error}
@@ -530,7 +504,7 @@ export function BrowseScreen() {
       onRetry={() => void retryEvents()}
       count={results.length}
       viewMode={viewMode}
-      onFilterPress={() => setFilterOpen(true)}
+      onFilterPress={openFilter}
       onSortChange={changeSort}
       onViewModeChange={setViewMode}
     />
@@ -590,8 +564,8 @@ export function BrowseScreen() {
         {isNative && (
           <BrowseNativeCategoryBar
             top={insets.top + 56}
-            activeCategory={activeCategory}
-            onSelect={setActiveCategory}
+            genre={genre}
+            onSelect={openFilter}
             time={time}
             sort={sort}
             isFiltered={isFiltered}
@@ -605,7 +579,12 @@ export function BrowseScreen() {
         />
         <FilterModal
           visible={filterOpen}
-          value={{ category: activeCategory ?? "all", time, sort }}
+          value={{ genre: genre === "Semua" ? "all" : genre, time, sort }}
+          genres={facets.data?.genres}
+          genresLoading={facets.isLoading}
+          genresError={facets.isError}
+          onRetryGenres={() => void facets.refetch()}
+          onTimeChange={setFacetTime}
           onClose={() => setFilterOpen(false)}
           onApply={applyFilter}
         />

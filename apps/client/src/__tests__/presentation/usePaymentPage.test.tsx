@@ -43,8 +43,10 @@ class FakeRepo implements PaymentRepository {
   }
 }
 
-function wrapper(repo: PaymentRepository) {
-  const base = createContainer({ useMocks: true });
+function wrapper(
+  repo: PaymentRepository,
+  base = createContainer({ useMocks: true }),
+) {
   const container: Container = { ...base, paymentRepository: repo };
   const qc = new QueryClient({
     defaultOptions: {
@@ -82,6 +84,22 @@ describe("usePaymentPage (RBT-060)", () => {
     });
     await waitFor(() => expect(result.current.page?.bookingId).toBe("bk-1"));
     expect(result.current.page?.methods).toEqual(["VA_BCA", "QRIS"]);
+  });
+
+  it("persists only the booking and public event references for restart recovery", async () => {
+    const repo = new FakeRepo();
+    const container = createContainer({ useMocks: true });
+    const save = jest.spyOn(container.paymentJourneyStorage, "save");
+    const { result } = renderHook(() => usePaymentPage("bk-1", "evt-1"), {
+      wrapper: wrapper(repo, container),
+    });
+    await waitFor(() => expect(result.current.page?.bookingId).toBe("bk-1"));
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith({
+        bookingId: "bk-1",
+        eventId: "evt-1",
+      }),
+    );
   });
 
   it("does not fetch for an empty bookingId", () => {

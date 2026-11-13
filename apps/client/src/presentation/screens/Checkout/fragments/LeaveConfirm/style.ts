@@ -6,7 +6,7 @@ import {
   withAlpha,
 } from "@presentation/theme";
 
-import type { DynamicStyle } from "@presentation/utils/style";
+import { hardShadowStyle, type DynamicStyle } from "@presentation/utils/style";
 
 export const styles = StyleSheet.create({
   overlay: {
@@ -64,8 +64,9 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 16,
     borderWidth: designBorders.standard,
-    borderColor: designColors.danger,
+    borderColor: designColors.ink,
     backgroundColor: designColors.danger,
+    ...hardShadowStyle(4, 4, designColors.ink),
     alignItems: "center",
   },
   leaveButtonText: {

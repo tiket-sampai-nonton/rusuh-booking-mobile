@@ -19,14 +19,16 @@ export const EVENTS_QUERY_KEY = ["events", "catalog"] as const;
 /** Fetch + split the event catalog (upcoming + history). */
 export function useEvents(
   query?: EventQuery,
+  quarter = false,
 ): UseQueryResult<CatalogSplit, Error> {
   const { eventRepository, serverClock } = useServices();
   const initialEvents = query
     ? undefined
     : eventRepository.getInitialEvents?.();
   return useQuery<CatalogSplit, Error>({
-    queryKey: query ? [...EVENTS_QUERY_KEY, query] : EVENTS_QUERY_KEY,
-    queryFn: () => new ListEvents(eventRepository, serverClock).execute(query),
+    queryKey: query ? [...EVENTS_QUERY_KEY, query, quarter] : EVENTS_QUERY_KEY,
+    queryFn: () =>
+      new ListEvents(eventRepository, serverClock).execute(query, quarter),
     ...(initialEvents
       ? {
           initialData: splitCatalog(initialEvents, serverClock.serverNow()),

@@ -13,7 +13,7 @@ jest.mock("react-native-reanimated", () => {
 });
 
 // eslint-disable-next-line import/first
-import { ToastProvider } from "@presentation/components/design-system";
+import { ToastProvider } from "@presentation/components";
 // eslint-disable-next-line import/first
 import { HomeFooter } from "@presentation/screens/Home/fragments/HomeFooter";
 

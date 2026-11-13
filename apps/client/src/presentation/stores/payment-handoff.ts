@@ -35,3 +35,8 @@ export function getPaymentHandoff(bookingId: string): typeof pending {
 export function clearPaymentHandoff(bookingId: string): void {
   if (pending?.bookingId === bookingId) pending = undefined;
 }
+
+/** Drop any in-memory SNAP URL when its user session ends. */
+export function clearAllPaymentHandoff(): void {
+  pending = undefined;
+}

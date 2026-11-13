@@ -8,7 +8,7 @@ export const browseChipStyles = StyleSheet.create({
     borderColor: designColors.ink,
     backgroundColor: designColors.ground,
     paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingVertical: 8,
   },
   selectedContainer: {
     borderColor: designColors.ember,

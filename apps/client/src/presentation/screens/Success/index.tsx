@@ -29,11 +29,7 @@ import { SummaryRow } from "./fragments/SummaryRow";
 import { ETicketCard } from "@presentation/components/ETicketCard";
 import { Seo } from "@presentation/components/Seo";
 import { useETicketDownload } from "@presentation/hooks/useETicketDownload";
-import {
-  CheckIcon,
-  MailIcon,
-  ArrowIcon,
-} from "@presentation/components/ArrowIcon";
+import { CheckIcon, MailIcon, Icon } from "@presentation/components/Icon";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 import { useSuccessTickets } from "@presentation/hooks/useSuccessTickets";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
@@ -52,6 +48,7 @@ import { apiErrorMessage } from "@presentation/utils/api-error-message";
 
 export interface SuccessScreenProps {
   readonly bookingId: string;
+  readonly eventId?: string;
 }
 
 interface VerificationPanelProps {
@@ -125,7 +122,10 @@ function VerificationPanel({
   );
 }
 
-export function SuccessScreen({ bookingId }: SuccessScreenProps) {
+export function SuccessScreen({
+  bookingId,
+  eventId: routeEventId,
+}: SuccessScreenProps) {
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -135,7 +135,8 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
   const amountMinor = useSessionStore((s) => s.amountMinor);
   const buyerNikMasked = useSessionStore((s) => s.buyerNikMasked);
   const ticketCount = useSessionStore((s) => s.ticketCount);
-  const eventId = useSessionStore((s) => s.eventId);
+  const sessionEventId = useSessionStore((s) => s.eventId);
+  const eventId = routeEventId ?? sessionEventId;
   const { data: event } = useEventDetail(eventId ?? "");
 
   // Re-verify authoritatively. verdict "failed" → the recovery screen; a
@@ -174,10 +175,19 @@ export function SuccessScreen({ bookingId }: SuccessScreenProps) {
     try {
       await downloadTickets(
         bookingId,
-        count,
-        issuedTickets.map((ticket) => ticket.qrPayload),
-        event?.name,
-        issuedTickets.map((ticket) => ticket.ticketCode),
+        issuedTickets.map((ticket, index) => ({
+          bookingId,
+          eventName: event?.name ?? "E-Tiket Rusuh Booking",
+          venue: event?.venue,
+          startsAt: ticketsQuery.data?.eventStartsAt ?? event?.startsAt,
+          attendeeName: ticket.attendeeName,
+          attendeeNikMasked: ticket.attendeeNikMasked,
+          categoryCode: ticket.categoryCode,
+          qrPayload: ticket.qrPayload,
+          ticketCode: ticket.ticketCode,
+          index,
+          total: count,
+        })),
       );
     } catch (error) {
       setDownloadError(
@@ -468,7 +478,7 @@ function SuccessTicketList({
           total={count}
           eventName={event?.name}
           venue={event?.venue}
-          startsAt={event?.startsAt}
+          startsAt={ticketsQuery.data?.eventStartsAt ?? event?.startsAt}
           attendeeNikMasked={ticket.attendeeNikMasked}
           attendeeName={ticket.attendeeName}
           categoryCode={ticket.categoryCode}
@@ -510,7 +520,7 @@ function SuccessReceiptActions({
           style={componentStyles.elementBackgroundColor5}
         >
           <View className="flex-row items-center gap-2">
-            <ArrowIcon direction="download" color={designColors.ink} />
+            <Icon direction="download" color={designColors.ink} />
             <Text
               className="text-sm font-bold uppercase"
               style={componentStyles.elementColor6}

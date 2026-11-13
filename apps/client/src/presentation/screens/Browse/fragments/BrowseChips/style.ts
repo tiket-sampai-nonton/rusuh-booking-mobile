@@ -5,6 +5,8 @@ import { designColors } from "@presentation/theme";
 export const browseChipsStyles = StyleSheet.create({
   container: {
     gap: 8,
+    flexWrap: "nowrap",
+    alignItems: "center",
   },
   refineButton: {
     width: 36,

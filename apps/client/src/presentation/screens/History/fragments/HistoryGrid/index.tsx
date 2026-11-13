@@ -8,7 +8,7 @@
  */
 import { View } from "react-native";
 
-import { EventCard } from "@presentation/components/design-system/EventCard";
+import { EventCard } from "@presentation/components/EventCard";
 
 import type { HistoryGridProps } from "../../interface";
 import { historyStyles, historyGridRow, historyGridCell } from "../../style";

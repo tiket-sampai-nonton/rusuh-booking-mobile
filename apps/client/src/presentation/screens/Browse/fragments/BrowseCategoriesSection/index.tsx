@@ -8,7 +8,6 @@ import {
 } from "react-native";
 
 import { BrowseChips } from "../BrowseChips";
-import { BROWSE_CATEGORIES, type BrowseCategoryKey } from "../categories";
 import {
   browseCategories,
   browseCategoriesCompactStyle,
@@ -16,9 +15,6 @@ import {
   browseCategoryBtn,
   browseCategoryBtnActive,
   browseCategoryBtnCompactStyle,
-  browseCategoryControls,
-  browseCategoryControlsCompact,
-  browseCategoryGrid,
   browseCategoryGridCompactStyle,
   browseCategoryHeading,
   browseCategoryHeadingWrap,
@@ -26,18 +22,18 @@ import {
 } from "../../style";
 
 interface BrowseCategoriesSectionProps {
-  readonly activeCategory: BrowseCategoryKey | null;
+  readonly genre?: string;
   readonly isDesktop: boolean;
   readonly isMobileWeb?: boolean;
   readonly time: string;
   readonly sort: string;
   readonly isFiltered: boolean;
-  readonly onSelect: (category: BrowseCategoryKey) => void;
+  readonly onSelect: () => void;
   readonly onReset: () => void;
 }
 
 export function BrowseCategoriesSection({
-  activeCategory,
+  genre = "Semua",
   isDesktop,
   isMobileWeb = false,
   time,
@@ -46,13 +42,8 @@ export function BrowseCategoriesSection({
   onSelect,
   onReset,
 }: BrowseCategoriesSectionProps) {
-  const visibleCategories = BROWSE_CATEGORIES.filter(
-    (category) =>
-      category.key === "all" || category.key === (activeCategory ?? "all"),
-  );
-
-  const categoryButtons = visibleCategories.map((category) => {
-    const isActive = (activeCategory ?? "all") === category.key;
+  const categoryButtons = [genre].map((label) => {
+    const isActive = true;
     let buttonStyle: StyleProp<ViewStyle> = browseCategoryBtn;
     if (isActive) buttonStyle = browseCategoryBtnActive;
     if (isMobileWeb) {
@@ -63,21 +54,23 @@ export function BrowseCategoriesSection({
     }
     return (
       <Pressable
-        key={category.key}
+        key={label}
         style={buttonStyle}
-        onPress={() => onSelect(category.key)}
-        testID={`category-${category.key}`}
+        onPress={onSelect}
+        testID={`category-${label === "Semua" ? "all" : label}`}
         accessibilityRole="button"
         accessibilityState={{ selected: isActive }}
       >
-        <Text style={browseCategoryLabel(isActive)}>{category.label}</Text>
+        <Text style={browseCategoryLabel(isActive)}>
+          {label.replaceAll("_", " ")}
+        </Text>
       </Pressable>
     );
   });
 
   const selectedFilterChips = (
     <BrowseChips
-      genre="Semua"
+      genre={genre}
       time={time}
       sort={sort}
       isFiltered={isFiltered}
@@ -94,27 +87,18 @@ export function BrowseCategoriesSection({
       <View style={browseCategoriesInner(isDesktop)}>
         {!isMobileWeb && (
           <View style={browseCategoryHeadingWrap}>
-            <Text style={browseCategoryHeading}>Kategori</Text>
+            <Text style={browseCategoryHeading}>Genre</Text>
           </View>
         )}
-        {isMobileWeb ? (
-          <View style={[browseCategoryControls, browseCategoryControlsCompact]}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={browseCategoryGridCompactStyle}
-              testID="browse-categories-scroll"
-            >
-              {categoryButtons}
-            </ScrollView>
-            {selectedFilterChips}
-          </View>
-        ) : (
-          <View style={browseCategoryControls}>
-            <View style={browseCategoryGrid}>{categoryButtons}</View>
-            {selectedFilterChips}
-          </View>
-        )}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={browseCategoryGridCompactStyle}
+          testID="browse-categories-scroll"
+        >
+          {categoryButtons}
+          {selectedFilterChips}
+        </ScrollView>
       </View>
     </View>
   );

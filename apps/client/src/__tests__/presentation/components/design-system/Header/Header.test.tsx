@@ -1,7 +1,7 @@
 import { act, fireEvent, render } from "@testing-library/react-native";
 import React from "react";
 
-import { Header } from "../../../../../presentation/components/design-system/Header/index";
+import { Header } from "../../../../../presentation/components/Header/index";
 
 const mockResponsive = { isNative: true, headerHeight: 56 };
 let mockReducedMotion = false;
@@ -131,9 +131,10 @@ describe("Header", () => {
 
   it("completes the entrance transition after its delay", () => {
     jest.useFakeTimers();
-    const { unmount } = render(<Header />);
+    const { getByLabelText, unmount } = render(<Header />);
 
     act(() => jest.advanceTimersByTime(500));
+    expect(getByLabelText("Beranda Rusuh Tiket")).toBeTruthy();
     unmount();
     jest.useRealTimers();
   });

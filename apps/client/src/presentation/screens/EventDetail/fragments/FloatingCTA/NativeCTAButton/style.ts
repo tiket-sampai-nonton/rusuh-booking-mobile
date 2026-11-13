@@ -6,7 +6,7 @@ import type { DynamicStyle } from "@presentation/utils/style";
 export const nativeCtaButtonStyles = StyleSheet.create({
   pressedButton: {
     backgroundColor: designColors.accent,
-    borderColor: designColors.accent,
+    borderColor: designColors.ink,
     transform: [{ translateX: 4 }, { translateY: 4 }],
   },
   pressedLabel: {

@@ -12,21 +12,20 @@
  * RBT-060 lands the page. No infrastructure import — ports via hooks only.
  */
 import { useNavigation, useRouter, type Href } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { PaymentMethod } from "@domain/repositories/payment.repository";
-import {
-  paymentCancelled,
-  paymentResultNotification,
-  paymentTimeout,
-} from "@domain/rules/notification-flows";
+import { paymentCancelled } from "@domain/rules/notification-flows";
 import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
 import { CancelLocalNotification } from "@application/notifications/cancel-local-notification.use-case";
 import { ScreenFade } from "@presentation/components/ScreenFade";
+import { ConnectivityBanner } from "@presentation/components/ConnectivityBanner";
 import { usePayment } from "@presentation/hooks/usePayment";
+import { useConnectivity } from "@presentation/hooks/useConnectivity";
 import { usePaymentPage } from "@presentation/hooks/usePaymentPage";
+import { useClearQueueMembership } from "@presentation/hooks/useRestoreMembership";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
 import { useSessionStore } from "@presentation/stores/session-store";
@@ -40,13 +39,45 @@ import { PaymentTopBar } from "./fragments/PaymentTopBar";
 import type { PaymentScreenProps } from "./interface";
 import { paymentScrollContent } from "./style";
 import { LeaveConfirm } from "../Checkout/fragments/LeaveConfirm";
+import {
+  applyPaymentExitResult,
+  isTerminalPaymentStatus,
+  reconcileExpiredPaymentStatus,
+  requestPaymentExit,
+  reconcilePaymentOnReconnect,
+  recoverUnavailablePaymentPage,
+  routeTerminalPaymentStatus,
+  updatePaymentNotification,
+} from "./effects";
 
-export function PaymentScreen({ bookingId }: PaymentScreenProps) {
+function expiryRetryLabel(isChecking: boolean, isOffline: boolean): string {
+  if (isChecking) return "MEMERIKSA…";
+  if (isOffline) return "MENUNGGU KONEKSI";
+  return "PERIKSA STATUS";
+}
+
+export function PaymentScreen({
+  bookingId,
+  eventId: routeEventId,
+}: PaymentScreenProps) {
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { isDesktop, isMobileWeb, isNative } = useResponsive();
-  const { serverClock, notification } = useServices();
+  const connectivity = useConnectivity();
+  const {
+    serverClock,
+    notification,
+    paymentJourneyStorage,
+    navigationHistory,
+  } = useServices();
+  const clearQueueMembership = useClearQueueMembership();
+  const sessionEventId = useSessionStore((s) => s.eventId);
+  const eventId = routeEventId ?? sessionEventId;
+  const eventQuery = eventId ? `?eventId=${encodeURIComponent(eventId)}` : "";
+  const successHref =
+    `/success/${encodeURIComponent(bookingId)}${eventQuery}` as Href;
+  const paymentHref = `/payment/${encodeURIComponent(bookingId)}${eventQuery}`;
   const scheduleNotification = useMemo(
     () => new ScheduleLocalNotification(notification),
     [notification],
@@ -61,11 +92,27 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
     error: pageError,
     refetch: retryPaymentPage,
     isFetching: isRetryingPaymentPage,
-  } = usePaymentPage(bookingId);
-  const { createAttempt, resumeHandoff } = usePayment();
+  } = usePaymentPage(bookingId, eventId);
+  const { createAttempt, resumeHandoff, cancelBooking, reconcilePayment } =
+    usePayment();
+  const verifyPayment = reconcilePayment.mutateAsync;
   const setBooking = useSessionStore((s) => s.setBooking);
+  const resetSession = useSessionStore((s) => s.reset);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [handoffError, setHandoffError] = useState(false);
+  const [leaveError, setLeaveError] = useState<string>();
+  const [leaveWithoutCancel, setLeaveWithoutCancel] = useState(false);
+  const [expiryRecoveryError, setExpiryRecoveryError] = useState<string>();
+  const [isVerifyingExpiry, setIsVerifyingExpiry] = useState(false);
+  const expiryCheckInFlight = useRef(false);
+  const reconnectCheckHandled = useRef(false);
+  const restoreBrowserLocation = useRef<() => void>(() => undefined);
+  const checkedUnavailablePage = useRef<Error | null>(null);
+
+  useEffect(() => {
+    restoreBrowserLocation.current =
+      navigationHistory.captureRestorePoint(paymentHref);
+  }, [navigationHistory, paymentHref]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (event) => {
@@ -73,14 +120,18 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
       if (
         actionType === "GO_BACK" ||
         actionType === "POP" ||
-        actionType === "POP_TO_TOP"
+        actionType === "POP_TO_TOP" ||
+        (!isNative && actionType === "RESET")
       ) {
         event.preventDefault();
+        if (!isNative && actionType === "RESET") {
+          restoreBrowserLocation.current();
+        }
         setConfirmLeave(true);
       }
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [isNative, navigation]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener(
@@ -113,50 +164,117 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
     if (page) setBooking(bookingId, page.amountMinor);
   }, [bookingId, page, setBooking]);
 
+  useEffect(() => {
+    return recoverUnavailablePaymentPage({
+      pageError,
+      checkedPage: checkedUnavailablePage,
+      isOffline: connectivity.isOffline,
+      verify: () => verifyPayment(bookingId),
+      syncServerTime: (time) => serverClock.sync(time),
+      clearJourney: () => paymentJourneyStorage.clear(),
+      clearQueue: clearQueueMembership,
+      resetSession,
+      showSuccess: () => router.replace(successHref),
+      showHome: () => router.replace("/" as Href),
+    });
+  }, [
+    bookingId,
+    successHref,
+    clearQueueMembership,
+    connectivity.isOffline,
+    pageError,
+    paymentJourneyStorage,
+    verifyPayment,
+    resetSession,
+    router,
+    serverClock,
+  ]);
+
+  useEffect(() => {
+    routeTerminalPaymentStatus(
+      page?.currentAttempt?.status,
+      bookingId,
+      () => paymentJourneyStorage.clear(),
+      () => router.replace(successHref),
+      (id) => router.replace(`/failed/${id}` as Href),
+    );
+  }, [
+    bookingId,
+    page?.currentAttempt?.status,
+    paymentJourneyStorage,
+    router,
+    successHref,
+  ]);
+
+  const reconcileExpiredPayment = useCallback(
+    () =>
+      reconcileExpiredPaymentStatus({
+        inFlight: expiryCheckInFlight,
+        isOffline: connectivity.isOffline,
+        bookingId,
+        setError: setExpiryRecoveryError,
+        setVerifying: setIsVerifyingExpiry,
+        reconcile: () => reconcilePayment.mutateAsync(bookingId),
+        serverClock,
+        clearJourney: () => paymentJourneyStorage.clear(),
+        showSuccess: () => router.replace(successHref),
+        showFailure: () =>
+          router.replace(`/failed/${bookingId}?reason=payment` as Href),
+        paymentExpiresAt: page?.paymentExpiresAt,
+        refreshPage: async () =>
+          (await retryPaymentPage()) as {
+            isError?: boolean;
+            error?: Error | null;
+          },
+      }),
+    [
+      bookingId,
+      successHref,
+      connectivity.isOffline,
+      page?.paymentExpiresAt,
+      paymentJourneyStorage,
+      reconcilePayment,
+      retryPaymentPage,
+      router,
+      serverClock,
+    ],
+  );
+
   const { remainingMs, expired } = useServerCountdown({
     clock: serverClock,
     expiresAtIso: page?.paymentExpiresAt,
     serverTimeIso: page?.serverTime,
     onExpire: () => {
-      const status = page?.currentAttempt?.status;
-      const hasTerminalResult =
-        status === "PAID" || status === "FAILED" || status === "EXPIRED";
-      if (isNative && !hasTerminalResult) {
-        void cancelNotification
-          .execute(`payment-timeout-${bookingId}`)
-          .catch(() => undefined)
-          .then(() => scheduleNotification.execute(paymentTimeout(bookingId)))
-          .catch(() => undefined);
-      }
-      router.replace(`/failed/${bookingId}` as Href);
+      if (!isTerminalPaymentStatus(page?.currentAttempt?.status))
+        void reconcileExpiredPayment();
     },
   });
 
   useEffect(() => {
-    if (!isNative || !page) return;
-    const attemptStatus = page.currentAttempt?.status;
-    if (
-      attemptStatus === "PAID" ||
-      attemptStatus === "FAILED" ||
-      attemptStatus === "EXPIRED"
-    ) {
-      const outcome = paymentResultNotification(attemptStatus, bookingId);
-      void cancelNotification
-        .execute(`payment-timeout-${bookingId}`)
-        .catch(() => undefined)
-        .then(() => scheduleNotification.execute(outcome))
-        .catch(() => undefined);
-      return;
-    }
+    reconcilePaymentOnReconnect(
+      connectivity.justReconnected,
+      reconnectCheckHandled,
+      expiryRecoveryError !== undefined,
+      expired,
+      () => void reconcileExpiredPayment(),
+    );
+  }, [
+    connectivity.justReconnected,
+    expired,
+    expiryRecoveryError,
+    reconcileExpiredPayment,
+  ]);
 
-    // Translate the server-clock duration to an OS timestamp once per payment
-    // page payload so Notifee can deliver even while the app is backgrounded.
-    const remaining = serverClock.remaining(page.paymentExpiresAt);
-    if (remaining <= 0) return; // The countdown's one-shot expiry path handles this.
-    const scheduledAtMs = Date.now() + remaining;
-    void scheduleNotification
-      .execute(paymentTimeout(bookingId, scheduledAtMs))
-      .catch(() => undefined);
+  useEffect(() => {
+    if (!page) return;
+    updatePaymentNotification({
+      isNative,
+      status: page.currentAttempt?.status,
+      bookingId,
+      remainingMs: serverClock.remaining(page.paymentExpiresAt),
+      schedule: (notification) => scheduleNotification.execute(notification),
+      cancel: (id) => cancelNotification.execute(id),
+    });
   }, [
     bookingId,
     cancelNotification,
@@ -179,13 +297,16 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
 
   if (isLoading) {
     return (
-      <View
-        className="flex-1 items-center justify-center bg-background"
-        testID="payment-loading"
-      >
-        <Text className="text-sm text-muted-foreground">
-          Memuat pembayaran…
-        </Text>
+      <View className="flex-1 bg-background" testID="payment-loading">
+        <ConnectivityBanner
+          isOffline={connectivity.isOffline}
+          justReconnected={connectivity.justReconnected}
+        />
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-sm text-muted-foreground">
+            Memuat pembayaran…
+          </Text>
+        </View>
       </View>
     );
   }
@@ -195,37 +316,40 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   // a recoverable screen instead of leaving a spinner or exposing pay actions.
   if (!page) {
     return (
-      <View
-        className="flex-1 items-center justify-center bg-background p-6"
-        testID="payment-unavailable"
-      >
-        <Text className="mb-4 text-center text-base font-bold">
-          {pageError
-            ? apiErrorMessage(pageError)
-            : "Halaman pembayaran tidak tersedia atau sudah berakhir."}
-        </Text>
-        {pageError ? (
+      <View className="flex-1 bg-background" testID="payment-unavailable">
+        <ConnectivityBanner
+          isOffline={connectivity.isOffline}
+          justReconnected={connectivity.justReconnected}
+        />
+        <View className="flex-1 items-center justify-center p-6">
+          <Text className="mb-4 text-center text-base font-bold">
+            {pageError
+              ? apiErrorMessage(pageError)
+              : "Halaman pembayaran tidak tersedia atau sudah berakhir."}
+          </Text>
+          {pageError ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Coba muat pembayaran lagi"
+              accessibilityState={{ disabled: isRetryingPaymentPage }}
+              disabled={isRetryingPaymentPage || connectivity.isOffline}
+              onPress={() => void retryPaymentPage()}
+              testID="payment-retry"
+              className="mb-4 border-2 border-ink px-6 py-3"
+            >
+              <Text className="font-bold">{paymentPageRetryLabel}</Text>
+            </Pressable>
+          ) : null}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Coba muat pembayaran lagi"
-            accessibilityState={{ disabled: isRetryingPaymentPage }}
-            disabled={isRetryingPaymentPage}
-            onPress={() => void retryPaymentPage()}
-            testID="payment-retry"
-            className="mb-4 border-2 border-ink px-6 py-3"
+            accessibilityLabel="Cari event lagi"
+            onPress={() => router.replace("/browse" as Href)}
+            testID="payment-unavailable-browse"
+            className="border-2 border-ink px-6 py-3"
           >
-            <Text className="font-bold">{paymentPageRetryLabel}</Text>
+            <Text className="font-bold">CARI EVENT LAGI</Text>
           </Pressable>
-        ) : null}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Cari event lagi"
-          onPress={() => router.replace("/browse" as Href)}
-          testID="payment-unavailable-browse"
-          className="border-2 border-ink px-6 py-3"
-        >
-          <Text className="font-bold">CARI EVENT LAGI</Text>
-        </Pressable>
+        </View>
       </View>
     );
   }
@@ -240,6 +364,28 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
           isMobileWeb={isMobileWeb}
           onBack={() => setConfirmLeave(true)}
         />
+        <ConnectivityBanner
+          isOffline={connectivity.isOffline}
+          justReconnected={connectivity.justReconnected}
+          detail="Koneksi terputus. Jangan tutup alur pembayaran; status dan waktu akan dicocokkan kembali saat koneksi pulih."
+        />
+        {expiryRecoveryError ? (
+          <View className="flex-row items-center justify-between gap-3 border-b-2 border-ink bg-background px-4 py-3">
+            <Text className="flex-1 text-sm">{expiryRecoveryError}</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Periksa status pembayaran"
+              disabled={isVerifyingExpiry || connectivity.isOffline}
+              onPress={() => void reconcileExpiredPayment()}
+              testID="payment-expiry-retry"
+              className="min-h-11 justify-center border-2 border-ink px-3"
+            >
+              <Text className="text-xs font-bold">
+                {expiryRetryLabel(isVerifyingExpiry, connectivity.isOffline)}
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         <ScrollView
           contentContainerStyle={paymentScrollContent(isDesktop, isMobileWeb)}
@@ -283,17 +429,54 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
         <LeaveConfirm
           visible={confirmLeave}
           variant="payment"
-          onStay={() => setConfirmLeave(false)}
-          onLeave={() => {
+          pending={cancelBooking.isPending || reconcilePayment.isPending}
+          errorMessage={leaveError}
+          bodyText={
+            inFlight && !leaveWithoutCancel
+              ? "Kami akan memastikan status pembayaran ke server sebelum keluar."
+              : undefined
+          }
+          leaveLabel={
+            leaveWithoutCancel ? "Keluar, lanjutkan nanti" : undefined
+          }
+          onStay={() => {
+            setLeaveError(undefined);
+            setLeaveWithoutCancel(false);
             setConfirmLeave(false);
-            if (isNative) {
-              // The BE has no cancel-attempt endpoint; this copy accurately
-              // describes the buyer leaving the payment flow, not provider cancellation.
-              void scheduleNotification
-                .execute(paymentCancelled(bookingId))
-                .catch(() => undefined);
+          }}
+          onLeave={() => {
+            if (leaveWithoutCancel) {
+              setConfirmLeave(false);
+              router.replace("/" as Href);
+              return;
             }
-            router.replace("/" as Href);
+            setLeaveError(undefined);
+            void requestPaymentExit({
+              cancelBooking: () => cancelBooking.mutateAsync(bookingId),
+              reconcilePayment: () => reconcilePayment.mutateAsync(bookingId),
+              clearJourney: () => paymentJourneyStorage.clear(),
+              clearQueue: clearQueueMembership,
+              syncServerTime: (time) => serverClock.sync(time),
+            }).then((result) => {
+              applyPaymentExitResult({
+                result,
+                isNative,
+                setConfirmLeave,
+                setLeaveWithoutCancel,
+                setLeaveError,
+                resetSession,
+                goHome: () => router.replace("/" as Href),
+                goSuccess: () => router.replace(successHref),
+                goExpired: () => router.replace(`/failed/${bookingId}` as Href),
+                goFailed: () =>
+                  router.replace(`/failed/${bookingId}?reason=payment` as Href),
+                notifyCancelled: () => {
+                  void scheduleNotification
+                    .execute(paymentCancelled(bookingId))
+                    .catch(() => undefined);
+                },
+              });
+            });
           }}
         />
       </View>

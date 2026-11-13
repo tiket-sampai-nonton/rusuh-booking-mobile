@@ -27,7 +27,8 @@ import {
   View,
   type ImageStyle,
 } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
+import { SalesPeriod } from "../SalesPeriod";
 
 import {
   designColors,
@@ -38,7 +39,7 @@ import {
   CalendarIcon,
   ClockIcon,
   PinIcon,
-} from "@presentation/components/ArrowIcon";
+} from "@presentation/components/Icon";
 
 import type { DetailHeroProps } from "../../interface";
 import { designDetailStyles as styles } from "../../style";
@@ -64,6 +65,8 @@ export function DetailHero({
   name,
   meta,
   chips,
+  salesStartsAt,
+  salesEndsAt,
   subtitle,
   isMobileWeb = false,
   isActive = true,
@@ -195,25 +198,23 @@ export function DetailHero({
         style={[styles.heroContent, isMobileWeb && styles.mobileWebHeroContent]}
       >
         {/* Badge */}
-        {!isMobileWeb && (
-          <Animated.View
+        <Animated.View
+          style={[
+            styles.heroBadge,
+            isMobileWeb && styles.mobileWebHeroBadge,
+            styleForDetailHeroAnimatedView2(fadeAnim, slideAnim),
+          ]}
+        >
+          {isLive && <View style={styles.liveDot} />}
+          <Text
             style={[
-              styles.heroBadge,
-              isMobileWeb && styles.mobileWebHeroBadge,
-              styleForDetailHeroAnimatedView2(fadeAnim, slideAnim),
+              styles.heroBadgeText,
+              isMobileWeb && styles.mobileWebHeroBadgeText,
             ]}
           >
-            {isLive && <View style={styles.liveDot} />}
-            <Text
-              style={[
-                styles.heroBadgeText,
-                isMobileWeb && styles.mobileWebHeroBadgeText,
-              ]}
-            >
-              {statusLabel}
-            </Text>
-          </Animated.View>
-        )}
+            {statusLabel}
+          </Text>
+        </Animated.View>
 
         {/* Title */}
         <Animated.Text
@@ -267,20 +268,27 @@ export function DetailHero({
         )}
 
         {/* Chips (WEB ONLY - optional ticket count, etc) */}
-        {!isNative && !isMobileWeb && chips && chips.length > 0 && (
-          <Animated.View
-            style={[
-              heroStyles.chipRow,
-              styleForDetailHeroAnimatedView6(fadeAnim, slideAnim),
-            ]}
-          >
-            {chips.map((chip) => (
-              <View key={chip} style={heroStyles.chip}>
-                <Text style={heroStyles.chipText}>{chip}</Text>
-              </View>
-            ))}
-          </Animated.View>
-        )}
+        {!isNative &&
+          !isMobileWeb &&
+          (chips.length > 0 || salesStartsAt || salesEndsAt) && (
+            <Animated.View
+              style={[
+                heroStyles.chipRow,
+                styleForDetailHeroAnimatedView6(fadeAnim, slideAnim),
+              ]}
+            >
+              <SalesPeriod
+                startsAt={salesStartsAt}
+                endsAt={salesEndsAt}
+                variant="hero"
+              />
+              {chips.map((chip) => (
+                <View key={chip} style={heroStyles.chip}>
+                  <Text style={heroStyles.chipText}>{chip}</Text>
+                </View>
+              ))}
+            </Animated.View>
+          )}
       </View>
     </View>
   );

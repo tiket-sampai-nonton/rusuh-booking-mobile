@@ -89,8 +89,9 @@ describe("TicketQrSheet", () => {
     );
 
     expect(screen.getByText("T-1")).toBeTruthy();
-    expect(screen.getByText("Kategori VIP")).toBeTruthy();
-    expect(screen.getByText("Rizky · 31****89")).toBeTruthy();
+    expect(screen.getByText("VIP")).toBeTruthy();
+    expect(screen.getByText("Rizky")).toBeTruthy();
+    expect(screen.getByText("31****89")).toBeTruthy();
     expect(screen.getByTestId("qr-code").props.accessibilityLabel).toBe(
       "safe-payload",
     );

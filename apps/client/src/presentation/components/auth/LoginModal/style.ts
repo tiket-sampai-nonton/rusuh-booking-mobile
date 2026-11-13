@@ -232,7 +232,8 @@ export const loginStyles = StyleSheet.create({
     gap: 8,
     backgroundColor: designColors.accent,
     borderWidth: designBorders.standard,
-    borderColor: designColors.accent,
+    borderColor: designColors.ink,
+    ...hardShadowStyle(4, 4, designColors.ink),
     borderRadius: 0, // Brutalist: NO border-radius
     paddingVertical: 10,
     paddingHorizontal: 20,

@@ -306,6 +306,11 @@ export const designDetailStyles = StyleSheet.create({
     borderBottomWidth: designBorders.standard,
     borderBottomColor: designColors.ink,
   },
+  mobileWebSalesPeriod: {
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: designColors.ink,
+  },
   mobileWebTicketStat: { flex: 1, paddingVertical: 10, paddingHorizontal: 16 },
   mobileWebTicketStatSecond: {
     borderLeftWidth: 1,
@@ -860,7 +865,8 @@ export const designDetailStyles = StyleSheet.create({
     paddingHorizontal: Platform.OS === "web" ? designSpacingSemantic.l : 32, // 48px web, 32px native
     backgroundColor: designColors.accent,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ember,
+    borderColor: designColors.ink,
+    ...(Platform.OS === "web" ? hardShadowStyle(4, 4, designColors.ink) : {}),
     // Pulse glow animation applied separately
   },
   floatingCtaBtnDisabled: {

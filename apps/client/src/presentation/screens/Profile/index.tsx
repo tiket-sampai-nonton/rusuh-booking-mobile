@@ -1,26 +1,25 @@
 import { useRouter, type Href } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CompleteRegistration } from "@application/auth/complete-registration.use-case";
 import { ClearSession } from "@application/auth/clear-session.use-case";
 import { DomainError } from "@domain/errors/domain-error";
 import { ScreenFade } from "@presentation/components/ScreenFade";
-import {
-  BottomNav,
-  Header,
-  navigateBottomTab,
-} from "@presentation/components/design-system";
-import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
+import { BottomNav, Header, navigateBottomTab } from "@presentation/components";
+import { createPrimaryNavLinks } from "@presentation/components/primary-navigation";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
+import { useSessionStore } from "@presentation/stores/session-store";
+import { clearAllPaymentHandoff } from "@presentation/stores/payment-handoff";
+import { useClearUserQueryCache } from "@presentation/hooks/useClearUserQueryCache";
 
 import { useServices } from "@providers/service-context";
 
 import { LoginModal } from "@presentation/components/auth/LoginModal";
-import { useToast } from "@presentation/components/design-system/Toast";
+import { useToast } from "@presentation/components/Toast";
 import { GuestAccountCard } from "./fragments/GuestAccountCard";
 import { SignedInProfile } from "./fragments/SignedInProfile";
 import { profileContentContainerStyle, styles } from "./style";
@@ -31,7 +30,8 @@ export function ProfileScreen() {
   const { isWeb, isMobileWeb, width } = useResponsive();
   const profile = useAccountStore((state) => state.profile);
   const clearProfile = useAccountStore((state) => state.clearProfile);
-  const { userRepository, tokenStorage, buyerEmailStorage } = useServices();
+  const { userRepository, userDataStorage } = useServices();
+  const clearUserQueryCache = useClearUserQueryCache();
   const { show: showToast } = useToast();
   const [loginOpen, setLoginOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -71,15 +71,35 @@ export function ProfileScreen() {
   };
 
   const signOut = async () => {
+    let remoteLogoutFailed = false;
+    let localCleanupFailed = false;
     try {
       await userRepository.logout?.();
-      await new ClearSession(tokenStorage, buyerEmailStorage).execute();
-      clearProfile();
-      setEditing(false);
-      showToast("Berhasil keluar dari akun.", "success");
     } catch {
-      setError("Gagal keluar. Silakan coba lagi.");
-      showToast("Gagal keluar. Silakan coba lagi.", "error");
+      remoteLogoutFailed = true;
+    }
+    try {
+      await new ClearSession(userDataStorage).execute();
+    } catch {
+      localCleanupFailed = true;
+    }
+    clearProfile();
+    useSessionStore.getState().reset();
+    clearAllPaymentHandoff();
+    clearUserQueryCache();
+    setEditing(false);
+    setError("");
+
+    if (localCleanupFailed) {
+      setError("Sesi ditutup, tetapi sebagian data lokal belum terhapus.");
+      showToast("Sebagian data lokal belum terhapus.", "error");
+    } else if (remoteLogoutFailed) {
+      showToast(
+        "Sesi lokal dihapus, tetapi server belum mengonfirmasi keluar.",
+        "error",
+      );
+    } else {
+      showToast("Berhasil keluar dari akun.", "success");
     }
   };
 

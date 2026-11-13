@@ -3,6 +3,7 @@ import type { PaymentMethod } from "@domain/repositories/payment.repository";
 
 export interface PaymentScreenProps {
   readonly bookingId: string;
+  readonly eventId?: string;
 }
 
 export interface PaymentTopBarProps {

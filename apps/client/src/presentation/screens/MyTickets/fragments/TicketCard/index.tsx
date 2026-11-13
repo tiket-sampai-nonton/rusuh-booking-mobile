@@ -1,5 +1,5 @@
 import { Pressable, Text, View } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 
 import { eventImage } from "@domain/rules/event-image";
 import { formatDateID } from "@domain/services/date-format";

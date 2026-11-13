@@ -39,11 +39,11 @@ import {
   useToast,
   Cursor,
   ScrollProgress,
-} from "@presentation/components/design-system";
+} from "@presentation/components";
 // eslint-disable-next-line import/first -- these standalone variants exercise their edge props directly.
-import { ProgressBar } from "@presentation/components/design-system/Loader/ProgressBar";
+import { ProgressBar } from "@presentation/components/Loader/ProgressBar";
 // eslint-disable-next-line import/first
-import { ToastItem } from "@presentation/components/design-system/Toast/ToastItem";
+import { ToastItem } from "@presentation/components/Toast/ToastItem";
 
 afterEach(() => {
   mockMotionReduced = false;
@@ -423,7 +423,7 @@ describe("ToastProvider / useToastContext", () => {
   it("delivers show() through context to a descendant", () => {
     jest.useFakeTimers();
     const { ToastProvider, useToastContext } =
-      require("@presentation/components/design-system") as typeof import("@presentation/components/design-system");
+      require("@presentation/components") as typeof import("@presentation/components");
 
     function Child() {
       const { show } = useToastContext();
@@ -447,7 +447,7 @@ describe("ToastProvider / useToastContext", () => {
 
   it("throws when used outside a provider", () => {
     const { useToastContext } =
-      require("@presentation/components/design-system") as typeof import("@presentation/components/design-system");
+      require("@presentation/components") as typeof import("@presentation/components");
     function Bad() {
       useToastContext();
       return null;

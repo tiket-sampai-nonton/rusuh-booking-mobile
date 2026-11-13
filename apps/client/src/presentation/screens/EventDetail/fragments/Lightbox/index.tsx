@@ -12,7 +12,7 @@
  */
 import { useCallback, useEffect, useRef } from "react";
 import { Animated, Modal, Platform, Text } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 
 import { designDuration } from "@presentation/theme/event-design-tokens";
 import { nativeDriverSupported } from "@presentation/utils/style";

@@ -142,15 +142,15 @@
 | O3 | **ARCHITECTURE.md §6.1 correction**: make web push v1 (per D8.2). | FE (us) | Do in Phase 2 |
 | O4 | `/browse` server-side filter/sort params + event history/archive endpoint. | BE team | Tracked dependency |
 
-### Runtime status addendum — 2026-11-12
+### Runtime status addendum — 2026-11-13
 
-The O1/O2 rows above preserve the original grooming state from 2026-10-29. Since then, the live BE provides event-detail rich content and the payment service implements page-token issuance/exchange. FE now consumes rich content and includes a `/pay/[bookingId]` same-origin bootstrap route for the returned site-relative URL. O1 is partially resolved (catalog-level `remainingTickets` still needs a contract decision); O2 is implemented in code, with a web deployment and physical iOS/Android cookie/SNAP verification still outstanding. See [`AS-BUILT-ALIGNMENT-2026-11-12.md`](AS-BUILT-ALIGNMENT-2026-11-12.md) for evidence and remaining schema/device gaps.
+The O1/O2 rows above preserve the original grooming state from 2026-10-29. The live BE provides event-detail rich content and payment page-token issuance/exchange. A later user-approved native payment flow opens the BE-issued SNAP `redirectUrl` directly in the in-app WebView; the `/pay/[bookingId]` same-origin bootstrap remains available to web flows that use a page token and is not a prerequisite for native SNAP. O1 is partially resolved (catalog-level `remainingTickets` still needs a contract decision). O2's supported payment/status endpoints are integrated; physical iOS/Android transaction and provider URL-reuse QA remain incomplete. See [`AS-BUILT-ALIGNMENT-2026-11-13.md`](AS-BUILT-ALIGNMENT-2026-11-13.md) and the 2026-11-12 evidence addendum for scope and remaining contract gaps.
 
 ## Phase 2 instructions derived from this document
 
 Phase 2 **verifies + adopts** the existing strong material rather than generating from scratch:
 - `ARCHITECTURE.md` → adopt as-is **except** correct §6.1 (web push v1). **Payment: FE DOES build the payment page (method selection) then hands off to SNAP — follow the prototype (D10).**
-- `FE-Flow-Diagrams.md` → adopt; keep the payment sequence as the FE-page → `createAttempt` → SNAP-redirect → verify-with-BE model, **page-token WebView-reuse retained as FE scope** (D10.3), and reflect web push.
+- `FE-Flow-Diagrams.md` → adopt; keep the payment sequence as FE page → `createAttempt` → SNAP redirect → verify with BE. D10.3 records the original reusable-page decision; the current user-approved native runtime opens the backend SNAP URL directly, while the `/pay` token bootstrap remains a web capability.
 - `PIPELINE.md` → adopt as the CI-CD doc.
 - OpenAPI contracts → adopt as API-CONTRACT; attach the O1/O2/O4 gap list.
 - Still to GENERATE (thin or missing): DESIGN-SYSTEM, EDGE-CASES, SECURITY (from D7), OBSERVABILITY (FE-side), TESTING-STRATEGY (from ARCHITECTURE §9 + D6).

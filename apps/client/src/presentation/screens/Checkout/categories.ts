@@ -1,15 +1,4 @@
-import type { BookingCategory } from "@domain/repositories/booking.repository";
 import type { TicketRow } from "@domain/rules/checkout";
-
-export function categoryPrice(
-  categoryId: string,
-  categories: readonly BookingCategory[],
-): number {
-  return (
-    categories.find((category) => category.categoryId === categoryId)
-      ?.priceMinor ?? 0
-  );
-}
 
 /**
  * Mint a stable per-row id for React list reconciliation. Client-side only

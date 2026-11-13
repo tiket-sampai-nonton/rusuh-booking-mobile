@@ -10,7 +10,7 @@ jest.mock("react-native-reanimated", () => {
 import {
   getUnderlineTransformOrigin,
   NavLink,
-} from "../../../../../../presentation/components/design-system/Header/NavLink/index";
+} from "../../../../../../presentation/components/Header/NavLink/index";
 
 describe("NavLink", () => {
   afterEach(() => {

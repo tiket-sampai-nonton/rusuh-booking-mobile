@@ -8,20 +8,23 @@
  * the ServerClock, never the device clock.
  */
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { GetPaymentPage } from "@application/payment/get-payment-page.use-case";
 import type { PaymentPage } from "@domain/repositories/payment.repository";
 import { useServices } from "@providers/service-context";
 
-export function usePaymentPage(bookingId: string): {
+export function usePaymentPage(
+  bookingId: string,
+  eventId?: string,
+): {
   page: PaymentPage | undefined;
   isLoading: boolean;
   error: Error | null;
   refetch: () => Promise<unknown>;
   isFetching: boolean;
 } {
-  const { paymentRepository } = useServices();
+  const { paymentRepository, paymentJourneyStorage } = useServices();
   const usecase = useMemo(
     () => new GetPaymentPage(paymentRepository),
     [paymentRepository],
@@ -30,7 +33,15 @@ export function usePaymentPage(bookingId: string): {
     queryKey: ["payment-page", bookingId],
     queryFn: () => usecase.execute(bookingId),
     enabled: bookingId.length > 0,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
   });
+  useEffect(() => {
+    if (!bookingId || !query.data) return;
+    void paymentJourneyStorage
+      .save({ bookingId, eventId })
+      .catch(() => undefined);
+  }, [bookingId, eventId, paymentJourneyStorage, query.data]);
   return {
     page: query.data,
     isLoading: query.isLoading,

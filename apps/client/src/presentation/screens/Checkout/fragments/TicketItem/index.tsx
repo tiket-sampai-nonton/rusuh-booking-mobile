@@ -8,7 +8,7 @@
  */
 import { Pressable, Switch, Text, View } from "react-native";
 
-import { isValidNik } from "@domain/rules/checkout";
+import { normalizeNikInput } from "@domain/rules/checkout";
 import { designColors } from "@presentation/theme";
 import { minorToIDR } from "@domain/services/money";
 
@@ -16,6 +16,7 @@ import { Field } from ".././common";
 import type { TicketItemProps } from "../../interface";
 import {
   componentStyles,
+  buyerDataSwitchTrackColor,
   styleForTicketItemPressable0,
   styleForTicketItemText1,
   styleForTicketItemText2,
@@ -41,6 +42,7 @@ export function TicketItem({
   onRemove,
   onPatch,
   onUseBuyer,
+  showBuyerDataControl,
   status = "idle",
   categories,
   buyerName = "",
@@ -73,18 +75,24 @@ export function TicketItem({
       <View style={componentStyles.elementMarginTop5}>
         {categories.map((category) => {
           const selected = row.categoryId === category.categoryId;
+          const soldOut = category.available <= 0;
           return (
             <Pressable
               key={category.categoryId}
               accessibilityRole="button"
-              accessibilityLabel={`Kategori ${category.name}, ${minorToIDR(category.priceMinor)}`}
-              accessibilityState={{ selected }}
+              accessibilityLabel={`Kategori ${category.name}, ${minorToIDR(category.priceMinor)}${soldOut ? ", habis" : ""}`}
+              accessibilityState={{ selected, disabled: soldOut }}
+              disabled={soldOut}
               onPress={() => onPatch({ categoryId: category.categoryId })}
               testID={`cat-${index}-${category.code}`}
-              style={styleForTicketItemPressable0(selected)}
+              style={[
+                styleForTicketItemPressable0(selected),
+                soldOut && { opacity: 0.45 },
+              ]}
             >
               <Text style={styleForTicketItemText1(selected)}>
                 {category.name} · {minorToIDR(category.priceMinor)}
+                {soldOut ? " · Habis" : ""}
               </Text>
             </Pressable>
           );
@@ -109,18 +117,11 @@ export function TicketItem({
       <Field
         label="NIK Penonton (16 digit)"
         value={row.useBuyerNik ? buyerNik : row.attendeeNik}
-        onChangeText={(t) =>
-          onPatch({ attendeeNik: t.replace(/\D/g, "").slice(0, 16) })
-        }
+        onChangeText={(t) => onPatch({ attendeeNik: normalizeNikInput(t) })}
         placeholder="16 digit KTP penonton"
         keyboardType="number-pad"
         editable={!row.useBuyerNik}
-        invalid={
-          Boolean(attendeeNikError) ||
-          (!row.useBuyerNik &&
-            row.attendeeNik.length > 0 &&
-            !isValidNik(row.attendeeNik))
-        }
+        invalid={Boolean(attendeeNikError)}
         errorMessage={attendeeNikError}
         testID={`attendee-nik-${index}`}
       />
@@ -135,19 +136,27 @@ export function TicketItem({
         </Text>
       ) : null}
 
-      <View style={componentStyles.elementMarginTop6}>
-        <Text style={componentStyles.elementFlex7}>
-          "Gunakan data pembeli (pembeli ikut nonton)"
-        </Text>
-        <Switch
-          accessibilityLabel={`Gunakan data pembeli untuk tiket ${index + 1}`}
-          value={row.useBuyerNik}
-          onValueChange={onUseBuyer}
-          trackColor={{ false: designColors.field, true: designColors.ink }} // Use field per Design Palette Guide
-          thumbColor={designColors.ground}
-          testID={`use-buyer-${index}`}
-        />
-      </View>
+      {showBuyerDataControl ? (
+        <View
+          style={componentStyles.buyerDataControl}
+          testID={`buyer-data-control-${index}`}
+        >
+          <Text style={componentStyles.elementFlex7}>
+            Gunakan data pembeli (pembeli ikut nonton)
+          </Text>
+          <Switch
+            accessibilityLabel="Gunakan data pembeli untuk tiket pertama"
+            accessibilityRole="switch"
+            accessibilityState={{ checked: row.useBuyerNik }}
+            value={row.useBuyerNik}
+            onValueChange={onUseBuyer}
+            trackColor={buyerDataSwitchTrackColor}
+            ios_backgroundColor={designColors.gray}
+            thumbColor={designColors.ground}
+            testID={`use-buyer-${index}`}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }

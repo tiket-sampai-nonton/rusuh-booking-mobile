@@ -8,6 +8,11 @@ import { CheckoutHero } from "@presentation/screens/Checkout/fragments/CheckoutH
 import { LeaveConfirm } from "@presentation/screens/Checkout/fragments/LeaveConfirm";
 import { TicketItem } from "@presentation/screens/Checkout/fragments/TicketItem";
 import {
+  buyerDataSwitchTrackColor,
+  componentStyles as ticketItemStyles,
+} from "@presentation/screens/Checkout/fragments/TicketItem/style";
+import { designColors } from "@presentation/theme";
+import {
   Field,
   Section,
 } from "@presentation/screens/Checkout/fragments/common";
@@ -207,6 +212,7 @@ describe("TicketItem attendee-check status (RBT-052)", () => {
   const noop = jest.fn();
   const props = {
     index: 0,
+    showBuyerDataControl: true,
     row: ticketRow,
     canRemove: false,
     onRemove: noop,
@@ -248,5 +254,26 @@ describe("TicketItem attendee-check status (RBT-052)", () => {
   it("defaults to idle (no status row) when the status prop is omitted", () => {
     render(<TicketItem {...props} />);
     expect(screen.queryByTestId("attendee-status-0")).toBeNull();
+  });
+
+  it("shows a high-contrast buyer-data switch for the first ticket", () => {
+    const onUseBuyer = jest.fn();
+    render(<TicketItem {...props} onUseBuyer={onUseBuyer} />);
+    const control = screen.getByTestId("use-buyer-0");
+    expect(ticketItemStyles.buyerDataControl).toMatchObject({
+      borderColor: designColors.ink,
+      backgroundColor: designColors.ground,
+      borderWidth: 1,
+    });
+    expect(buyerDataSwitchTrackColor.false).toBe(designColors.gray);
+    expect(buyerDataSwitchTrackColor.true).toBe(designColors.ink);
+    fireEvent(control, "valueChange", true);
+    expect(onUseBuyer).toHaveBeenCalledWith(true);
+  });
+
+  it("hides the buyer-data switch on later tickets", () => {
+    render(<TicketItem {...props} index={1} showBuyerDataControl={false} />);
+    expect(screen.queryByTestId("use-buyer-1")).toBeNull();
+    expect(screen.queryByText(/Gunakan data pembeli/)).toBeNull();
   });
 });

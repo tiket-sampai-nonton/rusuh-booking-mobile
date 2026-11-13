@@ -30,15 +30,12 @@ import {
 } from "./style";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import {
-  BottomNav,
-  Header,
-  navigateBottomTab,
-} from "@presentation/components/design-system";
-import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
+import { BottomNav, Header, navigateBottomTab } from "@presentation/components";
+import { createPrimaryNavLinks } from "@presentation/components/primary-navigation";
 import { LoginModal } from "@presentation/components/auth/LoginModal";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
+import { useEventDetail } from "@presentation/hooks/useEventDetail";
 import { useMyTicketsData } from "@presentation/hooks/useMyTicketsData";
 import { useETicketShare } from "@presentation/hooks/useETicketShare";
 import { useETicketDownload } from "@presentation/hooks/useETicketDownload";
@@ -333,13 +330,16 @@ export function MyTicketsScreen() {
   const { data } = useEvents();
   const bookingId = useSessionStore((s) => s.bookingId);
   const eventId = useSessionStore((s) => s.eventId);
+  const { data: activeEventDetail } = useEventDetail(eventId ?? "");
   const amountMinor = useSessionStore((s) => s.amountMinor) ?? 0;
   const ticketCount = useSessionStore((s) => s.ticketCount) ?? 1;
   const profile = useAccountStore((s) => s.profile);
   const { serverClock } = useServices();
   const activeEvent = useMemo(
-    () => (data?.upcoming ?? []).find((event) => event.id === eventId),
-    [data?.upcoming, eventId],
+    () =>
+      activeEventDetail ??
+      (data?.upcoming ?? []).find((event) => event.id === eventId),
+    [activeEventDetail, data?.upcoming, eventId],
   );
   const { shareTickets } = useETicketShare();
   const { downloadTickets } = useETicketDownload();
@@ -410,6 +410,19 @@ export function MyTicketsScreen() {
     history?.pages,
   );
   const knownEvents = [...(data?.upcoming ?? []), ...(data?.history ?? [])];
+  const matchingEvents = selectedBooking
+    ? knownEvents.filter(
+        (event) =>
+          event.name === selectedBooking.eventName &&
+          Boolean(selectedTickets?.eventStartsAt) &&
+          Date.parse(event.startsAt ?? "") ===
+            Date.parse(selectedTickets?.eventStartsAt ?? ""),
+      )
+    : [];
+  let qrEvent = activeEvent;
+  if (selectedBooking) {
+    qrEvent = matchingEvents.length === 1 ? matchingEvents[0] : undefined;
+  }
   const now = serverClock.serverNow();
   const isPastBooking = (booking: MyBookingSummary) =>
     bookingIsPast(booking, knownEvents, now);
@@ -441,13 +454,21 @@ export function MyTicketsScreen() {
     try {
       const tickets = localTickets.data?.tickets ?? [];
       if (!tickets.length) throw new Error("Tiket belum tersedia.");
-      const qrPayloads = tickets.map((ticket) => ticket.qrPayload);
       await downloadTickets(
         bookingId,
-        tickets.length,
-        qrPayloads,
-        activeEvent.name,
-        tickets.map((ticket) => ticket.ticketCode),
+        tickets.map((ticket, index) => ({
+          bookingId,
+          eventName: activeEvent.name,
+          venue: activeEvent.venue,
+          startsAt: localTickets.data?.eventStartsAt ?? activeEvent.startsAt,
+          attendeeName: ticket.attendeeName,
+          attendeeNikMasked: ticket.attendeeNikMasked,
+          categoryCode: ticket.categoryCode,
+          qrPayload: ticket.qrPayload,
+          ticketCode: ticket.ticketCode,
+          index,
+          total: tickets.length,
+        })),
       );
     } catch (error) {
       setDownloadError(
@@ -462,15 +483,22 @@ export function MyTicketsScreen() {
     if (!selectedBooking || !selectedTickets) return;
     setDownloadError("");
     try {
-      const qrPayloads = selectedTickets.tickets.map(
-        (ticket) => ticket.qrPayload,
-      );
+      const event = qrEvent;
       await downloadTickets(
         selectedBooking.bookingId,
-        qrPayloads.length,
-        qrPayloads,
-        selectedBooking.eventName,
-        selectedTickets.tickets.map((ticket) => ticket.ticketCode),
+        selectedTickets.tickets.map((ticket, index) => ({
+          bookingId: selectedBooking.bookingId,
+          eventName: selectedBooking.eventName,
+          venue: event?.venue,
+          startsAt: selectedTickets.eventStartsAt ?? event?.startsAt,
+          attendeeName: ticket.attendeeName,
+          attendeeNikMasked: ticket.attendeeNikMasked,
+          categoryCode: ticket.categoryCode,
+          qrPayload: ticket.qrPayload,
+          ticketCode: ticket.ticketCode,
+          index,
+          total: selectedTickets.tickets.length,
+        })),
       );
     } catch (error) {
       setDownloadError(
@@ -504,7 +532,15 @@ export function MyTicketsScreen() {
 
   const qrSheet = (
     <TicketQrSheet
-      eventName={selectedBooking?.eventName ?? "QR Tiket Anda"}
+      eventName={
+        selectedBooking?.eventName ?? activeEvent?.name ?? "QR Tiket Anda"
+      }
+      venue={qrEvent?.venue}
+      startsAt={
+        (selectedBooking
+          ? selectedTickets?.eventStartsAt
+          : localTickets.data?.eventStartsAt) ?? qrEvent?.startsAt
+      }
       bookingId={selectedBooking?.bookingId ?? bookingId ?? "booking"}
       bookingSummary={selectedBooking ?? undefined}
       bookingTickets={

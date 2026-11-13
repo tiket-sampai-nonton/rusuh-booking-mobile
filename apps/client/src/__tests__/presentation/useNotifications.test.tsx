@@ -43,7 +43,9 @@ describe("useNotifications (RBT-072)", () => {
     renderHook(() => useNotifications(), { wrapper });
     await waitFor(() => expect(subscribe).toHaveBeenCalledTimes(1));
     handler?.({ deepLink: "/success/bk-1", kind: "payment_success" });
-    expect(mockRouter.push).toHaveBeenCalledWith("/success/bk-1");
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith("/success/bk-1"),
+    );
   });
 
   it("still listens for notification taps when optional push registration fails", async () => {
@@ -82,6 +84,86 @@ describe("useNotifications (RBT-072)", () => {
     renderHook(() => useNotifications(), { wrapper });
     await waitFor(() => expect(handler).toBeDefined());
     handler?.({});
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it("ignores an old payment notification while a different payment is active", async () => {
+    const container = createContainer({ useMocks: true });
+    jest
+      .spyOn(container.paymentJourneyStorage, "load")
+      .mockResolvedValue({ bookingId: "bk-new" });
+    let handler:
+      | ((data: Readonly<Record<string, unknown>> | undefined) => void)
+      | undefined;
+    jest
+      .spyOn(container.notification, "subscribeToResponses")
+      .mockImplementation((onResponse) => {
+        handler = onResponse;
+        return jest.fn();
+      });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <ServiceProvider container={container}>{children}</ServiceProvider>
+    );
+    renderHook(() => useNotifications(), { wrapper });
+    await waitFor(() => expect(handler).toBeDefined());
+    handler?.({ deepLink: "/payment/bk-old", kind: "payment_timeout" });
+    await waitFor(() =>
+      expect(container.paymentJourneyStorage.load).toHaveBeenCalled(),
+    );
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it("does not replace a live queue with an old payment notification", async () => {
+    const container = createContainer({ useMocks: true });
+    jest.spyOn(container.paymentJourneyStorage, "load").mockResolvedValue(null);
+    jest.spyOn(container.queueMembership, "load").mockResolvedValue({
+      eventId: "new-event",
+      queueId: "new-queue",
+    });
+    let handler:
+      | ((data: Readonly<Record<string, unknown>> | undefined) => void)
+      | undefined;
+    jest
+      .spyOn(container.notification, "subscribeToResponses")
+      .mockImplementation((onResponse) => {
+        handler = onResponse;
+        return jest.fn();
+      });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <ServiceProvider container={container}>{children}</ServiceProvider>
+    );
+    renderHook(() => useNotifications(), { wrapper });
+    await waitFor(() => expect(handler).toBeDefined());
+    handler?.({ deepLink: "/payment/old-booking", kind: "payment_timeout" });
+    await waitFor(() =>
+      expect(container.queueMembership.load).toHaveBeenCalled(),
+    );
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it("does not let an old cancellation notification send an active journey home", async () => {
+    const container = createContainer({ useMocks: true });
+    jest
+      .spyOn(container.paymentJourneyStorage, "load")
+      .mockResolvedValue({ bookingId: "bk-current" });
+    let handler:
+      | ((data: Readonly<Record<string, unknown>> | undefined) => void)
+      | undefined;
+    jest
+      .spyOn(container.notification, "subscribeToResponses")
+      .mockImplementation((onResponse) => {
+        handler = onResponse;
+        return jest.fn();
+      });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <ServiceProvider container={container}>{children}</ServiceProvider>
+    );
+    renderHook(() => useNotifications(), { wrapper });
+    await waitFor(() => expect(handler).toBeDefined());
+    handler?.({ deepLink: "/", kind: "payment_cancelled" });
+    await waitFor(() =>
+      expect(container.paymentJourneyStorage.load).toHaveBeenCalled(),
+    );
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 });

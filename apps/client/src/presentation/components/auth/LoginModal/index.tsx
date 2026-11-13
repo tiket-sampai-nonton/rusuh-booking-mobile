@@ -43,8 +43,8 @@ import {
 } from "@presentation/components/auth/auth.schema";
 import { useAuth } from "@presentation/hooks/useAuth";
 import { useResponsive } from "@presentation/hooks/useResponsive";
-import { CheckIcon, CloseIcon } from "@presentation/components/ArrowIcon";
-import { useToast } from "@presentation/components/design-system/Toast";
+import { CheckIcon, CloseIcon } from "@presentation/components/Icon";
+import { useToast } from "@presentation/components/Toast";
 import {
   designColors,
   designDuration,

@@ -18,9 +18,24 @@ export function isValidNik(nik: string): boolean {
   return /^\d{16}$/.test(nik);
 }
 
+/** Normalize a typed NIK to the digits accepted by the booking contract. */
+export function normalizeNikInput(value: string): string {
+  return value.replace(/\D/g, "").slice(0, 16);
+}
+
 /** A minimally-valid email (UX gate; BE is authoritative). */
 export function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const value = email.trim();
+  const at = value.indexOf("@");
+  const domain = value.slice(at + 1);
+  const dot = domain.lastIndexOf(".");
+  return (
+    at > 0 &&
+    value.indexOf("@", at + 1) === -1 &&
+    !/\s/.test(value) &&
+    dot > 0 &&
+    dot < domain.length - 1
+  );
 }
 
 /** One ticket row in the checkout form. */
@@ -122,10 +137,11 @@ export function setBuyerUseAt(
   index: number,
   on: boolean,
 ): TicketRow[] {
+  if (on && !canUseBuyerDataForTicket(index)) return [...rows];
   return rows.map((row, i) => {
     let useBuyerNik = row.useBuyerNik;
     if (i === index) useBuyerNik = on;
-    else if (on) useBuyerNik = false;
+    else if (on || i !== 0) useBuyerNik = false;
 
     return { ...row, useBuyerNik };
   });
@@ -154,6 +170,9 @@ export function isAttendeeWarning(result: AttendeeCheckResult): boolean {
 export interface CheckoutState {
   readonly buyerNik: string;
   readonly buyerEmail: string;
+  readonly buyerName?: string;
+  /** Omit only for callers that do not expose an email confirmation field. */
+  readonly emailConfirmation?: string;
   readonly rows: readonly TicketRow[];
   readonly maxSelectable: number;
   /**
@@ -169,24 +188,253 @@ export interface CheckoutState {
   readonly consentGiven?: boolean;
 }
 
+export type CheckoutIssue =
+  | "required"
+  | "invalid"
+  | "mismatch"
+  | "duplicate"
+  | "already-registered";
+
+export interface CheckoutRowIssues {
+  readonly category?: "required";
+  readonly attendeeName?: "required";
+  readonly attendeeNik?: CheckoutIssue;
+}
+
+export interface CheckoutIssues {
+  readonly buyerName?: "required";
+  readonly buyerNik?: "required" | "invalid";
+  readonly buyerEmail?: "required" | "invalid";
+  readonly emailConfirmation?: "required" | "mismatch";
+  readonly consent?: "required";
+  readonly quantity?: "invalid";
+  readonly buyerDataPosition?: "invalid";
+  readonly rows: Readonly<Record<string, CheckoutRowIssues>>;
+  readonly isValid: boolean;
+}
+
+/** Buyer identity is a single order-wide choice and belongs to ticket one. */
+export function canUseBuyerDataForTicket(index: number): boolean {
+  return index === 0;
+}
+
+/** Resolve the buyer-as-attendee choice for display and submission. */
+export function resolveBuyerTicketRows(
+  rows: readonly TicketRow[],
+  buyerName: string,
+  buyerNik: string,
+): TicketRow[] {
+  return rows.map((row) =>
+    row.useBuyerNik
+      ? { ...row, attendeeName: buyerName, attendeeNik: buyerNik }
+      : row,
+  );
+}
+
+/** Sum category priceMinor values for the selected rows. */
+export function checkoutTotalMinor(
+  rows: readonly TicketRow[],
+  categories: readonly {
+    readonly categoryId: string;
+    readonly priceMinor: number;
+  }[],
+): number {
+  const priceByCategory = new Map(
+    categories.map((category) => [category.categoryId, category.priceMinor]),
+  );
+  return rows.reduce(
+    (total, row) => total + (priceByCategory.get(row.categoryId) ?? 0),
+    0,
+  );
+}
+
+/** Apply the first available category only to rows that have no selection. */
+export function assignDefaultCategory(
+  rows: readonly TicketRow[],
+  categoryId: string,
+): TicketRow[] {
+  let changed = false;
+  const next = rows.map((row) => {
+    if (row.categoryId) return row;
+    changed = true;
+    return { ...row, categoryId };
+  });
+  return changed ? next : [...rows];
+}
+
+/** The first backend-provided category is the initial checkout selection. */
+export function defaultCheckoutCategory(
+  categories: readonly {
+    readonly categoryId: string;
+    readonly available?: number;
+  }[],
+): string {
+  return (
+    categories.find(
+      (category) => category.available === undefined || category.available > 0,
+    )?.categoryId ?? ""
+  );
+}
+
+/** Clear a selection when the server reports that its category is sold out. */
+export function reconcileCheckoutCategories(
+  rows: readonly TicketRow[],
+  categories: readonly {
+    readonly categoryId: string;
+    readonly available?: number;
+  }[],
+): TicketRow[] {
+  const valid = new Set(
+    categories
+      .filter(
+        (category) =>
+          category.available === undefined || category.available > 0,
+      )
+      .map((category) => category.categoryId),
+  );
+  const fallback = defaultCheckoutCategory(categories);
+  return rows.map((row) => {
+    if (valid.has(row.categoryId)) return row;
+    const categoryId = row.categoryId ? "" : fallback;
+    return { ...row, categoryId };
+  });
+}
+
+function nikIssue(nik: string): "required" | "invalid" | undefined {
+  if (!nik.trim()) return "required";
+  return isValidNik(nik) ? undefined : "invalid";
+}
+
+function buyerEmailIssue(email: string): "required" | "invalid" | undefined {
+  if (!email.trim()) return "required";
+  if (!isValidEmail(email)) return "invalid";
+  return undefined;
+}
+
+function confirmationIssue(
+  confirmation: string | undefined,
+  email: string,
+): "required" | "mismatch" | undefined {
+  if (confirmation === undefined) return undefined;
+  if (!confirmation.trim()) return "required";
+  if (confirmation.trim() !== email.trim()) return "mismatch";
+  return undefined;
+}
+
+function rowAttendeeNikIssue(
+  issue: "required" | "invalid" | undefined,
+  duplicate: boolean,
+  check: AttendeeCheckResult,
+): CheckoutRowIssues["attendeeNik"] {
+  if (issue) return issue;
+  if (duplicate) return "duplicate";
+  if (isAttendeeBlocked(check)) return "already-registered";
+  return undefined;
+}
+
+function resolvedBuyerName(state: CheckoutState): string {
+  const row = state.rows.find((ticket) => ticket.useBuyerNik);
+  return state.buyerName ?? row?.attendeeName ?? "";
+}
+
+function hasInvalidBuyerPosition(rows: readonly TicketRow[]): boolean {
+  return (
+    rows.filter((row) => row.useBuyerNik).length > 1 ||
+    rows.some(
+      (row, index) => row.useBuyerNik && !canUseBuyerDataForTicket(index),
+    )
+  );
+}
+
+function attendeeNikCounts(niks: readonly string[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const nik of niks) {
+    if (nik) counts.set(nik, (counts.get(nik) ?? 0) + 1);
+  }
+  return counts;
+}
+
+function checkoutRowIssues(
+  state: CheckoutState,
+  buyerName: string,
+): Record<string, CheckoutRowIssues> {
+  const niks = resolveAttendeeNiks(state.rows, state.buyerNik);
+  const counts = attendeeNikCounts(niks);
+  return Object.fromEntries(
+    state.rows.map((row, index) => {
+      const nik = niks[index] ?? "";
+      const nikIssueValue = nikIssue(nik);
+      const duplicate = Boolean(nik) && (counts.get(nik) ?? 0) > 1;
+      const check = state.attendeeChecks?.[nik] ?? "AVAILABLE";
+      const name = row.useBuyerNik ? buyerName : row.attendeeName;
+      const attendeeIssue = rowAttendeeNikIssue(
+        nikIssueValue,
+        duplicate,
+        check,
+      );
+      const issues: CheckoutRowIssues = {
+        ...(!row.categoryId ? { category: "required" as const } : {}),
+        ...(!name.trim() ? { attendeeName: "required" as const } : {}),
+        ...(attendeeIssue ? { attendeeNik: attendeeIssue } : {}),
+      };
+      return [row.rowId, issues];
+    }),
+  );
+}
+
+/** Validate checkout rules once; presentation maps issue codes to UI copy. */
+export function validateCheckout(state: CheckoutState): CheckoutIssues {
+  const buyerNikIssue = nikIssue(state.buyerNik);
+  const buyerEmailError = buyerEmailIssue(state.buyerEmail);
+  const emailConfirmationError = confirmationIssue(
+    state.emailConfirmation,
+    state.buyerEmail,
+  );
+  const buyerName = resolvedBuyerName(state);
+  const buyerNameIssue: "required" | undefined =
+    state.rows.some((row) => row.useBuyerNik) && !buyerName.trim()
+      ? "required"
+      : undefined;
+  const consentIssue: "required" | undefined =
+    state.consentGiven === false ? "required" : undefined;
+  const quantityIssue: "invalid" | undefined = isQuantityValid(
+    state.rows.length,
+    state.maxSelectable,
+  )
+    ? undefined
+    : "invalid";
+  const buyerDataPositionIssue: "invalid" | undefined = hasInvalidBuyerPosition(
+    state.rows,
+  )
+    ? "invalid"
+    : undefined;
+  const rowIssues = checkoutRowIssues(state, buyerName);
+
+  const fieldIssues = {
+    ...(buyerNameIssue ? { buyerName: buyerNameIssue } : {}),
+    ...(buyerNikIssue ? { buyerNik: buyerNikIssue } : {}),
+    ...(buyerEmailError ? { buyerEmail: buyerEmailError } : {}),
+    ...(emailConfirmationError
+      ? { emailConfirmation: emailConfirmationError }
+      : {}),
+    ...(consentIssue ? { consent: consentIssue } : {}),
+    ...(quantityIssue ? { quantity: quantityIssue } : {}),
+    ...(buyerDataPositionIssue
+      ? { buyerDataPosition: buyerDataPositionIssue }
+      : {}),
+  };
+  return {
+    ...fieldIssues,
+    rows: rowIssues,
+    isValid:
+      Object.keys(fieldIssues).length === 0 &&
+      Object.values(rowIssues).every(
+        (issues) => Object.keys(issues).length === 0,
+      ),
+  };
+}
+
 /** Overall readiness: valid buyer, valid quantity, every row complete + unique. */
 export function isCheckoutReady(state: CheckoutState): boolean {
-  if (!isValidNik(state.buyerNik)) return false;
-  if (!isValidEmail(state.buyerEmail)) return false;
-  if (!isQuantityValid(state.rows.length, state.maxSelectable)) return false;
-  if (!buyerNikUsedOnce(state.rows)) return false;
-  // Consent is mandatory before the hold (D7.1). Undefined means "not gated
-  // here" (logged-in users consented at registration); false blocks.
-  if (state.consentGiven === false) return false;
-  const checks = state.attendeeChecks ?? {};
-  for (const r of state.rows) {
-    if (r.categoryId.length === 0) return false;
-    const nik = r.useBuyerNik ? state.buyerNik : r.attendeeNik;
-    const name = r.attendeeName;
-    if (!isValidNik(nik)) return false;
-    if (name.trim().length === 0) return false;
-    // A NIK the BE already flagged ALREADY_REGISTERED cannot be held.
-    if (isAttendeeBlocked(checks[nik] ?? "AVAILABLE")) return false;
-  }
-  return attendeeNiksUnique(state.rows, state.buyerNik);
+  return validateCheckout(state).isValid;
 }

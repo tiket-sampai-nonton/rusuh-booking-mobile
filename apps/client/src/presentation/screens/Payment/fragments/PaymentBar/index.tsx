@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { minorToIDR } from "@domain/services/money";
 import { designColors } from "@presentation/theme";
-import { ExternalLinkIcon } from "@presentation/components/ArrowIcon";
+import { ExternalLinkIcon } from "@presentation/components/Icon";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import type { PaymentBarProps } from "../../interface";

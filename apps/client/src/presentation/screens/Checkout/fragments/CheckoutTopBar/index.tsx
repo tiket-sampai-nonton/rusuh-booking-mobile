@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 
 import { formatCountdown } from "@domain/services/date-format";
-import { ArrowIcon } from "@presentation/components/ArrowIcon";
+import { Icon } from "@presentation/components/Icon";
 
 import type { CheckoutTopBarProps } from "../../interface";
 import { styles, componentStyles, styleForCheckoutTopBarView0 } from "./style";
@@ -40,7 +40,7 @@ export function CheckoutTopBar({
           style={styles.backButton}
         >
           <View style={componentStyles.elementFlexDirection0}>
-            <ArrowIcon direction="left" />
+            <Icon direction="left" />
             {!isMobileWeb && <Text style={styles.backText}>Kembali</Text>}
           </View>
         </Pressable>

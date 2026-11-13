@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import { Linking } from "react-native";
 
-import { ToastProvider } from "@presentation/components/design-system";
+import { ToastProvider } from "@presentation/components";
 import { FooterLink } from "@presentation/screens/Home/fragments/HomeFooter/FooterLink";
 
 describe("FooterLink navigation", () => {
