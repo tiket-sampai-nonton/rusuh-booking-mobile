@@ -62,7 +62,7 @@ export function BrowseCategoriesSection({
         accessibilityState={{ selected: isActive }}
       >
         <Text style={browseCategoryLabel(isActive)}>
-          {label.replace(/_/g, " ")}
+          {label.replaceAll("_", " ")}
         </Text>
       </Pressable>
     );

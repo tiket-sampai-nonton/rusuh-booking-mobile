@@ -23,7 +23,7 @@ export function ScrollProgress(): null {
     if (!doc || !win) return;
 
     const bar = doc.createElement("div");
-    bar.setAttribute("data-testid", "v2-scroll-progress");
+    bar.dataset.testid = "v2-scroll-progress";
     bar.style.cssText =
       `position:fixed;top:0;left:0;height:3px;width:100%;background:${designColors.ink};` +
       `transform-origin:left;transform:scaleX(0);z-index:1000;` +

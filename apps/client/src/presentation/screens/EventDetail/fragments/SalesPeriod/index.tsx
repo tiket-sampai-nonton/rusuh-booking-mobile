@@ -25,61 +25,62 @@ export function SalesPeriod({
   const end = formatSalesTime(endsAt);
   if (!start && !end) return null;
   const hero = variant === "hero";
-  const webLabel =
-    start && end
-      ? `Penjualan: ${formatWIBDateID(startsAt)} ${formatWIBTimeID(startsAt).replace(" WIB", "")} – ${formatWIBDateID(endsAt)} ${formatWIBTimeID(endsAt)}`
-      : start
-        ? `Penjualan tiket mulai: ${start}`
-        : `Penjualan tiket berakhir: ${end}`;
+  const webLabel = formatWebLabel(start, end, startsAt, endsAt);
+  const containerStyle = salesContainerStyle(variant);
+  const card = variant === "card";
   return (
     <View
-      style={[
-        styles.container,
-        hero ? styles.hero : variant === "inline" ? styles.inline : undefined,
-      ]}
+      style={[styles.container, containerStyle]}
       testID="ticket-sales-period"
     >
-      {variant !== "card" ? (
+      {!card ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <Text style={[styles.text, hero && styles.heroText]}>{webLabel}</Text>
+          <Text style={[styles.text, textVariantStyle(hero, false)]}>
+            {webLabel}
+          </Text>
         </ScrollView>
       ) : (
         <>
-          <Text
-            style={[
-              styles.heading,
-              hero && styles.heroText,
-              variant === "card" && styles.cardHeading,
-            ]}
-          >
+          <Text style={[styles.heading, styles.cardHeading]}>
             Penjualan tiket
           </Text>
           {start ? (
-            <Text
-              style={[
-                styles.text,
-                hero && styles.heroText,
-                variant === "card" && styles.cardText,
-              ]}
-            >
-              Mulai: {start}
-            </Text>
+            <Text style={[styles.text, styles.cardText]}>Mulai: {start}</Text>
           ) : null}
           {end ? (
-            <Text
-              style={[
-                styles.text,
-                hero && styles.heroText,
-                variant === "card" && styles.cardText,
-              ]}
-            >
-              Berakhir: {end}
-            </Text>
+            <Text style={[styles.text, styles.cardText]}>Berakhir: {end}</Text>
           ) : null}
         </>
       )}
     </View>
   );
+}
+
+function formatWebLabel(
+  start: string,
+  end: string,
+  startsAt?: string,
+  endsAt?: string,
+): string {
+  if (start && end) {
+    const startTime = formatWIBTimeID(startsAt).replace(" WIB", "");
+    const endTime = formatWIBTimeID(endsAt);
+    return `Penjualan: ${formatWIBDateID(startsAt)} ${startTime} – ${formatWIBDateID(endsAt)} ${endTime}`;
+  }
+  if (start) return `Penjualan tiket mulai: ${start}`;
+  return `Penjualan tiket berakhir: ${end}`;
+}
+
+function salesContainerStyle(variant: "hero" | "inline" | "card") {
+  if (variant === "hero") return styles.hero;
+  if (variant === "inline") return styles.inline;
+  return undefined;
+}
+
+function textVariantStyle(hero: boolean, card: boolean) {
+  if (card) return styles.cardText;
+  if (hero) return styles.heroText;
+  return undefined;
 }
 
 const styles = StyleSheet.create({

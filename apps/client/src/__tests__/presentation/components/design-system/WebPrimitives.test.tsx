@@ -82,7 +82,7 @@ describe("Cursor (web, fine pointer)", () => {
   it("renders nothing under reduced motion", () => {
     mockMotionReduced = true;
     render(<Cursor />);
-    expect(document.body.querySelectorAll("div").length).toBe(0);
+    expect(document.body.querySelectorAll("div")).toHaveLength(0);
   });
 
   it("renders nothing on a coarse pointer", () => {
@@ -90,13 +90,13 @@ describe("Cursor (web, fine pointer)", () => {
       matches: false,
     }) as unknown as typeof window.matchMedia;
     render(<Cursor />);
-    expect(document.body.querySelectorAll("div").length).toBe(0);
+    expect(document.body.querySelectorAll("div")).toHaveLength(0);
   });
 
   it("renders nothing when the browser has no matchMedia support", () => {
     window.matchMedia = undefined as unknown as typeof window.matchMedia;
     const { unmount } = render(<Cursor />);
-    expect(document.body.querySelectorAll("div").length).toBe(0);
+    expect(document.body.querySelectorAll("div")).toHaveLength(0);
     unmount();
   });
 });

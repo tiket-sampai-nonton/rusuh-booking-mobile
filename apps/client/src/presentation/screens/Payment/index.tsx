@@ -17,11 +17,7 @@ import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { PaymentMethod } from "@domain/repositories/payment.repository";
-import {
-  paymentCancelled,
-  paymentResultNotification,
-  paymentTimeout,
-} from "@domain/rules/notification-flows";
+import { paymentCancelled } from "@domain/rules/notification-flows";
 import { ScheduleLocalNotification } from "@application/notifications/schedule-local-notification.use-case";
 import { CancelLocalNotification } from "@application/notifications/cancel-local-notification.use-case";
 import { ScreenFade } from "@presentation/components/ScreenFade";
@@ -43,6 +39,22 @@ import { PaymentTopBar } from "./fragments/PaymentTopBar";
 import type { PaymentScreenProps } from "./interface";
 import { paymentScrollContent } from "./style";
 import { LeaveConfirm } from "../Checkout/fragments/LeaveConfirm";
+import {
+  applyPaymentExitResult,
+  isTerminalPaymentStatus,
+  reconcileExpiredPaymentStatus,
+  requestPaymentExit,
+  reconcilePaymentOnReconnect,
+  recoverUnavailablePaymentPage,
+  routeTerminalPaymentStatus,
+  updatePaymentNotification,
+} from "./effects";
+
+function expiryRetryLabel(isChecking: boolean, isOffline: boolean): string {
+  if (isChecking) return "MEMERIKSA…";
+  if (isOffline) return "MENUNGGU KONEKSI";
+  return "PERIKSA STATUS";
+}
 
 export function PaymentScreen({
   bookingId,
@@ -62,9 +74,10 @@ export function PaymentScreen({
   const clearQueueMembership = useClearQueueMembership();
   const sessionEventId = useSessionStore((s) => s.eventId);
   const eventId = routeEventId ?? sessionEventId;
+  const eventQuery = eventId ? `?eventId=${encodeURIComponent(eventId)}` : "";
   const successHref =
-    `/success/${encodeURIComponent(bookingId)}${eventId ? `?eventId=${encodeURIComponent(eventId)}` : ""}` as Href;
-  const paymentHref = `/payment/${encodeURIComponent(bookingId)}${eventId ? `?eventId=${encodeURIComponent(eventId)}` : ""}`;
+    `/success/${encodeURIComponent(bookingId)}${eventQuery}` as Href;
+  const paymentHref = `/payment/${encodeURIComponent(bookingId)}${eventQuery}`;
   const scheduleNotification = useMemo(
     () => new ScheduleLocalNotification(notification),
     [notification],
@@ -152,37 +165,18 @@ export function PaymentScreen({
   }, [bookingId, page, setBooking]);
 
   useEffect(() => {
-    if (
-      !pageError ||
-      !pageError.message.includes("BOOKING_NOT_PAYABLE") ||
-      checkedUnavailablePage.current === pageError ||
-      connectivity.isOffline
-    )
-      return;
-    checkedUnavailablePage.current = pageError;
-    let active = true;
-    void verifyPayment(bookingId)
-      .then(async (status) => {
-        if (!active) return;
-        if (status.serverTime) serverClock.sync(status.serverTime);
-        if (status.status === "PAID") {
-          await paymentJourneyStorage.clear();
-          if (active) router.replace(successHref);
-        } else if (status.status === "EXPIRED" || status.status === "FAILED") {
-          await Promise.all([
-            paymentJourneyStorage.clear(),
-            clearQueueMembership(),
-          ]);
-          if (active) {
-            resetSession();
-            router.replace("/" as Href);
-          }
-        }
-      })
-      .catch(() => undefined);
-    return () => {
-      active = false;
-    };
+    return recoverUnavailablePaymentPage({
+      pageError,
+      checkedPage: checkedUnavailablePage,
+      isOffline: connectivity.isOffline,
+      verify: () => verifyPayment(bookingId),
+      syncServerTime: (time) => serverClock.sync(time),
+      clearJourney: () => paymentJourneyStorage.clear(),
+      clearQueue: clearQueueMembership,
+      resetSession,
+      showSuccess: () => router.replace(successHref),
+      showHome: () => router.replace("/" as Href),
+    });
   }, [
     bookingId,
     successHref,
@@ -197,13 +191,13 @@ export function PaymentScreen({
   ]);
 
   useEffect(() => {
-    const status = page?.currentAttempt?.status;
-    if (status !== "PAID" && status !== "FAILED" && status !== "EXPIRED") {
-      return;
-    }
-    void paymentJourneyStorage.clear().catch(() => undefined);
-    if (status === "PAID") router.replace(successHref);
-    else router.replace(`/failed/${bookingId}` as Href);
+    routeTerminalPaymentStatus(
+      page?.currentAttempt?.status,
+      bookingId,
+      () => paymentJourneyStorage.clear(),
+      () => router.replace(successHref),
+      (id) => router.replace(`/failed/${id}` as Href),
+    );
   }, [
     bookingId,
     page?.currentAttempt?.status,
@@ -212,94 +206,58 @@ export function PaymentScreen({
     successHref,
   ]);
 
-  const reconcileExpiredPayment = useCallback(async (): Promise<void> => {
-    if (expiryCheckInFlight.current) return;
-    if (connectivity.isOffline) {
-      setExpiryRecoveryError(
-        "Koneksi terputus. Status pembayaran akan diperiksa saat koneksi kembali.",
-      );
-      return;
-    }
-
-    expiryCheckInFlight.current = true;
-    setIsVerifyingExpiry(true);
-    setExpiryRecoveryError(undefined);
-    try {
-      const status = await reconcilePayment.mutateAsync(bookingId);
-      if (status.serverTime) serverClock.sync(status.serverTime);
-      if (status.status === "PAID") {
-        void paymentJourneyStorage.clear().catch(() => undefined);
-        router.replace(successHref);
-        return;
-      }
-      if (status.status === "FAILED" || status.status === "EXPIRED") {
-        void paymentJourneyStorage.clear().catch(() => undefined);
-        router.replace(`/failed/${bookingId}?reason=payment` as Href);
-        return;
-      }
-
-      const latestDeadline = status.paymentExpiresAt ?? page?.paymentExpiresAt;
-      if (latestDeadline && serverClock.remaining(latestDeadline) > 0) {
-        const result = (await retryPaymentPage()) as {
-          isError?: boolean;
-          error?: Error | null;
-        };
-        if (result.isError) {
-          throw result.error ?? new Error("Payment page refresh failed");
-        }
-        setExpiryRecoveryError(undefined);
-      } else {
-        setExpiryRecoveryError(
-          "Pembayaran masih menunggu konfirmasi server. Periksa status lagi sebelum melanjutkan.",
-        );
-      }
-    } catch (error) {
-      setExpiryRecoveryError(
-        apiErrorMessage(
-          error,
-          "Status pembayaran belum dapat dipastikan. Periksa koneksi lalu coba lagi.",
-        ),
-      );
-    } finally {
-      expiryCheckInFlight.current = false;
-      setIsVerifyingExpiry(false);
-    }
-  }, [
-    bookingId,
-    successHref,
-    connectivity.isOffline,
-    page?.paymentExpiresAt,
-    paymentJourneyStorage,
-    reconcilePayment,
-    retryPaymentPage,
-    router,
-    serverClock,
-  ]);
+  const reconcileExpiredPayment = useCallback(
+    () =>
+      reconcileExpiredPaymentStatus({
+        inFlight: expiryCheckInFlight,
+        isOffline: connectivity.isOffline,
+        bookingId,
+        setError: setExpiryRecoveryError,
+        setVerifying: setIsVerifyingExpiry,
+        reconcile: () => reconcilePayment.mutateAsync(bookingId),
+        serverClock,
+        clearJourney: () => paymentJourneyStorage.clear(),
+        showSuccess: () => router.replace(successHref),
+        showFailure: () =>
+          router.replace(`/failed/${bookingId}?reason=payment` as Href),
+        paymentExpiresAt: page?.paymentExpiresAt,
+        refreshPage: async () =>
+          (await retryPaymentPage()) as {
+            isError?: boolean;
+            error?: Error | null;
+          },
+      }),
+    [
+      bookingId,
+      successHref,
+      connectivity.isOffline,
+      page?.paymentExpiresAt,
+      paymentJourneyStorage,
+      reconcilePayment,
+      retryPaymentPage,
+      router,
+      serverClock,
+    ],
+  );
 
   const { remainingMs, expired } = useServerCountdown({
     clock: serverClock,
     expiresAtIso: page?.paymentExpiresAt,
     serverTimeIso: page?.serverTime,
     onExpire: () => {
-      const status = page?.currentAttempt?.status;
-      const hasTerminalResult =
-        status === "PAID" || status === "FAILED" || status === "EXPIRED";
-      if (!hasTerminalResult) void reconcileExpiredPayment();
+      if (!isTerminalPaymentStatus(page?.currentAttempt?.status))
+        void reconcileExpiredPayment();
     },
   });
 
   useEffect(() => {
-    if (!connectivity.justReconnected) {
-      reconnectCheckHandled.current = false;
-      return;
-    }
-    if (
-      !reconnectCheckHandled.current &&
-      (expiryRecoveryError !== undefined || expired)
-    ) {
-      reconnectCheckHandled.current = true;
-      void reconcileExpiredPayment();
-    }
+    reconcilePaymentOnReconnect(
+      connectivity.justReconnected,
+      reconnectCheckHandled,
+      expiryRecoveryError !== undefined,
+      expired,
+      () => void reconcileExpiredPayment(),
+    );
   }, [
     connectivity.justReconnected,
     expired,
@@ -308,30 +266,15 @@ export function PaymentScreen({
   ]);
 
   useEffect(() => {
-    if (!isNative || !page) return;
-    const attemptStatus = page.currentAttempt?.status;
-    if (
-      attemptStatus === "PAID" ||
-      attemptStatus === "FAILED" ||
-      attemptStatus === "EXPIRED"
-    ) {
-      const outcome = paymentResultNotification(attemptStatus, bookingId);
-      void cancelNotification
-        .execute(`payment-timeout-${bookingId}`)
-        .catch(() => undefined)
-        .then(() => scheduleNotification.execute(outcome))
-        .catch(() => undefined);
-      return;
-    }
-
-    // Translate the server-clock duration to an OS timestamp once per payment
-    // page payload so Notifee can deliver even while the app is backgrounded.
-    const remaining = serverClock.remaining(page.paymentExpiresAt);
-    if (remaining <= 0) return; // The countdown's one-shot expiry path handles this.
-    const scheduledAtMs = Date.now() + remaining;
-    void scheduleNotification
-      .execute(paymentTimeout(bookingId, scheduledAtMs))
-      .catch(() => undefined);
+    if (!page) return;
+    updatePaymentNotification({
+      isNative,
+      status: page.currentAttempt?.status,
+      bookingId,
+      remainingMs: serverClock.remaining(page.paymentExpiresAt),
+      schedule: (notification) => scheduleNotification.execute(notification),
+      cancel: (id) => cancelNotification.execute(id),
+    });
   }, [
     bookingId,
     cancelNotification,
@@ -438,11 +381,7 @@ export function PaymentScreen({
               className="min-h-11 justify-center border-2 border-ink px-3"
             >
               <Text className="text-xs font-bold">
-                {isVerifyingExpiry
-                  ? "MEMERIKSA…"
-                  : connectivity.isOffline
-                    ? "MENUNGGU KONEKSI"
-                    : "PERIKSA STATUS"}
+                {expiryRetryLabel(isVerifyingExpiry, connectivity.isOffline)}
               </Text>
             </Pressable>
           </View>
@@ -505,75 +444,39 @@ export function PaymentScreen({
             setLeaveWithoutCancel(false);
             setConfirmLeave(false);
           }}
-          onLeave={async () => {
+          onLeave={() => {
             if (leaveWithoutCancel) {
               setConfirmLeave(false);
               router.replace("/" as Href);
               return;
             }
             setLeaveError(undefined);
-            try {
-              const booking = await cancelBooking.mutateAsync(bookingId);
-              if (booking.status === "PAID") {
-                setConfirmLeave(false);
-                void paymentJourneyStorage.clear().catch(() => undefined);
-                router.replace(successHref);
-                return;
-              }
-              if (
-                booking.status !== "CANCELLED" &&
-                booking.status !== "EXPIRED"
-              ) {
-                setLeaveError(
-                  "Status booking belum dapat dipastikan. Coba lagi atau tetap di halaman ini.",
-                );
-                return;
-              }
-              setConfirmLeave(false);
-              await Promise.all([
-                paymentJourneyStorage.clear().catch(() => undefined),
-                clearQueueMembership().catch(() => undefined),
-              ]);
-              if (booking.status === "CANCELLED" && isNative) {
-                void scheduleNotification
-                  .execute(paymentCancelled(bookingId))
-                  .catch(() => undefined);
-              }
-              resetSession();
-              router.replace(
-                booking.status === "EXPIRED"
-                  ? (`/failed/${bookingId}` as Href)
-                  : ("/" as Href),
-              );
-            } catch (error) {
-              try {
-                const status = await reconcilePayment.mutateAsync(bookingId);
-                if (status.serverTime) serverClock.sync(status.serverTime);
-                if (status.status === "PAID") {
-                  void paymentJourneyStorage.clear().catch(() => undefined);
-                  setConfirmLeave(false);
-                  router.replace(successHref);
-                  return;
-                }
-                if (status.status === "FAILED" || status.status === "EXPIRED") {
-                  void paymentJourneyStorage.clear().catch(() => undefined);
-                  setConfirmLeave(false);
-                  router.replace(`/failed/${bookingId}?reason=payment` as Href);
-                  return;
-                }
-                setLeaveWithoutCancel(true);
-                setLeaveError(
-                  "Pembayaran masih aktif di SNAP dan belum dapat dibatalkan. Kamu dapat kembali ke SNAP atau keluar lalu melanjutkannya nanti.",
-                );
-              } catch (statusError) {
-                setLeaveError(
-                  apiErrorMessage(
-                    statusError ?? error,
-                    "Status belum dapat dipastikan. Periksa koneksi lalu coba lagi.",
-                  ),
-                );
-              }
-            }
+            void requestPaymentExit({
+              cancelBooking: () => cancelBooking.mutateAsync(bookingId),
+              reconcilePayment: () => reconcilePayment.mutateAsync(bookingId),
+              clearJourney: () => paymentJourneyStorage.clear(),
+              clearQueue: clearQueueMembership,
+              syncServerTime: (time) => serverClock.sync(time),
+            }).then((result) => {
+              applyPaymentExitResult({
+                result,
+                isNative,
+                setConfirmLeave,
+                setLeaveWithoutCancel,
+                setLeaveError,
+                resetSession,
+                goHome: () => router.replace("/" as Href),
+                goSuccess: () => router.replace(successHref),
+                goExpired: () => router.replace(`/failed/${bookingId}` as Href),
+                goFailed: () =>
+                  router.replace(`/failed/${bookingId}?reason=payment` as Href),
+                notifyCancelled: () => {
+                  void scheduleNotification
+                    .execute(paymentCancelled(bookingId))
+                    .catch(() => undefined);
+                },
+              });
+            });
           }}
         />
       </View>

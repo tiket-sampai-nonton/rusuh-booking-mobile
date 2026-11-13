@@ -4,8 +4,9 @@ import { useServices } from "@providers/service-context";
 
 export function useEventFacets(time: string, enabled: boolean) {
   const { eventRepository, serverClock } = useServices();
-  const timeframe =
-    time === "week" ? "THIS_WEEK" : time === "month" ? "THIS_MONTH" : undefined;
+  let timeframe: "THIS_WEEK" | "THIS_MONTH" | undefined;
+  if (time === "week") timeframe = "THIS_WEEK";
+  else if (time === "month") timeframe = "THIS_MONTH";
   return useQuery({
     queryKey: ["events", "facets", time],
     queryFn: () =>

@@ -35,7 +35,7 @@ function base64ToBytes(value: string): Uint8Array {
   const binary = atob(value);
   const result = new Uint8Array(binary.length);
   for (let index = 0; index < binary.length; index += 1) {
-    result[index] = binary.charCodeAt(index);
+    result[index] = binary.codePointAt(index) ?? 0;
   }
   return result;
 }
@@ -104,18 +104,38 @@ function wrapText(
     if (lines.length === maxLines) break;
   }
   if (line && lines.length < maxLines) lines.push(line);
-  if (lines.length === maxLines && words.join(" ") !== lines.join(" ")) {
-    const finalLine = lines[maxLines - 1] ?? "";
-    let clipped = finalLine;
-    while (
-      clipped.length > 1 &&
-      font.widthOfTextAtSize(`${clipped}…`, fontSize) > maxWidth
-    ) {
-      clipped = clipped.slice(0, -1);
-    }
-    lines[maxLines - 1] = `${clipped}…`;
-  }
+  if (lines.length === maxLines && words.join(" ") !== lines.join(" "))
+    lines[maxLines - 1] = clippedFinalLine(
+      lines[maxLines - 1] ?? "",
+      font,
+      fontSize,
+      maxWidth,
+    );
   return lines;
+}
+
+function clippedFinalLine(
+  source: string,
+  font: PDFFont,
+  fontSize: number,
+  maxWidth: number,
+): string {
+  let value = source;
+  while (
+    value.length > 1 &&
+    font.widthOfTextAtSize(`${value}…`, fontSize) > maxWidth
+  ) {
+    value = value.slice(0, -1);
+  }
+  return `${value}…`;
+}
+
+interface DrawFieldContext {
+  readonly regular: PDFFont;
+  readonly bold: PDFFont;
+  readonly theme: ETicketPdfTheme;
+  readonly rgb: PdfLibrary["rgb"];
+  readonly alignRight?: boolean;
 }
 
 function drawField(
@@ -125,12 +145,9 @@ function drawField(
   x: number,
   y: number,
   width: number,
-  regular: PDFFont,
-  bold: PDFFont,
-  theme: ETicketPdfTheme,
-  rgb: PdfLibrary["rgb"],
-  alignRight = false,
+  context: DrawFieldContext,
 ): void {
+  const { regular, bold, theme, rgb, alignRight = false } = context;
   const muted = pdfColor(theme.muted, rgb);
   const ink = pdfColor(theme.ink, rgb);
   const labelWidth = regular.widthOfTextAtSize(label, LABEL_SIZE);
@@ -251,6 +268,11 @@ function drawTicket(
 
   const halfWidth = (PAGE_WIDTH - pad * 2 - 24) / 2;
   const rightX = PAGE_WIDTH - pad - halfWidth;
+  const fieldContext: DrawFieldContext = { regular, bold, theme, rgb };
+  const rightFieldContext: DrawFieldContext = {
+    ...fieldContext,
+    alignRight: true,
+  };
   drawField(
     page,
     "PENONTON",
@@ -258,10 +280,7 @@ function drawTicket(
     pad,
     438,
     halfWidth,
-    regular,
-    bold,
-    theme,
-    rgb,
+    fieldContext,
   );
   drawField(
     page,
@@ -270,11 +289,7 @@ function drawTicket(
     rightX,
     438,
     halfWidth,
-    regular,
-    bold,
-    theme,
-    rgb,
-    true,
+    rightFieldContext,
   );
   drawField(
     page,
@@ -283,10 +298,7 @@ function drawTicket(
     pad,
     384,
     halfWidth,
-    regular,
-    bold,
-    theme,
-    rgb,
+    fieldContext,
   );
   drawField(
     page,
@@ -295,11 +307,7 @@ function drawTicket(
     rightX,
     384,
     halfWidth,
-    regular,
-    bold,
-    theme,
-    rgb,
-    true,
+    rightFieldContext,
   );
   drawField(
     page,
@@ -308,10 +316,7 @@ function drawTicket(
     pad,
     330,
     halfWidth,
-    regular,
-    bold,
-    theme,
-    rgb,
+    fieldContext,
   );
   drawField(
     page,
@@ -320,11 +325,7 @@ function drawTicket(
     rightX,
     330,
     halfWidth,
-    regular,
-    bold,
-    theme,
-    rgb,
-    true,
+    rightFieldContext,
   );
   page.drawLine({
     start: { x: pad, y: 298 },
@@ -360,7 +361,7 @@ function encodeBase64(bytes: Uint8Array): string {
   let binary = "";
   const chunkSize = 0x8000;
   for (let index = 0; index < bytes.length; index += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+    binary += String.fromCodePoint(...bytes.subarray(index, index + chunkSize));
   }
   return btoa(binary);
 }

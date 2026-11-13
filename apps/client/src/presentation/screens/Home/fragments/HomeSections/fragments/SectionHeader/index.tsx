@@ -2,8 +2,8 @@ import { Pressable, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { Icon } from "@presentation/components/Icon";
 import { designColors } from "@presentation/theme";
-import { styles } from "./style";
 import {
+  styles,
   sectionHeaderContainerStyle,
   sectionHeaderTitleStyle,
   sectionLinkStyle,

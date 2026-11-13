@@ -48,8 +48,10 @@ import { designColors } from "@presentation/theme";
 
 import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
 import { useResponsive } from "@presentation/hooks/useResponsive";
-import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
-import { useCancelBookingSession } from "@presentation/hooks/useBookingSession";
+import {
+  useCancelBookingSession,
+  useRestoreBookingSession,
+} from "@presentation/hooks/useBookingSession";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
 import { useHoldBooking } from "@presentation/hooks/useHoldBooking";
 import { useConnectivity } from "@presentation/hooks/useConnectivity";
@@ -198,6 +200,20 @@ function hasRestoredSession(
 
 function sessionErrorMessage(error: unknown): string | undefined {
   return error ? apiErrorMessage(error) : undefined;
+}
+
+function isExpiredSessionError(error: unknown): error is DomainError {
+  return (
+    error instanceof DomainError &&
+    (error.code === "SESSION_EXPIRED" || error.code === "SESSION_INVALID")
+  );
+}
+
+function isNewExpiredHoldError(
+  error: DomainError | null | undefined,
+  handledCode: string | null,
+): error is DomainError {
+  return error?.kind === "session_expired" && error.code !== handledCode;
 }
 
 function attendeeNikMessage(
@@ -427,6 +443,12 @@ interface CheckoutConsentSectionProps {
   readonly onOpenPrivacy: () => void;
 }
 
+function expiryRetryLabel(isChecking: boolean, isOffline: boolean): string {
+  if (isChecking) return "MEMERIKSA…";
+  if (isOffline) return "MENUNGGU KONEKSI";
+  return "PERIKSA STATUS";
+}
+
 function CheckoutConsentSection({
   visible,
   consent,
@@ -652,11 +674,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   ]);
 
   useEffect(() => {
-    if (
-      sessionError instanceof DomainError &&
-      (sessionError.code === "SESSION_EXPIRED" ||
-        sessionError.code === "SESSION_INVALID")
-    ) {
+    if (isExpiredSessionError(sessionError)) {
       let active = true;
       void clearQueueMembership()
         .then(() => {
@@ -670,12 +688,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   }, [clearQueueMembership, router, sessionError, sessionId]);
 
   useEffect(() => {
-    if (
-      !holdError ||
-      holdError.kind !== "session_expired" ||
-      handledExpiredHold.current === holdError.code
-    )
-      return;
+    if (!isNewExpiredHoldError(holdError, handledExpiredHold.current)) return;
 
     handledExpiredHold.current = holdError.code;
     let active = true;
@@ -891,11 +904,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
               className="min-h-11 justify-center border-2 border-ink px-3"
             >
               <Text className="text-xs font-bold">
-                {expiryCheckPending
-                  ? "MEMERIKSA…"
-                  : connectivity.isOffline
-                    ? "MENUNGGU KONEKSI"
-                    : "PERIKSA STATUS"}
+                {expiryRetryLabel(expiryCheckPending, connectivity.isOffline)}
               </Text>
             </Pressable>
           </View>
