@@ -54,6 +54,32 @@ describe("ListEventFacets", () => {
     });
   });
 
+  it("requires synchronized server time before building a quarter filter", async () => {
+    const repo: EventRepository = {
+      supportsServerFilters: true,
+      listEvents: jest.fn().mockResolvedValue([]),
+      getEventDetail: jest.fn(),
+      getFacets: jest.fn(),
+    };
+    await expect(
+      new ListEventFacets(repo, new ServerClock({ now: () => 0 })).execute(
+        {},
+        true,
+      ),
+    ).rejects.toThrow("Waktu server belum tersedia");
+  });
+
+  it("fails clearly when server filters are supported but facets are missing", async () => {
+    const repo: EventRepository = {
+      supportsServerFilters: true,
+      listEvents: jest.fn(),
+      getEventDetail: jest.fn(),
+    };
+    await expect(
+      new ListEventFacets(repo, new ServerClock({ now: () => 0 })).execute({}),
+    ).rejects.toThrow("Pilihan genre belum tersedia");
+  });
+
   it("propagates a facets failure for retry instead of inventing genres", async () => {
     const repo: EventRepository = {
       listEvents: jest.fn(),

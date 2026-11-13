@@ -44,7 +44,7 @@ export class ListEventFacets {
       cities: [],
       genres: [
         ...new Set(visible.flatMap((event) => event.genres ?? [])),
-      ].sort(),
+      ].sort((left, right) => left.localeCompare(right, "id")),
     };
   }
 }
