@@ -6,7 +6,7 @@
  * - Category pills with filled/outlined states
  * - Uppercase labels
  */
-import { Pressable, Switch, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import { normalizeNikInput } from "@domain/rules/checkout";
 import { designColors } from "@presentation/theme";
@@ -16,7 +16,6 @@ import { Field } from ".././common";
 import type { TicketItemProps } from "../../interface";
 import {
   componentStyles,
-  buyerDataSwitchTrackColor,
   styleForTicketItemPressable0,
   styleForTicketItemText1,
   styleForTicketItemText2,
@@ -138,17 +137,22 @@ export function TicketItem({
           <Text style={componentStyles.elementFlex7}>
             Gunakan data pembeli (pembeli ikut nonton)
           </Text>
-          <Switch
+          <Pressable
             accessibilityLabel="Gunakan data pembeli untuk tiket pertama"
             accessibilityRole="switch"
             accessibilityState={{ checked: row.useBuyerNik }}
-            value={row.useBuyerNik}
-            onValueChange={onUseBuyer}
-            trackColor={buyerDataSwitchTrackColor}
-            ios_backgroundColor={designColors.gray}
-            thumbColor={designColors.ground}
+            onPress={() => onUseBuyer(!row.useBuyerNik)}
+            hitSlop={8}
+            style={componentStyles.toggleTrack}
             testID={`use-buyer-${index}`}
-          />
+          >
+            <View
+              style={[
+                componentStyles.toggleThumb,
+                row.useBuyerNik && componentStyles.toggleThumbOn,
+              ]}
+            />
+          </Pressable>
         </View>
       ) : null}
     </View>

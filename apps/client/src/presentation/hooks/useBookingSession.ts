@@ -10,8 +10,8 @@
  * — it names no concrete adapter and imports no infrastructure (ARCHITECTURE
  * §3, §4.3).
  *
- * On create/restore it records the sessionId in the session store so later
- * checkout screens resume against the same session.
+ * On create/restore it records the session and event IDs so later screens
+ * resume the same journey and load the correct event's ticket details.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
@@ -40,7 +40,7 @@ export function useCreateBookingSession(): {
   );
   const mutation = useMutation<BookingSession, Error, string>({
     mutationFn: (admissionToken) => usecase.execute(admissionToken),
-    onSuccess: (session) => setSession(session.sessionId),
+    onSuccess: (session) => setSession(session.sessionId, session.eventId),
   });
   return {
     create: mutation.mutateAsync,
@@ -93,7 +93,7 @@ export function useRestoreBookingSession(
       : ["booking-session", "current", eventId],
     queryFn: async () => {
       const session = await usecase.execute(sessionId, eventId);
-      if (session) setSession(session.sessionId);
+      if (session) setSession(session.sessionId, session.eventId);
       return session;
     },
     enabled,

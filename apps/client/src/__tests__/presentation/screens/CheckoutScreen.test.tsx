@@ -271,6 +271,22 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     );
     fireEvent.press(screen.getByTestId("checkout-consent")); // guest consent (RBT-052)
 
+    fireEvent.press(screen.getByTestId("add-ticket"));
+    fireEvent.press(screen.getByTestId("checkout-submit"));
+    expect(
+      screen.getByText("Lengkapi data yang ditandai sebelum lanjut bayar."),
+    ).toBeTruthy();
+    expect(screen.getByTestId("attendee-name-1-error").props.children).toBe(
+      "Nama penonton wajib diisi.",
+    );
+    expect(screen.getByTestId("attendee-nik-1-error")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("remove-ticket-1"));
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Lengkapi data yang ditandai sebelum lanjut bayar."),
+      ).toBeNull(),
+    );
+
     await waitFor(() =>
       expect(
         screen.getByTestId("checkout-submit").props.accessibilityState.disabled,
@@ -289,7 +305,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
       screen.getByTestId("buyer-email-confirmation"),
       "buyer@mail.com",
     );
-    fireEvent(screen.getByTestId("use-buyer-0"), "valueChange", true);
+    fireEvent.press(screen.getByTestId("use-buyer-0"));
     fireEvent.changeText(screen.getByTestId("attendee-name-0"), "Nama Pembeli");
     fireEvent.press(screen.getByTestId("checkout-consent")); // guest consent (RBT-052)
     // With the buyer attending row-0, the order is ready (buyer NIK valid).
@@ -307,9 +323,10 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
     fireEvent.press(screen.getByTestId("add-ticket")); // 2 rows
     expect(screen.queryByTestId("use-buyer-1")).toBeNull();
-    fireEvent(screen.getByTestId("use-buyer-0"), "valueChange", true);
-    expect(screen.getByTestId("use-buyer-0").props.value).toBe(true);
-    expect(screen.getByTestId("use-buyer-0").props.value).toBe(true);
+    fireEvent.press(screen.getByTestId("use-buyer-0"));
+    expect(
+      screen.getByTestId("use-buyer-0").props.accessibilityState.checked,
+    ).toBe(true);
   });
 
   it("editing one row's attendee leaves the other rows untouched (patch by index)", async () => {

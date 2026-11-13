@@ -41,8 +41,8 @@ export interface SessionState {
   setQueue: (eventId: string, queueId: string, status: QueueStatus) => void;
   /** Update the observed queue status. */
   setQueueStatus: (status: QueueStatus) => void;
-  /** Record a created booking session. */
-  setSession: (sessionId: string) => void;
+  /** Record a booking session and its event for payment and ticket details. */
+  setSession: (sessionId: string, eventId?: string) => void;
   /** Record a confirmed booking (id + total). */
   setBooking: (bookingId: string, amountMinor?: number) => void;
   /** Record the order detail shown on success (masked NIK + ticket count). */
@@ -57,7 +57,8 @@ export const useSessionStore = create<SessionState>((set) => ({
   setQueue: (eventId, queueId, queueStatus) =>
     set({ eventId, queueId, queueStatus }),
   setQueueStatus: (queueStatus) => set({ queueStatus }),
-  setSession: (sessionId) => set({ sessionId }),
+  setSession: (sessionId, eventId) =>
+    set({ sessionId, ...(eventId === undefined ? {} : { eventId }) }),
   setBooking: (bookingId, amountMinor) => set({ bookingId, amountMinor }),
   setOrderDetail: (buyerNikMasked, ticketCount) =>
     set({ buyerNikMasked, ticketCount }),
