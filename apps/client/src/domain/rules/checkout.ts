@@ -254,9 +254,40 @@ export function assignDefaultCategory(
 
 /** The first backend-provided category is the initial checkout selection. */
 export function defaultCheckoutCategory(
-  categories: readonly { readonly categoryId: string }[],
+  categories: readonly {
+    readonly categoryId: string;
+    readonly available?: number;
+  }[],
 ): string {
-  return categories[0]?.categoryId ?? "";
+  return (
+    categories.find(
+      (category) => category.available === undefined || category.available > 0,
+    )?.categoryId ?? ""
+  );
+}
+
+/** Clear a selection when the server reports that its category is sold out. */
+export function reconcileCheckoutCategories(
+  rows: readonly TicketRow[],
+  categories: readonly {
+    readonly categoryId: string;
+    readonly available?: number;
+  }[],
+): TicketRow[] {
+  const valid = new Set(
+    categories
+      .filter(
+        (category) =>
+          category.available === undefined || category.available > 0,
+      )
+      .map((category) => category.categoryId),
+  );
+  const fallback = defaultCheckoutCategory(categories);
+  return rows.map((row) =>
+    valid.has(row.categoryId)
+      ? row
+      : { ...row, categoryId: row.categoryId ? "" : fallback },
+  );
 }
 
 function nikIssue(nik: string): "required" | "invalid" | undefined {

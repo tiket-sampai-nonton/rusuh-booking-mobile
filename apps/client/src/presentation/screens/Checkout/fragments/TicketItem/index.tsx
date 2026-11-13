@@ -75,18 +75,24 @@ export function TicketItem({
       <View style={componentStyles.elementMarginTop5}>
         {categories.map((category) => {
           const selected = row.categoryId === category.categoryId;
+          const soldOut = category.available <= 0;
           return (
             <Pressable
               key={category.categoryId}
               accessibilityRole="button"
-              accessibilityLabel={`Kategori ${category.name}, ${minorToIDR(category.priceMinor)}`}
-              accessibilityState={{ selected }}
+              accessibilityLabel={`Kategori ${category.name}, ${minorToIDR(category.priceMinor)}${soldOut ? ", habis" : ""}`}
+              accessibilityState={{ selected, disabled: soldOut }}
+              disabled={soldOut}
               onPress={() => onPatch({ categoryId: category.categoryId })}
               testID={`cat-${index}-${category.code}`}
-              style={styleForTicketItemPressable0(selected)}
+              style={[
+                styleForTicketItemPressable0(selected),
+                soldOut && { opacity: 0.45 },
+              ]}
             >
               <Text style={styleForTicketItemText1(selected)}>
                 {category.name} · {minorToIDR(category.priceMinor)}
+                {soldOut ? " · Habis" : ""}
               </Text>
             </Pressable>
           );
