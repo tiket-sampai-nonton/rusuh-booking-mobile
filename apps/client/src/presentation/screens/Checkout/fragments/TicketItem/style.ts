@@ -3,12 +3,28 @@ import { designColors, plusJakartaSansFonts } from "@presentation/theme";
 
 import type { DynamicStyle } from "@presentation/utils/style";
 
-export const buyerDataSwitchTrackColor = {
-  false: designColors.gray,
-  true: designColors.ink,
-} as const;
-
 export const componentStyles = StyleSheet.create({
+  // Toggle: grey track, white thumb with black border (same in both states).
+  toggleTrack: {
+    width: 48,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: designColors.gray,
+    justifyContent: "center",
+    paddingHorizontal: 2,
+  },
+  toggleThumb: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: designColors.white,
+    borderWidth: 2,
+    borderColor: designColors.black,
+  },
+  toggleThumbOn: {
+    alignSelf: "flex-end",
+    backgroundColor: designColors.black,
+  },
   elementMarginTop0: {
     marginTop: 16,
     borderWidth: 2,

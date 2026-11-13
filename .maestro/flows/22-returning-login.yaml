@@ -1,0 +1,43 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 22-returning-login
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- openLink:
+    link: rusuhbooking://profile
+    autoVerify: true
+- extendedWaitUntil:
+    visible:
+      id: profile-login
+    timeout: 30000
+- tapOn:
+    id: profile-login
+    waitToSettleTimeoutMs: 200
+- runFlow: ../helpers/register.yaml
+- extendedWaitUntil:
+    visible:
+      id: profile-sign-out
+    timeout: 30000
+- tapOn:
+    id: profile-sign-out
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: profile-login
+    timeout: 30000
+- tapOn:
+    id: profile-login
+    waitToSettleTimeoutMs: 200
+- runFlow: ../helpers/verify-otp.yaml
+- extendedWaitUntil:
+    visible:
+      id: login-close-signed
+    timeout: 30000
+- assertNotVisible:
+    id: login-reg-name-input
+- tapOn:
+    id: login-close-signed
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: profile-edit

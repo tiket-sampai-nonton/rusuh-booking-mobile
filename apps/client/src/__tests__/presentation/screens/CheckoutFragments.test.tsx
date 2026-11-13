@@ -7,10 +7,7 @@ import { ConsentGate } from "@presentation/screens/Checkout/fragments/ConsentGat
 import { CheckoutHero } from "@presentation/screens/Checkout/fragments/CheckoutHero";
 import { LeaveConfirm } from "@presentation/screens/Checkout/fragments/LeaveConfirm";
 import { TicketItem } from "@presentation/screens/Checkout/fragments/TicketItem";
-import {
-  buyerDataSwitchTrackColor,
-  componentStyles as ticketItemStyles,
-} from "@presentation/screens/Checkout/fragments/TicketItem/style";
+import { componentStyles as ticketItemStyles } from "@presentation/screens/Checkout/fragments/TicketItem/style";
 import { designColors } from "@presentation/theme";
 import {
   Field,
@@ -265,9 +262,14 @@ describe("TicketItem attendee-check status (RBT-052)", () => {
       backgroundColor: designColors.ground,
       borderWidth: 1,
     });
-    expect(buyerDataSwitchTrackColor.false).toBe(designColors.gray);
-    expect(buyerDataSwitchTrackColor.true).toBe(designColors.ink);
-    fireEvent(control, "valueChange", true);
+    expect(ticketItemStyles.toggleTrack.backgroundColor).toBe(
+      designColors.gray,
+    );
+    expect(ticketItemStyles.toggleThumb).toMatchObject({
+      backgroundColor: designColors.white,
+      borderColor: designColors.black,
+    });
+    fireEvent.press(control);
     expect(onUseBuyer).toHaveBeenCalledWith(true);
   });
 

@@ -1,0 +1,27 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 08-checkout-leave
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/checkout.yaml
+- tapOn:
+    id: checkout-back
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: checkout-leave-modal
+- tapOn:
+    id: checkout-stay
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: checkout-timer
+- tapOn:
+    id: checkout-back
+    waitToSettleTimeoutMs: 200
+- tapOn:
+    id: checkout-leave-confirm
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: home-scroll
+    timeout: 30000

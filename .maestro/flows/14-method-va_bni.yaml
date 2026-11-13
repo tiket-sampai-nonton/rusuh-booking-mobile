@@ -1,0 +1,43 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 14-method-va_bni
+tags:
+  - regression
+  - methods
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/checkout.yaml
+- runFlow: ../helpers/hold.yaml
+- scrollUntilVisible:
+    element:
+      id: method-VA_BNI
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: method-VA_BNI
+    waitToSettleTimeoutMs: 200
+- tapOn:
+    id: pay-now
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: snap-screen
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: snap-success
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: snap-success
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: success-eyebrow
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: eticket-0
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: eticket-0

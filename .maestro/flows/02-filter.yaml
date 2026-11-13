@@ -1,0 +1,35 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 02-filter
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- tapOn:
+    id: bottom-nav-browse
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: browse-filter
+    timeout: 30000
+- tapOn:
+    id: browse-filter
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: filter-modal
+- tapOn:
+    id: filter-genre-concert
+    waitToSettleTimeoutMs: 200
+- tapOn:
+    id: filter-apply
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: browse-scroll
+    timeout: 30000
+- assertVisible:
+    id: browse-reset
+- tapOn:
+    id: browse-reset
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: browse-count

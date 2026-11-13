@@ -1,0 +1,14 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: event
+tags:
+  - regression
+---
+- openLink:
+    link: rusuhbooking://events/evt-1
+    autoVerify: true
+- extendedWaitUntil:
+    visible:
+      id: join-cta
+    timeout: 30000
+- assertVisible:
+    id: event-detail-screen

@@ -1,0 +1,11 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: queue-turn-missed
+tags:
+  - scenario
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/join.yaml
+- extendedWaitUntil:
+    visible:
+      id: waiting-claim-error-state
+    timeout: 60000

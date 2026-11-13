@@ -1,0 +1,59 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 04-registration-profile-logout
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- openLink:
+    link: rusuhbooking://profile
+    autoVerify: true
+- extendedWaitUntil:
+    visible:
+      id: profile-login
+    timeout: 30000
+- tapOn:
+    id: profile-login
+    waitToSettleTimeoutMs: 200
+- runFlow: ../helpers/register.yaml
+- extendedWaitUntil:
+    visible:
+      id: profile-edit
+    timeout: 30000
+- tapOn:
+    id: profile-edit
+    waitToSettleTimeoutMs: 200
+- scrollUntilVisible:
+    element:
+      id: profile-name-input
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: profile-name-input
+    waitToSettleTimeoutMs: 200
+- eraseText
+- inputText: Maestro Updated
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: profile-nik-input
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: profile-nik-input
+    waitToSettleTimeoutMs: 200
+- inputText: "9900000000000003"
+- hideKeyboard
+- tapOn:
+    id: profile-save
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: profile-edit
+    timeout: 30000
+- tapOn:
+    id: profile-sign-out
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: profile-login
+    timeout: 30000

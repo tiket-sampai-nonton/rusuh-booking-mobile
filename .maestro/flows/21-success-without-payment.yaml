@@ -1,0 +1,15 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 21-success-without-payment
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- openLink:
+    link: rusuhbooking://success/nonexistent
+    autoVerify: true
+- extendedWaitUntil:
+    visible:
+      id: success-verifying
+    timeout: 30000
+- assertNotVisible:
+    id: eticket-0

@@ -1,0 +1,16 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 07-checkout-validation
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/checkout.yaml
+- tapOn:
+    id: checkout-submit
+    waitToSettleTimeoutMs: 200
+- scrollUntilVisible:
+    element:
+      id: buyer-nik-error
+    direction: UP
+- assertVisible:
+    id: buyer-nik-error

@@ -11,6 +11,7 @@
  * this mounted screen's form state; booking summaries use its masked form.
  * No infrastructure import — ports via useServices/hooks only.
  */
+import { CheckoutValidationFocus, ValidationTarget } from "./validation-focus";
 import { useNavigation, useRouter, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
@@ -380,31 +381,32 @@ function CheckoutTicketFields({
           row.useBuyerNik,
         );
         return (
-          <TicketItem
-            key={row.rowId}
-            index={index}
-            row={row}
-            buyerName={buyerName}
-            buyerNik={buyerNik}
-            categoryError={
-              submitAttempted && rowIssues.category
-                ? "Pilih kategori tiket."
-                : undefined
-            }
-            attendeeNameError={
-              submitAttempted && rowIssues.attendeeName
-                ? "Nama penonton wajib diisi."
-                : undefined
-            }
-            attendeeNikError={attendeeNikError}
-            canRemove={rows.length > 1}
-            onRemove={() => onRemove(index)}
-            onPatch={(patch) => onPatch(index, patch)}
-            onUseBuyer={(enabled) => onUseBuyer(index, enabled)}
-            showBuyerDataControl={canUseBuyerDataForTicket(index)}
-            status={rowStatus(checks[nik], Boolean(pending[nik]))}
-            categories={categories}
-          />
+          <ValidationTarget key={row.rowId} id={`ticket-row-${index}`}>
+            <TicketItem
+              index={index}
+              row={row}
+              buyerName={buyerName}
+              buyerNik={buyerNik}
+              categoryError={
+                submitAttempted && rowIssues.category
+                  ? "Pilih kategori tiket."
+                  : undefined
+              }
+              attendeeNameError={
+                submitAttempted && rowIssues.attendeeName
+                  ? "Nama penonton wajib diisi."
+                  : undefined
+              }
+              attendeeNikError={attendeeNikError}
+              canRemove={rows.length > 1}
+              onRemove={() => onRemove(index)}
+              onPatch={(patch) => onPatch(index, patch)}
+              onUseBuyer={(enabled) => onUseBuyer(index, enabled)}
+              showBuyerDataControl={canUseBuyerDataForTicket(index)}
+              status={rowStatus(checks[nik], Boolean(pending[nik]))}
+              categories={categories}
+            />
+          </ValidationTarget>
         );
       })}
       <Pressable
@@ -747,6 +749,48 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     ],
   );
   const ready = validation.isValid;
+  const scrollRef = useRef<ScrollView>(null);
+  const contentRef = useRef<View>(null);
+  const [validationAttempt, setValidationAttempt] = useState(0);
+  const [focusTarget, setFocusTarget] = useState<string>();
+  const invalidRowIndex = rows.findIndex(
+    (row) => Object.keys(validation.rows[row.rowId] ?? {}).length > 0,
+  );
+  const invalidRow = validation.rows[rows[invalidRowIndex]?.rowId];
+  const validationTarget = validation.buyerName
+    ? "buyer-name"
+    : validation.buyerNik
+      ? "buyer-nik"
+      : validation.buyerEmail
+        ? "buyer-email"
+        : validation.emailConfirmation
+          ? "buyer-email-confirmation"
+          : invalidRow?.category
+            ? `ticket-row-${invalidRowIndex}`
+            : invalidRow?.attendeeName
+              ? `attendee-name-${invalidRowIndex}`
+              : invalidRow?.attendeeNik
+                ? `attendee-nik-${invalidRowIndex}`
+                : validation.consent
+                  ? "checkout-consent-target"
+                  : undefined;
+  const validationFocus = useMemo(
+    () => ({
+      target: focusTarget,
+      attempt: validationAttempt,
+      reveal: (view: View, input?: import("react-native").TextInput | null) => {
+        if (!contentRef.current) return;
+        view.measureLayout(contentRef.current, (_x, y) => {
+          input?.focus();
+          scrollRef.current?.scrollTo({
+            y: Math.max(0, y - 16),
+            animated: true,
+          });
+        });
+      },
+    }),
+    [focusTarget, validationAttempt],
+  );
 
   const buyerNameError = buyerNameValidationMessage(
     submitAttempted ? validation.buyerName : undefined,
@@ -817,7 +861,11 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
 
   const handleSubmit = (): void => {
     setSubmitAttempted(true);
-    if (!ready) return;
+    if (!ready) {
+      setFocusTarget(validationTarget);
+      setValidationAttempt((attempt) => attempt + 1);
+      return;
+    }
     // The hold use case keeps one idempotency key across dependency retries.
     void (async () => {
       try {
@@ -913,71 +961,89 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
         {/* Progress Steps Bar (prototype .progress-container) */}
         <ProgressSteps currentStep={3} />
 
-        <ScrollView
-          contentContainerStyle={checkoutScrollContent(isDesktop, isMobileWeb)}
-          testID="checkout-scroll"
-        >
-          <CheckoutHero
-            eventId={session.eventId}
-            eventName={eventDetail?.name}
-            eventNameError={eventDetailError}
-            isMobileWeb={isMobileWeb}
-            onRetryEventName={() => void retryEventDetail()}
-          />
+        <CheckoutValidationFocus.Provider value={validationFocus}>
+          <ScrollView
+            ref={scrollRef}
+            contentContainerStyle={checkoutScrollContent(
+              isDesktop,
+              isMobileWeb,
+            )}
+            testID="checkout-scroll"
+          >
+            <View ref={contentRef} collapsable={false}>
+              <CheckoutHero
+                eventId={session.eventId}
+                eventName={eventDetail?.name}
+                eventNameError={eventDetailError}
+                isMobileWeb={isMobileWeb}
+                onRetryEventName={() => void retryEventDetail()}
+              />
 
-          <CheckoutBuyerFields
-            isAccountUser={isAccountUser}
-            buyerName={buyerName}
-            onBuyerNameChange={setBuyerName}
-            buyerNameError={buyerNameError}
-            buyerNameHelperText={buyerNameHelperText}
-            buyerNameLocked={Boolean(checkoutDetails?.fullName?.trim())}
-            buyerNik={buyerNik}
-            onBuyerNikChange={(value) => setBuyerNik(normalizeNikInput(value))}
-            buyerNikError={buyerNikError}
-            buyerNikHelperText={buyerNikHelperText}
-            buyerNikLocked={Boolean(checkoutDetails?.nik)}
-            buyerEmail={buyerEmail}
-            onBuyerEmailChange={setBuyerEmail}
-            buyerEmailError={buyerEmailError}
-            buyerEmailHelperText={buyerEmailHelperText}
-            buyerEmailLocked={Boolean(checkoutDetails?.email)}
-            emailConfirmation={emailConfirmation}
-            onEmailConfirmationChange={setEmailConfirmation}
-            emailConfirmationError={emailConfirmationError}
-            emailConfirmationHelperText={emailConfirmationHelperText}
-          />
+              <CheckoutBuyerFields
+                isAccountUser={isAccountUser}
+                buyerName={buyerName}
+                onBuyerNameChange={setBuyerName}
+                buyerNameError={buyerNameError}
+                buyerNameHelperText={buyerNameHelperText}
+                buyerNameLocked={Boolean(checkoutDetails?.fullName?.trim())}
+                buyerNik={buyerNik}
+                onBuyerNikChange={(value) =>
+                  setBuyerNik(normalizeNikInput(value))
+                }
+                buyerNikError={buyerNikError}
+                buyerNikHelperText={buyerNikHelperText}
+                buyerNikLocked={Boolean(checkoutDetails?.nik)}
+                buyerEmail={buyerEmail}
+                onBuyerEmailChange={setBuyerEmail}
+                buyerEmailError={buyerEmailError}
+                buyerEmailHelperText={buyerEmailHelperText}
+                buyerEmailLocked={Boolean(checkoutDetails?.email)}
+                emailConfirmation={emailConfirmation}
+                onEmailConfirmationChange={setEmailConfirmation}
+                emailConfirmationError={emailConfirmationError}
+                emailConfirmationHelperText={emailConfirmationHelperText}
+              />
 
-          <CheckoutTicketFields
-            rows={rows}
-            buyerName={buyerName}
-            buyerNik={buyerNik}
-            submitAttempted={submitAttempted}
-            validationRows={validation.rows}
-            checks={checks}
-            pending={pending}
-            maxSelectable={cap}
-            categories={session.categories}
-            onAdd={addRow}
-            onRemove={removeRow}
-            onPatch={patchRow}
-            onUseBuyer={setUseBuyer}
-          />
+              <CheckoutTicketFields
+                rows={rows}
+                buyerName={buyerName}
+                buyerNik={buyerNik}
+                submitAttempted={submitAttempted}
+                validationRows={validation.rows}
+                checks={checks}
+                pending={pending}
+                maxSelectable={cap}
+                categories={session.categories}
+                onAdd={addRow}
+                onRemove={removeRow}
+                onPatch={patchRow}
+                onUseBuyer={setUseBuyer}
+              />
 
-          <CheckoutConsentSection
-            visible={isGuest}
-            consent={consent}
-            onToggle={setConsent}
-            onOpenPrivacy={() => router.push("/privacy" as Href)}
-            errorMessage={consentErrorMessage}
-          />
-        </ScrollView>
+              <ValidationTarget id="checkout-consent-target">
+                <CheckoutConsentSection
+                  visible={isGuest}
+                  consent={consent}
+                  onToggle={setConsent}
+                  onOpenPrivacy={() => router.push("/privacy" as Href)}
+                  errorMessage={consentErrorMessage}
+                />
+              </ValidationTarget>
+            </View>
+          </ScrollView>
+        </CheckoutValidationFocus.Provider>
 
         <CheckoutBar
           totalMinor={totalMinor}
           pending={isHolding}
           expired={expired}
-          errorMessage={holdError?.userMessage ?? (leaveError || undefined)}
+          errorMessage={
+            holdError?.userMessage ??
+            (leaveError || undefined) ??
+            (submitAttempted && !ready
+              ? "Lengkapi data yang ditandai sebelum lanjut bayar."
+              : undefined)
+          }
           errorActionLabel={holdErrorAction}
           onErrorAction={handleHoldErrorAction}
           onSubmit={handleSubmit}

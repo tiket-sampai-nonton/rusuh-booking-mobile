@@ -1,0 +1,15 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 20-profile-guest-tickets
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- openLink:
+    link: rusuhbooking://my-tickets
+    autoVerify: true
+- extendedWaitUntil:
+    visible:
+      id: my-tickets-screen
+    timeout: 30000
+- assertVisible:
+    id: my-tickets-empty
