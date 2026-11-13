@@ -20,6 +20,10 @@ export function LeaveConfirm({
   visible,
   onStay,
   onLeave,
+  pending = false,
+  errorMessage,
+  bodyText,
+  leaveLabel,
   variant = "checkout",
 }: LeaveConfirmProps & { readonly variant?: "checkout" | "payment" }) {
   return (
@@ -52,15 +56,18 @@ export function LeaveConfirm({
               : "Tinggalkan halaman?"}
           </Text>
           <Text style={styles.body}>
-            {variant === "payment"
-              ? "Kamu akan keluar dari proses pembayaran. Status transaksi tetap perlu dikonfirmasi sebelum mencoba lagi. Yakin mau keluar?"
-              : "Kalau kamu keluar sekarang, sesi pemilihan tiket dilepas dan kamu harus mengulang antrean dari awal. Yakin mau keluar?"}
+            {errorMessage ??
+              bodyText ??
+              (variant === "payment"
+                ? "Kamu akan keluar dari proses pembayaran. Status transaksi tetap perlu dikonfirmasi sebelum mencoba lagi. Yakin mau keluar?"
+                : "Kalau kamu keluar sekarang, sesi pemilihan tiket dilepas dan kamu harus mengulang antrean dari awal. Yakin mau keluar?")}
           </Text>
           <View style={styles.actions}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Tetap di sini"
               onPress={onStay}
+              disabled={pending}
               testID="checkout-stay"
               style={styles.stayButton}
             >
@@ -68,12 +75,17 @@ export function LeaveConfirm({
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Ya, keluar"
+              accessibilityLabel={
+                pending ? "Memproses permintaan" : (leaveLabel ?? "Ya, keluar")
+              }
               onPress={onLeave}
+              disabled={pending}
               testID="checkout-leave-confirm"
               style={styles.leaveButton}
             >
-              <Text style={styles.leaveButtonText}>Ya, keluar</Text>
+              <Text style={styles.leaveButtonText}>
+                {pending ? "MEMPROSES…" : (leaveLabel ?? "Ya, keluar")}
+              </Text>
             </Pressable>
           </View>
         </Pressable>

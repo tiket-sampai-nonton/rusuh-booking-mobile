@@ -17,9 +17,9 @@
  * StrictMode double-invoke) never double-navigates. `enabled` lets a caller
  * defer the restore until the router/layout is ready.
  */
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, type Href } from "expo-router";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import {
   RestoreMembership,
@@ -32,6 +32,24 @@ export interface UseRestoreMembershipResult {
   readonly isRestoring: boolean;
   /** The resumable membership + fresh entry, or null when nothing to resume. */
   readonly resumed: ResumedMembership | null;
+}
+
+export const QUEUE_MEMBERSHIP_RESTORE_QUERY_KEY = [
+  "queue-membership",
+  "restore",
+] as const;
+
+/** Clear the persisted and cached queue pointer after a confirmed journey end. */
+export function useClearQueueMembership(): () => Promise<void> {
+  const { queueMembership } = useServices();
+  const queryClient = useQueryClient();
+  return useCallback(async () => {
+    await queryClient.cancelQueries({
+      queryKey: QUEUE_MEMBERSHIP_RESTORE_QUERY_KEY,
+    });
+    queryClient.setQueryData(QUEUE_MEMBERSHIP_RESTORE_QUERY_KEY, null);
+    await queueMembership.clear();
+  }, [queryClient, queueMembership]);
 }
 
 /**
@@ -51,7 +69,7 @@ export function useRestoreMembership(
   );
 
   const query = useQuery<ResumedMembership | null, Error>({
-    queryKey: ["queue-membership", "restore"],
+    queryKey: QUEUE_MEMBERSHIP_RESTORE_QUERY_KEY,
     queryFn: () => restore.execute(),
     enabled,
     // The persisted pointer is read once per app start; the live status it

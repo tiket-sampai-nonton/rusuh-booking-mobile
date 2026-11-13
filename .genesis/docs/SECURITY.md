@@ -35,8 +35,9 @@
 - **Card/instrument data never touches the FE.** The FE builds the payment page (order summary + **method-bucket selection** + timer) and hands off to the **Midtrans SNAP hosted page**, where the actual card number / VA auth / e-wallet PIN is entered. FE triggers create-attempt, opens the SNAP link, and verifies status with BE — it never collects or stores a payment instrument (PCI stays out of scope).
 - This keeps the FE **out of PCI-DSS scope** — do not add any card-input UI.
 - Verify payment outcome with BE (`GET /payments/{id}/status`) before rendering success; never trust the SNAP callback alone.
-- Resolve the BE's relative `/pay/{bookingId}` URL against `EXPO_PUBLIC_SITE_URL`; reject non-HTTPS, non-site origins, or paths outside `/pay/{bookingId}`.
-- Native payment opens the backend-issued HTTPS Midtrans SNAP redirect in a WebView after validating its host. Keep the SNAP URL in transient memory, never in navigation parameters or logs. Verify backend status after matching a backend-provided return URL or a configured site callback; callback parameters are not proof of payment.
+- Native payment opens the backend-issued HTTPS Midtrans SNAP redirect in a WebView after validating its host. Keep the SNAP URL in transient memory, never in navigation parameters, persistent storage, or logs. Verify backend status after a recognized provider return; callback parameters are not proof of payment.
+- The `/pay/{bookingId}` one-time-token bootstrap, when used by a web flow, must remain on the configured HTTPS `EXPO_PUBLIC_SITE_URL` origin and exchange its token promptly. It is not the current native SNAP handoff.
+- Payment recovery persists only a booking ID (native SecureStore; web localStorage). Re-fetch BE page/status before exposing resume/cancel actions. Offline state never proves cancellation or expiry.
 
 ## 5. Transport & data handling
 

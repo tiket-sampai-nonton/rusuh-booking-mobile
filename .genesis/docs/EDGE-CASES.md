@@ -4,7 +4,7 @@
 > **observes and reacts**, never reconciles inventory locally. Error codes map to Bahasa messages (D3.5).
 > Conforms to `GROOMING-DECISIONS.md`, `ARCHITECTURE.md`, `FE-Flow-Diagrams.md`.
 
-> **Implementation status addendum (2026-11-12):** the live detail API now supplies rich event `description`; catalog-level `remainingTickets` remains optional/unavailable. Current payment WebView URL and retry handling are documented in the payment cases below.
+> **Implementation status addendum (2026-11-13):** the live detail API supplies rich event `description`; catalog-level `remainingTickets` remains optional/unavailable. Native SNAP uses the BE-issued redirect URL directly in the in-app WebView. The `/pay` one-time-token bootstrap remains a separate web route, not the native SNAP handoff. See `AS-BUILT-ALIGNMENT-2026-11-13.md` for payment recovery and connectivity behavior.
 
 ## 1. Session / continuity ("jangan PHP") — D0, NFR-02
 
@@ -52,17 +52,21 @@
 
 | Case | FE reaction |
 |---|---|
-| Pay → create-attempt → SNAP link | FE payment page (summary + method selection + timer) → `createAttempt` → open SNAP `redirectUrl` (web: redirect; mobile: WebView via page-token). Instrument/card entry on SNAP only |
+| Pay → create-attempt → SNAP link | FE payment page (summary + method selection + timer) → `createAttempt` → open BE-issued SNAP `redirectUrl` (web: browser redirect; native: in-app WebView). Instrument/card entry on SNAP only |
 | Success callback | Return → `GET /payments/{id}/status`; render success only if `PAID` (never trust callback alone) |
 | Failed callback, booking still payable | `expired.html?reason=payment-failed` → retry (new attempt) |
 | Payment deadline (10 min) passed | `expired.html?reason=payment`; stock released, expired email (BE) |
 | `VERIFYING` / `REVIEW` / `UNKNOWN` | "Diproses" state; poll status with backoff; no FE fraud logic (D10.3) |
 | Double "Bayar" tap | One `Idempotency-Key` reused → no duplicate attempt (D3.3) |
 | Callback arrives but status still PENDING | Keep polling with backoff until terminal; show processing |
-| User closes WebView without finishing | On return, re-check status; if still payable, allow retry |
-| BE returns relative page URL (`/pay/{bookingId}`) | Resolve against `EXPO_PUBLIC_SITE_URL`; require HTTPS and same configured origin before mounting WebView |
-| WebView cannot load payment page or token exchange fails | Show a retry action; native mints a fresh one-time token. The `/pay` bootstrap exchanges through `PaymentRepository` once and routes to payment only after success |
-| WebView navigates to a non-site payment/callback URL | Keep the one-use token confined to the configured HTTPS `/pay/{bookingId}` URL; only route callbacks from the configured site origin and matching booking ID |
+| User closes SNAP/WebView without finishing | Request booking cancellation where supported, then re-check payment status. If an attempt locked the booking, cancellation is not available from the public BE API; retain the booking reference and return to a BE-verified payment page with `Kembali ke SNAP` when the open attempt can be resumed |
+| User backs out before an attempt exists | Call `POST /bookings/{bookingId}/cancel`; route only after BE confirms cancellation or a terminal status |
+| App/browser closes or refreshes during payment | Persist only `bookingId`; on return, query BE page/status before routing. Browser unload cancellation is best effort and cannot be relied on for refresh, redirect, or force-close |
+| Airplane mode / signal lost in checkout, payment, or SNAP | Keep the current journey and permitted input, show offline state, and do not cancel automatically. On reconnect, re-fetch server clock and BE status; retry an uncertain idempotent action with its same key |
+| Timer reaches zero offline | Do not infer expiry from device time; show recovery state. After reconnect, route only from BE's session/payment status and server deadline |
+| Native WebView cannot load SNAP | Show a connection/retry state; on reconnect query payment status and the current payment page before reopening its BE-issued redirect URL |
+| Provider return URL / callback | Route only a recognized provider/site return; verify with `GET /payments/{bookingId}/status` before rendering terminal UI |
+| Web payment page returns from SNAP or reloads | Re-fetch page/status. Resume only an active BE attempt; never re-enter payment for a terminal booking |
 
 ## 5. Success / tickets — FR-22
 

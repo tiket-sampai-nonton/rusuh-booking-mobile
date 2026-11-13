@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react-native";
+import { act, fireEvent, render } from "@testing-library/react-native";
 import { Image, Platform } from "react-native";
 
 import { EVENT_FIXTURES } from "@shared/test-fixtures/events.fixture";
@@ -76,6 +76,61 @@ describe("EventCard", () => {
       <EventCard event={EVENT_FIXTURES[0]} onPress={jest.fn()} listMode />,
     );
     expect(UNSAFE_getByType(CachedImage).props.source.uri).toContain("w=960");
+  });
+
+  it("uses the lazy web image path for BE media without changing its URL", () => {
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    mockResponsive.isNative = false;
+    const mediaUrl = "https://dev.rusuhbooking.my.id/media/event-thumb.jpg";
+    const originalObserver = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "IntersectionObserver",
+    );
+    let intersectionCallback: IntersectionObserverCallback | undefined;
+    class MockIntersectionObserver {
+      constructor(callback: IntersectionObserverCallback) {
+        intersectionCallback = callback;
+      }
+
+      observe = jest.fn();
+      disconnect = jest.fn();
+    }
+    Object.defineProperty(globalThis, "IntersectionObserver", {
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
+
+    try {
+      const { UNSAFE_getByType, UNSAFE_queryAllByType } = render(
+        <EventCard
+          event={{ ...EVENT_FIXTURES[0], thumbnailUrl: mediaUrl }}
+          onPress={jest.fn()}
+        />,
+      );
+
+      expect(UNSAFE_queryAllByType(CachedImage)).toHaveLength(0);
+      act(() => {
+        intersectionCallback?.(
+          [{ isIntersecting: true } as IntersectionObserverEntry],
+          {} as IntersectionObserver,
+        );
+      });
+
+      expect(UNSAFE_getByType(CachedImage).props.source).toEqual([
+        { uri: mediaUrl, width: 640 },
+        { uri: mediaUrl, width: 960 },
+      ]);
+    } finally {
+      if (originalObserver) {
+        Object.defineProperty(
+          globalThis,
+          "IntersectionObserver",
+          originalObserver,
+        );
+      } else {
+        Reflect.deleteProperty(globalThis, "IntersectionObserver");
+      }
+    }
   });
 
   it("keeps history cards navigable for event details", () => {

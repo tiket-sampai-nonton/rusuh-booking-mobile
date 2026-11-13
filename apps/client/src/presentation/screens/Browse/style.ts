@@ -183,7 +183,7 @@ export const browseSortControl = {
   cursor: "pointer",
   outlineWidth: 0,
 };
-export const BROWSE_NATIVE_CATEGORY_BAR_HEIGHT = 92;
+export const BROWSE_NATIVE_CATEGORY_BAR_HEIGHT = 52;
 
 export const browseNativeCategoryBar: ViewStyle = {
   position: "absolute",
@@ -200,15 +200,14 @@ export const browseNativeCategoryBarPosition = (top: number): ViewStyle => ({
 });
 export const browseNativeCategoryScrollContent: ViewStyle = {
   paddingHorizontal: 16,
-  paddingVertical: 8,
+  alignItems: "center",
   gap: 8,
 };
 export const browseNativeCategorySummary: ViewStyle = {
-  paddingHorizontal: 16,
-  paddingBottom: 8,
+  alignSelf: "center",
 };
 export const browseNativeCategoryScroll: ViewStyle = {
-  height: 52,
+  height: BROWSE_NATIVE_CATEGORY_BAR_HEIGHT,
 };
 export const browseNativeCategoryButton = (active: boolean): ViewStyle => ({
   paddingHorizontal: 16,
@@ -267,8 +266,8 @@ export const browseCategoryGridCompactStyle: ViewStyle = {
 };
 
 export const browseCategoryBtnCompactStyle: ViewStyle = {
-  minHeight: 38,
-  paddingVertical: 8,
+  minHeight: 34,
+  paddingVertical: 5,
   paddingHorizontal: 12,
 };
 
@@ -279,8 +278,9 @@ export const browseCategoriesInner = (isDesktop: boolean): ViewStyle => ({
 });
 
 export const browseCategoryBtn: ViewStyle = {
-  paddingVertical: 16,
-  paddingHorizontal: 24,
+  minHeight: 34,
+  paddingVertical: 5,
+  paddingHorizontal: 12,
   borderWidth: designBorders.standard,
   borderColor: designColors.ink,
   backgroundColor: designColors.ground,

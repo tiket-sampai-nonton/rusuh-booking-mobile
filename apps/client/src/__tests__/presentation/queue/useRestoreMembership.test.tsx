@@ -11,7 +11,7 @@
  *  - a re-render does not double-navigate (navigate-once guard).
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react-native";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
 import React from "react";
 
 import type { QueueMembershipStorage } from "@domain/queue/queue-membership.port";
@@ -24,7 +24,10 @@ import type { Container } from "@providers/container";
 import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
 import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
-import { useRestoreMembership } from "@presentation/hooks/useRestoreMembership";
+import {
+  useClearQueueMembership,
+  useRestoreMembership,
+} from "@presentation/hooks/useRestoreMembership";
 
 let mockRouter = { push: jest.fn() };
 jest.mock("expo-router", () => ({
@@ -162,6 +165,39 @@ describe("useRestoreMembership", () => {
 
     await waitFor(() => expect(result.current.isRestoring).toBe(false));
     expect(result.current.resumed).toBeNull();
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it("does not restore an in-flight queue result after the membership is cleared", async () => {
+    const repo = new FakeQueueRepository();
+    let resolveStatus!: (entry: QueueEntry) => void;
+    const status = new Promise<QueueEntry>((resolve) => {
+      resolveStatus = resolve;
+    });
+    const getStatus = jest.spyOn(repo, "getStatus").mockReturnValue(status);
+    const storage = new InMemoryQueueMembership();
+    await storage.save({ eventId: "evt-1", queueId: "q-evt-1" });
+    const { result } = renderHook(
+      () => ({
+        restore: useRestoreMembership(),
+        clear: useClearQueueMembership(),
+      }),
+      { wrapper: makeWrapper(repo, storage) },
+    );
+
+    await waitFor(() => expect(getStatus).toHaveBeenCalled());
+    await act(async () => result.current.clear());
+    await act(async () => {
+      resolveStatus({
+        queueId: "q-evt-1",
+        eventId: "evt-1",
+        position: 3,
+        status: "WAITING",
+      });
+      await status;
+    });
+    expect(result.current.restore.resumed).toBeNull();
+    expect(await storage.load()).toBeNull();
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 });

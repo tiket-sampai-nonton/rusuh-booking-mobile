@@ -172,7 +172,10 @@ describe("BrowseScreen — URL-driven filters", () => {
     fireEvent.press(screen.getByTestId("filter-genre-festival"));
     fireEvent.press(screen.getByTestId("filter-apply"));
     expect(screen.getByTestId("category-festival")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("category-all"));
+    expect(screen.queryByTestId("category-all")).toBeNull();
+    expect(screen.getByTestId("browse-reset")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("browse-reset"));
+    expect(screen.getByTestId("category-all")).toBeTruthy();
     fireEvent.press(screen.getByTestId("view-list"));
     fireEvent.press(screen.getByTestId("view-grid"));
     fireEvent.press(screen.getByTestId("nav-home"));

@@ -203,7 +203,7 @@ values are embedded during the runner's build; never store secrets in `EXPO_PUBL
 1. Open **Workers & Pages → `rusuh-booking` → Deployments**.
 2. After GitHub Actions deploys to the `develop` branch, open `https://rusuh-booking.pages.dev`.
 3. Confirm the home and public routes load, then check the GitHub Actions run and Telegram summary.
-4. Verify `https://rusuh-booking.pages.dev/pay/<booking-id>?ppt=invalid&embedded=1` renders the payment bootstrap/error UI, not Expo's "Unmatched Route". The BE's native page-token URL depends on the `/pay/[bookingId]` route being present in the deployed web bundle; an HTTP 200 fallback alone does not prove the client route exists.
+4. If validating the optional page-token web bootstrap, verify `https://rusuh-booking.pages.dev/pay/<booking-id>?ppt=invalid&embedded=1` renders its bootstrap/error UI, not Expo's "Unmatched Route". Current native payment opens the BE-issued SNAP `redirectUrl` directly and does not depend on the deployed `/pay` route. An HTTP 200 fallback alone does not prove a client route exists.
 
 ### C4. Branch → environment mapping (matches PIPELINE.md)
 - Merge/push to **`develop`** → automatic preprod web build and deployment to the `rusuh-booking`

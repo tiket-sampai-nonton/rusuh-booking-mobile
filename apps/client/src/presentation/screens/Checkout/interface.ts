@@ -91,4 +91,8 @@ export interface LeaveConfirmProps {
   readonly visible: boolean;
   readonly onStay: () => void;
   readonly onLeave: () => void;
+  readonly pending?: boolean;
+  readonly errorMessage?: string;
+  readonly bodyText?: string;
+  readonly leaveLabel?: string;
 }

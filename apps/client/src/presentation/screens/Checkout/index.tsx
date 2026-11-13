@@ -12,7 +12,7 @@
  * No infrastructure import — ports via useServices/hooks only.
  */
 import { useNavigation, useRouter, type Href } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PlusIcon, WarningIcon } from "@presentation/components/ArrowIcon";
@@ -37,6 +37,7 @@ import {
   type TicketRow,
 } from "@domain/rules/checkout";
 import { ScreenFade } from "@presentation/components/ScreenFade";
+import { ConnectivityBanner } from "@presentation/components/ConnectivityBanner";
 import { designColors } from "@presentation/theme";
 
 import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
@@ -44,6 +45,7 @@ import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
 import { useHoldBooking } from "@presentation/hooks/useHoldBooking";
+import { useConnectivity } from "@presentation/hooks/useConnectivity";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
 import {
   prefillFromProfile,
@@ -478,6 +480,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   } = useEventDetail(session?.eventId ?? "");
   const { checks, pending, request } = useAttendeeCheck(sessionId);
   const { hold, isHolding, error: holdError, resetError } = useHoldBooking();
+  const connectivity = useConnectivity();
   const setOrderDetail = useSessionStore((s) => s.setOrderDetail);
   // Select the STABLE profile reference (not a fresh object) so zustand does not
   // re-render every tick; derive the prefill from it with useMemo.
@@ -506,6 +509,10 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [authRecoveryOpen, setAuthRecoveryOpen] = useState(false);
   const [hasAuthToken, setHasAuthToken] = useState(false);
+  const [expiryCheckPending, setExpiryCheckPending] = useState(false);
+  const [expiryCheckError, setExpiryCheckError] = useState<string>();
+  const expiryCheckInFlight = useRef(false);
+  const reconnectExpiryCheckHandled = useRef(false);
   const checkoutDetailsRequestStarted = useRef(false);
   // Logged-in users consented at registration; guests consent inline (AC3).
   const isAccountUser = isAccountCheckout(
@@ -609,15 +616,85 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
 
   const cap = effectiveCap(session?.maxSelectable);
 
+  const checkSessionExpiry = useCallback(async (): Promise<void> => {
+    if (expiryCheckInFlight.current) return;
+    if (connectivity.isOffline) {
+      setExpiryCheckError(
+        "Koneksi terputus. Status sesi akan diperiksa saat koneksi kembali.",
+      );
+      return;
+    }
+    expiryCheckInFlight.current = true;
+    setExpiryCheckPending(true);
+    setExpiryCheckError(undefined);
+    try {
+      const result = (await retry()) as {
+        data?: BookingSession | null;
+        isError?: boolean;
+        error?: Error | null;
+      };
+      if (result.isError) throw result.error ?? new Error("Status unavailable");
+      const latest = result.data;
+      if (!latest || latest.phase === "ENDED") {
+        void queueMembership.clear().catch(() => undefined);
+        router.replace(
+          `/failed/${sessionId}?reason=hold&eventId=${encodeURIComponent(session?.eventId ?? "")}` as Href,
+        );
+        return;
+      }
+      if (latest.serverTime) serverClock.sync(latest.serverTime);
+      if (serverClock.remaining(latest.expiresAt) <= 0) {
+        void queueMembership.clear().catch(() => undefined);
+        router.replace(
+          `/failed/${sessionId}?reason=hold&eventId=${encodeURIComponent(latest.eventId)}` as Href,
+        );
+      }
+    } catch (error) {
+      setExpiryCheckError(
+        apiErrorMessage(
+          error,
+          "Status sesi belum dapat dipastikan. Coba lagi setelah koneksi tersedia.",
+        ),
+      );
+    } finally {
+      expiryCheckInFlight.current = false;
+      setExpiryCheckPending(false);
+    }
+  }, [
+    connectivity.isOffline,
+    queueMembership,
+    retry,
+    router,
+    serverClock,
+    session?.eventId,
+    sessionId,
+  ]);
+
   const { remainingMs, expired } = useServerCountdown({
     clock: serverClock,
     expiresAtIso: session?.expiresAt,
     serverTimeIso: session?.serverTime,
-    onExpire: () =>
-      router.replace(
-        `/failed/${sessionId}?reason=hold&eventId=${encodeURIComponent(session?.eventId ?? "")}` as Href,
-      ),
+    onExpire: () => void checkSessionExpiry(),
   });
+
+  useEffect(() => {
+    if (!connectivity.justReconnected) {
+      reconnectExpiryCheckHandled.current = false;
+      return;
+    }
+    if (
+      !reconnectExpiryCheckHandled.current &&
+      (expiryCheckError !== undefined || expired)
+    ) {
+      reconnectExpiryCheckHandled.current = true;
+      void checkSessionExpiry();
+    }
+  }, [
+    checkSessionExpiry,
+    connectivity.justReconnected,
+    expired,
+    expiryCheckError,
+  ]);
 
   useEffect(() => {
     if (
@@ -835,6 +912,36 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
           expired={expired}
           onBack={() => setConfirmLeave(true)}
         />
+        <ConnectivityBanner
+          isOffline={connectivity.isOffline}
+          justReconnected={connectivity.justReconnected}
+          detail={
+            expiryCheckPending
+              ? "Waktu sesi lokal sudah habis. Menunggu konfirmasi server saat koneksi kembali."
+              : "Koneksi terputus. Formulir tetap tersedia selama aplikasi terbuka; NIK perlu dimasukkan kembali jika aplikasi dimulai ulang."
+          }
+        />
+        {expiryCheckError ? (
+          <View className="flex-row items-center justify-between gap-3 border-b-2 border-ink bg-background px-4 py-3">
+            <Text className="flex-1 text-sm">{expiryCheckError}</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Periksa status sesi"
+              disabled={expiryCheckPending || connectivity.isOffline}
+              onPress={() => void checkSessionExpiry()}
+              testID="checkout-expiry-retry"
+              className="min-h-11 justify-center border-2 border-ink px-3"
+            >
+              <Text className="text-xs font-bold">
+                {expiryCheckPending
+                  ? "MEMERIKSA…"
+                  : connectivity.isOffline
+                    ? "MENUNGGU KONEKSI"
+                    : "PERIKSA STATUS"}
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         {/* Progress Steps Bar (prototype .progress-container) */}
         <ProgressSteps currentStep={3} />

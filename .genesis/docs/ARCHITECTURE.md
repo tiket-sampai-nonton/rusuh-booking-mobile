@@ -119,7 +119,7 @@ flowchart LR
 
 | Layer (folder) | Responsibility | Examples |
 |---|---|---|
-| `domain` | Pure business concepts, rules, ports | NIK validation, quantity rules, money, timer math, queue/booking/payment state machines; `EventRepository`, `PaymentRepository`, `ClockPort` interfaces |
+| `domain` | Pure business concepts, rules, ports | NIK validation, quantity rules, money, timer math, queue/booking/payment state machines; `EventRepository`, `PaymentRepository`, `ClockPort`, `ConnectivityPort`, and `PaymentJourneyStorage` interfaces |
 | `application` | User-intent orchestration (use cases, dto) | `JoinQueue`, `HoldBooking`, `CreatePaymentAttempt`, `RestoreSession`; dto + mappers |
 | `presentation` | React UI + async-state hooks + stores + theme | screens, components, hooks (TanStack Query seam), Zustand stores, NativeWind theme |
 | `infrastructure` | Port implementations + platform adapters | HTTP repositories, `HttpClient` (axios/fetch), notification/storage/file adapters, mock fixtures |
@@ -133,7 +133,7 @@ flowchart LR
 | Web presentation | SEO metadata, browser URLs, keyboard/focus, desktop nav, print, downloads, hover/pointer | `presentation/**/*.web.tsx` |
 | Native presentation | Native navigation, safe areas, gestures, back behavior, haptics | `presentation/**/*.native.tsx` |
 | Web adapters | Cookies, browser storage, payment redirects, Blob/download, web notification provider | `infrastructure/**/*.web.ts` |
-| Native adapters | Secure storage, push/local notifications, file system, share sheet, deep links, biometric/device APIs | `infrastructure/**/*.native.ts` |
+| Native adapters | Secure storage, OS connectivity events, push/local notifications, file system, share sheet, deep links, biometric/device APIs | `infrastructure/**/*.native.ts` |
 | Platform motion | Shared motion tokens, CSS/Canvas or native-specific where needed | `presentation` |
 
 React Native Web is the default web renderer, while `.web.tsx`, `.native.tsx`, `.ios.tsx`, and `.android.tsx` are explicit escape hatches—not duplicated business logic. Expo and React Native document these platform-specific extension mechanisms. [React Native platform-specific code](https://reactnative.dev/docs/platform-specific-code.html) [Expo web support](https://docs.expo.dev/workflow/web/)
@@ -194,8 +194,9 @@ This keeps the same booking flow usable by Android, iOS, web, mocks, and automat
 | QR | `react-native-svg` + QR library | Render shared QR; platform-specific export/download adapter |
 | Notifications | `expo-notifications` | Local scheduling and remote token registration |
 | Files | `expo-file-system` + `expo-sharing` | Native save/share; browser download fallback |
-| Secure storage | `expo-secure-store` | Tokens and sensitive client credentials on native |
-| Local persistence | **AsyncStorage** | Non-authoritative drafts and restore metadata; SQLite is out of scope for v1 |
+| Secure storage | `expo-secure-store` | Tokens and sensitive client credentials on native; payment recovery stores only a booking reference |
+| Local persistence | **AsyncStorage**, SecureStore, and web `localStorage` by purpose | Non-authoritative drafts and restore metadata; payment recovery stores only `bookingId` (SecureStore on native, localStorage on web). Raw NIK and SNAP URLs are never persisted. SQLite is out of scope for v1 |
+| Connectivity | `expo-network` behind `ConnectivityPort` | OS network state drives offline/reconnect UI and TanStack Query reconnect refetch; server responses remain authoritative |
 | Contracts | OpenAPI-generated TypeScript types/client | Keep FE aligned with BE contracts |
 | Static quality | **SonarCloud Quality Gate** | TypeScript analysis, bugs, vulnerabilities, code smells, duplication, and coverage thresholds |
 | Unit/component testing | **Jest** + React Native Testing Library | Domain rules, hooks, components, accessibility contracts |
@@ -227,7 +228,7 @@ apps/
     │   ├── domain/                     # PURE TS — no React/RN/Expo (ESLint-enforced)
     │   │   ├── models/                 # event, queue, booking, payment, ticket
     │   │   ├── errors/                 # typed domain errors
-    │   │   ├── services/               # server clock, polling policy, money, messages
+    │   │   ├── services/               # server clock, polling policy, connectivity/storage ports, money, messages
     │   │   ├── rules/                  # NIK, quantity, attendee, payment-method rules
     │   │   ├── state-machines/         # queue, booking, payment
     │   │   └── repositories/           # PORTS: EventRepository, QueueRepository, PaymentRepository, ClockPort
@@ -432,7 +433,7 @@ The FE consumes the existing contracts; this architecture does not change BE own
 | User | Optional OTP/profile UI, session presentation | OTP request/verify, profile, refresh, logout |
 | Queue | Join, restore, observe, claim, leave | Queue entry and status endpoints |
 | Booking | Event catalog, session, attendee checks, hold, ticket retrieval | Events, sessions, bookings, ticket endpoints |
-| Payment | Show page, create attempt, SNAP redirect/callback, verify status | Payment page, attempts, status, optional page tokens |
+| Payment | Show page, create attempt, SNAP redirect/callback, verify status and recover an interrupted journey | Payment page, attempts, status; optional page-token bootstrap for web, native opens the BE-issued SNAP redirect |
 | Notification | No direct business send from FE | Backend sends e-ticket/expiry email and remote push |
 
 ### 5.1 Shared API conventions
@@ -558,6 +559,8 @@ SEO is therefore capable for the public catalog and event discovery surface, but
 | `/expired/[resourceId]` | recovery | Re-fetch state, explain booking/payment/SNAP failure, restart |
 
 The navigation layer only coordinates routes. It must not contain inventory rules, payment settlement logic, or duplicate validation implementations.
+
+Payment recovery stores only the booking reference. On app/browser return, the payment page and status endpoints revalidate the journey before exposing payment actions. Connectivity events can trigger a refetch, but never change booking/payment state locally.
 
 ## 8. Security and Privacy
 

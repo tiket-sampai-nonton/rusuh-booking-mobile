@@ -15,7 +15,12 @@ import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { Platform } from "react-native";
 
-import { CreatePaymentAttempt } from "@application/payment/create-payment-attempt.use-case";
+import {
+  CreatePaymentAttempt,
+  VerifyPayment,
+} from "@application/payment/create-payment-attempt.use-case";
+import { CancelBooking } from "@application/booking/cancel-booking.use-case";
+import type { Booking } from "@domain/repositories/booking.repository";
 import type {
   PaymentAttempt,
   PaymentMethod,
@@ -85,8 +90,11 @@ export function usePayment(
     CreateAttemptInput
   >;
   readonly resumeHandoff: (attempt: PaymentAttempt) => Promise<void>;
+  readonly cancelBooking: UseMutationResult<Booking, Error, string>;
+  readonly reconcilePayment: UseMutationResult<PaymentAttempt, Error, string>;
 } {
-  const { paymentRepository, idempotencyKeys } = useServices();
+  const { paymentRepository, bookingRepository, idempotencyKeys } =
+    useServices();
   const setPaymentMethod = useSessionStore((s) => s.setPaymentMethod);
   const usecase = useMemo(
     () => new CreatePaymentAttempt(paymentRepository, idempotencyKeys),
@@ -102,11 +110,20 @@ export function usePayment(
     },
   });
 
+  const cancelBooking = useMutation<Booking, Error, string>({
+    mutationFn: (bookingId) =>
+      new CancelBooking(bookingRepository).execute(bookingId),
+  });
+  const reconcilePayment = useMutation<PaymentAttempt, Error, string>({
+    mutationFn: (bookingId) =>
+      new VerifyPayment(paymentRepository).execute(bookingId, bookingId),
+  });
+
   // "Kembali ke SNAP" — re-open the handoff for an in-flight attempt (AC2).
   const resumeHandoff = async (attempt: PaymentAttempt): Promise<void> => {
     if (attempt.redirectUrl)
       await handoff(attempt.redirectUrl, attempt.bookingId, attempt);
   };
 
-  return { createAttempt, resumeHandoff };
+  return { createAttempt, resumeHandoff, cancelBooking, reconcilePayment };
 }

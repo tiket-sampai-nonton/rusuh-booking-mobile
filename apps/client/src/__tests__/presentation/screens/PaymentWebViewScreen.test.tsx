@@ -1,25 +1,35 @@
-import { screen } from "@testing-library/react-native";
+import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
 import { setPaymentHandoff } from "@presentation/stores/payment-handoff";
+import type { BookingRepository } from "@domain/repositories/booking.repository";
+import type {
+  PaymentAttempt,
+  PaymentRepository,
+} from "@domain/repositories/payment.repository";
+import { createContainer } from "@providers/container";
 import {
   PaymentWebViewScreen,
   isBackendPaymentReturn,
   resolveWebViewNav,
 } from "@presentation/screens/PaymentWebView";
 
+const mockRouter = { replace: jest.fn(), back: jest.fn() };
+
 jest.mock("expo-router", () => ({
-  useRouter: () => ({ replace: jest.fn(), back: jest.fn() }),
+  useRouter: () => mockRouter,
+  useNavigation: () => ({ addListener: jest.fn(() => jest.fn()) }),
 }));
 const RN = require("react-native") as typeof import("react-native");
 
 describe("native SNAP WebView", () => {
   const originalOS = RN.Platform.OS;
-  afterEach(() =>
+  afterEach(() => {
     Object.defineProperty(RN.Platform, "OS", {
       value: originalOS,
       configurable: true,
-    }),
-  );
+    });
+    mockRouter.replace.mockReset();
+  });
 
   it("opens the backend SNAP redirect directly in the WebView", () => {
     Object.defineProperty(RN.Platform, "OS", {
@@ -52,6 +62,80 @@ describe("native SNAP WebView", () => {
     });
     renderWithProviders(<PaymentWebViewScreen bookingId="other-booking" />);
     expect(screen.getByTestId("paywv-error")).toBeTruthy();
+  });
+
+  it("asks the BE to cancel before leaving SNAP", async () => {
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "android",
+      configurable: true,
+    });
+    setPaymentHandoff(
+      "booking-1",
+      "https://app.sandbox.midtrans.com/snap/v4/redirection/test",
+    );
+    renderWithProviders(<PaymentWebViewScreen bookingId="booking-1" />);
+    fireEvent.press(screen.getByTestId("paywv-close"));
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/"));
+  });
+
+  it("returns to the payment page when the active SNAP attempt is locked", async () => {
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "android",
+      configurable: true,
+    });
+    setPaymentHandoff(
+      "booking-1",
+      "https://app.sandbox.midtrans.com/snap/v4/redirection/test",
+    );
+    const base = createContainer({ useMocks: true });
+    const bookingRepository: BookingRepository = {
+      ...base.bookingRepository,
+      cancelBooking: async () => {
+        throw new Error("BOOKING_LOCKED");
+      },
+    };
+    const paymentRepository: PaymentRepository = {
+      ...base.paymentRepository,
+      getStatus: async (): Promise<PaymentAttempt> => ({
+        attemptId: "1",
+        bookingId: "booking-1",
+        status: "AWAITING_PAYMENT",
+      }),
+    };
+    renderWithProviders(<PaymentWebViewScreen bookingId="booking-1" />, {
+      container: { bookingRepository, paymentRepository },
+    });
+    fireEvent.press(screen.getByTestId("paywv-close"));
+    await waitFor(() =>
+      expect(mockRouter.replace).toHaveBeenCalledWith("/payment/booking-1"),
+    );
+  });
+
+  it("routes to success when payment wins the cancellation race", async () => {
+    Object.defineProperty(RN.Platform, "OS", {
+      value: "ios",
+      configurable: true,
+    });
+    setPaymentHandoff(
+      "booking-1",
+      "https://app.sandbox.midtrans.com/snap/v4/redirection/test",
+    );
+    const base = createContainer({ useMocks: true });
+    const bookingRepository: BookingRepository = {
+      ...base.bookingRepository,
+      cancelBooking: async () => ({
+        bookingId: "booking-1",
+        status: "PAID",
+        amountMinor: 1000,
+      }),
+    };
+    renderWithProviders(<PaymentWebViewScreen bookingId="booking-1" />, {
+      container: { bookingRepository },
+    });
+    fireEvent.press(screen.getByTestId("paywv-close"));
+    await waitFor(() =>
+      expect(mockRouter.replace).toHaveBeenCalledWith("/success/booking-1"),
+    );
   });
 
   it("recognizes backend-provided callback URLs without trusting query status", () => {

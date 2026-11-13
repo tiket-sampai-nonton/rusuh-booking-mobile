@@ -34,6 +34,32 @@ describe("FilterModal", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it("restores the applied category, time, and sort when opened", () => {
+    render(
+      <FilterModal
+        visible
+        value={{ category: "festival", time: "week", sort: "furthest" }}
+        onApply={jest.fn()}
+        onClose={jest.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByTestId("filter-genre-festival").props.accessibilityState
+        .selected,
+    ).toBe(true);
+    expect(
+      screen.getByTestId("filter-time-week").props.accessibilityState.selected,
+    ).toBe(true);
+    expect(
+      screen.getByTestId("filter-sort-furthest").props.accessibilityState
+        .selected,
+    ).toBe(true);
+    expect(
+      screen.getByTestId("filter-genre-all").props.accessibilityState.selected,
+    ).toBe(false);
+  });
+
   it("closes from the backdrop and stops taps inside the sheet from bubbling", () => {
     const onClose = jest.fn();
     render(<FilterModal visible onApply={jest.fn()} onClose={onClose} />);

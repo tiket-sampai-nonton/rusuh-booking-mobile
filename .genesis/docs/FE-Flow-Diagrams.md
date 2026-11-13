@@ -268,10 +268,10 @@ sequenceDiagram
 ### 2.4 Payment (attempt → SNAP → callback → hasil)
 
 > **KOREKSI (2026-10-29, user) — ikuti prototype.** Model pembayaran = **FE membangun halaman pembayaran** (`.genesis/prototype/Final/payment.html`): ringkasan pesanan (total = `amountMinor`, **tanpa biaya layanan**), **UI pemilihan metode** (VA BCA/BNI/BRI/Permata · QRIS · GoPay, dari `page.methods`), dan timer 10-menit server-authoritative (`paymentExpiresAt` + `serverTime`). "Bayar" → `createAttempt(bookingId, method, Idempotency-Key)` → **BE mengembalikan `redirectUrl` SNAP Midtrans** → FE handoff ke SNAP (web: redirect; mobile: WebView) → SNAP (gateway 3rd-party) menampilkan UI charge sebenarnya (prototype mensimulasikan via `snap.html`) → dua callback success/failed (`successReturnUrl`/`failedReturnUrl`) → FE **verifikasi status ke BE** (`GET /payments/{id}/status`), tidak pernah percaya callback saja. Konsekuensi terhadap diagram di bawah:
-> - Blok `opt mobile WebView` (page-token / `rb_pay` / `POST /payment-page-sessions`) **TETAP scope FE** (D10.3) — halaman bayar FE yang sama dipakai ulang di WebView mobile lewat one-time pageToken; timer tetap server-authoritative lintas handoff. Diagram di bawah akurat.
+> - **Runtime correction (2026-11-13):** native now opens the BE-issued SNAP `redirectUrl` directly in the in-app WebView. It does not use the `/pay` page-token bootstrap for this handoff. The standalone `/pay/{bookingId}` route remains available for its web bootstrap use case.
 > - Pemilihan metode terjadi **di halaman FE kita** (bucket metode); detail instrumen (no. kartu/VA/PIN) terjadi di SNAP → PCI tetap di luar scope.
 > - **FR-24 dipenuhi oleh halaman bayar FE reusable + handoff SNAP** (konsisten web+mobile tanpa membangun ulang UI native).
-> - **Status addendum (2026-11-12):** BE page-token endpoints are implemented. The BE returns a site-relative `/pay/{bookingId}` URL; native resolves it against `EXPO_PUBLIC_SITE_URL`, and the same-origin `/pay` bootstrap screen exchanges the one-use token through `PaymentRepository` before opening `/payment/{bookingId}`. The current deployed Pages bundle still lacks this route until the updated web app is deployed. The 07-11 OpenAPI snapshot and physical-device cookie/redirect QA remain outstanding; see `AS-BUILT-ALIGNMENT-2026-11-12.md`.
+> - Current lifecycle details, cancellation limitations, connectivity recovery, and evidence are in `AS-BUILT-ALIGNMENT-2026-11-13.md`.
 
 Pilih metode → buat attempt → redirect ke SNAP → kembali ke success/failed callback → verifikasi status BE.
 
@@ -289,20 +289,17 @@ sequenceDiagram
   P-->>FE: 200 PaymentPage { methods[], amountMinor, paymentExpiresAt, serverTime, currentAttempt? }
   Note over FE,U: countdown 10 menit dari (paymentExpiresAt - serverNow)
 
-  opt mobile WebView (reuse halaman web)
-    FE->>G: POST /payments/{bookingId}/page-tokens
-    P-->>FE: 201 { pageToken, pageUrl }
-    FE->>G: POST /payment-page-sessions { pageToken }
-    P-->>FE: 204 (set cookie rb_pay)
-  end
-
   U->>FE: pilih metode (VA_BCA/BNI/BRI/PERMATA | QRIS | GOPAY), klik Bayar
   FE->>G: POST /payments/{bookingId}/attempts { method }<br/>header Idempotency-Key
   G->>P: teruskan
   P->>M: buat transaksi SNAP
   M-->>P: redirectUrl + return URLs
   P-->>FE: 201 Attempt { status: PENDING, redirectUrl, successReturnUrl, failedReturnUrl, expiresAt }
-  FE->>U: redirect ke SNAP
+  alt web
+    FE->>U: browser redirect ke SNAP
+  else native
+    FE->>U: buka redirectUrl di in-app WebView
+  end
   U->>M: selesaikan atau batalkan pembayaran
   M-->>FE: redirect successReturnUrl atau failedReturnUrl
   FE->>G: GET /payments/{bookingId}/status
@@ -318,6 +315,8 @@ sequenceDiagram
     FE->>U: tampilkan status sedang diproses dan polling/query dengan backoff
   end
 ```
+
+For explicit Back or SNAP close, FE requests `POST /bookings/{bookingId}/cancel` and reconciles payment status. Once SNAP has locked the booking, the current public BE API has no cancel-attempt route; FE returns to the payment page and offers resume only if BE reports an active resumable attempt. App/tab close and network loss are not cancellation signals. The app/browser restores only `bookingId` and asks BE for the current status on return.
 
 ### 2.5 Success (e-tiket)
 

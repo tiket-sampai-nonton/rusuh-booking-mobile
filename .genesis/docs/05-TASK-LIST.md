@@ -358,7 +358,7 @@ Type: Story · P0 · L · Deps: RBT-053, RBT-012
 
 **Delivers:** FE-built payment page (order summary + method selection + server timer) → create-attempt → SNAP handoff → verify → recovery, per **prototype `payment.html`/`snap.html`**. **P0. Deps:** E6.
 
-> **Planning baseline (D10.5, 2026-10-29):** every story below is production code built against the `PaymentRepository` port; the initial implementation used a mock adapter. The live BE payment adapter is now integrated. Current native page-token routing and verification status are recorded in `AS-BUILT-ALIGNMENT-2026-11-12.md`.
+> **Planning baseline (D10.5, 2026-10-29):** every story below is production code built against the `PaymentRepository` port; the initial implementation used a mock adapter. The live BE payment adapter is now integrated. The original mobile page-token story below is a planning baseline; the current native SNAP handoff and recovery behavior are documented in `AS-BUILT-ALIGNMENT-2026-11-13.md`.
 
 #### RBT-060: Payment page (summary + method selection + timer)
 Type: Story · P0 · L · Deps: RBT-054, RBT-011
@@ -368,12 +368,14 @@ Type: Story · P0 · L · Deps: RBT-054, RBT-011
 
 #### RBT-061: Create-attempt + SNAP handoff (web redirect / mobile WebView)
 Type: Story · P0 · L · Deps: RBT-060, RBT-012
-- AC1: "Bayar" → `createAttempt(bookingId, method, Idempotency-Key)` → BE `redirectUrl`; web redirects, mobile opens the page-token WebView. O2 endpoints are implemented; sandbox/native device verification remains a QA item. (FR-24, D10.2)
+- AC1: "Bayar" → `createAttempt(bookingId, method, Idempotency-Key)` → BE `redirectUrl`; web redirects, native opens that backend-issued SNAP URL in its in-app WebView. The mobile page-token flow below is retained as a planning baseline, not the current native handoff. (FR-24, D10.2; runtime correction 2026-11-13)
 - AC2: refresh-safe — `currentAttempt.status==='PENDING'` restores selected method + SNAP redirect state ("Kembali ke SNAP").
 - Skills: payment integration, platform adapters, WebView.
 
 #### RBT-062: Page-token WebView reuse (mobile)
 Type: Story · P0 · M · Deps: RBT-061
+
+> Historical implementation requirement: the currently approved native path opens the BE-issued SNAP redirect URL directly. The same-origin `/pay/{bookingId}` page-token bootstrap remains available for web where used; it is not a required step in native checkout. See the RBT-140 current runtime and contract report.
 - AC1: mobile path `POST /payments/{id}/page-tokens` → one-time `pageToken` and site-relative `/pay/{id}` URL → resolve against `EXPO_PUBLIC_SITE_URL` → WebView loads the same-origin HTTPS payment page → exchange token once to set `rb_pay`. Do not inject the token on another origin/path; preserve the server-authoritative timer. (FR-24, D10.3)
 - Skills: WebView, platform adapters, session handoff.
 
@@ -490,6 +492,44 @@ Type: Story · P0 · L · Deps: RBT-010, E5/E6/E7 ports
 - **Skills:** No added dependencies; TypeScript/Expo integration and repository workflow.
 
 ---
+
+## Ad hoc Follow-up
+
+#### RBT-140: Cross-platform readiness, payment recovery, and documentation alignment
+Type: Task · Priority: P1 · Size: XL · Deps: current payment/BE contract review
+
+**Execution note:** implementation was authorized. Work is on `fix/RBT-140-cross-platform-readiness`, based on `origin/develop` at `4e1231f795c48bb2f3ac82d2a97d0d151027b61f`. Changes remain uncommitted and unpushed; no PR, merge, or issue closure is authorized in this task.
+
+- AC1: Run web Lighthouse against the current app and make all applicable category results green; save the report and summarize any environment-dependent limits.
+- AC2: Review every file under `.genesis/docs/` against the current source and approved decisions. Update documentation that has drifted. When implementation conflicts with an authoritative project decision, follow the documented escalation rule and record the conflict instead of silently rewriting the decision.
+- AC3: Inventory open GitHub issues, classify whether this task resolves them, and prepare proposed closure and exception lists. Do not close issues until the user separately confirms the closure scope.
+- AC4: In Home and Browse filters, selecting a category replaces the `SEMUA` pill. Show the selected category, waktu, urutan, and `HAPUS PENYARINGAN` in one same-height row; preserve usable behavior on narrow screens.
+- AC5: Native payment page Back before SNAP requests the BE cancellation endpoint and reconciles the returned/current payment status before choosing the next route.
+- AC6: On native cold start after the app was closed during payment, restore the saved payment reference, query BE status, and resume the payment route only when the BE confirms the payment is still resumable. Route terminal or expired states appropriately.
+- AC7: On a normal SNAP close/back event in native, request cancellation when the BE contract permits it and reconcile status. Do not treat force-closing the app as a guaranteed cancellation callback.
+- AC8: Apply equivalent recovery behavior on web for internal Back, SNAP close, page refresh, and a later browser reopen. Treat unload/page-hide cancellation as best effort; use persisted references and BE status reconciliation for reliable recovery.
+- AC9: Confirm whether an existing payment attempt can reopen SNAP or needs a new page token using the current BE contract. Implement only supported behavior; document any BE or provider limitation as a blocker.
+- AC10: Handle airplane mode and signal loss during checkout, the payment page, and SNAP on web and native. Preserve the resumable journey and user input, show a clear connection state, and retry/reconcile safely after connectivity returns. While the server-authoritative checkout/payment timer remains valid, let the user continue without duplicating booking, payment-attempt, or cancellation actions. If the BE reports expiry or a terminal payment state, route accordingly.
+- AC11: Verify the payment, connectivity-recovery, and filter flows on web and native, capture task evidence, and report successful paths, failures, and lifecycle cases that cannot be guaranteed by the client.
+
+**Proposed solution and execution details**
+
+1. **Branch and baseline.** Fetch `develop`, create a task branch from its current head, and preserve any existing work. Record the baseline commit, environment, known issues, and current web/native behavior before changing code. (Completed: branch `fix/RBT-140-cross-platform-readiness`, base `4e1231f795c48bb2f3ac82d2a97d0d151027b61f`.)
+2. **Lighthouse (AC1).** Run Lighthouse against a production-like web build with documented URL, device profile, network settings, and repeatable data. Record baseline Performance, Accessibility, Best Practices, and SEO scores; target green (90 or above) for each applicable category. Fix the highest-impact findings, rerun under the same conditions, and save before/after reports. Report external API or environment limitations rather than hiding them.
+3. **Documentation (AC2).** Inventory every file under `.genesis/docs/`, compare routes, architecture, contracts, configuration, flows, security, and operational steps with the current implementation and approved decisions, then record discrepancies. Update stale descriptions and cross-references; identify decisions where the code violates the authoritative docs and escalate as required. Verify links and avoid exposing secrets or personal data.
+4. **GitHub issues (AC3).** List open issues, inspect their status and dependencies, and produce a proposed closure list and an exceptions list. Do not close any issue during this task; report the inventory and ask the user to confirm closure scope separately.
+5. **Filter row (AC4).** Derive the pills from the same applied filter state used by Home and Browse. When a category is selected, display it in place of `SEMUA`; place category, waktu, urutan, and the clear action in one row with consistent height. Keep the row usable on small screens with horizontal scrolling where needed. Verify default, selected, cleared, and Home-to-Browse states on web and native.
+6. **Contract and cancellation (AC5, AC7, AC9).** Inspect the current BE contract and deployed behavior for `POST /booking-sessions/{sessionId}/cancel`, `POST /bookings/{bookingId}/cancel`, payment page/status, and attempt creation. Determine which resource exists at each step and confirm authentication, idempotency, error responses, and payment-versus-cancellation races. Route a confirmed payment-page exit or normal SNAP close through the appropriate use case and port, show progress, reconcile the returned/current status, and offer recovery if the result is unknown. A successful payment takes precedence over an assumed cancellation.
+7. **Native restore (AC6, AC9).** Persist only the minimum non-sensitive journey references using the existing platform storage architecture, and ensure the required visitor/auth context can be restored. On cold start or return to foreground, query the BE before choosing a route. Resume an eligible payment page, expose `Kembali ke SNAP` only when the active attempt can be reopened, and route paid, cancelled, or expired journeys to their proper screens. Clear stale references after a confirmed terminal outcome. Verify whether the provider URL is reusable or requires a fresh token; record any contract gap.
+8. **Web lifecycle (AC8).** Use the same server reconciliation for refresh and later reopen, with persistent references scoped to the current user or visitor. Handle an explicit in-app Back or SNAP close through the normal cancellation flow. Browser unload/tab close is best effort only; on return, query the BE instead of assuming cancellation. Ensure expired or terminal journeys do not redirect back into payment.
+9. **Connectivity recovery (AC10).** Detect loss and return of connectivity on checkout, payment, and SNAP; show a human-readable offline state and preserve the current screen and permissible input. Do not automatically cancel just because connectivity is lost. When online again, re-fetch the server clock and authoritative session/payment status before retrying or resuming. Reuse the same idempotency key for an uncertain action, avoid parallel retries, and show a clear expired or terminal state when the BE says the timer ended. Keep raw NIK out of persistent storage; any NIK held in memory may need re-entry after a process restart. SNAP and server actions require a working connection.
+10. **Verification and evidence (AC11).** Exercise web plus available Android and iOS devices across explicit Back, normal SNAP close, app/tab close and reopen before and after SNAP, payment success racing with cancellation, offline/reconnect, retry, expiry while offline, and repeated reopen. Check API calls, status transitions, duplicate prevention, user messages, and filter behavior at mobile and desktop widths. Capture sanitized recordings/screenshots and API/status evidence without raw NIK, tokens, or payment credentials; save Lighthouse reports and document platform or BE limitations.
+
+**Clarification before issue closure:** confirm whether “all GitHub issues” means every open repository issue, including unrelated or incomplete work, or only issues verified as resolved. Do not close unrelated or incomplete issues without that confirmation.
+
+**Execution status — 2026-11-13:** Filter persistence, payment recovery/cancellation reconciliation, connectivity feedback, lazy web event-card images, and documentation updates are implemented on this branch. Targeted validation passed: 13 Jest suites / 113 tests, TypeScript typecheck, Prettier, ESLint (0 errors; 31 warnings), `web:metadata`, `web:verify`, and `git diff --check`. A source-wide architecture review of 696 TypeScript/TSX files found no Clean Architecture boundary violations; lint enforces the documented import direction. Web verification passed for 9 public routes, 17 transactional routes, SEO artifacts, and gzip budgets. Browse filter state was confirmed in Chrome at port 8081. Android emulator and iOS Simulator launch evidence is saved under `.genesis/evidence/RBT-140/`; payment lifecycle, SNAP, airplane-mode, and reconnect scenarios were not completed end to end on physical devices. Desktop Lighthouse scores are all 90+; mobile Lighthouse Performance is 67–76 and therefore AC1 remains unmet. See `AS-BUILT-ALIGNMENT-2026-11-13.md` for score tables, test details, issue inventory, architecture review, and blockers. Adding `expo-network` requires a new native Android/iOS build. No issues were closed and no Git commit/push/PR/merge was performed.
+
+**Contract finding for payment lifecycle:** the current BE `POST /bookings/{bookingId}/cancel` refuses cancellation after payment lock while an attempt is active. The current public Payment API has no separate cancel-attempt endpoint. In that state, FE must reconcile and offer resume/status recovery; a true SNAP cancellation requires BE contract support. Do not call booking cancel and claim SNAP was cancelled.
 
 ## Milestones
 
