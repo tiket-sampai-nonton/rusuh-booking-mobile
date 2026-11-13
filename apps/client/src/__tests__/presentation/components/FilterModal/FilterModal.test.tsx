@@ -20,14 +20,21 @@ describe("FilterModal", () => {
   it("applies the selected genre, date window, and sort order", () => {
     const onApply = jest.fn();
     const onClose = jest.fn();
-    render(<FilterModal visible onApply={onApply} onClose={onClose} />);
+    render(
+      <FilterModal
+        visible
+        genres={["FESTIVAL", "JAZZ"]}
+        onApply={onApply}
+        onClose={onClose}
+      />,
+    );
 
-    fireEvent.press(screen.getByTestId("filter-genre-festival"));
+    fireEvent.press(screen.getByTestId("filter-genre-FESTIVAL"));
     fireEvent.press(screen.getByTestId("filter-time-week"));
     fireEvent.press(screen.getByTestId("filter-sort-furthest"));
     fireEvent.press(screen.getByTestId("filter-apply"));
     expect(onApply).toHaveBeenCalledWith({
-      category: "festival",
+      genre: "FESTIVAL",
       time: "week",
       sort: "furthest",
     });
@@ -38,14 +45,14 @@ describe("FilterModal", () => {
     render(
       <FilterModal
         visible
-        value={{ category: "festival", time: "week", sort: "furthest" }}
+        value={{ genre: "FESTIVAL", time: "week", sort: "furthest" }}
         onApply={jest.fn()}
         onClose={jest.fn()}
       />,
     );
 
     expect(
-      screen.getByTestId("filter-genre-festival").props.accessibilityState
+      screen.getByTestId("filter-genre-FESTIVAL").props.accessibilityState
         .selected,
     ).toBe(true);
     expect(
@@ -59,6 +66,55 @@ describe("FilterModal", () => {
       screen.getByTestId("filter-genre-all").props.accessibilityState.selected,
     ).toBe(false);
   });
+
+  it("keeps the selected genre and offers retry if facets cannot load", () => {
+    const retry = jest.fn();
+    render(
+      <FilterModal
+        visible
+        value={{ genre: "JAZZ", time: "month", sort: "closest" }}
+        genresError
+        onRetryGenres={retry}
+        onClose={jest.fn()}
+        onApply={jest.fn()}
+      />,
+    );
+    expect(
+      screen.getByTestId("filter-genre-JAZZ").props.accessibilityState.selected,
+    ).toBe(true);
+    fireEvent.press(screen.getByText("Gagal memuat genre. Coba lagi"));
+    expect(retry).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["android", "ios", "web"] as const)(
+    "selects a BE genre on %s",
+    (platform) => {
+      Object.defineProperty(Platform, "OS", {
+        configurable: true,
+        value: platform,
+      });
+      const onApply = jest.fn();
+      const onTimeChange = jest.fn();
+      render(
+        <FilterModal
+          visible
+          genres={["HIP_HOP", "JAZZ"]}
+          onClose={jest.fn()}
+          onApply={onApply}
+          onTimeChange={onTimeChange}
+        />,
+      );
+      fireEvent.press(screen.getByTestId("filter-genre-HIP_HOP"));
+      fireEvent.press(screen.getByTestId("filter-time-month"));
+      expect(onTimeChange).toHaveBeenCalledWith("month");
+      fireEvent.press(screen.getByTestId("filter-apply"));
+      expect(onApply).toHaveBeenCalledWith({
+        genre: "HIP_HOP",
+        time: "month",
+        sort: "closest",
+      });
+    },
+  );
 
   it("closes from the backdrop and stops taps inside the sheet from bubbling", () => {
     const onClose = jest.fn();

@@ -16,6 +16,7 @@ import type { ClockPort } from "@domain/services/clock.port";
 export class ServerClock {
   /** serverTime − deviceTime captured at the last `sync`. Starts at 0 (unsynced). */
   private offset = 0;
+  private synchronized = false;
 
   constructor(private readonly clock: ClockPort) {}
 
@@ -24,7 +25,14 @@ export class ServerClock {
    * Stores `offset = serverTime − deviceTime(now)`; re-sync overwrites it.
    */
   sync(serverTimeIso: string): void {
-    this.offset = Date.parse(serverTimeIso) - this.clock.now();
+    const serverTime = Date.parse(serverTimeIso);
+    if (!Number.isFinite(serverTime)) return;
+    this.offset = serverTime - this.clock.now();
+    this.synchronized = true;
+  }
+
+  isSynchronized(): boolean {
+    return this.synchronized;
   }
 
   /** Current server-authoritative time in epoch milliseconds. */

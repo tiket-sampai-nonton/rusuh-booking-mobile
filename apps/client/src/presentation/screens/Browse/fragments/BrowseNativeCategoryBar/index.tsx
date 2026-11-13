@@ -1,7 +1,6 @@
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { BrowseChips } from "../BrowseChips";
-import { BROWSE_CATEGORIES, type BrowseCategoryKey } from "../categories";
 import {
   browseNativeCategoryBar,
   browseNativeCategoryBarPosition,
@@ -14,30 +13,23 @@ import {
 
 interface BrowseNativeCategoryBarProps {
   readonly top: number;
-  readonly activeCategory: BrowseCategoryKey | null;
+  readonly genre?: string;
   readonly time?: string;
   readonly sort?: string;
   readonly isFiltered?: boolean;
-  readonly onSelect: (category: BrowseCategoryKey) => void;
+  readonly onSelect: () => void;
   readonly onReset?: () => void;
 }
 
 export function BrowseNativeCategoryBar({
   top,
-  activeCategory,
+  genre = "Semua",
   time = "all",
   sort = "closest",
   isFiltered = false,
   onSelect,
   onReset,
 }: BrowseNativeCategoryBarProps) {
-  const selected =
-    activeCategory && activeCategory !== "all"
-      ? BROWSE_CATEGORIES.find((category) => category.key === activeCategory)
-      : undefined;
-  const visibleCategories = selected
-    ? [selected]
-    : BROWSE_CATEGORIES.filter((category) => category.key === "all");
   return (
     <View
       style={[browseNativeCategoryBar, browseNativeCategoryBarPosition(top)]}
@@ -48,26 +40,26 @@ export function BrowseNativeCategoryBar({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={browseNativeCategoryScrollContent}
       >
-        {visibleCategories.map((category) => {
-          const active = (activeCategory ?? "all") === category.key;
+        {[genre].map((category) => {
+          const active = true;
           return (
             <Pressable
-              key={category.key}
-              onPress={() => onSelect(category.key)}
+              key={category}
+              onPress={onSelect}
               style={browseNativeCategoryButton(active)}
-              testID={`category-${category.key}`}
+              testID={`category-${category === "Semua" ? "all" : category}`}
               accessibilityRole="button"
               accessibilityState={{ selected: active }}
             >
               <Text style={browseNativeCategoryLabel(active)}>
-                {category.label}
+                {category.replace(/_/g, " ")}
               </Text>
             </Pressable>
           );
         })}
         <View style={browseNativeCategorySummary}>
           <BrowseChips
-            genre="Semua"
+            genre={genre}
             time={time}
             sort={sort}
             isFiltered={isFiltered}

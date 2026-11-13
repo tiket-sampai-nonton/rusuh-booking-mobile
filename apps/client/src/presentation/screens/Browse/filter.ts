@@ -2,29 +2,17 @@
  * Browse filter logic — pure, framework-free (RBT-031).
  *
  * URL query values are normalized here and sent to the server by Browse. This
- * module keeps the small category-chip filtering and mock fallback pure. No
- * React / RN / Expo imports. Category filters are applied client-side; actual
- * genre query values remain separate and follow the backend contract.
+ * module keeps the mock fallback pure. Genre values follow the backend contract.
  */
 import type { EventSummary } from "@domain/repositories/event.repository";
+import { inTimeBucket } from "@domain/rules/catalog-time-window";
+export { inTimeBucket } from "@domain/rules/catalog-time-window";
 
-/** Known genre labels for legacy genre links. "Semua" = no genre filter. */
-export const GENRES = [
-  "Semua",
-  "Festival",
-  "Jazz",
-  "Rock",
-  "Elektronik",
-  "Folk",
-  "Orkestra",
-] as const;
 export const TIMES = ["all", "week", "month", "quarter"] as const;
 export const SORTS = ["closest", "furthest"] as const;
 
 /**
- * Query-result pages are client-filtered and have no dedicated static HTML.
- * Until server-backed filters land, any non-empty query is noindex while the
- * Seo component keeps its canonical URL at `/browse`.
+ * Any non-empty query is noindex while the canonical URL remains `/browse`.
  */
 type BrowseQueryValue = string | string[] | undefined;
 type BrowseQueryParams = Readonly<Record<string, BrowseQueryValue>>;
@@ -48,32 +36,6 @@ export const SORT_LABEL: Record<string, string> = {
   furthest: "Terjauh",
 };
 
-const DAY = 86_400_000;
-
-const CATEGORY_TERMS: Readonly<Record<string, readonly string[]>> = {
-  concert: ["concert", "konser"],
-  festival: ["festival", "fest"],
-  sports: ["sports", "sport", "olahraga"],
-  theater: ["theater", "theatre", "teater"],
-};
-
-/** Best-effort category match until EventSummary receives a typed genre field. */
-export function matchesCategory(
-  event: Pick<EventSummary, "name" | "venue"> &
-    Partial<Pick<EventSummary, "genres">>,
-  category: string,
-): boolean {
-  const terms = CATEGORY_TERMS[category.toLowerCase()] ?? [
-    category.toLowerCase(),
-  ];
-  const searchable = `${event.name} ${event.venue ?? ""}`.toLowerCase();
-  return terms.some(
-    (term) =>
-      searchable.includes(term) ||
-      event.genres?.some((genre) => genre.toLowerCase() === term),
-  );
-}
-
 /**
  * URL params are user-controlled — normalize unknown/tampered values to the
  * safe default instead of turning a typo into a false empty state.
@@ -88,31 +50,15 @@ export function readParam(
 }
 
 /**
- * Read the genre param case-insensitively. Home navigates with lowercase slugs
- * (e.g. /browse?genre=rock) while the chips/filter use the canonical capitalized
- * form ("Rock"); match by lowercase so a deep link still filters correctly, and
- * return the canonical casing for display. Unknown → "Semua".
+ * Normalize a user-supplied URL genre in the same form used by the backend.
  */
 export function readGenre(v: string | string[] | undefined): string {
   const s = Array.isArray(v) ? v[0] : v;
-  if (!s) return "Semua";
-  const hit = GENRES.find((g) => g.toLowerCase() === s.toLowerCase());
-  return hit ?? s;
-}
-
-/** True when `ev` starts inside the selected time window (from `now`). */
-export function inTimeBucket(
-  ev: Pick<EventSummary, "startsAt">,
-  time: string,
-  now: number,
-): boolean {
-  if (time === "all") return true;
-  const t = ev.startsAt ? new Date(ev.startsAt).getTime() : Number.NaN;
-  if (!Number.isFinite(t)) return false;
-  if (time === "week") return t >= now && t <= now + 7 * DAY;
-  if (time === "month") return t >= now && t <= now + 30 * DAY;
-  if (time === "quarter") return t >= now && t <= now + 90 * DAY;
-  return true;
+  if (!s || ["semua", "all"].includes(s.trim().toLowerCase())) return "Semua";
+  return s
+    .trim()
+    .toUpperCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 /**
@@ -128,7 +74,9 @@ export function filterEvents(
 ): EventSummary[] {
   let list = all.filter((ev) => inTimeBucket(ev, time, now));
   if (genre !== "Semua") {
-    list = list.filter((ev) => matchesCategory(ev, genre));
+    list = list.filter((ev) =>
+      ev.genres?.some((value) => value.toLowerCase() === genre.toLowerCase()),
+    );
   }
   const dir = sort === "furthest" ? -1 : 1;
   return [...list].sort((a, b) => {

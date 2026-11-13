@@ -32,6 +32,7 @@ import {
 } from "@presentation/theme/event-design-tokens";
 import { plusJakartaSansFontForWeight } from "@presentation/theme/fonts";
 import { withAlpha } from "@presentation/theme";
+import { hardShadowStyle } from "@presentation/utils/style";
 
 import type { ZoneTone } from "./display";
 
@@ -457,7 +458,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: palette.accent,
-    borderColor: palette.accent,
+    borderWidth: B,
+    borderColor: palette.ink,
+    ...hardShadowStyle(4, 4, palette.ink),
   },
   leaveBtnTextMobile: {
     color: palette.ground,
@@ -597,8 +600,9 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 16,
     borderWidth: B,
-    borderColor: palette.accent,
+    borderColor: palette.ink,
     backgroundColor: palette.accent,
+    ...hardShadowStyle(4, 4, palette.ink),
     alignItems: "center",
   },
   modalBtnLeaveText: {

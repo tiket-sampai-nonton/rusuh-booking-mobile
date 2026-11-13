@@ -114,10 +114,10 @@ describe("HomeScreen (web desktop)", () => {
     expect(screen.getByTestId("filter-modal")).toBeTruthy();
     expect(mockRouter.push).not.toHaveBeenCalled();
     expect(mockRouter.navigate).not.toHaveBeenCalled();
-    // Apply → /browse WITH category, time, and sort query params.
+    // Apply the default genre with time and sort query params.
     fireEvent.press(screen.getByTestId("filter-apply"));
     expect(mockRouter.navigate).toHaveBeenCalledWith(
-      expect.stringMatching(/^\/browse\?.*category=/),
+      "/browse?time=all&sort=closest",
     );
   });
 

@@ -6,7 +6,7 @@ import {
   withAlpha,
 } from "@presentation/theme";
 
-import type { DynamicStyle } from "@presentation/utils/style";
+import { hardShadowStyle, type DynamicStyle } from "@presentation/utils/style";
 
 export const styles = StyleSheet.create({
   container: {
@@ -56,8 +56,9 @@ export const styles = StyleSheet.create({
   mobileWebTotalValue: { color: designColors.ink, fontSize: 16 },
   payButton: {
     borderWidth: designBorders.standard,
-    borderColor: designColors.accent,
+    borderColor: designColors.ink,
     backgroundColor: designColors.accent,
+    ...hardShadowStyle(4, 4, designColors.ink),
     paddingVertical: 16,
     paddingHorizontal: 32,
   },
@@ -66,7 +67,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     backgroundColor: designColors.accent,
-    borderColor: designColors.accent,
+    borderColor: designColors.ink,
   },
   payButtonNative: {
     minWidth: 160,
@@ -77,7 +78,7 @@ export const styles = StyleSheet.create({
   },
   payButtonPressed: {
     backgroundColor: designColors.accentDeep,
-    borderColor: designColors.ember,
+    borderColor: designColors.ink,
   },
   payButtonDisabled: {
     opacity: 0.5,

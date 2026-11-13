@@ -860,7 +860,8 @@ export const designDetailStyles = StyleSheet.create({
     paddingHorizontal: Platform.OS === "web" ? designSpacingSemantic.l : 32, // 48px web, 32px native
     backgroundColor: designColors.accent,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ember,
+    borderColor: designColors.ink,
+    ...(Platform.OS === "web" ? hardShadowStyle(4, 4, designColors.ink) : {}),
     // Pulse glow animation applied separately
   },
   floatingCtaBtnDisabled: {

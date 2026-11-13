@@ -34,7 +34,7 @@ import {
 } from "./style";
 
 export interface FilterValue {
-  readonly category: string;
+  readonly genre: string;
   readonly time: string;
   readonly sort: string;
 }
@@ -46,14 +46,12 @@ export interface FilterModalProps {
   readonly value?: FilterValue;
   /** Apply — receives the chosen filter (the screen navigates to /browse). */
   readonly onApply: (value: FilterValue) => void;
+  readonly genres?: readonly string[];
+  readonly genresLoading?: boolean;
+  readonly genresError?: boolean;
+  readonly onRetryGenres?: () => void;
+  readonly onTimeChange?: (time: string) => void;
 }
-
-const CATEGORIES = [
-  { v: "all", l: "Semua" },
-  { v: "concert", l: "Konser" },
-  { v: "festival", l: "Festival" },
-  { v: "sports", l: "Olahraga" },
-] as const;
 const TIMES = [
   { v: "all", l: "Semua waktu" },
   { v: "week", l: "Minggu ini" },
@@ -70,22 +68,27 @@ export function FilterModal({
   value,
   onClose,
   onApply,
+  genres = [],
+  genresLoading = false,
+  genresError = false,
+  onRetryGenres,
+  onTimeChange,
 }: FilterModalProps) {
   const insets = useSafeAreaInsets();
   const { isMobileWeb } = useResponsive();
-  const [category, setCategory] = useState(value?.category ?? "all");
+  const [genre, setGenre] = useState(value?.genre ?? "all");
   const [time, setTime] = useState(value?.time ?? "all");
   const [sort, setSort] = useState(value?.sort ?? "closest");
 
   useEffect(() => {
     if (!visible) return;
-    setCategory(value?.category ?? "all");
+    setGenre(value?.genre ?? "all");
     setTime(value?.time ?? "all");
     setSort(value?.sort ?? "closest");
-  }, [value?.category, value?.sort, value?.time, visible]);
+  }, [value?.genre, value?.sort, value?.time, visible]);
 
   const apply = (): void => {
-    onApply({ category, time, sort });
+    onApply({ genre, time, sort });
   };
 
   useEffect(() => {
@@ -128,7 +131,7 @@ export function FilterModal({
               Saring Event
             </Text>
             <Text style={componentStyles.elementMarginTop4}>
-              Pilih kategori, waktu, dan urutan event.
+              Pilih genre, waktu, dan urutan event.
             </Text>
           </View>
           <Pressable
@@ -150,17 +153,36 @@ export function FilterModal({
           keyboardShouldPersistTaps="handled"
         >
           <PillGroup
-            label="Kategori acara"
-            options={CATEGORIES}
-            value={category}
-            onPick={setCategory}
+            label="Genre"
+            options={[
+              { v: "all", l: "Semua" },
+              ...[
+                ...new Set([...genres, ...(genre !== "all" ? [genre] : [])]),
+              ].map((g) => ({ v: g, l: g.replace(/_/g, " ") })),
+            ]}
+            value={genre}
+            onPick={setGenre}
             testPrefix="filter-genre"
           />
+          {genresLoading ? (
+            <Text accessibilityLiveRegion="polite">Memuat genre…</Text>
+          ) : null}
+          {!genresLoading && !genresError && genres.length === 0 ? (
+            <Text>Tidak ada genre untuk pilihan waktu ini.</Text>
+          ) : null}
+          {genresError ? (
+            <Pressable accessibilityRole="button" onPress={onRetryGenres}>
+              <Text>Gagal memuat genre. Coba lagi</Text>
+            </Pressable>
+          ) : null}
           <PillGroup
             label="Waktu"
             options={TIMES}
             value={time}
-            onPick={setTime}
+            onPick={(next) => {
+              setTime(next);
+              onTimeChange?.(next);
+            }}
             testPrefix="filter-time"
           />
           <PillGroup

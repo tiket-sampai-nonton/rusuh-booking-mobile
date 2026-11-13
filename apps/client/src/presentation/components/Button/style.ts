@@ -1,4 +1,5 @@
 import type { DynamicStyle } from "@presentation/utils/style";
+import { hardShadowStyle } from "@presentation/utils/style";
 import {
   designBorders,
   designColors,
@@ -22,10 +23,10 @@ export function styleForButtonPressable0(
   return {
     borderWidth: designBorders.standard,
     borderColor: designColors.ink,
+    ...hardShadowStyle(4, 4, designColors.ink),
     backgroundColor: arg0.bg,
     paddingVertical: arg1,
     paddingHorizontal: arg2,
-    overflow: "hidden",
     opacity: arg3 ? 0.5 : 1,
     flexDirection: "row",
     alignItems: "center",
