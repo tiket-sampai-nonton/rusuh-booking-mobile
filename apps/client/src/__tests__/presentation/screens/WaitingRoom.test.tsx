@@ -36,10 +36,12 @@ const mockUseAutoClaim = jest.fn<UseAutoClaimResult, [unknown]>();
 const mockUseEventDetail = jest.fn();
 const mockUseRestoreBookingSession = jest.fn();
 const mockScheduleLocal = jest.fn().mockResolvedValue(undefined);
+const mockClearQueueMembership = jest.fn().mockResolvedValue(undefined);
 
 jest.mock("@providers/service-context", () => ({
   useServices: () => ({
     notification: { scheduleLocal: mockScheduleLocal },
+    queueMembership: { clear: mockClearQueueMembership },
   }),
 }));
 
@@ -115,6 +117,7 @@ function claim(over: Partial<UseAutoClaimResult> = {}): UseAutoClaimResult {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockClearQueueMembership.mockResolvedValue(undefined);
   mockReducedMotion.mockReturnValue(false);
   mockUseQueuePolling.mockReturnValue(polling());
   mockUseAutoClaim.mockReturnValue(claim());
@@ -166,6 +169,24 @@ describe("WaitingRoomScreen — Buku Antrean layout", () => {
       "q-9",
       expect.any(Boolean),
     );
+  });
+
+  it("clears an invalid visitor token and routes back Home", async () => {
+    mockUseQueuePolling.mockReturnValue(
+      polling({
+        entry: undefined,
+        isError: true,
+        error: Object.assign(new Error("VISITOR_TOKEN_INVALID"), {
+          httpStatus: 401,
+        }),
+      }),
+    );
+    render(<WaitingRoomScreen queueId="q-1" eventId="evt-1" />);
+
+    await waitFor(() => {
+      expect(mockClearQueueMembership).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith("/");
+    });
   });
 });
 

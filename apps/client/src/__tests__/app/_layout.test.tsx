@@ -9,6 +9,11 @@ const mockServices = {
   tokenStorage: { load: jest.fn() },
   buyerEmailStorage: { load: jest.fn() },
   userRepository: { getMe: jest.fn() },
+  paymentJourneyStorage: {
+    load: jest.fn().mockResolvedValue(null),
+    save: jest.fn(),
+    clear: jest.fn(),
+  },
 };
 
 // Mock expo-router's Stack to a null-rendering stub so the layout's JSX actually
@@ -18,6 +23,7 @@ const mockServices = {
 // expo-notifications; here we only assert the layout mounts without crashing.
 jest.mock("expo-router", () => ({
   Stack: () => null,
+  usePathname: () => "/",
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
 }));
 jest.mock("@presentation/bridges/StartupUpdateBridge", () => ({

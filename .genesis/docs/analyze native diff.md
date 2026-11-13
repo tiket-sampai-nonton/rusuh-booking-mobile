@@ -2,7 +2,7 @@
 
 Date: 2026-11-04  
 Scope: Expo native output on iPhone 16 Pro Simulator / iOS 18.6 compared with `.genesis/prototype/v2-mobile`  
-App target checked: native React Native renderer; web was used only as a secondary cross-check at `localhost:8081`.
+Historical baseline report for the native React Native renderer; web was used only as a secondary cross-check at `localhost:8081`. Payment handoff behavior has since changed; see `AS-BUILT-ALIGNMENT-2026-11-13.md`.
 
 ## Executive summary
 

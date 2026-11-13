@@ -12,9 +12,11 @@
  *     CLEAR the stale membership and return null (nothing to resume).
  * A missing membership (fresh install / already cleared) → null, no fetch.
  *
- * If the status fetch FAILS (e.g. offline / the entry no longer exists on the
- * server), the membership is cleared and null returned — a dead pointer must
- * not trap the user on a broken waiting room across restarts.
+ * A confirmed 401 means the saved visitor token is invalid/expired/rotated per
+ * the queue contract, so that pointer cannot authorize recovery; clear it.
+ * A confirmed 404/410 also clears it. For all other failures keep the pointer
+ * and return an unverified result so the waiting-room recovery view can retry.
+ * An unknown server state must never be treated as a terminal queue state.
  *
  * PURE TS: ports + the pure state machine only; no React / RN / Expo / TanStack
  * / infrastructure imports (ARCHITECTURE §3, §4.3).
@@ -35,6 +37,17 @@ export interface ResumedMembership {
   readonly entry: QueueEntry;
 }
 
+/** A saved membership whose live status could not be verified. */
+export interface UnverifiedMembership {
+  readonly membership: QueueMembership;
+  readonly status: "unverified";
+}
+
+export type RestoreMembershipResult =
+  | ResumedMembership
+  | UnverifiedMembership
+  | null;
+
 export class RestoreMembership {
   constructor(
     private readonly queue: QueueRepository,
@@ -45,7 +58,7 @@ export class RestoreMembership {
    * Resolve to the resumable membership (ACTIVE) or null (none persisted, or
    * terminal/unresolvable → cleared).
    */
-  async execute(): Promise<ResumedMembership | null> {
+  async execute(): Promise<RestoreMembershipResult> {
     const stored = await this.membership.load();
     if (stored === null) return null;
 
@@ -54,8 +67,11 @@ export class RestoreMembership {
       entry = await this.queue.getStatus(stored.queueId, stored.eventId);
     } catch (error) {
       const status = (error as { httpStatus?: number } | null)?.httpStatus;
-      if (status === 404 || status === 410) await this.membership.clear();
-      return null;
+      if (status === 401 || status === 404 || status === 410) {
+        await this.membership.clear();
+        return null;
+      }
+      return { membership: stored, status: "unverified" };
     }
 
     if (isTerminal(entry.status)) {

@@ -53,6 +53,9 @@ Because logic never splits across platforms (D2.3), the hard assertions live in 
 11. Payment: FE renders success only after BE `status=PAID`, never on callback alone (D10).
 12. Native **and** web push registration paths both exercised (D8.2).
 13. Re-join same event restores the existing queue entry (no duplicate) (D9.3).
+14. Payment Back, SNAP close, refresh, and cold-start recovery reconcile BE status before routing; a locked active payment attempt is resumable and is never reported as cancelled.
+15. Airplane mode at checkout/payment/SNAP preserves the journey; reconnect fetches current BE status and server time before retry or expiry routing.
+16. Filter selection survives Home → Browse and reopening the filter modal; selected category, time, sort, and clear action remain usable in the same-height row on web and native.
 
 ## 5. Flash-crowd / capacity testing (NFR-03, ARCHITECTURE §9.2)
 

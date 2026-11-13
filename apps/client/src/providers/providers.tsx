@@ -9,11 +9,15 @@
  * The `queryClient` prop lets tests inject a retry-disabled client for
  * deterministic error-state assertions.
  */
-import React, { useMemo } from "react";
-import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
+import React, { useEffect, useMemo } from "react";
+import {
+  onlineManager,
+  QueryClientProvider,
+  type QueryClient,
+} from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import type { Container } from "@providers/container";
+import { createContainer, type Container } from "@providers/container";
 import { createQueryClient } from "@providers/query-client";
 import { ServiceProvider } from "@providers/service-context";
 import { ToastProvider } from "@presentation/components/design-system/Toast";
@@ -42,10 +46,38 @@ export function AppProviders({
     () => queryClient ?? createQueryClient(),
     [queryClient],
   );
+  const services = useMemo(() => container ?? createContainer(), [container]);
+
+  useEffect(() => {
+    onlineManager.setEventListener((setOnline) => {
+      let active = true;
+      let receivedNetworkEvent = false;
+      const update = (isOnline: boolean | null): void => {
+        if (active && isOnline !== null) setOnline(isOnline);
+      };
+      const unsubscribe = services.connectivity.subscribe((isOnline) => {
+        receivedNetworkEvent = true;
+        update(isOnline);
+      });
+      void services.connectivity
+        .getIsOnline()
+        .then((isOnline) => {
+          if (!receivedNetworkEvent) update(isOnline);
+        })
+        .catch(() => undefined);
+      return () => {
+        active = false;
+        unsubscribe();
+      };
+    });
+    return () => {
+      onlineManager.setEventListener(() => () => undefined);
+    };
+  }, [services.connectivity]);
 
   const serviceTree = (
     <ToastProvider>
-      <ServiceProvider container={container}>{children}</ServiceProvider>
+      <ServiceProvider container={services}>{children}</ServiceProvider>
     </ToastProvider>
   );
   return (

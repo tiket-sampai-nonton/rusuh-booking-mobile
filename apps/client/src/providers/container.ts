@@ -29,6 +29,9 @@ import type { ClockPort } from "@domain/services/clock.port";
 import type { FileSharePort } from "@domain/services/file-share.port";
 import type { AppUpdatePort } from "@domain/services/app-update.port";
 import type { NotificationPort } from "@domain/services/notification.port";
+import type { ConnectivityPort } from "@domain/services/connectivity.port";
+import type { PaymentJourneyStorage } from "@domain/services/payment-journey-storage.port";
+import type { NavigationHistory } from "@domain/services/navigation-history.port";
 import type { PushSubscriptionPort } from "@domain/services/push-subscription.port";
 import { HttpPushSubscriptionAdapter } from "@infrastructure/notifications/http-push-subscription.adapter";
 import { ServerClock } from "@domain/services/server-clock";
@@ -65,6 +68,12 @@ import { RefreshingHttpClient } from "@infrastructure/http/refreshing-http-clien
 import type { HttpClient } from "@infrastructure/http/http-client";
 import { SystemClock } from "@infrastructure/time/system-clock";
 import { ExpoAppUpdateAdapter } from "@infrastructure/updates/expo-app-update.adapter";
+import { ExpoConnectivityAdapter } from "@infrastructure/network/expo-connectivity.adapter";
+import {
+  InMemoryPaymentJourneyStorage,
+  PlatformPaymentJourneyStorage,
+} from "@infrastructure/platform/payment-journey-storage";
+import { PlatformNavigationHistory } from "@infrastructure/platform/navigation-history";
 
 /**
  * The container: every domain port bound to one concrete adapter. Hooks read
@@ -89,6 +98,9 @@ export interface Container {
   readonly pushSubscription: PushSubscriptionPort;
   readonly fileShare: FileSharePort;
   readonly appUpdate: AppUpdatePort;
+  readonly paymentJourneyStorage: PaymentJourneyStorage;
+  readonly navigationHistory: NavigationHistory;
+  readonly connectivity: ConnectivityPort;
   readonly tokenStorage: TokenStorage;
   /** Persisted signed-in email used to refill checkout after refresh. */
   readonly buyerEmailStorage: BuyerEmailStorage;
@@ -161,6 +173,8 @@ export interface ContainerOptions {
    * `process.env` assignment would not be seen.
    */
   readonly baseUrl?: string;
+  /** Override OS reachability for deterministic presentation tests. */
+  readonly connectivity?: ConnectivityPort;
 }
 
 /**
@@ -288,6 +302,16 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // Local native notifications are a device capability, independent of whether
   // API repositories use mocks. Mock mode disables remote push registration.
   const notificationAdapter = createNotificationAdapter(useMocks);
+  const connectivity = options.connectivity ?? new ExpoConnectivityAdapter();
+  const paymentJourneyStorage =
+    useMocks && Platform.OS === "web"
+      ? new InMemoryPaymentJourneyStorage()
+      : new PlatformPaymentJourneyStorage(
+          Platform.OS === "web" ? "web" : "native",
+        );
+  const navigationHistory = new PlatformNavigationHistory(
+    Platform.OS === "web",
+  );
   const fileShareAdapter = createFileShareAdapter();
   // Server-authoritative clock layered over the device clock. Unsynced until a
   // server timestamp arrives (offset 0 → serverNow === device now); the catalog
@@ -333,6 +357,9 @@ export function createContainer(options: ContainerOptions = {}): Container {
       pushSubscription: { register: async () => {}, remove: async () => {} },
       fileShare: fileShareAdapter,
       appUpdate: new ExpoAppUpdateAdapter(),
+      paymentJourneyStorage,
+      navigationHistory,
+      connectivity,
     };
   }
 
@@ -391,5 +418,8 @@ export function createContainer(options: ContainerOptions = {}): Container {
     pushSubscription: new HttpPushSubscriptionAdapter(httpClient),
     fileShare: fileShareAdapter,
     appUpdate: new ExpoAppUpdateAdapter(),
+    paymentJourneyStorage,
+    navigationHistory,
+    connectivity,
   };
 }

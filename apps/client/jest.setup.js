@@ -104,3 +104,14 @@ jest.mock("expo-notifications", () => ({
     .fn()
     .mockReturnValue({ remove: jest.fn() }),
 }));
+
+// Connectivity is controlled through the ConnectivityPort in app code. Keep
+// the OS SDK deterministic and online by default in unit tests; individual
+// tests can inject an offline port to exercise recovery states.
+jest.mock("expo-network", () => ({
+  getNetworkStateAsync: jest.fn().mockResolvedValue({
+    isConnected: null,
+    isInternetReachable: null,
+  }),
+  addNetworkStateListener: jest.fn().mockReturnValue({ remove: jest.fn() }),
+}));

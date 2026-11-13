@@ -16,6 +16,7 @@ jest.mock("@providers/query-client", () => ({
 // intercept regardless of suite order under --runInBand.
 let receivedClient: unknown = null;
 jest.mock("@tanstack/react-query", () => ({
+  onlineManager: { setEventListener: jest.fn() },
   QueryClientProvider: ({
     client,
     children,

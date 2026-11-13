@@ -31,10 +31,13 @@ export function BrowseNativeCategoryBar({
   onSelect,
   onReset,
 }: BrowseNativeCategoryBarProps) {
-  const visibleCategories = BROWSE_CATEGORIES.filter(
-    (category) =>
-      category.key === "all" || category.key === (activeCategory ?? "all"),
-  );
+  const selected =
+    activeCategory && activeCategory !== "all"
+      ? BROWSE_CATEGORIES.find((category) => category.key === activeCategory)
+      : undefined;
+  const visibleCategories = selected
+    ? [selected]
+    : BROWSE_CATEGORIES.filter((category) => category.key === "all");
   return (
     <View
       style={[browseNativeCategoryBar, browseNativeCategoryBarPosition(top)]}
@@ -62,19 +65,19 @@ export function BrowseNativeCategoryBar({
             </Pressable>
           );
         })}
+        <View style={browseNativeCategorySummary}>
+          <BrowseChips
+            genre="Semua"
+            time={time}
+            sort={sort}
+            isFiltered={isFiltered}
+            showCategory={false}
+            showRefine={false}
+            showReset
+            onReset={onReset}
+          />
+        </View>
       </ScrollView>
-      <View style={browseNativeCategorySummary}>
-        <BrowseChips
-          genre="Semua"
-          time={time}
-          sort={sort}
-          isFiltered={isFiltered}
-          showCategory={false}
-          showRefine={false}
-          showReset={false}
-          onReset={onReset}
-        />
-      </View>
     </View>
   );
 }

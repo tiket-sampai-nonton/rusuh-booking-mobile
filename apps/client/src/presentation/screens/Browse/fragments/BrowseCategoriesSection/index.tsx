@@ -16,9 +16,6 @@ import {
   browseCategoryBtn,
   browseCategoryBtnActive,
   browseCategoryBtnCompactStyle,
-  browseCategoryControls,
-  browseCategoryControlsCompact,
-  browseCategoryGrid,
   browseCategoryGridCompactStyle,
   browseCategoryHeading,
   browseCategoryHeadingWrap,
@@ -46,10 +43,13 @@ export function BrowseCategoriesSection({
   onSelect,
   onReset,
 }: BrowseCategoriesSectionProps) {
-  const visibleCategories = BROWSE_CATEGORIES.filter(
-    (category) =>
-      category.key === "all" || category.key === (activeCategory ?? "all"),
-  );
+  const selected =
+    activeCategory && activeCategory !== "all"
+      ? BROWSE_CATEGORIES.find((category) => category.key === activeCategory)
+      : undefined;
+  const visibleCategories = selected
+    ? [selected]
+    : BROWSE_CATEGORIES.filter((category) => category.key === "all");
 
   const categoryButtons = visibleCategories.map((category) => {
     const isActive = (activeCategory ?? "all") === category.key;
@@ -97,24 +97,15 @@ export function BrowseCategoriesSection({
             <Text style={browseCategoryHeading}>Kategori</Text>
           </View>
         )}
-        {isMobileWeb ? (
-          <View style={[browseCategoryControls, browseCategoryControlsCompact]}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={browseCategoryGridCompactStyle}
-              testID="browse-categories-scroll"
-            >
-              {categoryButtons}
-            </ScrollView>
-            {selectedFilterChips}
-          </View>
-        ) : (
-          <View style={browseCategoryControls}>
-            <View style={browseCategoryGrid}>{categoryButtons}</View>
-            {selectedFilterChips}
-          </View>
-        )}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={browseCategoryGridCompactStyle}
+          testID="browse-categories-scroll"
+        >
+          {categoryButtons}
+          {selectedFilterChips}
+        </ScrollView>
       </View>
     </View>
   );

@@ -1,0 +1,27 @@
+import { usePathname, useRouter, type Href } from "expo-router";
+import { useEffect, useRef } from "react";
+
+import { useServices } from "@providers/service-context";
+
+/** Reopens an interrupted payment route; the payment page then gates it with BE status. */
+export function PaymentJourneyRecoveryBridge() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { paymentJourneyStorage } = useServices();
+  const checkedAtHome = useRef(false);
+
+  useEffect(() => {
+    if (pathname !== "/" || checkedAtHome.current) return;
+    checkedAtHome.current = true;
+    void paymentJourneyStorage
+      .load()
+      .then((bookingId) => {
+        if (bookingId) {
+          router.replace(`/payment/${encodeURIComponent(bookingId)}` as Href);
+        }
+      })
+      .catch(() => undefined);
+  }, [pathname, paymentJourneyStorage, router]);
+
+  return null;
+}

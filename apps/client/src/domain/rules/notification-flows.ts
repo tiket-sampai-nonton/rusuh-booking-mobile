@@ -74,14 +74,14 @@ export function paymentResultNotification(
   return paymentFailure(bookingId);
 }
 
-/** Buyer leaves the payment screen; this does not claim the provider cancelled it. */
+/** The backend confirmed that the booking was cancelled. */
 export function paymentCancelled(bookingId: string): LocalNotification {
   return {
     kind: "payment_cancelled",
     notificationId: `payment-left-${bookingId}`,
-    title: "Proses pembayaran ditutup",
-    body: "Kamu menutup proses pembayaran sebelum selesai. Kamu bisa lanjut lagi kapan saja.",
-    deepLink: `/payment/${bookingId}`,
+    title: "Pesanan dibatalkan",
+    body: "Pesananmu sudah dibatalkan. Jika masih ingin menonton, pilih event dan mulai lagi.",
+    deepLink: "/",
   };
 }
 

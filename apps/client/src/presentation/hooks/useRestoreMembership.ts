@@ -17,14 +17,16 @@
  * StrictMode double-invoke) never double-navigates. `enabled` lets a caller
  * defer the restore until the router/layout is ready.
  */
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, type Href } from "expo-router";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import {
   RestoreMembership,
+  type RestoreMembershipResult,
   type ResumedMembership,
 } from "@application/queue/restore-membership.use-case";
+import type { QueueMembership } from "@domain/queue/queue-membership.port";
 import { useServices } from "@providers/service-context";
 
 export interface UseRestoreMembershipResult {
@@ -32,6 +34,26 @@ export interface UseRestoreMembershipResult {
   readonly isRestoring: boolean;
   /** The resumable membership + fresh entry, or null when nothing to resume. */
   readonly resumed: ResumedMembership | null;
+  /** A saved membership to verify in the waiting-room retry state. */
+  readonly unverified: QueueMembership | null;
+}
+
+export const QUEUE_MEMBERSHIP_RESTORE_QUERY_KEY = [
+  "queue-membership",
+  "restore",
+] as const;
+
+/** Clear the persisted and cached queue pointer after a confirmed journey end. */
+export function useClearQueueMembership(): () => Promise<void> {
+  const { queueMembership } = useServices();
+  const queryClient = useQueryClient();
+  return useCallback(async () => {
+    await queryClient.cancelQueries({
+      queryKey: QUEUE_MEMBERSHIP_RESTORE_QUERY_KEY,
+    });
+    queryClient.setQueryData(QUEUE_MEMBERSHIP_RESTORE_QUERY_KEY, null);
+    await queueMembership.clear();
+  }, [queryClient, queueMembership]);
 }
 
 /**
@@ -50,8 +72,8 @@ export function useRestoreMembership(
     [queueRepository, queueMembership],
   );
 
-  const query = useQuery<ResumedMembership | null, Error>({
-    queryKey: ["queue-membership", "restore"],
+  const query = useQuery<RestoreMembershipResult, Error>({
+    queryKey: QUEUE_MEMBERSHIP_RESTORE_QUERY_KEY,
     queryFn: () => restore.execute(),
     enabled,
     // The persisted pointer is read once per app start; the live status it
@@ -61,11 +83,24 @@ export function useRestoreMembership(
     refetchOnWindowFocus: false,
   });
 
-  const resumed = query.data ?? null;
+  const resumed = query.data && "entry" in query.data ? query.data : null;
+  const unverified =
+    query.data && "status" in query.data ? query.data.membership : null;
 
   // Navigate at most once into the waiting room for a resumable membership.
   const navigatedTo = useRef<string | null>(null);
   useEffect(() => {
+    if (!enabled) return;
+    if (unverified) {
+      const { eventId, queueId } = unverified;
+      if (navigatedTo.current === queueId) return;
+      navigatedTo.current = queueId;
+      // The waiting screen owns the retryable network state. It will resume
+      // polling when connectivity returns and route to checkout only after a
+      // fresh server status confirms the queue was claimed.
+      router.replace(`/waiting/${eventId}?queueId=${queueId}` as Href);
+      return;
+    }
     if (resumed === null) return;
     // A claimed queue entry is no longer a waiting room. The startup bridge
     // restores its current booking session and routes directly to checkout.
@@ -74,7 +109,7 @@ export function useRestoreMembership(
     if (navigatedTo.current === queueId) return;
     navigatedTo.current = queueId;
     router.push(`/waiting/${eventId}?queueId=${queueId}` as Href);
-  }, [resumed, router]);
+  }, [enabled, resumed, router, unverified]);
 
-  return { isRestoring: query.isLoading, resumed };
+  return { isRestoring: query.isLoading, resumed, unverified };
 }

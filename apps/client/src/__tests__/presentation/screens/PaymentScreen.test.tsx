@@ -1,4 +1,5 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { Platform } from "react-native";
 
 import type {
   PaymentAttempt,
@@ -7,7 +8,11 @@ import type {
   PaymentRepository,
 } from "@domain/repositories/payment.repository";
 import { MockNotificationAdapter } from "@infrastructure/__fixtures__/mock-notification.adapter";
-import { renderWithProviders } from "@shared/test-fixtures/render-with-providers";
+import { MockBookingRepository } from "@infrastructure/__fixtures__/mock-booking.repository";
+import {
+  makeTestQueryClient,
+  renderWithProviders,
+} from "@shared/test-fixtures/render-with-providers";
 import { useSessionStore } from "@presentation/stores/session-store";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
@@ -65,6 +70,7 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
   beforeEach(() => {
     jest.useFakeTimers({ advanceTimers: true });
     mockRouter.replace.mockReset();
+    mockNavigation.addListener.mockClear();
     useSessionStore.getState().reset();
   });
   afterEach(() => {
@@ -107,6 +113,47 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     expect(screen.queryByTestId("pay-now")).toBeNull();
     fireEvent.press(screen.getByTestId("payment-unavailable-browse"));
     expect(mockRouter.replace).toHaveBeenCalledWith("/browse");
+  });
+
+  it("checks server status before returning an expired saved payment to home", async () => {
+    const repo = paymentRepo(page());
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: {
+        paymentRepository: {
+          ...repo,
+          getPaymentPage: async () => {
+            throw new Error("BOOKING_NOT_PAYABLE: expired");
+          },
+          getStatus: async () => ({
+            attemptId: "",
+            bookingId: "bk-1",
+            status: "EXPIRED",
+          }),
+        },
+      },
+    });
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/"));
+  });
+
+  it("does not discard an unavailable payment when its status cannot be verified", async () => {
+    const repo = paymentRepo(page());
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: {
+        paymentRepository: {
+          ...repo,
+          getPaymentPage: async () => {
+            throw new Error("BOOKING_NOT_PAYABLE: unavailable");
+          },
+          getStatus: async () => {
+            throw new Error("offline");
+          },
+        },
+      },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("payment-unavailable")).toBeTruthy(),
+    );
+    expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 
   it("renders the total == amountMinor with NO service-fee line (D10.1)", async () => {
@@ -226,8 +273,24 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
   });
 
   it("asks before leaving when the payment back button is pressed", async () => {
+    const bookingRepository = new MockBookingRepository();
+    const cancelBooking = jest.spyOn(bookingRepository, "cancelBooking");
+    const queueMembership = {
+      load: jest.fn(async () => null),
+      save: jest.fn(async () => undefined),
+      clear: jest.fn(async () => undefined),
+    };
+    const queryClient = makeTestQueryClient();
+    queryClient.setQueryData(["queue-membership", "restore"], {
+      stale: true,
+    });
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
-      container: { paymentRepository: paymentRepo(page()) },
+      queryClient,
+      container: {
+        paymentRepository: paymentRepo(page()),
+        bookingRepository,
+        queueMembership,
+      },
     });
     await waitFor(() =>
       expect(screen.getByTestId("payment-back")).toBeTruthy(),
@@ -236,7 +299,73 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy();
     expect(mockRouter.replace).not.toHaveBeenCalled();
     fireEvent.press(screen.getByTestId("checkout-leave-confirm"));
-    expect(mockRouter.replace).toHaveBeenCalledWith("/");
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/"));
+    expect(cancelBooking).toHaveBeenCalledWith("bk-1");
+    expect(queueMembership.clear).toHaveBeenCalled();
+    expect(
+      queryClient.getQueryData(["queue-membership", "restore"]),
+    ).toBeNull();
+  });
+
+  it("keeps the payment route and asks before a web history reset", async () => {
+    const platform = jest.replaceProperty(Platform, "OS", "web");
+    const restoreLocation = jest.fn();
+    try {
+      renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+        container: {
+          paymentRepository: paymentRepo(page()),
+          navigationHistory: {
+            captureRestorePoint: () => restoreLocation,
+          },
+        },
+      });
+      await waitFor(() => screen.getByTestId("payment-back"));
+      const calls = mockNavigation.addListener.mock.calls as unknown as [
+        string,
+        (event: {
+          data: { action: { type: string } };
+          preventDefault: () => void;
+        }) => void,
+      ][];
+      const listener = calls.find(([name]) => name === "beforeRemove")?.[1];
+      expect(listener).toBeDefined();
+      const preventDefault = jest.fn();
+      act(() =>
+        listener?.({ data: { action: { type: "RESET" } }, preventDefault }),
+      );
+      expect(preventDefault).toHaveBeenCalled();
+      expect(restoreLocation).toHaveBeenCalled();
+      expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy();
+    } finally {
+      platform.restore();
+    }
+  });
+
+  it("does not leave or claim cancellation when the BE cancellation fails", async () => {
+    const bookingRepository = new MockBookingRepository();
+    jest
+      .spyOn(bookingRepository, "cancelBooking")
+      .mockRejectedValueOnce(new Error("offline"));
+    const repository: PaymentRepository = {
+      ...paymentRepo(page()),
+      getStatus: async () => {
+        throw new Error("offline");
+      },
+    };
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: {
+        paymentRepository: repository,
+        bookingRepository,
+      },
+    });
+    await waitFor(() => screen.getByTestId("payment-back"));
+    fireEvent.press(screen.getByTestId("payment-back"));
+    fireEvent.press(screen.getByTestId("checkout-leave-confirm"));
+    await waitFor(() =>
+      expect(screen.getByText(/Periksa koneksi internet Anda/i)).toBeTruthy(),
+    );
+    expect(mockRouter.replace).not.toHaveBeenCalledWith("/");
+    expect(screen.getByTestId("checkout-leave-modal")).toBeTruthy();
   });
 
   it("sends a local notification after confirming payment-flow exit", async () => {
@@ -263,7 +392,7 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
           }),
           expect.objectContaining({
             kind: "payment_cancelled",
-            deepLink: "/payment/bk-1",
+            deepLink: "/",
           }),
         ]),
       ),
@@ -287,19 +416,66 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     );
   });
 
-  it("redirects to /failed when the payment countdown elapses", async () => {
+  it("checks BE status before routing to failed after the local deadline", async () => {
+    const getStatus = jest.fn(
+      async (): Promise<PaymentAttempt> => ({
+        attemptId: "a1",
+        bookingId: "bk-1",
+        status: "EXPIRED",
+      }),
+    );
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: {
-        paymentRepository: paymentRepo(
-          page({
-            paymentExpiresAt: "2026-12-01T00:00:00.000Z",
-            serverTime: "2026-12-01T00:10:00.000Z", // already past
-          }),
-        ),
+        paymentRepository: {
+          ...paymentRepo(
+            page({
+              paymentExpiresAt: "2026-12-01T00:00:00.000Z",
+              serverTime: "2026-12-01T00:10:00.000Z", // already past
+            }),
+          ),
+          getStatus,
+        },
       },
     });
     await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/failed/bk-1"),
+      expect(mockRouter.replace).toHaveBeenCalledWith(
+        "/failed/bk-1?reason=payment",
+      ),
+    );
+    expect(getStatus).toHaveBeenCalledWith("bk-1", "bk-1");
+  });
+
+  it("does not route to expired while offline and shows recovery", async () => {
+    const getStatus = jest.fn(
+      async (): Promise<PaymentAttempt> => ({
+        attemptId: "a1",
+        bookingId: "bk-1",
+        status: "EXPIRED",
+      }),
+    );
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: {
+        connectivity: {
+          getIsOnline: async () => false,
+          subscribe: () => () => undefined,
+        },
+        paymentRepository: {
+          ...paymentRepo(
+            page({
+              paymentExpiresAt: "2026-12-01T00:00:00.000Z",
+              serverTime: "2026-12-01T00:10:00.000Z",
+            }),
+          ),
+          getStatus,
+        },
+      },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("payment-expiry-retry")).toBeTruthy(),
+    );
+    expect(getStatus).not.toHaveBeenCalled();
+    expect(mockRouter.replace).not.toHaveBeenCalledWith(
+      expect.stringContaining("/failed/"),
     );
   });
 });

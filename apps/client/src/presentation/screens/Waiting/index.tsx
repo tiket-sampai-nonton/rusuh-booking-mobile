@@ -22,6 +22,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -85,7 +86,7 @@ export function WaitingRoomScreen({
   const insets = useSafeAreaInsets();
   const reducedMotion = useReducedMotion() ?? false;
   const { isDesktop, isMobileWeb, isNative } = useResponsive();
-  const { notification } = useServices();
+  const { notification, queueMembership } = useServices();
   const scheduleNotification = useMemo(
     () => new ScheduleLocalNotification(notification),
     [notification],
@@ -115,6 +116,32 @@ export function WaitingRoomScreen({
     leave,
     refetch,
   } = useQueuePolling(queueId, reducedMotion, eventId, isScreenFocused);
+
+  const invalidVisitorTokenHandled = useRef(false);
+  useEffect(() => {
+    if (!error) {
+      invalidVisitorTokenHandled.current = false;
+      return;
+    }
+    const details = error as Error & {
+      httpStatus?: number;
+      code?: unknown;
+    };
+    const invalidVisitorToken =
+      details.httpStatus === 401 ||
+      details.code === "VISITOR_TOKEN_INVALID" ||
+      /^VISITOR_TOKEN_INVALID:/.test(details.message);
+    if (!invalidVisitorToken || invalidVisitorTokenHandled.current) return;
+
+    // The BE contract defines 401 as an expired, rotated, or device-mismatched
+    // visitor token. That saved queue pointer cannot be resumed; clear it and
+    // return Home instead of presenting a retry loop against the same token.
+    invalidVisitorTokenHandled.current = true;
+    void queueMembership
+      .clear()
+      .then(() => router.replace("/" as Href))
+      .catch(() => undefined);
+  }, [error, queueMembership, router]);
 
   // Only ADMITTED authorizes the claim (RBT-040). The hook fires it once.
   const admitted = entry !== undefined && isAdmitted(entry.status);

@@ -128,6 +128,22 @@ export class MockBookingRepository implements BookingRepository {
     });
     return booking;
   }
+
+  async cancelBooking(bookingId: string): Promise<Booking> {
+    for (const [key, booking] of this.bookingsByKey) {
+      if (booking.bookingId !== bookingId) continue;
+      const cancelled: Booking = { ...booking, status: "CANCELLED" };
+      this.bookingsByKey.set(key, cancelled);
+      return cancelled;
+    }
+    const cancelled: Booking = {
+      bookingId,
+      status: "CANCELLED",
+      amountMinor: 0,
+      serverTime: new Date().toISOString(),
+    };
+    return cancelled;
+  }
 }
 
 function attendeeResultForNik(nik: string): AttendeeCheck["result"] {

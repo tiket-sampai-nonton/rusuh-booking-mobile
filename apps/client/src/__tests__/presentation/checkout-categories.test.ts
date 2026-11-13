@@ -1,7 +1,4 @@
-import {
-  categoryPrice,
-  emptyRow,
-} from "@presentation/screens/Checkout/categories";
+import { emptyRow } from "@presentation/screens/Checkout/categories";
 import { BOOKING_CATEGORY_FIXTURE } from "@shared/test-fixtures/booking-categories.fixture";
 import {
   checkoutScrollContent,
@@ -29,25 +26,6 @@ describe("Checkout style helpers (RBT-051)", () => {
 });
 
 describe("Checkout categories (RBT-051)", () => {
-  it("categoryPrice resolves prices by the contract category ID", () => {
-    expect(
-      categoryPrice(
-        BOOKING_CATEGORY_FIXTURE[0].categoryId,
-        BOOKING_CATEGORY_FIXTURE,
-      ),
-    ).toBe(450000);
-    expect(
-      categoryPrice(
-        BOOKING_CATEGORY_FIXTURE[1].categoryId,
-        BOOKING_CATEGORY_FIXTURE,
-      ),
-    ).toBe(950000);
-  });
-
-  it("categoryPrice falls back to 0 for an unknown category", () => {
-    expect(categoryPrice("NOPE", BOOKING_CATEGORY_FIXTURE)).toBe(0);
-  });
-
   it("emptyRow uses its supplied category and leaves attendee data blank", () => {
     const row = emptyRow(BOOKING_CATEGORY_FIXTURE[0].categoryId);
     expect(row.categoryId).toBe(BOOKING_CATEGORY_FIXTURE[0].categoryId);

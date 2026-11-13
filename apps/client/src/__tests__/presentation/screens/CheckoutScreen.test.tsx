@@ -300,26 +300,16 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     );
   });
 
-  it("buyer-NIK switch is single-use: turning it on for a 2nd row clears the 1st", async () => {
+  it("shows buyer data only on ticket one and prevents a later ticket from claiming it", async () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(SESSION) },
     });
     await waitFor(() => expect(screen.getByTestId("add-ticket")).toBeTruthy());
     fireEvent.press(screen.getByTestId("add-ticket")); // 2 rows
-    await waitFor(() => expect(screen.getByTestId("use-buyer-1")).toBeTruthy());
+    expect(screen.queryByTestId("use-buyer-1")).toBeNull();
     fireEvent(screen.getByTestId("use-buyer-0"), "valueChange", true);
     expect(screen.getByTestId("use-buyer-0").props.value).toBe(true);
-    // Turning it on for row-1 must turn row-0 off (single-use across rows).
-    fireEvent(screen.getByTestId("use-buyer-1"), "valueChange", true);
-    await waitFor(() =>
-      expect(screen.getByTestId("use-buyer-1").props.value).toBe(true),
-    );
-    expect(screen.getByTestId("use-buyer-0").props.value).toBe(false);
-    // Turning row-1 back off leaves both off.
-    fireEvent(screen.getByTestId("use-buyer-1"), "valueChange", false);
-    await waitFor(() =>
-      expect(screen.getByTestId("use-buyer-1").props.value).toBe(false),
-    );
+    expect(screen.getByTestId("use-buyer-0").props.value).toBe(true);
   });
 
   it("editing one row's attendee leaves the other rows untouched (patch by index)", async () => {
@@ -426,7 +416,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     expect(getCurrentSession).toHaveBeenCalledTimes(2);
   });
 
-  it("routes an expired server session to the expired recovery screen", async () => {
+  it("returns home when the server reports the session expired", async () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-expired" />, {
       container: {
         bookingRepository: {
@@ -440,11 +430,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
         defaultOptions: { queries: { retry: false, gcTime: Infinity } },
       }),
     });
-    await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith(
-        "/failed/sess-expired?reason=hold",
-      ),
-    );
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/"));
   });
 
   it("shows the NIK-format error when the buyer NIK is too short", async () => {
@@ -460,7 +446,7 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     );
   });
 
-  it("redirects to /failed when the server countdown elapses", async () => {
+  it("returns home when the server confirms the checkout deadline elapsed", async () => {
     const past: BookingSession = {
       ...SESSION,
       expiresAt: "2026-12-01T00:00:00.000Z",
@@ -469,10 +455,6 @@ describe("CheckoutScreen — item list + quantity rules (RBT-051)", () => {
     renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
       container: { bookingRepository: bookingRepo(past) },
     });
-    await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith(
-        "/failed/sess-1?reason=hold&eventId=evt-1",
-      ),
-    );
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/"));
   });
 });

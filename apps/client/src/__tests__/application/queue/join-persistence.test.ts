@@ -7,8 +7,8 @@
  *   - a failed join persists NOTHING;
  *   - RestoreMembership resumes an ACTIVE entry (re-fetched live status),
  *     clears + returns null for a TERMINAL entry, returns null (no fetch) when
- *     nothing is persisted, and clears a dead pointer when the status fetch
- *     throws.
+ *     nothing is persisted, clears a pointer rejected by the server, and
+ *     preserves an unverified pointer when status fetch fails transiently.
  */
 import { JoinQueue } from "@application/queue/join-queue.use-case";
 import { RestoreMembership } from "@application/queue/restore-membership.use-case";
@@ -119,7 +119,9 @@ describe("RBT-041 RestoreMembership", () => {
         eventId: "evt-1",
         queueId: "q-evt-1",
       });
-      expect(resumed?.entry.status).toBe(status);
+      expect(resumed && "entry" in resumed ? resumed.entry.status : null).toBe(
+        status,
+      );
       // Still persisted — an active slot is not cleared.
       expect(await storage.load()).not.toBeNull();
     },
@@ -140,14 +142,30 @@ describe("RBT-041 RestoreMembership", () => {
     expect(await storage.load()).toBeNull();
   });
 
-  it("preserves membership when the status fetch fails offline", async () => {
+  it("returns an unverified result and preserves membership when status fetch fails", async () => {
     await storage.save({ eventId: "evt-1", queueId: "q-evt-1" });
     repo.getStatusError = new Error("offline / entry gone");
     const resumed = await new RestoreMembership(repo, storage).execute();
-    expect(resumed).toBeNull();
+    expect(resumed).toEqual({
+      membership: { eventId: "evt-1", queueId: "q-evt-1" },
+      status: "unverified",
+    });
     expect(await storage.load()).toEqual({
       eventId: "evt-1",
       queueId: "q-evt-1",
     });
   });
+
+  it.each([401, 404, 410])(
+    "clears a membership on confirmed HTTP %s",
+    async (httpStatus) => {
+      await storage.save({ eventId: "evt-1", queueId: "q-evt-1" });
+      repo.getStatusError = Object.assign(new Error("not found"), {
+        httpStatus,
+      });
+      const result = await new RestoreMembership(repo, storage).execute();
+      expect(result).toBeNull();
+      expect(await storage.load()).toBeNull();
+    },
+  );
 });

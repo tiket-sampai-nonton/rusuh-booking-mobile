@@ -22,6 +22,7 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { LazyCachedImage } from "@presentation/components/design-system/LazyCachedImage";
 import Animated, {
   Easing,
   interpolate,
@@ -408,11 +409,12 @@ function AnimatedEventCard({
             <Animated.View
               style={[styleForEventCardAnimatedView3(), imageScaleStyle]}
             >
-              <CachedImage
+              <LazyCachedImage
                 source={imageSource}
                 resizeMode="cover"
                 accessibilityIgnoresInvertColors
                 style={webImageStyle}
+                deferUntilVisible
               />
             </Animated.View>
 
@@ -518,7 +520,16 @@ function responsiveWebImageSource(
   uri: string,
   listMode: boolean,
 ): { uri: string; width: number }[] | { uri: string } {
-  if (!uri.includes("images.unsplash.com")) return { uri };
+  if (!uri.includes("images.unsplash.com")) {
+    // FastImage's web adapter marks multi-size sources as loading="lazy".
+    // The BE media URLs do not currently expose width variants, so keep their
+    // URL unchanged while using the responsive-source path to defer offscreen
+    // event-card downloads. Native cards use their own cache-backed URI.
+    return [
+      { uri, width: 640 },
+      { uri, width: 960 },
+    ];
+  }
 
   const widths = listMode ? [640, 960] : [480, 768];
   return widths.map((width) => ({
