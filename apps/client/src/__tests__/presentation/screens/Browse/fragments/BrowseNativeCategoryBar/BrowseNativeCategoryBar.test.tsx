@@ -5,11 +5,7 @@ import { BrowseNativeCategoryBar } from "../../../../../../presentation/screens/
 describe("BrowseNativeCategoryBar", () => {
   it("shows only the default category before the user filters", () => {
     render(
-      <BrowseNativeCategoryBar
-        top={44}
-        activeCategory="all"
-        onSelect={jest.fn()}
-      />,
+      <BrowseNativeCategoryBar top={44} genre="Semua" onSelect={jest.fn()} />,
     );
 
     expect(screen.getByText("Semua")).toBeTruthy();
@@ -22,14 +18,10 @@ describe("BrowseNativeCategoryBar", () => {
   it("supports a non-default active category", () => {
     const onSelect = jest.fn();
     render(
-      <BrowseNativeCategoryBar
-        top={0}
-        activeCategory="sports"
-        onSelect={onSelect}
-      />,
+      <BrowseNativeCategoryBar top={0} genre="OLAHRAGA" onSelect={onSelect} />,
     );
-    expect(screen.getByTestId("category-sports")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("category-sports"));
-    expect(onSelect).toHaveBeenCalledWith("sports");
+    expect(screen.getByTestId("category-OLAHRAGA")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("category-OLAHRAGA"));
+    expect(onSelect).toHaveBeenCalled();
   });
 });

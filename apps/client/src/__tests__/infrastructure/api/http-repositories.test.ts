@@ -36,6 +36,23 @@ const ok = <T>(data: T): HttpResponse<unknown> => ({
 });
 
 describe("HttpEventRepository", () => {
+  it("serializes repeated genres and the supported catalog filters", async () => {
+    const http = new FakeHttpClient();
+    http.queueResponse(ok({ events: [], serverTime: "2026-01-01T00:00:00Z" }));
+    const repo = new HttpEventRepository(
+      http,
+      new ServerClock({ now: () => 0 }),
+    );
+    await repo.listEvents({
+      genres: ["POP", "ROCK"],
+      timeframe: "THIS_WEEK",
+      city: "Jakarta",
+      sort: "DATE_DESC",
+    });
+    expect(http.calls[0].url).toBe(
+      "events?genres=POP&genres=ROCK&timeframe=THIS_WEEK&city=Jakarta&sort=DATE_DESC",
+    );
+  });
   it("lists events (unwrap + map DTO→domain)", async () => {
     const http = new FakeHttpClient();
     const serverClock = new ServerClock({

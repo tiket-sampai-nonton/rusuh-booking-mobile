@@ -179,13 +179,27 @@ export function Button({
       )}
     >
       {/* Fill layer */}
-      <Animated.View
+      <View
         style={[
-          styleForButtonAnimatedView1(palette),
-          fillStyle,
+          {
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            overflow: "hidden",
+          },
           pointerEventsNone,
         ]}
-      />
+      >
+        <Animated.View
+          style={[
+            styleForButtonAnimatedView1(palette),
+            fillStyle,
+            pointerEventsNone,
+          ]}
+        />
+      </View>
 
       {/* Label */}
       <Animated.Text

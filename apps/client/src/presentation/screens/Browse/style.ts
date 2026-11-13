@@ -23,6 +23,7 @@ import {
   designSpacingSemantic,
 } from "@presentation/theme";
 import { plusJakartaSansFonts } from "@presentation/theme/fonts";
+import { hardShadowStyle } from "@presentation/utils/style";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LAYOUT
@@ -214,8 +215,9 @@ export const browseNativeCategoryButton = (active: boolean): ViewStyle => ({
   minHeight: 34,
   justifyContent: "center",
   borderWidth: 2,
-  borderColor: active ? designColors.ember : designColors.ink,
+  borderColor: designColors.ink,
   backgroundColor: active ? brand.deep : designColors.ground,
+  ...(active ? hardShadowStyle(3, 3, designColors.ink) : {}),
 });
 export const browseNativeCategoryLabel = (active: boolean): TextStyle => ({
   color: active ? designColors.ground : designColors.ink,
@@ -284,13 +286,13 @@ export const browseCategoryBtn: ViewStyle = {
   borderWidth: designBorders.standard,
   borderColor: designColors.ink,
   backgroundColor: designColors.ground,
-  overflow: "hidden",
 };
 
 export const browseCategoryBtnActive: ViewStyle = {
   ...browseCategoryBtn,
   backgroundColor: brand.deep,
-  borderColor: designColors.ember,
+  borderColor: designColors.ink,
+  ...hardShadowStyle(3, 3, designColors.ink),
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -342,6 +344,9 @@ export const browseViewBtn: ViewStyle = {
 export const browseViewBtnActive: ViewStyle = {
   ...browseViewBtn,
   backgroundColor: designColors.accentDeep,
+  borderWidth: designBorders.standard,
+  borderColor: designColors.ink,
+  ...hardShadowStyle(3, 3, designColors.ink),
 };
 
 export const browseSortSelect: ViewStyle = {

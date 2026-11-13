@@ -104,7 +104,8 @@ export const componentStyles = StyleSheet.create({
   elementBackgroundColor16: {
     backgroundColor: designColors.accentDeep,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ember,
+    borderColor: designColors.ink,
+    ...hardShadowStyle(4, 4, designColors.ink, 4),
     paddingVertical: 16, // .btn-large: 1rem
     paddingHorizontal: 32, // .btn-large: 2rem
   },
@@ -176,7 +177,7 @@ export const componentStyles = StyleSheet.create({
     alignSelf: "flex-start",
     backgroundColor: designColors.accent,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ember,
+    borderColor: designColors.ink,
     ...hardShadowStyle(4, 4, designColors.ink, 4),
   },
   elementFlexDirection28: {

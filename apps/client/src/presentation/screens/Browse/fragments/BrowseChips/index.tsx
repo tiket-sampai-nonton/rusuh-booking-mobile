@@ -27,7 +27,7 @@ export function BrowseChips({
     >
       {showCategory ? (
         <BrowseChip
-          label="Kategori"
+          label={genre === "Semua" ? "Kategori" : "Genre"}
           value={categoryValue}
           selected={genre !== "Semua"}
         />

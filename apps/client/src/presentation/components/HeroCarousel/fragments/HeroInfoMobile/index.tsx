@@ -18,6 +18,7 @@ import Animated, {
 import type { EventSummary } from "@domain/repositories/event.repository";
 import { formatDateID } from "@domain/services/date-format";
 import { designColors, withAlpha } from "@presentation/theme";
+import { hardShadowStyle } from "@presentation/utils/style";
 
 import { EASE, INFO_FADE_DELAY_MS } from "../../constants";
 import { componentStyles, styleForHeroInfoMobileText6 } from "../../style";
@@ -148,6 +149,9 @@ const mobileWebStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: designColors.accent,
+    borderWidth: 2,
+    borderColor: designColors.ink,
+    ...hardShadowStyle(3, 3, designColors.ink),
   },
   primaryText: {
     color: designColors.ground,

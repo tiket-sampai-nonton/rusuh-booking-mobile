@@ -6,7 +6,7 @@ import {
 } from "@presentation/theme";
 import type { ViewStyle } from "react-native";
 
-import type { DynamicStyle } from "@presentation/utils/style";
+import { hardShadowStyle, type DynamicStyle } from "@presentation/utils/style";
 
 export const componentStyles = StyleSheet.create({
   elementFlexDirection3: { flexDirection: "row", gap: 24 },
@@ -31,8 +31,9 @@ export const componentStyles = StyleSheet.create({
   },
   elementBorderWidth8: {
     borderWidth: designBorders.standard,
-    borderColor: designColors.accent,
+    borderColor: designColors.ink,
     backgroundColor: designColors.accentDeep,
+    ...hardShadowStyle(4, 4, designColors.ink),
     paddingVertical: 8,
     paddingHorizontal: 16,
     overflow: "hidden",

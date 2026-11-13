@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { designColors } from "@presentation/theme";
+import { hardShadowStyle } from "@presentation/utils/style";
 
 export const styles = StyleSheet.create({
   returnButton: {
@@ -8,6 +9,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: designColors.accent,
+    borderWidth: 2,
+    borderColor: designColors.ink,
+    ...hardShadowStyle(4, 4, designColors.ink),
   },
   returnText: {
     color: designColors.ground,

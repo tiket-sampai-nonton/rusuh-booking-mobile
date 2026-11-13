@@ -96,8 +96,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: designBorders.standard,
-    borderColor: designColors.danger,
+    borderColor: designColors.ink,
     backgroundColor: designColors.danger,
+    ...hardShadowStyle(4, 4, designColors.ink),
   },
   downloadText: {
     color: designColors.ground,

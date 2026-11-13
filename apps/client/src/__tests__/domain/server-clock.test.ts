@@ -10,6 +10,16 @@ class FakeClock implements ClockPort {
 }
 
 describe("domain/ServerClock", () => {
+  it("does not treat an invalid timestamp as a server synchronization", () => {
+    const sut = new ServerClock(new FakeClock(1000));
+    sut.sync("invalid");
+    expect(sut.isSynchronized()).toBe(false);
+    expect(sut.serverNow()).toBe(1000);
+    sut.sync("2026-01-01T00:00:00Z");
+    sut.sync("invalid");
+    expect(sut.isSynchronized()).toBe(true);
+    expect(sut.serverNow()).toBe(Date.parse("2026-01-01T00:00:00Z"));
+  });
   it("applies the server offset: serverNow reflects serverTime at sync", () => {
     const device = Date.parse("2026-01-01T00:00:00.000Z");
     const server = Date.parse("2026-01-01T00:00:05.000Z"); // server 5s ahead

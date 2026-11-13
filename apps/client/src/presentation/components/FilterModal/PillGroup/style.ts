@@ -6,6 +6,7 @@ import {
   designColors,
   plusJakartaSansFonts,
 } from "@presentation/theme";
+import { hardShadowStyle } from "@presentation/utils/style";
 
 export const pillGroupStyles = StyleSheet.create({
   group: {
@@ -26,7 +27,8 @@ export const pillGroupStyles = StyleSheet.create({
   },
   selectedOption: {
     backgroundColor: brand.deep,
-    borderColor: designColors.ember,
+    borderColor: designColors.ink,
+    ...hardShadowStyle(3, 3, designColors.ink),
   },
   unselectedOption: {
     backgroundColor: designColors.ground,

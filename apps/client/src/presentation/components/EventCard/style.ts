@@ -7,7 +7,7 @@ import {
   designSpacingSemantic,
 } from "@presentation/theme";
 
-import type { DynamicStyle } from "@presentation/utils/style";
+import { hardShadowStyle, type DynamicStyle } from "@presentation/utils/style";
 import type { EventBadge } from "@domain/rules/event-display";
 
 const MOBILE_VENUE_SIZE = 12;
@@ -275,8 +275,9 @@ export function styleForEventCardView12(
     width: MOBILE_ACTION_SIZE,
     height: MOBILE_ACTION_SIZE,
     borderWidth: designBorders.standard,
-    borderColor: isActive ? designColors.accent : designColors.ink,
+    borderColor: designColors.ink,
     backgroundColor,
+    ...(isActive ? hardShadowStyle(3, 3, designColors.ink) : {}),
     alignItems: "center",
     justifyContent: "center",
   } as DynamicStyle;
@@ -292,7 +293,8 @@ export function styleForEventCardView13(
   return {
     backgroundColor: actionColor,
     borderWidth: designBorders.standard,
-    borderColor: actionColor,
+    borderColor: disabled ? designColors.inkMuted : designColors.ink,
+    ...(!disabled ? hardShadowStyle(3, 3, designColors.ink) : {}),
     paddingHorizontal: 16,
     paddingVertical: 8,
   } as DynamicStyle;
