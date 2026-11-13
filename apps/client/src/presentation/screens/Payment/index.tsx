@@ -74,6 +74,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   } = usePaymentPage(bookingId);
   const { createAttempt, resumeHandoff, cancelBooking, reconcilePayment } =
     usePayment();
+  const verifyPayment = reconcilePayment.mutateAsync;
   const setBooking = useSessionStore((s) => s.setBooking);
   const resetSession = useSessionStore((s) => s.reset);
   const [confirmLeave, setConfirmLeave] = useState(false);
@@ -85,6 +86,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   const expiryCheckInFlight = useRef(false);
   const reconnectCheckHandled = useRef(false);
   const restoreBrowserLocation = useRef<() => void>(() => undefined);
+  const checkedUnavailablePage = useRef<Error | null>(null);
 
   useEffect(() => {
     restoreBrowserLocation.current = navigationHistory.captureRestorePoint(
@@ -141,6 +143,50 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   useEffect(() => {
     if (page) setBooking(bookingId, page.amountMinor);
   }, [bookingId, page, setBooking]);
+
+  useEffect(() => {
+    if (
+      !pageError ||
+      !pageError.message.includes("BOOKING_NOT_PAYABLE") ||
+      checkedUnavailablePage.current === pageError ||
+      connectivity.isOffline
+    )
+      return;
+    checkedUnavailablePage.current = pageError;
+    let active = true;
+    void verifyPayment(bookingId)
+      .then(async (status) => {
+        if (!active) return;
+        if (status.serverTime) serverClock.sync(status.serverTime);
+        if (status.status === "PAID") {
+          await paymentJourneyStorage.clear();
+          if (active) router.replace(`/success/${bookingId}` as Href);
+        } else if (status.status === "EXPIRED" || status.status === "FAILED") {
+          await Promise.all([
+            paymentJourneyStorage.clear(),
+            clearQueueMembership(),
+          ]);
+          if (active) {
+            resetSession();
+            router.replace("/" as Href);
+          }
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [
+    bookingId,
+    clearQueueMembership,
+    connectivity.isOffline,
+    pageError,
+    paymentJourneyStorage,
+    verifyPayment,
+    resetSession,
+    router,
+    serverClock,
+  ]);
 
   useEffect(() => {
     const status = page?.currentAttempt?.status;

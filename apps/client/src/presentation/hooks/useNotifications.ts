@@ -28,14 +28,42 @@ export function routeForTap(
 
 export function useNotifications(): void {
   const router = useRouter();
-  const { notification } = useServices();
+  const { notification, paymentJourneyStorage, queueMembership } =
+    useServices();
 
   useEffect(() => {
     // Listen before requesting permission/token so a cold-start notification tap
     // is not missed while the optional remote registration is in progress.
     const unsubscribe = notification.subscribeToResponses((data) => {
       const route = routeForTap(data as TappedNotificationData | undefined);
-      if (route) router.push(route as Href);
+      if (!route) return;
+      void Promise.all([paymentJourneyStorage.load(), queueMembership.load()])
+        .then(([activeBookingId, activeQueue]) => {
+          const routeMatch = /^\/(?:payment|success)\/([^/?#]+)/.exec(route);
+          const linkedBookingId = routeMatch?.[1]
+            ? decodeURIComponent(routeMatch[1])
+            : undefined;
+          const linkedToDifferentBooking =
+            linkedBookingId &&
+            activeBookingId &&
+            linkedBookingId !== activeBookingId;
+          const homeWouldInterruptJourney =
+            route === "/" && Boolean(activeBookingId || activeQueue);
+          const oldPaymentLinkDuringQueue = Boolean(
+            linkedBookingId && activeQueue && !activeBookingId,
+          );
+          if (
+            linkedToDifferentBooking ||
+            homeWouldInterruptJourney ||
+            oldPaymentLinkDuringQueue
+          )
+            return;
+          router.push(route as Href);
+        })
+        .catch(() => {
+          // If state cannot be read, let the destination reconcile with BE.
+          router.push(route as Href);
+        });
     });
 
     // Remote push is optional and may be unavailable in Expo Go or offline.

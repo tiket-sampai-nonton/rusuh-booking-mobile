@@ -54,11 +54,11 @@ describe("required notification flows (RBT-072 AC1)", () => {
     expect(n.deepLink).toBe("/events/evt-3");
   });
 
-  it("payment leave copy does not claim the provider cancelled the payment", () => {
+  it("confirmed cancellation directs the buyer home to start again", () => {
     const n = paymentCancelled("bk-1");
     expect(n.kind).toBe("payment_cancelled");
-    expect(n.deepLink).toBe("/payment/bk-1");
-    expect(n.body).toContain("menutup proses pembayaran");
+    expect(n.deepLink).toBe("/");
+    expect(n.body).toContain("Pesananmu sudah dibatalkan");
   });
 
   it("leaving the waiting room links back to the same event", () => {

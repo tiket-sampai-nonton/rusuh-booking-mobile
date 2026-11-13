@@ -29,7 +29,7 @@ import {
   useRestoreMembership,
 } from "@presentation/hooks/useRestoreMembership";
 
-let mockRouter = { push: jest.fn() };
+let mockRouter = { push: jest.fn(), replace: jest.fn() };
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
@@ -42,10 +42,12 @@ class FakeQueueRepository implements QueueRepository {
     return undefined;
   }
   public statusToReturn: QueueStatus = "WAITING";
+  public statusError: Error | null = null;
   async join(eventId: string): Promise<QueueEntry> {
     return { queueId: `q-${eventId}`, eventId, position: 5, status: "WAITING" };
   }
   async getStatus(queueId: string): Promise<QueueEntry> {
+    if (this.statusError) throw this.statusError;
     return {
       queueId,
       eventId: "evt-1",
@@ -89,7 +91,7 @@ function makeWrapper(repo: QueueRepository, storage: QueueMembershipStorage) {
 
 describe("useRestoreMembership", () => {
   beforeEach(() => {
-    mockRouter = { push: jest.fn() };
+    mockRouter = { push: jest.fn(), replace: jest.fn() };
   });
 
   it("resumes an ACTIVE membership and navigates once to the waiting room", async () => {
@@ -112,7 +114,7 @@ describe("useRestoreMembership", () => {
     expect(await storage.load()).not.toBeNull();
 
     // A new router reference re-runs the effect; the queue-id guard still prevents duplicate navigation.
-    const nextRouter = { push: jest.fn() };
+    const nextRouter = { push: jest.fn(), replace: jest.fn() };
     mockRouter = nextRouter;
     rerender({});
     expect(initialRouter.push).toHaveBeenCalledTimes(1);
@@ -133,6 +135,51 @@ describe("useRestoreMembership", () => {
     expect(result.current.resumed).toBeNull();
     expect(await storage.load()).toBeNull();
     expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+  });
+
+  it("opens the waiting recovery view when status cannot be verified", async () => {
+    const repo = new FakeQueueRepository();
+    jest.spyOn(repo, "getStatus").mockRejectedValue(new Error("offline"));
+    const storage = new InMemoryQueueMembership();
+    await storage.save({ eventId: "evt-1", queueId: "q-evt-1" });
+
+    const { result } = renderHook(() => useRestoreMembership(), {
+      wrapper: makeWrapper(repo, storage),
+    });
+
+    await waitFor(() => expect(result.current.unverified).not.toBeNull());
+    expect(result.current.unverified).toEqual({
+      eventId: "evt-1",
+      queueId: "q-evt-1",
+    });
+    expect(mockRouter.replace).toHaveBeenCalledWith(
+      "/waiting/evt-1?queueId=q-evt-1",
+    );
+    expect(await storage.load()).toEqual({
+      eventId: "evt-1",
+      queueId: "q-evt-1",
+    });
+  });
+
+  it("clears an expired or rotated visitor token and stays on Home", async () => {
+    const repo = new FakeQueueRepository();
+    repo.statusError = Object.assign(new Error("visitor token invalid"), {
+      httpStatus: 401,
+    });
+    const storage = new InMemoryQueueMembership();
+    await storage.save({ eventId: "evt-1", queueId: "q-evt-1" });
+
+    const { result } = renderHook(() => useRestoreMembership(), {
+      wrapper: makeWrapper(repo, storage),
+    });
+
+    await waitFor(() => expect(result.current.isRestoring).toBe(false));
+    expect(result.current.resumed).toBeNull();
+    expect(result.current.unverified).toBeNull();
+    expect(await storage.load()).toBeNull();
+    expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 
   it("leaves a CLAIMED entry for checkout-session recovery instead of reopening waiting", async () => {

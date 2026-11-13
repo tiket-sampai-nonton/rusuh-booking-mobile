@@ -115,6 +115,47 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
     expect(mockRouter.replace).toHaveBeenCalledWith("/browse");
   });
 
+  it("checks server status before returning an expired saved payment to home", async () => {
+    const repo = paymentRepo(page());
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: {
+        paymentRepository: {
+          ...repo,
+          getPaymentPage: async () => {
+            throw new Error("BOOKING_NOT_PAYABLE: expired");
+          },
+          getStatus: async () => ({
+            attemptId: "",
+            bookingId: "bk-1",
+            status: "EXPIRED",
+          }),
+        },
+      },
+    });
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/"));
+  });
+
+  it("does not discard an unavailable payment when its status cannot be verified", async () => {
+    const repo = paymentRepo(page());
+    renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
+      container: {
+        paymentRepository: {
+          ...repo,
+          getPaymentPage: async () => {
+            throw new Error("BOOKING_NOT_PAYABLE: unavailable");
+          },
+          getStatus: async () => {
+            throw new Error("offline");
+          },
+        },
+      },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("payment-unavailable")).toBeTruthy(),
+    );
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+  });
+
   it("renders the total == amountMinor with NO service-fee line (D10.1)", async () => {
     renderWithProviders(<PaymentScreen bookingId="bk-1" />, {
       container: { paymentRepository: paymentRepo(page()) },
@@ -351,7 +392,7 @@ describe("PaymentScreen — summary + method + timer (RBT-060)", () => {
           }),
           expect.objectContaining({
             kind: "payment_cancelled",
-            deepLink: "/payment/bk-1",
+            deepLink: "/",
           }),
         ]),
       ),

@@ -34,9 +34,9 @@ export function usePaymentPage(bookingId: string): {
     refetchOnWindowFocus: true,
   });
   useEffect(() => {
-    if (!bookingId) return;
+    if (!bookingId || !query.data) return;
     void paymentJourneyStorage.save(bookingId).catch(() => undefined);
-  }, [bookingId, paymentJourneyStorage]);
+  }, [bookingId, paymentJourneyStorage, query.data]);
   return {
     page: query.data,
     isLoading: query.isLoading,
