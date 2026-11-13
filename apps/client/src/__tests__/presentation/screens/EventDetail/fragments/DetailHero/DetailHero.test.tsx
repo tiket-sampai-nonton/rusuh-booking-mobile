@@ -3,6 +3,7 @@ import { Animated, Platform } from "react-native";
 
 import type { DetailHeroProps } from "../../../../../../presentation/screens/EventDetail/interface";
 import { DetailHero } from "../../../../../../presentation/screens/EventDetail/fragments/DetailHero/index";
+import { SalesPeriod } from "../../../../../../presentation/screens/EventDetail/fragments/SalesPeriod";
 
 const hero: DetailHeroProps = {
   banner: "https://example.com/event.jpg",
@@ -63,4 +64,33 @@ describe("DetailHero", () => {
     expect(screen.queryByText("15 November")).toBeNull();
     expect(screen.queryByText("Konser")).toBeNull();
   });
+
+  it.each(["web", "android", "ios"] as const)(
+    "displays the sales period in WIB on %s",
+    (platform) => {
+      Object.defineProperty(Platform, "OS", {
+        configurable: true,
+        value: platform,
+      });
+      render(
+        <SalesPeriod
+          startsAt="2026-11-02T03:00:00Z"
+          endsAt="2026-11-15T08:00:00Z"
+          variant={platform === "web" ? "inline" : "card"}
+        />,
+      );
+      if (platform === "web") {
+        expect(
+          screen.getByText(
+            "Penjualan: 02 Nov 2026 10:00 – 15 Nov 2026 15:00 WIB",
+          ),
+        ).toBeTruthy();
+      } else {
+        expect(screen.getByText("Mulai: 02 Nov 2026 · 10:00 WIB")).toBeTruthy();
+        expect(
+          screen.getByText("Berakhir: 15 Nov 2026 · 15:00 WIB"),
+        ).toBeTruthy();
+      }
+    },
+  );
 });

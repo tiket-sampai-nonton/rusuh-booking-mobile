@@ -306,6 +306,11 @@ export const designDetailStyles = StyleSheet.create({
     borderBottomWidth: designBorders.standard,
     borderBottomColor: designColors.ink,
   },
+  mobileWebSalesPeriod: {
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: designColors.ink,
+  },
   mobileWebTicketStat: { flex: 1, paddingVertical: 10, paddingHorizontal: 16 },
   mobileWebTicketStatSecond: {
     borderLeftWidth: 1,

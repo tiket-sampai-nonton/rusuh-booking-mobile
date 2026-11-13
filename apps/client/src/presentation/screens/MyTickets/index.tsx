@@ -35,6 +35,7 @@ import { createPrimaryNavLinks } from "@presentation/components/primary-navigati
 import { LoginModal } from "@presentation/components/auth/LoginModal";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
+import { useEventDetail } from "@presentation/hooks/useEventDetail";
 import { useMyTicketsData } from "@presentation/hooks/useMyTicketsData";
 import { useETicketShare } from "@presentation/hooks/useETicketShare";
 import { useETicketDownload } from "@presentation/hooks/useETicketDownload";
@@ -329,13 +330,16 @@ export function MyTicketsScreen() {
   const { data } = useEvents();
   const bookingId = useSessionStore((s) => s.bookingId);
   const eventId = useSessionStore((s) => s.eventId);
+  const { data: activeEventDetail } = useEventDetail(eventId ?? "");
   const amountMinor = useSessionStore((s) => s.amountMinor) ?? 0;
   const ticketCount = useSessionStore((s) => s.ticketCount) ?? 1;
   const profile = useAccountStore((s) => s.profile);
   const { serverClock } = useServices();
   const activeEvent = useMemo(
-    () => (data?.upcoming ?? []).find((event) => event.id === eventId),
-    [data?.upcoming, eventId],
+    () =>
+      activeEventDetail ??
+      (data?.upcoming ?? []).find((event) => event.id === eventId),
+    [activeEventDetail, data?.upcoming, eventId],
   );
   const { shareTickets } = useETicketShare();
   const { downloadTickets } = useETicketDownload();
@@ -406,8 +410,19 @@ export function MyTicketsScreen() {
     history?.pages,
   );
   const knownEvents = [...(data?.upcoming ?? []), ...(data?.history ?? [])];
+  const matchingEvents = selectedBooking
+    ? knownEvents.filter(
+        (event) =>
+          event.name === selectedBooking.eventName &&
+          Boolean(selectedTickets?.eventStartsAt) &&
+          Date.parse(event.startsAt ?? "") ===
+            Date.parse(selectedTickets?.eventStartsAt ?? ""),
+      )
+    : [];
   const qrEvent = selectedBooking
-    ? knownEvents.find((event) => event.name === selectedBooking.eventName)
+    ? matchingEvents.length === 1
+      ? matchingEvents[0]
+      : undefined
     : activeEvent;
   const now = serverClock.serverNow();
   const isPastBooking = (booking: MyBookingSummary) =>
@@ -446,7 +461,7 @@ export function MyTicketsScreen() {
           bookingId,
           eventName: activeEvent.name,
           venue: activeEvent.venue,
-          startsAt: activeEvent.startsAt,
+          startsAt: localTickets.data?.eventStartsAt ?? activeEvent.startsAt,
           attendeeName: ticket.attendeeName,
           attendeeNikMasked: ticket.attendeeNikMasked,
           categoryCode: ticket.categoryCode,
@@ -469,16 +484,14 @@ export function MyTicketsScreen() {
     if (!selectedBooking || !selectedTickets) return;
     setDownloadError("");
     try {
-      const event = [...(data?.upcoming ?? []), ...(data?.history ?? [])].find(
-        (item) => item.name === selectedBooking.eventName,
-      );
+      const event = qrEvent;
       await downloadTickets(
         selectedBooking.bookingId,
         selectedTickets.tickets.map((ticket, index) => ({
           bookingId: selectedBooking.bookingId,
           eventName: selectedBooking.eventName,
           venue: event?.venue,
-          startsAt: event?.startsAt,
+          startsAt: selectedTickets.eventStartsAt ?? event?.startsAt,
           attendeeName: ticket.attendeeName,
           attendeeNikMasked: ticket.attendeeNikMasked,
           categoryCode: ticket.categoryCode,
@@ -520,9 +533,15 @@ export function MyTicketsScreen() {
 
   const qrSheet = (
     <TicketQrSheet
-      eventName={selectedBooking?.eventName ?? "QR Tiket Anda"}
+      eventName={
+        selectedBooking?.eventName ?? activeEvent?.name ?? "QR Tiket Anda"
+      }
       venue={qrEvent?.venue}
-      startsAt={qrEvent?.startsAt}
+      startsAt={
+        (selectedBooking
+          ? selectedTickets?.eventStartsAt
+          : localTickets.data?.eventStartsAt) ?? qrEvent?.startsAt
+      }
       bookingId={selectedBooking?.bookingId ?? bookingId ?? "booking"}
       bookingSummary={selectedBooking ?? undefined}
       bookingTickets={

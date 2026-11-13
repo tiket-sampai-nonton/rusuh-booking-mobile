@@ -142,6 +142,7 @@ describe("MyTicketsScreen", () => {
         amountMinor: 45000000,
         ticketQuantity: 1,
         buyerNikMasked: "31****89",
+        eventStartsAt: "2026-11-15T12:30:00Z",
         tickets: [
           {
             ticketCode: "TICKET-1",
@@ -165,6 +166,8 @@ describe("MyTicketsScreen", () => {
     fireEvent.press(screen.getByTestId("account-ticket-booking-1"));
     expect(await screen.findByTestId("ticket-qr-sheet")).toBeTruthy();
     expect(await screen.findByText("TICKET-1")).toBeTruthy();
+    expect(screen.getByText("15 Nov 2026")).toBeTruthy();
+    expect(screen.getByText("19:30 WIB")).toBeTruthy();
     expect(screen.getByTestId("qr-code").props.accessibilityLabel).toBe(
       "signed-ticket-payload",
     );
@@ -177,6 +180,7 @@ describe("MyTicketsScreen", () => {
           categoryCode: "FEST",
           attendeeName: "Rizky",
           attendeeNikMasked: "31****89",
+          startsAt: "2026-11-15T12:30:00Z",
         }),
       ]),
     );

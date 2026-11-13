@@ -22,7 +22,7 @@ import type { DomainErrorKind } from "@domain/errors/domain-error";
 
 import {
   appendRow,
-  assignDefaultCategory,
+  reconcileCheckoutCategories,
   canUseBuyerDataForTicket,
   checkoutTotalMinor,
   defaultCheckoutCategory,
@@ -693,13 +693,13 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   // Guests must tick the inline consent; logged-in users already consented.
   const consentGiven = isGuest ? consent : true;
 
+  const sessionCategories = session?.categories;
   useEffect(() => {
-    const defaultCategoryId = defaultCheckoutCategory(
-      session?.categories ?? [],
+    if (!sessionCategories) return;
+    setRows((current) =>
+      reconcileCheckoutCategories(current, sessionCategories),
     );
-    if (!defaultCategoryId) return;
-    setRows((current) => assignDefaultCategory(current, defaultCategoryId));
-  }, [session?.categories]);
+  }, [sessionCategories]);
 
   // A ticket using buyer identity resolves to the current buyer name + NIK.
   // Keep the attendee's own fields untouched so switching the option off

@@ -31,6 +31,8 @@ export interface BookingTickets {
   readonly amountMinor: number;
   readonly ticketQuantity: number;
   readonly buyerNikMasked: string;
+  /** Event start supplied by the booking service for the issued tickets. */
+  readonly eventStartsAt?: string;
   readonly tickets: readonly BookingTicket[];
 }
 
