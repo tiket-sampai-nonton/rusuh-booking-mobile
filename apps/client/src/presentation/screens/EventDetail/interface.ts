@@ -43,6 +43,8 @@ export interface DetailHeroProps {
   readonly name: string;
   readonly meta: string;
   readonly chips: readonly string[];
+  readonly salesStartsAt?: string;
+  readonly salesEndsAt?: string;
   readonly isMobileWeb?: boolean;
 }
 
