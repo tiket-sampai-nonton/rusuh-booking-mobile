@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { LoginIcon } from "@presentation/components/ArrowIcon";
+import { LoginIcon } from "@presentation/components/Icon";
 import { designColors, designEasing } from "@presentation/theme";
 
 import {

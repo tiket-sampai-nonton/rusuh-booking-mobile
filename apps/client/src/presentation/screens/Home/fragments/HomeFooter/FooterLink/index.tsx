@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { useToast } from "@presentation/components/design-system";
+import { useToast } from "@presentation/components";
 import { designDuration, designEasing } from "@presentation/theme";
 import { followLink } from "@presentation/utils/follow-link";
 

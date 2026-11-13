@@ -1,7 +1,7 @@
 import { act, fireEvent, render } from "@testing-library/react-native";
 import React from "react";
 
-import { Header } from "../../../../../presentation/components/design-system/Header/index";
+import { Header } from "../../../../../presentation/components/Header/index";
 
 const mockResponsive = { isNative: true, headerHeight: 56 };
 let mockReducedMotion = false;

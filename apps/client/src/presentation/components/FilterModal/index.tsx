@@ -23,7 +23,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { CloseIcon } from "@presentation/components/ArrowIcon";
+import { CloseIcon } from "@presentation/components/Icon";
 import { designColors } from "@presentation/theme";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { PillGroup } from "./PillGroup";

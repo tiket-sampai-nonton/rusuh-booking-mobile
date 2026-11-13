@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import { EVENT_FIXTURES } from "@shared/test-fixtures/events.fixture";
 import { EventsGrid } from "@presentation/screens/Home/fragments/HomeSections/fragments/EventsGrid";
 
-jest.mock("@presentation/components/design-system", () => {
+jest.mock("@presentation/components", () => {
   const ReactMock = require("react");
   const { Pressable, Text } = require("react-native");
   return {

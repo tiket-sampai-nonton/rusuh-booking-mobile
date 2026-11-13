@@ -21,8 +21,8 @@
  */
 import { memo, useCallback, useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
-import { LazyCachedImage } from "@presentation/components/design-system/LazyCachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
+import { LazyCachedImage } from "@presentation/components/LazyCachedImage";
 import Animated, {
   Easing,
   interpolate,
@@ -48,7 +48,7 @@ import {
 } from "@presentation/theme";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { pointerEventsNone } from "@presentation/utils/style";
-import { ArrowIcon, PinIcon } from "@presentation/components/ArrowIcon";
+import { Icon, PinIcon } from "@presentation/components/Icon";
 import {
   componentStyles,
   eventCardContainerStyle,
@@ -215,7 +215,7 @@ function NativeEventCard({
                 </Text>
               </View>
               <View style={styleForEventCardView12(disabled)}>
-                <ArrowIcon
+                <Icon
                   direction="right"
                   color={eventCardArrowColor(disabled, false)}
                   size={16}
@@ -485,7 +485,7 @@ function AnimatedEventCard({
               {isNative ? (
                 // Mobile: 32x32 icon box
                 <View style={styleForEventCardView12(disabled, isHovered)}>
-                  <ArrowIcon
+                  <Icon
                     direction="right"
                     color={eventCardArrowColor(disabled, isHovered)}
                     size={16}

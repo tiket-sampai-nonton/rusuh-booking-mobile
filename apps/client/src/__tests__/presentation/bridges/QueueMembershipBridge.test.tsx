@@ -78,7 +78,7 @@ describe("QueueMembershipBridge", () => {
   });
 
   it("does not restore checkout when a payment journey exists", async () => {
-    mockLoadPayment.mockResolvedValue("booking-1");
+    mockLoadPayment.mockResolvedValue({ bookingId: "booking-1" });
     mockUseRestoreMembership.mockReturnValue({
       resumed: {
         membership: { eventId: "evt-1", queueId: "queue-1" },

@@ -18,10 +18,10 @@ import {
   View,
   type ImageStyle,
 } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 
 import { designColors } from "@presentation/theme/event-design-tokens";
-import { PinIcon } from "@presentation/components/ArrowIcon";
+import { PinIcon } from "@presentation/components/Icon";
 import { venueStyles, styleForVenueImage0, styleForVenueView1 } from "./style";
 
 // ═══════════════════════════════════════════════════════════════════════════════

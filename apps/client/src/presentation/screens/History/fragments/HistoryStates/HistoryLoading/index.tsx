@@ -1,6 +1,6 @@
 import { View } from "react-native";
 
-import { Loader } from "@presentation/components/design-system/Loader";
+import { Loader } from "@presentation/components/Loader";
 
 import { historyStateStyles } from "../../../style";
 

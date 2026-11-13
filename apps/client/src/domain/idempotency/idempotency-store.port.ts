@@ -15,4 +15,6 @@ export interface IdempotencyStore {
   set(actionId: string, key: string): void;
   /** Remove the key (called when the action reaches a terminal state). */
   delete(actionId: string): void;
+  /** Remove all persisted action keys when their owning user session ends. */
+  clearAll(): Promise<void>;
 }

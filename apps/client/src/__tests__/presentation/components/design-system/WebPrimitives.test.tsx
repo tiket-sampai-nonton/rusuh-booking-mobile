@@ -25,9 +25,9 @@ jest.mock("react-native/Libraries/Utilities/Platform", () => ({
 // Import the two web-only primitives DIRECTLY (not via the index barrel, which
 // would drag in Button/Loader/Modal and their heavier reanimated usage).
 // eslint-disable-next-line import/first -- must follow jest.mock (hoisting)
-import { Cursor } from "@presentation/components/design-system/Cursor";
+import { Cursor } from "@presentation/components/Cursor";
 // eslint-disable-next-line import/first -- must follow jest.mock (hoisting)
-import { ScrollProgress } from "@presentation/components/design-system/ScrollProgress";
+import { ScrollProgress } from "@presentation/components/ScrollProgress";
 
 afterEach(() => {
   mockMotionReduced = false;

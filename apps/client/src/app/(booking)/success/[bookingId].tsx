@@ -7,6 +7,9 @@ import { SuccessScreen } from "@presentation/screens/Success";
 // download/share is RBT-071. noindex is set by the screen's own <Seo>
 // (transactional ticket/NIK, SECURITY §6.5).
 export default function SuccessRoute() {
-  const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
-  return <SuccessScreen bookingId={bookingId ?? ""} />;
+  const { bookingId, eventId } = useLocalSearchParams<{
+    bookingId: string;
+    eventId?: string;
+  }>();
+  return <SuccessScreen bookingId={bookingId ?? ""} eventId={eventId} />;
 }

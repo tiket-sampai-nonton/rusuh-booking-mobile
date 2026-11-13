@@ -6,6 +6,7 @@ import { WebView } from "react-native-webview";
 
 import { usePayment } from "@presentation/hooks/usePayment";
 import { useConnectivity } from "@presentation/hooks/useConnectivity";
+import { useSessionStore } from "@presentation/stores/session-store";
 import { ConnectivityBanner } from "@presentation/components/ConnectivityBanner";
 import { useServices } from "@providers/service-context";
 import { apiErrorMessage } from "@presentation/utils/api-error-message";
@@ -114,6 +115,11 @@ export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
   const connectivity = useConnectivity();
   const { cancelBooking, reconcilePayment } = usePayment();
   const { paymentJourneyStorage, serverClock } = useServices();
+  const eventId = useSessionStore((state) => state.eventId);
+  const successHref =
+    `/success/${encodeURIComponent(bookingId)}${eventId ? `?eventId=${encodeURIComponent(eventId)}` : ""}` as Href;
+  const paymentHref =
+    `/payment/${encodeURIComponent(bookingId)}${eventId ? `?eventId=${encodeURIComponent(eventId)}` : ""}` as Href;
   const siteUrl =
     process.env.EXPO_PUBLIC_SITE_URL ?? "https://rusuh-booking.pages.dev";
 
@@ -124,7 +130,7 @@ export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
       if (status === "PAID") {
         await paymentJourneyStorage.clear().catch(() => undefined);
         allowRouteChange.current = true;
-        router.replace(`/success/${bookingId}` as Href);
+        router.replace(successHref);
       } else if (status === "FAILED" || status === "EXPIRED") {
         await paymentJourneyStorage.clear().catch(() => undefined);
         allowRouteChange.current = true;
@@ -133,10 +139,10 @@ export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
         // Payment is still open or cannot yet be cancelled. The payment route
         // fetches fresh BE state and offers the existing SNAP attempt to resume.
         allowRouteChange.current = true;
-        router.replace(`/payment/${bookingId}` as Href);
+        router.replace(paymentHref);
       }
     },
-    [bookingId, paymentJourneyStorage, router],
+    [bookingId, paymentHref, paymentJourneyStorage, router, successHref],
   );
 
   const resumeAfterReconnect = useCallback(async (): Promise<void> => {

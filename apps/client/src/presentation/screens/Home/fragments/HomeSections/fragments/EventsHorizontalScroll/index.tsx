@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { FlatList, Text, View, type ListRenderItemInfo } from "react-native";
-import { EventCard } from "@presentation/components/design-system";
+import { EventCard } from "@presentation/components";
 import type { EventSummary } from "@domain/repositories/event.repository";
 import { styles } from "./style";
 

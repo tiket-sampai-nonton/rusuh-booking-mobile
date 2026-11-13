@@ -8,7 +8,7 @@ jest.mock("react-native-reanimated", () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { Input } from "../../../../../presentation/components/design-system/Input/index";
+import { Input } from "../../../../../presentation/components/Input/index";
 
 describe("Input", () => {
   afterEach(() => {

@@ -44,7 +44,10 @@ import type { PaymentScreenProps } from "./interface";
 import { paymentScrollContent } from "./style";
 import { LeaveConfirm } from "../Checkout/fragments/LeaveConfirm";
 
-export function PaymentScreen({ bookingId }: PaymentScreenProps) {
+export function PaymentScreen({
+  bookingId,
+  eventId: routeEventId,
+}: PaymentScreenProps) {
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -57,6 +60,11 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
     navigationHistory,
   } = useServices();
   const clearQueueMembership = useClearQueueMembership();
+  const sessionEventId = useSessionStore((s) => s.eventId);
+  const eventId = routeEventId ?? sessionEventId;
+  const successHref =
+    `/success/${encodeURIComponent(bookingId)}${eventId ? `?eventId=${encodeURIComponent(eventId)}` : ""}` as Href;
+  const paymentHref = `/payment/${encodeURIComponent(bookingId)}${eventId ? `?eventId=${encodeURIComponent(eventId)}` : ""}`;
   const scheduleNotification = useMemo(
     () => new ScheduleLocalNotification(notification),
     [notification],
@@ -71,7 +79,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
     error: pageError,
     refetch: retryPaymentPage,
     isFetching: isRetryingPaymentPage,
-  } = usePaymentPage(bookingId);
+  } = usePaymentPage(bookingId, eventId);
   const { createAttempt, resumeHandoff, cancelBooking, reconcilePayment } =
     usePayment();
   const verifyPayment = reconcilePayment.mutateAsync;
@@ -89,10 +97,9 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
   const checkedUnavailablePage = useRef<Error | null>(null);
 
   useEffect(() => {
-    restoreBrowserLocation.current = navigationHistory.captureRestorePoint(
-      `/payment/${encodeURIComponent(bookingId)}`,
-    );
-  }, [bookingId, navigationHistory]);
+    restoreBrowserLocation.current =
+      navigationHistory.captureRestorePoint(paymentHref);
+  }, [navigationHistory, paymentHref]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (event) => {
@@ -160,7 +167,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
         if (status.serverTime) serverClock.sync(status.serverTime);
         if (status.status === "PAID") {
           await paymentJourneyStorage.clear();
-          if (active) router.replace(`/success/${bookingId}` as Href);
+          if (active) router.replace(successHref);
         } else if (status.status === "EXPIRED" || status.status === "FAILED") {
           await Promise.all([
             paymentJourneyStorage.clear(),
@@ -178,6 +185,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
     };
   }, [
     bookingId,
+    successHref,
     clearQueueMembership,
     connectivity.isOffline,
     pageError,
@@ -194,9 +202,15 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
       return;
     }
     void paymentJourneyStorage.clear().catch(() => undefined);
-    if (status === "PAID") router.replace(`/success/${bookingId}` as Href);
+    if (status === "PAID") router.replace(successHref);
     else router.replace(`/failed/${bookingId}` as Href);
-  }, [bookingId, page?.currentAttempt?.status, paymentJourneyStorage, router]);
+  }, [
+    bookingId,
+    page?.currentAttempt?.status,
+    paymentJourneyStorage,
+    router,
+    successHref,
+  ]);
 
   const reconcileExpiredPayment = useCallback(async (): Promise<void> => {
     if (expiryCheckInFlight.current) return;
@@ -215,7 +229,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
       if (status.serverTime) serverClock.sync(status.serverTime);
       if (status.status === "PAID") {
         void paymentJourneyStorage.clear().catch(() => undefined);
-        router.replace(`/success/${bookingId}` as Href);
+        router.replace(successHref);
         return;
       }
       if (status.status === "FAILED" || status.status === "EXPIRED") {
@@ -252,6 +266,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
     }
   }, [
     bookingId,
+    successHref,
     connectivity.isOffline,
     page?.paymentExpiresAt,
     paymentJourneyStorage,
@@ -502,7 +517,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
               if (booking.status === "PAID") {
                 setConfirmLeave(false);
                 void paymentJourneyStorage.clear().catch(() => undefined);
-                router.replace(`/success/${bookingId}` as Href);
+                router.replace(successHref);
                 return;
               }
               if (
@@ -537,7 +552,7 @@ export function PaymentScreen({ bookingId }: PaymentScreenProps) {
                 if (status.status === "PAID") {
                   void paymentJourneyStorage.clear().catch(() => undefined);
                   setConfirmLeave(false);
-                  router.replace(`/success/${bookingId}` as Href);
+                  router.replace(successHref);
                   return;
                 }
                 if (status.status === "FAILED" || status.status === "EXPIRED") {

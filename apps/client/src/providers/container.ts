@@ -27,10 +27,12 @@ import { InMemoryIdempotencyStore } from "@infrastructure/__fixtures__/in-memory
 import { DurableIdempotencyStore } from "@infrastructure/idempotency/durable-idempotency-store";
 import type { ClockPort } from "@domain/services/clock.port";
 import type { FileSharePort } from "@domain/services/file-share.port";
+import type { ETicketPdfGenerator } from "@domain/services/eticket-pdf-generator.port";
 import type { AppUpdatePort } from "@domain/services/app-update.port";
 import type { NotificationPort } from "@domain/services/notification.port";
 import type { ConnectivityPort } from "@domain/services/connectivity.port";
 import type { PaymentJourneyStorage } from "@domain/services/payment-journey-storage.port";
+import type { UserDataStorage } from "@domain/services/user-data-storage.port";
 import type { NavigationHistory } from "@domain/services/navigation-history.port";
 import type { PushSubscriptionPort } from "@domain/services/push-subscription.port";
 import { HttpPushSubscriptionAdapter } from "@infrastructure/notifications/http-push-subscription.adapter";
@@ -63,6 +65,7 @@ import { SecureStoreQueueMembership } from "@infrastructure/queue/secure-store-q
 import { WebQueueMembership } from "@infrastructure/queue/web-queue-membership";
 import { ExpoFileShareAdapter } from "@infrastructure/files/expo-file-share.adapter";
 import { WebFileShareAdapter } from "@infrastructure/files/web-file-share.adapter";
+import { ExpoETicketPdfAdapter } from "@infrastructure/files/eticket-pdf.adapter";
 import { FetchHttpClient } from "@infrastructure/http/fetch-http-client";
 import { RefreshingHttpClient } from "@infrastructure/http/refreshing-http-client";
 import type { HttpClient } from "@infrastructure/http/http-client";
@@ -73,6 +76,7 @@ import {
   InMemoryPaymentJourneyStorage,
   PlatformPaymentJourneyStorage,
 } from "@infrastructure/platform/payment-journey-storage";
+import { CompositeUserDataStorage } from "@infrastructure/platform/composite-user-data-storage";
 import { PlatformNavigationHistory } from "@infrastructure/platform/navigation-history";
 
 /**
@@ -97,8 +101,10 @@ export interface Container {
   readonly notification: NotificationPort;
   readonly pushSubscription: PushSubscriptionPort;
   readonly fileShare: FileSharePort;
+  readonly eticketPdfGenerator: ETicketPdfGenerator;
   readonly appUpdate: AppUpdatePort;
   readonly paymentJourneyStorage: PaymentJourneyStorage;
+  readonly userDataStorage: UserDataStorage;
   readonly navigationHistory: NavigationHistory;
   readonly connectivity: ConnectivityPort;
   readonly tokenStorage: TokenStorage;
@@ -313,6 +319,7 @@ export function createContainer(options: ContainerOptions = {}): Container {
     Platform.OS === "web",
   );
   const fileShareAdapter = createFileShareAdapter();
+  const eticketPdfGenerator = new ExpoETicketPdfAdapter();
   // Server-authoritative clock layered over the device clock. Unsynced until a
   // server timestamp arrives (offset 0 → serverNow === device now); the catalog
   // split + timers read through it so a later sync corrects everything at once.
@@ -328,6 +335,19 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // Idempotency keys are a client-side primitive over an in-memory store →
   // bound in BOTH modes (RBT-012/054).
   const idempotencyKeys = createIdempotencyKeys(useMocks);
+  const visitorTokenStorage = createVisitorTokenStorage();
+  const refreshTokenStorage = createRefreshTokenStorage(useMocks);
+  const userDataStorage = new CompositeUserDataStorage(
+    [
+      tokenStorage,
+      refreshTokenStorage,
+      visitorTokenStorage,
+      buyerEmailStorage,
+      queueMembership,
+      paymentJourneyStorage,
+    ],
+    idempotencyKeys,
+  );
 
   if (useMocks) {
     const mockBooking = new MockBookingRepository();
@@ -356,8 +376,10 @@ export function createContainer(options: ContainerOptions = {}): Container {
       notification: notificationAdapter,
       pushSubscription: { register: async () => {}, remove: async () => {} },
       fileShare: fileShareAdapter,
+      eticketPdfGenerator,
       appUpdate: new ExpoAppUpdateAdapter(),
       paymentJourneyStorage,
+      userDataStorage,
       navigationHistory,
       connectivity,
     };
@@ -372,8 +394,6 @@ export function createContainer(options: ContainerOptions = {}): Container {
         "(or set EXPO_PUBLIC_USE_MOCKS=true for mock wiring).",
     );
   }
-  const visitorTokenStorage = createVisitorTokenStorage();
-  const refreshTokenStorage = createRefreshTokenStorage(useMocks);
   const transport: HttpClient = new FetchHttpClient({
     baseUrl,
     getHeaders: async () => {
@@ -417,8 +437,10 @@ export function createContainer(options: ContainerOptions = {}): Container {
     notification: notificationAdapter,
     pushSubscription: new HttpPushSubscriptionAdapter(httpClient),
     fileShare: fileShareAdapter,
+    eticketPdfGenerator,
     appUpdate: new ExpoAppUpdateAdapter(),
     paymentJourneyStorage,
+    userDataStorage,
     navigationHistory,
     connectivity,
   };

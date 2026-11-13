@@ -21,4 +21,8 @@ export class InMemoryIdempotencyStore implements IdempotencyStore {
   delete(actionId: string): void {
     this.keys.delete(actionId);
   }
+
+  async clearAll(): Promise<void> {
+    this.keys.clear();
+  }
 }

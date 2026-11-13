@@ -2,7 +2,7 @@ import { render } from "@testing-library/react-native";
 import Svg, { Path } from "react-native-svg";
 
 import {
-  ArrowIcon,
+  Icon,
   CalendarIcon,
   CheckIcon,
   ClockIcon,
@@ -14,8 +14,8 @@ import {
   PinIcon,
   PlusIcon,
   WarningIcon,
-} from "../../../../presentation/components/ArrowIcon";
-import { IconFrame } from "../../../../presentation/components/ArrowIcon/IconFrame";
+} from "../../../../presentation/components/Icon";
+import { IconFrame } from "../../../../presentation/components/Icon/IconFrame";
 
 describe("shared SVG icons", () => {
   it("renders each icon with its default appearance", () => {
@@ -29,7 +29,7 @@ describe("shared SVG icons", () => {
         <LoginIcon />
         <ExternalLinkIcon />
         <PlusIcon />
-        <ArrowIcon />
+        <Icon />
         <CheckIcon />
         <WarningIcon />
         <CloseIcon />
@@ -58,7 +58,7 @@ describe("shared SVG icons", () => {
     (direction) => {
       expect(
         render(
-          <ArrowIcon direction={direction} color="#123456" size={24} />,
+          <Icon direction={direction} color="#123456" size={24} />,
         ).toJSON(),
       ).toBeTruthy();
     },

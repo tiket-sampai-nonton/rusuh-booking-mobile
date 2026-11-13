@@ -7,7 +7,10 @@ import { PaymentScreen } from "@presentation/screens/Payment";
 // Booking route `/payment/[bookingId]` — RBT-060 payment page (summary +
 // method + server timer). noindex: a crawler must never see payment state.
 export default function PaymentRoute() {
-  const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
+  const { bookingId, eventId } = useLocalSearchParams<{
+    bookingId: string;
+    eventId?: string;
+  }>();
   const id = bookingId ?? "";
   return (
     <Fragment>
@@ -17,7 +20,7 @@ export default function PaymentRoute() {
         path={`/payment/${id}`}
         noindex
       />
-      <PaymentScreen bookingId={id} />
+      <PaymentScreen bookingId={id} eventId={eventId} />
     </Fragment>
   );
 }

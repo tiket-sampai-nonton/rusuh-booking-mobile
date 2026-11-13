@@ -30,8 +30,8 @@ import {
   HeroCarousel,
   BottomNav,
   navigateBottomTab,
-} from "@presentation/components/design-system";
-import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
+} from "@presentation/components";
+import { createPrimaryNavLinks } from "@presentation/components/primary-navigation";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";

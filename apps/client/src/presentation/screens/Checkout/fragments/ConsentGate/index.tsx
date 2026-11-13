@@ -8,7 +8,7 @@
 import { Pressable, Text, View } from "react-native";
 
 import { designColors } from "@presentation/theme";
-import { CheckIcon } from "@presentation/components/ArrowIcon";
+import { CheckIcon } from "@presentation/components/Icon";
 
 import type { ConsentGateProps } from "../../interface";
 import { componentStyles, styleForConsentGateView0 } from "./style";

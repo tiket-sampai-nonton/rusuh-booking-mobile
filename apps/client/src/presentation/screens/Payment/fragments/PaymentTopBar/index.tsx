@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { formatCountdown } from "@domain/services/date-format";
-import { ArrowIcon } from "@presentation/components/ArrowIcon";
+import { Icon } from "@presentation/components/Icon";
 import { designColors } from "@presentation/theme";
 
 import type { PaymentTopBarProps } from "../../interface";
@@ -35,7 +35,7 @@ export function PaymentTopBar({
         testID="payment-back"
       >
         <View className="flex-row items-center gap-1.5">
-          <ArrowIcon direction="left" color={designColors.ink} />
+          <Icon direction="left" color={designColors.ink} />
           {!isMobileWeb && (
             <Text
               className="text-sm font-bold uppercase tracking-tag"

@@ -175,7 +175,7 @@ describe("SuccessScreen (RBT-070)", () => {
     await waitFor(() =>
       expect(screen.getByTestId("success-eyebrow")).toBeTruthy(),
     );
-    expect(screen.getByText("••••")).toBeTruthy();
+    expect(screen.getAllByText("••••")).toHaveLength(2);
     // default qty 1 when ticketCount unset
     expect(screen.getByText("1 tiket")).toBeTruthy();
   });
@@ -188,13 +188,15 @@ describe("SuccessScreen (RBT-070)", () => {
       fireEvent.press(screen.getByTestId("success-download")),
     ).not.toThrow();
     await waitFor(() =>
-      expect(mockDownloadTickets).toHaveBeenCalledWith(
-        "bk-1",
-        1,
-        ["ISSUED-1"],
-        undefined,
-        ["TKT-1"],
-      ),
+      expect(mockDownloadTickets).toHaveBeenCalledWith("bk-1", [
+        expect.objectContaining({
+          qrPayload: "ISSUED-1",
+          ticketCode: "TKT-1",
+          categoryCode: "REG",
+          index: 0,
+          total: 1,
+        }),
+      ]),
     );
   });
 
@@ -204,13 +206,10 @@ describe("SuccessScreen (RBT-070)", () => {
     await waitFor(() => expect(screen.getByTestId("eticket-0")).toBeTruthy());
     fireEvent.press(screen.getByTestId("success-download"));
     await waitFor(() =>
-      expect(mockDownloadTickets).toHaveBeenCalledWith(
-        "bk-1",
-        2,
-        ["ISSUED-1", "ISSUED-2"],
-        undefined,
-        ["TKT-1", "TKT-2"],
-      ),
+      expect(mockDownloadTickets).toHaveBeenCalledWith("bk-1", [
+        expect.objectContaining({ qrPayload: "ISSUED-1", index: 0, total: 2 }),
+        expect.objectContaining({ qrPayload: "ISSUED-2", index: 1, total: 2 }),
+      ]),
     );
   });
 

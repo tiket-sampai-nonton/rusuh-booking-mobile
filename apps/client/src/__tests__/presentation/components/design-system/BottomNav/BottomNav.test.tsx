@@ -2,7 +2,7 @@ import { fireEvent, render } from "@testing-library/react-native";
 import { Platform } from "react-native";
 import { Path } from "react-native-svg";
 
-import { TicketsIcon } from "../../../../../presentation/components/design-system/BottomNav/NavItem/icons/TicketsIcon";
+import { TicketsIcon } from "../../../../../presentation/components/BottomNav/NavItem/icons/TicketsIcon";
 
 let mockMotionReduced = false;
 jest.mock("react-native-reanimated", () => {
@@ -14,7 +14,7 @@ jest.mock("react-native-reanimated", () => {
 import {
   BottomNav,
   type BottomNavRoute,
-} from "../../../../../presentation/components/design-system/BottomNav/index";
+} from "../../../../../presentation/components/BottomNav/index";
 
 describe("BottomNav", () => {
   afterEach(() => {

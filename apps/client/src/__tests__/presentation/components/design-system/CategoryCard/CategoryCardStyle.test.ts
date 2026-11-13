@@ -6,7 +6,7 @@ import {
   styleForCategoryCardAnimatedView1,
   styleForCategoryCardAnimatedView2,
   styleForCategoryCardAnimatedView3,
-} from "@presentation/components/design-system/CategoryCard/style";
+} from "@presentation/components/CategoryCard/style";
 import { designColors } from "@presentation/theme";
 
 describe("CategoryCard style helpers", () => {

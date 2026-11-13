@@ -1,19 +1,20 @@
 import type { ReactNode } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
-import QRCode from "react-native-qrcode-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ETicketCard } from "@presentation/components/ETicketCard";
 import type {
   BookingTicket,
   MyBookingSummary,
 } from "@domain/repositories/ticket-history.repository";
 import { minorToIDR } from "@domain/services/money";
-import { designColors } from "@presentation/theme";
 import { styles, ticketQrContentStyle, ticketQrBackdropStyle } from "./style";
 
 export { ticketQrBackdropStyle } from "./style";
 
 interface TicketQrSheetProps {
   readonly eventName: string;
+  readonly venue?: string;
+  readonly startsAt?: string;
   readonly bookingId: string;
   readonly bookingTickets?: readonly BookingTicket[];
   readonly bookingSummary?: MyBookingSummary;
@@ -36,6 +37,10 @@ type TicketContentProps = Pick<
   TicketQrSheetProps,
   | "bookingTickets"
   | "bookingSummary"
+  | "eventName"
+  | "bookingId"
+  | "venue"
+  | "startsAt"
   | "isLoading"
   | "isError"
   | "errorMessage"
@@ -46,6 +51,10 @@ type TicketContentProps = Pick<
 function buildTicketContent({
   bookingTickets,
   bookingSummary,
+  eventName,
+  bookingId,
+  venue,
+  startsAt,
   isLoading,
   isError,
   errorMessage,
@@ -70,7 +79,13 @@ function buildTicketContent({
       onRetry,
     );
   }
-  return bookingTicketCards(bookingTickets);
+  return bookingTicketCards(
+    bookingTickets,
+    bookingId,
+    eventName,
+    venue,
+    startsAt,
+  );
 }
 
 function unpaidBookingContent(booking: MyBookingSummary): ReactNode {
@@ -99,27 +114,32 @@ function unpaidBookingReason(status: MyBookingSummary["status"]): string {
   return "E-tiket akan tersedia setelah pembayaran berhasil dikonfirmasi.";
 }
 
-function bookingTicketCards(tickets: readonly BookingTicket[]): ReactNode {
-  return tickets.map((ticket) => (
+function bookingTicketCards(
+  tickets: readonly BookingTicket[],
+  bookingId: string,
+  eventName: string,
+  venue?: string,
+  startsAt?: string,
+): ReactNode {
+  return tickets.map((ticket, index) => (
     <View
       key={ticket.ticketCode}
       pointerEvents={ticketQrCardPointerEvents(Platform.OS)}
       style={styles.ticketQr}
     >
-      <QRCode
-        value={ticket.qrPayload}
-        size={190}
-        color={designColors.ink}
-        backgroundColor={designColors.ground}
+      <ETicketCard
+        bookingId={bookingId}
+        index={index}
+        total={tickets.length}
+        eventName={eventName}
+        venue={venue}
+        startsAt={startsAt}
+        attendeeName={ticket.attendeeName}
+        attendeeNikMasked={ticket.attendeeNikMasked}
+        categoryCode={ticket.categoryCode}
+        qrPayload={ticket.qrPayload}
+        ticketCode={ticket.ticketCode}
       />
-      <Text style={styles.ticketCode}>{ticket.ticketCode}</Text>
-      <Text style={styles.ticketDetails}>
-        Kategori {ticket.categoryCode || "—"}
-      </Text>
-      <Text style={styles.ticketDetails}>
-        {ticket.attendeeName || "Pemegang tiket"} ·{" "}
-        {ticket.attendeeNikMasked || "••••"}
-      </Text>
     </View>
   ));
 }
@@ -130,6 +150,8 @@ interface TicketQrSheetViewProps extends TicketQrSheetProps {
 
 function TicketQrSheetView({
   eventName,
+  venue,
+  startsAt,
   bookingId,
   bookingTickets,
   bookingSummary,
@@ -150,6 +172,10 @@ function TicketQrSheetView({
   const ticketContent = buildTicketContent({
     bookingTickets,
     bookingSummary,
+    eventName,
+    bookingId,
+    venue,
+    startsAt,
     isLoading,
     isError,
     errorMessage,
@@ -182,7 +208,9 @@ function TicketQrSheetView({
           {hasUnpaidSummary ? (
             <Text style={styles.sectionTitle}>Detail Tiket</Text>
           ) : null}
-          <Text style={styles.title}>{eventName}</Text>
+          {hasUnpaidSummary || !hasTickets ? (
+            <Text style={styles.title}>{eventName}</Text>
+          ) : null}
           {ticketContent}
           {hasTickets ? (
             <Text style={styles.instruction}>

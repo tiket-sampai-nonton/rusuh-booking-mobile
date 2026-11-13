@@ -47,4 +47,9 @@ export class IdempotencyKeys {
   clear(actionId: string): void {
     this.store.delete(actionId);
   }
+
+  /** Clear every action key when a user signs out. */
+  async clearAll(): Promise<void> {
+    await this.store.clearAll();
+  }
 }

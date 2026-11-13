@@ -3,7 +3,7 @@ import { Path } from "react-native-svg";
 import { IconFrame } from "../IconFrame";
 import type { ArrowDirection, IconProps } from "../types";
 
-interface ArrowIconProps extends IconProps {
+interface DirectionalIconProps extends IconProps {
   readonly direction?: ArrowDirection;
 }
 
@@ -13,11 +13,11 @@ const ARROW_PATH: Readonly<Record<ArrowDirection, string>> = {
   right: "M5 12h14m-6-6 6 6-6 6",
 };
 
-export function ArrowIcon({
+export function Icon({
   direction = "right",
   color,
   size = 16,
-}: ArrowIconProps) {
+}: DirectionalIconProps) {
   return (
     <IconFrame color={color} size={size}>
       <Path d={ARROW_PATH[direction]} />

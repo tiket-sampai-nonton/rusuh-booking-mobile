@@ -64,7 +64,7 @@ import {
   designDetailScrollContent,
   designDetailStyles as styles,
 } from "./style";
-import { CheckIcon } from "@presentation/components/ArrowIcon";
+import { CheckIcon } from "@presentation/components/Icon";
 import { designColors } from "@presentation/theme";
 
 // ═══════════════════════════════════════════════════════════════════════════════

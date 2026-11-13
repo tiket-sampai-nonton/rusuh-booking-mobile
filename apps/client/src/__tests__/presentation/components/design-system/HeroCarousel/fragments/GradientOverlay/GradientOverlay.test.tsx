@@ -3,7 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Platform, View } from "react-native";
 import { designColors, withAlpha } from "@presentation/theme";
 
-import { GradientOverlay } from "../../../../../../../presentation/components/design-system/HeroCarousel/fragments/GradientOverlay/index";
+import { GradientOverlay } from "../../../../../../../presentation/components/HeroCarousel/fragments/GradientOverlay/index";
 
 describe("GradientOverlay", () => {
   const originalPlatform = Platform.OS;

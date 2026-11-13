@@ -19,7 +19,7 @@
 import { Text, View } from "react-native";
 
 import { BrandMark } from "@presentation/components/BrandMark";
-import { Reveal } from "@presentation/components/design-system";
+import { Reveal } from "@presentation/components";
 import { designColors } from "@presentation/theme";
 
 import { FooterLink } from "./FooterLink";

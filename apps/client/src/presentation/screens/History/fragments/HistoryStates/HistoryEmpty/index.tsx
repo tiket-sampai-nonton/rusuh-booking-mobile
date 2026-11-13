@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 import { useRouter, type Href } from "expo-router";
 
-import { CalendarIcon } from "@presentation/components/ArrowIcon/CalendarIcon";
+import { CalendarIcon } from "@presentation/components/Icon/CalendarIcon";
 import { designColors } from "@presentation/theme";
 
 import { historyStateStyles, historyStyles } from "../../../style";

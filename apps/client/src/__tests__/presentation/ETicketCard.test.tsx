@@ -29,8 +29,8 @@ describe("ETicketCard (RBT-071)", () => {
     expect(screen.getByTestId("eticket-0")).toBeTruthy();
     // QR mock carries the encoded value as accessibilityLabel
     expect(screen.getByLabelText("issued-payload")).toBeTruthy();
-    expect(screen.getByText("E-Tiket 1 / 3")).toBeTruthy();
-    expect(screen.getByText("Kategori — · Kode tiket TKT-1")).toBeTruthy();
+    expect(screen.getByText("TIKET 1 DARI 3")).toBeTruthy();
+    expect(screen.getByText("TKT-1")).toBeTruthy();
   });
 
   it("the rendered card never contains a raw 16-digit NIK", () => {
@@ -48,8 +48,8 @@ describe("ETicketCard (RBT-071)", () => {
       />,
     );
     expect(screen.getByText("Rusuh Fest")).toBeTruthy();
-    expect(screen.getByText("Pemegang tiket · ••••")).toBeTruthy();
-    expect(screen.getByText("Tanggal menyusul · Lokasi menyusul")).toBeTruthy();
+    expect(screen.getByText("Pemegang tiket")).toBeTruthy();
+    expect(screen.getAllByText("Menyusul")).toHaveLength(3);
   });
 
   it("renders provided event and attendee details", () => {
@@ -60,16 +60,17 @@ describe("ETicketCard (RBT-071)", () => {
         total={2}
         eventName="Rusuh Fest"
         venue="Gelora Bung Karno"
-        startsAt="15 November 2026"
+        startsAt="2026-11-15T12:30:00Z"
         attendeeName="Penonton QA"
         attendeeNikMasked="31****99"
         categoryCode="VIP"
       />,
     );
-    expect(screen.getByText("Penonton QA · 31****99")).toBeTruthy();
-    expect(screen.getByText("Kategori VIP · Kode tiket —")).toBeTruthy();
-    expect(
-      screen.getByText("15 November 2026 · Gelora Bung Karno"),
-    ).toBeTruthy();
+    expect(screen.getByText("Penonton QA")).toBeTruthy();
+    expect(screen.getByText("31****99")).toBeTruthy();
+    expect(screen.getByText("VIP")).toBeTruthy();
+    expect(screen.getByText("15 Nov 2026")).toBeTruthy();
+    expect(screen.getByText("19:30 WIB")).toBeTruthy();
+    expect(screen.getByText("Gelora Bung Karno")).toBeTruthy();
   });
 });

@@ -14,7 +14,10 @@ import { GetPaymentPage } from "@application/payment/get-payment-page.use-case";
 import type { PaymentPage } from "@domain/repositories/payment.repository";
 import { useServices } from "@providers/service-context";
 
-export function usePaymentPage(bookingId: string): {
+export function usePaymentPage(
+  bookingId: string,
+  eventId?: string,
+): {
   page: PaymentPage | undefined;
   isLoading: boolean;
   error: Error | null;
@@ -35,8 +38,10 @@ export function usePaymentPage(bookingId: string): {
   });
   useEffect(() => {
     if (!bookingId || !query.data) return;
-    void paymentJourneyStorage.save(bookingId).catch(() => undefined);
-  }, [bookingId, paymentJourneyStorage, query.data]);
+    void paymentJourneyStorage
+      .save({ bookingId, eventId })
+      .catch(() => undefined);
+  }, [bookingId, eventId, paymentJourneyStorage, query.data]);
   return {
     page: query.data,
     isLoading: query.isLoading,

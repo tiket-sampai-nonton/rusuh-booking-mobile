@@ -22,8 +22,8 @@ import {
   Header,
   ToastProvider,
   EventCard,
-} from "@presentation/components/design-system";
-import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
+} from "@presentation/components";
+import { createPrimaryNavLinks } from "@presentation/components/primary-navigation";
 import {
   FilterModal,
   type FilterValue,
