@@ -10,7 +10,7 @@ import {
 import {
   CachedImage,
   type CachedImageProps,
-} from "@presentation/components/design-system/CachedImage";
+} from "@presentation/components/CachedImage";
 
 export type LazyCachedImageProps = CachedImageProps & {
   /** Defer browser downloads until the image approaches the visible viewport. */

@@ -22,6 +22,8 @@ export const ID_MONTHS = [
   "Des",
 ] as const;
 
+const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+
 /**
  * Format an ISO-8601 timestamp as `DD MMM YYYY` in Indonesian month names.
  * Returns `""` for a missing/invalid date so a caller can render a dash.
@@ -45,6 +47,28 @@ export function formatTimeID(iso: string | null | undefined): string {
   const hh = d.getUTCHours().toString().padStart(2, "0");
   const mm = d.getUTCMinutes().toString().padStart(2, "0");
   return `${hh}:${mm} WIB`;
+}
+
+/** Format an ISO timestamp in the WIB time zone for ticket/event display. */
+export function formatWIBDateID(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const timestamp = Date.parse(iso);
+  if (!Number.isFinite(timestamp)) return "";
+  const date = new Date(timestamp + WIB_OFFSET_MS);
+  const day = date.getUTCDate().toString().padStart(2, "0");
+  const month = ID_MONTHS[date.getUTCMonth()];
+  return `${day} ${month} ${date.getUTCFullYear()}`;
+}
+
+/** Format an ISO timestamp clock time as `HH:MM WIB`. */
+export function formatWIBTimeID(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const timestamp = Date.parse(iso);
+  if (!Number.isFinite(timestamp)) return "";
+  const date = new Date(timestamp + WIB_OFFSET_MS);
+  const hours = date.getUTCHours().toString().padStart(2, "0");
+  const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+  return `${hours}:${minutes} WIB`;
 }
 
 /** Format a milliseconds-remaining value as `MM:SS` (for payment/booking timers). */

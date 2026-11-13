@@ -1,4 +1,4 @@
-export { ArrowIcon } from "./ArrowIcon";
+export { Icon } from "./Glyph";
 export { CalendarIcon } from "./CalendarIcon";
 export { CheckIcon } from "./CheckIcon";
 export { ClockIcon } from "./ClockIcon";

@@ -2,6 +2,8 @@ import {
   formatCountdown,
   formatDateID,
   formatTimeID,
+  formatWIBDateID,
+  formatWIBTimeID,
 } from "@domain/services/date-format";
 
 describe("formatDateID", () => {
@@ -28,6 +30,15 @@ describe("formatTimeID", () => {
   it("returns an empty string for missing or invalid input", () => {
     expect(formatTimeID(undefined)).toBe("");
     expect(formatTimeID("nope")).toBe("");
+  });
+});
+
+describe("WIB ticket formatting", () => {
+  it("converts UTC timestamps to WIB, including the next calendar day", () => {
+    expect(formatWIBDateID("2026-11-15T20:30:00.000Z")).toBe("16 Nov 2026");
+    expect(formatWIBTimeID("2026-11-15T12:30:00.000Z")).toBe("19:30 WIB");
+    expect(formatWIBDateID("invalid")).toBe("");
+    expect(formatWIBTimeID(undefined)).toBe("");
   });
 });
 

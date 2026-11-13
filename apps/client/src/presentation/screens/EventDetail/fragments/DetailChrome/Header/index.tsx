@@ -2,7 +2,7 @@ import { Animated, Platform, Pressable, Text, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ArrowIcon } from "@presentation/components/ArrowIcon";
+import { Icon } from "@presentation/components/Icon";
 import { BrandMark } from "@presentation/components/BrandMark";
 import {
   designBorders,
@@ -101,7 +101,7 @@ export function Header({
               style={styles.backBtn}
             >
               <View style={detailHeaderStyles.webBackContent}>
-                <ArrowIcon direction="left" color={designColors.ink} />
+                <Icon direction="left" color={designColors.ink} />
                 {!isMobileWeb && (
                   <Text style={detailHeaderStyles.webBackLabel}>Kembali</Text>
                 )}

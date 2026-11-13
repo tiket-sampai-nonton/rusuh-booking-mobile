@@ -27,7 +27,7 @@ import {
   View,
   type ImageStyle,
 } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 
 import {
   designColors,
@@ -38,7 +38,7 @@ import {
   CalendarIcon,
   ClockIcon,
   PinIcon,
-} from "@presentation/components/ArrowIcon";
+} from "@presentation/components/Icon";
 
 import type { DetailHeroProps } from "../../interface";
 import { designDetailStyles as styles } from "../../style";

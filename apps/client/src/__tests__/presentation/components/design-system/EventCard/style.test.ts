@@ -12,7 +12,7 @@ import {
   styleForEventCardText11,
   styleForEventCardView12,
   styleForEventCardView13,
-} from "@presentation/components/design-system/EventCard/style";
+} from "@presentation/components/EventCard/style";
 import type { EventBadge } from "@domain/rules/event-display";
 
 describe("EventCard style variants", () => {

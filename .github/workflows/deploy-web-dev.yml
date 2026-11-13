@@ -443,6 +443,10 @@ jobs:
           esac
           if [ -n "$FAILED_JOBS" ]; then
             STATUS="FAILED — $FAILED_JOBS"
+          elif [ "$OTA_DECISION" = 'native-change-ota-skipped' ]; then
+            STATUS='NATIVE BUILD REQUIRED'
+          elif [ "$OTA_DECISION" = 'ota-disabled' ]; then
+            STATUS='PARTIAL RELEASE — OTA DISABLED'
           else
             STATUS="SUCCESS"
           fi

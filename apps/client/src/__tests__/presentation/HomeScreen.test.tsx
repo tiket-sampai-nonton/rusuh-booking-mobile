@@ -60,7 +60,7 @@ jest.mock("react-native-reanimated", () => {
     ) => callback,
   };
 });
-jest.mock("@presentation/components/design-system/HeroCarousel", () => {
+jest.mock("@presentation/components/HeroCarousel", () => {
   const ReactMock = require("react");
   const { Pressable, Text, View } = require("react-native");
   return {

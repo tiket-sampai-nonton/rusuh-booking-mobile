@@ -12,7 +12,7 @@
  */
 import { useCallback, useState } from "react";
 import { Platform, Pressable, View } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 import Animated, {
   Easing,
   interpolate,

@@ -23,17 +23,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import {
-  BottomNav,
-  Header,
-  navigateBottomTab,
-} from "@presentation/components/design-system";
-import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
+import { BottomNav, Header, navigateBottomTab } from "@presentation/components";
+import { createPrimaryNavLinks } from "@presentation/components/primary-navigation";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useAccountStore } from "@presentation/stores/account-store";
-import { EventCard } from "@presentation/components/design-system/EventCard";
+import { EventCard } from "@presentation/components/EventCard";
 import type { EventSummary } from "@domain/repositories/event.repository";
 import { gridItemStyle as homeGridItemStyle } from "../Home/fragments/HomeSections/fragments/EventsGrid/style";
 import { GridIcon } from "../Browse/fragments/BrowseResultsToolbar/icons/GridIcon";

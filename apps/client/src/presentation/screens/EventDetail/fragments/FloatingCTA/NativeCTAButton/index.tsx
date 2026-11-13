@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Animated, Pressable, Text } from "react-native";
 
-import { ArrowIcon } from "@presentation/components/ArrowIcon";
+import { Icon } from "@presentation/components/Icon";
 import { designColors } from "@presentation/theme/event-design-tokens";
 
 import { designDetailStyles as styles } from "../../../style";
@@ -47,7 +47,7 @@ export function NativeCTAButton({
         >
           {label}
         </Text>
-        {canJoin && <ArrowIcon color={designColors.ground} />}
+        {canJoin && <Icon color={designColors.ground} />}
       </Pressable>
     </Animated.View>
   );

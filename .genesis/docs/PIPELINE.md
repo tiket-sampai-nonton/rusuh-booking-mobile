@@ -213,7 +213,7 @@ After a successful merge into `develop`, the orchestrator automatically:
 3. Deploy the checked artifact to the dedicated preprod Cloudflare Pages project.
 4. If the change is OTA-compatible, publish JavaScript/assets to the EAS `development` channel. Otherwise, skip OTA and report that a native build is required.
 5. Record Git SHA, Expo runtime version, environment, OTA update ID (if published), and web deployment ID.
-6. Send one Telegram release summary with each job result and the failed job name(s), if any.
+6. Send one Telegram release summary with each job result and the failed job name(s), if any. If native-affecting changes skip OTA, headline the message `NATIVE BUILD REQUIRED`; do not label the release `SUCCESS`. If OTA is disabled, report a partial release.
 
 Firebase distribution is not part of the automatic post-merge path. An operator may manually select Firebase distribution in the same orchestrator; it builds a signed development APK using the development BE with mocks disabled and sends it to the QA tester group.
 
@@ -227,7 +227,7 @@ After the merge, the same orchestrator automatically:
 3. Deploy the checked artifact to the separate production Cloudflare Pages project.
 4. If the change is OTA-compatible, publish JavaScript/assets to the EAS `production` channel. Otherwise, skip OTA and report that a native build is required.
 5. Record Git SHA, Expo runtime version, environment, OTA update ID (if published), and web deployment ID.
-6. Send one Telegram release summary with each job result and the failed job name(s), if any.
+6. Send one Telegram release summary with each job result and the failed job name(s), if any. If native-affecting changes skip OTA, headline the message `NATIVE BUILD REQUIRED`; do not label the release `SUCCESS`. If OTA is disabled, report a partial release.
 7. Monitor native update adoption, crashes, web health, and critical booking-flow metrics; roll back either delivery independently if needed.
 
 Firebase production APK distribution is not automatic. An operator may manually select Firebase distribution in the same orchestrator; it builds a signed production APK with production configuration and sends it to the production tester group. Production signing credentials and Firebase settings must be stored in a protected `production` GitHub Environment.
@@ -330,7 +330,7 @@ Never store NIK, payment data, API secrets, signing keys, or service-account JSO
 ## 11. Rollback and failure handling
 
 - A failed quality gate blocks merge.
-- On each post-merge release or manual Firebase run, the Telegram summary job runs even when a gate or delivery job fails. Include the outcome of each job and identify the failed job(s); report a partial release when OTA is disabled or skipped for a native change. A notification failure must be visible as a failed job too.
+- On each post-merge release or manual Firebase run, the Telegram summary job runs even when a gate or delivery job fails. Include the outcome of each job and identify the failed job(s); report `NATIVE BUILD REQUIRED` when a native change skips OTA, and a partial release when OTA is disabled. Do not report either outcome as `SUCCESS`. A notification failure must be visible as a failed job too.
 - A failed OTA publication does not change the currently deployed update.
 - A bad development OTA is rolled back to the previous development update.
 - A bad production OTA is rolled back to the previous production update when runtime-compatible.

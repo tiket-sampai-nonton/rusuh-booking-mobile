@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
 import { IMAGE_FALLBACK } from "@presentation/constants/image-fallback";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 
 describe("CachedImage", () => {
   it("shows the bundled fallback after the remote image fails", () => {

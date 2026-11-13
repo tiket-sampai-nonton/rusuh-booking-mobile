@@ -29,7 +29,7 @@ jest.mock("react-native-reanimated", () => {
   const actual = jest.requireActual("react-native-reanimated/mock");
   return { ...actual, useReducedMotion: () => true };
 });
-jest.mock("@presentation/components/design-system/HeroCarousel", () => {
+jest.mock("@presentation/components/HeroCarousel", () => {
   const ReactMock = require("react");
   const { View } = require("react-native");
   return {

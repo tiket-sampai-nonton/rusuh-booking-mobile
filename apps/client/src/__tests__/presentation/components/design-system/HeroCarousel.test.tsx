@@ -30,7 +30,7 @@ jest.mock("@providers/service-context", () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { HeroCarousel } from "@presentation/components/design-system/HeroCarousel";
+import { HeroCarousel } from "@presentation/components/HeroCarousel";
 
 describe("HeroCarousel", () => {
   afterEach(() => {

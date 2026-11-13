@@ -91,7 +91,7 @@ describe("useNotifications (RBT-072)", () => {
     const container = createContainer({ useMocks: true });
     jest
       .spyOn(container.paymentJourneyStorage, "load")
-      .mockResolvedValue("bk-new");
+      .mockResolvedValue({ bookingId: "bk-new" });
     let handler:
       | ((data: Readonly<Record<string, unknown>> | undefined) => void)
       | undefined;
@@ -145,7 +145,7 @@ describe("useNotifications (RBT-072)", () => {
     const container = createContainer({ useMocks: true });
     jest
       .spyOn(container.paymentJourneyStorage, "load")
-      .mockResolvedValue("bk-current");
+      .mockResolvedValue({ bookingId: "bk-current" });
     let handler:
       | ((data: Readonly<Record<string, unknown>> | undefined) => void)
       | undefined;

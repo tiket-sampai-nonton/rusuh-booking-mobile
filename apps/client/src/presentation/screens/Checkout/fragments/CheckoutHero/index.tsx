@@ -7,7 +7,7 @@
  * - Black/white typography with uppercase title
  */
 import { Pressable, Text, View, type ImageStyle } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 
 import { eventImage } from "@domain/rules/event-image";
 

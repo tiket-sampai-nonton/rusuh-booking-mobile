@@ -15,7 +15,7 @@ import { useNavigation, useRouter, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { PlusIcon, WarningIcon } from "@presentation/components/ArrowIcon";
+import { PlusIcon, WarningIcon } from "@presentation/components/Icon";
 import { DomainError } from "@domain/errors/domain-error";
 import type { BookingSession } from "@domain/repositories/booking.repository";
 import type { DomainErrorKind } from "@domain/errors/domain-error";

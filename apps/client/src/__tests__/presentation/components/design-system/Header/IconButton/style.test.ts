@@ -3,7 +3,7 @@ import {
   iconButtonBackgroundColor,
   iconButtonForegroundColor,
   iconButtonShadowStyle,
-} from "@presentation/components/design-system/Header/IconButton/style";
+} from "@presentation/components/Header/IconButton/style";
 
 describe("header icon button pressed styles", () => {
   it("returns platform shadows and both foreground/background states", () => {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Platform, Pressable, Text, type ImageStyle } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 
 import { lineupStyles } from "../style";
 import type { LineupItem } from "../types";

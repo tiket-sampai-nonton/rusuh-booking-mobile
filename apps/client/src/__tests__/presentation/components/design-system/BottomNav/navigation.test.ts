@@ -1,4 +1,4 @@
-import { navigateBottomTab } from "../../../../../presentation/components/design-system/BottomNav/navigation";
+import { navigateBottomTab } from "../../../../../presentation/components/BottomNav/navigation";
 
 describe("navigateBottomTab", () => {
   const createRouter = () => ({

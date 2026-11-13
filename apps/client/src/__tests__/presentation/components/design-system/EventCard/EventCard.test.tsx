@@ -2,7 +2,7 @@ import { act, fireEvent, render } from "@testing-library/react-native";
 import { Image, Platform } from "react-native";
 
 import { EVENT_FIXTURES } from "@shared/test-fixtures/events.fixture";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 
 const mockResponsive = { isNative: true };
 let mockReducedMotion = false;
@@ -15,7 +15,7 @@ jest.mock("react-native-reanimated", () => ({
 }));
 
 // eslint-disable-next-line import/first
-import { EventCard } from "../../../../../presentation/components/design-system/EventCard/index";
+import { EventCard } from "../../../../../presentation/components/EventCard/index";
 
 describe("EventCard", () => {
   const originalPlatform = Platform.OS;

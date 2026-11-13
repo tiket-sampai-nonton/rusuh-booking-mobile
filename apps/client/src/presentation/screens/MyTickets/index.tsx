@@ -30,12 +30,8 @@ import {
 } from "./style";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import {
-  BottomNav,
-  Header,
-  navigateBottomTab,
-} from "@presentation/components/design-system";
-import { createPrimaryNavLinks } from "@presentation/components/design-system/primary-navigation";
+import { BottomNav, Header, navigateBottomTab } from "@presentation/components";
+import { createPrimaryNavLinks } from "@presentation/components/primary-navigation";
 import { LoginModal } from "@presentation/components/auth/LoginModal";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { useEvents } from "@presentation/hooks/useEvents";
@@ -410,6 +406,9 @@ export function MyTicketsScreen() {
     history?.pages,
   );
   const knownEvents = [...(data?.upcoming ?? []), ...(data?.history ?? [])];
+  const qrEvent = selectedBooking
+    ? knownEvents.find((event) => event.name === selectedBooking.eventName)
+    : activeEvent;
   const now = serverClock.serverNow();
   const isPastBooking = (booking: MyBookingSummary) =>
     bookingIsPast(booking, knownEvents, now);
@@ -441,13 +440,21 @@ export function MyTicketsScreen() {
     try {
       const tickets = localTickets.data?.tickets ?? [];
       if (!tickets.length) throw new Error("Tiket belum tersedia.");
-      const qrPayloads = tickets.map((ticket) => ticket.qrPayload);
       await downloadTickets(
         bookingId,
-        tickets.length,
-        qrPayloads,
-        activeEvent.name,
-        tickets.map((ticket) => ticket.ticketCode),
+        tickets.map((ticket, index) => ({
+          bookingId,
+          eventName: activeEvent.name,
+          venue: activeEvent.venue,
+          startsAt: activeEvent.startsAt,
+          attendeeName: ticket.attendeeName,
+          attendeeNikMasked: ticket.attendeeNikMasked,
+          categoryCode: ticket.categoryCode,
+          qrPayload: ticket.qrPayload,
+          ticketCode: ticket.ticketCode,
+          index,
+          total: tickets.length,
+        })),
       );
     } catch (error) {
       setDownloadError(
@@ -462,15 +469,24 @@ export function MyTicketsScreen() {
     if (!selectedBooking || !selectedTickets) return;
     setDownloadError("");
     try {
-      const qrPayloads = selectedTickets.tickets.map(
-        (ticket) => ticket.qrPayload,
+      const event = [...(data?.upcoming ?? []), ...(data?.history ?? [])].find(
+        (item) => item.name === selectedBooking.eventName,
       );
       await downloadTickets(
         selectedBooking.bookingId,
-        qrPayloads.length,
-        qrPayloads,
-        selectedBooking.eventName,
-        selectedTickets.tickets.map((ticket) => ticket.ticketCode),
+        selectedTickets.tickets.map((ticket, index) => ({
+          bookingId: selectedBooking.bookingId,
+          eventName: selectedBooking.eventName,
+          venue: event?.venue,
+          startsAt: event?.startsAt,
+          attendeeName: ticket.attendeeName,
+          attendeeNikMasked: ticket.attendeeNikMasked,
+          categoryCode: ticket.categoryCode,
+          qrPayload: ticket.qrPayload,
+          ticketCode: ticket.ticketCode,
+          index,
+          total: selectedTickets.tickets.length,
+        })),
       );
     } catch (error) {
       setDownloadError(
@@ -505,6 +521,8 @@ export function MyTicketsScreen() {
   const qrSheet = (
     <TicketQrSheet
       eventName={selectedBooking?.eventName ?? "QR Tiket Anda"}
+      venue={qrEvent?.venue}
+      startsAt={qrEvent?.startsAt}
       bookingId={selectedBooking?.bookingId ?? bookingId ?? "booking"}
       bookingSummary={selectedBooking ?? undefined}
       bookingTickets={

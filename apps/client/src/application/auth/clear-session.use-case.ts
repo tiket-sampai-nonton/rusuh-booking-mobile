@@ -1,21 +1,17 @@
 /**
  * ClearSession — application use case (RBT-023, E3).
  *
- * Removes the persisted auth token on sign-out via the {@link TokenStorage}
- * port (idempotent — clearing an empty store is a no-op). PURE TS:
- * constructor-injected port, domain-only imports. Thin by design.
+ * Removes app-owned account and active-journey data on sign-out through the
+ * {@link UserDataStorage} port. PURE TS: constructor-injected port, domain-only
+ * imports. Persistence details remain in infrastructure.
  */
-import type { TokenStorage } from "@domain/auth/token-storage.port";
-import type { BuyerEmailStorage } from "@domain/auth/buyer-email-storage.port";
+import type { UserDataStorage } from "@domain/services/user-data-storage.port";
 
 export class ClearSession {
-  constructor(
-    private readonly storage: TokenStorage,
-    private readonly buyerEmailStorage?: BuyerEmailStorage,
-  ) {}
+  constructor(private readonly userDataStorage: UserDataStorage) {}
 
-  /** Clear the persisted session token (sign-out). Resolves once removed. */
+  /** Clear auth, profile prefill, queue, payment, and idempotency storage. */
   async execute(): Promise<void> {
-    await Promise.all([this.storage.clear(), this.buyerEmailStorage?.clear()]);
+    await this.userDataStorage.clear();
   }
 }

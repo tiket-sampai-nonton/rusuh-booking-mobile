@@ -38,19 +38,19 @@ export function useNotifications(): void {
       const route = routeForTap(data as TappedNotificationData | undefined);
       if (!route) return;
       void Promise.all([paymentJourneyStorage.load(), queueMembership.load()])
-        .then(([activeBookingId, activeQueue]) => {
+        .then(([activePayment, activeQueue]) => {
           const routeMatch = /^\/(?:payment|success)\/([^/?#]+)/.exec(route);
           const linkedBookingId = routeMatch?.[1]
             ? decodeURIComponent(routeMatch[1])
             : undefined;
           const linkedToDifferentBooking =
             linkedBookingId &&
-            activeBookingId &&
-            linkedBookingId !== activeBookingId;
+            activePayment?.bookingId &&
+            linkedBookingId !== activePayment.bookingId;
           const homeWouldInterruptJourney =
-            route === "/" && Boolean(activeBookingId || activeQueue);
+            route === "/" && Boolean(activePayment?.bookingId || activeQueue);
           const oldPaymentLinkDuringQueue = Boolean(
-            linkedBookingId && activeQueue && !activeBookingId,
+            linkedBookingId && activeQueue && !activePayment?.bookingId,
           );
           if (
             linkedToDifferentBooking ||

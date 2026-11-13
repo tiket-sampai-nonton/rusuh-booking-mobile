@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Platform, View, type ImageStyle } from "react-native";
-import { CachedImage } from "@presentation/components/design-system/CachedImage";
+import { CachedImage } from "@presentation/components/CachedImage";
 import Animated, {
   interpolate,
   useAnimatedStyle,

@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 
-import { LockIcon } from "@presentation/components/ArrowIcon";
+import { LockIcon } from "@presentation/components/Icon";
 import { designColors } from "@presentation/theme";
 
 import { paymentSummaryStyles } from "../style";

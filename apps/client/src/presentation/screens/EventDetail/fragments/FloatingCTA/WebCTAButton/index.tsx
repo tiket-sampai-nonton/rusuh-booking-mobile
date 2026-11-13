@@ -1,6 +1,6 @@
 import { Animated, Pressable, Text, type ViewStyle } from "react-native";
 
-import { ArrowIcon } from "@presentation/components/ArrowIcon";
+import { Icon } from "@presentation/components/Icon";
 
 import { designDetailStyles as styles } from "../../../style";
 import type { CTAButtonProps } from "../types";
@@ -43,9 +43,7 @@ export function WebCTAButton({
         >
           {label}
         </Text>
-        {canJoin && (
-          <ArrowIcon color={styles.floatingCtaArrow.color as string} />
-        )}
+        {canJoin && <Icon color={styles.floatingCtaArrow.color as string} />}
       </Pressable>
     </Animated.View>
   );

@@ -15,9 +15,14 @@ export function PaymentJourneyRecoveryBridge() {
     checkedAtHome.current = true;
     void paymentJourneyStorage
       .load()
-      .then((bookingId) => {
-        if (bookingId) {
-          router.replace(`/payment/${encodeURIComponent(bookingId)}` as Href);
+      .then((reference) => {
+        if (reference?.bookingId) {
+          const eventQuery = reference.eventId
+            ? `?eventId=${encodeURIComponent(reference.eventId)}`
+            : "";
+          router.replace(
+            `/payment/${encodeURIComponent(reference.bookingId)}${eventQuery}` as Href,
+          );
         }
       })
       .catch(() => undefined);

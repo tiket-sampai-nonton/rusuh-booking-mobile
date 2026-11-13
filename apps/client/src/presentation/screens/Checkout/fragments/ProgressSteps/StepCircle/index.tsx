@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 
-import { CheckIcon } from "@presentation/components/ArrowIcon";
+import { CheckIcon } from "@presentation/components/Icon";
 import { designColors } from "@presentation/theme";
 
 import { stepCircleStyles } from "./style";

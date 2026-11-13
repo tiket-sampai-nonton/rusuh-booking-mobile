@@ -1,7 +1,7 @@
 /** Home screen sections composed from screen-owned fragments. */
 import { useMemo } from "react";
 import { View } from "react-native";
-import { Reveal } from "@presentation/components/design-system";
+import { Reveal } from "@presentation/components";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { HomeFooter } from "../HomeFooter";
 import type { HomeSectionsProps } from "../../interface";

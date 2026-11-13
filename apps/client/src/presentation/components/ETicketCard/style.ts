@@ -1,34 +1,92 @@
-/**  e-ticket styles — the dashed perforation divider (prototype `.ticket-divider`). */
 import { StyleSheet } from "react-native";
 
-import { designColors, designBorders } from "@presentation/theme";
+import {
+  designBorders,
+  designColors,
+  plusJakartaSansFonts,
+  withAlpha,
+} from "@presentation/theme";
 
-export const eTicketStyles = StyleSheet.create({
-  divider: {
-    borderTopWidth: 2,
-    borderStyle: "dashed",
-    borderTopColor: designColors.field,
-  },
-});
-
-export const componentStyles = StyleSheet.create({
-  elementBorderWidth0: {
+export const ticketStyles = StyleSheet.create({
+  card: {
+    width: "100%",
+    maxWidth: 520,
+    alignSelf: "center",
+    overflow: "hidden",
+    borderRadius: 24,
+    backgroundColor: designColors.ground,
     borderWidth: designBorders.standard,
-    borderColor: designColors.ink,
+    borderColor: withAlpha(designColors.ink, 0.08),
+  },
+  header: {
+    minHeight: 70,
+    paddingHorizontal: 18,
+    paddingVertical: 13,
+    justifyContent: "center",
+  },
+  headerTitle: {
+    color: designColors.ground,
+    fontFamily: plusJakartaSansFonts.extraBold,
+    fontSize: 16,
+    lineHeight: 21,
+  },
+  headerSubtitle: {
+    marginTop: 4,
+    color: withAlpha(designColors.ground, 0.88),
+    fontFamily: plusJakartaSansFonts.bold,
+    fontSize: 9,
+    letterSpacing: 1,
+  },
+  body: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 18 },
+  fieldRow: { flexDirection: "row", gap: 14, marginBottom: 13 },
+  field: { flex: 1, minWidth: 0 },
+  fieldRight: { alignItems: "flex-end" },
+  label: {
+    color: designColors.gray,
+    fontFamily: plusJakartaSansFonts.medium,
+    fontSize: 9,
+    letterSpacing: 1.1,
+    textTransform: "uppercase",
+  },
+  value: {
+    marginTop: 4,
+    color: designColors.ink,
+    fontFamily: plusJakartaSansFonts.bold,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  divider: {
+    borderTopWidth: 1,
+    borderStyle: "dashed",
+    borderTopColor: withAlpha(designColors.gray, 0.4),
+    marginTop: 2,
+    marginBottom: 15,
+  },
+  qrBox: {
+    width: 154,
+    height: 154,
+    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: withAlpha(designColors.gray, 0.24),
+    borderRadius: 14,
     backgroundColor: designColors.ground,
   },
-  elementBackgroundColor1: { backgroundColor: designColors.ink },
-  elementLetterSpacing2: { letterSpacing: -0.3 },
-  elementBackgroundColor3: { backgroundColor: designColors.ink },
-  elementColor4: { color: designColors.ink, letterSpacing: 1.5 },
-  elementBorderTopWidth5: {
-    borderTopWidth: designBorders.standard,
-    borderTopColor: designColors.ink,
-    paddingTop: 16,
+  ticketCode: {
+    marginTop: 12,
+    color: designColors.ink,
+    fontFamily: plusJakartaSansFonts.extraBold,
+    fontSize: 11,
+    letterSpacing: 2,
+    textAlign: "center",
   },
-  elementColor6: { color: designColors.ink },
-  elementColor7: { color: designColors.gray },
-  elementColor8: { color: designColors.gray },
-  elementColor9: { color: designColors.ink },
-  elementColor10: { color: designColors.gray },
+  reference: {
+    marginTop: 5,
+    color: designColors.gray,
+    fontFamily: plusJakartaSansFonts.regular,
+    fontSize: 8,
+    letterSpacing: 0.3,
+    textAlign: "center",
+  },
 });

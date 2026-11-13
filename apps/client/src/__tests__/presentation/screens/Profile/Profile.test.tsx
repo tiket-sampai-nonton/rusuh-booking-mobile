@@ -3,14 +3,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { Animated } from "react-native";
 
-import type { TokenStorage } from "@domain/auth/token-storage.port";
 import type {
   UserProfile,
   UserRepository,
 } from "@domain/repositories/user.repository";
 import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
-import { ToastProvider } from "@presentation/components/design-system/Toast";
+import { ToastProvider } from "@presentation/components/Toast";
 import { ProfileScreen } from "@presentation/screens/Profile";
 import { useAccountStore } from "@presentation/stores/account-store";
 
@@ -42,7 +41,7 @@ const returningProfile: UserProfile = {
 function renderProfile(
   overrides: {
     completeRegistration?: UserRepository["completeRegistration"];
-    clearToken?: TokenStorage["clear"];
+    clearUserData?: () => Promise<void>;
     logout?: UserRepository["logout"];
   } = {},
 ) {
@@ -54,10 +53,9 @@ function renderProfile(
       overrides.completeRegistration ??
       jest.fn().mockResolvedValue(returningProfile),
   };
-  const tokenStorage: TokenStorage = {
-    ...base.tokenStorage,
-    clear: overrides.clearToken ?? jest.fn().mockResolvedValue(undefined),
-  };
+  const clearUserData =
+    overrides.clearUserData ?? jest.fn().mockResolvedValue(undefined);
+  const userDataStorage = { clear: clearUserData };
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false, gcTime: Infinity },
@@ -66,14 +64,14 @@ function renderProfile(
   });
   const screen = render(
     <QueryClientProvider client={queryClient}>
-      <ServiceProvider container={{ ...base, userRepository, tokenStorage }}>
+      <ServiceProvider container={{ ...base, userRepository, userDataStorage }}>
         <ToastProvider>
           <ProfileScreen />
         </ToastProvider>
       </ServiceProvider>
     </QueryClientProvider>,
   );
-  return { ...screen, userRepository, tokenStorage };
+  return { ...screen, userRepository, clearUserData };
 }
 
 describe("ProfileScreen", () => {
@@ -170,30 +168,34 @@ describe("ProfileScreen", () => {
   });
 
   it("clears the session and profile on sign out", async () => {
-    const clearToken = jest.fn().mockResolvedValue(undefined);
+    const clearUserData = jest.fn().mockResolvedValue(undefined);
     useAccountStore.getState().setProfile(returningProfile);
-    const { getByTestId, getByText } = renderProfile({ clearToken });
+    const { getByTestId, getByText } = renderProfile({ clearUserData });
 
     fireEvent.press(getByTestId("profile-sign-out"));
 
     await waitFor(() => expect(getByText("Akun Tamu")).toBeTruthy());
     expect(getByText("Berhasil keluar dari akun.")).toBeTruthy();
-    expect(clearToken).toHaveBeenCalledTimes(1);
+    expect(clearUserData).toHaveBeenCalledTimes(1);
     expect(useAccountStore.getState().profile).toBeUndefined();
   });
 
-  it("shows a failure toast and keeps the account when logout fails", async () => {
+  it("clears local account data when server logout fails", async () => {
     useAccountStore.getState().setProfile(returningProfile);
-    const { getByTestId, getAllByText } = renderProfile({
+    const { getByTestId, getByText } = renderProfile({
       logout: jest.fn().mockRejectedValue(new Error("offline")),
     });
 
     fireEvent.press(getByTestId("profile-sign-out"));
 
     await waitFor(() =>
-      expect(getAllByText("Gagal keluar. Silakan coba lagi.")).toHaveLength(1),
+      expect(
+        getByText(
+          "Sesi lokal dihapus, tetapi server belum mengonfirmasi keluar.",
+        ),
+      ).toBeTruthy(),
     );
-    expect(useAccountStore.getState().profile).toEqual(returningProfile);
+    expect(useAccountStore.getState().profile).toBeUndefined();
   });
 
   it("supports desktop navigation and cancels an incomplete profile edit", () => {

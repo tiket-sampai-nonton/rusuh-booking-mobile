@@ -20,7 +20,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { createContainer, type Container } from "@providers/container";
 import { createQueryClient } from "@providers/query-client";
 import { ServiceProvider } from "@providers/service-context";
-import { ToastProvider } from "@presentation/components/design-system/Toast";
+import { ToastProvider } from "@presentation/components/Toast";
 import { NativeStatusBarBackdrop } from "@presentation/components/NativeStatusBarBackdrop";
 
 export interface AppProvidersProps {

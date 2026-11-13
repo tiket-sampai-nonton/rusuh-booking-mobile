@@ -34,9 +34,9 @@ export function QueueMembershipBridge() {
     }
     void paymentJourneyStorage
       .load()
-      .then((bookingId) => {
+      .then((reference) => {
         if (!active) return;
-        setHasPayment(Boolean(bookingId));
+        setHasPayment(Boolean(reference?.bookingId));
         setPaymentChecked(true);
       })
       .catch(() => {

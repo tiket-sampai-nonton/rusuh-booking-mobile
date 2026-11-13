@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { EventCard, Reveal } from "@presentation/components/design-system";
+import { EventCard, Reveal } from "@presentation/components";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import type { EventSummary } from "@domain/repositories/event.repository";
 import { styles, gridContainerStyle, gridItemStyle } from "./style";
