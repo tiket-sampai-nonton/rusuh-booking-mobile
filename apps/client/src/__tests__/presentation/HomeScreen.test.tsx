@@ -100,6 +100,7 @@ import { HomeScreen } from "@presentation/screens/Home";
 function repoReturning(events: readonly EventSummary[]): EventRepository {
   return {
     listEvents: async () => events,
+    getFacets: async () => ({ cities: [], genres: ["FESTIVAL", "JAZZ"] }),
     getEventDetail: async (id) =>
       events.find((e) => e.id === id) as EventDetail,
   };
@@ -300,11 +301,13 @@ describe("HomeScreen", () => {
     fireEvent.press(screen.getByTestId("login-cancel"));
     fireEvent.press(screen.getByTestId("filter-btn"));
     expect(screen.getByText("Saring Event")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("filter-genre-festival"));
+    await waitFor(() => screen.getByTestId("filter-genre-FESTIVAL"));
+    fireEvent.press(screen.getByTestId("filter-genre-FESTIVAL"));
     fireEvent.press(screen.getByTestId("filter-time-month"));
+    fireEvent.press(screen.getByTestId("filter-sort-furthest"));
     fireEvent.press(screen.getByTestId("filter-apply"));
     expect(mockRouter.navigate).toHaveBeenCalledWith(
-      "/browse?category=festival&time=month&sort=closest",
+      "/browse?genre=FESTIVAL&time=month&sort=furthest",
     );
   });
 

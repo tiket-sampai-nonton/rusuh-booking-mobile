@@ -14,6 +14,7 @@ import type {
 } from "@domain/repositories/event.repository";
 import { splitCatalog, type CatalogSplit } from "@domain/rules/event-display";
 import type { ServerClock } from "@domain/services/server-clock";
+import { catalogQuarter } from "@domain/rules/catalog-quarter";
 
 export class ListEvents {
   constructor(
@@ -26,10 +27,26 @@ export class ListEvents {
    * recent first). The split is taken on the server-authoritative clock so a
    * skewed device clock never miscategorises an event.
    */
-  async execute(query?: EventQuery): Promise<CatalogSplit> {
-    const list = query
-      ? await this.events.listEvents(query)
+  async execute(query?: EventQuery, quarter = false): Promise<CatalogSplit> {
+    // A catalog response anchors the clock before computing a WIB date range.
+    if (quarter && this.events.supportsServerFilters) {
+      await this.events.listEvents({ timeframe: "ALL" });
+      if (!this.clock.isSynchronized()) {
+        throw new Error("Waktu server belum tersedia. Silakan coba lagi.");
+      }
+    }
+    const effectiveQuery =
+      quarter && this.events.supportsServerFilters
+        ? { ...query, ...catalogQuarter(this.clock.serverNow()) }
+        : query;
+    const list = effectiveQuery
+      ? await this.events.listEvents(effectiveQuery)
       : await this.events.listEvents();
-    return splitCatalog(list, this.clock.serverNow());
+    const split = splitCatalog(list, this.clock.serverNow());
+    if (!effectiveQuery || !this.events.supportsServerFilters) return split;
+    return {
+      upcoming: list,
+      history: split.history,
+    };
   }
 }
