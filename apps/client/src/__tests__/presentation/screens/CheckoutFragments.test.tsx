@@ -7,9 +7,7 @@ import { ConsentGate } from "@presentation/screens/Checkout/fragments/ConsentGat
 import { CheckoutHero } from "@presentation/screens/Checkout/fragments/CheckoutHero";
 import { LeaveConfirm } from "@presentation/screens/Checkout/fragments/LeaveConfirm";
 import { TicketItem } from "@presentation/screens/Checkout/fragments/TicketItem";
-import {
-  componentStyles as ticketItemStyles,
-} from "@presentation/screens/Checkout/fragments/TicketItem/style";
+import { componentStyles as ticketItemStyles } from "@presentation/screens/Checkout/fragments/TicketItem/style";
 import { designColors } from "@presentation/theme";
 import {
   Field,
