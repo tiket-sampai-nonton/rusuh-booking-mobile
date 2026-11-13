@@ -3,6 +3,8 @@ import {
   appendRow,
   attendeeNiksUnique,
   buyerNikUsedOnce,
+  canUseBuyerDataForTicket,
+  checkoutTotalMinor,
   effectiveCap,
   isAttendeeBlocked,
   isAttendeeWarning,
@@ -11,11 +13,14 @@ import {
   isValidEmail,
   isValidNik,
   maskNik,
+  normalizeNikInput,
   patchRowAt,
   removeRowAt,
   resolveAttendeeNiks,
+  resolveBuyerTicketRows,
   setBuyerUseAt,
   type TicketRow,
+  validateCheckout,
 } from "@domain/rules/checkout";
 
 // `rowId` defaults to a value DERIVED from the row's content, so two rows with
@@ -112,19 +117,21 @@ describe("row-list transforms (RBT-051 add/remove/patch/single-use)", () => {
     expect(out[1].attendeeName).toBe("B2"); // patched (i === index arm)
   });
 
-  it("setBuyerUseAt is single-use: ON clears the others, OFF leaves them", () => {
+  it("buyer data is restricted to ticket one and cannot be assigned to later rows", () => {
     const rows = [row(), row()];
     const on0 = setBuyerUseAt(rows, 0, true);
     expect(on0[0].useBuyerNik).toBe(true);
     expect(on0[1].useBuyerNik).toBe(false);
-    // Turning ON row 1 clears row 0 (single-use across rows).
+    // A later ticket cannot take the buyer identity.
     const on1 = setBuyerUseAt(on0, 1, true);
-    expect(on1[0].useBuyerNik).toBe(false);
-    expect(on1[1].useBuyerNik).toBe(true);
-    // Turning OFF row 1 leaves the (already off) others as-is.
+    expect(on1[0].useBuyerNik).toBe(true);
+    expect(on1[1].useBuyerNik).toBe(false);
     const off1 = setBuyerUseAt(on1, 1, false);
-    expect(off1[0].useBuyerNik).toBe(false);
+    expect(off1[0].useBuyerNik).toBe(true);
     expect(off1[1].useBuyerNik).toBe(false);
+    expect(canUseBuyerDataForTicket(0)).toBe(true);
+    expect(canUseBuyerDataForTicket(1)).toBe(false);
+    expect(setBuyerUseAt(on1, 0, false)[0].useBuyerNik).toBe(false);
   });
 });
 
@@ -226,6 +233,7 @@ describe("isCheckoutReady end-to-end", () => {
     expect(
       isCheckoutReady({
         ...base,
+        buyerName: "Nama Pembeli",
         rows: [
           row({
             useBuyerNik: true,
@@ -243,5 +251,52 @@ describe("isCheckoutReady end-to-end", () => {
         rows: [row({ useBuyerNik: true }), row({ useBuyerNik: true })],
       }),
     ).toBe(false);
+  });
+});
+
+describe("checkout form rules remain in the domain", () => {
+  it("reports email confirmation, required name, and later-ticket buyer-data issues", () => {
+    const issues = validateCheckout({
+      buyerNik: "3171999999999999",
+      buyerEmail: "buyer@mail.com",
+      emailConfirmation: "other@mail.com",
+      rows: [
+        row(),
+        row({ rowId: "second", useBuyerNik: true, attendeeName: "" }),
+      ],
+      maxSelectable: 3,
+      consentGiven: true,
+    });
+    expect(issues.emailConfirmation).toBe("mismatch");
+    expect(issues.buyerName).toBe("required");
+    expect(issues.buyerDataPosition).toBe("invalid");
+    expect(issues.isValid).toBe(false);
+  });
+
+  it("normalizes NIK input and resolves the buyer ticket data for display", () => {
+    expect(normalizeNikInput("3171-abcd0101010001x")).toBe("31710101010001");
+    expect(
+      resolveBuyerTicketRows(
+        [row({ useBuyerNik: true })],
+        "Nama Pembeli",
+        "3171999999999999",
+      )[0],
+    ).toMatchObject({
+      attendeeName: "Nama Pembeli",
+      attendeeNik: "3171999999999999",
+      useBuyerNik: true,
+    });
+  });
+
+  it("calculates selected ticket totals from category minor prices", () => {
+    expect(
+      checkoutTotalMinor(
+        [row({ categoryId: "regular" }), row({ categoryId: "vip" })],
+        [
+          { categoryId: "regular", priceMinor: 185000 },
+          { categoryId: "vip", priceMinor: 350000 },
+        ],
+      ),
+    ).toBe(535000);
   });
 });

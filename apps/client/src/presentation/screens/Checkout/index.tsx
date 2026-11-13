@@ -22,19 +22,25 @@ import type { DomainErrorKind } from "@domain/errors/domain-error";
 
 import {
   appendRow,
-  attendeeNiksUnique,
+  assignDefaultCategory,
+  canUseBuyerDataForTicket,
+  checkoutTotalMinor,
+  defaultCheckoutCategory,
   effectiveCap,
   isAttendeeBlocked,
   isAttendeeWarning,
-  isCheckoutReady,
-  isValidEmail,
   isValidNik,
   maskNik,
+  normalizeNikInput,
   patchRowAt,
   removeRowAt,
+  resolveBuyerTicketRows,
   setBuyerUseAt,
   type AttendeeCheckResult,
+  type CheckoutIssue,
+  type CheckoutIssues,
   type TicketRow,
+  validateCheckout,
 } from "@domain/rules/checkout";
 import { ScreenFade } from "@presentation/components/ScreenFade";
 import { ConnectivityBanner } from "@presentation/components/ConnectivityBanner";
@@ -43,10 +49,13 @@ import { designColors } from "@presentation/theme";
 import { useAttendeeCheck } from "@presentation/hooks/useAttendeeCheck";
 import { useResponsive } from "@presentation/hooks/useResponsive";
 import { useRestoreBookingSession } from "@presentation/hooks/useBookingSession";
+import { useCancelBookingSession } from "@presentation/hooks/useBookingSession";
 import { useServerCountdown } from "@presentation/hooks/useServerCountdown";
 import { useHoldBooking } from "@presentation/hooks/useHoldBooking";
 import { useConnectivity } from "@presentation/hooks/useConnectivity";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
+import { useCheckoutAccountDetails } from "@presentation/hooks/useCheckoutAccountDetails";
+import { useClearQueueMembership } from "@presentation/hooks/useRestoreMembership";
 import {
   prefillFromProfile,
   useAccountStore,
@@ -54,7 +63,7 @@ import {
 import { useSessionStore } from "@presentation/stores/session-store";
 import { useServices } from "@providers/service-context";
 
-import { categoryPrice, emptyRow } from "./categories";
+import { emptyRow } from "./categories";
 import { CheckoutBar } from "./fragments/CheckoutBar";
 import { CheckoutHero } from "./fragments/CheckoutHero";
 import { CheckoutTopBar } from "./fragments/CheckoutTopBar";
@@ -73,8 +82,6 @@ import {
 
 import { apiErrorMessage } from "@presentation/utils/api-error-message";
 import { LoginModal } from "@presentation/components/auth/LoginModal";
-import { GetCheckoutUserDetails } from "@application/auth/get-checkout-user-details.use-case";
-import type { CheckoutUserDetails } from "@domain/repositories/user.repository";
 
 /** Map a resolved NIK verdict (+ pending flag) to the row's display status. */
 function rowStatus(
@@ -89,55 +96,43 @@ function rowStatus(
 }
 
 function requiredOrInvalidNikMessage(
-  submitAttempted: boolean,
-  nik: string,
+  issue: "required" | "invalid" | undefined,
   subject: "pembeli" | "penonton",
 ): string | undefined {
-  if (nik.length > 0 && !isValidNik(nik))
-    return `NIK ${subject} harus terdiri dari 16 digit.`;
-  if (submitAttempted && !nik.trim())
-    return `NIK ${subject} wajib diisi (16 digit).`;
+  if (issue === "invalid") return `NIK ${subject} harus terdiri dari 16 digit.`;
+  if (issue === "required") return `NIK ${subject} wajib diisi (16 digit).`;
   return undefined;
 }
 
 function requiredOrInvalidEmailMessage(
-  submitAttempted: boolean,
-  email: string,
+  issue: "required" | "invalid" | undefined,
 ): string | undefined {
-  if (email.length > 0 && !isValidEmail(email))
-    return email.trim()
-      ? "Masukkan alamat email yang valid."
-      : "Email wajib diisi.";
-  if (submitAttempted && !email.trim()) return "Email wajib diisi.";
+  if (issue === "invalid") return "Masukkan alamat email yang valid.";
+  if (issue === "required") return "Email wajib diisi.";
   return undefined;
 }
 
 function emailConfirmationMessage(
-  submitAttempted: boolean,
-  confirmation: string,
-  email: string,
+  issue: "required" | "mismatch" | undefined,
 ): string | undefined {
-  if (confirmation.length > 0 && confirmation.trim() !== email.trim())
+  if (issue === "mismatch")
     return "Konfirmasi email harus sama dengan email pembeli.";
-  if (submitAttempted && !confirmation.trim())
-    return "Konfirmasi email wajib diisi.";
+  if (issue === "required") return "Konfirmasi email wajib diisi.";
   return undefined;
 }
 
 function isAccountCheckout(
   fromAccount: boolean,
   hasAuthToken: boolean,
-  checkoutDetails: CheckoutUserDetails | null,
+  hasCheckoutDetails: boolean,
 ): boolean {
-  return fromAccount || hasAuthToken || checkoutDetails !== null;
+  return fromAccount || hasAuthToken || hasCheckoutDetails;
 }
 
 function buyerNameValidationMessage(
-  submitAttempted: boolean,
-  required: boolean,
-  buyerName: string,
+  issue: "required" | undefined,
 ): string | undefined {
-  return submitAttempted && required && !buyerName.trim()
+  return issue === "required"
     ? "Nama pembeli wajib diisi untuk menggunakan data pembeli."
     : undefined;
 }
@@ -206,20 +201,17 @@ function sessionErrorMessage(error: unknown): string | undefined {
 }
 
 function attendeeNikMessage(
-  submitAttempted: boolean,
-  nik: string,
+  issue: CheckoutIssue | undefined,
   useBuyerNik: boolean,
-  attendeeNiksAreUnique: boolean,
 ): string | undefined {
-  if (submitAttempted && !isValidNik(nik)) {
+  if (issue === "required")
     return useBuyerNik
       ? "Masukkan NIK pembeli yang valid pada bagian Data Pembeli."
       : "NIK penonton wajib diisi (16 digit).";
-  }
-  if (!isValidNik(nik) && nik.length > 0)
-    return "NIK penonton harus terdiri dari 16 digit.";
-  if (submitAttempted && !attendeeNiksAreUnique)
-    return "NIK ini sudah digunakan pada tiket lain.";
+  if (issue === "invalid") return "NIK penonton harus terdiri dari 16 digit.";
+  if (issue === "duplicate") return "NIK ini sudah digunakan pada tiket lain.";
+  if (issue === "already-registered")
+    return "NIK sudah terdaftar untuk event ini.";
   return undefined;
 }
 
@@ -336,7 +328,7 @@ interface CheckoutTicketFieldsProps {
   readonly buyerName: string;
   readonly buyerNik: string;
   readonly submitAttempted: boolean;
-  readonly attendeeNiksAreUnique: boolean;
+  readonly validationRows: CheckoutIssues["rows"];
   readonly checks: Readonly<Record<string, AttendeeCheckResult>>;
   readonly pending: Readonly<Record<string, boolean>>;
   readonly maxSelectable: number;
@@ -352,7 +344,7 @@ function CheckoutTicketFields({
   buyerName,
   buyerNik,
   submitAttempted,
-  attendeeNiksAreUnique,
+  validationRows,
   checks,
   pending,
   maxSelectable,
@@ -366,11 +358,10 @@ function CheckoutTicketFields({
     <Section title="Tiket" number={2}>
       {rows.map((row, index) => {
         const nik = row.useBuyerNik ? buyerNik : row.attendeeNik;
+        const rowIssues = validationRows[row.rowId] ?? {};
         const attendeeNikError = attendeeNikMessage(
-          submitAttempted,
-          nik,
+          submitAttempted || Boolean(nik) ? rowIssues.attendeeNik : undefined,
           row.useBuyerNik,
-          attendeeNiksAreUnique,
         );
         return (
           <TicketItem
@@ -380,12 +371,12 @@ function CheckoutTicketFields({
             buyerName={buyerName}
             buyerNik={buyerNik}
             categoryError={
-              submitAttempted && !row.categoryId
+              submitAttempted && rowIssues.category
                 ? "Pilih kategori tiket."
                 : undefined
             }
             attendeeNameError={
-              submitAttempted && !row.useBuyerNik && !row.attendeeName.trim()
+              submitAttempted && rowIssues.attendeeName
                 ? "Nama penonton wajib diisi."
                 : undefined
             }
@@ -394,6 +385,7 @@ function CheckoutTicketFields({
             onRemove={() => onRemove(index)}
             onPatch={(patch) => onPatch(index, patch)}
             onUseBuyer={(enabled) => onUseBuyer(index, enabled)}
+            showBuyerDataControl={canUseBuyerDataForTicket(index)}
             status={rowStatus(checks[nik], Boolean(pending[nik]))}
             categories={categories}
           />
@@ -460,13 +452,9 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { isDesktop, isMobileWeb } = useResponsive();
-  const {
-    serverClock,
-    bookingRepository,
-    queueMembership,
-    tokenStorage,
-    userRepository,
-  } = useServices();
+  const { serverClock } = useServices();
+  const clearQueueMembership = useClearQueueMembership();
+  const { cancel: cancelBookingSession } = useCancelBookingSession();
   const {
     session,
     isLoading,
@@ -486,18 +474,14 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   // re-render every tick; derive the prefill from it with useMemo.
   const profile = useAccountStore((s) => s.profile);
   const accountEmail = useAccountStore((s) => s.buyerEmail);
-  const getCheckoutUserDetails = useMemo(
-    () => new GetCheckoutUserDetails(userRepository),
-    [userRepository],
-  );
+  const { details: checkoutDetails, hasAuthToken } =
+    useCheckoutAccountDetails();
   const prefill = useMemo(
     () => prefillFromProfile(profile, accountEmail),
     [profile, accountEmail],
   );
   const [buyerName, setBuyerName] = useState(prefill.fullName ?? "");
   const [buyerNik, setBuyerNik] = useState("");
-  const [checkoutDetails, setCheckoutDetails] =
-    useState<CheckoutUserDetails | null>(null);
   const [buyerEmail, setBuyerEmail] = useState(prefill.email ?? "");
   const [emailConfirmation, setEmailConfirmation] = useState(
     prefill.email ?? "",
@@ -508,54 +492,31 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [authRecoveryOpen, setAuthRecoveryOpen] = useState(false);
-  const [hasAuthToken, setHasAuthToken] = useState(false);
   const [expiryCheckPending, setExpiryCheckPending] = useState(false);
   const [expiryCheckError, setExpiryCheckError] = useState<string>();
   const expiryCheckInFlight = useRef(false);
+  const handledExpiredHold = useRef<string | null>(null);
   const reconnectExpiryCheckHandled = useRef(false);
-  const checkoutDetailsRequestStarted = useRef(false);
   // Logged-in users consented at registration; guests consent inline (AC3).
   const isAccountUser = isAccountCheckout(
     prefill.fromAccount,
     hasAuthToken,
-    checkoutDetails,
+    checkoutDetails !== null,
   );
   const isGuest = !isAccountUser;
 
-  // Fetch authenticated /me data specifically for checkout. The raw NIK stays
-  // in this mounted screen's state and is never placed in shared/persisted
-  // account storage. Guests continue with manual entry.
   useEffect(() => {
-    if (checkoutDetailsRequestStarted.current) return;
-    let active = true;
-    void (async () => {
-      try {
-        const token = await tokenStorage.load();
-        if (!token || !active) return;
-        checkoutDetailsRequestStarted.current = true;
-        setHasAuthToken(true);
-        const details = await getCheckoutUserDetails.execute();
-        if (active) {
-          setCheckoutDetails(details);
-          if (details.fullName?.trim()) setBuyerName(details.fullName);
-          if (details.nik) {
-            setBuyerNik(details.nik.replace(/\D/g, "").slice(0, 16));
-          }
-          if (details.email.trim()) {
-            setBuyerEmail(details.email.trim());
-            setEmailConfirmation(details.email.trim());
-          }
-        }
-      } catch {
-        checkoutDetailsRequestStarted.current = false;
-        // Keep manual checkout available if /me is unavailable or the session
-        // has expired; the booking API remains authoritative.
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [getCheckoutUserDetails, prefill.fromAccount, tokenStorage]);
+    if (checkoutDetails?.fullName?.trim())
+      setBuyerName((current) => current || checkoutDetails.fullName || "");
+    if (checkoutDetails?.nik)
+      setBuyerNik(normalizeNikInput(checkoutDetails.nik));
+    if (checkoutDetails?.email.trim()) {
+      setBuyerEmail((current) => current || checkoutDetails.email.trim());
+      setEmailConfirmation(
+        (current) => current || checkoutDetails.email.trim(),
+      );
+    }
+  }, [checkoutDetails]);
 
   // Profile names may arrive after the checkout screen mounts. Fill an empty
   // buyer name field once, without overwriting anything the user entered.
@@ -636,18 +597,14 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
       if (result.isError) throw result.error ?? new Error("Status unavailable");
       const latest = result.data;
       if (!latest || latest.phase === "ENDED") {
-        void queueMembership.clear().catch(() => undefined);
-        router.replace(
-          `/failed/${sessionId}?reason=hold&eventId=${encodeURIComponent(session?.eventId ?? "")}` as Href,
-        );
+        await clearQueueMembership();
+        router.replace("/" as Href);
         return;
       }
       if (latest.serverTime) serverClock.sync(latest.serverTime);
       if (serverClock.remaining(latest.expiresAt) <= 0) {
-        void queueMembership.clear().catch(() => undefined);
-        router.replace(
-          `/failed/${sessionId}?reason=hold&eventId=${encodeURIComponent(latest.eventId)}` as Href,
-        );
+        await clearQueueMembership();
+        router.replace("/" as Href);
       }
     } catch (error) {
       setExpiryCheckError(
@@ -661,13 +618,11 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
       setExpiryCheckPending(false);
     }
   }, [
+    clearQueueMembership,
     connectivity.isOffline,
-    queueMembership,
     retry,
     router,
     serverClock,
-    session?.eventId,
-    sessionId,
   ]);
 
   const { remainingMs, expired } = useServerCountdown({
@@ -702,25 +657,48 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
       (sessionError.code === "SESSION_EXPIRED" ||
         sessionError.code === "SESSION_INVALID")
     ) {
-      router.replace(`/failed/${sessionId}?reason=hold` as Href);
+      let active = true;
+      void clearQueueMembership()
+        .then(() => {
+          if (active) router.replace("/" as Href);
+        })
+        .catch(() => undefined);
+      return () => {
+        active = false;
+      };
     }
-  }, [router, sessionError, sessionId]);
+  }, [clearQueueMembership, router, sessionError, sessionId]);
+
+  useEffect(() => {
+    if (
+      !holdError ||
+      holdError.kind !== "session_expired" ||
+      handledExpiredHold.current === holdError.code
+    )
+      return;
+
+    handledExpiredHold.current = holdError.code;
+    let active = true;
+    void clearQueueMembership()
+      .catch(() => undefined)
+      .finally(() => {
+        resetError();
+        if (active) router.replace("/" as Href);
+      });
+    return () => {
+      active = false;
+    };
+  }, [clearQueueMembership, holdError, resetError, router]);
 
   // Guests must tick the inline consent; logged-in users already consented.
   const consentGiven = isGuest ? consent : true;
 
   useEffect(() => {
-    const defaultCategoryId = session?.categories[0]?.categoryId;
+    const defaultCategoryId = defaultCheckoutCategory(
+      session?.categories ?? [],
+    );
     if (!defaultCategoryId) return;
-    setRows((current) => {
-      let changed = false;
-      const next = current.map((row) => {
-        if (row.categoryId) return row;
-        changed = true;
-        return { ...row, categoryId: defaultCategoryId };
-      });
-      return changed ? next : current;
-    });
+    setRows((current) => assignDefaultCategory(current, defaultCategoryId));
   }, [session?.categories]);
 
   // A ticket using buyer identity resolves to the current buyer name + NIK.
@@ -728,60 +706,49 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   // restores the identity they had entered for that ticket.
   const resolvedBuyerNik = buyerNik;
   const resolvedRows = useMemo(
-    () =>
-      rows.map((row) =>
-        row.useBuyerNik
-          ? {
-              ...row,
-              attendeeName: buyerName,
-              attendeeNik: resolvedBuyerNik,
-            }
-          : row,
-      ),
+    () => resolveBuyerTicketRows(rows, buyerName, resolvedBuyerNik),
     [rows, buyerName, resolvedBuyerNik],
   );
 
-  const ready = useMemo(
+  const validation = useMemo(
     () =>
-      buyerEmail.trim() === emailConfirmation.trim() &&
-      isCheckoutReady({
+      validateCheckout({
+        buyerName,
         buyerNik: resolvedBuyerNik,
         buyerEmail,
-        rows: resolvedRows,
+        emailConfirmation,
+        rows,
         maxSelectable: cap,
         attendeeChecks: checks,
         consentGiven,
       }),
     [
+      buyerName,
       resolvedBuyerNik,
       buyerEmail,
       emailConfirmation,
-      resolvedRows,
+      rows,
       cap,
       checks,
       consentGiven,
     ],
   );
+  const ready = validation.isValid;
 
-  const buyerNameRequired = rows.some((row) => row.useBuyerNik);
   const buyerNameError = buyerNameValidationMessage(
-    submitAttempted,
-    buyerNameRequired,
-    buyerName,
+    submitAttempted ? validation.buyerName : undefined,
   );
   const buyerNikError = requiredOrInvalidNikMessage(
-    submitAttempted,
-    buyerNik,
+    submitAttempted || Boolean(buyerNik) ? validation.buyerNik : undefined,
     "pembeli",
   );
   const buyerEmailError = requiredOrInvalidEmailMessage(
-    submitAttempted,
-    buyerEmail,
+    submitAttempted || Boolean(buyerEmail) ? validation.buyerEmail : undefined,
   );
   const emailConfirmationError = emailConfirmationMessage(
-    submitAttempted,
-    emailConfirmation,
-    buyerEmail,
+    submitAttempted || Boolean(emailConfirmation)
+      ? validation.emailConfirmation
+      : undefined,
   );
   const buyerNikHelperText = buyerNikHelperMessage(
     Boolean(checkoutDetails?.nik),
@@ -799,22 +766,13 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
   const emailConfirmationHelperText = checkoutDetails?.email
     ? "Konfirmasi mengikuti email akun dan tidak dapat diubah."
     : undefined;
-  const attendeeNiksAreUnique = attendeeNiksUnique(
-    resolvedRows,
-    resolvedBuyerNik,
-  );
   const consentErrorMessage =
-    submitAttempted && !consent
+    submitAttempted && validation.consent
       ? "Persetujuan diperlukan sebelum melanjutkan."
       : undefined;
 
   const totalMinor = useMemo(
-    () =>
-      rows.reduce(
-        (sum, row) =>
-          sum + categoryPrice(row.categoryId, session?.categories ?? []),
-        0,
-      ),
+    () => checkoutTotalMinor(rows, session?.categories ?? []),
     [rows, session?.categories],
   );
 
@@ -832,7 +790,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
     setRows((current) =>
       appendRow(
         current,
-        emptyRow(session?.categories[0]?.categoryId ?? ""),
+        emptyRow(defaultCheckoutCategory(session?.categories ?? [])),
         cap,
       ),
     );
@@ -966,9 +924,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
             buyerNameHelperText={buyerNameHelperText}
             buyerNameLocked={Boolean(checkoutDetails?.fullName?.trim())}
             buyerNik={buyerNik}
-            onBuyerNikChange={(value) =>
-              setBuyerNik(value.replace(/\D/g, "").slice(0, 16))
-            }
+            onBuyerNikChange={(value) => setBuyerNik(normalizeNikInput(value))}
             buyerNikError={buyerNikError}
             buyerNikHelperText={buyerNikHelperText}
             buyerNikLocked={Boolean(checkoutDetails?.nik)}
@@ -988,7 +944,7 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
             buyerName={buyerName}
             buyerNik={buyerNik}
             submitAttempted={submitAttempted}
-            attendeeNiksAreUnique={attendeeNiksAreUnique}
+            validationRows={validation.rows}
             checks={checks}
             pending={pending}
             maxSelectable={cap}
@@ -1026,8 +982,8 @@ export function CheckoutScreen({ sessionId }: CheckoutScreenProps) {
             // Leaving releases the selection session → re-queue from home.
             void (async () => {
               try {
-                await bookingRepository.cancelSession?.(sessionId);
-                await queueMembership.clear();
+                await cancelBookingSession(sessionId);
+                await clearQueueMembership();
                 setConfirmLeave(false);
                 router.replace("/" as Href);
               } catch {

@@ -57,6 +57,7 @@ export interface TicketItemProps {
   readonly onRemove: () => void;
   readonly onPatch: (p: Partial<TicketRow>) => void;
   readonly onUseBuyer: (on: boolean) => void;
+  readonly showBuyerDataControl: boolean;
   /** Attendee-NIK availability status for this row (RBT-052 AC2). */
   readonly status?: RowCheckStatus;
   readonly categories: readonly BookingCategory[];

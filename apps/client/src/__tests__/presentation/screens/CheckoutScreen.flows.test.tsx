@@ -457,4 +457,58 @@ describe("CheckoutScreen — attendee checks + consent + buyer (RBT-052/053)", (
       expect.stringContaining("/payment/"),
     );
   });
+
+  it("clears the queue and returns home when hold confirms the session expired", async () => {
+    useAccountStore.getState().setProfile(LOGGED_IN);
+    const clearMembership = jest.fn(async () => undefined);
+    const repo: BookingRepository = {
+      ...verdictRepo(SESSION),
+      hold: async () => {
+        throw mapError({ code: "SESSION_EXPIRED" });
+      },
+    };
+    renderWithProviders(<CheckoutScreen sessionId="sess-1" />, {
+      container: {
+        bookingRepository: repo,
+        queueMembership: {
+          save: async () => undefined,
+          load: async () => null,
+          clear: clearMembership,
+        },
+      },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("ticket-row-0")).toBeTruthy(),
+    );
+    fireEvent.changeText(screen.getByTestId("buyer-nik"), "3171999999999999");
+    fireEvent.changeText(screen.getByTestId("buyer-email"), "buyer@mail.com");
+    fireEvent.changeText(
+      screen.getByTestId("buyer-email-confirmation"),
+      "buyer@mail.com",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("attendee-name-0"),
+      "Penonton Satu",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("attendee-nik-0"),
+      "3171010101010001",
+    );
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("checkout-submit").props.accessibilityState
+            .disabled,
+        ).toBe(false),
+      { timeout: 3000 },
+    );
+
+    fireEvent.press(screen.getByTestId("checkout-submit"));
+
+    await waitFor(() => expect(clearMembership).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/"));
+    expect(mockRouter.replace).not.toHaveBeenCalledWith(
+      expect.stringContaining("/payment/"),
+    );
+  });
 });
