@@ -49,6 +49,7 @@ export function gridItemStyle(
 
   const style: ViewStyle = {
     width: `${100 / columns}%` as `${number}%`,
+    backgroundColor: designColors.ground,
     borderRightWidth: isLastInRow ? 0 : GRID_GAP,
     borderBottomWidth: isLastRow ? 0 : GRID_GAP,
     borderColor: designColors.ink,
