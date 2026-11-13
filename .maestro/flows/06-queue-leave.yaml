@@ -1,0 +1,21 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 06-queue-leave
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/join.yaml
+- extendedWaitUntil:
+    visible:
+      id: waiting-leave
+    timeout: 30000
+- tapOn:
+    id: waiting-leave
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: waiting-leave-modal
+- tapOn: Keluar dari Antrean
+- extendedWaitUntil:
+    visible:
+      id: home-scroll
+    timeout: 30000

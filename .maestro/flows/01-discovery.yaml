@@ -1,0 +1,24 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 01-discovery
+tags:
+  - regression
+  - smoke
+---
+- runFlow: ../helpers/start.yaml
+- tapOn:
+    id: bottom-nav-browse
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: browse-scroll
+    timeout: 30000
+- assertVisible:
+    id: browse-count
+- openLink:
+    link: rusuhbooking://history
+    autoVerify: true
+- extendedWaitUntil:
+    visible:
+      id: history-grid
+    timeout: 30000
+- runFlow: ../helpers/event.yaml

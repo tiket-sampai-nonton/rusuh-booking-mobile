@@ -1,0 +1,17 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: checkout
+tags:
+  - regression
+---
+- runFlow: join.yaml
+- extendedWaitUntil:
+    visible:
+      id: checkout-scroll
+    timeout: 60000
+- assertVisible:
+    id: checkout-timer
+- scrollUntilVisible:
+    element:
+      id: buyer-name
+    direction: DOWN
+    timeout: 20000

@@ -1,0 +1,32 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 19-attendee-check-limit
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/checkout.yaml
+- scrollUntilVisible:
+    element:
+      id: cat-0-REG
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: cat-0-REG
+    waitToSettleTimeoutMs: 200
+- scrollUntilVisible:
+    element:
+      id: attendee-nik-0
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: attendee-nik-0
+    waitToSettleTimeoutMs: 200
+- inputText: "9900000000000099"
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: attendee-status-0
+    timeout: 30000
+- assertVisible:
+    id: attendee-status-0
+    text: .*Batas pengecekan tercapai.*

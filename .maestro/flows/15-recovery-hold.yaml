@@ -1,0 +1,19 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 15-recovery-hold
+tags:
+  - regression
+  - recovery
+---
+- runFlow: ../helpers/start.yaml
+- openLink:
+    link: rusuhbooking://failed/maestro?reason=hold&eventId=evt-1
+    autoVerify: true
+- extendedWaitUntil:
+    visible:
+      id: expired-recovery
+    timeout: 30000
+- assertVisible:
+    id: expired-title
+- tapOn:
+    id: expired-requeue
+    waitToSettleTimeoutMs: 200

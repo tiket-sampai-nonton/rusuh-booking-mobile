@@ -1,0 +1,21 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: pay
+tags:
+  - regression
+---
+- runFlow: hold.yaml
+- scrollUntilVisible:
+    element:
+      id: method-VA_BCA
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: method-VA_BCA
+    waitToSettleTimeoutMs: 200
+- tapOn:
+    id: pay-now
+    waitToSettleTimeoutMs: 200
+- extendedWaitUntil:
+    visible:
+      id: snap-screen
+    timeout: 30000

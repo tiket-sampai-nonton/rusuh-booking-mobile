@@ -3,7 +3,7 @@
  * Re-verifies PAID; shows orderId/qty/amount/MASKED NIK; failed → recovery.
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
 
 import type {
@@ -18,9 +18,19 @@ import { createContainer } from "@providers/container";
 import { ServiceProvider } from "@providers/service-context";
 import { SuccessScreen } from "@presentation/screens/Success";
 import { useSessionStore } from "@presentation/stores/session-store";
+import { InMemoryPaymentJourneyStorage } from "@infrastructure/platform/payment-journey-storage";
+import { InMemoryQueueMembership } from "@infrastructure/__fixtures__/in-memory-queue-membership";
 
 const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
-const mockNavigation = { addListener: jest.fn(() => jest.fn()) };
+type NavigationEvent = {
+  data: { action: { type: string } };
+  preventDefault: () => void;
+};
+const mockNavigation = {
+  addListener: jest.fn(
+    (_name: string, _listener: (event: NavigationEvent) => void) => jest.fn(),
+  ),
+};
 const mockDownloadTickets = jest.fn(async () => undefined);
 jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
@@ -71,7 +81,11 @@ class StatusRepo implements PaymentRepository {
   }
 }
 
-function renderScreen(status: PaymentStatus, bookingId = "bk-1") {
+function renderScreen(
+  status: PaymentStatus,
+  bookingId = "bk-1",
+  overrides: Partial<Container> = {},
+) {
   const base = createContainer({ useMocks: true });
   const container: Container = {
     ...base,
@@ -98,6 +112,7 @@ function renderScreen(status: PaymentStatus, bookingId = "bk-1") {
         };
       },
     },
+    ...overrides,
   };
   const qc = new QueryClient({
     defaultOptions: {
@@ -158,7 +173,110 @@ describe("SuccessScreen (RBT-070)", () => {
       expect(screen.getByTestId("success-home")).toBeTruthy(),
     );
     fireEvent.press(screen.getByTestId("success-home"));
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/"));
+  });
+
+  it("clears the paid journey before returning Home so recovery cannot reopen it", async () => {
+    const paymentJourneyStorage = new InMemoryPaymentJourneyStorage();
+    const queueMembership = new InMemoryQueueMembership();
+    await paymentJourneyStorage.save({ bookingId: "bk-1", eventId: "evt-1" });
+    await queueMembership.save({ eventId: "evt-1", queueId: "q-1" });
+    const screen = renderScreen("PAID", "bk-1", {
+      paymentJourneyStorage,
+      queueMembership,
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("success-home")).toBeTruthy(),
+    );
+
+    await act(async () => fireEvent.press(screen.getByTestId("success-home")));
+
+    expect(await paymentJourneyStorage.load()).toBeNull();
+    expect(await queueMembership.load()).toBeNull();
     expect(mockRouter.replace).toHaveBeenCalledWith("/");
+  });
+
+  it("keeps recovery references while the authoritative payment is pending", async () => {
+    const paymentJourneyStorage = new InMemoryPaymentJourneyStorage();
+    const queueMembership = new InMemoryQueueMembership();
+    await paymentJourneyStorage.save({ bookingId: "bk-1", eventId: "evt-1" });
+    await queueMembership.save({ eventId: "evt-1", queueId: "q-1" });
+    const screen = renderScreen("AWAITING_PAYMENT", "bk-1", {
+      paymentJourneyStorage,
+      queueMembership,
+    });
+    await waitFor(() =>
+      expect(screen.getByText("Menyiapkan tiket…")).toBeTruthy(),
+    );
+
+    expect(await paymentJourneyStorage.load()).toEqual({
+      bookingId: "bk-1",
+      eventId: "evt-1",
+    });
+    expect(await queueMembership.load()).toEqual({
+      eventId: "evt-1",
+      queueId: "q-1",
+    });
+  });
+
+  it("does not erase a newer journey when viewing an older paid ticket", async () => {
+    const paymentJourneyStorage = new InMemoryPaymentJourneyStorage();
+    const queueMembership = new InMemoryQueueMembership();
+    await paymentJourneyStorage.save({
+      bookingId: "bk-new",
+      eventId: "evt-new",
+    });
+    await queueMembership.save({ eventId: "evt-new", queueId: "q-new" });
+    const screen = renderScreen("PAID", "bk-1", {
+      paymentJourneyStorage,
+      queueMembership,
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("success-home")).toBeTruthy(),
+    );
+
+    await act(async () => fireEvent.press(screen.getByTestId("success-home")));
+
+    expect(await paymentJourneyStorage.load()).toEqual({
+      bookingId: "bk-new",
+      eventId: "evt-new",
+    });
+    expect(await queueMembership.load()).toEqual({
+      eventId: "evt-new",
+      queueId: "q-new",
+    });
+  });
+
+  it("preserves pending recovery when Back is pressed before payment is verified", async () => {
+    const paymentJourneyStorage = new InMemoryPaymentJourneyStorage();
+    const queueMembership = new InMemoryQueueMembership();
+    await paymentJourneyStorage.save({ bookingId: "bk-1", eventId: "evt-1" });
+    await queueMembership.save({ eventId: "evt-1", queueId: "q-1" });
+    const screen = renderScreen("AWAITING_PAYMENT", "bk-1", {
+      paymentJourneyStorage,
+      queueMembership,
+    });
+    await waitFor(() =>
+      expect(screen.getByText("Menyiapkan tiket…")).toBeTruthy(),
+    );
+    const beforeRemove = mockNavigation.addListener.mock.calls.at(-1)?.[1];
+    expect(beforeRemove).toBeDefined();
+
+    await act(async () => {
+      beforeRemove?.({
+        data: { action: { type: "GO_BACK" } },
+        preventDefault: jest.fn(),
+      });
+    });
+
+    expect(await paymentJourneyStorage.load()).toEqual({
+      bookingId: "bk-1",
+      eventId: "evt-1",
+    });
+    expect(await queueMembership.load()).toEqual({
+      eventId: "evt-1",
+      queueId: "q-1",
+    });
   });
 
   it("shows the MASKED NIK, never a raw 16-digit NIK", async () => {

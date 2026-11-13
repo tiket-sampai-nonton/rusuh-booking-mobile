@@ -78,7 +78,7 @@ function wrapper(repo: BookingRepository, queryRetry: false | number = false) {
 describe("useCreateBookingSession", () => {
   beforeEach(() => useSessionStore.getState().reset());
 
-  it("creates a session and records sessionId in the store", async () => {
+  it("creates a session and keeps its event for payment and e-ticket details", async () => {
     const { result } = renderHook(() => useCreateBookingSession(), {
       wrapper: wrapper(new FakeBookingRepo()),
     });
@@ -87,13 +87,14 @@ describe("useCreateBookingSession", () => {
     await waitFor(() =>
       expect(useSessionStore.getState().sessionId).toBe("sess-1"),
     );
+    expect(useSessionStore.getState().eventId).toBe("evt-7");
   });
 });
 
 describe("useRestoreBookingSession", () => {
   beforeEach(() => useSessionStore.getState().reset());
 
-  it("restores the current session + records it", async () => {
+  it("restores the event context with the current session after a cold start", async () => {
     const { result } = renderHook(() => useRestoreBookingSession(true), {
       wrapper: wrapper(new FakeBookingRepo()),
     });
@@ -101,6 +102,7 @@ describe("useRestoreBookingSession", () => {
       expect(result.current.session?.sessionId).toBe("sess-1"),
     );
     expect(useSessionStore.getState().sessionId).toBe("sess-1");
+    expect(useSessionStore.getState().eventId).toBe("evt-1");
   });
 
   it("returns null session when none active (no store write)", async () => {

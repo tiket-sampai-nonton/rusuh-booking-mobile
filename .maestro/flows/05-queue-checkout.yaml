@@ -1,0 +1,16 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 05-queue-checkout
+tags:
+  - regression
+  - smoke
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/checkout.yaml
+- scrollUntilVisible:
+    element:
+      id: buyer-email
+    direction: DOWN
+- assertVisible:
+    id: buyer-email
+- assertNotVisible:
+    id: login-card

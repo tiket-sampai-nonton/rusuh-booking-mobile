@@ -1,0 +1,89 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: fill-checkout
+tags:
+  - regression
+---
+- scrollUntilVisible:
+    element:
+      id: buyer-name
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: buyer-name
+    waitToSettleTimeoutMs: 200
+- inputText: Maestro Guest
+- assertVisible:
+    id: buyer-name
+    text: Maestro Guest
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: buyer-nik
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: buyer-nik
+    waitToSettleTimeoutMs: 200
+- inputText: "9900000000000001"
+- assertVisible:
+    id: buyer-nik
+    text: "9900000000000001"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: buyer-email
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: buyer-email
+    waitToSettleTimeoutMs: 200
+- inputText: maestro@example.test
+- assertVisible:
+    id: buyer-email
+    text: maestro@example.test
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: buyer-email-confirmation
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: buyer-email-confirmation
+    waitToSettleTimeoutMs: 200
+- inputText: maestro@example.test
+- assertVisible:
+    id: buyer-email-confirmation
+    text: maestro@example.test
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: cat-0-REG
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: cat-0-REG
+    waitToSettleTimeoutMs: 200
+- scrollUntilVisible:
+    element:
+      id: use-buyer-0
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: use-buyer-0
+    retryTapIfNoChange: false
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: use-buyer-0
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: checkout-consent
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: checkout-consent
+    retryTapIfNoChange: false
+    waitToSettleTimeoutMs: 200
+- assertVisible:
+    id: checkout-consent
+    checked: true

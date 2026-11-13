@@ -1,0 +1,41 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 09-ticket-cap
+tags:
+  - regression
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/checkout.yaml
+- scrollUntilVisible:
+    element:
+      id: add-ticket
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: add-ticket
+    waitToSettleTimeoutMs: 200
+- scrollUntilVisible:
+    element:
+      id: add-ticket
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: add-ticket
+    waitToSettleTimeoutMs: 200
+- scrollUntilVisible:
+    element:
+      id: add-ticket
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: add-ticket
+    enabled: false
+- scrollUntilVisible:
+    element:
+      id: remove-ticket-2
+    direction: UP
+    timeout: 20000
+- tapOn:
+    id: remove-ticket-2
+    waitToSettleTimeoutMs: 200
+- assertNotVisible:
+    id: ticket-row-2

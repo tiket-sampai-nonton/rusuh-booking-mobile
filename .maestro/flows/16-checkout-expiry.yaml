@@ -1,0 +1,15 @@
+appId: com.tiketsampainonton.rusuhbooking
+name: 16-checkout-expiry
+tags:
+  - slow
+---
+- runFlow: ../helpers/start.yaml
+- runFlow: ../helpers/checkout.yaml
+- extendedWaitUntil:
+    visible:
+      id: expired-recovery
+    timeout: 360000
+- assertVisible:
+    id: expired-title
+- assertNotVisible:
+    id: checkout-submit

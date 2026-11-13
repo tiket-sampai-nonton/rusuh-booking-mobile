@@ -14,7 +14,7 @@
  * success card with a dark summary, white-primary / outline-secondary actions.
  */
 import { useNavigation, useRouter, type Href } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -33,6 +33,8 @@ import { CheckIcon, MailIcon, Icon } from "@presentation/components/Icon";
 import { useVerifyPayment } from "@presentation/hooks/useVerifyPayment";
 import { useSuccessTickets } from "@presentation/hooks/useSuccessTickets";
 import { useEventDetail } from "@presentation/hooks/useEventDetail";
+import { useClearQueueMembership } from "@presentation/hooks/useRestoreMembership";
+import { useServices } from "@providers/service-context";
 
 import { useSessionStore } from "@presentation/stores/session-store";
 import { useAccountStore } from "@presentation/stores/account-store";
@@ -130,6 +132,8 @@ export function SuccessScreen({
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { isMobileWeb } = useResponsive();
+  const { paymentJourneyStorage } = useServices();
+  const clearQueueMembership = useClearQueueMembership();
   const profile = useAccountStore((state) => state.profile);
   const attemptId = useSessionStore((s) => s.attemptId);
   const amountMinor = useSessionStore((s) => s.amountMinor);
@@ -156,6 +160,26 @@ export function SuccessScreen({
   const count = issuedTickets.length;
   const [downloadError, setDownloadError] = useState("");
 
+  const clearCompletedJourney = useCallback(async (): Promise<void> => {
+    if (verdict !== "paid") return;
+    const reference = await paymentJourneyStorage.load();
+    // An old ticket must not erase recovery for a newer booking.
+    if (reference?.bookingId !== bookingId) return;
+    await clearQueueMembership();
+    await paymentJourneyStorage.clear();
+  }, [bookingId, clearQueueMembership, paymentJourneyStorage, verdict]);
+
+  useEffect(() => {
+    if (verdict === "paid") void clearCompletedJourney().catch(() => undefined);
+  }, [clearCompletedJourney, verdict]);
+
+  const handleHome = useCallback((): void => {
+    // Finish cleanup before landing bridges can try to restore this paid order.
+    void clearCompletedJourney()
+      .catch(() => undefined)
+      .then(() => router.replace((profile ? "/my-tickets" : "/") as Href));
+  }, [clearCompletedJourney, profile, router]);
+
   useEffect(() => {
     return navigation.addListener("beforeRemove", (event) => {
       const actionType = event.data.action.type;
@@ -165,10 +189,10 @@ export function SuccessScreen({
         actionType === "POP_TO_TOP"
       ) {
         event.preventDefault();
-        router.replace("/" as Href);
+        handleHome();
       }
     });
-  }, [navigation, profile, router]);
+  }, [handleHome, navigation]);
 
   const handleDownload = async () => {
     setDownloadError("");
@@ -247,7 +271,7 @@ export function SuccessScreen({
           buyerNikMasked={buyerNikMasked}
           event={event}
           onDownload={handleDownload}
-          onHome={() => router.replace((profile ? "/my-tickets" : "/") as Href)}
+          onHome={handleHome}
           downloadError={downloadError}
         />
       ) : null}
