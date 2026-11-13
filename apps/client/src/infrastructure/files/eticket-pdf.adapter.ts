@@ -22,7 +22,8 @@ type PdfLibrary = typeof import("pdf-lib");
 type PdfColor = ReturnType<PdfLibrary["rgb"]>;
 // pdf-lib 1.17.1's ESM entry imports a tslib 1.x default shim that Metro
 // cannot interoperate with. Its self-contained UMD build works across targets.
-const { PDFDocument, rgb } = require("pdf-lib/dist/pdf-lib.min.js") as PdfLibrary;
+const { PDFDocument, rgb } =
+  require("pdf-lib/dist/pdf-lib.min.js") as PdfLibrary;
 
 export type ETicketFontAssets = {
   regular: Uint8Array;

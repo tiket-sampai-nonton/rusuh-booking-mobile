@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { PDFDocument } from "pdf-lib";
+import { Asset } from "expo-asset";
+import { Platform } from "react-native";
 
 import {
   ExpoETicketPdfAdapter,
@@ -53,5 +55,92 @@ describe("ExpoETicketPdfAdapter", () => {
     expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe("%PDF-");
     const parsed = await PDFDocument.load(bytes);
     expect(parsed.getPageCount()).toBe(2);
+  });
+
+  it("retries failed default font loading and safely renders incomplete ticket data", async () => {
+    const regularFont = readFileSync(
+      resolve(process.cwd(), "src/assets/fonts/PlusJakartaSans-Regular.ttf"),
+    );
+    const boldFont = readFileSync(
+      resolve(process.cwd(), "src/assets/fonts/PlusJakartaSans-Bold.ttf"),
+    );
+    const asArrayBuffer = (bytes: Uint8Array): ArrayBuffer =>
+      bytes.buffer.slice(
+        bytes.byteOffset,
+        bytes.byteOffset + bytes.byteLength,
+      ) as ArrayBuffer;
+    const originalFetch = global.fetch;
+    const originalPlatform = Object.getOwnPropertyDescriptor(Platform, "OS");
+    const fetchMock = jest.fn().mockResolvedValue({ ok: false } as Response);
+    const assetSpy = jest.spyOn(Asset, "fromModule").mockImplementation(
+      () =>
+        ({
+          uri: "asset://ticket-font",
+          downloadAsync: jest.fn().mockResolvedValue(undefined),
+        }) as unknown as ReturnType<typeof Asset.fromModule>,
+    );
+
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "web",
+    });
+    global.fetch = fetchMock;
+
+    try {
+      const adapter = new ExpoETicketPdfAdapter();
+      const ticket = {
+        bookingId: "",
+        eventName: "Malam Akustik Rintik ".repeat(12),
+        venue: "",
+        startsAt: "invalid-date",
+        attendeeName: "Penonton dengan nama yang sangat panjang ".repeat(8),
+        attendeeNikMasked: "",
+        categoryCode: "",
+        qrPayload: "opaque-ticket-payload",
+        ticketCode: "",
+        index: 0,
+        total: 1,
+      };
+
+      await expect(adapter.generate("", [ticket], theme)).rejects.toThrow(
+        "Font tiket tidak dapat dimuat.",
+      );
+
+      fetchMock.mockResolvedValue({
+        ok: true,
+        arrayBuffer: async () => asArrayBuffer(regularFont),
+      } as Response);
+      const result = await adapter.generate("", [ticket], {
+        ...theme,
+        headerStart: "#fff",
+        headerEnd: "invalid",
+        ink: "#xyzxyz",
+        muted: "#eee",
+        line: "no-color",
+        paper: "transparent",
+      });
+
+      expect(result.fileName).toBe("eticket-booking.pdf");
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+      const bytes = Uint8Array.from(atob(result.base64), (char) =>
+        char.charCodeAt(0),
+      );
+      const parsed = await PDFDocument.load(bytes);
+      expect(parsed.getPageCount()).toBe(1);
+
+      fetchMock.mockResolvedValue({
+        ok: true,
+        arrayBuffer: async () => asArrayBuffer(boldFont),
+      } as Response);
+      await adapter.generate("booking/second", [ticket], theme);
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+      expect(assetSpy).toHaveBeenCalledTimes(4);
+    } finally {
+      global.fetch = originalFetch;
+      assetSpy.mockRestore();
+      if (originalPlatform) {
+        Object.defineProperty(Platform, "OS", originalPlatform);
+      }
+    }
   });
 });

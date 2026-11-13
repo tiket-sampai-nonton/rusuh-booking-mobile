@@ -143,8 +143,10 @@ describe("SuccessScreen (RBT-070)", () => {
     expect(screen.getByText("31****89")).toBeTruthy();
     // RBT-071: one e-ticket card per ticket + download/home actions
     expect(screen.getByTestId("eticket-list")).toBeTruthy();
-    expect(screen.getByTestId("eticket-0")).toBeTruthy();
-    expect(screen.getByTestId("eticket-1")).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.getByTestId("eticket-0")).toBeTruthy();
+      expect(screen.getByTestId("eticket-1")).toBeTruthy();
+    });
     expect(screen.getByTestId("success-download")).toBeTruthy();
     expect(screen.getByTestId("success-home")).toBeTruthy();
   });
