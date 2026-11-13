@@ -9,9 +9,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { designMotion } from "@presentation/theme";
+import { designEasing } from "@presentation/theme";
 
-const EASE = Easing.bezier(...designMotion.easeBezier);
+const EASE = Easing.bezier(...designEasing.primary);
 const DURATION_MS = 600;
 const DEFAULT_RISE = 40;
 

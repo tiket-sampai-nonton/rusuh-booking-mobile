@@ -116,10 +116,11 @@ export function PaymentWebViewScreen({ bookingId }: PaymentWebViewScreenProps) {
   const { cancelBooking, reconcilePayment } = usePayment();
   const { paymentJourneyStorage, serverClock } = useServices();
   const eventId = useSessionStore((state) => state.eventId);
+  const eventQuery = eventId ? `?eventId=${encodeURIComponent(eventId)}` : "";
   const successHref =
-    `/success/${encodeURIComponent(bookingId)}${eventId ? `?eventId=${encodeURIComponent(eventId)}` : ""}` as Href;
+    `/success/${encodeURIComponent(bookingId)}${eventQuery}` as Href;
   const paymentHref =
-    `/payment/${encodeURIComponent(bookingId)}${eventId ? `?eventId=${encodeURIComponent(eventId)}` : ""}` as Href;
+    `/payment/${encodeURIComponent(bookingId)}${eventQuery}` as Href;
   const siteUrl =
     process.env.EXPO_PUBLIC_SITE_URL ?? "https://rusuh-booking.pages.dev";
 

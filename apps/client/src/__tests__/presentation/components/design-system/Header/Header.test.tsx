@@ -131,9 +131,10 @@ describe("Header", () => {
 
   it("completes the entrance transition after its delay", () => {
     jest.useFakeTimers();
-    const { unmount } = render(<Header />);
+    const { getByLabelText, unmount } = render(<Header />);
 
     act(() => jest.advanceTimersByTime(500));
+    expect(getByLabelText("Beranda Rusuh Tiket")).toBeTruthy();
     unmount();
     jest.useRealTimers();
   });

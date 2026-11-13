@@ -158,7 +158,7 @@ export function FilterModal({
               { v: "all", l: "Semua" },
               ...[
                 ...new Set([...genres, ...(genre !== "all" ? [genre] : [])]),
-              ].map((g) => ({ v: g, l: g.replace(/_/g, " ") })),
+              ].map((g) => ({ v: g, l: g.replaceAll("_", " ") })),
             ]}
             value={genre}
             onPick={setGenre}

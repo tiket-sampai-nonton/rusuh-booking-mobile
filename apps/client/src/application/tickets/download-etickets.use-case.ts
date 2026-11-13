@@ -1,9 +1,9 @@
-import type { ETicketPdfGenerator } from "@domain/services/eticket-pdf-generator.port";
-import type { FileSharePort } from "@domain/services/file-share.port";
 import type {
+  ETicketPdfGenerator,
   ETicketPdfItem,
   ETicketPdfTheme,
 } from "@domain/services/eticket-pdf-generator.port";
+import type { FileSharePort } from "@domain/services/file-share.port";
 
 export interface DownloadETicketsInput {
   readonly bookingId: string;

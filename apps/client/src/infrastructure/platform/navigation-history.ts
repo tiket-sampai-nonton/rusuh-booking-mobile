@@ -7,8 +7,8 @@ export class PlatformNavigationHistory implements NavigationHistory {
   captureRestorePoint(path: string): () => void {
     if (
       !this.isWeb ||
-      typeof globalThis.history === "undefined" ||
-      typeof globalThis.location === "undefined"
+      globalThis.history === undefined ||
+      globalThis.location === undefined
     ) {
       return () => undefined;
     }

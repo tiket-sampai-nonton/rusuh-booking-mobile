@@ -52,7 +52,7 @@ export function BrowseNativeCategoryBar({
               accessibilityState={{ selected: active }}
             >
               <Text style={browseNativeCategoryLabel(active)}>
-                {category.replace(/_/g, " ")}
+                {category.replaceAll("_", " ")}
               </Text>
             </Pressable>
           );

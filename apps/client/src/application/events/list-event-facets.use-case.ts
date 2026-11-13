@@ -30,21 +30,25 @@ export class ListEventFacets {
       throw new Error("Pilihan genre belum tersedia.");
     const events = await this.events.listEvents(filters);
     const now = this.clock.serverNow();
-    const time = quarter
-      ? "quarter"
-      : filters.timeframe === "THIS_WEEK"
-        ? "week"
-        : filters.timeframe === "THIS_MONTH"
-          ? "month"
-          : "all";
+    const time = resolveTimeBucket(quarter, filters.timeframe);
     const visible = splitCatalog(events, now).upcoming.filter((event) =>
       inTimeBucket(event, time, now),
     );
     return {
       cities: [],
-      genres: [
-        ...new Set(visible.flatMap((event) => event.genres ?? [])),
-      ].sort(),
+      genres: [...new Set(visible.flatMap((event) => event.genres ?? []))].sort(
+        (left, right) => left.localeCompare(right, "id"),
+      ),
     };
   }
+}
+
+function resolveTimeBucket(
+  quarter: boolean,
+  timeframe: EventQuery["timeframe"],
+): "quarter" | "week" | "month" | "all" {
+  if (quarter) return "quarter";
+  if (timeframe === "THIS_WEEK") return "week";
+  if (timeframe === "THIS_MONTH") return "month";
+  return "all";
 }

@@ -419,11 +419,10 @@ export function MyTicketsScreen() {
             Date.parse(selectedTickets?.eventStartsAt ?? ""),
       )
     : [];
-  const qrEvent = selectedBooking
-    ? matchingEvents.length === 1
-      ? matchingEvents[0]
-      : undefined
-    : activeEvent;
+  let qrEvent = activeEvent;
+  if (selectedBooking) {
+    qrEvent = matchingEvents.length === 1 ? matchingEvents[0] : undefined;
+  }
   const now = serverClock.serverNow();
   const isPastBooking = (booking: MyBookingSummary) =>
     bookingIsPast(booking, knownEvents, now);

@@ -130,7 +130,7 @@ export function WaitingRoomScreen({
     const invalidVisitorToken =
       details.httpStatus === 401 ||
       details.code === "VISITOR_TOKEN_INVALID" ||
-      /^VISITOR_TOKEN_INVALID:/.test(details.message);
+      details.message.startsWith("VISITOR_TOKEN_INVALID:");
     if (!invalidVisitorToken || invalidVisitorTokenHandled.current) return;
 
     // The BE contract defines 401 as an expired, rotated, or device-mismatched

@@ -309,12 +309,11 @@ export function createContainer(options: ContainerOptions = {}): Container {
   // API repositories use mocks. Mock mode disables remote push registration.
   const notificationAdapter = createNotificationAdapter(useMocks);
   const connectivity = options.connectivity ?? new ExpoConnectivityAdapter();
-  const paymentJourneyStorage =
-    useMocks && Platform.OS === "web"
+  const platformKind = Platform.OS === "web" ? "web" : "native";
+  const paymentJourneyStorage: PaymentJourneyStorage =
+    useMocks && platformKind === "web"
       ? new InMemoryPaymentJourneyStorage()
-      : new PlatformPaymentJourneyStorage(
-          Platform.OS === "web" ? "web" : "native",
-        );
+      : new PlatformPaymentJourneyStorage(platformKind);
   const navigationHistory = new PlatformNavigationHistory(
     Platform.OS === "web",
   );
