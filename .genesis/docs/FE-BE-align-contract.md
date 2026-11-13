@@ -19,6 +19,10 @@ For the historical RBT-128 integration check, see [`api-contract/07-11/INTEGRATI
 - The live event-detail response for event `ec2f4c95-6247-4ee7-9524-2e5530edbfe4` includes `imageUrl`, `bannerUrl`, `thumbnailUrl`, categories, and a `description` object with `longDesc`, `lineup`, `location`, `gallery`, and `terms`. FE parses these fields defensively in `domain/rules/event-description.ts`; event-detail content is no longer an outstanding runtime gap. The 07-11 generated public contract snapshot does not yet describe this `description` shape, so BE schema documentation still needs alignment.
 - The payment service returns a site-relative `pageUrl` (`/pay/{bookingId}?ppt=…&embedded=1`). The configured API origin does not host `/pay`. Browser inspection on 2026-11-12 found the currently deployed Pages app returned its Expo "Unmatched Route" screen for `/pay`; this branch adds the missing `/pay/[bookingId]` bootstrap route. That route must be included in a web deployment before a native app can use it. A credentialed OPTIONS preflight from `https://rusuh-booking.pages.dev` to `POST /api/v1/payment-page-sessions` returned 204 and allowed that origin. Physical iOS/Android cookie persistence and SNAP return behavior remain unverified.
 
+### Addendum — catalog filtering (RBT-142)
+
+The current FE uses `GET /events/facets` for genre choices and sends supported filters to `GET /events` through the event repository. Home passes `genre`, `time`, and `sort` in the `/browse` URL; Browse restores those values on navigation and refresh. Week and month use the BE `THIS_WEEK` and `THIS_MONTH` calendar filters. Three months uses `startDate` and `endDate` derived from a synchronized server clock in WIB. Date ordering comes from the BE. The UI selects one genre at a time; it does not map prototype categories to genres or offer a province filter. Mock mode has a local filtering fallback. Earlier V5 notes about client-side production filtering and rolling windows are historical, not the current FE behavior.
+
 Hierarki sumber kebenaran (urutan otoritas, atas menang atas bawah):
 
 1. **PDF "Tender Rusuh Booking Ticket"** — *source of truth* untuk **WHAT & WHY**: ruang lingkup, aturan bisnis, prinsip UX, dan prioritas MoSCoW.
@@ -34,7 +38,7 @@ typed route parameters. The identifier meaning stays the same in both implementa
 | Prototype label | V5 static URL | Locked Expo route |
 |---|---|---|
 | `index.html` | `index.html` | `/` |
-| `browse.html` | `browse.html?genre=&province=&time=&sort=` | `/browse?genre=&province=&time=&sort=` |
+| `browse.html` | `browse.html?genre=&province=&time=&sort=` | `/browse?genre=&time=&sort=` |
 | `event.html` | `event.html?eventId={eventId}` | `/events/[eventId]` |
 | `waiting.html` | `waiting.html?eventId={eventId}` | `/waiting/[eventId]` |
 | `detail.html` | `detail.html?sessionId={sessionId}` | `/checkout/[sessionId]` |
@@ -172,16 +176,16 @@ Login bersifat **opsional**: guest tetap bisa menyelesaikan pembelian dengan men
 - Card wajib menampilkan tanggal **DD MMM YYYY** (derivasi FE dari `startsAt`, OK) dan **jumlah tiket tersedia**. **FE NEED THIS**: tambah `remainingTickets` (integer) ke `EventSummary` (level list tidak punya angka sisa). Prototype memakai mock `remainingTickets`.
 - Badge **"Tersedia"**/**"Stok Menipis"**: "Stok Menipis" butuh ambang atas `remainingTickets` → **FE NEED THIS** (sama seperti di atas). Badge "Segera"/`NOT_STARTED` tidak lagi jadi fokus.
 - Tombol **Filter Event** tidak memfilter di halaman Home. V5 membuka modal dengan **Genre Musik, Lokasi (Provinsi), Waktu, Urutkan** lalu mengarah ke `browse.html`.
-- **Filter production gap:** `GET /events` belum punya field genre/province terstruktur atau query `genre`, `province`, `time`, `sort`, pagination. V5 memfilter client-side dari katalog yang sudah di-fetch; untuk production, BE perlu menambah dukungan server-side atau menyetujui batas katalog yang aman.
+- **Historical V5 gap:** prototype filtering was client-side. See the RBT-142 catalog addendum for the current server-backed implementation.
 - **Banner image** tidak ada di `EventSummary` → **FE NEED THIS** (`bannerUrl`/`thumbnailUrl`) atau sumber media tambahan.
 
 ### 4.1a `browse.html` — Filtered Event Results
 | # | Method & Path | Tujuan | Field utama dipakai |
 |---|---|---|---|
 | 1 | `GET /api/v1/events` (Booking) | Ambil katalog yang akan difilter | Contract `EventSummary[]`; V5 mock menambahkan `city`, `category`, dan `remainingTickets` |
-| 2 | URL query `genre`, `province`, `time`, `sort` | Menjaga filter tetap shareable dan refresh-safe | `genre=all|Festival|Jazz|Rock|Elektronik|Folk|Orkestra|Etc`; `province=all|<province-id>`; `time=all|week|month|quarter`; `sort=closest|furthest` |
+| 2 | URL query `genre`, `time`, `sort` | Menjaga filter tetap shareable dan refresh-safe | Genre berasal dari facets; `time=all|week|month|quarter`; `sort=closest|furthest` |
 
-**NOTE (gap):** `browse.html` adalah tambahan V5. Hasil hanya event mendatang; `week`, `month`, dan `quarter` memakai rolling window 7/30/90 hari dari `serverTime`. Filter chip dapat dihapus satu per satu, di-reset, atau dibuka kembali. Karena contract belum menyediakan query/filter fields, ini **prototype-only client-side filtering**. Production harus menambahkan filter/sort/pagination server-side atau menetapkan batas katalog serta aturan canonical/noindex untuk URL hasil filter.
+**Historical prototype:** `browse.html` was added in V5. The current Expo Browse flow and calendar semantics are described in the RBT-142 addendum above.
 
 ### 4.2 `event.html` — Detail Event
 | # | Method & Path | Tujuan | Field utama dipakai |
