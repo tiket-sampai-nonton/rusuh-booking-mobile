@@ -179,7 +179,7 @@ export function SuccessScreen({
           bookingId,
           eventName: event?.name ?? "E-Tiket Rusuh Booking",
           venue: event?.venue,
-          startsAt: event?.startsAt,
+          startsAt: ticketsQuery.data?.eventStartsAt ?? event?.startsAt,
           attendeeName: ticket.attendeeName,
           attendeeNikMasked: ticket.attendeeNikMasked,
           categoryCode: ticket.categoryCode,
@@ -478,7 +478,7 @@ function SuccessTicketList({
           total={count}
           eventName={event?.name}
           venue={event?.venue}
-          startsAt={event?.startsAt}
+          startsAt={ticketsQuery.data?.eventStartsAt ?? event?.startsAt}
           attendeeNikMasked={ticket.attendeeNikMasked}
           attendeeName={ticket.attendeeName}
           categoryCode={ticket.categoryCode}
